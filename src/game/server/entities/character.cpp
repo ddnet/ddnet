@@ -17,6 +17,7 @@
 #include <generated/protocol.h>
 #include <generated/server_data.h>
 
+#include <game/envelope_trigger.h>
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
@@ -138,6 +139,20 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 			GameServer()->m_apSavedTees[m_pPlayer->GetCid()]->Load(m_pPlayer->GetCharacter(), Team);
 			delete GameServer()->m_apSavedTees[m_pPlayer->GetCid()];
 			GameServer()->m_apSavedTees[m_pPlayer->GetCid()] = nullptr;
+		}
+	}
+
+	// envelope trigger snap objects are tied to the current life, dropping them on spawn
+	// prevents stale triggers from a previous life (which are never cleared otherwise) from
+	// being re-applied to the respawned player
+	GameServer()->m_aEnvelopeTriggerSnaps[m_pPlayer->GetCid()].clear();
+
+	// report the spawn envelope trigger to the spawning player, so the envelopes are reproduced on spawn
+	if(GameServer()->m_EnvelopeTriggerSpawn.has_value())
+	{
+		for(int EnvelopeId = 0; EnvelopeId < GameServer()->m_World.NumEnvelopes(); ++EnvelopeId)
+		{
+			GameServer()->QueueEnvelopeTriggerSnap(EnvelopeId, GameServer()->m_EnvelopeTriggerSpawn.value(), m_pPlayer->GetCid(), TRIGGER_FLAG_NONE);
 		}
 	}
 
@@ -1640,6 +1655,9 @@ void CCharacter::HandleTiles(int Index)
 	m_TileIndex = Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = Collision()->GetFrontTileIndex(MapIndex);
 	m_MoveRestrictions = Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, MapIndex);
+
+	HandleEnvelopeTriggerTiles(Index);
+
 	if(Index < 0)
 	{
 		m_LastRefillJumps = false;
@@ -2120,6 +2138,64 @@ void CCharacter::HandleTiles(int Index)
 			}
 		}
 		return;
+	}
+}
+
+void CCharacter::HandleEnvelopeTriggerTiles(int Index)
+{
+	if(Index < 0)
+	{
+		m_LastEnvelopeTriggerZone = ENVELOPE_NONE;
+		return;
+	}
+
+	int TuneZone = Collision()->IsTune(Index);
+	int SwitchType = Collision()->GetSwitchType(Index);
+	bool IsEnvelopeTrigger = SwitchType >= TILE_ENV_TRIGGER_SOLO && SwitchType <= TILE_ENV_TRIGGER_TEAM;
+	bool IsSolo = SwitchType == TILE_ENV_TRIGGER_SOLO;
+
+	if(!IsEnvelopeTrigger && TuneZone <= 0)
+	{
+		m_LastEnvelopeTriggerZone = ENVELOPE_NONE;
+		return;
+	}
+
+	int TriggerZoneId;
+
+	if(!IsEnvelopeTrigger && TuneZone > 0)
+	{
+		// tune zone support: skip if not mapped to an envelope zone
+		if(!GameWorld()->TuneZoneToEnvelopeZone().contains(TuneZone))
+			return;
+		TriggerZoneId = GameWorld()->TuneZoneToEnvelopeZone()[TuneZone];
+	}
+	else
+	{
+		int StartDelay = Collision()->GetSwitchDelay(Index);
+		TriggerZoneId = Collision()->GetSwitchNumber(Index);
+
+		// we are supporting 256^2 - 1 trigger zones
+		TriggerZoneId = TriggerZoneId + StartDelay * 256;
+	}
+
+	// do not repeatedly hit the same envelope trigger and reset it
+	if(!GameWorld()->EnvelopeTriggerList().contains(TriggerZoneId) || m_LastEnvelopeTriggerZone == TriggerZoneId)
+	{
+		return;
+	}
+
+	// store the last trigger zone so we don't repeatedly hit it every tick
+	m_LastEnvelopeTriggerZone = TriggerZoneId;
+
+	const CEnvelopeTriggerZone &TriggerZone = GameWorld()->EnvelopeTriggerList()[TriggerZoneId];
+
+	// report every envelope trigger in the zone to the clients, they reproduce the animations
+	for(const auto &EnvelopeTrigger : TriggerZone.m_vEnvelopeTriggers)
+	{
+		if(EnvelopeTrigger.m_EnvelopeId >= 0 && EnvelopeTrigger.m_State != EEnvelopeTriggerType::NUM_ENVELOPE_TRIGGERS)
+		{
+			GameServer()->QueueEnvelopeTriggerSnap(EnvelopeTrigger.m_EnvelopeId, EnvelopeTrigger.m_State, m_pPlayer->GetCid(), IsSolo ? TRIGGER_FLAG_NONE : TRIGGER_FLAG_TEAM);
+		}
 	}
 }
 

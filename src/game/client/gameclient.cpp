@@ -76,6 +76,7 @@
 #include <generated/protocol7.h>
 #include <generated/protocolglue.h>
 
+#include <game/client/components/envelope_state.h>
 #include <game/client/projectile_data.h>
 #include <game/localization.h>
 #include <game/mapitems.h>
@@ -198,6 +199,9 @@ void CGameClient::OnConsoleInit()
 	// register game commands to allow the client prediction to load settings from the map
 	Console()->Register("tune", "s[tuning] ?f[value]", CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("envelope_trigger", "i[zone] s[trigger_type] i[envelope]", CFGFLAG_GAME, ConEnvelopeTrigger, this, "Set a trigger type for an env in a trigger zone");
+	Console()->Register("tune_zone_envelope_trigger", "i[zone] i[envelope_zone]", CFGFLAG_GAME, ConTuneZoneEnvelopeTrigger, this, "Make a tune zone activate an envelope zone");
+	Console()->Register("envelope_trigger_spawn", "s[trigger_type]", CFGFLAG_GAME, ConEnvelopeTriggerSpawn, this, "Set a trigger type for all envs on spawn");
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
 	for(auto &pComponent : m_vpAll)
@@ -1717,6 +1721,9 @@ void CGameClient::InvalidateSnapshot()
 	SnapCollectEntities();
 }
 
+static constexpr int ENVELOPE_TRIGGER_RESYNC_MAX_TICKS = 2;
+static constexpr int ENVELOPE_TRIGGER_MAX_STARTAGE_TICKS = 50;
+
 void CGameClient::OnNewSnapshot(bool DummySwapped)
 {
 	auto &&Evolve = [this](CNetObj_Character *pCharacter, int Tick) {
@@ -2114,6 +2121,94 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 				const CNetObj_MapBestTime *pMapBestTimeData = static_cast<const CNetObj_MapBestTime *>(Item.m_pData);
 				m_MapBestTimeSeconds = pMapBestTimeData->m_MapBestTimeSeconds;
 				m_MapBestTimeMillis = pMapBestTimeData->m_MapBestTimeMillis;
+			}
+			else if(Item.m_Type == NETOBJTYPE_ENVELOPETRIGGER)
+			{
+				const CNetObj_EnvelopeTrigger *pEnvelopeData = static_cast<const CNetObj_EnvelopeTrigger *>(Item.m_pData);
+				int MessageEnvelopeId = Item.m_Id;
+				int ClientId = pEnvelopeData->m_ClientId;
+				int Type = pEnvelopeData->m_Type;
+				int Flags = pEnvelopeData->m_Flags;
+
+				if(Type < NUM_ENVELOPE_TRIGGERS && pEnvelopeData->m_StartTick <= Client()->GameTick(g_Config.m_ClDummy))
+				{
+					// solo triggers only apply to the triggering player, team triggers to all team members
+					bool ShouldApply = false;
+					bool IsDummy = (Client()->DummyConnected() && m_aLocalIds[1] == ClientId);
+
+					if(ClientId == -1 || IsDummy || ClientId == m_Snap.m_LocalClientId)
+					{
+						ShouldApply = true;
+					}
+					else if((Flags & TRIGGER_FLAG_TEAM) > 0)
+					{
+						ShouldApply = (m_Snap.m_LocalClientId >= 0 && m_Teams.Team(ClientId) == m_Teams.Team(m_Snap.m_LocalClientId));
+					}
+
+					if(ShouldApply)
+					{
+						auto ApplyEnvelopeState = [&](int EnvelopeId) {
+							auto LastStateIt = m_GameWorld.EnvelopeTriggerState(IsDummy).find(EnvelopeId);
+							CEnvelopeTriggerState *pOldState = nullptr;
+							if(LastStateIt != m_GameWorld.EnvelopeTriggerState(IsDummy).end())
+							{
+								pOldState = &LastStateIt->second;
+							}
+
+							EEnvelopeTriggerType EnvelopeType = static_cast<EEnvelopeTriggerType>(pEnvelopeData->m_Type);
+
+							// the server's absolute trigger moment and the current time, both in the same tick basis as EnvelopeEval
+							if(!m_Snap.m_pGameInfoObj)
+								return;
+							const int NowTick = (Client()->State() == IClient::STATE_DEMOPLAYBACK || !g_Config.m_ClPredict ||
+										    (m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)) ?
+										    Client()->GameTick(g_Config.m_ClDummy) :
+										    Client()->PredGameTick(g_Config.m_ClDummy);
+							const std::chrono::nanoseconds ServerStartTime = (pEnvelopeData->m_StartTick - m_Snap.m_pGameInfoObj->m_RoundStartTick) * CEnvelopeState::NanosPerTick();
+							const std::chrono::nanoseconds ServerTime = (NowTick - m_Snap.m_pGameInfoObj->m_RoundStartTick) * CEnvelopeState::NanosPerTick();
+							const std::chrono::nanoseconds ServerElapsed = ServerTime - ServerStartTime;
+
+							if(pOldState != nullptr && pOldState->Type() == EnvelopeType)
+							{
+								if(pOldState->Predicted())
+								{
+									// this animation was started by local prediction, on a high ping it is legitimately
+									// ahead of the server object which only confirms it, so never rewind, only correct forward
+									// only let the server take over if the predicted start time is too old, as this is a genuine hard desync
+									if(pOldState->StartTime() + ENVELOPE_TRIGGER_MAX_STARTAGE_TICKS * CEnvelopeState::NanosPerTick() < ServerStartTime)
+									{
+										// TODO instead speed up envelope a bit
+										if(IsEnvelopeTriggerPlaying(EnvelopeType))
+											pOldState->SetEnvelopeTime(ServerElapsed);
+										pOldState->SetStartTime(ServerStartTime);
+										pOldState->SetPredicted(false);
+									}
+									return;
+								}
+
+								// the animation was initialized from a server object, resync only if its trigger moment drifted too far
+								const std::chrono::nanoseconds Drift = pOldState->StartTime() - ServerStartTime;
+								const std::chrono::nanoseconds MaxDrift = ENVELOPE_TRIGGER_RESYNC_MAX_TICKS * CEnvelopeState::NanosPerTick();
+								if(Drift > MaxDrift || -Drift > MaxDrift)
+								{
+									// TODO: resync with animation speeds
+									if(IsEnvelopeTriggerPlaying(EnvelopeType))
+										pOldState->SetEnvelopeTime(ServerElapsed);
+									pOldState->SetStartTime(ServerStartTime);
+								}
+								return;
+							}
+
+							CEnvelopeTriggerState State(EnvelopeType, pOldState, ServerStartTime, ServerTime);
+							m_GameWorld.EnvelopeTriggerState(IsDummy)[EnvelopeId] = State;
+						};
+
+						if(MessageEnvelopeId >= 0 && MessageEnvelopeId < m_GameWorld.NumEnvelopes())
+						{
+							ApplyEnvelopeState(MessageEnvelopeId);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -2640,6 +2735,7 @@ void CGameClient::OnPredict()
 	// PredictedEvents are only handled in predicted world, so update them here
 	m_GameWorld.m_PredictedEvents = m_PredictedWorld.m_PredictedEvents;
 	m_PredictedWorld.CopyWorld(&m_GameWorld);
+	m_PredictedWorld.SetRoundStartTick(m_Snap.m_pGameInfoObj ? m_Snap.m_pGameInfoObj->m_RoundStartTick : 0);
 
 	// don't predict inactive players, or entities from other teams
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2837,6 +2933,20 @@ void CGameClient::OnPredict()
 					}
 				}
 			}
+		}
+	}
+
+	// add predicted animations
+	if(g_Config.m_ClPredict)
+	{
+		for(int DummyTrigger = 0; DummyTrigger < 2; DummyTrigger++)
+		{
+			m_GameWorld.EnvelopeTriggerState(DummyTrigger) = m_PredictedWorld.EnvelopeTriggerState(DummyTrigger);
+			if(CCharacter *pChar = m_GameWorld.GetCharacterById(m_Snap.m_LocalClientId))
+				pChar->m_LastEnvelopeTriggerZone = pLocalChar->m_LastEnvelopeTriggerZone;
+			if(pDummyChar)
+				if(CCharacter *pChar = m_GameWorld.GetCharacterById(m_aLocalIds[!g_Config.m_ClDummy]))
+					pChar->m_LastEnvelopeTriggerZone = pDummyChar->m_LastEnvelopeTriggerZone;
 		}
 	}
 
@@ -3629,11 +3739,12 @@ void CGameClient::UpdatePrediction()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
+			bool IsDummy = (PredictDummy() && i == m_aLocalIds[1]);
 			bool IsLocal = (i == m_Snap.m_LocalClientId || (PredictDummy() && i == m_aLocalIds[!g_Config.m_ClDummy]));
 			int GameTeam = IsTeamPlay() ? m_aClients[i].m_Team : i;
 			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
 				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : nullptr,
-				GameTeam, IsLocal);
+				GameTeam, IsLocal, IsDummy);
 		}
 
 	for(const CSnapEntities &EntData : SnapEntities())
@@ -4247,6 +4358,11 @@ void CGameClient::LoadMapSettings()
 		TuningList()[TuneZone].Set("shotgun_speeddiff", 0);
 	}
 
+	// reset envelope triggers
+	int EnvStart, NumEnvs;
+	Map()->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &NumEnvs);
+	m_GameWorld.SetNumEnvelopes(NumEnvs);
+
 	// Load map tunings
 	int Start, Num;
 	Map()->GetType(MAPITEMTYPE_INFO, &Start, &Num);
@@ -4299,6 +4415,50 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < TuneZone::NUM)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
+}
+
+void CGameClient::ConEnvelopeTrigger(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	int TriggerZoneId = pResult->GetInteger(0);
+	const char *pTriggerName = pResult->GetString(1);
+	int EnvelopeId = pResult->GetInteger(2);
+
+	if(TriggerZoneId >= 0 && TriggerZoneId < 256 * 256 && EnvelopeId >= 0 && EnvelopeId < pSelf->m_GameWorld.NumEnvelopes())
+	{
+		if(!pSelf->m_GameWorld.EnvelopeTriggerList().contains(TriggerZoneId))
+		{
+			CEnvelopeTriggerZone Zone;
+			pSelf->m_GameWorld.EnvelopeTriggerList()[TriggerZoneId] = Zone;
+		}
+
+		CEnvelopeTriggerZone &TriggerZone = pSelf->m_GameWorld.EnvelopeTriggerList()[TriggerZoneId];
+
+		CEnvelopeTrigger EnvelopeTrigger;
+		EnvelopeTrigger.m_EnvelopeId = EnvelopeId;
+		EnvelopeTrigger.m_State = CEnvelopeTrigger::FromName(pTriggerName);
+
+		TriggerZone.m_vEnvelopeTriggers.emplace_back(EnvelopeTrigger);
+	}
+}
+
+void CGameClient::ConTuneZoneEnvelopeTrigger(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	int TuneZoneId = pResult->GetInteger(0);
+	int EnvelopeZoneId = pResult->GetInteger(1);
+
+	if(TuneZoneId >= 0 && TuneZoneId < 256 && EnvelopeZoneId >= 0 && EnvelopeZoneId < 256 * 256)
+	{
+		pSelf->m_GameWorld.TuneZoneToEnvelopeZone()[TuneZoneId] = EnvelopeZoneId;
+	}
+}
+
+void CGameClient::ConEnvelopeTriggerSpawn(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pTriggerName = pResult->GetString(0);
+	pSelf->m_GameWorld.SetEnvelopeOnSpawn(CEnvelopeTrigger::FromName(pTriggerName));
 }
 
 void CGameClient::ConMapbug(IConsole::IResult *pResult, void *pUserData)
