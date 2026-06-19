@@ -969,20 +969,11 @@ public:
 	void QuadsDrawCurrentVertices(bool KeepVertices = true) override;
 	void QuadsSetRotation(float Angle) override;
 
-	template<typename TName>
-	void SetColor(TName *pVertex, int ColorIndex)
-	{
-		TName *pVert = pVertex;
-		pVert->m_Color = m_aColor[ColorIndex];
-	}
-
-	void SetColorVertex(const CColorVertex *pArray, size_t Num) override;
 	void SetColor(float r, float g, float b, float a) override;
 	void SetColor(ColorRGBA Color) override;
+	void SetColor2(ColorRGBA First, ColorRGBA Second) override;
 	void SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight) override;
 
-	// go through all vertices and change their color (only works for quads)
-	void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) override;
 	void ChangeColorOfQuadVertices(size_t QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) override;
 
 	void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV) override;
@@ -1007,33 +998,33 @@ public:
 				pVertices[m_NumVertices + 6 * i].m_Pos.x = pArray[i].m_X;
 				pVertices[m_NumVertices + 6 * i].m_Pos.y = pArray[i].m_Y;
 				pVertices[m_NumVertices + 6 * i].m_Tex = m_aTexture[0];
-				SetColor(&pVertices[m_NumVertices + 6 * i], 0);
+				pVertices[m_NumVertices + 6 * i].m_Color = m_aColor[0];
 
 				pVertices[m_NumVertices + 6 * i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
 				pVertices[m_NumVertices + 6 * i + 1].m_Pos.y = pArray[i].m_Y;
 				pVertices[m_NumVertices + 6 * i + 1].m_Tex = m_aTexture[1];
-				SetColor(&pVertices[m_NumVertices + 6 * i + 1], 1);
+				pVertices[m_NumVertices + 6 * i + 1].m_Color = m_aColor[1];
 
 				pVertices[m_NumVertices + 6 * i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
 				pVertices[m_NumVertices + 6 * i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
 				pVertices[m_NumVertices + 6 * i + 2].m_Tex = m_aTexture[2];
-				SetColor(&pVertices[m_NumVertices + 6 * i + 2], 2);
+				pVertices[m_NumVertices + 6 * i + 2].m_Color = m_aColor[2];
 
 				// second triangle
 				pVertices[m_NumVertices + 6 * i + 3].m_Pos.x = pArray[i].m_X;
 				pVertices[m_NumVertices + 6 * i + 3].m_Pos.y = pArray[i].m_Y;
 				pVertices[m_NumVertices + 6 * i + 3].m_Tex = m_aTexture[0];
-				SetColor(&pVertices[m_NumVertices + 6 * i + 3], 0);
+				pVertices[m_NumVertices + 6 * i + 3].m_Color = m_aColor[0];
 
 				pVertices[m_NumVertices + 6 * i + 4].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
 				pVertices[m_NumVertices + 6 * i + 4].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
 				pVertices[m_NumVertices + 6 * i + 4].m_Tex = m_aTexture[2];
-				SetColor(&pVertices[m_NumVertices + 6 * i + 4], 2);
+				pVertices[m_NumVertices + 6 * i + 4].m_Color = m_aColor[2];
 
 				pVertices[m_NumVertices + 6 * i + 5].m_Pos.x = pArray[i].m_X;
 				pVertices[m_NumVertices + 6 * i + 5].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
 				pVertices[m_NumVertices + 6 * i + 5].m_Tex = m_aTexture[3];
-				SetColor(&pVertices[m_NumVertices + 6 * i + 5], 3);
+				pVertices[m_NumVertices + 6 * i + 5].m_Color = m_aColor[3];
 
 				if(m_Rotation != 0)
 				{
@@ -1053,22 +1044,22 @@ public:
 				pVertices[m_NumVertices + 4 * i].m_Pos.x = pArray[i].m_X;
 				pVertices[m_NumVertices + 4 * i].m_Pos.y = pArray[i].m_Y;
 				pVertices[m_NumVertices + 4 * i].m_Tex = m_aTexture[0];
-				SetColor(&pVertices[m_NumVertices + 4 * i], 0);
+				pVertices[m_NumVertices + 4 * i].m_Color = m_aColor[0];
 
 				pVertices[m_NumVertices + 4 * i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
 				pVertices[m_NumVertices + 4 * i + 1].m_Pos.y = pArray[i].m_Y;
 				pVertices[m_NumVertices + 4 * i + 1].m_Tex = m_aTexture[1];
-				SetColor(&pVertices[m_NumVertices + 4 * i + 1], 1);
+				pVertices[m_NumVertices + 4 * i + 1].m_Color = m_aColor[1];
 
 				pVertices[m_NumVertices + 4 * i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
 				pVertices[m_NumVertices + 4 * i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
 				pVertices[m_NumVertices + 4 * i + 2].m_Tex = m_aTexture[2];
-				SetColor(&pVertices[m_NumVertices + 4 * i + 2], 2);
+				pVertices[m_NumVertices + 4 * i + 2].m_Color = m_aColor[2];
 
 				pVertices[m_NumVertices + 4 * i + 3].m_Pos.x = pArray[i].m_X;
 				pVertices[m_NumVertices + 4 * i + 3].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
 				pVertices[m_NumVertices + 4 * i + 3].m_Tex = m_aTexture[3];
-				SetColor(&pVertices[m_NumVertices + 4 * i + 3], 3);
+				pVertices[m_NumVertices + 4 * i + 3].m_Color = m_aColor[3];
 
 				if(m_Rotation != 0)
 				{
