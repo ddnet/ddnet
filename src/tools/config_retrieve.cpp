@@ -58,7 +58,7 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 	Reader.Close();
 	if(!ConfigFound)
 	{
-		fs_remove(pConfigName);
+		(void)fs_remove(pConfigName);
 	}
 }
 #include "config_common.h"

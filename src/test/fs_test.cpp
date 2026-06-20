@@ -107,7 +107,7 @@ TEST(Filesystem, ExecutablePath)
 	char aExecutablePath[IO_MAX_PATH_LENGTH];
 	ASSERT_FALSE(fs_executable_path(aExecutablePath, sizeof(aExecutablePath)));
 	EXPECT_TRUE(fs_is_file(aExecutablePath));
-	fs_parent_dir(aExecutablePath);
+	EXPECT_FALSE(fs_parent_dir(aExecutablePath));
 	EXPECT_FALSE(fs_is_relative_path(aExecutablePath));
 }
 

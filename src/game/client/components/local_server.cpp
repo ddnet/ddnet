@@ -39,9 +39,8 @@ bool CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
 	char aBuf[IO_MAX_PATH_LENGTH];
 	Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
 #if defined(CONF_PLATFORM_MACOS)
-	if(!fs_is_file(aBuf))
+	if(!fs_is_file(aBuf) && fs_parent_dir(aBuf) == 0)
 	{
-		fs_parent_dir(aBuf);
 		str_append(aBuf, "/../../../DDNet-Server.app/Contents/MacOS/");
 		str_append(aBuf, PLAT_SERVER_EXEC);
 	}
