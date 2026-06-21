@@ -21,18 +21,7 @@
 #include <game/editor/mapitems/map.h>
 
 static const char *const CURVE_TYPE_NAMES[] = {"Step", "Linear", "Slow", "Fast", "Smooth", "Bezier"};
-static const char *const CURVE_TYPE_NAMES_SHORT[] = {"N", "L", "S", "F", "M", "B"};
 static_assert(std::size(CURVE_TYPE_NAMES) == NUM_CURVETYPES);
-static_assert(std::size(CURVE_TYPE_NAMES_SHORT) == NUM_CURVETYPES);
-
-static const char *CurveTypeNameShort(int CurveType)
-{
-	if(in_range<int>(CurveType, 0, std::size(CURVE_TYPE_NAMES_SHORT) - 1))
-	{
-		return CURVE_TYPE_NAMES_SHORT[CurveType];
-	}
-	return "!?";
-}
 
 static float ClampDelta(float Val, float Delta, float Min, float Max)
 {
@@ -131,16 +120,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 	static CLineInput s_NameInput;
 
-	CUIRect ToolBar, CurveBar, ColorBar, DragBar;
+	CUIRect ToolBar, ColorBar, DragBar;
 	View.HSplitTop(30.0f, &DragBar, nullptr);
 	DragBar.y -= 2.0f;
 	DragBar.w += 2.0f;
 	DragBar.h += 4.0f;
 	DoEditorDragBar(View, &DragBar, EDragSide::TOP, &m_aExtraEditorSplits[EXTRAEDITOR_ENVELOPES]);
 	View.HSplitTop(15.0f, &ToolBar, &View);
-	View.HSplitTop(15.0f, &CurveBar, &View);
+	View.HSplitTop(2.0f, nullptr, &View);
 	ToolBar.Margin(2.0f, &ToolBar);
-	CurveBar.Margin(2.0f, &CurveBar);
 
 	bool CurrentEnvelopeSwitched = false;
 
@@ -487,7 +475,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 
 			m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
-			str_copy(m_aTooltip, "Double click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.");
+			str_copy(m_aTooltip, "Double click to create a new point. Right-click to change curve type. Use shift to change the zoom axis. Press S to scale selected envelope points.");
 		}
 
 		UpdateZoomEnvelopeX(View);
@@ -535,6 +523,39 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Ui()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			Ui()->ClipDisable();
+		}
+
+		// highlight active region and handle curve type
+		if(s_Operation == EEnvelopeEditorOp::NONE && Ui()->HotItem() == &s_EnvelopeEditorId)
+		{
+			float MouseTime = ScreenToEnvelopeX(View, Ui()->MouseX());
+			if(0.0f <= MouseTime)
+			{
+				for(size_t i = 0; i < pEnvelope->m_vPoints.size() - 1; i++)
+				{
+					float TimeRegionEnd = pEnvelope->m_vPoints[i + 1].m_Time.AsSeconds();
+					if(MouseTime <= TimeRegionEnd)
+					{
+						float RegionStartX = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].m_Time.AsSeconds());
+						float RegionEndX = EnvelopeToScreenX(View, TimeRegionEnd);
+						CUIRect ActiveRegion{
+							RegionStartX,
+							View.y,
+							RegionEndX - RegionStartX,
+							View.h,
+						};
+						ActiveRegion.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), IGraphics::CORNER_NONE, 0.0f);
+
+						if(Ui()->MouseButton(1))
+						{
+							m_PopupEnvelopeSelectedPoint = i;
+							static SPopupMenuId s_PopupCurvetypeId;
+							Ui()->DoPopupMenu(&s_PopupCurvetypeId, Ui()->MouseX(), Ui()->MouseY(), 80, (float)NUM_CURVETYPES * 14.0f + 10.0f, this, PopupEnvelopeCurvetype);
+						}
+						break;
+					}
+				}
+			}
 		}
 
 		// handle time bar
@@ -769,43 +790,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->LinesEnd();
 			Ui()->ClipDisable();
-		}
-
-		// render curve options
-		{
-			for(int i = 0; i < (int)pEnvelope->m_vPoints.size() - 1; i++)
-			{
-				float t0 = pEnvelope->m_vPoints[i].m_Time.AsSeconds();
-				float t1 = pEnvelope->m_vPoints[i + 1].m_Time.AsSeconds();
-
-				CUIRect CurveButton;
-				CurveButton.x = EnvelopeToScreenX(View, t0 + (t1 - t0) * 0.5f);
-				CurveButton.y = CurveBar.y;
-				CurveButton.h = CurveBar.h;
-				CurveButton.w = CurveBar.h;
-				CurveButton.x -= CurveButton.w / 2.0f;
-				const void *pId = &pEnvelope->m_vPoints[i].m_Curvetype;
-				if(CurveButton.x >= View.x)
-				{
-					const int ButtonResult = DoButton_Editor(pId, CurveTypeNameShort(pEnvelope->m_vPoints[i].m_Curvetype), 0, &CurveButton, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier).");
-					if(ButtonResult == 1)
-					{
-						const int PrevCurve = pEnvelope->m_vPoints[i].m_Curvetype;
-						const int Direction = Input()->ShiftIsPressed() ? -1 : 1;
-						pEnvelope->m_vPoints[i].m_Curvetype = (pEnvelope->m_vPoints[i].m_Curvetype + Direction + NUM_CURVETYPES) % NUM_CURVETYPES;
-
-						Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEditPoint>(Map(),
-							Map()->m_SelectedEnvelope, i, 0, CEditorActionEnvelopeEditPoint::EEditType::CURVE_TYPE, PrevCurve, pEnvelope->m_vPoints[i].m_Curvetype));
-						Map()->OnModify();
-					}
-					else if(ButtonResult == 2)
-					{
-						m_PopupEnvelopeSelectedPoint = i;
-						static SPopupMenuId s_PopupCurvetypeId;
-						Ui()->DoPopupMenu(&s_PopupCurvetypeId, Ui()->MouseX(), Ui()->MouseY(), 80, (float)NUM_CURVETYPES * 14.0f + 10.0f, this, PopupEnvelopeCurvetype);
-					}
-				}
-			}
 		}
 
 		// render colorbar
