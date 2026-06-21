@@ -300,6 +300,8 @@ public:
 		QUICK_SERVERNAME = 1,
 		QUICK_PLAYER = 2,
 		QUICK_MAPNAME = 4,
+		QUICK_GAMETYPE = 8,
+		QUICK_ADDRESS = 16,
 	};
 
 	enum
