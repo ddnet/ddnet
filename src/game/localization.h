@@ -17,6 +17,9 @@ public:
 
 	std::string m_Name;
 	std::string m_Filename;
+	/**
+	 * Country code in ISO 3166-1 numeric.
+	 */
 	int m_CountryCode;
 	std::vector<std::string> m_vLanguageCodes;
 

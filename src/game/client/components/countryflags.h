@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_COUNTRYFLAGS_H
 
 #include <engine/graphics.h>
+#include <engine/shared/protocol.h>
 
 #include <game/client/component.h>
 
@@ -16,6 +17,9 @@ public:
 	class CCountryFlag
 	{
 	public:
+		/**
+		 * Country code in ISO 3166-1 numeric.
+		 */
 		int m_CountryCode;
 		char m_aCountryCodeString[8];
 		IGraphics::CTextureHandle m_Texture;
@@ -33,11 +37,8 @@ public:
 	void Render(int CountryCode, ColorRGBA Color, float x, float y, float w, float h);
 
 private:
-	static constexpr int CODE_LB = -1;
-	static constexpr int CODE_UB = 999;
-
 	std::vector<CCountryFlag> m_vCountryFlags;
-	size_t m_aCountryCodeToIndexTable[CODE_UB - CODE_LB + 1];
+	size_t m_aCountryCodeToIndexTable[CountryCode::MAXIMUM - CountryCode::MINIMUM + 1];
 
 	int m_FlagsQuadContainerIndex;
 

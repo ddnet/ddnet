@@ -140,6 +140,10 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 			str_copy(pClient->m_aName, ClientName);
 			str_copy(pClient->m_aClan, Clan);
 			pClient->m_Country = json_int_get(&Country);
+			if(!in_range(pClient->m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+			{
+				pClient->m_Country = CountryCode::DEFAULT;
+			}
 			pClient->m_Score = json_int_get(&Score);
 			pClient->m_IsPlayer = IsPlayer;
 
