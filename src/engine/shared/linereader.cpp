@@ -8,6 +8,26 @@
 
 #include <cstdlib>
 
+static bool IsValidLine(const char *pLine)
+{
+	if(!str_utf8_check(pLine))
+	{
+		// Skip lines containing invalid UTF-8
+		return false;
+	}
+
+	// Skip lines containing any control character except `\t`
+	for(size_t Index = 0; pLine[Index] != '\0'; ++Index)
+	{
+		if((unsigned char)pLine[Index] < ' ' && pLine[Index] != '\t')
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 CLineReader::CLineReader()
 {
 	m_pBuffer = nullptr;
@@ -77,9 +97,8 @@ const char *CLineReader::Get()
 				++m_BufferPos;
 			}
 
-			if(!str_utf8_check(&m_pBuffer[LineStart]))
+			if(!IsValidLine(&m_pBuffer[LineStart]))
 			{
-				// Skip lines containing invalid UTF-8
 				if(m_ReadLastLine)
 				{
 					return nullptr;
