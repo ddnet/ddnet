@@ -37,8 +37,8 @@ void CLayerTele::Resize(int NewW, int NewH)
 	mem_zero(pNewTeleData, (size_t)NewW * NewH * sizeof(CTeleTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
-		mem_copy(&pNewTeleData[y * NewW], &m_pTeleTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CTeleTile));
+	for(int y = 0; y < std::min(NewH, m_Height); y++)
+		mem_copy(&pNewTeleData[y * NewW], &m_pTeleTile[y * m_Width], std::min(m_Width, NewW) * sizeof(CTeleTile));
 
 	// replace old
 	delete[] m_pTeleTile;

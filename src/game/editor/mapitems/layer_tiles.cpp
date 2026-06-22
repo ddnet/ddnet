@@ -679,8 +679,8 @@ void CLayerTiles::Resize(int NewW, int NewH)
 	mem_zero(pNewData, (size_t)NewW * NewH * sizeof(CTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
-		mem_copy(&pNewData[y * NewW], &m_pTiles[y * m_Width], minimum(m_Width, NewW) * sizeof(CTile));
+	for(int y = 0; y < std::min(NewH, m_Height); y++)
+		mem_copy(&pNewData[y * NewW], &m_pTiles[y * m_Width], std::min(m_Width, NewW) * sizeof(CTile));
 
 	// replace old
 	delete[] m_pTiles;
@@ -721,10 +721,10 @@ void CLayerTiles::ShowInfo()
 	Graphics()->TextureSet(Editor()->Client()->GetDebugFont());
 	Graphics()->QuadsBegin();
 
-	int StartY = maximum(0, (int)(ScreenY0 / 32.0f) - 1);
-	int StartX = maximum(0, (int)(ScreenX0 / 32.0f) - 1);
-	int EndY = minimum((int)(ScreenY1 / 32.0f) + 1, m_Height);
-	int EndX = minimum((int)(ScreenX1 / 32.0f) + 1, m_Width);
+	int StartY = std::max(0, (int)(ScreenY0 / 32.0f) - 1);
+	int StartX = std::max(0, (int)(ScreenX0 / 32.0f) - 1);
+	int EndY = std::min((int)(ScreenY1 / 32.0f) + 1, m_Height);
+	int EndX = std::min((int)(ScreenX1 / 32.0f) + 1, m_Width);
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)

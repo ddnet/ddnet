@@ -2,12 +2,12 @@
 
 #include "json.h"
 
-#include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
 
 #include <engine/external/json-parser/json.h>
 
+#include <algorithm>
 #include <cstdio>
 
 static bool IsAllowedHex(char c)
@@ -251,7 +251,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 	{
 		return false;
 	}
-	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
+	for(int i = 0; i < std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
 		Unequal = false;
 		Unequal = Unequal || str_comp(m_aClients[i].m_aName, Other.m_aClients[i].m_aName) != 0;
@@ -283,7 +283,7 @@ CServerInfo2::operator CServerInfo() const
 	str_copy(Result.m_aMap, m_aMapName);
 	str_copy(Result.m_aVersion, m_aVersion);
 
-	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
+	for(int i = 0; i < std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
 		str_copy(Result.m_aClients[i].m_aName, m_aClients[i].m_aName);
 		str_copy(Result.m_aClients[i].m_aClan, m_aClients[i].m_aClan);
@@ -306,7 +306,7 @@ CServerInfo2::operator CServerInfo() const
 		}
 	}
 
-	Result.m_NumReceivedClients = minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);
+	Result.m_NumReceivedClients = std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);
 	Result.m_Latency = -1;
 
 	return Result;

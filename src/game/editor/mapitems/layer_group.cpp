@@ -1,10 +1,10 @@
 #include "layer_group.h"
 
-#include <base/math.h>
-
 #include <engine/shared/config.h>
 
 #include <game/editor/editor.h>
+
+#include <algorithm>
 
 CLayerGroup::CLayerGroup(CEditorMap *pMap) :
 	CMapObject(pMap)
@@ -43,7 +43,7 @@ void CLayerGroup::Convert(CUIRect *pRect) const
 
 void CLayerGroup::Mapping(float *pPoints) const
 {
-	float NormalParallaxZoom = std::clamp((double)(maximum(m_ParallaxX, m_ParallaxY)), 0., 100.);
+	float NormalParallaxZoom = std::clamp((float)std::max(m_ParallaxX, m_ParallaxY), 0.0f, 100.0f);
 	float ParallaxZoom = Editor()->m_PreviewZoom ? NormalParallaxZoom : 100.0f;
 
 	Graphics()->MapScreenToWorld(
@@ -160,8 +160,8 @@ void CLayerGroup::GetSize(float *pWidth, float *pHeight) const
 	{
 		float LayerWidth, LayerHeight;
 		pLayer->GetSize(&LayerWidth, &LayerHeight);
-		*pWidth = maximum(*pWidth, LayerWidth);
-		*pHeight = maximum(*pHeight, LayerHeight);
+		*pWidth = std::max(*pWidth, LayerWidth);
+		*pHeight = std::max(*pHeight, LayerHeight);
 	}
 }
 

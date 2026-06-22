@@ -481,7 +481,7 @@ int CEditor::RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect V
 	if(NumEntries > 0)
 	{
 		// Draw the background
-		CommandsDropdown.h = minimum(NumEntries * 15.0f + 1.0f, MaxHeight);
+		CommandsDropdown.h = std::min(NumEntries * 15.0f + 1.0f, MaxHeight);
 		CommandsDropdown.Draw(ColorRGBA(0.1f, 0.1f, 0.1f, 0.9f), IGraphics::CORNER_ALL, 3.0f);
 
 		if(Ui()->MouseButton(0) && Ui()->MouseInside(&CommandsDropdown))
@@ -508,7 +508,7 @@ int CEditor::RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect V
 			char aBuf[128];
 			pfnMatchCallback(vData.at(i), aBuf, Props.m_vColorSplits);
 
-			LargestWidth = maximum(LargestWidth, TextRender()->TextWidth(12.0f, aBuf) + 10.0f);
+			LargestWidth = std::max(LargestWidth, TextRender()->TextWidth(12.0f, aBuf) + 10.0f);
 			if(!Item.m_Visible)
 				continue;
 
@@ -703,7 +703,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						// Setup input rect, which will be used to draw the map settings input later
 						Label.HMargin(1.0, &FixInput);
 						DisplayFixInput = true;
-						DropdownHeight = minimum(DropdownHeight, EndY - FixInput.y - 16.0f);
+						DropdownHeight = std::min(DropdownHeight, EndY - FixInput.y - 16.0f);
 					}
 					else
 					{
@@ -882,7 +882,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						// Setup input rect in case we are fixing the setting
 						Label.HMargin(1.0, &FixInput);
 						DisplayFixInput = true;
-						DropdownHeight = minimum(DropdownHeight, EndY - FixInput.y - 16.0f);
+						DropdownHeight = std::min(DropdownHeight, EndY - FixInput.y - 16.0f);
 					}
 					else
 					{
@@ -907,7 +907,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 		// Display the map settings edit box after having rendered all the lines, so the dropdown shows in
 		// front of everything, but is still being clipped by the scroll region.
 		if(DisplayFixInput)
-			DoMapSettingsEditBox(&s_Context, &FixInput, 10.0f, maximum(DropdownHeight, 30.0f));
+			DoMapSettingsEditBox(&s_Context, &FixInput, 10.0f, std::max(DropdownHeight, 30.0f));
 
 		s_ScrollRegion.End();
 	}
@@ -1300,7 +1300,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 	// NextArg is used to get the contents of the current argument and go to the next argument position
 	// It outputs the length of the argument in pLength and returns a boolean indicating if the parsing
 	// of that argument is valid or not (only the case when using strings with quotes ("))
-	auto &&NextArg = [&](const char *pArg, int *pLength) {
+	auto &&NextArg = [&](const char *pArg, size_t *pLength) {
 		if(*pIterator == '"')
 		{
 			pIterator++;
@@ -1380,7 +1380,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 		// Insert argument here
 		char Char = *pIterator;
 		const char *pArgStart = pIterator;
-		int Length;
+		size_t Length;
 		bool Valid = NextArg(pArgStart, &Length); // Get contents and go to next argument position
 		size_t Offset = pArgStart - pLineInputStr; // Compute offset from the start of the input
 
@@ -1388,7 +1388,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 		m_vCurrentArgs.emplace_back();
 		auto &NewArg = m_vCurrentArgs.back();
 		// Fill argument value, with a maximum length of 256
-		str_copy(NewArg.m_aValue, pArgStart, minimum((int)sizeof(SCurrentSettingArg::m_aValue), Length + 1));
+		str_copy(NewArg.m_aValue, pArgStart, std::min(sizeof(SCurrentSettingArg::m_aValue), Length + 1));
 
 		// Validate argument from the parsed argument of the current setting.
 		// If current setting is not valid, then there are no arguments which results in an error.
@@ -1679,7 +1679,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 	{
 		// Use a substring from the start of the input to the cursor offset
 		char aSubString[128];
-		str_copy(aSubString, m_aCommand, minimum(m_LastCursorOffset + 1, sizeof(aSubString)));
+		str_copy(aSubString, m_aCommand, std::min(m_LastCursorOffset + 1, sizeof(aSubString)));
 
 		// Iterate through available map settings and find those which the beginning matches with the command/setting name we are writing
 		for(auto &pSetting : m_pBackend->m_vpMapSettings)
@@ -1734,7 +1734,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 						// with the current argument value
 
 						auto &CurrentArg = m_vCurrentArgs.at(m_CursorArgIndex);
-						int SubstringLength = minimum(m_LastCursorOffset, CurrentArg.m_End) - CurrentArg.m_Start;
+						int SubstringLength = std::min(m_LastCursorOffset, CurrentArg.m_End) - CurrentArg.m_Start;
 
 						// Substring based on the cursor position inside that argument
 						char aSubString[256];

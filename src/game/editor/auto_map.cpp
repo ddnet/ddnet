@@ -88,7 +88,7 @@ void CAutoMapper::Load(const char *pTileName)
 				m_vConfigs.push_back(NewConf);
 				int ConfigurationId = m_vConfigs.size() - 1;
 				pCurrentConf = &m_vConfigs[ConfigurationId];
-				str_copy(pCurrentConf->m_aName, pLine, minimum<int>(sizeof(pCurrentConf->m_aName), str_length(pLine)));
+				str_copy(pCurrentConf->m_aName, pLine, std::min(sizeof(pCurrentConf->m_aName), (size_t)str_length(pLine)));
 
 				// add start run
 				CRun NewRun;
@@ -249,10 +249,10 @@ void CAutoMapper::Load(const char *pTileName)
 					CPosRule NewPosRule = {x, y, Value, vNewIndexList};
 					pCurrentIndex->m_vRules.push_back(NewPosRule);
 
-					pCurrentConf->m_StartX = minimum(pCurrentConf->m_StartX, NewPosRule.m_X);
-					pCurrentConf->m_StartY = minimum(pCurrentConf->m_StartY, NewPosRule.m_Y);
-					pCurrentConf->m_EndX = maximum(pCurrentConf->m_EndX, NewPosRule.m_X);
-					pCurrentConf->m_EndY = maximum(pCurrentConf->m_EndY, NewPosRule.m_Y);
+					pCurrentConf->m_StartX = std::min(pCurrentConf->m_StartX, NewPosRule.m_X);
+					pCurrentConf->m_StartY = std::min(pCurrentConf->m_StartY, NewPosRule.m_Y);
+					pCurrentConf->m_EndX = std::max(pCurrentConf->m_EndX, NewPosRule.m_X);
+					pCurrentConf->m_EndY = std::max(pCurrentConf->m_EndY, NewPosRule.m_Y);
 
 					if(x == 0 && y == 0)
 					{

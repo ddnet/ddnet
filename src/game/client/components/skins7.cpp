@@ -8,7 +8,6 @@
 #include <base/dbg.h>
 #include <base/io.h>
 #include <base/log.h>
-#include <base/math.h>
 #include <base/str.h>
 #include <base/time.h>
 
@@ -24,6 +23,8 @@
 
 #include <game/client/gameclient.h>
 #include <game/localization.h>
+
+#include <algorithm>
 
 const char *const CSkins7::ms_apSkinPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
 const char *const CSkins7::ms_apSkinPartNamesLocalized[protocol7::NUM_SKINPARTS] = {Localizable("Body", "skins"), Localizable("Marking", "skins"), Localizable("Decoration", "skins"), Localizable("Hands", "skins"), Localizable("Feet", "skins"), Localizable("Eyes", "skins")};
@@ -158,7 +159,7 @@ bool CSkins7::LoadSkinPart(int PartType, const char *pName, int DirType)
 	{
 		Part.m_Flags |= SKINFLAG_STANDARD;
 	}
-	str_copy(Part.m_aName, pName, minimum<int>(PartNameSize + 1, sizeof(Part.m_aName)));
+	str_copy(Part.m_aName, pName, std::min(PartNameSize + 1, sizeof(Part.m_aName)));
 	Part.m_OriginalTexture = Graphics()->LoadTextureRaw(Info, 0, aFilename);
 	Part.m_BloodColor = DetermineBloodColor(Part.m_Type, Info);
 	ConvertToGrayscale(Info);

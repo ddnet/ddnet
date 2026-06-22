@@ -71,9 +71,9 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 {
 	m_LastAddedRect = Rect;
 	if(m_Params.m_ScrollHorizontal)
-		m_ContentSize = maximum(std::ceil(Rect.x + Rect.w - (m_ContentAreaRect.x + m_ContentScrollOffset)), m_ContentSize);
+		m_ContentSize = std::max(std::ceil(Rect.x + Rect.w - (m_ContentAreaRect.x + m_ContentScrollOffset)), m_ContentSize);
 	else
-		m_ContentSize = maximum(std::ceil(Rect.y + Rect.h - (m_ContentAreaRect.y + m_ContentScrollOffset)), m_ContentSize);
+		m_ContentSize = std::max(std::ceil(Rect.y + Rect.h - (m_ContentAreaRect.y + m_ContentScrollOffset)), m_ContentSize);
 	if(ShouldScrollHere)
 		ScrollHere();
 	return !RectClipped(Rect);
@@ -83,7 +83,7 @@ void CScrollRegion::ScrollHere(EScrollOption Option)
 {
 	const float LastAddedPos = m_Params.m_ScrollHorizontal ? m_LastAddedRect.x : m_LastAddedRect.y;
 	const float LastAddedSize = m_Params.m_ScrollHorizontal ? m_LastAddedRect.w : m_LastAddedRect.h;
-	const float MinHeight = minimum(ContentAreaSize(), LastAddedSize);
+	const float MinHeight = std::min(ContentAreaSize(), LastAddedSize);
 	const float TopScroll = LastAddedPos - (ContentAreaPos() + m_ContentScrollOffset);
 
 	switch(Option)
@@ -133,9 +133,9 @@ void CScrollRegion::DoEdgeScrolling()
 	const float BottomScrollPosition = ContentAreaPos() + ContentAreaSize() - ScrollBorderSize;
 	const float MousePos = m_Params.m_ScrollHorizontal ? Ui()->MouseX() : Ui()->MouseY();
 	if(MousePos < TopScrollPosition)
-		ScrollRelative(SCROLLRELATIVE_UP, minimum(MaxScrollMultiplier, (TopScrollPosition - MousePos) * ScrollSpeedFactor));
+		ScrollRelative(SCROLLRELATIVE_UP, std::min(MaxScrollMultiplier, (TopScrollPosition - MousePos) * ScrollSpeedFactor));
 	else if(MousePos > BottomScrollPosition)
-		ScrollRelative(SCROLLRELATIVE_DOWN, minimum(MaxScrollMultiplier, (MousePos - BottomScrollPosition) * ScrollSpeedFactor));
+		ScrollRelative(SCROLLRELATIVE_DOWN, std::min(MaxScrollMultiplier, (MousePos - BottomScrollPosition) * ScrollSpeedFactor));
 }
 
 bool CScrollRegion::RectClipped(const CUIRect &Rect) const
@@ -306,7 +306,7 @@ void CScrollRegion::AdvanceAnimation()
 void CScrollRegion::DoSlider()
 {
 	const float RailSize = m_Params.m_ScrollHorizontal ? m_RailRect.w : m_RailRect.h;
-	const float SliderSize = maximum(m_Params.m_SliderMinSize, ContentAreaSize() / m_ContentSize * RailSize);
+	const float SliderSize = std::max(m_Params.m_SliderMinSize, ContentAreaSize() / m_ContentSize * RailSize);
 
 	CUIRect Slider = m_RailRect;
 	float &SliderPos = m_Params.m_ScrollHorizontal ? Slider.x : Slider.y;

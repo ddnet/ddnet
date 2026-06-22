@@ -547,7 +547,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
 					TileLayer = true;
-					s_RotationAmount = maximum(90, (s_RotationAmount / 90) * 90);
+					s_RotationAmount = std::max(90, (s_RotationAmount / 90) * 90);
 					break;
 				}
 
@@ -942,7 +942,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 	bool GridEnabled = MapView()->MapGrid()->IsEnabled() && !Input()->AltIsPressed();
 
 	// Perform computation from the original position of this point
-	int Threshold = f2fx(maximum(5.0f, 10.0f * MapView()->MouseWorldScale()));
+	int Threshold = f2fx(std::max(5.0f, 10.0f * MapView()->MouseWorldScale()));
 	CPoint OrigPoint = m_QuadDragOriginalPoints.at(QuadIndex)[PointIndex];
 	// Get the "current" point by applying the offset
 	CPoint Point = OrigPoint + Offset;
@@ -1123,7 +1123,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 	// This method is a bit different than the point alignment in the way where instead of trying to align 1 point to all quads,
 	// we try to align 5 points to all quads, these 5 points being 5 points of an AABB.
 	// Otherwise, the concept is the same, we use the original position of the AABB to make the computations.
-	int Threshold = f2fx(maximum(5.0f, 10.0f * MapView()->MouseWorldScale()));
+	int Threshold = f2fx(std::max(5.0f, 10.0f * MapView()->MouseWorldScale()));
 	ivec2 SmallestDiff = ivec2(Threshold + 1, Threshold + 1);
 	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
 
@@ -1209,10 +1209,10 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 		CPoint QuadMin = pCurrentQuad->m_aPoints[0], QuadMax = pCurrentQuad->m_aPoints[0];
 		for(int v = 1; v < 4; v++)
 		{
-			QuadMin.x = minimum(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
-			QuadMin.y = minimum(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
-			QuadMax.x = maximum(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
-			QuadMax.y = maximum(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMin.x = std::min(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMin.y = std::min(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMax.x = std::max(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMax.y = std::max(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
 		}
 
 		CheckAABBAlignment(QuadMin, QuadMax);
@@ -1289,10 +1289,10 @@ void CEditor::QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxi
 		for(int i = 0; i < 4; i++)
 		{
 			auto *pPoint = &pQuad->m_aPoints[i];
-			Min.x = minimum(Min.x, pPoint->x);
-			Min.y = minimum(Min.y, pPoint->y);
-			Max.x = maximum(Max.x, pPoint->x);
-			Max.y = maximum(Max.y, pPoint->y);
+			Min.x = std::min(Min.x, pPoint->x);
+			Min.y = std::min(Min.y, pPoint->y);
+			Max.x = std::max(Max.x, pPoint->x);
+			Max.y = std::max(Max.y, pPoint->y);
 		}
 	}
 	CPoint Center = (Min + Max) / 2.0f;
@@ -3246,7 +3246,7 @@ void CEditor::RenderSelectedImage(CUIRect View) const
 		View.w = View.h;
 	else
 		View.h = View.w;
-	float Max = maximum<float>(pSelectedImage->m_Width, pSelectedImage->m_Height);
+	float Max = std::max(pSelectedImage->m_Width, pSelectedImage->m_Height);
 	View.w *= pSelectedImage->m_Width / Max;
 	View.h *= pSelectedImage->m_Height / Max;
 	Graphics()->TextureSet(pSelectedImage->m_Texture);
@@ -4231,10 +4231,10 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 	float aPoints[4];
 	Group.Mapping(aPoints);
 	const int ExtraBorder = 9; // doors extend beyond the tile on which they are placed
-	const int StartX = std::max<int>(0, std::floor(aPoints[0] / TileSize) - ExtraBorder);
-	const int EndX = std::min<int>(TilesLayer.m_Width, std::ceil(aPoints[2] / TileSize) + ExtraBorder);
-	const int StartY = std::max<int>(0, std::floor(aPoints[1] / TileSize) - ExtraBorder);
-	const int EndY = std::min<int>(TilesLayer.m_Height, std::ceil(aPoints[3] / TileSize) + ExtraBorder);
+	const int StartX = std::max(0, (int)std::floor(aPoints[0] / TileSize) - ExtraBorder);
+	const int EndX = std::min(TilesLayer.m_Width, (int)std::ceil(aPoints[2] / TileSize) + ExtraBorder);
+	const int StartY = std::max(0, (int)std::floor(aPoints[1] / TileSize) - ExtraBorder);
+	const int EndY = std::min(TilesLayer.m_Height, (int)std::ceil(aPoints[3] / TileSize) + ExtraBorder);
 	for(int y = StartY; y < EndY; y++)
 	{
 		for(int x = StartX; x < EndX; x++)

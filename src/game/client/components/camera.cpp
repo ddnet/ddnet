@@ -6,7 +6,6 @@
 #include "controls.h"
 
 #include <base/log.h>
-#include <base/math.h>
 #include <base/vmath.h>
 
 #include <engine/shared/config.h>
@@ -235,7 +234,7 @@ void CCamera::UpdateCamera()
 		}
 		else
 		{
-			m_DyncamSmoothingSpeedBias = maximum(5.0f, CameraSpeed); // make sure toggle back is fast
+			m_DyncamSmoothingSpeedBias = std::max(5.0f, CameraSpeed); // make sure toggle back is fast
 		}
 	}
 
@@ -260,11 +259,11 @@ void CCamera::UpdateCamera()
 			}
 		}
 
-		float OffsetAmount = maximum(l - CurrentDeadzone, 0.0f) * (CurrentFollowFactor / 100.0f);
+		float OffsetAmount = std::max(l - CurrentDeadzone, 0.0f) * (CurrentFollowFactor / 100.0f);
 
 		if(CanUseCameraInfo)
 		{
-			OffsetAmount = minimum(OffsetAmount, 350.0f * m_Zoom);
+			OffsetAmount = std::min(OffsetAmount, 350.0f * m_Zoom);
 		}
 
 		m_DyncamTargetCameraOffset = normalize_pre_length(TargetPos, l) * OffsetAmount;
@@ -274,7 +273,7 @@ void CCamera::UpdateCamera()
 	vec2 CurrentCameraOffset = m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy];
 	float SpeedBias = m_CameraSmoothing ? 50.0f : m_DyncamSmoothingSpeedBias;
 	if(Smoothness > 0)
-		CurrentCameraOffset += (m_DyncamTargetCameraOffset - CurrentCameraOffset) * minimum(DeltaTime * SpeedBias, 1.0f);
+		CurrentCameraOffset += (m_DyncamTargetCameraOffset - CurrentCameraOffset) * std::min(DeltaTime * SpeedBias, 1.0f);
 	else
 		CurrentCameraOffset = m_DyncamTargetCameraOffset;
 
