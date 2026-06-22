@@ -86,7 +86,7 @@ void CFifo::Shutdown()
 		return;
 
 	close(m_File);
-	(void)fs_remove(m_aFilename);
+	fs_remove(m_aFilename);
 }
 
 void CFifo::Update()

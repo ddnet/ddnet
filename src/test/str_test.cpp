@@ -258,8 +258,8 @@ TEST(Str, Utf8CompNocase)
 {
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölü") == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase("ÜlÖ", "ölü") > 0); // ü > ö
-	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // \0 < a
-	EXPECT_TRUE(str_utf8_comp_nocase("ölüa", "ÖlÜ") > 0); // a < \0
+	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a
+	EXPECT_TRUE(str_utf8_comp_nocase("ölüa", "ÖlÜ") > 0); // a < NULL
 
 #if (CHAR_MIN < 0)
 	const char a[2] = {CHAR_MIN, 0};
@@ -589,30 +589,30 @@ TEST(Str, Base64)
 TEST(Str, Base64Decode)
 {
 	char aOut[17];
-	str_copy(aOut, "XXXXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), ""), 0);
 	EXPECT_STREQ(aOut, "XXXXXXXXXXXXXXXX");
 
 	// https://en.wikipedia.org/w/index.php?title=Base64&oldid=1033503483#Output_padding
-	str_copy(aOut, "XXXXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "cGxlYXN1cmUu"), 9);
 	EXPECT_STREQ(aOut, "pleasure.XXXXXXX");
-	str_copy(aOut, "XXXXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "bGVhc3VyZS4="), 8);
 	EXPECT_STREQ(aOut, "leasure.XXXXXXXX");
-	str_copy(aOut, "XXXXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "ZWFzdXJlLg=="), 7);
 	EXPECT_STREQ(aOut, "easure.XXXXXXXXX");
-	str_copy(aOut, "XXXXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "YXN1cmUu"), 6);
 	EXPECT_STREQ(aOut, "asure.XXXXXXXXXX");
-	str_copy(aOut, "XXXXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "c3VyZS4="), 5);
 	EXPECT_STREQ(aOut, "sure.XXXXXXXXXXX");
-	str_copy(aOut, "XXXXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "////"), 3);
 	EXPECT_STREQ(aOut, "\xff\xff\xffXXXXXXXXXXXXX");
-	str_copy(aOut, "XXXXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "CQk+"), 3);
 	EXPECT_STREQ(aOut, "		>XXXXXXXXXXXXX");
 }

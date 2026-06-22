@@ -16,6 +16,11 @@ extern crate ddnet_test;
 
 mod config;
 mod rust_version;
+#[allow(non_snake_case)]
+mod snapshot;
+mod uuid_manager;
 
 pub use config::*;
 pub use rust_version::*;
+pub use snapshot::*;
+pub use uuid_manager::*;

@@ -8,8 +8,8 @@
 
 #include <engine/console.h>
 #include <engine/serverbrowser.h>
+#include <engine/shared/memheap.h>
 
-#include <deque>
 #include <functional>
 #include <map>
 #include <optional>
@@ -277,8 +277,6 @@ public:
 	void UpdateServerFriends(CServerInfo *pInfo) const;
 	void UpdateServerCommunity(CServerInfo *pInfo) const;
 	void UpdateServerRank(CServerInfo *pInfo) const;
-	void UpdateServerLatency(CServerInfo *pInfo, int OwnLocation) const;
-	int DetermineOwnLocation() const;
 	void ValidateServerlistType();
 	const char *GetTutorialServer() override;
 
@@ -336,10 +334,7 @@ private:
 	IServerBrowserPingCache *m_pPingCache = nullptr;
 	const char *m_pHttpPrevBestUrl = nullptr;
 
-	// Entries are owned by m_ServerlistStorage; m_vpServerlist holds non-owning
-	// pointers into it. std::deque keeps element pointers stable across growth,
-	// which the request list (m_pPrevReq/m_pNextReq) and m_vpServerlist rely on.
-	std::deque<CServerEntry> m_ServerlistStorage;
+	CHeap m_ServerlistHeap;
 	std::vector<CServerEntry *> m_vpServerlist;
 	std::vector<int> m_vSortedServerlist;
 	std::unordered_map<NETADDR, int> m_ByAddr;

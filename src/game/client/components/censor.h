@@ -1,5 +1,6 @@
 #ifndef GAME_CLIENT_COMPONENTS_CENSOR_H
 #define GAME_CLIENT_COMPONENTS_CENSOR_H
+/*
 #include <base/lock.h>
 
 #include <engine/console.h>
@@ -14,9 +15,6 @@
 #include <string>
 #include <vector>
 
-void CensorReplaceWords(char *pBuffer, const std::vector<std::string> &vWords, char Replacement);
-
-/*
 class CCensor : public CComponent
 {
 private:
@@ -61,6 +59,8 @@ public:
 	void CensorMessage(char *pMessage) const;
 };
 */
+
+#include <game/client/component.h>
 
 class CCensor : public CComponent
 {

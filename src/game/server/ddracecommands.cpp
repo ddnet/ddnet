@@ -423,7 +423,14 @@ void CGameContext::Teleport(CCharacter *pChr, vec2 Pos)
 	pChr->m_PrevPos = Pos;
 	pChr->m_DDRaceState = ERaceState::CHEATED;
 }
-
+//yirou
+void CGameContext::Teleport_relay(CCharacter *pChr, vec2 Pos)
+{
+	pChr->SetPosition(Pos);
+	pChr->m_Pos = Pos;
+	pChr->m_PrevPos = Pos;
+	//pChr->m_DDRaceState = ERaceState::CHEATED;
+}
 void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

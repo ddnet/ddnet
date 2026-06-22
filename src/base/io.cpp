@@ -159,25 +159,25 @@ char *io_read_all_str(IOHANDLE io)
 
 int io_skip(IOHANDLE io, int64_t size)
 {
-	return io_seek(io, size, EIoSeekOrigin::CURRENT);
+	return io_seek(io, size, IOSEEK_CUR);
 }
 
-int io_seek(IOHANDLE io, int64_t offset, EIoSeekOrigin origin)
+int io_seek(IOHANDLE io, int64_t offset, ESeekOrigin origin)
 {
 	int real_origin;
 	switch(origin)
 	{
-	case EIoSeekOrigin::START:
+	case IOSEEK_START:
 		real_origin = SEEK_SET;
 		break;
-	case EIoSeekOrigin::CURRENT:
+	case IOSEEK_CUR:
 		real_origin = SEEK_CUR;
 		break;
-	case EIoSeekOrigin::END:
+	case IOSEEK_END:
 		real_origin = SEEK_END;
 		break;
 	default:
-		dbg_assert_failed("Invalid origin: %d", (int)origin);
+		dbg_assert_failed("Invalid origin: %d", origin);
 	}
 #if defined(CONF_FAMILY_WINDOWS)
 	return _fseeki64((FILE *)io, offset, real_origin);
@@ -197,12 +197,12 @@ int64_t io_tell(IOHANDLE io)
 
 int64_t io_length(IOHANDLE io)
 {
-	if(io_seek(io, 0, EIoSeekOrigin::END) != 0)
+	if(io_seek(io, 0, IOSEEK_END) != 0)
 	{
 		return -1;
 	}
 	const int64_t length = io_tell(io);
-	if(io_seek(io, 0, EIoSeekOrigin::START) != 0)
+	if(io_seek(io, 0, IOSEEK_START) != 0)
 	{
 		return -1;
 	}

@@ -5,9 +5,9 @@
 
 #include "dbg.h"
 #include "detect.h"
+#include "math.h"
 #include "mem.h"
 
-#include <algorithm>
 #include <cctype>
 #include <charconv> // std::to_chars
 #include <cstdarg>
@@ -479,7 +479,7 @@ const char *str_find(const char *haystack, const char *needle)
 	return nullptr;
 }
 
-static const char *str_token_get(const char *str, const char *delim, size_t *length)
+static const char *str_token_get(const char *str, const char *delim, int *length)
 {
 	size_t len = strspn(str, delim);
 	if(len > 1)
@@ -493,13 +493,11 @@ static const char *str_token_get(const char *str, const char *delim, size_t *len
 	return str;
 }
 
-const char *str_next_token(const char *str, const char *delim, char *buffer, size_t buffer_size)
+const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size)
 {
-	dbg_assert(buffer_size > 0, "buffer size 0");
-
-	size_t len = 0;
+	int len = 0;
 	const char *tok = str_token_get(str, delim, &len);
-	if(tok == nullptr)
+	if(len < 0 || tok == nullptr)
 	{
 		buffer[0] = '\0';
 		return nullptr;
@@ -515,7 +513,7 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, siz
 int str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
-	size_t len = 0, notfound = 1, needlelen = str_length(needle);
+	int len = 0, notfound = 1, needlelen = str_length(needle);
 
 	while(notfound && (tok = str_token_get(tok, delim, &len)))
 	{
@@ -1361,11 +1359,10 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 		for(i = 1; i <= a_len; i++)
 		{
 			int subst = (a[i - 1] != b[j - 1]);
-			B(i, j) = std::min({
+			B(i, j) = minimum(
 				B(i - 1, j) + 1,
 				B(i, j - 1) + 1,
-				B(i - 1, j - 1) + subst,
-			});
+				B(i - 1, j - 1) + subst);
 		}
 	}
 	return B(a_len, b_len);

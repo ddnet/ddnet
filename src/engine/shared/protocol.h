@@ -159,16 +159,6 @@ enum
 	VERSION_DDNET_MAP_BESTTIME = 19070,
 };
 
-/**
- * Country codes in ISO 3166-1 numeric.
- */
-namespace CountryCode
-{
-	inline constexpr int DEFAULT = -1;
-	inline constexpr int MINIMUM = -1;
-	inline constexpr int MAXIMUM = 999;
-};
-
 namespace TuneZone
 {
 	inline constexpr int OVERRIDE_NONE = -1;

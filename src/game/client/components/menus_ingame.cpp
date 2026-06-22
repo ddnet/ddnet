@@ -627,7 +627,8 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	const float FontSizeTitle = 32.0f;
 	const float FontSizeBody = 20.0f;
 
-	const CServerInfo &CurrentServerInfo = Client()->ServerInfo();
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
 
 	CUIRect ServerInfo, GameInfo, Motd;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
@@ -1188,27 +1189,6 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 		NewPage = PAGE_FAVORITES;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
-
-	const int MaxPage = PAGE_FAVORITES + ServerBrowser()->FavoriteCommunities().size();
-	if(
-		!Ui()->IsPopupOpen() &&
-		CLineInput::GetActiveInput() == nullptr &&
-		(g_Config.m_UiPage >= PAGE_INTERNET && g_Config.m_UiPage <= MaxPage) &&
-		(m_MenuPage >= PAGE_INTERNET && m_MenuPage <= PAGE_FAVORITE_COMMUNITY_5))
-	{
-		if(Input()->KeyPress(KEY_RIGHT))
-		{
-			NewPage = g_Config.m_UiPage + 1;
-			if(NewPage > MaxPage)
-				NewPage = PAGE_INTERNET;
-		}
-		if(Input()->KeyPress(KEY_LEFT))
-		{
-			NewPage = g_Config.m_UiPage - 1;
-			if(NewPage < PAGE_INTERNET)
-				NewPage = MaxPage;
-		}
-	}
 
 	size_t FavoriteCommunityIndex = 0;
 	static CButtonContainer s_aFavoriteCommunityButtons[5];

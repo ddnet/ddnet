@@ -125,7 +125,7 @@ static std::pair<EArgumentCompletionType, int> ArgumentCompletion(const char *pS
 
 	for(const auto &Entry : gs_aArgumentCompletionEntries)
 	{
-		int Length = std::max(str_length(Entry.m_pCommandName), CommandLength);
+		int Length = maximum(str_length(Entry.m_pCommandName), CommandLength);
 		if(str_comp_nocase_num(Entry.m_pCommandName, pCommandStart, Length) == 0)
 		{
 			int CurrentArg = 0;
@@ -352,12 +352,12 @@ void CGameConsole::CInstance::UpdateCompletionSuggestions()
 	char aOldCommand[IConsole::CMDLINE_LENGTH];
 	aOldCommand[0] = '\0';
 	if(m_CompletionChosen != -1 && (size_t)m_CompletionChosen < m_vpCommandSuggestions.size())
-		str_copy(aOldCommand, m_vpCommandSuggestions[m_CompletionChosen]);
+		str_copy(aOldCommand, m_vpCommandSuggestions[m_CompletionChosen], sizeof(aOldCommand));
 
 	char aOldArgument[IConsole::CMDLINE_LENGTH];
 	aOldArgument[0] = '\0';
 	if(m_CompletionChosenArgument != -1 && (size_t)m_CompletionChosenArgument < m_vpArgumentSuggestions.size())
-		str_copy(aOldArgument, m_vpArgumentSuggestions[m_CompletionChosenArgument]);
+		str_copy(aOldArgument, m_vpArgumentSuggestions[m_CompletionChosenArgument], sizeof(aOldArgument));
 
 	m_vpCommandSuggestions.clear();
 	m_vpArgumentSuggestions.clear();
@@ -477,13 +477,13 @@ void CGameConsole::CInstance::GetCommand(const char *pInput, char (&aCmd)[IConso
 	}
 	m_CompletionCommandStart = str_skip_whitespaces_const(aInput + m_CompletionCommandStart) - aInput;
 
-	str_copy(aCmd, aInput + m_CompletionCommandStart);
+	str_copy(aCmd, aInput + m_CompletionCommandStart, sizeof(aCmd));
 }
 
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
 {
 	const char *pSpace = str_find(pSrc, " ");
-	str_copy(pDest, pSrc, std::min(pSpace ? (size_t)(pSpace - pSrc + 1) : 1, DestSize));
+	str_copy(pDest, pSrc, minimum<size_t>(pSpace ? pSpace - pSrc + 1 : 1, DestSize));
 }
 
 bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
@@ -545,9 +545,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 						m_pHistoryEntry = pTest;
 				}
 				else
-				{
 					m_pHistoryEntry = m_History.Last();
-				}
 
 				if(m_pHistoryEntry)
 					m_Input.Set(m_pHistoryEntry);
@@ -748,9 +746,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 				m_pCommandParams = pCommand->Params();
 			}
 			else
-			{
 				m_IsCommand = false;
-			}
 		}
 	}
 
@@ -783,7 +779,7 @@ int CGameConsole::CInstance::GetLinesToScroll(int Direction, int LinesToScroll)
 		pEntry = m_Backlog.Prev(pEntry);
 	}
 
-	int Amount = std::max(0, Line - LinesToSkip);
+	int Amount = maximum(0, Line - LinesToSkip);
 	while(pEntry && (LinesToScroll > 0 ? Amount < LinesToScroll : true))
 	{
 		if(pEntry->m_LineCount == -1)
@@ -792,7 +788,7 @@ int CGameConsole::CInstance::GetLinesToScroll(int Direction, int LinesToScroll)
 		pEntry = Direction == -1 ? m_Backlog.Prev(pEntry) : m_Backlog.Next(pEntry);
 	}
 
-	return LinesToScroll > 0 ? std::min(Amount, LinesToScroll) : Amount;
+	return LinesToScroll > 0 ? minimum(Amount, LinesToScroll) : Amount;
 }
 
 void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
@@ -800,7 +796,7 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 	// This method is used to scroll lines from `StartLine` to `EndLine` to the center of the screen, if possible.
 
 	// Find target line
-	int Target = std::max(0, (int)std::ceil(StartLine - std::min(StartLine - EndLine, m_LinesRendered) / 2) - m_LinesRendered / 2);
+	int Target = maximum(0, (int)ceil(StartLine - minimum(StartLine - EndLine, m_LinesRendered) / 2) - m_LinesRendered / 2);
 	if(m_BacklogCurLine == Target)
 		return;
 
@@ -1127,9 +1123,7 @@ void CGameConsole::Prompt(char (&aPrompt)[32])
 				str_format(aPrompt, sizeof(aPrompt), "%s> ", Localize("Enter Password"));
 		}
 		else
-		{
 			str_format(aPrompt, sizeof(aPrompt), "%s> ", Localize("NOT CONNECTED"));
-		}
 	}
 	else
 	{
@@ -1481,7 +1475,7 @@ void CGameConsole::OnRender()
 			if(Outside && !CanRenderOneLine)
 				break;
 
-			const int LinesNotRendered = pEntry->m_LineCount - std::min((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
+			const int LinesNotRendered = pEntry->m_LineCount - minimum((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
 			pConsole->m_LinesRendered -= LinesNotRendered;
 
 			CTextCursor EntryCursor;
@@ -1517,8 +1511,8 @@ void CGameConsole::OnRender()
 
 			if(EntryCursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 			{
-				pConsole->m_CurSelStart = std::min(EntryCursor.m_SelectionStart, EntryCursor.m_SelectionEnd);
-				pConsole->m_CurSelEnd = std::max(EntryCursor.m_SelectionStart, EntryCursor.m_SelectionEnd);
+				pConsole->m_CurSelStart = minimum(EntryCursor.m_SelectionStart, EntryCursor.m_SelectionEnd);
+				pConsole->m_CurSelEnd = maximum(EntryCursor.m_SelectionStart, EntryCursor.m_SelectionEnd);
 			}
 			pConsole->m_LinesRendered += First ? pEntry->m_LineCount - (pConsole->m_BacklogLastActiveLine - SkippedLines) : pEntry->m_LineCount;
 
@@ -1612,9 +1606,7 @@ bool CGameConsole::OnInput(const IInput::CEvent &Event)
 		return false;
 
 	if(Event.m_Key == KEY_ESCAPE && (Event.m_Flags & IInput::FLAG_PRESS) && !CurrentConsole()->m_Searching)
-	{
 		Toggle(m_ConsoleType);
-	}
 	else if(!CurrentConsole()->OnInput(Event))
 	{
 		if(GameClient()->Input()->ModifierIsPressed() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_C)

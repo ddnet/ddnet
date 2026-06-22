@@ -16,6 +16,14 @@ class CCharacter;
 class CPlayer;
 struct CScoreSaveResult;
 
+enum ETeamRelayState
+{
+	RELAY_STATE_IDLE = 0, // 空闲，未开始
+	RELAY_STATE_COUNTDOWN, // 倒计时准备
+	RELAY_STATE_RUNNING, // 接力进行中
+	RELAY_STATE_FINISHED, // 已全部完成
+};
+
 class CGameTeams
 {
 	// `m_TeeStarted` is used to keep track whether a given tee has hit the
@@ -129,6 +137,18 @@ public:
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
 	bool IsValidTeamNumber(int Team) const;
+	//yirou
+	ETeamRelayState m_aTeamRelayState[NUM_DDRACE_TEAMS]; // 每个队伍的状态
+	int m_aTeamRelayOrder[NUM_DDRACE_TEAMS][MAX_CLIENTS]; // 存储每个队伍的接力顺序（玩家ID列表）
+	int m_aTeamRelayRunnerCount[NUM_DDRACE_TEAMS]; // 已确认设定顺序的玩家人数
+	int m_aTeamCurrentRunnerIndex[NUM_DDRACE_TEAMS]; // 当前跑第几棒（索引）
+	int m_aTeamRelayTickStart[NUM_DDRACE_TEAMS]; // 当前棒开始的游戏Tick
+	int m_aTeamRelayDurationTicks[NUM_DDRACE_TEAMS]; // 每棒持续时间（Tick数，由/setrelaytime换算）
+	bool m_aTeamRelayPlayerFinished[NUM_DDRACE_TEAMS][MAX_CLIENTS]; // 标记每个玩家是否已完成自己的棒次
+									
+	void SetTeamRelayDuration(int Team, int Ticks); // 设置队伍接力持续时间
+	int GetTeamRelayDuration(int Team) const;// 获取队伍接力持续时间
 };
 
 #endif
+

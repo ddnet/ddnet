@@ -49,6 +49,29 @@ if(NOT SPIRV_OPTIMIZER_PROGRAM)
   endif()
 endif()
 
+# Find Vulkan shader files
+file(GLOB_RECURSE GLSL_SHADER_FILES
+  "data/shader/vulkan/*.frag"
+  "data/shader/vulkan/*.vert"
+)
+list(SORT GLSL_SHADER_FILES)
+
+# Generate shader SHA256 list to determine changes
+set(TMP_SHADER_SHA256_LIST "")
+foreach(GLSL_SHADER_FILE ${GLSL_SHADER_FILES})
+  file(SHA256 ${GLSL_SHADER_FILE} TMP_FILE_SHA)
+  set(TMP_SHADER_SHA256_LIST "${TMP_SHADER_SHA256_LIST}${TMP_FILE_SHA}")
+endforeach(GLSL_SHADER_FILE)
+
+string(SHA256 GLSL_SHADER_SHA256 "${TMP_SHADER_SHA256_LIST}")
+set(GLSL_SHADER_SHA256 "${GLSL_SHADER_SHA256}@v1")
+
+set(FOUND_MATCHING_SHA256_FILE FALSE)
+
+if("${VULKAN_SHADER_FILE_SHA256}" STREQUAL "${GLSL_SHADER_SHA256}")
+  set(FOUND_MATCHING_SHA256_FILE TRUE)
+endif()
+
 # Settings
 set(TW_VULKAN_VERSION "vulkan100")
 
@@ -82,52 +105,52 @@ endfunction()
 # Primitives
 generate_shader_file("" "" "prim.frag" "prim.frag.spv")
 generate_shader_file("" "" "prim.vert" "prim.vert.spv")
-
+  
 generate_shader_file("-DTW_TEXTURED" "" "prim.frag" "prim_textured.frag.spv")
 generate_shader_file("-DTW_TEXTURED" "" "prim.vert" "prim_textured.vert.spv")
-
+  
 generate_shader_file("" "" "prim3d.frag" "prim3d.frag.spv")
 generate_shader_file("" "" "prim3d.vert" "prim3d.vert.spv")
-
+  
 generate_shader_file("-DTW_TEXTURED" "" "prim3d.frag" "prim3d_textured.frag.spv")
 generate_shader_file("-DTW_TEXTURED" "" "prim3d.vert" "prim3d_textured.vert.spv")
-
+  
 # Text
 generate_shader_file("" "" "text.frag" "text.frag.spv")
 generate_shader_file("" "" "text.vert" "text.vert.spv")
-
+  
 # Quad container
 generate_shader_file("" "" "primex.frag" "primex.frag.spv")
 generate_shader_file("" "" "primex.vert" "primex.vert.spv")
-
+  
 generate_shader_file("" "" "primex.frag" "primex_rotationless.frag.spv")
 generate_shader_file("-DTW_ROTATIONLESS" "" "primex.vert" "primex_rotationless.vert.spv")
-
+  
 generate_shader_file("-DTW_TEXTURED" "" "primex.frag" "primex_tex.frag.spv")
 generate_shader_file("" "" "primex.vert" "primex_tex.vert.spv")
-
+  
 generate_shader_file("-DTW_TEXTURED" "" "primex.frag" "primex_tex_rotationless.frag.spv")
 generate_shader_file("-DTW_ROTATIONLESS" "" "primex.vert" "primex_tex_rotationless.vert.spv")
-
+  
 generate_shader_file("" "" "spritemulti.frag" "spritemulti.frag.spv")
 generate_shader_file("" "" "spritemulti.vert" "spritemulti.vert.spv")
-
+  
 generate_shader_file("-DTW_PUSH_CONST" "" "spritemulti.frag" "spritemulti_push.frag.spv")
 generate_shader_file("-DTW_PUSH_CONST" "" "spritemulti.vert" "spritemulti_push.vert.spv")
-
+  
 # Tile layer
 generate_shader_file("" "" "tile.frag" "tile.frag.spv")
 generate_shader_file("" "" "tile.vert" "tile.vert.spv")
 
 generate_shader_file("-DTW_TILE_TEXTURED" "" "tile.frag" "tile_textured.frag.spv")
 generate_shader_file("-DTW_TILE_TEXTURED" "" "tile.vert" "tile_textured.vert.spv")
-
+  
 generate_shader_file("" "" "tile_border.frag" "tile_border.frag.spv")
 generate_shader_file("" "" "tile_border.vert" "tile_border.vert.spv")
-
+  
 generate_shader_file("" "-DTW_TILE_TEXTURED" "tile_border.frag" "tile_border_textured.frag.spv")
 generate_shader_file("" "-DTW_TILE_TEXTURED" "tile_border.vert" "tile_border_textured.vert.spv")
-
+  
 # Quad layer
 generate_shader_file("" "" "quad.frag" "quad.frag.spv")
 generate_shader_file("" "" "quad.vert" "quad.vert.spv")
@@ -141,6 +164,6 @@ generate_shader_file("-DTW_QUAD_TEXTURED" "" "quad.vert" "quad_textured.vert.spv
 generate_shader_file("-DTW_QUAD_TEXTURED" "-DTW_QUAD_GROUPED" "quad.frag" "quad_grouped_textured.frag.spv")
 generate_shader_file("-DTW_QUAD_TEXTURED" "-DTW_QUAD_GROUPED" "quad.vert" "quad_grouped_textured.vert.spv")
 
-set(VULKAN_SHADER_FILE_LIST ${VULKAN_SHADER_FILE_LIST} CACHE STRING "Vulkan shader file list" FORCE)
+  set(VULKAN_SHADER_FILE_LIST ${VULKAN_SHADER_FILE_LIST} CACHE STRING "Vulkan shader file list" FORCE)
 set(VULKAN_SHADER_OUTPUT_PATHS ${VULKAN_SHADER_OUTPUT_PATHS} CACHE STRING "Vulkan shader output list" FORCE)
 add_custom_target(build_vulkan_shaders DEPENDS ${VULKAN_SHADER_OUTPUT_PATHS})

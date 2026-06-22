@@ -37,7 +37,7 @@ struct THREAD_RUN
 #if defined(CONF_FAMILY_UNIX)
 static void *thread_run(void *user)
 #elif defined(CONF_FAMILY_WINDOWS)
-static DWORD __stdcall thread_run(void *user)
+static unsigned long __stdcall thread_run(void *user)
 #else
 #error not implemented
 #endif
@@ -50,13 +50,7 @@ static DWORD __stdcall thread_run(void *user)
 	void *u = data->u;
 	free(data);
 	threadfunc(u);
-#if defined(CONF_FAMILY_UNIX)
-	return nullptr;
-#elif defined(CONF_FAMILY_WINDOWS)
 	return 0;
-#else
-#error not implemented
-#endif
 }
 
 void *thread_init(void (*threadfunc)(void *), void *u, const char *name)

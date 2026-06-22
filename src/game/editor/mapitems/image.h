@@ -25,7 +25,7 @@ public:
 	char m_aName[IO_MAX_PATH_LENGTH] = "";
 	unsigned char m_aTileFlags[256];
 
-	CAutomapper m_Automapper;
+	CAutoMapper m_AutoMapper;
 };
 
 #endif

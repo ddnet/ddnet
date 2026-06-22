@@ -4,6 +4,7 @@
 
 struct sqlite3;
 struct sqlite3_stmt;
+class IConsole;
 class IStorage;
 
 class CSqliteDeleter
@@ -19,9 +20,9 @@ public:
 typedef std::unique_ptr<sqlite3, CSqliteDeleter> CSqlite;
 typedef std::unique_ptr<sqlite3_stmt, CSqliteStmtDeleter> CSqliteStmt;
 
-int SqliteHandleError(int Error, sqlite3 *pSqlite, const char *pContext);
-#define SQLITE_HANDLE_ERROR(x) SqliteHandleError(x, &*pSqlite, #x)
+int SqliteHandleError(IConsole *pConsole, int Error, sqlite3 *pSqlite, const char *pContext);
+#define SQLITE_HANDLE_ERROR(x) SqliteHandleError(pConsole, x, &*pSqlite, #x)
 
-CSqlite SqliteOpen(IStorage *pStorage, const char *pPath);
-CSqliteStmt SqlitePrepare(sqlite3 *pSqlite, const char *pStatement);
+CSqlite SqliteOpen(IConsole *pConsole, IStorage *pStorage, const char *pPath);
+CSqliteStmt SqlitePrepare(IConsole *pConsole, sqlite3 *pSqlite, const char *pStatement);
 #endif // ENGINE_SQLITE_H

@@ -17,22 +17,23 @@ class CHeap
 		CChunk *m_pNext;
 	};
 
-	/**
-	 * How large each chunk should be.
-	 */
-	static constexpr size_t CHUNK_SIZE = 1025 * 64;
+	enum
+	{
+		// how large each chunk should be
+		CHUNK_SIZE = 1025 * 64,
+	};
 
 	CChunk *m_pCurrent;
 
 	void Clear();
 	void NewChunk(size_t ChunkSize);
-	void *AllocateFromChunk(size_t Size, size_t Alignment);
+	void *AllocateFromChunk(unsigned int Size, unsigned Alignment);
 
 public:
 	CHeap();
 	~CHeap();
 	void Reset();
-	void *Allocate(size_t Size, size_t Alignment = alignof(std::max_align_t));
+	void *Allocate(unsigned Size, unsigned Alignment = alignof(std::max_align_t));
 	const char *StoreString(const char *pSrc);
 
 	template<typename T, typename... TArgs>

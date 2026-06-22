@@ -70,9 +70,6 @@ public:
 	public:
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
-		/**
-		 * Country code in ISO 3166-1 numeric.
-		 */
 		int m_Country;
 		int m_Score;
 		bool m_Player;
@@ -93,6 +90,7 @@ public:
 
 	int m_Type;
 	uint64_t m_ReceivedPackets;
+	int m_NumReceivedClients;
 
 	int m_NumAddresses;
 	NETADDR m_aAddresses[MAX_SERVER_ADDRESSES];
@@ -124,7 +122,7 @@ public:
 	int m_MapSize;
 	char m_aVersion[32];
 	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
-	std::vector<CClient> m_vClients;
+	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
 	int m_NumFilteredPlayers;
 	bool m_RequiresLogin;
 
@@ -154,9 +152,6 @@ class CCommunityCountry
 	friend class CServerBrowser;
 
 	char m_aName[CServerInfo::MAX_COMMUNITY_COUNTRY_LENGTH];
-	/**
-	 * Country code in ISO 3166-1 numeric.
-	 */
 	int m_FlagId;
 	std::vector<CCommunityCountryServer> m_vServers;
 

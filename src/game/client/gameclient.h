@@ -332,15 +332,8 @@ public:
 
 	vec2 m_LocalCharacterPos;
 
-	/**
-	 * Our prediction for the local character at tick
-	 * `IClient::PredGameTick() - 1`.
-	 */
+	// predicted players
 	CCharacterCore m_PredictedPrevChar;
-	/**
-	 * Our prediction for the local character at tick
-	 * `IClient::PredGameTick()`.
-	 */
 	CCharacterCore m_PredictedChar;
 
 	// snap pointers
@@ -457,9 +450,6 @@ public:
 
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
-		/**
-		 * Country code in ISO 3166-1 numeric.
-		 */
 		int m_Country;
 		char m_aSkinName[MAX_SKIN_LENGTH];
 		int m_Team;

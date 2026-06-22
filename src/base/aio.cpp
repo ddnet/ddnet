@@ -35,6 +35,13 @@ struct ASYNCIO
 	unsigned char refcount;
 };
 
+enum
+{
+	ASYNCIO_RUNNING,
+	ASYNCIO_CLOSE,
+	ASYNCIO_EXIT,
+};
+
 struct BUFFERS
 {
 	unsigned char *buf1;

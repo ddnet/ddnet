@@ -196,6 +196,10 @@ class CGameContext : public IGameServer
 	};
 
 public:
+	//yirou
+	bool SetTeamRelayDuration(int ClientID, int Seconds);
+	int GetTeamRelayDuration(int ClientID) const;
+
 	IServer *Server() const { return m_pServer; }
 	IConfigManager *ConfigManager() const { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
@@ -323,6 +327,8 @@ public:
 
 	void List(int ClientId, const char *pFilter);
 
+	//
+	void CheckPureTuning();
 	void SendTuningParams(int ClientId, int Zone = 0);
 
 	const CVoteOptionServer *GetVoteOption(int Index) const;
@@ -539,6 +545,11 @@ private:
 	static void ConTeleXY(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
 	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
+
+	//yirou
+	static void ConStartRelay(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetRelayTime(IConsole::IResult *pResult, void *pUserData);
+	void Teleport_relay(CCharacter *pChr, vec2 Pos);
 
 	// Chat commands for practice mode
 	static void ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUserData);

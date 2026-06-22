@@ -17,9 +17,8 @@ class CHuffman
 		HUFFMAN_LUTMASK = (HUFFMAN_LUTSIZE - 1)
 	};
 
-	class CNode
+	struct CNode
 	{
-	public:
 		// symbol
 		unsigned m_Bits;
 		unsigned m_NumBits;
@@ -38,7 +37,7 @@ class CHuffman
 	CNode *m_pStartNode;
 	int m_NumNodes;
 
-	void SetBitsRecursive(CNode *pNode, int Bits, unsigned Depth);
+	void Setbits_r(CNode *pNode, int Bits, unsigned Depth);
 	void ConstructTree(const unsigned *pFrequencies);
 
 public:
@@ -46,11 +45,14 @@ public:
 		Function: Init
 			Inits the compressor/decompressor.
 
+		Parameters:
+			pFrequencies - A pointer to an array of 256 entries of the frequencies of the bytes
+
 		Remarks:
 			- Does no allocation whatsoever.
 			- You don't have to call any cleanup functions when you are done with it.
 	*/
-	void Init();
+	void Init(const unsigned *pFrequencies = ms_aFreqTable);
 
 	/*
 		Function: Compress

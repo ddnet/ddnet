@@ -159,9 +159,6 @@ public:
 
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
-		/**
-		 * Country code in ISO 3166-1 numeric.
-		 */
 		int m_Country;
 		std::optional<int> m_Score;
 		int m_AuthKey;
@@ -216,9 +213,9 @@ public:
 	CClient m_aClients[MAX_CLIENTS];
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
-	CSnapshotDelta m_SnapshotDelta;
-	CSnapshotDelta m_SnapshotDeltaSixup;
-	CSnapshotBuilder m_SnapshotBuilder;
+	rust::Box<CSnapshotDelta> m_pSnapshotDelta;
+	rust::Box<CSnapshotDelta> m_pSnapshotDeltaSixup;
+	rust::Box<CSnapshotBuilder> m_pSnapshotBuilder;
 	CSnapIdPool m_IdPool;
 	CNetServer m_NetServer;
 	CEcon m_Econ;
@@ -307,7 +304,7 @@ public:
 
 	int Init();
 
-	static bool StrHideIps(const char *pInput, char *pOutputWithIps, size_t OutputWithIpsSize, char *pOutputWithoutIps, size_t OutputWithoutIpsSize);
+	static bool StrHideIps(const char *pInput, char *pOutputWithIps, int OutputWithIpsSize, char *pOutputWithoutIps, int OutputWithoutIpsSize);
 	void SendLogLine(const CLogMessage *pMessage);
 	void SetRconCid(int ClientId) override;
 	int GetAuthedState(int ClientId) const override;
@@ -485,7 +482,7 @@ public:
 
 	std::optional<int> SnapNewId() override;
 	void SnapFreeId(int Id) override;
-	bool SnapNewItem(int Type, int Id, const void *pData, int Size) override;
+	bool SnapNewItem(int Type, int Id, rust::Slice<const int32_t> Data) override;
 	void SnapSetStaticsize(int ItemType, int Size) override;
 	void SnapSetStaticsize7(int ItemType, int Size) override;
 

@@ -94,7 +94,6 @@ void CEditorMap::Clean()
 	m_MapGridState.Reset();
 	m_ProofModeState.Reset();
 	m_QuadKnifeState.Reset();
-	m_EnvelopeEditorState.Reset(Editor());
 }
 
 void CEditorMap::CreateDefault()
@@ -343,7 +342,7 @@ void CEditorMap::SelectNextLayer()
 {
 	int CurrentLayer = 0;
 	for(const auto &Selected : m_vSelectedLayers)
-		CurrentLayer = std::max(Selected, CurrentLayer);
+		CurrentLayer = maximum(Selected, CurrentLayer);
 	SelectLayer(CurrentLayer);
 
 	if(m_vSelectedLayers[0] < (int)m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1)
@@ -367,7 +366,7 @@ void CEditorMap::SelectPreviousLayer()
 {
 	int CurrentLayer = std::numeric_limits<int>::max();
 	for(const auto &Selected : m_vSelectedLayers)
-		CurrentLayer = std::min(Selected, CurrentLayer);
+		CurrentLayer = minimum(Selected, CurrentLayer);
 	SelectLayer(CurrentLayer);
 
 	if(m_vSelectedLayers[0] > 0)
@@ -525,10 +524,27 @@ void CEditorMap::DeselectQuadPoints()
 void CEditorMap::DeleteSelectedQuads()
 {
 	std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(SelectedLayerType(0, LAYERTYPE_QUADS));
-	if(!pLayer || m_vSelectedQuads.empty() || m_vSelectedLayers.size() != 1)
+	if(!pLayer)
 		return;
 
-	m_EditorHistory.Execute(std::make_shared<CEditorActionDeleteQuad>(this, m_SelectedGroup, m_vSelectedLayers[0]));
+	std::vector<int> vSelectedQuads(m_vSelectedQuads);
+	std::vector<CQuad> vDeletedQuads;
+	vDeletedQuads.reserve(m_vSelectedQuads.size());
+	for(int i = 0; i < (int)m_vSelectedQuads.size(); ++i)
+	{
+		auto const &Quad = pLayer->m_vQuads[m_vSelectedQuads[i]];
+		vDeletedQuads.push_back(Quad);
+
+		pLayer->m_vQuads.erase(pLayer->m_vQuads.begin() + m_vSelectedQuads[i]);
+		for(int j = i + 1; j < (int)m_vSelectedQuads.size(); ++j)
+			if(m_vSelectedQuads[j] > m_vSelectedQuads[i])
+				m_vSelectedQuads[j]--;
+
+		m_vSelectedQuads.erase(m_vSelectedQuads.begin() + i);
+		i--;
+	}
+
+	m_EditorHistory.RecordAction(std::make_shared<CEditorActionDeleteQuad>(this, m_SelectedGroup, m_vSelectedLayers[0], vSelectedQuads, vDeletedQuads));
 }
 
 std::shared_ptr<CEnvelope> CEditorMap::NewEnvelope(CEnvelope::EType Type)

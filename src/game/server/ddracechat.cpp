@@ -16,6 +16,7 @@
 #include <game/team_state.h>
 #include <game/teamscore.h>
 #include <game/version.h>
+#include "gamemodes/mod.h"
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
@@ -2391,4 +2392,278 @@ void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pResult->GetString(0);
 	pSelf->Score()->LoadPlayerTimeCp(pResult->m_ClientId, pName);
+}
+
+//yirou
+void CGameContext::ConStartRelay(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You need to be alive to start the timer");
+		return;
+	}
+
+	// 检查玩家权限（GetAuthedState 返回 1 表示管理员）
+	bool IsAdmin = (pSelf->Server()->GetAuthedState(pResult->m_ClientId) == 1);
+
+	const int PlayerTeam = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	// 管理员模式：启动所有队伍的计时
+	if(IsAdmin && pResult->NumArguments() > 0 && str_comp_nocase(pResult->GetString(0), "all") == 0)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Admin: Starting timer for ALL teams...");
+		// 获取管理员位置
+		vec2 AdminPos = pChr->m_Pos;
+
+		int TeleportedCount = 0;
+		int TeamsStarted = 0;
+
+		// 遍历所有玩家进行传送
+		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+		{
+			if(!pSelf->m_apPlayers[ClientId])
+				continue;
+
+			// 跳过管理员自己
+			if(ClientId == pResult->m_ClientId)
+				continue;
+
+			CCharacter *pTargetChr = pSelf->m_apPlayers[ClientId]->GetCharacter();
+			if(!pTargetChr || !pTargetChr->IsAlive())
+				continue;
+
+			//使用 pSelf->Teleport() 函数传送
+			pSelf->Teleport_relay(pTargetChr, AdminPos);
+			pTargetChr->ResetJumps();
+			pTargetChr->Unfreeze();
+			pTargetChr->ResetVelocity();
+
+			TeleportedCount++;
+		}
+
+		// 遍历所有可能的队伍（1 到 MAX_CLIENTS）
+		for(int Team = 1; Team < MAX_CLIENTS; Team++)
+		{
+			if(!Teams.IsValidTeamNumber(Team))
+				continue;
+
+			// 检查队伍是否有活跃玩家
+			bool HasActivePlayer = false;
+			for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+			{
+				if(!pSelf->m_apPlayers[ClientId])
+					continue;
+
+				if(pSelf->GetDDRaceTeam(ClientId) == Team)
+				{
+					CCharacter *pTeamChr = pSelf->m_apPlayers[ClientId]->GetCharacter();
+					if(pTeamChr && pTeamChr->IsAlive() && pTeamChr->m_DDRaceState == ERaceState::NONE)
+					{
+						HasActivePlayer = true;
+						break;
+					}
+				}
+			}
+
+			if(HasActivePlayer)
+			{
+				// 为该队伍的所有玩家启动计时
+				for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+				{
+					if(!pSelf->m_apPlayers[ClientId])
+						continue;
+
+					if(pSelf->GetDDRaceTeam(ClientId) == Team)
+					{
+						CCharacter *pTeamChr = pSelf->m_apPlayers[ClientId]->GetCharacter();
+						if(pTeamChr && pTeamChr->IsAlive() && pTeamChr->m_DDRaceState == ERaceState::NONE)
+						{
+							Teams.OnCharacterStart(ClientId);
+							pTeamChr->m_LastTimeCp = -1;
+							for(float &CurrentTimeCp : pTeamChr->m_aCurrentTimeCp)
+							{
+								CurrentTimeCp = 0.0f;
+							}
+						}
+					}
+				}
+				TeamsStarted++;
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Started timer for team %d", Team);
+				pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+			}
+		}
+
+		char aResult[128];
+		str_format(aResult, sizeof(aResult), "Admin: Started timer for %d team(s)", TeamsStarted);
+		pSelf->SendChatTarget(pResult->m_ClientId, aResult);
+		return;
+	}
+
+	// ========== 普通玩家逻辑（启动自己队伍） ==========
+
+	// 检查玩家是否已经在计时中
+	if(pChr->m_DDRaceState == ERaceState::STARTED)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Timer already started for your team");
+		return;
+	}
+
+	// 检查玩家是否已经完成
+	if(pChr->m_DDRaceState == ERaceState::FINISHED)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You already finished this map");
+		return;
+	}
+
+	// 检查玩家是否作弊
+	if(pChr->m_DDRaceState == ERaceState::CHEATED)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You cheated, cannot start timer");
+		return;
+	}
+
+	// 强制单人模式检查
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		if(pChr->m_DDRaceState == ERaceState::STARTED)
+			return;
+		if(pChr->m_DDRaceState == ERaceState::FINISHED)
+			return;
+	}
+
+	// 检查队伍存档状态
+	if(Teams.GetSaving(PlayerTeam))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You can't start while loading/saving of team is in progress");
+		return;
+	}
+
+	// 检查队伍人数要求（如果配置了最小队伍人数）
+	if(g_Config.m_SvTeam == SV_TEAM_MANDATORY && (PlayerTeam == TEAM_FLOCK || Teams.TeamSize(PlayerTeam) <= 1))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You have to be in a team with other tees to start");
+		return;
+	}
+
+	// 队伍人数不足警告（但不阻止开始）
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && PlayerTeam != TEAM_FLOCK &&
+		Teams.IsValidTeamNumber(PlayerTeam) && Teams.TeamSize(PlayerTeam) < g_Config.m_SvMinTeamSize &&
+		!Teams.TeamFlock(PlayerTeam))
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Your team has fewer than %d players, so your team rank won't count",
+			g_Config.m_SvMinTeamSize);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+	}
+
+	// 重置道具（如果配置了）
+	if(g_Config.m_SvResetPickups)
+	{
+		pChr->ResetPickups();
+	}
+
+	// 调用队伍开始逻辑 - 这是核心！
+	Teams.OnCharacterStart(pResult->m_ClientId);
+
+	// 重置检查点相关时间
+	pChr->m_LastTimeCp = -1;
+	pChr->m_LastTimeCpBroadcasted = -1;
+	for(float &CurrentTimeCp : pChr->m_aCurrentTimeCp)
+	{
+		CurrentTimeCp = 0.0f;
+	}
+
+	// 发送成功消息
+	if(PlayerTeam == TEAM_FLOCK || Teams.TeamFlock(PlayerTeam))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Race timer started!");
+	}
+	else
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Race timer started for team %d!", PlayerTeam);
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+	}
+
+	// 可选：发送日志到控制台
+	char aLogBuf[256];
+	str_format(aLogBuf, sizeof(aLogBuf), "'%s' started the timer manually via /start",
+		pSelf->Server()->ClientName(pResult->m_ClientId));
+	log_info("chatresp", "%s", aLogBuf);
+}
+
+void CGameContext::ConSetRelayTime(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientID = pResult->m_ClientId;
+
+	// 1. 验证玩家是否有效
+	if(!pSelf->m_apPlayers[ClientID] || !pSelf->m_apPlayers[ClientID]->GetCharacter())
+	{
+		pSelf->SendChatTarget(ClientID, "Error: You must be alive to use this command");
+		return;
+	}
+
+	// 2. 获取玩家队伍
+	int Team = pSelf->GetDDRaceTeam(ClientID);
+	if(Team <= 0 || Team >= NUM_DDRACE_TEAMS)
+	{
+		pSelf->SendChatTarget(ClientID, "Error: You must be in a valid DDRace team (team > 0)");
+		return;
+	}
+
+	// 3. 获取 Mod 控制器
+	CGameControllerMod *pController = dynamic_cast<CGameControllerMod *>(pSelf->m_pController);
+	if(!pController)
+	{
+		pSelf->SendChatTarget(ClientID, "Error: Not in Mod game mode");
+		return;
+	}
+
+	// 4. 没有参数时：显示当前设置
+	if(pResult->NumArguments() == 0)
+	{
+		int currentSec = pController->GetTeamRelayDurationSeconds(Team);
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf),
+			"Team %d current relay duration: %d seconds", Team, currentSec);
+		pSelf->SendChatTarget(ClientID, aBuf);
+		return;
+	}
+
+	// 5. 有参数时：设置新时间
+	int sec = pResult->GetInteger(0);
+	if(sec < 1)
+	{
+		pSelf->SendChatTarget(ClientID, "Error: Duration must be at least 1 second");
+		return;
+	}
+	if(sec > 3600) // 限制最大1小时，防止溢出
+	{
+		pSelf->SendChatTarget(ClientID, "Error: Duration cannot exceed 3600 seconds");
+		return;
+	}
+
+	int ticks = sec * pSelf->Server()->TickSpeed();
+	pController->SetTeamRelayDuration(Team, ticks);
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Team %d relay duration set to %d seconds (%d ticks)",
+		Team, sec, ticks);
+	pSelf->SendChatTarget(ClientID, aBuf);
+
+	// 日志记录
+	dbg_msg("relay", "ClientID=%d set team %d relay duration to %d ticks",
+		ClientID, Team, ticks);
 }

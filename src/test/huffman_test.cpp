@@ -34,8 +34,8 @@ TEST(Huffman, CompressionShouldNotChangeData)
 
 	for(int InputMod = 0x00; InputMod <= 0xFFFF; ++InputMod)
 	{
-		mem_zero(aInput, sizeof(aInput));
-		mem_zero(aCompressed, sizeof(aCompressed));
+	mem_zero(aInput, sizeof(aInput));
+	mem_zero(aCompressed, sizeof(aCompressed));
 		mem_zero(aDecompressed, sizeof(aDecompressed));
 		aInput[0] = InputMod & 0xFF;
 		aInput[1] = (InputMod >> 8) & 0xFF;
@@ -82,6 +82,7 @@ TEST(Huffman, CompressionNoTrailingNull)
 	unsigned char aInput[64];
 	unsigned char aCompressed[2048];
 	unsigned char aDecompressed[2048];
+	Huffman.Decompress(aCompressed, sizeof(aCompressed), aDecompressed, sizeof(aDecompressed));
 
 	mem_zero(aInput, sizeof(aInput));
 	mem_zero(aCompressed, sizeof(aCompressed));

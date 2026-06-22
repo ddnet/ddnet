@@ -43,11 +43,8 @@
 
 static NETSTATS network_stats = {0};
 
-#ifdef CONF_PLATFORM_LINUX
-static constexpr size_t VLEN = 128;
-#endif
-static constexpr size_t PACKETSIZE = 1400;
-
+#define VLEN 128
+#define PACKETSIZE 1400
 typedef struct
 {
 #ifdef CONF_PLATFORM_LINUX
@@ -70,7 +67,7 @@ static void net_buffer_init(NETSOCKET_BUFFER *buffer)
 	mem_zero(buffer->msgs, sizeof(buffer->msgs));
 	mem_zero(buffer->iovecs, sizeof(buffer->iovecs));
 	mem_zero(buffer->sockaddrs, sizeof(buffer->sockaddrs));
-	for(size_t i = 0; i < VLEN; ++i)
+	for(int i = 0; i < VLEN; ++i)
 	{
 		buffer->iovecs[i].iov_base = buffer->bufs[i];
 		buffer->iovecs[i].iov_len = PACKETSIZE;
@@ -85,7 +82,7 @@ static void net_buffer_init(NETSOCKET_BUFFER *buffer)
 #if defined(CONF_PLATFORM_LINUX)
 static void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
 {
-	for(size_t i = 0; i < VLEN; i++)
+	for(int i = 0; i < VLEN; i++)
 	{
 		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
 	}
@@ -1124,7 +1121,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 		if(sock->buffer.pos >= sock->buffer.size)
 		{
 			net_buffer_reinit(&sock->buffer);
-			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, nullptr);
+			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, NULL);
 			sock->buffer.pos = 0;
 		}
 	}
@@ -1134,7 +1131,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 		if(sock->buffer.pos >= sock->buffer.size)
 		{
 			net_buffer_reinit(&sock->buffer);
-			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, nullptr);
+			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, NULL);
 			sock->buffer.pos = 0;
 		}
 	}

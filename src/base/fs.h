@@ -29,7 +29,7 @@
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_makedir(const char *path);
+int fs_makedir(const char *path);
 
 /**
  * Recursively creates parent directories for a file or directory.
@@ -42,7 +42,7 @@
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_makedir_rec_for(const char *path);
+int fs_makedir_rec_for(const char *path);
 
 /**
  * Removes a directory.
@@ -57,7 +57,7 @@
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_removedir(const char *path);
+int fs_removedir(const char *path);
 
 /**
  * Lists the files and folders in a directory.
@@ -98,7 +98,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_chdir(const char *path);
+int fs_chdir(const char *path);
 
 /**
  * Gets the current working directory.
@@ -112,7 +112,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] char *fs_getcwd(char *buffer, int buffer_size);
+char *fs_getcwd(char *buffer, int buffer_size);
 
 /**
  * Fetches per user configuration directory.
@@ -131,7 +131,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_storage_path(const char *appname, char *path, int max);
+int fs_storage_path(const char *appname, char *path, int max);
 
 /**
  * Gets the absolute path to the executable.
@@ -147,7 +147,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_executable_path(char *buffer, int buffer_size);
+int fs_executable_path(char *buffer, int buffer_size);
 
 /**
  * Checks if a file exists.
@@ -161,7 +161,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_is_file(const char *path);
+int fs_is_file(const char *path);
 
 /**
  * Checks if a folder exists.
@@ -175,7 +175,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_is_dir(const char *path);
+int fs_is_dir(const char *path);
 
 /**
  * Checks whether a given path is relative or absolute.
@@ -188,7 +188,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_is_relative_path(const char *path);
+int fs_is_relative_path(const char *path);
 
 /**
  * Gets the name of a file or folder specified by a path,
@@ -204,7 +204,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  * @remark No distinction between files and folders is being made.
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] const char *fs_filename(const char *path);
+const char *fs_filename(const char *path);
 
 /**
  * Splits a filename into name (without extension) and file extension.
@@ -234,7 +234,7 @@ void fs_split_file_extension(const char *filename, char *name, size_t name_size,
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_parent_dir(char *path);
+int fs_parent_dir(char *path);
 
 /**
  * Normalizes the given path: replaces backslashes with regular slashes
@@ -260,7 +260,7 @@ void fs_normalize_path(char *path);
  * @remark The strings are treated as null-terminated strings.
  * @remark Returns an error if the path specifies a directory name.
  */
-[[nodiscard]] int fs_remove(const char *filename);
+int fs_remove(const char *filename);
 
 /**
  * Renames the file or directory. If the paths differ the file will be moved.
@@ -274,7 +274,7 @@ void fs_normalize_path(char *path);
  *
  * @remark The strings are treated as null-terminated strings.
  */
-[[nodiscard]] int fs_rename(const char *oldname, const char *newname);
+int fs_rename(const char *oldname, const char *newname);
 
 /**
  * Gets the creation and the last modification date of a file or directory.
@@ -290,6 +290,6 @@ void fs_normalize_path(char *path);
  * @remark The strings are treated as null-terminated strings.
  * @remark Returned time is in seconds since UNIX Epoch.
  */
-[[nodiscard]] int fs_file_time(const char *name, time_t *created, time_t *modified);
+int fs_file_time(const char *name, time_t *created, time_t *modified);
 
 #endif

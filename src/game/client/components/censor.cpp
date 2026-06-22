@@ -1,7 +1,7 @@
+/*
 #include "censor.h"
 
 #include <base/log.h>
-#include <base/str.h>
 
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
@@ -10,7 +10,7 @@
 #include <optional>
 #include <utility>
 
-void CensorReplaceWords(char *pBuffer, const std::vector<std::string> &vWords, char Replacement)
+static void ReplaceWords(char *pBuffer, const std::vector<std::string> &vWords, char Replacement)
 {
 	if(!pBuffer)
 		return;
@@ -38,7 +38,6 @@ void CensorReplaceWords(char *pBuffer, const std::vector<std::string> &vWords, c
 	}
 }
 
-/*
 void CCensor::ConchainRefreshCensorList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -101,7 +100,7 @@ void CCensor::CensorMessage(char *pMessage) const
 
 	if(!*pMessage)
 		return;
-	CensorReplaceWords(pMessage, m_vCensoredWords, '*');
+	ReplaceWords(pMessage, m_vCensoredWords, '*');
 }
 
 std::optional<std::vector<std::string>> CCensor::LoadCensorListFromFile(const char *pFilePath) const

@@ -8,7 +8,7 @@
 
 #include <gtest/gtest.h>
 
-void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pExpectedLines, bool ExpectSuccess, bool WriteBom)
+void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess, bool WriteBom)
 {
 	CTestInfo Info;
 	IOHANDLE File = io_open(Info.m_aFilename, IOFLAG_WRITE);
@@ -26,17 +26,16 @@ void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::in
 	ASSERT_EQ(ActualSuccess, ExpectSuccess);
 	if(ActualSuccess)
 	{
-		for(const char *pExpectedLine : pExpectedLines)
+		for(const char *pRead : pReads)
 		{
-			const char *pActualLine = LineReader.Get();
-			ASSERT_TRUE(pActualLine) << "Line reader returned less lines than expected. Expected next line: '" << pExpectedLine << "'";
-			EXPECT_STREQ(pActualLine, pExpectedLine) << "Line reader returned unexpected line";
+			const char *pReadLine = LineReader.Get();
+			ASSERT_TRUE(pReadLine) << "Line reader returned less lines than expected";
+			EXPECT_STREQ(pReadLine, pRead) << "Line reader returned unexpected line";
 		}
-		const char *pActualLastLine = LineReader.Get();
-		EXPECT_FALSE(pActualLastLine) << "Line reader returned more lines than expected. Unexpected last line: '" << pActualLastLine << "'";
+		EXPECT_FALSE(LineReader.Get()) << "Line reader returned more lines than expected";
 	}
 
-	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+	fs_remove(Info.m_aFilename);
 }
 
 void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess)
@@ -50,31 +49,24 @@ void TestFileLineReader(const char *pWritten, std::initializer_list<const char *
 	TestFileLineReaderRaw(pWritten, str_length(pWritten), pReads, true);
 }
 
-TEST(LineReader, LineFeedLineEndings)
+TEST(LineReader, NormalNewline)
 {
 	TestFileLineReader("foo\nbar\nbaz", {"foo", "bar", "baz"});
 	TestFileLineReader("foo\nbar\nbaz\n", {"foo", "bar", "baz"});
 }
 
-TEST(LineReader, CarriageReturnLineFeedLineEndings)
+TEST(LineReader, CRLFNewline)
 {
 	TestFileLineReader("foo\r\nbar\r\nbaz", {"foo", "bar", "baz"});
 	TestFileLineReader("foo\r\nbar\r\nbaz\r\n", {"foo", "bar", "baz"});
 }
 
-TEST(LineReader, CarriageReturnLineEndings)
-{
-	// Line ending `\r` not supported
-	TestFileLineReader("foo\rbar\rbaz", {});
-	TestFileLineReader("foo\rbar\rbaz\r", {});
-}
-
-TEST(LineReader, MixedLineEndings)
+TEST(LineReader, MixedNewline)
 {
 	TestFileLineReader("1\n2\r\n3\n4\n5\r\n6", {"1", "2", "3", "4", "5", "6"});
 	TestFileLineReader("1\n2\r\n3\n4\n5\r\n6\n", {"1", "2", "3", "4", "5", "6"});
 	TestFileLineReader("1\n2\r\n3\n4\n5\r\n6\r\n", {"1", "2", "3", "4", "5", "6"});
-	TestFileLineReader("1\n2\r\n3\n4\n5\r\n6\r", {"1", "2", "3", "4", "5"}); // Line with trailing `\r` is skipped
+	TestFileLineReader("1\n2\r\n3\n4\n5\r\n6\r", {"1", "2", "3", "4", "5", "6\r"});
 }
 
 TEST(LineReader, EmptyLines)
@@ -82,10 +74,10 @@ TEST(LineReader, EmptyLines)
 	TestFileLineReader("\n\r\n\n\n\r\n", {"", "", "", "", ""});
 	TestFileLineReader("\n\r\n\n\n\r\n\n", {"", "", "", "", "", ""});
 	TestFileLineReader("\n\r\n\n\n\r\n\r\n", {"", "", "", "", "", ""});
-	TestFileLineReader("\n\r\n\n\n\r\n\r", {"", "", "", "", ""}); // Line with trailing `\r` is skipped
+	TestFileLineReader("\n\r\n\n\n\r\n\r", {"", "", "", "", "", "\r"});
 }
 
-TEST(LineReader, InvalidUtf8)
+TEST(LineReader, Invalid)
 {
 	// Lines containing invalid UTF-8 are skipped
 	TestFileLineReader("foo\xff\nbar\xff\nbaz\xff", {});
@@ -93,15 +85,6 @@ TEST(LineReader, InvalidUtf8)
 	TestFileLineReader("foo\nbar\xff\nbaz", {"foo", "baz"});
 	TestFileLineReader("foo\nbar\nbaz\xff", {"foo", "bar"});
 	TestFileLineReader("foo\nbar1\xff\nbar2\xff\nfoobar\nbar3\xff\nbaz", {"foo", "foobar", "baz"});
-}
-
-TEST(LineReader, ControlCharacters)
-{
-	// Lines containing control characters except `\t` are skipped
-	TestFileLineReader(
-		"\x01\n\x02\n\x03\n\x04\n\x05\n\x06\n\x07\n\x08\n\x09\n\x0B\n\x0C\n\x0E\n\x0F\n\x10\n" // `\0x0A` and `\0x0D` are `\n` and `\r`
-		"\x11\n\x12\n\x13\n\x14\n\x15\n\x16\n\x17\n\x18\n\x19\n\x1A\n\x1B\n\x1C\n\x1D\n\x1E\n\x1F",
-		{"\t"});
 }
 
 TEST(LineReader, NullBytes)

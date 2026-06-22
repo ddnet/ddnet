@@ -12,6 +12,14 @@ CGameControllerMod::CGameControllerMod(class CGameContext *pGameServer) :
 	IGameController(pGameServer)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
+	
+	//yirou
+	// 初始化接力时间 默认设置为 5 秒
+	int DefaultTicks = 5 * Server()->TickSpeed(); // 5 * 50 = 250
+	for(int i = 0; i < NUM_DDRACE_TEAMS; i++)
+	{
+		m_aTeamRelayDurationTicks[i] = DefaultTicks;
+	}
 
 	//m_GameFlags = GAMEFLAG_TEAMS; // GAMEFLAG_TEAMS makes it a two-team gamemode
 }

@@ -230,6 +230,7 @@ class NetObject:
 			lines = [f"struct {self.struct_name}", "{"]
 		lines += ["\tusing is_sixup = char;"]
 		lines += [f"\tstatic constexpr int ms_MsgId = {self.enum_name};"]
+		lines += ["\trust::Slice<const int32_t> AsSlice() const { return rust::Slice((const int32_t *)this, sizeof(*this) / sizeof(int32_t)); }"]
 		for v in self.variables:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]

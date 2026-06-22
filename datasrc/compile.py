@@ -48,6 +48,7 @@ def gen_network_header():
 	print("#ifndef GENERATED_PROTOCOL_H")
 	print("#define GENERATED_PROTOCOL_H")
 	print("class CUnpacker;")
+	print("#include <base/cxx.h>")
 	print("#include <engine/message.h>")
 	print(network.RawHeader)
 

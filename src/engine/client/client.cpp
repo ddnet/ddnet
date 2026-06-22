@@ -99,22 +99,24 @@ CSnapshotDelta *CClient::SnapshotDelta()
 {
 	if(IsSixup())
 	{
-		return &m_SnapshotDeltaSixup;
+		return &*m_pSnapshotDeltaSixup;
 	}
-	return &m_SnapshotDelta;
+	return &*m_pSnapshotDelta;
 }
 
 CClient::CClient() :
-	m_DemoPlayer(&m_SnapshotDelta, &m_SnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
+	m_pSnapshotDelta(CSnapshotDelta_New()),
+	m_pSnapshotDeltaSixup(CSnapshotDelta_New()),
+	m_DemoPlayer(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_aInputtimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_FpsGraph(4096, 0, true)
 {
 	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorders)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
+		DemoRecorder = CDemoRecorder(&*m_pSnapshotDelta);
 	for(auto &DemoRecorder : m_aDemoRecordersSixup)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDeltaSixup);
+		DemoRecorder = CDemoRecorder(&*m_pSnapshotDeltaSixup);
 	m_LastRenderTime = time_get();
 	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
@@ -603,14 +605,21 @@ void CClient::GenerateTimeoutSeed()
 
 void CClient::GenerateTimeoutCodes(const NETADDR *pAddrs, int NumAddrs)
 {
-	if(g_Config.m_ClTimeoutSeed[0] == '\0')
+	if(g_Config.m_ClTimeoutSeed[0])
 	{
-		GenerateTimeoutSeed();
+		for(int i = 0; i < 2; i++)
+		{
+			GenerateTimeoutCode(m_aTimeoutCodes[i], sizeof(m_aTimeoutCodes[i]), g_Config.m_ClTimeoutSeed, pAddrs, NumAddrs, i);
+
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "timeout code '%s' (%s)", m_aTimeoutCodes[i], i == 0 ? "normal" : "dummy");
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
+		}
 	}
-	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+	else
 	{
-		GenerateTimeoutCode(m_aTimeoutCodes[Dummy], sizeof(m_aTimeoutCodes[Dummy]), g_Config.m_ClTimeoutSeed, pAddrs, NumAddrs, Dummy);
-		log_debug("client", "timeout code '%s' (%s)", m_aTimeoutCodes[Dummy], Dummy == 0 ? "normal" : "dummy");
+		str_copy(m_aTimeoutCodes[0], g_Config.m_ClTimeoutCode);
+		str_copy(m_aTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode);
 	}
 }
 
@@ -698,13 +707,9 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		m_SendPassword = false;
 	}
 	else if(!pPassword)
-	{
 		m_aPassword[0] = 0;
-	}
 	else
-	{
 		str_copy(m_aPassword, pPassword);
-	}
 
 	m_CanReceiveServerCapabilities = true;
 
@@ -714,9 +719,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		m_aNetClient[CONN_MAIN].Connect7(aConnectAddrs, NumConnectAddrs);
 	}
 	else
-	{
 		m_aNetClient[CONN_MAIN].Connect(aConnectAddrs, NumConnectAddrs);
-	}
 
 	m_aNetClient[CONN_MAIN].RefreshStun();
 	SetState(IClient::STATE_CONNECTING);
@@ -878,9 +881,9 @@ bool CClient::DummyAllowed() const
 	return m_ServerCapabilities.m_AllowDummy;
 }
 
-const CServerInfo &CClient::ServerInfo() const
+void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 {
-	return m_CurrentServerInfo;
+	*pServerInfo = m_CurrentServerInfo;
 }
 
 void CClient::ServerInfoRequest()
@@ -936,12 +939,12 @@ int CClient::SnapNumItems(int SnapId) const
 
 void CClient::SnapSetStaticsize(int ItemType, int Size)
 {
-	m_SnapshotDelta.SetStaticsize(ItemType, Size);
+	m_pSnapshotDelta->SetStaticsize(ItemType, Size);
 }
 
 void CClient::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_SnapshotDeltaSixup.SetStaticsize(ItemType, Size);
+	m_pSnapshotDeltaSixup->SetStaticsize(ItemType, Size);
 }
 
 void CClient::RenderDebug()
@@ -1371,7 +1374,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	CUnpacker Up;
 	Up.Reset(pData, DataSize);
 
-#define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES))
+#define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES), sizeof(array))
 #define GET_INT(integer) (integer) = str_toint(Up.GetString())
 
 	int Token;
@@ -1454,10 +1457,10 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	}
 
 	bool IgnoreError = false;
-	for(int i = 0; i < MAX_CLIENTS && (int)Info.m_vClients.size() < MAX_CLIENTS && !Up.Error(); i++)
+	for(int i = 0; i < MAX_CLIENTS && Info.m_NumReceivedClients < MAX_CLIENTS && !Up.Error(); i++)
 	{
-		CServerInfo::CClient Client = {};
-		GET_STRING(Client.m_aName);
+		CServerInfo::CClient *pClient = &Info.m_aClients[Info.m_NumReceivedClients];
+		GET_STRING(pClient->m_aName);
 		if(Up.Error())
 		{
 			// Packet end, no problem unless it happens during one
@@ -1465,14 +1468,10 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			IgnoreError = true;
 			break;
 		}
-		GET_STRING(Client.m_aClan);
-		GET_INT(Client.m_Country);
-		if(!in_range(Client.m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
-		{
-			Client.m_Country = CountryCode::DEFAULT;
-		}
-		GET_INT(Client.m_Score);
-		GET_INT(Client.m_Player);
+		GET_STRING(pClient->m_aClan);
+		GET_INT(pClient->m_Country);
+		GET_INT(pClient->m_Score);
+		GET_INT(pClient->m_Player);
 		if(SavedType == SERVERINFO_EXTENDED)
 		{
 			Up.GetString(); // extra info, reserved
@@ -1485,12 +1484,12 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 				if(!(Info.m_ReceivedPackets & Flag))
 				{
 					Info.m_ReceivedPackets |= Flag;
-					Info.m_vClients.push_back(Client);
+					Info.m_NumReceivedClients++;
 				}
 			}
 			else
 			{
-				Info.m_vClients.push_back(Client);
+				Info.m_NumReceivedClients++;
 			}
 		}
 	}
@@ -1740,7 +1739,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				{
 					char aUrl[256];
 					char aEscaped[256];
-					EscapeUrl(aEscaped, str_startswith(m_aMapdownloadFilename, "downloadedmaps/"));
+					EscapeUrl(aEscaped, m_aMapdownloadFilename + 15); // cut off downloadedmaps/
 					bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps.ddnet.org") != 0 || m_aMapDownloadUrl[0] == '\0';
 					str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
@@ -1769,15 +1768,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 			if(IsSixup())
 			{
-				if(m_TranslationContext.m_MapdownloadTotalsize <= 0 ||
-					m_TranslationContext.m_MapDownloadChunkSize <= 0 ||
-					m_TranslationContext.m_MapDownloadChunksPerRequest <= 0)
-				{
-					return;
-				}
 				MapCRC = m_MapdownloadCrc;
 				Chunk = m_MapdownloadChunk;
-				Size = std::min(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
+				Size = minimum(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
 			}
 			else
 			{
@@ -1843,9 +1836,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				g_Config.m_ClDummy = 0;
 			}
 			else
-			{
 				m_DummyDeactivateOnReconnect = false;
-			}
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CON_READY)
 		{
@@ -2138,7 +2129,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// decompress snapshot
-					const void *pDeltaData = SnapshotDelta()->EmptyDelta();
+					const void *pDeltaData = SnapshotDelta()->EmptyDelta().data();
 					int DeltaSize = sizeof(int) * 3;
 
 					if(m_aSnapshotIncomingDataSize[Conn])
@@ -2153,7 +2144,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// unpack delta
-					const int SnapSize = SnapshotDelta()->UnpackDelta(pDeltaShot, &TmpBuffer3, pDeltaData, DeltaSize);
+					// TODO: this needs alignment for
+					// `m_aChunkData` of 4, but this is not
+					// guaranteed. This is assumed above,
+					// too, anyway, in
+					// `CVariableInt::Decompress`.
+					const int SnapSize = SnapshotDelta()->UnpackDelta(*pDeltaShot, TmpBuffer3, rust::Slice((const int32_t *)pDeltaData, DeltaSize / sizeof(int32_t)));
 					if(SnapSize < 0)
 					{
 						dbg_msg("client", "delta unpack failed. error=%d", SnapSize);
@@ -2380,8 +2376,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 {
 	CUnpacker Unpacker;
-	CSnapshotBuilder Builder;
-	Builder.Init();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	pBuilder->Init(false);
 	CNetObjHandler *pNetObjHandler = GameClient()->GetNetObjHandler();
 
 	int Num = pFrom->NumItems();
@@ -2390,6 +2386,14 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 		const CSnapshotItem *pFromItem = pFrom->GetItem(Index);
 		const int FromItemSize = pFrom->GetItemSize(Index);
 		const int ItemType = pFrom->GetItemType(Index);
+		if(ItemType <= 0)
+		{
+			// Don't add extended item type descriptions, they get
+			// added implicitly (== 0).
+			//
+			// Don't add items of unknown item types either (< 0).
+			continue;
+		}
 		const void *pData = pFromItem->Data();
 		Unpacker.Reset(pData, FromItemSize);
 
@@ -2402,7 +2406,7 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 			continue;
 		}
 
-		void *pSecuredData = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
+		const void *pSecuredData = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
 		if(!pSecuredData)
 		{
 			if(g_Config.m_Debug && ItemType != UUID_UNKNOWN)
@@ -2415,13 +2419,13 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 		}
 		const int ItemSize = pNetObjHandler->GetUnpackedObjSize(ItemType);
 
-		if(!Builder.NewItem(ItemType, pFromItem->Id(), pSecuredData, ItemSize))
+		if(!pBuilder->NewItem(ItemType, pFromItem->Id(), rust::Slice((const int32_t *)pSecuredData, ItemSize / sizeof(int32_t))))
 		{
 			return -4;
 		}
 	}
 
-	return Builder.Finish(pTo);
+	return pBuilder->Finish(*pTo);
 }
 
 void CClient::ResetMapDownload(bool ResetActive)
@@ -2983,9 +2987,7 @@ void CClient::Update()
 	if(m_pMapdownloadTask)
 	{
 		if(m_pMapdownloadTask->State() == EHttpState::DONE)
-		{
 			FinishMapDownload();
-		}
 		else if(m_pMapdownloadTask->State() == EHttpState::ERROR || m_pMapdownloadTask->State() == EHttpState::ABORTED)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
@@ -3105,7 +3107,7 @@ void CClient::InitInterfaces()
 	m_pNotifications = Kernel()->RequestInterface<INotifications>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	m_DemoEditor.Init(&m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pConsole, m_pStorage);
+	m_DemoEditor.Init(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, m_pConsole, m_pStorage);
 
 	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
 
@@ -3469,9 +3471,7 @@ void CClient::Run()
 			LastTime = Now + SleepTimeInNanoSeconds;
 		}
 		else
-		{
 			LastTime = Now;
-		}
 
 		// update local and global time
 		m_LocalTime = (time_get() - m_LocalStartTime) / (float)time_freq();
@@ -3583,9 +3583,7 @@ bool CClient::CtrlShiftKey(int Key, bool &Last)
 		return true;
 	}
 	else if(Last && !Input()->KeyIsPressed(Key))
-	{
 		Last = false;
-	}
 
 	return false;
 }
@@ -3930,9 +3928,7 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 	{
 		int Length = pResult->GetInteger(0);
 		if(Length <= 0)
-		{
 			pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: length must be greater than 0 second.");
-		}
 		else
 		{
 			if(pResult->NumArguments() >= 2)
@@ -3942,9 +3938,7 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 		}
 	}
 	else
-	{
 		pSelf->SaveReplay(g_Config.m_ClReplayLength);
-	}
 }
 
 void CClient::SaveReplay(const int Length, const char *pFilename)
@@ -3997,7 +3991,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
-		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
+		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
 		m_EditJobs.push_back(pDemoEditTask);
 
@@ -4325,8 +4319,8 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		return 2;
 	}
 	int End = Start + Length;
-	int ChecksumBytesEnd = std::min(End, (int)sizeof(m_Checksum.m_aBytes));
-	int FileStart = std::max(Start, (int)sizeof(m_Checksum.m_aBytes));
+	int ChecksumBytesEnd = minimum(End, (int)sizeof(m_Checksum.m_aBytes));
+	int FileStart = maximum(Start, (int)sizeof(m_Checksum.m_aBytes));
 	unsigned char aStartBytes[sizeof(int32_t)];
 	unsigned char aEndBytes[sizeof(int32_t)];
 	uint_to_bytes_be(aStartBytes, Start);
@@ -4349,7 +4343,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
 	if(CHECKSUM_RECORD(Flags)) \
 	{ \
-		str_copy(m_Checksum.m_Data.m_Config.m_##Name, g_Config.m_##Name); \
+		str_copy(m_Checksum.m_Data.m_Config.m_##Name, g_Config.m_##Name, sizeof(m_Checksum.m_Data.m_Config.m_##Name)); \
 	}
 #include <engine/shared/config_variables.h>
 #undef CHECKSUM_RECORD
@@ -4390,13 +4384,13 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	if(End > (int)sizeof(m_Checksum.m_aBytes))
 	{
 		unsigned char aBuf[2048];
-		if(io_seek(m_OwnExecutable, FileStart - sizeof(m_Checksum.m_aBytes), EIoSeekOrigin::START))
+		if(io_seek(m_OwnExecutable, FileStart - sizeof(m_Checksum.m_aBytes), IOSEEK_START))
 		{
 			return 5;
 		}
 		for(int i = FileStart; i < End; i += sizeof(aBuf))
 		{
-			int Read = io_read(m_OwnExecutable, aBuf, std::min((int)sizeof(aBuf), End - i));
+			int Read = io_read(m_OwnExecutable, aBuf, minimum((int)sizeof(aBuf), End - i));
 			sha256_update(&Sha256Ctxt, aBuf, Read);
 		}
 	}
@@ -4419,9 +4413,7 @@ void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, 
 			pSelf->Graphics()->SwitchWindowScreen(pResult->GetInteger(0), true);
 	}
 	else
-	{
 		pfnCallback(pResult, pCallbackUserData);
-	}
 }
 
 void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4433,9 +4425,7 @@ void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IC
 			pSelf->Graphics()->SetWindowParams(pResult->GetInteger(0), g_Config.m_GfxBorderless);
 	}
 	else
-	{
 		pfnCallback(pResult, pCallbackUserData);
-	}
 }
 
 void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4447,9 +4437,7 @@ void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData
 			pSelf->Graphics()->SetWindowParams(g_Config.m_GfxFullscreen, !g_Config.m_GfxBorderless);
 	}
 	else
-	{
 		pfnCallback(pResult, pCallbackUserData);
-	}
 }
 
 void CClient::Notify(const char *pTitle, const char *pMessage)
@@ -4478,9 +4466,7 @@ void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, I
 			pSelf->Graphics()->SetVSync(pResult->GetInteger(0));
 	}
 	else
-	{
 		pfnCallback(pResult, pCallbackUserData);
-	}
 }
 
 void CClient::ConchainWindowResize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -5261,7 +5247,7 @@ void CClient::RequestDDNetInfo()
 	if(g_Config.m_BrIndicateFinished)
 	{
 		char aEscaped[128];
-		EscapeUrl(aEscaped, PlayerName());
+		EscapeUrl(aEscaped, sizeof(aEscaped), PlayerName());
 		str_append(aUrl, "?name=");
 		str_append(aUrl, aEscaped);
 	}
@@ -5442,9 +5428,7 @@ bool CClient::ViewFile(const char *pFilename)
 		str_append(aWorkingDir, "/");
 	}
 	else
-	{
 		aWorkingDir[0] = '\0';
-	}
 
 	char aFileLink[IO_MAX_PATH_LENGTH];
 	str_format(aFileLink, sizeof(aFileLink), "file://%s%s", aWorkingDir, pFilename);

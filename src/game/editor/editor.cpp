@@ -82,6 +82,18 @@ bool CEditor::IsVanillaImage(const char *pImage)
 	return std::any_of(std::begin(VANILLA_IMAGES), std::end(VANILLA_IMAGES), [pImage](const char *pVanillaImage) { return str_comp(pImage, pVanillaImage) == 0; });
 }
 
+void CEditor::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels)
+{
+	if(EnvelopeIndex < 0 || EnvelopeIndex >= (int)Map()->m_vpEnvelopes.size())
+		return;
+
+	std::shared_ptr<CEnvelope> pEnvelope = Map()->m_vpEnvelopes[EnvelopeIndex];
+	float Time = m_AnimateTime;
+	Time *= m_AnimateSpeed;
+	Time += (TimeOffsetMillis / 1000.0f);
+	pEnvelope->Eval(Time, Result, Channels);
+}
+
 bool CEditor::CallbackOpenMap(const char *pFilename, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
@@ -387,22 +399,14 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
-		// animation buttons
+		// animation button
 		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
-		static char s_JumpStartButton = 0;
-		if(DoButton_FontIcon(&s_JumpStartButton, FontIcon::BACKWARD_STEP, false, &Button, BUTTONFLAG_LEFT, "Jump to beginning of animation.", IGraphics::CORNER_L))
-		{
-			Map()->m_EnvelopeEvaluator.m_AnimateTime = 0;
-			Map()->m_EnvelopeEvaluator.m_Animate = false;
-		}
-
-		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
-		static char s_AnimateButton = 0;
-		if(DoButton_FontIcon(&s_AnimateButton, Map()->m_EnvelopeEvaluator.m_Animate ? FontIcon::PAUSE : FontIcon::PLAY, Map()->m_EnvelopeEvaluator.m_Animate, &Button, BUTTONFLAG_LEFT, "[Ctrl+M] Toggle animation.", IGraphics::CORNER_NONE) ||
+		static char s_AnimateButton;
+		if(DoButton_FontIcon(&s_AnimateButton, FontIcon::CIRCLE_PLAY, m_Animate, &Button, BUTTONFLAG_LEFT, "[Ctrl+M] Toggle animation.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_M) && ModPressed))
 		{
-			Map()->m_EnvelopeEvaluator.m_AnimateStart = Client()->GlobalTime() - Map()->m_EnvelopeEvaluator.m_AnimateTime;
-			Map()->m_EnvelopeEvaluator.m_Animate = !Map()->m_EnvelopeEvaluator.m_Animate;
+			m_AnimateStart = Client()->GlobalTime();
+			m_Animate = !m_Animate;
 		}
 
 		// animation settings button
@@ -410,7 +414,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		static char s_AnimateSettingsButton;
 		if(DoButton_FontIcon(&s_AnimateSettingsButton, FontIcon::CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, "Change the animation settings.", IGraphics::CORNER_R, 8.0f))
 		{
-			Map()->m_EnvelopeEvaluator.m_AnimateUpdatePopup = true;
+			m_AnimateUpdatePopup = true;
 			static SPopupMenuId s_PopupAnimateSettingsId;
 			Ui()->DoPopupMenu(&s_PopupAnimateSettingsId, Button.x, Button.y + Button.h, 150.0f, 37.0f, this, PopupAnimateSettings);
 		}
@@ -535,7 +539,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
 					TileLayer = true;
-					s_RotationAmount = std::max(90, (s_RotationAmount / 90) * 90);
+					s_RotationAmount = maximum(90, (s_RotationAmount / 90) * 90);
 					break;
 				}
 
@@ -858,7 +862,7 @@ void CEditor::UpdateHotSoundSource(const CLayerSounds *pLayer)
 	const void *pMinSourceId = nullptr;
 
 	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = distance_squared(Position, MouseWorld) / (MapView()->MouseWorldScale() * MapView()->MouseWorldScale());
+		const float CurrDist = length_squared((Position - MouseWorld) / MapView()->MouseWorldScale());
 		if(CurrDist < MinDist)
 		{
 			MinDist = CurrDist;
@@ -930,7 +934,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 	bool GridEnabled = MapView()->MapGrid()->IsEnabled() && !Input()->AltIsPressed();
 
 	// Perform computation from the original position of this point
-	int Threshold = f2fx(std::max(5.0f, 10.0f * MapView()->MouseWorldScale()));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * MapView()->MouseWorldScale()));
 	CPoint OrigPoint = m_QuadDragOriginalPoints.at(QuadIndex)[PointIndex];
 	// Get the "current" point by applying the offset
 	CPoint Point = OrigPoint + Offset;
@@ -1111,7 +1115,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 	// This method is a bit different than the point alignment in the way where instead of trying to align 1 point to all quads,
 	// we try to align 5 points to all quads, these 5 points being 5 points of an AABB.
 	// Otherwise, the concept is the same, we use the original position of the AABB to make the computations.
-	int Threshold = f2fx(std::max(5.0f, 10.0f * MapView()->MouseWorldScale()));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * MapView()->MouseWorldScale()));
 	ivec2 SmallestDiff = ivec2(Threshold + 1, Threshold + 1);
 	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
 
@@ -1197,10 +1201,10 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 		CPoint QuadMin = pCurrentQuad->m_aPoints[0], QuadMax = pCurrentQuad->m_aPoints[0];
 		for(int v = 1; v < 4; v++)
 		{
-			QuadMin.x = std::min(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
-			QuadMin.y = std::min(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
-			QuadMax.x = std::max(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
-			QuadMax.y = std::max(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMin.x = minimum(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMin.y = minimum(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMax.x = maximum(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMax.y = maximum(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
 		}
 
 		CheckAABBAlignment(QuadMin, QuadMax);
@@ -1277,10 +1281,10 @@ void CEditor::QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxi
 		for(int i = 0; i < 4; i++)
 		{
 			auto *pPoint = &pQuad->m_aPoints[i];
-			Min.x = std::min(Min.x, pPoint->x);
-			Min.y = std::min(Min.y, pPoint->y);
-			Max.x = std::max(Max.x, pPoint->x);
-			Max.y = std::max(Max.y, pPoint->y);
+			Min.x = minimum(Min.x, pPoint->x);
+			Min.y = minimum(Min.y, pPoint->y);
+			Max.x = maximum(Max.x, pPoint->x);
+			Max.y = maximum(Max.y, pPoint->y);
 		}
 	}
 	CPoint Center = (Min + Max) / 2.0f;
@@ -1397,7 +1401,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		{
 			if(s_Operation == OP_SELECT)
 			{
-				if(distance_squared(s_MouseStart, Ui()->MousePos()) > 20.0f)
+				if(length_squared(s_MouseStart - Ui()->MousePos()) > 20.0f)
 				{
 					if(!Map()->IsQuadSelected(Index))
 						Map()->SelectQuad(Index);
@@ -1697,7 +1701,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 		{
 			if(s_Operation == OP_SELECT)
 			{
-				if(distance_squared(s_MouseStart, Ui()->MousePos()) > 20.0f)
+				if(length_squared(s_MouseStart - Ui()->MousePos()) > 20.0f)
 				{
 					if(!Map()->IsQuadPointSelected(QuadIndex, V))
 						Map()->SelectQuadPoint(QuadIndex, V);
@@ -2102,7 +2106,7 @@ void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer)
 	const void *pMinPointId = nullptr;
 
 	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = distance_squared(Position, MouseWorld) / (MapView()->MouseWorldScale() * MapView()->MouseWorldScale());
+		const float CurrDist = length_squared((Position - MouseWorld) / MapView()->MouseWorldScale());
 		if(CurrDist < MinDist)
 		{
 			MinDist = CurrDist;
@@ -2232,7 +2236,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	CUIRect UnscrolledLayersBox = LayersBox;
 
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarThickness = 10.0f;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5.0f;
 	State.m_ScrollRegion.Begin(&LayersBox, &ScrollParams);
@@ -2929,7 +2933,7 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 	ConvertToRgba(*pImg);
 	DilateImage(*pImg);
 
-	pImg->m_Automapper.Load(pImg->m_aName);
+	pImg->m_AutoMapper.Load(pImg->m_aName);
 	int TextureLoadFlag = Graphics()->TextureLoadFlags();
 	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
@@ -2989,7 +2993,7 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 		TextureLoadFlag = 0;
 	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFilename);
 	str_copy(pImg->m_aName, aBuf);
-	pImg->m_Automapper.Load(pImg->m_aName);
+	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->Map()->m_vpImages.push_back(pImg);
 	pEditor->Map()->SortImages();
 	pEditor->Map()->SelectImage(pImg);
@@ -3119,7 +3123,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 
 	static CScrollRegion s_ScrollRegion;
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarThickness = 10.0f;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5;
 	s_ScrollRegion.Begin(&ToolBox, &ScrollParams);
@@ -3234,7 +3238,7 @@ void CEditor::RenderSelectedImage(CUIRect View) const
 		View.w = View.h;
 	else
 		View.h = View.w;
-	float Max = std::max(pSelectedImage->m_Width, pSelectedImage->m_Height);
+	float Max = maximum<float>(pSelectedImage->m_Width, pSelectedImage->m_Height);
 	View.w *= pSelectedImage->m_Width / Max;
 	View.h *= pSelectedImage->m_Height / Max;
 	Graphics()->TextureSet(pSelectedImage->m_Texture);
@@ -3252,7 +3256,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 
 	static CScrollRegion s_ScrollRegion;
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarThickness = 10.0f;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5;
 	s_ScrollRegion.Begin(&ToolBox, &ScrollParams);
@@ -3369,7 +3373,7 @@ void CEditor::RenderModebar(CUIRect View)
 	CUIRect Mentions, IngameMoved, ModeButtons, ModeButton;
 	View.HSplitTop(12.0f, &Mentions, &View);
 	View.HSplitTop(12.0f, &IngameMoved, &View);
-	View.HSplitBottom(22.0f, nullptr, &ModeButtons);
+	View.HSplitTop(8.0f, nullptr, &ModeButtons);
 	const float Width = m_ToolBoxWidth - 5.0f;
 	ModeButtons.VSplitLeft(Width, &ModeButtons, nullptr);
 	const float ButtonWidth = Width / 3;
@@ -3596,7 +3600,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, T: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldPos().x / 32.0f, MapView()->MouseWorldPos().y / 32.0f, MapView()->Zoom()->GetValue(), Map()->m_EnvelopeEvaluator.m_AnimateTime * Map()->m_EnvelopeEvaluator.m_AnimateSpeed, Map()->m_EnvelopeEvaluator.m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
+	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldPos().x / 32.0f, MapView()->MouseWorldPos().y / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_HelpButton = 0;
@@ -3644,7 +3648,7 @@ void CEditor::Render()
 	CUIRect MenuBar, ModeBar, ToolBar, StatusBar, ExtraEditor, ToolBox;
 	if(m_GuiActive)
 	{
-		View.HSplitTop(20.0f, &MenuBar, &View);
+		View.HSplitTop(16.0f, &MenuBar, &View);
 		View.HSplitTop(53.0f, &ToolBar, &View);
 		View.VSplitLeft(m_ToolBoxWidth, &ToolBox, &View);
 
@@ -3845,7 +3849,7 @@ void CEditor::Render()
 			static bool s_ShowServerSettingsEditorLast = false;
 			if(m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES)
 			{
-				m_EnvelopeEditor.Render(ExtraEditor);
+				RenderEnvelopeEditor(ExtraEditor);
 			}
 			else if(m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS)
 			{
@@ -3927,16 +3931,15 @@ void CEditor::Render()
 
 			if(Input()->ShiftIsPressed())
 			{
-				const int AdjustModifiers = Input()->ModifierIsPressed() ? (Input()->AltIsPressed() ? 2 : 1) : 0;
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					AdjustBrushSpecialTiles(false, AdjustModifiers, -1);
+					AdjustBrushSpecialTiles(false, -1);
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					AdjustBrushSpecialTiles(false, AdjustModifiers, 1);
+					AdjustBrushSpecialTiles(false, 1);
 			}
 
 			// Use ctrl+f to replace number in brush with next free
 			if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_F))
-				AdjustBrushSpecialTiles(true, 0, 0);
+				AdjustBrushSpecialTiles(true);
 		}
 	}
 
@@ -4219,10 +4222,10 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 	float aPoints[4];
 	Group.Mapping(aPoints);
 	const int ExtraBorder = 9; // doors extend beyond the tile on which they are placed
-	const int StartX = std::max(0, (int)std::floor(aPoints[0] / TileSize) - ExtraBorder);
-	const int EndX = std::min(TilesLayer.m_Width, (int)std::ceil(aPoints[2] / TileSize) + ExtraBorder);
-	const int StartY = std::max(0, (int)std::floor(aPoints[1] / TileSize) - ExtraBorder);
-	const int EndY = std::min(TilesLayer.m_Height, (int)std::ceil(aPoints[3] / TileSize) + ExtraBorder);
+	const int StartX = std::max<int>(0, std::floor(aPoints[0] / TileSize) - ExtraBorder);
+	const int EndX = std::min<int>(TilesLayer.m_Width, std::ceil(aPoints[2] / TileSize) + ExtraBorder);
+	const int StartY = std::max<int>(0, std::floor(aPoints[1] / TileSize) - ExtraBorder);
+	const int EndY = std::min<int>(TilesLayer.m_Height, std::ceil(aPoints[3] / TileSize) + ExtraBorder);
 	for(int y = StartY; y < EndY; y++)
 	{
 		for(int x = StartX; x < EndX; x++)
@@ -4398,6 +4401,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
+	m_ResetZoomEnvelope = true;
 	m_SettingsCommandInput.Clear();
 	m_MapSettingsCommandContext.Reset();
 	m_RenderLayersState.Reset();
@@ -4464,9 +4468,10 @@ void CEditor::Init()
 		OnInput(Event);
 	});
 	m_RenderMap.Init(m_pGraphics, m_pTextRender);
+	m_ZoomEnvelopeX.OnInit(this);
+	m_ZoomEnvelopeY.OnInit(this);
 
 	m_vComponents.emplace_back(m_MapView);
-	m_vComponents.emplace_back(m_EnvelopeEditor);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
 	m_vComponents.emplace_back(m_LayerSelector);
 	m_vComponents.emplace_back(m_FileBrowser);
@@ -4590,7 +4595,9 @@ void CEditor::HandleWriterFinishJobs()
 	// send rcon.. if we can
 	if(Client()->RconAuthed() && g_Config.m_EdAutoMapReload)
 	{
-		const CServerInfo &CurrentServerInfo = Client()->ServerInfo();
+		CServerInfo CurrentServerInfo;
+		Client()->GetServerInfo(&CurrentServerInfo);
+
 		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
 			char aMapName[MAX_MAP_LENGTH];
@@ -4669,8 +4676,10 @@ void CEditor::OnRender()
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
 
-	if(Map()->m_EnvelopeEvaluator.m_Animate)
-		Map()->m_EnvelopeEvaluator.m_AnimateTime = Client()->GlobalTime() - Map()->m_EnvelopeEvaluator.m_AnimateStart;
+	if(m_Animate)
+		m_AnimateTime = Client()->GlobalTime() - m_AnimateStart;
+	else
+		m_AnimateTime = 0;
 
 	m_pUiGotContext = nullptr;
 	Ui()->StartCheck();
@@ -4816,15 +4825,15 @@ CEditorHistory &CEditor::ActiveHistory()
 	}
 }
 
-void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int AdjustValue)
+void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 {
 	// Adjust m_Angle of speedup or m_Number field of tune, switch and tele tiles by `Adjust` if `UseNextFree` is false
-	// If `AdjustValue` is 0 and `UseNextFree` is false, then update numbers of brush tiles to global values
+	// If `Adjust` is 0 and `UseNextFree` is false, then update numbers of brush tiles to global values
 	// If true, then use the next free number instead
 
-	dbg_assert(AdjustValue == -1 || AdjustValue == 0 || AdjustValue == 1, "Invalid AdjustValue: %d", AdjustValue);
-	auto &&AdjustNumber = [AdjustValue](auto &Number, int Min, int Max) {
-		const int NumberInt = Number + AdjustValue; // Cast to int so this does not overflow unsigned char for some tiles
+	dbg_assert(Adjust == -1 || Adjust == 0 || Adjust == 1, "Invalid Adjust: %d", Adjust);
+	auto &&AdjustNumber = [Adjust](auto &Number, int Min, int Max) {
+		const int NumberInt = Number + Adjust; // Cast to int so this does not overflow unsigned char for some tiles
 		if(NumberInt < Min)
 		{
 			Number = Max;
@@ -4866,16 +4875,15 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
 							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
 					}
-					else if(AdjustValue == 0)
+					else
+						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number, 1, 255);
+
+					if(!UseNextFree && Adjust == 0 && IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
 					{
 						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
 							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleCheckpointNumber;
-						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
+						else
 							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumber;
-					}
-					else if(AdjustModifiers == 0)
-					{
-						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number, 1, 255);
 					}
 				}
 			}
@@ -4893,13 +4901,9 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 						continue;
 
 					if(UseNextFree)
-					{
 						pTuneLayer->m_pTuneTile[i].m_Number = NextFreeNumber;
-					}
-					else if(AdjustModifiers == 0)
-					{
+					else
 						AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number, 1, 255);
-					}
 				}
 			}
 		}
@@ -4916,17 +4920,9 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 						continue;
 
 					if(UseNextFree)
-					{
 						pSwitchLayer->m_pSwitchTile[i].m_Number = NextFreeNumber;
-					}
-					else if(AdjustModifiers == 0)
-					{
+					else
 						AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Number, 1, 255);
-					}
-					else if(AdjustModifiers == 1)
-					{
-						AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Delay, 0, 255);
-					}
 				}
 			}
 		}
@@ -4941,22 +4937,14 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 					if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
 						continue;
 
-					if(AdjustValue == 0)
-					{
-						pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
-						pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
-					}
-					else if(AdjustModifiers == 0)
+					if(Adjust != 0)
 					{
 						AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 0, 359);
 					}
-					else if(AdjustModifiers == 1)
+					else
 					{
-						AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Force, 1, 255);
-					}
-					else if(AdjustModifiers == 2)
-					{
-						AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_MaxSpeed, 0, 255);
+						pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
+						pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
 					}
 				}
 			}

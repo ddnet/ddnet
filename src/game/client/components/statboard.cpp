@@ -433,7 +433,7 @@ void CStatboard::AutoStatCSV()
 	}
 }
 
-std::string CStatboard::ReplaceCommata(const char *pStr)
+std::string CStatboard::ReplaceCommata(char *pStr)
 {
 	if(!str_find(pStr, ","))
 		return pStr;
@@ -456,8 +456,8 @@ std::string CStatboard::ReplaceCommata(const char *pStr)
 void CStatboard::FormatStats(char *pDest, size_t DestSize)
 {
 	// server stats
-	const CServerInfo &CurrentServerInfo = Client()->ServerInfo();
-
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
 	char aServerStats[1024];
 	str_format(aServerStats, sizeof(aServerStats), "Servername,Game-type,Map\n%s,%s,%s", ReplaceCommata(CurrentServerInfo.m_aName).c_str(), ReplaceCommata(CurrentServerInfo.m_aGameType).c_str(), ReplaceCommata(CurrentServerInfo.m_aMap).c_str());
 

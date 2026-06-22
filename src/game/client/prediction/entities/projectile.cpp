@@ -143,9 +143,7 @@ void CProjectile::Tick()
 			m_MarkedForDestroy = true;
 		}
 		else if(!m_Freeze)
-		{
 			m_MarkedForDestroy = true;
-		}
 	}
 	if(m_LifeSpan == -1)
 	{
@@ -199,13 +197,9 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 		m_SoundImpact = SOUND_GRENADE_EXPLODE;
 	}
 	else if(m_Type == WEAPON_GUN)
-	{
 		Lifetime = GetTuning(m_TuneZone)->m_GunLifetime * GameWorld()->GameTickSpeed();
-	}
 	else if(m_Type == WEAPON_SHOTGUN && !GameWorld()->m_WorldConfig.m_IsDDRace)
-	{
 		Lifetime = GetTuning(m_TuneZone)->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
-	}
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
 	m_Id = Id;
 	m_Number = pProj->m_SwitchNumber;

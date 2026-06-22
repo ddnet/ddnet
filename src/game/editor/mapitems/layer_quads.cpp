@@ -7,8 +7,6 @@
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
 
-#include <limits>
-
 CLayerQuads::CLayerQuads(CEditorMap *pMap) :
 	CLayer(pMap, LAYERTYPE_QUADS)
 {
@@ -32,9 +30,9 @@ void CLayerQuads::Render(bool QuadPicker)
 		Graphics()->TextureSet(Map()->m_vpImages[m_Image]->m_Texture);
 
 	Graphics()->BlendNone();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, &Map()->m_EnvelopeEvaluator);
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, Editor());
 	Graphics()->BlendNormal();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, &Map()->m_EnvelopeEvaluator);
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, Editor());
 }
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
@@ -138,50 +136,20 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 
 void CLayerQuads::BrushFlipX()
 {
-	// calculate bounding box
-	int LeftBound = std::numeric_limits<int>::max();
-	int RightBound = std::numeric_limits<int>::min();
 	for(auto &Quad : m_vQuads)
 	{
-		for(int PointId = 0; PointId < 4; ++PointId)
-		{
-			LeftBound = std::min(Quad.m_aPoints[PointId].x, LeftBound);
-			RightBound = std::max(Quad.m_aPoints[PointId].x, RightBound);
-		}
-	}
-
-	// flip box
-	for(auto &Quad : m_vQuads)
-	{
-		for(auto &Point : Quad.m_aPoints)
-		{
-			Point.x = RightBound - (Point.x - LeftBound);
-		}
+		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[1]);
+		std::swap(Quad.m_aPoints[2], Quad.m_aPoints[3]);
 	}
 	Map()->OnModify();
 }
 
 void CLayerQuads::BrushFlipY()
 {
-	// calculate bounding box
-	int TopBound = std::numeric_limits<int>::max();
-	int BottomBound = std::numeric_limits<int>::min();
 	for(auto &Quad : m_vQuads)
 	{
-		for(int PointId = 0; PointId < 4; ++PointId)
-		{
-			TopBound = std::min(Quad.m_aPoints[PointId].y, TopBound);
-			BottomBound = std::max(Quad.m_aPoints[PointId].y, BottomBound);
-		}
-	}
-
-	// flip box
-	for(auto &Quad : m_vQuads)
-	{
-		for(auto &Point : Quad.m_aPoints)
-		{
-			Point.y = BottomBound - (Point.y - TopBound);
-		}
+		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[2]);
+		std::swap(Quad.m_aPoints[1], Quad.m_aPoints[3]);
 	}
 	Map()->OnModify();
 }
@@ -222,8 +190,8 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 	{
 		for(const auto &Point : Quad.m_aPoints)
 		{
-			*pWidth = std::max(*pWidth, fx2f(Point.x));
-			*pHeight = std::max(*pHeight, fx2f(Point.y));
+			*pWidth = maximum(*pWidth, fx2f(Point.x));
+			*pHeight = maximum(*pHeight, fx2f(Point.y));
 		}
 	}
 }

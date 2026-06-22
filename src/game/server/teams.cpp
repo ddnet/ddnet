@@ -1418,3 +1418,18 @@ bool CGameTeams::IsValidTeamNumber(int Team) const
 {
 	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS - 1; // no TEAM_SUPER
 }
+//yirou
+// 设置队伍接力持续时间
+void CGameTeams::SetTeamRelayDuration(int Team, int Ticks)
+{
+	if(Team >= 0 && Team < NUM_DDRACE_TEAMS)
+		m_aTeamRelayDurationTicks[Team] = Ticks;
+}
+
+// 获取队伍接力持续时间
+int CGameTeams::GetTeamRelayDuration(int Team) const
+{
+	if(Team >= 0 && Team < NUM_DDRACE_TEAMS)
+		return m_aTeamRelayDurationTicks[Team];
+	return 0;
+}

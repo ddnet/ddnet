@@ -10,6 +10,7 @@ extend-exclude = [
 	"memcheck.supp",
 	"scripts/android/files/res",
 	"src/engine/external",
+	"vendor",
 
 	# tests with invalid words
 	"src/test/windows_test.cpp",

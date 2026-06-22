@@ -118,9 +118,7 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 			pLast->m_pNextTypeEntity = pEnt;
 		}
 		else
-		{
 			m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
-		}
 		pEnt->m_pPrevTypeEntity = pLast;
 		pEnt->m_pNextTypeEntity = nullptr;
 	}
@@ -481,11 +479,9 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 						First = Dist;
 					}
 					else if(Dist < Second)
-					{
 						Second = Dist;
-					}
 				}
-				if(pClosest && std::max(First, 2.0f) * 1.2f < Second)
+				if(pClosest && maximum(First, 2.f) * 1.2f < Second)
 					NetProj.m_Owner = pClosest->m_Id;
 			}
 		}

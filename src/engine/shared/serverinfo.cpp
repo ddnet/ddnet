@@ -2,12 +2,12 @@
 
 #include "json.h"
 
+#include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
 
 #include <engine/external/json-parser/json.h>
 
-#include <algorithm>
 #include <cstdio>
 
 static bool IsAllowedHex(char c)
@@ -140,10 +140,6 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 			str_copy(pClient->m_aName, ClientName);
 			str_copy(pClient->m_aClan, Clan);
 			pClient->m_Country = json_int_get(&Country);
-			if(!in_range(pClient->m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
-			{
-				pClient->m_Country = CountryCode::DEFAULT;
-			}
 			pClient->m_Score = json_int_get(&Score);
 			pClient->m_IsPlayer = IsPlayer;
 
@@ -255,7 +251,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 	{
 		return false;
 	}
-	for(int i = 0; i < std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
+	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
 		Unequal = false;
 		Unequal = Unequal || str_comp(m_aClients[i].m_aName, Other.m_aClients[i].m_aName) != 0;
@@ -287,30 +283,30 @@ CServerInfo2::operator CServerInfo() const
 	str_copy(Result.m_aMap, m_aMapName);
 	str_copy(Result.m_aVersion, m_aVersion);
 
-	Result.m_vClients.resize(std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS));
-	for(size_t i = 0; i < Result.m_vClients.size(); i++)
+	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
-		str_copy(Result.m_vClients[i].m_aName, m_aClients[i].m_aName);
-		str_copy(Result.m_vClients[i].m_aClan, m_aClients[i].m_aClan);
-		Result.m_vClients[i].m_Country = m_aClients[i].m_Country;
-		Result.m_vClients[i].m_Score = m_aClients[i].m_Score;
-		Result.m_vClients[i].m_Player = m_aClients[i].m_IsPlayer;
-		Result.m_vClients[i].m_Afk = m_aClients[i].m_IsAfk;
+		str_copy(Result.m_aClients[i].m_aName, m_aClients[i].m_aName);
+		str_copy(Result.m_aClients[i].m_aClan, m_aClients[i].m_aClan);
+		Result.m_aClients[i].m_Country = m_aClients[i].m_Country;
+		Result.m_aClients[i].m_Score = m_aClients[i].m_Score;
+		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;
+		Result.m_aClients[i].m_Afk = m_aClients[i].m_IsAfk;
 
 		// 0.6 skin
-		str_copy(Result.m_vClients[i].m_aSkin, m_aClients[i].m_aSkin);
-		Result.m_vClients[i].m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;
-		Result.m_vClients[i].m_CustomSkinColorBody = m_aClients[i].m_CustomSkinColorBody;
-		Result.m_vClients[i].m_CustomSkinColorFeet = m_aClients[i].m_CustomSkinColorFeet;
+		str_copy(Result.m_aClients[i].m_aSkin, m_aClients[i].m_aSkin);
+		Result.m_aClients[i].m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;
+		Result.m_aClients[i].m_CustomSkinColorBody = m_aClients[i].m_CustomSkinColorBody;
+		Result.m_aClients[i].m_CustomSkinColorFeet = m_aClients[i].m_CustomSkinColorFeet;
 		// 0.7 skin
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			str_copy(Result.m_vClients[i].m_aaSkin7[Part], m_aClients[i].m_aaSkin7[Part]);
-			Result.m_vClients[i].m_aUseCustomSkinColor7[Part] = m_aClients[i].m_aUseCustomSkinColor7[Part];
-			Result.m_vClients[i].m_aCustomSkinColor7[Part] = m_aClients[i].m_aCustomSkinColor7[Part];
+			str_copy(Result.m_aClients[i].m_aaSkin7[Part], m_aClients[i].m_aaSkin7[Part]);
+			Result.m_aClients[i].m_aUseCustomSkinColor7[Part] = m_aClients[i].m_aUseCustomSkinColor7[Part];
+			Result.m_aClients[i].m_aCustomSkinColor7[Part] = m_aClients[i].m_aCustomSkinColor7[Part];
 		}
 	}
 
+	Result.m_NumReceivedClients = minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);
 	Result.m_Latency = -1;
 
 	return Result;

@@ -19,7 +19,7 @@ CSaveTee::CSaveTee() = default;
 void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 {
 	m_ClientId = pChr->m_pPlayer->GetCid();
-	str_copy(m_aName, pChr->Server()->ClientName(m_ClientId));
+	str_copy(m_aName, pChr->Server()->ClientName(m_ClientId), sizeof(m_aName));
 
 	m_Alive = pChr->m_Alive;
 
@@ -645,7 +645,7 @@ bool CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 
 	if(pGameServer->Collision()->m_HighestSwitchNumber)
 	{
-		for(int i = 1; i < std::min(m_HighestSwitchNumber, pGameServer->Collision()->m_HighestSwitchNumber) + 1; i++)
+		for(int i = 1; i < minimum(m_HighestSwitchNumber, pGameServer->Collision()->m_HighestSwitchNumber) + 1; i++)
 		{
 			pGameServer->Switchers()[i].m_aStatus[Team] = m_pSwitchers[i].m_Status;
 			if(m_pSwitchers[i].m_EndTime)
@@ -706,7 +706,7 @@ int CSaveTeam::FromString(const char *pString)
 	unsigned int LastPos = 0;
 	unsigned int StrSize;
 
-	str_copy(m_aString, pString);
+	str_copy(m_aString, pString, sizeof(m_aString));
 
 	while(m_aString[Pos] != '\n' && Pos < sizeof(m_aString) && m_aString[Pos]) // find next \n or \0
 		Pos++;

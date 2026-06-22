@@ -434,9 +434,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 				TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED, true);
 			}
 			else if(g_Config.m_Debug)
-			{
 				dbg_msg("security", "invalid token (vanilla handshake)");
-			}
 		}
 		else
 		{

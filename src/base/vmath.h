@@ -5,7 +5,6 @@
 
 #include "math.h"
 
-#include <algorithm>
 #include <cmath>
 #include <cstdint>
 
@@ -98,12 +97,6 @@ inline T distance(const vector2_base<T> a, const vector2_base<T> &b)
 }
 
 template<Numeric T>
-inline T distance_squared(const vector2_base<T> a, const vector2_base<T> &b)
-{
-	return length_squared(a - b);
-}
-
-template<Numeric T>
 constexpr T dot(const vector2_base<T> a, const vector2_base<T> &b)
 {
 	return a.x * b.x + a.y * b.y;
@@ -183,9 +176,7 @@ constexpr bool closest_point_on_line(vector2_base<T> line_pointA, vector2_base<T
 		return true;
 	}
 	else
-	{
 		return false;
-	}
 }
 
 constexpr int intersect_line_circle(const vec2 LineStart, const vec2 LineEnd, const vec2 CircleCenter, float Radius, vec2 aIntersections[2])

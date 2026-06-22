@@ -27,9 +27,7 @@ static int GetStrTeam7(int Team, bool Teamplay)
 			return STR_TEAM_BLUE;
 	}
 	else if(Team == 0)
-	{
 		return STR_TEAM_GAME;
-	}
 
 	return STR_TEAM_SPECTATORS;
 }
@@ -541,10 +539,6 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		str_copy(Client.m_aName, pMsg7->m_pName);
 		str_copy(Client.m_aClan, pMsg7->m_pClan);
 		Client.m_Country = pMsg7->m_Country;
-		if(!in_range(Client.m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
-		{
-			Client.m_Country = CountryCode::DEFAULT;
-		}
 		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId, Conn);
 		if(m_pClient->m_TranslationContext.m_aLocalClientId[Conn] == -1)
 			return nullptr;

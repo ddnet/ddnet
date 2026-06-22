@@ -2,6 +2,7 @@
 
 #include <base/color.h>
 #include <base/dbg.h>
+#include <base/math.h>
 #include <base/str.h>
 
 #include <engine/external/json-parser/json.h>
@@ -430,7 +431,7 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 			{
 				EditBox.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_T, 5.0f);
 				EditBox.VSplitMid(&EditBox, &RightButton);
-				RightButton.VSplitLeft(ScrollParam.m_ScrollbarThickness / 2.0f, nullptr, &RightButton);
+				RightButton.VSplitLeft(ScrollParam.m_ScrollbarWidth / 2.0f, nullptr, &RightButton);
 				EditBox.VSplitLeft(ROWSIZE, &MiddleButton, &EditBox);
 				EditBox.VSplitLeft(SUBMARGIN, nullptr, &LeftButton);
 				Ui()->DoLabel(&LeftButton, Localize("Add command"), FONTSIZE, TEXTALIGN_ML);
@@ -471,7 +472,7 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 			{
 				EditBox.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_NONE, 0.0f);
 				EditBox.VSplitMid(&LeftButton, &MiddleButton);
-				MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarThickness / 2.0f, nullptr, &MiddleButton);
+				MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarWidth / 2.0f, nullptr, &MiddleButton);
 				str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command"));
 				Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
 				if(Ui()->DoClearableEditBox(&m_vBehaviorElements[CommandIndex]->m_InputCommand, &MiddleButton, 10.0f))
@@ -491,7 +492,7 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 			{
 				EditBox.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_NONE, 0.0f);
 				EditBox.VSplitMid(&LeftButton, &MiddleButton);
-				MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarThickness / 2.0f, nullptr, &MiddleButton);
+				MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarWidth / 2.0f, nullptr, &MiddleButton);
 				str_format(aBuf, sizeof(aBuf), "%s:", Localize("Label"));
 				Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
 				if(Ui()->DoClearableEditBox(&m_vBehaviorElements[CommandIndex]->m_InputLabel, &MiddleButton, 10.0f))
@@ -511,7 +512,7 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 			{
 				EditBox.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 5.0f);
 				EditBox.VSplitMid(&LeftButton, &MiddleButton);
-				MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarThickness / 2.0f, nullptr, &MiddleButton);
+				MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarWidth / 2.0f, nullptr, &MiddleButton);
 				str_format(aBuf, sizeof(aBuf), "%s:", Localize("Label type"));
 				Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
 				CTouchControls::CButtonLabel::EType NewButtonLabelType = m_vBehaviorElements[CommandIndex]->m_CachedCommands.m_LabelType;
@@ -581,7 +582,7 @@ bool CMenusIngameTouchControls::RenderVisibilitySettingBlock(CUIRect Block)
 		if(s_VisibilityScrollRegion.AddRect(EditBox))
 		{
 			EditBox.VSplitRight(EditBox.w / 2.0f + ROWGAP + ROWSIZE, &Label, &MiddleButton);
-			MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarThickness / 2.0f, nullptr, &MiddleButton);
+			MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarWidth / 2.0f, nullptr, &MiddleButton);
 			MiddleButton.VSplitLeft(ROWSIZE, &HelpButton, &MiddleButton);
 			MiddleButton.VSplitLeft(ROWGAP, nullptr, &MiddleButton);
 			// We'll only do help button for the first extra menu visibility.
@@ -1260,9 +1261,9 @@ void CMenusIngameTouchControls::CacheAllSettingsFromTarget(CTouchControls::CTouc
 			auto *pTargetBehavior = static_cast<CTouchControls::CBindToggleTouchButtonBehavior *>(pTargetButton->m_pBehavior.get());
 			auto TargetCommands = pTargetBehavior->GetCommand();
 			// Can't use resize here :(
-			while(m_vBehaviorElements.size() > std::max(TargetCommands.size(), (size_t)2))
+			while(m_vBehaviorElements.size() > maximum<size_t>(TargetCommands.size(), 2))
 				m_vBehaviorElements.pop_back();
-			while(m_vBehaviorElements.size() < std::max(TargetCommands.size(), (size_t)2))
+			while(m_vBehaviorElements.size() < maximum<size_t>(TargetCommands.size(), 2))
 				m_vBehaviorElements.emplace_back(std::make_unique<CBehaviorElements>());
 			for(unsigned CommandIndex = 0; CommandIndex < TargetCommands.size(); CommandIndex++)
 			{

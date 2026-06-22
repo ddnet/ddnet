@@ -691,8 +691,8 @@ public:
 
 	virtual void Minimize() = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
-	virtual bool SetWindowScreen(int Index, bool MoveToCenter, ivec2 *pDesktopSize) = 0;
-	virtual bool UpdateDisplayMode(int Index, ivec2 *pDesktopSize) = 0;
+	virtual bool SetWindowScreen(int Index, bool MoveToCenter) = 0;
+	virtual bool UpdateDisplayMode(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
@@ -1165,9 +1165,7 @@ public:
 			PrimCount = NumVerts / 3;
 		}
 		else
-		{
 			return;
-		}
 
 		Command.m_pVertices = (decltype(Command.m_pVertices))AllocCommandBufferData(VertSize * NumVerts);
 		Command.m_State = m_State;
@@ -1244,6 +1242,9 @@ public:
 
 	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
 	void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) override;
+
+	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxDesktopWidth; }
+	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxDesktopHeight; }
 
 	// synchronization
 	void InsertSignal(CSemaphore *pSemaphore) override;

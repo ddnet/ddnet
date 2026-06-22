@@ -1027,9 +1027,7 @@ void CVideo::WriteFrame(COutputStream *pStream, size_t ThreadIndex)
 			}
 		}
 		else
-		{
 			break;
-		}
 	} while(true);
 
 	if(RecvResult && RecvResult != AVERROR(EAGAIN))
@@ -1077,9 +1075,7 @@ void CVideo::FinishFrames(COutputStream *pStream)
 			}
 		}
 		else
-		{
 			break;
-		}
 	} while(true);
 
 	if(RecvResult && RecvResult != AVERROR_EOF)

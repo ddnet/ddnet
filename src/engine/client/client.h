@@ -77,6 +77,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IEngineTextRender *m_pTextRender = nullptr;
 	IUpdater *m_pUpdater = nullptr;
 
+	rust::Box<CSnapshotDelta> m_pSnapshotDelta;
+	rust::Box<CSnapshotDelta> m_pSnapshotDeltaSixup;
+	CSnapshotDelta *SnapshotDelta();
+
 	CNetClient m_aNetClient[NUM_CONNS];
 	CDemoPlayer m_DemoPlayer;
 	CDemoRecorder m_aDemoRecorders[RECORDER_MAX];
@@ -204,10 +208,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
 	CSnapshotBuffer m_aaDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2];
-
-	CSnapshotDelta m_SnapshotDelta;
-	CSnapshotDelta m_SnapshotDeltaSixup;
-	CSnapshotDelta *SnapshotDelta();
 
 	std::deque<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
@@ -346,7 +346,7 @@ public:
 	bool DummyConnectingDelayed() const override;
 	bool DummyAllowed() const override;
 
-	const CServerInfo &ServerInfo() const override;
+	void GetServerInfo(CServerInfo *pServerInfo) const override;
 	void ServerInfoRequest();
 	void SetCurrentServerInfo(const CServerInfo &ServerInfo);
 

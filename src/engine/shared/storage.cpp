@@ -110,7 +110,6 @@ public:
 			"demos/auto/server",
 			"demos/replays",
 			"editor",
-			"editor/automap",
 			"ghosts",
 			"teehistorian"};
 
@@ -290,7 +289,7 @@ public:
 		// 2) use compiled-in data-dir if present
 		if(fs_is_dir(DATA_DIR "/mapres"))
 		{
-			str_copy(m_aDatadir, DATA_DIR);
+			str_copy(m_aDatadir, DATA_DIR, sizeof(m_aDatadir));
 			return;
 		}
 #endif
@@ -298,7 +297,7 @@ public:
 		// 3) check for usable path in argv[0]
 		{
 #ifdef CONF_PLATFORM_HAIKU
-			pArgv0 = realpath(pArgv0, nullptr);
+			pArgv0 = realpath(pArgv0, NULL);
 #endif
 			unsigned int Pos = ~0U;
 			for(unsigned i = 0; pArgv0[i]; i++)
@@ -363,13 +362,13 @@ public:
 	void FindBinaryDirectory(const char *pArgv0)
 	{
 #if defined(BINARY_DIR)
-		str_copy(m_aBinarydir, BINARY_DIR);
+		str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
 		return;
 #endif
 
 		if(fs_executable_path(m_aBinarydir, sizeof(m_aBinarydir)) == 0)
 		{
-			dbg_assert(fs_parent_dir(m_aBinarydir) == 0, "Could not determine parent of executable: '%s'", m_aBinarydir);
+			fs_parent_dir(m_aBinarydir);
 			return;
 		}
 
@@ -896,9 +895,7 @@ public:
 			}
 		}
 		else
-		{
 			str_copy(pBuffer, aBinaryPath, BufferSize);
-		}
 		return pBuffer;
 	}
 

@@ -3,11 +3,11 @@
 #include "connection.h"
 
 #include <base/dbg.h>
-#include <base/log.h>
 #include <base/mem.h>
 #include <base/str.h>
 #include <base/thread.h>
 
+#include <engine/console.h>
 #include <engine/shared/config.h>
 
 #include <chrono>
@@ -36,7 +36,7 @@ struct CSqlExecData
 	CSqlExecData(
 		CDbConnectionPool::Mode m,
 		const CMysqlConfig *pMysqlConfig);
-	CSqlExecData(CDbConnectionPool::Mode m);
+	CSqlExecData(IConsole *pConsole, CDbConnectionPool::Mode m);
 	~CSqlExecData() = default;
 
 	enum
@@ -63,6 +63,7 @@ struct CSqlExecData
 		} m_Sqlite;
 		struct
 		{
+			IConsole *m_pConsole;
 			CDbConnectionPool::Mode m_Mode;
 		} m_Print;
 	} m_Ptr;
@@ -113,17 +114,18 @@ CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m,
 	mem_copy(&m_Ptr.m_Mysql.m_Config, pMysqlConfig, sizeof(m_Ptr.m_Mysql.m_Config));
 }
 
-CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m) :
+CSqlExecData::CSqlExecData(IConsole *pConsole, CDbConnectionPool::Mode m) :
 	m_Mode(PRINT),
 	m_pThreadData(nullptr),
 	m_pName("print database server")
 {
+	m_Ptr.m_Print.m_pConsole = pConsole;
 	m_Ptr.m_Print.m_Mode = m;
 }
 
-void CDbConnectionPool::Print(Mode DatabaseMode)
+void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
 {
-	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode);
+	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(pConsole, DatabaseMode);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
 	m_pShared->m_NumBackup.Signal();
 }
@@ -254,7 +256,7 @@ public:
 	void ProcessQueries();
 
 private:
-	void Print(CDbConnectionPool::Mode DatabaseMode);
+	void Print(IConsole *pConsole, CDbConnectionPool::Mode DatabaseMode);
 
 	bool m_DebugSql;
 
@@ -403,7 +405,7 @@ void CWorker::ProcessQueries()
 			break;
 		}
 		case CSqlExecData::PRINT:
-			Print(pThreadData->m_Ptr.m_Print.m_Mode);
+			Print(pThreadData->m_Ptr.m_Print.m_pConsole, pThreadData->m_Ptr.m_Print.m_Mode);
 			Success = true;
 			break;
 		}
@@ -417,28 +419,28 @@ void CWorker::ProcessQueries()
 	}
 }
 
-void CWorker::Print(CDbConnectionPool::Mode DatabaseMode)
+void CWorker::Print(IConsole *pConsole, CDbConnectionPool::Mode DatabaseMode)
 {
 	if(DatabaseMode == CDbConnectionPool::Mode::READ)
 	{
 		for(auto &pReadConnection : m_vpReadConnections)
-			pReadConnection->Print("Read");
+			pReadConnection->Print(pConsole, "Read");
 		if(m_vpReadConnections.empty())
-			log_info("server", "There are no read databases");
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "There are no read databases");
 	}
 	else if(DatabaseMode == CDbConnectionPool::Mode::WRITE)
 	{
 		if(m_pWriteConnection)
-			m_pWriteConnection->Print("Write");
+			m_pWriteConnection->Print(pConsole, "Write");
 		else
-			log_info("server", "There are no write databases");
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "There are no write databases");
 	}
 	else if(DatabaseMode == CDbConnectionPool::Mode::WRITE_BACKUP)
 	{
 		if(m_pWriteBackup)
-			m_pWriteBackup->Print("WriteBackup");
+			m_pWriteBackup->Print(pConsole, "WriteBackup");
 		else
-			log_info("server", "There are no write backup databases");
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "There are no write backup databases");
 	}
 }
 

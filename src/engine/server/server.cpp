@@ -11,6 +11,7 @@
 #include <base/fs.h>
 #include <base/io.h>
 #include <base/logger.h>
+#include <base/math.h>
 #include <base/secure.h>
 
 #include <engine/config.h>
@@ -46,7 +47,6 @@
 
 #include <zlib.h>
 
-#include <algorithm>
 #include <chrono>
 #include <vector>
 
@@ -235,13 +235,16 @@ void CServer::CClient::Reset()
 	m_RedirectDropTime = 0;
 }
 
-CServer::CServer()
+CServer::CServer() :
+	m_pSnapshotDelta(CSnapshotDelta_New()),
+	m_pSnapshotDeltaSixup(CSnapshotDelta_New()),
+	m_pSnapshotBuilder(CSnapshotBuilder_New())
 {
 	m_pConfig = &g_Config;
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aDemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta, true);
-	m_aDemoRecorder[RECORDER_MANUAL] = CDemoRecorder(&m_SnapshotDelta, false);
-	m_aDemoRecorder[RECORDER_AUTO] = CDemoRecorder(&m_SnapshotDelta, false);
+		m_aDemoRecorder[i] = CDemoRecorder(&*m_pSnapshotDelta, true);
+	m_aDemoRecorder[RECORDER_MANUAL] = CDemoRecorder(&*m_pSnapshotDelta, false);
+	m_aDemoRecorder[RECORDER_AUTO] = CDemoRecorder(&*m_pSnapshotDelta, false);
 
 	m_pGameServer = nullptr;
 
@@ -593,7 +596,7 @@ int CServer::Init()
 		Client.m_State = CClient::STATE_EMPTY;
 		Client.m_aName[0] = 0;
 		Client.m_aClan[0] = 0;
-		Client.m_Country = CountryCode::DEFAULT;
+		Client.m_Country = -1;
 		Client.m_Snapshots.Init();
 		Client.m_Traffic = 0;
 		Client.m_TrafficSince = 0;
@@ -613,7 +616,7 @@ int CServer::Init()
 	return 0;
 }
 
-bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, size_t OutputWithIpsSize, char *pOutputWithoutIps, size_t OutputWithoutIpsSize)
+bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, int OutputWithIpsSize, char *pOutputWithoutIps, int OutputWithoutIpsSize)
 {
 	const char *pStart = str_find(pInput, "<{");
 	const char *pEnd = pStart == nullptr ? nullptr : str_find(pStart + 2, "}>");
@@ -627,11 +630,11 @@ bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, size_t Output
 		return false;
 	}
 
-	str_append(pOutputWithIps, pInput, std::min((size_t)(pStart - pInput + 1), OutputWithIpsSize));
-	str_append(pOutputWithIps, pStart + 2, std::min((size_t)(pEnd - pInput - 1), OutputWithIpsSize));
+	str_append(pOutputWithIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithIpsSize));
+	str_append(pOutputWithIps, pStart + 2, minimum<size_t>(pEnd - pInput - 1, OutputWithIpsSize));
 	str_append(pOutputWithIps, pEnd + 2, OutputWithIpsSize);
 
-	str_append(pOutputWithoutIps, pInput, std::min((size_t)(pStart - pInput + 1), OutputWithoutIpsSize));
+	str_append(pOutputWithoutIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithoutIpsSize));
 	str_append(pOutputWithoutIps, "XXX", OutputWithoutIpsSize);
 	str_append(pOutputWithoutIps, pEnd + 2, OutputWithoutIpsSize);
 	return true;
@@ -1013,9 +1016,9 @@ void CServer::DoSnapshot()
 		CSnapshotBuffer Data;
 
 		// build snap and possibly add some messages
-		m_SnapshotBuilder.Init();
+		m_pSnapshotBuilder->Init(false);
 		GameServer()->OnSnap(-1, IsGlobalSnap, true);
-		int SnapshotSize = m_SnapshotBuilder.Finish(&Data);
+		int SnapshotSize = m_pSnapshotBuilder->Finish(Data);
 
 		// write snapshot
 		if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
@@ -1044,14 +1047,14 @@ void CServer::DoSnapshot()
 			continue;
 
 		{
-			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
+			m_pSnapshotBuilder->Init(m_aClients[i].m_Sixup);
 
 			// only snap events on global ticks
 			GameServer()->OnSnap(i, IsGlobalSnap, m_aDemoRecorder[i].IsRecording());
 
 			// finish snapshot
 			CSnapshotBuffer Data;
-			int SnapshotSize = m_SnapshotBuilder.Finish(&Data);
+			int SnapshotSize = m_pSnapshotBuilder->Finish(Data);
 
 			if(m_aDemoRecorder[i].IsRecording())
 			{
@@ -1094,9 +1097,9 @@ void CServer::DoSnapshot()
 			}
 
 			// create delta
-			CSnapshotDelta *const pSnapshotDelta = IsSixup(i) ? &m_SnapshotDeltaSixup : &m_SnapshotDelta;
-			char aDeltaData[CSnapshot::MAX_SIZE];
-			int DeltaSize = pSnapshotDelta->CreateDelta(pDeltashot, Data.AsSnapshot(), aDeltaData);
+			CSnapshotDelta *const pSnapshotDelta = IsSixup(i) ? &*m_pSnapshotDeltaSixup : &*m_pSnapshotDelta;
+			int32_t aDeltaData[CSnapshot::MAX_SIZE / sizeof(int32_t)];
+			int DeltaSize = pSnapshotDelta->CreateDelta(*pDeltashot, *Data.AsSnapshot(), rust::Slice(aDeltaData, std::size(aDeltaData)));
 
 			if(DeltaSize)
 			{
@@ -1183,7 +1186,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
-	pThis->m_aClients[ClientId].m_Country = CountryCode::DEFAULT;
+	pThis->m_aClients[ClientId].m_Country = -1;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
 	pThis->m_aClients[ClientId].m_AuthHidden = false;
@@ -1215,7 +1218,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
-	pThis->m_aClients[ClientId].m_Country = CountryCode::DEFAULT;
+	pThis->m_aClients[ClientId].m_Country = -1;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
 	pThis->m_aClients[ClientId].m_AuthHidden = false;
@@ -1304,7 +1307,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_EMPTY;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
-	pThis->m_aClients[ClientId].m_Country = CountryCode::DEFAULT;
+	pThis->m_aClients[ClientId].m_Country = -1;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
 	pThis->m_aClients[ClientId].m_AuthHidden = false;
@@ -1952,7 +1955,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			{
 				constexpr int MaxDumpedDataSize = 32;
 				char aBuf[MaxDumpedDataSize * 3 + 1];
-				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, std::min(pPacket->m_DataSize, MaxDumpedDataSize));
+				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, minimum(pPacket->m_DataSize, MaxDumpedDataSize));
 
 				char aBufMsg[256];
 				str_format(aBufMsg, sizeof(aBufMsg), "strange message ClientId=%d msg=%d data_size=%d", ClientId, Msg, pPacket->m_DataSize);
@@ -2313,7 +2316,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 		}
 		else
 		{
-			const int MaxClients = std::max(ClientCount, m_NetServer.MaxClients() - Config()->m_SvReservedSlots);
+			const int MaxClients = maximum(ClientCount, m_NetServer.MaxClients() - Config()->m_SvReservedSlots);
 			str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount, MaxClients);
 			p.AddString(aBuf, 64);
 		}
@@ -2351,9 +2354,9 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	}
 
 	ADD_INT(p, PlayerCount); // num players
-	ADD_INT(p, std::min(MaxClientsProtocol, std::max(MaxClients - std::max(Config()->m_SvSpectatorSlots, Config()->m_SvReservedSlots), PlayerCount))); // max players
+	ADD_INT(p, minimum(MaxClientsProtocol, maximum(MaxClients - maximum(Config()->m_SvSpectatorSlots, Config()->m_SvReservedSlots), PlayerCount))); // max players
 	ADD_INT(p, ClientCount); // num clients
-	ADD_INT(p, std::min(MaxClientsProtocol, std::max(MaxClients - Config()->m_SvReservedSlots, ClientCount))); // max clients
+	ADD_INT(p, minimum(MaxClientsProtocol, maximum(MaxClients - Config()->m_SvReservedSlots, ClientCount))); // max clients
 
 	if(Type == SERVERINFO_EXTENDED)
 		p.AddString("", 0); // extra info, reserved
@@ -2536,9 +2539,9 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 	int MaxClients = m_NetServer.MaxClients();
 	Packer.AddInt(Config()->m_SvSkillLevel); // server skill level
 	Packer.AddInt(PlayerCount); // num players
-	Packer.AddInt(std::max(MaxClients - std::max(Config()->m_SvSpectatorSlots, Config()->m_SvReservedSlots), PlayerCount)); // max players
+	Packer.AddInt(maximum(MaxClients - maximum(Config()->m_SvSpectatorSlots, Config()->m_SvReservedSlots), PlayerCount)); // max players
 	Packer.AddInt(ClientCount); // num clients
-	Packer.AddInt(std::max(MaxClients - Config()->m_SvReservedSlots, ClientCount)); // max clients
+	Packer.AddInt(maximum(MaxClients - Config()->m_SvReservedSlots, ClientCount)); // max clients
 
 	if(SendClients)
 	{
@@ -2686,8 +2689,8 @@ void CServer::UpdateRegisterServerInfo()
 		}
 	}
 
-	int MaxPlayers = std::max(m_NetServer.MaxClients() - std::max(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount);
-	int MaxClients = std::max(m_NetServer.MaxClients() - g_Config.m_SvReservedSlots, ClientCount);
+	int MaxPlayers = maximum(m_NetServer.MaxClients() - maximum(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount);
+	int MaxClients = maximum(m_NetServer.MaxClients() - g_Config.m_SvReservedSlots, ClientCount);
 	char aMapSha256[SHA256_MAXSTRSIZE];
 
 	sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIX], aMapSha256, sizeof(aMapSha256));
@@ -2829,9 +2832,7 @@ void CServer::UpdateServerInfo(bool Resend)
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			{
 				if(!IsSixup(i))
-				{
 					SendServerInfo(ClientAddr(i), -1, SERVERINFO_INGAME, false);
-				}
 				else
 				{
 					CMsgPacker ServerInfoMessage(protocol7::NETMSG_SERVERINFO, true, true);
@@ -2876,9 +2877,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 							ExtraToken = (Packet.m_aExtraData[0] << 8) | Packet.m_aExtraData[1];
 						}
 						else
-						{
 							Type = SERVERINFO_VANILLA;
-						}
 					}
 					else if(Packet.m_DataSize >= (int)sizeof(SERVERBROWSE_GETINFO_64_LEGACY) + 1 &&
 						mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO_64_LEGACY, sizeof(SERVERBROWSE_GETINFO_64_LEGACY)) == 0)
@@ -3058,7 +3057,7 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 		return;
 
 	g_Config.m_DbgDummies = std::clamp(g_Config.m_DbgDummies, 0, MaxClients());
-	for(int DummyIndex = 0; DummyIndex < std::max(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
+	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
 	{
 		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_DbgDummies;
 		const int ClientId = MaxClients() - DummyIndex - 1;
@@ -3102,7 +3101,7 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			CNetObj_PlayerInput Input = {0};
 			Input.m_Direction = (ClientId & 1) ? -1 : 1;
 			Client.m_aInputs[0].m_GameTick = Tick() + 1;
-			mem_copy(Client.m_aInputs[0].m_aData, &Input, std::min(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
+			mem_copy(Client.m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
 			Client.m_LatestInput = Client.m_aInputs[0];
 			Client.m_CurrentInput = 0;
 		}
@@ -3559,9 +3558,7 @@ void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 		((CServer *)pUser)->Kick(pResult->GetInteger(0), aBuf);
 	}
 	else
-	{
 		((CServer *)pUser)->Kick(pResult->GetInteger(0), "Kicked by console");
-	}
 }
 
 void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
@@ -3701,9 +3698,7 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 	if(pManager->AddKey(pIdent, pPw, pLevel) < 0)
-	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
-	}
 	else
 	{
 		if(NeedUpdate)
@@ -3754,9 +3749,7 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 
 	if(pManager->AddKeyHash(pIdent, Hash, aSalt, pLevel) < 0)
-	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
-	}
 	else
 	{
 		if(NeedUpdate)
@@ -4103,7 +4096,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	if(!MysqlAvailable())
 	{
-		log_error("server", "can't add MySQL server: compiled without MySQL support");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "can't add MySQL server: compiled without MySQL support");
 		return;
 	}
 
@@ -4112,39 +4105,37 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments() != 7 && pResult->NumArguments() != 8)
 	{
-		log_error("server", "7 or 8 arguments are required");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "7 or 8 arguments are required");
 		return;
 	}
 
 	CMysqlConfig Config;
 	bool Write;
 	if(str_comp_nocase(pResult->GetString(0), "r") == 0)
-	{
 		Write = false;
-	}
 	else if(str_comp_nocase(pResult->GetString(0), "w") == 0)
-	{
 		Write = true;
-	}
 	else
 	{
-		log_error("server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
 
-	str_copy(Config.m_aDatabase, pResult->GetString(1));
-	str_copy(Config.m_aPrefix, pResult->GetString(2));
-	str_copy(Config.m_aUser, pResult->GetString(3));
-	str_copy(Config.m_aPass, pResult->GetString(4));
-	str_copy(Config.m_aIp, pResult->GetString(5));
+	str_copy(Config.m_aDatabase, pResult->GetString(1), sizeof(Config.m_aDatabase));
+	str_copy(Config.m_aPrefix, pResult->GetString(2), sizeof(Config.m_aPrefix));
+	str_copy(Config.m_aUser, pResult->GetString(3), sizeof(Config.m_aUser));
+	str_copy(Config.m_aPass, pResult->GetString(4), sizeof(Config.m_aPass));
+	str_copy(Config.m_aIp, pResult->GetString(5), sizeof(Config.m_aIp));
 	Config.m_aBindaddr[0] = '\0';
 	Config.m_Port = pResult->GetInteger(6);
 	Config.m_Setup = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
-	log_info("server",
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
 		"Adding new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d",
 		Write ? "Write" : "Read",
 		Config.m_aDatabase, Config.m_aPrefix, Config.m_aUser, Config.m_aIp, Config.m_Port);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	pSelf->DbPool()->RegisterMysqlDatabase(Write ? CDbConnectionPool::WRITE : CDbConnectionPool::READ, &Config);
 }
 
@@ -4154,16 +4145,16 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 
 	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
 	{
-		pSelf->DbPool()->Print(CDbConnectionPool::WRITE);
-		pSelf->DbPool()->Print(CDbConnectionPool::WRITE_BACKUP);
+		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE);
+		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE_BACKUP);
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
 	{
-		pSelf->DbPool()->Print(CDbConnectionPool::READ);
+		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::READ);
 	}
 	else
 	{
-		log_error("server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
 }
@@ -4236,9 +4227,7 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 		}
 	}
 	else
-	{
 		pfnCallback(pResult, pCallbackUserData);
-	}
 }
 
 void CServer::LogoutClient(int ClientId, const char *pReason)
@@ -4523,19 +4512,19 @@ void CServer::SnapFreeId(int Id)
 	m_IdPool.FreeId(Id);
 }
 
-bool CServer::SnapNewItem(int Type, int Id, const void *pData, int Size)
+bool CServer::SnapNewItem(int Type, int Id, rust::Slice<const int32_t> Data)
 {
-	return m_SnapshotBuilder.NewItem(Type, Id, pData, Size);
+	return m_pSnapshotBuilder->NewItem(Type, Id, Data);
 }
 
 void CServer::SnapSetStaticsize(int ItemType, int Size)
 {
-	m_SnapshotDelta.SetStaticsize(ItemType, Size);
+	m_pSnapshotDelta->SetStaticsize(ItemType, Size);
 }
 
 void CServer::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_SnapshotDeltaSixup.SetStaticsize(ItemType, Size);
+	m_pSnapshotDeltaSixup->SetStaticsize(ItemType, Size);
 }
 
 CServer *CreateServer() { return new CServer(); }

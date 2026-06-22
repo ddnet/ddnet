@@ -7,6 +7,7 @@
 #include <base/detect.h>
 #include <base/io.h>
 #include <base/log.h>
+#include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
 #include <base/time.h>

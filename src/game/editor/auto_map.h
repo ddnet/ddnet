@@ -5,7 +5,7 @@
 
 #include <vector>
 
-class CAutomapper : public CMapObject
+class CAutoMapper : public CMapObject
 {
 	class CIndexInfo
 	{
@@ -72,7 +72,7 @@ class CAutomapper : public CMapObject
 	};
 
 public:
-	explicit CAutomapper(CEditorMap *pMap);
+	explicit CAutoMapper(CEditorMap *pMap);
 
 	void Load(const char *pTileName);
 	void Unload();

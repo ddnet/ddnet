@@ -75,11 +75,7 @@ int64_t time_get();
  *
  * @return The frequency of the high resolution timer.
  */
-constexpr int64_t time_freq()
-{
-	using namespace std::chrono_literals;
-	return std::chrono::nanoseconds(1s).count();
-}
+int64_t time_freq();
 
 /**
  * Retrieves the current time as a UNIX timestamp.
