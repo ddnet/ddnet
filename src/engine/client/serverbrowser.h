@@ -277,6 +277,8 @@ public:
 	void UpdateServerFriends(CServerInfo *pInfo) const;
 	void UpdateServerCommunity(CServerInfo *pInfo) const;
 	void UpdateServerRank(CServerInfo *pInfo) const;
+	void UpdateServerLatency(CServerInfo *pInfo, int OwnLocation) const;
+	int DetermineOwnLocation() const;
 	void ValidateServerlistType();
 	const char *GetTutorialServer() override;
 
