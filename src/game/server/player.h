@@ -145,6 +145,8 @@ private:
 	bool m_Afk;
 	bool m_RelayForcedSpec; // yirou: relay forced spec state, cannot be exited by player
 	bool m_CanToggleSpec; // yirou: if false, player cannot self-toggle spec/pause state
+	int m_RelayBackCount; // yirou: /b command usage counter
+	int m_RelayResetCount; // yirou: /r command usage counter
 
 	int m_DefEmote;
 	int m_OverrideEmote;
@@ -220,6 +222,12 @@ public:
 	// yirou: spec toggle control
 	bool CanToggleSpec() const { return m_CanToggleSpec; }
 	void SetCanToggleSpec(bool CanToggle) { m_CanToggleSpec = CanToggle; }
+	// yirou: relay counters
+	int GetRelayBackCount() const { return m_RelayBackCount; }
+	void IncrementRelayBackCount() { m_RelayBackCount++; }
+	int GetRelayResetCount() const { return m_RelayResetCount; }
+	void IncrementRelayResetCount() { m_RelayResetCount++; }
+	void ResetRelayCounters() { m_RelayBackCount = 0; m_RelayResetCount = 0; }
 
 	int64_t m_LastPlaytime;
 	int64_t m_LastEyeEmote;

@@ -166,6 +166,9 @@ public:
 	void SetTeamRelayDuration(int Team, int Ticks); // set relay duration in ticks
 	int GetTeamRelayDuration(int Team) const; // get relay duration in ticks
 	void PauseAllRelays(); // yirou: pause all active relays
+	void SendRelayStateToClient(int Team, int ClientId); // yirou: send relay state to specific client
+	void BroadcastRelayState(int Team); // yirou: broadcast relay state to all team members
+	void SendRelayAction(int Team, int ClientId, int Action); // yirou: send relay action (0=/b, 1=/r)
 };
 
 #endif

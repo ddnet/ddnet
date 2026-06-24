@@ -2608,6 +2608,10 @@ void CGameContext::ConRelayBack(IConsole::IResult *pResult, void *pUserData)
 	pChr->Unfreeze();
 	pSelf->Teleport_relay(pChr, Teams.m_aTeamRelayRecordPos[Team]);
 	Teams.m_aTeamRelayTickStart[Team] = pSelf->Server()->Tick();
+	
+	// yirou: increment counter and notify
+	pPlayer->IncrementRelayBackCount();
+	Teams.SendRelayAction(Team, ClientID, 0); // 0 = /b action
 }
 
 

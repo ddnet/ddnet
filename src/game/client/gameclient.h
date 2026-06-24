@@ -69,6 +69,7 @@
 #include "components/tooltips.h"
 #include "components/touch_controls.h"
 #include "components/voting.h"
+#include "components/relayhud.h"
 
 #include <memory>
 #include <vector>
@@ -170,6 +171,7 @@ public:
 	CDamageInd m_DamageInd;
 	CTouchControls m_TouchControls;
 	CVoting m_Voting;
+	CRelayHud m_RelayHud;
 	CSpectator m_Spectator;
 
 	CPlayers m_Players;
