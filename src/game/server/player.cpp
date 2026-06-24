@@ -124,8 +124,6 @@ void CPlayer::Reset()
 	m_Paused = PAUSE_NONE;
 	m_RelayForcedSpec = false; //yirou
 	m_CanToggleSpec = true; //yirou: by default player can toggle spec
-	m_RelayBackCount = 0; //yirou
-	m_RelayResetCount = 0; //yirou
 	m_DND = false;
 	m_Whispers = true;
 

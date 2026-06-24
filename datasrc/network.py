@@ -664,22 +664,4 @@ Messages = [
 	NetMessageEx("Sv_MapInfo", "map-info@netmsg.ddnet.org", [
 		NetString("m_pDescription"),
 	]),
-
-	# yirou: Relay mode network messages for live streaming client
-	NetMessageEx("Sv_RelayState", "relay-state@ddnet.tw", [
-		NetIntRange("m_Team", 0, 64),
-		NetIntRange("m_State", 0, 4),
-		NetIntRange("m_CurrentRunnerOrder", 0, 64),
-		NetIntRange("m_RunnerCount", 0, 64),
-		NetIntRange("m_DurationSec", 0, 3600),
-		NetIntAny("m_ElapsedTick"),
-		NetArray(NetIntAny("m_aRunnerClientIds"), 16),
-		NetArray(NetIntRange("m_aRunnerOrders", 0, 64), 16),
-	]),
-
-	NetMessageEx("Sv_RelayAction", "relay-action@ddnet.tw", [
-		NetIntRange("m_Team", 0, 64),
-		NetIntRange("m_ClientId", 0, 64),
-		NetIntRange("m_Action", 0, 1),
-	]),
 ]

@@ -1735,9 +1735,6 @@ void CGameTeams::StartRelay(int Team, vec2 RecordPos)
 	SetTeamLock(Team, true);
 
 	KillCharacterOrTeam(AnyMember, Team);
-	
-	// yirou: broadcast relay state to all team members
-	BroadcastRelayState(Team);
 }
 
 void CGameTeams::AdvanceRelayRunner(int Team, int NowTick)
@@ -1847,9 +1844,6 @@ void CGameTeams::AdvanceRelayRunner(int Team, int NowTick)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 			GameServer()->SendChatTarget(i, aBuf);
 	}
-	
-	// yirou: broadcast updated relay state
-	BroadcastRelayState(Team);
 }
 
 void CGameTeams::OnRelayTick(int Team)
@@ -2037,28 +2031,6 @@ void CGameTeams::FinishRelayTeam(int Team, int FinisherId)
 		str_format(aBuf, sizeof(aBuf), "Relay finished by %s", Server()->ClientName(FinisherId));
 		GameServer()->SendChatTeam(Team, aBuf);
 	}
-	
-	// yirou: broadcast final state
-	BroadcastRelayState(Team);
-	
-	// yirou: output relay statistics with /b and /r counters
-	GameServer()->SendChatTeam(Team, "--- Relay Statistics ---");
-	for(int i = 1; i < MAX_CLIENTS; i++)
-	{
-		int RunnerId = m_aTeamRelayOrder[Team][i];
-		if(RunnerId != -1 && GameServer()->m_apPlayers[RunnerId])
-		{
-			CPlayer *pPlayer = GameServer()->m_apPlayers[RunnerId];
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%s: /b used %d times, /r used %d times",
-				Server()->ClientName(RunnerId),
-				pPlayer->GetRelayBackCount(),
-				pPlayer->GetRelayResetCount());
-			GameServer()->SendChatTeam(Team, aBuf);
-			// Reset counters for next relay
-			pPlayer->ResetRelayCounters();
-		}
-	}
 }
 
 //yirou
@@ -2099,82 +2071,6 @@ void CGameTeams::PauseAllRelays()
 		{
 			if(GameServer()->m_apPlayers[i])
 				GameServer()->SendChatTarget(i, aBuf);
-		}
-	}
-}
-
-
-//yirou: send relay state to specific client
-void CGameTeams::SendRelayStateToClient(int Team, int ClientId)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-	if(!GameServer()->m_apPlayers[ClientId])
-		return;
-	
-	CNetMsg_Sv_RelayState Msg;
-	Msg.m_Team = Team;
-	Msg.m_State = m_aTeamRelayState[Team];
-	Msg.m_CurrentRunnerOrder = m_aTeamCurrentRunnerIndex[Team];
-	Msg.m_RunnerCount = m_aTeamRelayRunnerCount[Team];
-	Msg.m_DurationSec = m_aTeamRelayDurationTicks[Team] / Server()->TickSpeed();
-	Msg.m_ElapsedTick = (m_aTeamRelayState[Team] == RELAY_STATE_RUNNING) ? 
-		(Server()->Tick() - m_aTeamRelayTickStart[Team]) : 0;
-	
-	// Fill runner arrays
-	for(int i = 0; i < 16; i++)
-	{
-		Msg.m_aRunnerClientIds[i] = -1;
-		Msg.m_aRunnerOrders[i] = 0;
-	}
-	
-	int Index = 0;
-	for(int i = 1; i < MAX_CLIENTS && Index < 16; i++)
-	{
-		int RunnerId = m_aTeamRelayOrder[Team][i];
-		if(RunnerId != -1)
-		{
-			Msg.m_aRunnerClientIds[Index] = RunnerId;
-			Msg.m_aRunnerOrders[Index] = i;
-			Index++;
-		}
-	}
-	
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
-}
-
-//yirou: broadcast relay state to all team members
-void CGameTeams::BroadcastRelayState(int Team)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-	
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-		{
-			SendRelayStateToClient(Team, i);
-		}
-	}
-}
-
-//yirou: send relay action notification
-void CGameTeams::SendRelayAction(int Team, int ClientId, int Action)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-	
-	CNetMsg_Sv_RelayAction Msg;
-	Msg.m_Team = Team;
-	Msg.m_ClientId = ClientId;
-	Msg.m_Action = Action;
-	
-	// Send to all team members
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-		{
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 		}
 	}
 }
