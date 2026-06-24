@@ -429,6 +429,9 @@ void CGameContext::Teleport_relay(CCharacter *pChr, vec2 Pos)
 	pChr->SetPosition(Pos);
 	pChr->m_Pos = Pos;
 	pChr->m_PrevPos = Pos;
+	pChr->ResetJumps();
+	pChr->Unfreeze();
+	pChr->SetVelocity(vec2(0, 0));
 	//pChr->m_DDRaceState = ERaceState::CHEATED;
 }
 void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)

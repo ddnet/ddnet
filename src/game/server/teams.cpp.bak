@@ -15,7 +15,6 @@
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
-#include <game/server/interactions.h>
 #include <game/team_state.h>
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
@@ -45,9 +44,6 @@ void CGameTeams::Reset()
 		if(m_pGameContext->PracticeByDefault())
 			m_aPractice[i] = true;
 		ResetRoundState(i);
-		ResetRelayState(i);
-		// yirou: initialize relay duration with default 5 seconds
-		m_aTeamRelayDurationTicks[i] = 5 * Server()->TickSpeed();
 	}
 }
 
@@ -201,14 +197,7 @@ void CGameTeams::OnCharacterStart(int ClientId)
 
 void CGameTeams::OnCharacterFinish(int ClientId)
 {
-	int Team = m_Core.Team(ClientId);
-	if(IsRelayActive(Team))
-	{
-		FinishRelayTeam(Team, ClientId);
-		return;
-	}
-
-	if(((Team == TEAM_FLOCK || m_aTeamFlock[Team]) && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) || Team == TEAM_SUPER)
+	if(((m_Core.Team(ClientId) == TEAM_FLOCK || m_aTeamFlock[m_Core.Team(ClientId)]) && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) || m_Core.Team(ClientId) == TEAM_SUPER)
 	{
 		CPlayer *pPlayer = GetPlayer(ClientId);
 		if(pPlayer && pPlayer->IsPlaying())
@@ -284,10 +273,6 @@ void CGameTeams::Tick()
 		}
 	}
 	TeamHasWantedStartTime &= ~(uint64_t)1;
-
-	for(int i = 0; i < NUM_DDRACE_TEAMS; i++)
-		OnRelayTick(i);
-
 	if(!TeamHasWantedStartTime)
 	{
 		return;
@@ -475,12 +460,6 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 	m_aTeeFinished[ClientId] = false;
 	int OldTeam = m_Core.Team(ClientId);
 
-	//yirou: remove from old team's relay order when leaving
-	if(Team != OldTeam && IsValidTeamNumber(OldTeam))
-	{
-		RemoveRelayRunner(OldTeam, ClientId);
-	}
-
 	if(Team != OldTeam && (OldTeam != TEAM_FLOCK || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) && OldTeam != TEAM_SUPER && m_aTeamState[OldTeam] != ETeamState::EMPTY)
 	{
 		bool NoElseInOldTeam = TeamSize(OldTeam) <= 1;
@@ -497,12 +476,6 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 	}
 
 	m_Core.Team(ClientId, Team);
-
-	//yirou: auto assign relay order when joining a new team
-	if(Team != OldTeam && IsValidTeamNumber(Team) && Team > TEAM_FLOCK)
-	{
-		AutoAssignRelayOrder(Team, ClientId);
-	}
 
 	if(OldTeam != Team)
 	{
@@ -592,16 +565,6 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 		return CClientMask().set().reset(ExceptId);
 	}
 
-	CPlayer *pAsker = GetPlayer(Asker);
-	CInteractions Interact;
-	Interact.Init(Asker, pAsker ? pAsker->GetUniqueCid() : 0);
-	Interact.FillOwnerConnected(
-		pAsker && pAsker->GetCharacter() && pAsker->GetCharacter()->IsAlive(),
-		m_Core.Team(Asker),
-		m_Core.GetSolo(Asker),
-		false,
-		false); // TODO: these false values make little sense
-
 	CClientMask Mask;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -612,8 +575,59 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 		if(!((Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIXUP)) ||
 			   (!Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIX))))
 			continue;
-		if(!Interact.CanSee(GameServer(), i))
-			continue;
+
+		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
+		{ // Not spectator
+			if(i != Asker)
+			{ // Actions of other players
+				if(!Character(i))
+					continue; // Player is currently dead
+				if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
+				{
+					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+						continue; // In different teams
+				}
+				else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_OFF)
+				{
+					if(m_Core.GetSolo(Asker))
+						continue; // When in solo part don't show others
+					if(m_Core.GetSolo(i))
+						continue; // When in solo part don't show others
+					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+						continue; // In different teams
+				}
+			} // See everything of yourself
+		}
+		else if(GetPlayer(i)->SpectatorId() != SPEC_FREEVIEW)
+		{ // Spectating specific player
+			if(GetPlayer(i)->SpectatorId() != Asker)
+			{ // Actions of other players
+				if(!Character(GetPlayer(i)->SpectatorId()))
+					continue; // Player is currently dead
+				if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
+				{
+					if(m_Core.Team(GetPlayer(i)->SpectatorId()) != Team && m_Core.Team(GetPlayer(i)->SpectatorId()) != TEAM_SUPER)
+						continue; // In different teams
+				}
+				else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_OFF)
+				{
+					if(m_Core.GetSolo(Asker))
+						continue; // When in solo part don't show others
+					if(m_Core.GetSolo(GetPlayer(i)->SpectatorId()))
+						continue; // When in solo part don't show others
+					if(m_Core.Team(GetPlayer(i)->SpectatorId()) != Team && m_Core.Team(GetPlayer(i)->SpectatorId()) != TEAM_SUPER)
+						continue; // In different teams
+				}
+			} // See everything of player you're spectating
+		}
+		else
+		{ // Freeview
+			if(GetPlayer(i)->m_SpecTeam)
+			{ // Show only players in own team when spectating
+				if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+					continue; // in different teams
+			}
+		}
 
 		Mask.set(i);
 	}
@@ -1175,24 +1189,6 @@ void CGameTeams::OnCharacterSpawn(int ClientId)
 	if(GetSaving(Team))
 		return;
 
-	// yirou: if player should be in relay spec AND relay is active (RUNNING or COUNTDOWN), apply it now
-	if((m_aTeamRelayState[Team] == RELAY_STATE_RUNNING || m_aTeamRelayState[Team] == RELAY_STATE_COUNTDOWN) && 
-	   GameServer()->m_apPlayers[ClientId] && GameServer()->m_apPlayers[ClientId]->IsRelayForcedSpec())
-	{
-		GameServer()->m_apPlayers[ClientId]->ForceRelaySpec(true);
-		// Teleport to record point
-		CCharacter *pChr = GameServer()->m_apPlayers[ClientId]->GetCharacter();
-		if(pChr)
-		{
-			GameServer()->Teleport_relay(pChr, m_aTeamRelayRecordPos[Team]);
-			pChr->ResetJumps();
-			pChr->SetDeepFrozen(false);
-			pChr->Unfreeze();
-			pChr->ResetVelocity();
-		}
-		return; // Skip normal team assignment
-	}
-
 	if(!IsValidTeamNumber(Team) || !m_aTeamLocked[Team])
 	{
 		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
@@ -1209,45 +1205,6 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 	m_Core.SetSolo(ClientId, false);
 
 	int Team = m_Core.Team(ClientId);
-
-	// yirou: if player disconnects (WEAPON_WORLD) during relay, reset the team
-	if(Weapon == WEAPON_WORLD && IsRelayActive(Team))
-	{
-		// Remove from relay order first
-		RemoveRelayRunner(Team, ClientId);
-		// Reset the team
-		KillCharacterOrTeam(ClientId, Team);
-		// Reset relay state
-		ResetRelayState(Team);
-		// Unlock team
-		SetTeamLock(Team, false);
-		// Notify team
-		GameServer()->SendChatTeam(Team, "Relay cancelled: player disconnected");
-	}
-
-	// yirou: if any player dies during relay (by any means including /kill or K key), pause relay
-	if(IsRelayActive(Team))
-	{
-		// Pause relay - go to IDLE state (need /relaystart to resume)
-		m_aTeamRelayState[Team] = RELAY_STATE_IDLE;
-		
-		// Exit all players from spec
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-			{
-				GameServer()->m_apPlayers[i]->ForceRelaySpec(false);
-			}
-		}
-		
-		// Reset current runner index so next /relaystart starts from runner 1
-		m_aTeamCurrentRunnerIndex[Team] = 0;
-		m_aTeamRelayTickStart[Team] = 0;
-		
-		// Notify team
-		GameServer()->SendChatTeam(Team, "Relay paused: player died. Use /relaystart to resume.");
-	}
-
 	if(GetSaving(Team))
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
@@ -1502,575 +1459,17 @@ bool CGameTeams::IsValidTeamNumber(int Team) const
 	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS - 1; // no TEAM_SUPER
 }
 //yirou
-// 璁剧疆闃熶紞鎺ュ姏鎸佺画鏃堕棿
+// 设置队伍接力持续时间
 void CGameTeams::SetTeamRelayDuration(int Team, int Ticks)
 {
 	if(Team >= 0 && Team < NUM_DDRACE_TEAMS)
 		m_aTeamRelayDurationTicks[Team] = Ticks;
 }
 
-// 鑾峰彇闃熶紞鎺ュ姏鎸佺画鏃堕棿
+// 获取队伍接力持续时间
 int CGameTeams::GetTeamRelayDuration(int Team) const
 {
 	if(Team >= 0 && Team < NUM_DDRACE_TEAMS)
 		return m_aTeamRelayDurationTicks[Team];
 	return 0;
-}
-//yirou
-void CGameTeams::ResetRelayState(int Team)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-	m_aTeamRelayState[Team] = RELAY_STATE_IDLE;
-	m_aTeamRelayRunnerCount[Team] = 0;
-	m_aTeamCurrentRunnerIndex[Team] = 0;
-	m_aTeamRelayTickStart[Team] = 0;
-	// Do NOT reset m_aTeamRelayDurationTicks here, preserve user setting
-	// m_aTeamRelayDurationTicks[Team] = 5 * Server()->TickSpeed();
-	m_aTeamRelayCountdownEndTick[Team] = 0;
-	m_aTeamRelayLastWarnedSecond[Team] = -1;
-	m_aTeamRelayRecordPos[Team] = vec2(0, 0);
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		m_aTeamRelayOrder[Team][i] = -1;
-		m_aTeamRelayPlayerFinished[Team][i] = false;
-	}
-}
-
-bool CGameTeams::IsRelayTeam(int Team) const
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return false;
-	// yirou: all valid teams are relay teams by default
-	if(!IsValidTeamNumber(Team))
-		return false;
-	if(m_aTeamRelayState[Team] != RELAY_STATE_IDLE)
-		return true;
-	return true; // All valid teams are relay teams
-}
-
-bool CGameTeams::IsRelayActive(int Team) const
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return false;
-	return m_aTeamRelayState[Team] == RELAY_STATE_RUNNING;
-}
-
-bool CGameTeams::IsRelayForcedSpec(int ClientId) const
-{
-	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return false;
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(!pPlayer)
-		return false;
-	if(pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_DDRaceState == ERaceState::FINISHED)
-		return false;
-	int Team = m_Core.Team(ClientId);
-	if(!IsRelayActive(Team) && m_aTeamRelayState[Team] != RELAY_STATE_COUNTDOWN && m_aTeamRelayState[Team] != RELAY_STATE_RESETTING)
-		return false;
-	// any team member is forced spec while relay is active/countdown/resetting
-	return true;
-}
-
-void CGameTeams::SetRelayRunner(int Team, int Order, int ClientId)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS || ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return;
-	if(Order < 1 || Order >= MAX_CLIENTS)
-		return;
-	if(!GameServer()->m_apPlayers[ClientId])
-		return;
-	if(m_Core.Team(ClientId) != Team)
-		return;
-
-	int OldOrder = -1;
-	int TargetClientId = m_aTeamRelayOrder[Team][Order];
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_aTeamRelayOrder[Team][i] == ClientId)
-		{
-			OldOrder = i;
-			break;
-		}
-	}
-
-	if(OldOrder == Order)
-		return;
-
-	if(OldOrder != -1 && TargetClientId != -1 && TargetClientId != ClientId)
-	{
-		m_aTeamRelayOrder[Team][OldOrder] = TargetClientId;
-		m_aTeamRelayOrder[Team][Order] = ClientId;
-	}
-	else
-	{
-		if(OldOrder != -1)
-			m_aTeamRelayOrder[Team][OldOrder] = -1;
-		m_aTeamRelayOrder[Team][Order] = ClientId;
-	}
-
-	m_aTeamRelayRunnerCount[Team] = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_aTeamRelayOrder[Team][i] != -1)
-			m_aTeamRelayRunnerCount[Team]++;
-	}
-}
-
-//yirou
-void CGameTeams::RemoveRelayRunner(int Team, int ClientId)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS || ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return;
-
-	for(int i = 1; i < MAX_CLIENTS; i++)
-	{
-		if(m_aTeamRelayOrder[Team][i] == ClientId)
-		{
-			m_aTeamRelayOrder[Team][i] = -1;
-			break;
-		}
-	}
-
-	m_aTeamRelayRunnerCount[Team] = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_aTeamRelayOrder[Team][i] != -1)
-			m_aTeamRelayRunnerCount[Team]++;
-	}
-}
-
-//yirou
-void CGameTeams::AutoAssignRelayOrder(int Team, int ClientId)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS || ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return;
-	if(!GameServer()->m_apPlayers[ClientId])
-		return;
-	if(m_Core.Team(ClientId) != Team)
-		return;
-
-	// Check if already assigned
-	for(int i = 1; i < MAX_CLIENTS; i++)
-	{
-		if(m_aTeamRelayOrder[Team][i] == ClientId)
-			return; // Already assigned
-	}
-
-	// Find first available slot
-	for(int i = 1; i < MAX_CLIENTS; i++)
-	{
-		if(m_aTeamRelayOrder[Team][i] == -1)
-		{
-			m_aTeamRelayOrder[Team][i] = ClientId;
-			m_aTeamRelayRunnerCount[Team]++;
-			break;
-		}
-	}
-}
-
-void CGameTeams::SendRelayOrder(int Team)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "Relay order for team %d:", Team);
-	bool First = true;
-
-	for(int i = 1; i < MAX_CLIENTS; i++)
-	{
-		int ClientId = m_aTeamRelayOrder[Team][i];
-		if(ClientId != -1)
-		{
-			if(First)
-				First = false;
-			else
-				str_append(aBuf, ",");
-
-			char aEntry[64];
-			str_format(aEntry, sizeof(aEntry), " %d:%s", i, Server()->ClientName(ClientId));
-			str_append(aBuf, aEntry);
-		}
-	}
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-			GameServer()->SendChatTarget(i, aBuf);
-	}
-}
-
-void CGameTeams::StartRelay(int Team, vec2 RecordPos)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-	if(!IsRelayTeam(Team))
-		return;
-
-	int AnyMember = -1;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-		{
-			AnyMember = i;
-			break;
-		}
-	}
-	if(AnyMember == -1)
-		return;
-
-	m_aTeamRelayRecordPos[Team] = RecordPos;
-	m_aTeamRelayState[Team] = RELAY_STATE_RESETTING;
-	m_aTeamCurrentRunnerIndex[Team] = 0;
-	m_aTeamRelayTickStart[Team] = 0;
-	m_aTeamRelayCountdownEndTick[Team] = 0;
-	m_aTeamRelayLastWarnedSecond[Team] = -1;
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aTeamRelayPlayerFinished[Team][i] = false;
-
-	// yirou: lock team before starting relay
-	SetTeamLock(Team, true);
-
-	KillCharacterOrTeam(AnyMember, Team);
-}
-
-void CGameTeams::AdvanceRelayRunner(int Team, int NowTick)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-	if(m_aTeamRelayState[Team] != RELAY_STATE_RUNNING)
-		return;
-
-	// Use provided tick or get current
-	int CurrentTick = (NowTick >= 0) ? NowTick : Server()->Tick();
-
-	int OldRunnerIndex = m_aTeamCurrentRunnerIndex[Team];
-	int OldRunnerId = -1;
-	if(OldRunnerIndex >= 1 && OldRunnerIndex < MAX_CLIENTS)
-		OldRunnerId = m_aTeamRelayOrder[Team][OldRunnerIndex];
-
-	if(OldRunnerId != -1 && GameServer()->m_apPlayers[OldRunnerId])
-	{
-		CCharacter *pOldChr = GameServer()->m_apPlayers[OldRunnerId]->GetCharacter();
-		if(pOldChr)
-		{
-			m_aTeamRelayRecordPos[Team] = pOldChr->m_Pos;
-			GameServer()->m_apPlayers[OldRunnerId]->ForceRelaySpec(true);
-		}
-	}
-
-	int StartIndex = m_aTeamCurrentRunnerIndex[Team];
-	int NextRunnerId = -1;
-	int NextRunnerIndex = 0;
-	for(int Offset = 1; Offset < MAX_CLIENTS; Offset++)
-	{
-		int Idx = StartIndex + Offset;
-		if(Idx >= MAX_CLIENTS)
-			Idx -= MAX_CLIENTS;
-		if(Idx == 0)
-			continue;
-		int Candidate = m_aTeamRelayOrder[Team][Idx];
-		if(Candidate != -1 && GameServer()->m_apPlayers[Candidate] && GameServer()->m_apPlayers[Candidate]->GetCharacter())
-		{
-			NextRunnerId = Candidate;
-			NextRunnerIndex = Idx;
-			break;
-		}
-	}
-
-	if(NextRunnerId == -1)
-	{
-		m_aTeamRelayTickStart[Team] = CurrentTick;
-		return;
-	}
-
-	CPlayer *pNextPlayer = GameServer()->m_apPlayers[NextRunnerId];
-	if(!pNextPlayer)
-	{
-		m_aTeamRelayTickStart[Team] = CurrentTick;
-		return;
-	}
-	CCharacter *pNextChr = pNextPlayer->GetCharacter();
-	if(!pNextChr)
-	{
-		m_aTeamRelayTickStart[Team] = CurrentTick;
-		return;
-	}
-
-	pNextPlayer->ForceRelaySpec(false);
-	GameServer()->Teleport_relay(pNextChr, m_aTeamRelayRecordPos[Team]);
-	pNextChr->ResetJumps();
-	pNextChr->SetDeepFrozen(false);
-	pNextChr->Unfreeze();
-	pNextChr->ResetVelocity();
-
-	if(pNextChr->m_DDRaceState != ERaceState::STARTED)
-		OnCharacterStart(NextRunnerId);
-
-	m_aTeamCurrentRunnerIndex[Team] = NextRunnerIndex;
-	m_aTeamRelayTickStart[Team] = CurrentTick;
-
-	// yirou: announce runner change to all team members and show next runner
-	int AfterNextRunnerId = -1;
-	for(int Offset = 1; Offset < MAX_CLIENTS; Offset++)
-	{
-		int Idx = NextRunnerIndex + Offset;
-		if(Idx >= MAX_CLIENTS)
-			Idx -= MAX_CLIENTS;
-		if(Idx == 0)
-			continue;
-		int Candidate = m_aTeamRelayOrder[Team][Idx];
-		if(Candidate != -1 && GameServer()->m_apPlayers[Candidate] && GameServer()->m_apPlayers[Candidate]->GetCharacter())
-		{
-			AfterNextRunnerId = Candidate;
-			break;
-		}
-	}
-
-	char aBuf[256];
-	if(AfterNextRunnerId != -1)
-	{
-		str_format(aBuf, sizeof(aBuf), "Runner changed! Now: %s, Next: %s", Server()->ClientName(NextRunnerId), Server()->ClientName(AfterNextRunnerId));
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "Runner changed! Now: %s", Server()->ClientName(NextRunnerId));
-	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-			GameServer()->SendChatTarget(i, aBuf);
-	}
-}
-
-void CGameTeams::OnRelayTick(int Team)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-	if(!IsRelayTeam(Team))
-		return;
-
-	int Now = Server()->Tick();
-
-	switch(m_aTeamRelayState[Team])
-	{
-	case RELAY_STATE_RESETTING:
-	{
-		bool AllReady = true;
-		bool AnyOnline = false;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(m_Core.Team(i) != Team || !GameServer()->m_apPlayers[i])
-				continue;
-			AnyOnline = true;
-			CCharacter *pChr = GameServer()->m_apPlayers[i]->GetCharacter();
-			if(!pChr || !pChr->IsAlive())
-			{
-				AllReady = false;
-				break;
-			}
-		}
-		if(!AnyOnline)
-		{
-			m_aTeamRelayState[Team] = RELAY_STATE_IDLE;
-			return;
-		}
-		if(AllReady)
-		{
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(m_Core.Team(i) != Team || !GameServer()->m_apPlayers[i])
-					continue;
-				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-				CCharacter *pChr = pPlayer->GetCharacter();
-				if(!pChr)
-					continue;
-				pPlayer->ForceRelaySpec(true);
-				GameServer()->Teleport_relay(pChr, m_aTeamRelayRecordPos[Team]);
-				pChr->ResetJumps();
-				pChr->SetDeepFrozen(false);
-				pChr->Unfreeze();
-				pChr->ResetVelocity();
-			}
-			int CountdownSec = 5;
-			m_aTeamRelayCountdownEndTick[Team] = Now + (CountdownSec - 1) * Server()->TickSpeed(); // -1 for 1s offset
-			m_aTeamRelayState[Team] = RELAY_STATE_COUNTDOWN;
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Relay starts in %d seconds", CountdownSec);
-			GameServer()->SendChatTeam(Team, aBuf);
-		}
-		break;
-	}
-	case RELAY_STATE_COUNTDOWN:
-	{
-			int Remaining = (m_aTeamRelayCountdownEndTick[Team] - Now) / Server()->TickSpeed() + 1; // +1s offset
-		if(Remaining != m_aTeamRelayLastWarnedSecond[Team] && Remaining >= 1 && Remaining <= 5)
-		{
-			m_aTeamRelayLastWarnedSecond[Team] = Remaining;
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Relay starts in %d...", Remaining);
-			GameServer()->SendChatTeam(Team, aBuf);
-		}
-		if(Now >= m_aTeamRelayCountdownEndTick[Team])
-		{
-			m_aTeamRelayState[Team] = RELAY_STATE_RUNNING;
-			m_aTeamRelayTickStart[Team] = Now;
-			m_aTeamCurrentRunnerIndex[Team] = 0;
-			m_aTeamRelayLastWarnedSecond[Team] = -1;
-			GameServer()->SendChatTeam(Team, "Relay started! Runner 1 go!");
-			AdvanceRelayRunner(Team, Now);
-		}
-		break;
-	}
-	case RELAY_STATE_RUNNING:
-	{
-		int Elapsed = Now - m_aTeamRelayTickStart[Team];
-		int Duration = m_aTeamRelayDurationTicks[Team];
-			int Remaining = (Duration - Elapsed) / Server()->TickSpeed() + 1; // +1s offset for display
-		if(Remaining != m_aTeamRelayLastWarnedSecond[Team] && Remaining >= 1 && Remaining <= 3)
-		{
-			m_aTeamRelayLastWarnedSecond[Team] = Remaining;
-			// Find current runner and next runner
-			int CurrentRunnerIndex = m_aTeamCurrentRunnerIndex[Team];
-			int CurrentRunnerId = (CurrentRunnerIndex >= 1 && CurrentRunnerIndex < MAX_CLIENTS) ? m_aTeamRelayOrder[Team][CurrentRunnerIndex] : -1;
-			int NextRunnerId = -1;
-			for(int Offset = 1; Offset < MAX_CLIENTS; Offset++)
-			{
-				int Idx = CurrentRunnerIndex + Offset;
-				if(Idx >= MAX_CLIENTS)
-					Idx -= MAX_CLIENTS;
-				if(Idx == 0)
-					continue;
-				int Candidate = m_aTeamRelayOrder[Team][Idx];
-				if(Candidate != -1 && GameServer()->m_apPlayers[Candidate] && GameServer()->m_apPlayers[Candidate]->GetCharacter())
-				{
-					NextRunnerId = Candidate;
-					break;
-				}
-			}
-			char aBuf[256];
-			if(NextRunnerId != -1)
-			{
-				str_format(aBuf, sizeof(aBuf), "Relay ends in %d sec, next runner: %s", Remaining, Server()->ClientName(NextRunnerId));
-			}
-			else
-			{
-				str_format(aBuf, sizeof(aBuf), "Relay ends in %d sec", Remaining);
-			}
-			// Send to all team members
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-					GameServer()->SendChatTarget(i, aBuf);
-			}
-		}
-		if(Elapsed >= Duration)
-		{
-			m_aTeamRelayLastWarnedSecond[Team] = -1;
-			AdvanceRelayRunner(Team, Now);
-		}
-		break;
-	}
-	default:
-		break;
-	}
-}
-
-void CGameTeams::FinishRelayTeam(int Team, int FinisherId)
-{
-	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
-		return;
-	if(m_aTeamRelayState[Team] != RELAY_STATE_RUNNING)
-		return;
-
-	m_aTeamRelayState[Team] = RELAY_STATE_FINISHED;
-
-	vec2 FinishPos = m_aTeamRelayRecordPos[Team];
-	if(FinisherId >= 0 && FinisherId < MAX_CLIENTS && GameServer()->m_apPlayers[FinisherId])
-	{
-		CCharacter *pFinisherChr = GameServer()->m_apPlayers[FinisherId]->GetCharacter();
-		if(pFinisherChr)
-			FinishPos = pFinisherChr->m_Pos;
-	}
-
-	int FinishTimeTicks = 0;
-	if(FinisherId >= 0 && FinisherId < MAX_CLIENTS && GameServer()->m_apPlayers[FinisherId])
-		FinishTimeTicks = Server()->Tick() - GetStartTime(GameServer()->m_apPlayers[FinisherId]);
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) != Team || !GameServer()->m_apPlayers[i])
-			continue;
-		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-		CCharacter *pChr = pPlayer->GetCharacter();
-		if(!pChr)
-			continue;
-		pPlayer->ForceRelaySpec(false);
-		GameServer()->Teleport_relay(pChr, FinishPos);
-		pChr->ResetJumps();
-		pChr->SetDeepFrozen(false);
-		pChr->Unfreeze();
-		pChr->ResetVelocity();
-		SetDDRaceState(pPlayer, ERaceState::FINISHED);
-	}
-
-	if(FinishTimeTicks > 0)
-	{
-		float Time = FinishTimeTicks / (float)Server()->TickSpeed();
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Relay finished by %s in %d minute(s) %5.2f second(s)",
-			Server()->ClientName(FinisherId), (int)Time / 60, Time - ((int)Time / 60 * 60));
-		GameServer()->SendChatTeam(Team, aBuf);
-	}
-	else
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Relay finished by %s", Server()->ClientName(FinisherId));
-		GameServer()->SendChatTeam(Team, aBuf);
-	}
-}
-
-//yirou
-void CGameTeams::PauseAllRelays()
-{
-	int PausedCount = 0;
-	for(int Team = 1; Team < NUM_DDRACE_TEAMS; Team++)
-	{
-		if(!IsValidTeamNumber(Team))
-			continue;
-		if(m_aTeamRelayState[Team] != RELAY_STATE_IDLE)
-		{
-			// Pause this relay
-			m_aTeamRelayState[Team] = RELAY_STATE_IDLE;
-			
-			// Exit all players from spec
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-				{
-					GameServer()->m_apPlayers[i]->ForceRelaySpec(false);
-				}
-			}
-			
-			// Reset runner index
-			m_aTeamCurrentRunnerIndex[Team] = 0;
-			m_aTeamRelayTickStart[Team] = 0;
-			
-			PausedCount++;
-		}
-	}
-	
-	if(PausedCount > 0)
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "All relays paused (%d team(s))", PausedCount);
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(GameServer()->m_apPlayers[i])
-				GameServer()->SendChatTarget(i, aBuf);
-		}
-	}
 }

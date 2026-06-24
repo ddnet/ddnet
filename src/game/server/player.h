@@ -143,6 +143,8 @@ private:
 	int64_t m_ForcePauseTime;
 	int64_t m_LastPause;
 	bool m_Afk;
+	bool m_RelayForcedSpec; // yirou: relay forced spec state, cannot be exited by player
+	bool m_CanToggleSpec; // yirou: if false, player cannot self-toggle spec/pause state
 
 	int m_DefEmote;
 	int m_OverrideEmote;
@@ -177,6 +179,9 @@ public:
 	int ForcePause(int Time);
 	int IsPaused() const;
 	bool CanSpec() const;
+	//yirou
+	void ForceRelaySpec(bool Enable); // Force spec for relay, ignores ground check and cannot be exited by player
+	bool IsRelayForcedSpec() const { return m_RelayForcedSpec; }
 
 	bool IsPlaying() const;
 	int64_t m_LastKickVote;
@@ -212,6 +217,9 @@ public:
 	void SetAfk(bool Afk);
 	void SetInitialAfk(bool Afk);
 	bool IsAfk() const { return m_Afk; }
+	// yirou: spec toggle control
+	bool CanToggleSpec() const { return m_CanToggleSpec; }
+	void SetCanToggleSpec(bool CanToggle) { m_CanToggleSpec = CanToggle; }
 
 	int64_t m_LastPlaytime;
 	int64_t m_LastEyeEmote;

@@ -18,11 +18,10 @@ struct CScoreSaveResult;
 
 enum ETeamRelayState
 {
-	RELAY_STATE_IDLE = 0, // idle, not configured or finished
-	RELAY_STATE_RESETTING, // waiting for team respawn after KillCharacterOrTeam
-	RELAY_STATE_COUNTDOWN, // countdown before runner 1 starts
-	RELAY_STATE_RUNNING, // relay in progress
-	RELAY_STATE_FINISHED, // finished
+	RELAY_STATE_IDLE = 0, // 空闲，未开始
+	RELAY_STATE_COUNTDOWN, // 倒计时准备
+	RELAY_STATE_RUNNING, // 接力进行中
+	RELAY_STATE_FINISHED, // 已全部完成
 };
 
 class CGameTeams
@@ -48,7 +47,7 @@ class CGameTeams
 	bool m_aTeamSentStartWarning[NUM_DDRACE_TEAMS];
 	// `m_aTeamUnfinishableKillTick` is -1 by default and gets set when a
 	// team becomes unfinishable. If the team hasn't entered practice mode
-	// by that time, it'll be killed to prevent people not understanding
+	// by that time, it'll get killed to prevent people not understanding
 	// the message from playing for a long time in an unfinishable team.
 	int m_aTeamUnfinishableKillTick[NUM_DDRACE_TEAMS];
 
@@ -139,33 +138,17 @@ public:
 	bool IsPractice(int Team);
 	bool IsValidTeamNumber(int Team) const;
 	//yirou
-	ETeamRelayState m_aTeamRelayState[NUM_DDRACE_TEAMS]; // team relay state
-	int m_aTeamRelayOrder[NUM_DDRACE_TEAMS][MAX_CLIENTS]; // relay order (player ids), 1-based index
-	int m_aTeamRelayRunnerCount[NUM_DDRACE_TEAMS]; // number of runners with assigned order
-	int m_aTeamCurrentRunnerIndex[NUM_DDRACE_TEAMS]; // current runner order index (1-based)
-	int m_aTeamRelayTickStart[NUM_DDRACE_TEAMS]; // tick when current runner started
-	int m_aTeamRelayDurationTicks[NUM_DDRACE_TEAMS]; // relay duration per runner in ticks (set by relaytimeset)
-	bool m_aTeamRelayPlayerFinished[NUM_DDRACE_TEAMS][MAX_CLIENTS]; // unused placeholder
-	vec2 m_aTeamRelayRecordPos[NUM_DDRACE_TEAMS]; // relay record point (checkpoint)
-	int m_aTeamRelayCountdownEndTick[NUM_DDRACE_TEAMS]; // countdown end tick
-	int m_aTeamRelayLastWarnedSecond[NUM_DDRACE_TEAMS]; // last warned remaining second
-
-	void ResetRelayState(int Team);
-	bool IsRelayTeam(int Team) const;
-	bool IsRelayActive(int Team) const;
-	void SetRelayRunner(int Team, int Order, int ClientId);
-	void RemoveRelayRunner(int Team, int ClientId); // Remove player from relay order when leaving team
-	void AutoAssignRelayOrder(int Team, int ClientId); // Auto assign next available order to new player
-	void SendRelayOrder(int Team);
-	void StartRelay(int Team, vec2 RecordPos);
-	void AdvanceRelayRunner(int Team, int NowTick = -1); // NowTick for sync with OnRelayTick
-	void OnRelayTick(int Team);
-	void FinishRelayTeam(int Team, int FinisherId);
-	bool IsRelayForcedSpec(int ClientId) const;
-
-	void SetTeamRelayDuration(int Team, int Ticks); // set relay duration in ticks
-	int GetTeamRelayDuration(int Team) const; // get relay duration in ticks
-	void PauseAllRelays(); // yirou: pause all active relays
+	ETeamRelayState m_aTeamRelayState[NUM_DDRACE_TEAMS]; // 每个队伍的状态
+	int m_aTeamRelayOrder[NUM_DDRACE_TEAMS][MAX_CLIENTS]; // 存储每个队伍的接力顺序（玩家ID列表）
+	int m_aTeamRelayRunnerCount[NUM_DDRACE_TEAMS]; // 已确认设定顺序的玩家人数
+	int m_aTeamCurrentRunnerIndex[NUM_DDRACE_TEAMS]; // 当前跑第几棒（索引）
+	int m_aTeamRelayTickStart[NUM_DDRACE_TEAMS]; // 当前棒开始的游戏Tick
+	int m_aTeamRelayDurationTicks[NUM_DDRACE_TEAMS]; // 每棒持续时间（Tick数，由/setrelaytime换算）
+	bool m_aTeamRelayPlayerFinished[NUM_DDRACE_TEAMS][MAX_CLIENTS]; // 标记每个玩家是否已完成自己的棒次
+									
+	void SetTeamRelayDuration(int Team, int Ticks); // 设置队伍接力持续时间
+	int GetTeamRelayDuration(int Team) const;// 获取队伍接力持续时间
 };
 
 #endif
+

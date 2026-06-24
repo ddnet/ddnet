@@ -196,10 +196,6 @@ class CGameContext : public IGameServer
 	};
 
 public:
-	//yirou
-	bool SetTeamRelayDuration(int ClientID, int Seconds);
-	int GetTeamRelayDuration(int ClientID) const;
-
 	IServer *Server() const { return m_pServer; }
 	IConfigManager *ConfigManager() const { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
@@ -549,7 +545,9 @@ private:
 	//yirou
 	static void ConStartRelay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetRelayTime(IConsole::IResult *pResult, void *pUserData);
-	void Teleport_relay(CCharacter *pChr, vec2 Pos);
+	static void ConSetRelayOrder(IConsole::IResult *pResult, void *pUserData);
+	static void ConRelayBack(IConsole::IResult *pResult, void *pUserData);
+	static void ConRelayPause(IConsole::IResult *pResult, void *pUserData);
 
 	// Chat commands for practice mode
 	static void ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUserData);
@@ -647,6 +645,7 @@ private:
 public:
 	CLayers *Layers() { return &m_Layers; }
 	CScore *Score() { return m_pScore; }
+	void Teleport_relay(CCharacter *pChr, vec2 Pos);
 
 	enum
 	{

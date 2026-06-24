@@ -4178,8 +4178,12 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 
 	//yirou
-	Console()->Register("relaystart", "?s", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStartRelay, this, "strat the relay game；reco:srart all realy game");
-	Console()->Register("relaytimeset", "?i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayTime, this, "");
+	Console()->Register("relaystart", "?s", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStartRelay, this, "Start relay for your team (admin: 'all' starts all relay teams)");
+	Console()->Register("relaytimeset", "?i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayTime, this, "Set relay duration in seconds");
+	Console()->Register("relayset", "i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayOrder, this, "Set your relay order");
+	Console()->Register("setrelay", "i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayOrder, this, "Alias of relayset");
+	Console()->Register("B", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBack, this, "Return to relay record point");
+	Console()->Register("relaypause", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayPause, this, "Pause all relays (admin only)");
 
 }
 
