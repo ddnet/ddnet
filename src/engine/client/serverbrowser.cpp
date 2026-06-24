@@ -1168,20 +1168,7 @@ void CServerBrowser::SetCurrentServerPing(const NETADDR &Addr, int Ping)
 
 void CServerBrowser::UpdateFromHttp()
 {
-	int OwnLocation;
-	if(str_comp(g_Config.m_BrLocation, "auto") == 0)
-	{
-		OwnLocation = m_OwnLocation;
-	}
-	else
-	{
-		if(CServerInfo::ParseLocation(&OwnLocation, g_Config.m_BrLocation))
-		{
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "cannot parse br_location: '%s'", g_Config.m_BrLocation);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowser", aBuf);
-		}
-	}
+	const int OwnLocation = DetermineOwnLocation();
 
 	int NumServers = m_pHttp->NumServers();
 	m_vpServerlist.reserve(NumServers);
@@ -1228,16 +1215,7 @@ void CServerBrowser::UpdateFromHttp()
 		{
 			continue;
 		}
-		int Ping = m_pPingCache->GetPing(Info.m_aAddresses, Info.m_NumAddresses);
-		Info.m_LatencyIsEstimated = Ping == -1;
-		if(Info.m_LatencyIsEstimated)
-		{
-			Info.m_Latency = CServerInfo::EstimateLatency(OwnLocation, Info.m_Location);
-		}
-		else
-		{
-			Info.m_Latency = Ping;
-		}
+		UpdateServerLatency(&Info, OwnLocation);
 		CServerEntry *pEntry = Add(Info.m_aAddresses, Info.m_NumAddresses);
 		SetInfo(pEntry, Info);
 		pEntry->m_RequestIgnoreInfo = true;
@@ -1386,12 +1364,19 @@ void CServerBrowser::Update()
 const json_value *CServerBrowser::LoadDDNetInfo()
 {
 	LoadDDNetInfoJson();
+	const int PreviousOwnLocation = DetermineOwnLocation();
 	LoadDDNetLocation();
+	const int OwnLocation = DetermineOwnLocation();
+	const bool UpdateLatency = PreviousOwnLocation != OwnLocation;
 	LoadDDNetServers();
 	for(CServerEntry *pEntry : m_vpServerlist)
 	{
 		UpdateServerCommunity(&pEntry->m_Info);
 		UpdateServerRank(&pEntry->m_Info);
+		if(UpdateLatency)
+		{
+			UpdateServerLatency(&pEntry->m_Info, OwnLocation);
+		}
 	}
 	ValidateServerlistType();
 	RequestResort();
@@ -1701,6 +1686,35 @@ void CServerBrowser::UpdateServerRank(CServerInfo *pInfo) const
 {
 	const CCommunity *pCommunity = Community(pInfo->m_aCommunityId);
 	pInfo->m_HasRank = pCommunity == nullptr ? CServerInfo::RANK_UNAVAILABLE : pCommunity->HasRank(pInfo->m_aMap);
+}
+
+void CServerBrowser::UpdateServerLatency(CServerInfo *pInfo, int OwnLocation) const
+{
+	int Ping = m_pPingCache->GetPing(pInfo->m_aAddresses, pInfo->m_NumAddresses);
+	pInfo->m_LatencyIsEstimated = Ping == -1;
+	if(pInfo->m_LatencyIsEstimated)
+	{
+		pInfo->m_Latency = CServerInfo::EstimateLatency(OwnLocation, pInfo->m_Location);
+	}
+	else
+	{
+		pInfo->m_Latency = Ping;
+	}
+}
+
+int CServerBrowser::DetermineOwnLocation() const
+{
+	if(str_comp(g_Config.m_BrLocation, "auto") == 0)
+	{
+		return m_OwnLocation;
+	}
+
+	int OwnLocation;
+	if(CServerInfo::ParseLocation(&OwnLocation, g_Config.m_BrLocation))
+	{
+		log_error("serverbrowser", "Cannot parse br_location: '%s'", g_Config.m_BrLocation);
+	}
+	return OwnLocation;
 }
 
 void CServerBrowser::ValidateServerlistType()
