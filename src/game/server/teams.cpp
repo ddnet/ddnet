@@ -292,47 +292,47 @@ void CGameTeams::Tick()
 	{
 		return;
 	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(((TeamHasWantedStartTime >> i) & 1) == 0)
-		{
-			continue;
-		}
-		if(TeamSize(i) <= 1)
-		{
-			continue;
-		}
-		bool TeamHasCheatCharacter = false;
-		int NumPlayersNotStarted = 0;
-		char aPlayerNames[256];
-		aPlayerNames[0] = 0;
-		for(int j = 0; j < MAX_CLIENTS; j++)
-		{
-			if(Character(j) && Character(j)->m_DDRaceState == ERaceState::CHEATED)
-				TeamHasCheatCharacter = true;
-			if(m_Core.Team(j) == i && !m_aTeeStarted[j])
-			{
-				if(aPlayerNames[0])
-				{
-					str_append(aPlayerNames, ", ");
-				}
-				str_append(aPlayerNames, Server()->ClientName(j));
-				NumPlayersNotStarted += 1;
-			}
-		}
-		if(!aPlayerNames[0] || TeamHasCheatCharacter)
-		{
-			continue;
-		}
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf),
-			"Your team has %d %s not started yet, they need "
-			"to touch the start before this team can finish: %s",
-			NumPlayersNotStarted,
-			NumPlayersNotStarted == 1 ? "player that has" : "players that have",
-			aPlayerNames);
-		GameServer()->SendChatTeam(i, aBuf);
-	}
+	//for(int i = 0; i < MAX_CLIENTS; i++)
+	//{
+	//	if(((TeamHasWantedStartTime >> i) & 1) == 0)
+	//	{
+	//		continue;
+	//	}
+	//	if(TeamSize(i) <= 1)
+	//	{
+	//		continue;
+	//	}
+	//	bool TeamHasCheatCharacter = false;
+	//	int NumPlayersNotStarted = 0;
+	//	char aPlayerNames[256];
+	//	aPlayerNames[0] = 0;
+	//	for(int j = 0; j < MAX_CLIENTS; j++)
+	//	{
+	//		if(Character(j) && Character(j)->m_DDRaceState == ERaceState::CHEATED)
+	//			TeamHasCheatCharacter = true;
+	//		if(m_Core.Team(j) == i && !m_aTeeStarted[j])
+	//		{
+	//			if(aPlayerNames[0])
+	//			{
+	//				str_append(aPlayerNames, ", ");
+	//			}
+	//			str_append(aPlayerNames, Server()->ClientName(j));
+	//			NumPlayersNotStarted += 1;
+	//		}
+	//	}
+	//	if(!aPlayerNames[0] || TeamHasCheatCharacter)
+	//	{
+	//		continue;
+	//	}
+	//	char aBuf[512];
+	//	str_format(aBuf, sizeof(aBuf),
+	//		"Your team has %d %s not started yet, they need "
+	//		"to touch the start before this team can finish: %s",
+	//		NumPlayersNotStarted,
+	//		NumPlayersNotStarted == 1 ? "player that has" : "players that have",
+	//		aPlayerNames);
+	//	GameServer()->SendChatTeam(i, aBuf);
+	//}
 }
 
 void CGameTeams::CheckTeamFinished(int Team)
@@ -1529,7 +1529,9 @@ void CGameTeams::ResetRelayState(int Team)
 	// m_aTeamRelayDurationTicks[Team] = 5 * Server()->TickSpeed();
 	m_aTeamRelayCountdownEndTick[Team] = 0;
 	m_aTeamRelayLastWarnedSecond[Team] = -1;
+	m_aTeamRelayRaceTimerStarted[Team] = false; // yirou: reset race timer flag
 	m_aTeamRelayRecordPos[Team] = vec2(0, 0);
+	m_aTeamRelayPrevRecordPos[Team] = vec2(0, 0); // yirou: reset previous record point
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_aTeamRelayOrder[Team][i] = -1;
@@ -1757,7 +1759,14 @@ void CGameTeams::AdvanceRelayRunner(int Team, int NowTick)
 		CCharacter *pOldChr = GameServer()->m_apPlayers[OldRunnerId]->GetCharacter();
 		if(pOldChr)
 		{
+			// yirou: save current record point as previous before updating
+			m_aTeamRelayPrevRecordPos[Team] = m_aTeamRelayRecordPos[Team];
 			m_aTeamRelayRecordPos[Team] = pOldChr->m_Pos;
+			
+			// Clear old runner's input and hook before going to spec
+			pOldChr->ResetInput();
+			pOldChr->ResetHook();
+			
 			GameServer()->m_apPlayers[OldRunnerId]->ForceRelaySpec(true);
 		}
 	}
@@ -1801,17 +1810,27 @@ void CGameTeams::AdvanceRelayRunner(int Team, int NowTick)
 	}
 
 	pNextPlayer->ForceRelaySpec(false);
+	
+	// Clear new runner's input and hook before teleport
+	pNextChr->ResetInput();
+	pNextChr->ResetHook();
+	
 	GameServer()->Teleport_relay(pNextChr, m_aTeamRelayRecordPos[Team]);
 	pNextChr->ResetJumps();
 	pNextChr->SetDeepFrozen(false);
 	pNextChr->Unfreeze();
 	pNextChr->ResetVelocity();
 
-	if(pNextChr->m_DDRaceState != ERaceState::STARTED)
+	// Only start race timer for first runner (runner 1), don't reset on handoff
+	if(!m_aTeamRelayRaceTimerStarted[Team] && pNextChr->m_DDRaceState != ERaceState::STARTED)
+	{
 		OnCharacterStart(NextRunnerId);
+		m_aTeamRelayRaceTimerStarted[Team] = true;
+	}
+	// Note: Do NOT reset m_StartTime here - race timer continues across handoffs
 
 	m_aTeamCurrentRunnerIndex[Team] = NextRunnerIndex;
-	m_aTeamRelayTickStart[Team] = CurrentTick;
+	m_aTeamRelayTickStart[Team] = CurrentTick; // Relay timer resets for each runner
 
 	// yirou: announce runner change to all team members and show next runner
 	int AfterNextRunnerId = -1;
@@ -1899,7 +1918,7 @@ void CGameTeams::OnRelayTick(int Team)
 			m_aTeamRelayCountdownEndTick[Team] = Now + (CountdownSec - 1) * Server()->TickSpeed(); // -1 for 1s offset
 			m_aTeamRelayState[Team] = RELAY_STATE_COUNTDOWN;
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Relay starts in %d seconds", CountdownSec);
+			str_format(aBuf, sizeof(aBuf), "还有 %d 秒", CountdownSec);
 			GameServer()->SendChatTeam(Team, aBuf);
 		}
 		break;
@@ -1911,7 +1930,7 @@ void CGameTeams::OnRelayTick(int Team)
 		{
 			m_aTeamRelayLastWarnedSecond[Team] = Remaining;
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Relay starts in %d...", Remaining);
+			str_format(aBuf, sizeof(aBuf), "比赛将在 %d秒后开始", Remaining);
 			GameServer()->SendChatTeam(Team, aBuf);
 		}
 		if(Now >= m_aTeamRelayCountdownEndTick[Team])
@@ -1920,7 +1939,7 @@ void CGameTeams::OnRelayTick(int Team)
 			m_aTeamRelayTickStart[Team] = Now;
 			m_aTeamCurrentRunnerIndex[Team] = 0;
 			m_aTeamRelayLastWarnedSecond[Team] = -1;
-			GameServer()->SendChatTeam(Team, "Relay started! Runner 1 go!");
+			GameServer()->SendChatTeam(Team, "开始！! 出发!");
 			AdvanceRelayRunner(Team, Now);
 		}
 		break;
@@ -1954,11 +1973,11 @@ void CGameTeams::OnRelayTick(int Team)
 			char aBuf[256];
 			if(NextRunnerId != -1)
 			{
-				str_format(aBuf, sizeof(aBuf), "Relay ends in %d sec, next runner: %s", Remaining, Server()->ClientName(NextRunnerId));
+				str_format(aBuf, sizeof(aBuf), "还有 %d 秒, 下一位准备: %s", Remaining, Server()->ClientName(NextRunnerId));
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), "Relay ends in %d sec", Remaining);
+				str_format(aBuf, sizeof(aBuf), "还有 %d 秒", Remaining);
 			}
 			// Send to all team members
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1987,6 +2006,7 @@ void CGameTeams::FinishRelayTeam(int Team, int FinisherId)
 		return;
 
 	m_aTeamRelayState[Team] = RELAY_STATE_FINISHED;
+	m_aTeamRelayRaceTimerStarted[Team] = false; // Reset for next relay
 
 	vec2 FinishPos = m_aTeamRelayRecordPos[Team];
 	if(FinisherId >= 0 && FinisherId < MAX_CLIENTS && GameServer()->m_apPlayers[FinisherId])
@@ -1996,9 +2016,25 @@ void CGameTeams::FinishRelayTeam(int Team, int FinisherId)
 			FinishPos = pFinisherChr->m_Pos;
 	}
 
+	// Calculate finish time - try multiple sources
 	int FinishTimeTicks = 0;
 	if(FinisherId >= 0 && FinisherId < MAX_CLIENTS && GameServer()->m_apPlayers[FinisherId])
-		FinishTimeTicks = Server()->Tick() - GetStartTime(GameServer()->m_apPlayers[FinisherId]);
+	{
+		CPlayer *pFinisher = GameServer()->m_apPlayers[FinisherId];
+		CCharacter *pFinisherChr = pFinisher->GetCharacter();
+		
+		// Try GetStartTime first
+		int StartTime = GetStartTime(pFinisher);
+		if(StartTime > 0)
+		{
+			FinishTimeTicks = Server()->Tick() - StartTime;
+		}
+		// Fallback: try character's m_StartTime directly
+		else if(pFinisherChr && pFinisherChr->m_StartTime > 0)
+		{
+			FinishTimeTicks = Server()->Tick() - pFinisherChr->m_StartTime;
+		}
+	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -2017,19 +2053,34 @@ void CGameTeams::FinishRelayTeam(int Team, int FinisherId)
 		SetDDRaceState(pPlayer, ERaceState::FINISHED);
 	}
 
+	// Always broadcast finish message
+	char aBuf[256];
 	if(FinishTimeTicks > 0)
 	{
 		float Time = FinishTimeTicks / (float)Server()->TickSpeed();
-		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "Relay finished by %s in %d minute(s) %5.2f second(s)",
 			Server()->ClientName(FinisherId), (int)Time / 60, Time - ((int)Time / 60 * 60));
-		GameServer()->SendChatTeam(Team, aBuf);
 	}
 	else
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Relay finished by %s", Server()->ClientName(FinisherId));
-		GameServer()->SendChatTeam(Team, aBuf);
+		str_format(aBuf, sizeof(aBuf), "Relay finished by %s (time unknown)", Server()->ClientName(FinisherId));
+	}
+	GameServer()->SendChatTeam(Team, aBuf);
+	
+	// Also send to all players for visibility
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(GameServer()->m_apPlayers[i])
+			GameServer()->SendChatTarget(i, aBuf);
+	}
+	
+	// Broadcast finish to all players (like normal finish)
+	if(FinishTimeTicks > 0 && FinisherId >= 0 && FinisherId < MAX_CLIENTS && GameServer()->m_apPlayers[FinisherId])
+	{
+		CPlayer *pFinisher = GameServer()->m_apPlayers[FinisherId];
+		char aTimestamp[TIMESTAMP_STR_LENGTH];
+		str_timestamp_format(aTimestamp, sizeof(aTimestamp), TimestampFormat::SPACE);
+		OnFinish(pFinisher, FinishTimeTicks, aTimestamp);
 	}
 }
 
@@ -2058,6 +2109,7 @@ void CGameTeams::PauseAllRelays()
 			// Reset runner index
 			m_aTeamCurrentRunnerIndex[Team] = 0;
 			m_aTeamRelayTickStart[Team] = 0;
+			m_aTeamRelayRaceTimerStarted[Team] = false; // Reset race timer flag
 			
 			PausedCount++;
 		}

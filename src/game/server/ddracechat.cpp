@@ -2422,7 +2422,7 @@ void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Score()->LoadPlayerTimeCp(pResult->m_ClientId, pName);
 }
 
-//yirou
+//yirou 
 void CGameContext::ConStartRelay(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2440,30 +2440,11 @@ void CGameContext::ConStartRelay(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	bool IsAdmin = (pSelf->Server()->GetAuthedState(pResult->m_ClientId) == 1);
 	const int PlayerTeam = pSelf->GetDDRaceTeam(pResult->m_ClientId);
 	CGameTeams &Teams = pSelf->m_pController->Teams();
 	vec2 AdminPos = pChr->m_Pos;
 
-	if(IsAdmin && pResult->NumArguments() > 0 && str_comp_nocase(pResult->GetString(0), "all") == 0)
-	{
-		int StartedCount = 0;
-		for(int Team = 1; Team < NUM_DDRACE_TEAMS; Team++)
-		{
-			if(!Teams.IsValidTeamNumber(Team))
-				continue;
-			if(!Teams.IsRelayTeam(Team))
-				continue;
-			Teams.StartRelay(Team, AdminPos);
-			StartedCount++;
-		}
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Admin: started relay for %d team(s)", StartedCount);
-		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
-		return;
-	}
-
-	if(!Teams.IsValidTeamNumber(PlayerTeam))
+	if(!Teams.IsValidTeamNumber(PlayerTeam) || PlayerTeam == TEAM_FLOCK)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientId, "You must be in a valid team to start a relay");
 		return;
@@ -2477,6 +2458,60 @@ void CGameContext::ConStartRelay(IConsole::IResult *pResult, void *pUserData)
 
 	Teams.StartRelay(PlayerTeam, AdminPos);
 	pSelf->SendChatTarget(pResult->m_ClientId, "Relay started for your team");
+}
+
+void CGameContext::ConStartRelayAll(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+	
+	// Use first player's position as admin position, or default to (0,0)
+	vec2 AdminPos(0, 0);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetCharacter())
+		{
+			AdminPos = pSelf->m_apPlayers[i]->GetCharacter()->m_Pos;
+			break;
+		}
+	}
+
+	int StartedCount = 0;
+	for(int Team = 1; Team < NUM_DDRACE_TEAMS; Team++)
+	{
+		if(!Teams.IsValidTeamNumber(Team))
+			continue;
+		if(Team == TEAM_FLOCK) // team 0 cannot start relay
+			continue;
+		if(!Teams.IsRelayTeam(Team))
+			continue;
+		
+		// Check if team has any online players
+		bool HasPlayer = false;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(Teams.m_Core.Team(i) == Team && pSelf->m_apPlayers[i])
+			{
+				HasPlayer = true;
+				break;
+			}
+		}
+		if(!HasPlayer)
+			continue;
+		
+		Teams.StartRelay(Team, AdminPos);
+		StartedCount++;
+	}
+	
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Admin: started relay for %d team(s)", StartedCount);
+	// Send to all players
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->m_apPlayers[i])
+			pSelf->SendChatTarget(i, aBuf);
+	}
 }
 
 void CGameContext::ConSetRelayTime(IConsole::IResult *pResult, void *pUserData)
@@ -2608,6 +2643,69 @@ void CGameContext::ConRelayBack(IConsole::IResult *pResult, void *pUserData)
 	pChr->Unfreeze();
 	pSelf->Teleport_relay(pChr, Teams.m_aTeamRelayRecordPos[Team]);
 	Teams.m_aTeamRelayTickStart[Team] = pSelf->Server()->Tick();
+
+	const char *pName1 = pSelf->Server()->ClientName(ClientID);
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "!!!%d队的%sB了??", Team, pName1);
+	pSelf->SendChat(-1, TEAM_ALL, aBuf);
+}
+
+//yirou - /bb and /BB: teleport current runner to previous record point
+// Can be used by teammates in spec to help the current runner
+void CGameContext::ConRelayBackBack(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientID = pResult->m_ClientId;
+
+	if(!CheckClientId(ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
+	if(!pPlayer)
+		return;
+
+	int Team = pSelf->GetDDRaceTeam(ClientID);
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	if(!Teams.IsRelayTeam(Team))
+	{
+		pSelf->SendChatTarget(ClientID, "Your team is not in a relay");
+		return;
+	}
+
+	ETeamRelayState State = Teams.m_aTeamRelayState[Team];
+	if(State != RELAY_STATE_COUNTDOWN && State != RELAY_STATE_RUNNING)
+	{
+		pSelf->SendChatTarget(ClientID, "Relay has not started yet");
+		return;
+	}
+
+	// Find current runner
+	int CurrentRunnerIndex = Teams.m_aTeamCurrentRunnerIndex[Team];
+	int CurrentRunnerId = (CurrentRunnerIndex >= 1 && CurrentRunnerIndex < MAX_CLIENTS) ? Teams.m_aTeamRelayOrder[Team][CurrentRunnerIndex] : -1;
+	
+	if(CurrentRunnerId == -1 || !pSelf->m_apPlayers[CurrentRunnerId])
+	{
+		pSelf->SendChatTarget(ClientID, "No active runner found");
+		return;
+	}
+
+	CPlayer *pRunnerPlayer = pSelf->m_apPlayers[CurrentRunnerId];
+	CCharacter *pRunnerChr = pRunnerPlayer->GetCharacter();
+
+	// Teleport runner to previous record point
+	pRunnerChr->SetDeepFrozen(false);
+	pRunnerChr->Unfreeze();
+	pSelf->Teleport_relay(pRunnerChr, Teams.m_aTeamRelayPrevRecordPos[Team]);
+	Teams.m_aTeamRelayRecordPos[Team] = Teams.m_aTeamRelayPrevRecordPos[Team];
+	Teams.m_aTeamRelayTickStart[Team] = pSelf->Server()->Tick();
+	
+	// Notify
+	const char *pName1 = pSelf->Server()->ClientName(ClientID);
+	const char *pName2 = pSelf->Server()->ClientName(CurrentRunnerId);
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "!!!!!!%d队的%s已BB,这是%s造成的??????", Team, pName2, pName1);
+	pSelf->SendChat(-1, TEAM_ALL, aBuf);
 }
 
 
@@ -2620,14 +2718,28 @@ void CGameContext::ConRelayPause(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(ClientID))
 		return;
 
-	// Check admin permission
-	if(pSelf->Server()->GetAuthedState(ClientID) != 1)
-	{
-		pSelf->SendChatTarget(ClientID, "You need to be admin to use this command");
-		return;
-	}
+	//// Check admin permission
+	//if(pSelf->Server()->GetAuthedState(ClientID) != 1)
+	//{
+	//	pSelf->SendChatTarget(ClientID, "You need to be admin to use this command");
+	//	return;
+	//}
 
 	CGameTeams &Teams = pSelf->m_pController->Teams();
 	Teams.PauseAllRelays();
 	pSelf->SendChatTarget(ClientID, "All relays paused and reset");
+}
+
+void CGameContext::ConRoll(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientID = pResult->m_ClientId;
+	if(!CheckClientId(ClientID))
+		return;
+	const char *pName = pSelf->Server()->ClientName(ClientID);
+	srand((unsigned int)time(NULL));
+	int num = 1 + rand() % 99;
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s roll点得 %d", pName, num);
+	pSelf->SendChat(-1, TEAM_ALL, aBuf);
 }

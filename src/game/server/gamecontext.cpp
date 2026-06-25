@@ -4069,6 +4069,7 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("dump_log", "?i[seconds]", CFGFLAG_SERVER, ConDumpLog, this, "Show logs of the last i seconds");
 
 	Console()->Chain("sv_practice_by_default", ConchainPracticeByDefaultUpdate, this);
+
 }
 
 void CGameContext::RegisterChatCommands()
@@ -4178,12 +4179,18 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 
 	//yirou
-	Console()->Register("relaystart", "?s", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStartRelay, this, "Start relay for your team (admin: 'all' starts all relay teams)");
+	Console()->Register("relaystart", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStartRelay, this, "Start relay for your own team");
+	Console()->Register("relaystartall", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStartRelayAll, this, "Start relay for all teams with players (rcon only)");
+
 	Console()->Register("relaytimeset", "?i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayTime, this, "Set relay duration in seconds");
 	Console()->Register("relayset", "i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayOrder, this, "Set your relay order");
 	Console()->Register("setrelay", "i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayOrder, this, "Alias of relayset");
 	Console()->Register("B", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBack, this, "Return to relay record point");
+	Console()->Register("bb", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBackBack, this, "Teleport runner to previous record point");
+	Console()->Register("BB", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBackBack, this, "Teleport runner to previous record point");
 	Console()->Register("relaypause", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayPause, this, "Pause all relays (admin only)");
+
+	Console()->Register("roll", "?i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRoll, this, "roll unmber");
 
 }
 

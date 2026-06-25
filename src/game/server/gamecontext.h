@@ -544,10 +544,14 @@ private:
 
 	//yirou
 	static void ConStartRelay(IConsole::IResult *pResult, void *pUserData);
+	static void ConStartRelayAll(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetRelayTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetRelayOrder(IConsole::IResult *pResult, void *pUserData);
 	static void ConRelayBack(IConsole::IResult *pResult, void *pUserData);
+	static void ConRelayBackBack(IConsole::IResult *pResult, void *pUserData);
 	static void ConRelayPause(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConRoll(IConsole::IResult *pResult, void *pUserData);
 
 	// Chat commands for practice mode
 	static void ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUserData);

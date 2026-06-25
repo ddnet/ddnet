@@ -147,8 +147,10 @@ public:
 	int m_aTeamRelayDurationTicks[NUM_DDRACE_TEAMS]; // relay duration per runner in ticks (set by relaytimeset)
 	bool m_aTeamRelayPlayerFinished[NUM_DDRACE_TEAMS][MAX_CLIENTS]; // unused placeholder
 	vec2 m_aTeamRelayRecordPos[NUM_DDRACE_TEAMS]; // relay record point (checkpoint)
+	vec2 m_aTeamRelayPrevRecordPos[NUM_DDRACE_TEAMS]; // yirou: previous record point (for /bb command)
 	int m_aTeamRelayCountdownEndTick[NUM_DDRACE_TEAMS]; // countdown end tick
 	int m_aTeamRelayLastWarnedSecond[NUM_DDRACE_TEAMS]; // last warned remaining second
+	bool m_aTeamRelayRaceTimerStarted[NUM_DDRACE_TEAMS]; // yirou: whether race timer has been started for this team
 
 	void ResetRelayState(int Team);
 	bool IsRelayTeam(int Team) const;
