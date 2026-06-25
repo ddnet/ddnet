@@ -317,7 +317,7 @@ public:
 	void SendMotd(int ClientId) const;
 	void SendSettings(int ClientId) const;
 	void SendServerAlert(const char *pMessage);
-	void SendModeratorAlert(const char *pMessage, int ToClientId);
+	void SendModeratorAlert(int ToClientId, const char *pMessage);
 	void SendBroadcast(const char *pText, int ClientId, bool IsImportant = true);
 	void SendSkinChange7(int ClientId);
 
