@@ -82,12 +82,12 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 				log_error("countryflags", "Country code '%s' for country '%s' is not a number", pCountryCodeLine, CountryFlag.m_aCountryCodeString);
 				continue;
 			}
-			if(!in_range(CountryFlag.m_CountryCode, CODE_LB, CODE_UB))
+			if(!in_range(CountryFlag.m_CountryCode, CountryCode::MINIMUM, CountryCode::MAXIMUM))
 			{
-				log_error("countryflags", "Country code '%d' for country '%s' is not within valid code range [%d..%d]", CountryFlag.m_CountryCode, CountryFlag.m_aCountryCodeString, CODE_LB, CODE_UB);
+				log_error("countryflags", "Country code '%d' for country '%s' is not within valid code range [%d..%d]", CountryFlag.m_CountryCode, CountryFlag.m_aCountryCodeString, CountryCode::MINIMUM, CountryCode::MAXIMUM);
 				continue;
 			}
-			if(CountryFlag.m_CountryCode == -1 && str_comp(CountryFlag.m_aCountryCodeString, "default") != 0)
+			if(CountryFlag.m_CountryCode == CountryCode::DEFAULT && str_comp(CountryFlag.m_aCountryCodeString, "default") != 0)
 			{
 				log_error("countryflags", "Country code '%d' for country '%s' is only allowed for the default country", CountryFlag.m_CountryCode, CountryFlag.m_aCountryCodeString);
 				continue;
@@ -117,12 +117,12 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 
 	// Ensure a default flag exists
 	auto ExistingDefaultFlag = std::find_if(m_vCountryFlags.begin(), m_vCountryFlags.end(), [](const CCountryFlag &Flag) {
-		return Flag.m_CountryCode == -1;
+		return Flag.m_CountryCode == CountryCode::DEFAULT;
 	});
 	if(ExistingDefaultFlag == m_vCountryFlags.end())
 	{
 		CCountryFlag DefaultFlag;
-		DefaultFlag.m_CountryCode = -1;
+		DefaultFlag.m_CountryCode = CountryCode::DEFAULT;
 		str_copy(DefaultFlag.m_aCountryCodeString, "default");
 		m_vCountryFlags.push_back(DefaultFlag);
 	}
@@ -132,7 +132,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 	size_t DefaultIndex = 0;
 	for(size_t Index = 0; Index < m_vCountryFlags.size(); ++Index)
 	{
-		if(m_vCountryFlags[Index].m_CountryCode == -1)
+		if(m_vCountryFlags[Index].m_CountryCode == CountryCode::DEFAULT)
 		{
 			DefaultIndex = Index;
 			break;
@@ -142,7 +142,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 	std::fill(std::begin(m_aCountryCodeToIndexTable), std::end(m_aCountryCodeToIndexTable), DefaultIndex);
 	for(size_t i = 0; i < m_vCountryFlags.size(); ++i)
 	{
-		m_aCountryCodeToIndexTable[m_vCountryFlags[i].m_CountryCode - CODE_LB] = i;
+		m_aCountryCodeToIndexTable[m_vCountryFlags[i].m_CountryCode - CountryCode::MINIMUM] = i;
 	}
 
 	log_debug("countryflags", "Loaded %" PRIzu " country flags", m_vCountryFlags.size());
@@ -166,8 +166,8 @@ size_t CCountryFlags::Num() const
 
 const CCountryFlags::CCountryFlag &CCountryFlags::GetByCountryCode(int CountryCode) const
 {
-	dbg_assert(CountryCode >= CODE_LB && CountryCode <= CODE_UB, "Invalid CountryCode: %d", CountryCode);
-	return GetByIndex(m_aCountryCodeToIndexTable[CountryCode - CODE_LB]);
+	dbg_assert(CountryCode >= CountryCode::MINIMUM && CountryCode <= CountryCode::MAXIMUM, "Invalid CountryCode: %d", CountryCode);
+	return GetByIndex(m_aCountryCodeToIndexTable[CountryCode - CountryCode::MINIMUM]);
 }
 
 const CCountryFlags::CCountryFlag &CCountryFlags::GetByIndex(size_t Index) const

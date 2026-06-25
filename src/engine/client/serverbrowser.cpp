@@ -1454,6 +1454,11 @@ bool CServerBrowser::ParseCommunityServers(CCommunity *pCommunity, const json_va
 			log_error("serverbrowser", "invalid community country name (ServerIndex=%u)", ServerIndex);
 			return false;
 		}
+		if(!in_range(FlagId.u.integer, (int64_t)CountryCode::MINIMUM, (int64_t)CountryCode::MAXIMUM))
+		{
+			log_error("serverbrowser", "invalid community country code (ServerIndex=%u)", ServerIndex);
+			return false;
+		}
 		pCommunity->m_vCountries.emplace_back(Name.u.string.ptr, FlagId.u.integer);
 		CCommunityCountry *pCountry = &pCommunity->m_vCountries.back();
 
@@ -1629,7 +1634,7 @@ void CServerBrowser::LoadDDNetServers()
 	// Add default none community
 	{
 		CCommunity NoneCommunity(COMMUNITY_NONE, "None", std::nullopt, "");
-		NoneCommunity.m_vCountries.emplace_back(COMMUNITY_COUNTRY_NONE, -1);
+		NoneCommunity.m_vCountries.emplace_back(COMMUNITY_COUNTRY_NONE, CountryCode::DEFAULT);
 		NoneCommunity.m_vTypes.emplace_back(COMMUNITY_TYPE_NONE);
 		m_vCommunities.push_back(std::move(NoneCommunity));
 	}

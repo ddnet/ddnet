@@ -67,6 +67,9 @@ def parse_settings(lines):
 		value = value.replace("SERVERINFO_LEVEL_MAX", "2")
 		value = value.replace("SERVER_MAX_CLIENTS", "64")
 		value = value.replace("MAX_CLIENTS", "128")
+		value = value.replace("CountryCode::DEFAULT", "-1")
+		value = value.replace("CountryCode::MINIMUM", "-1")
+		value = value.replace("CountryCode::MAXIMUM", "999")
 		try:
 			return int(value, base=16) if value.startswith(("0x", "0X")) else int(value)
 		except Exception as e:

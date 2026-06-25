@@ -63,7 +63,7 @@ public:
 
 			m_aName[0] = '\0';
 			m_aClan[0] = '\0';
-			m_Country = 0;
+			m_Country = CountryCode::DEFAULT;
 			m_Team = 0;
 			m_PlayerFlags7 = 0;
 		}
@@ -72,6 +72,9 @@ public:
 
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
+		/**
+		 * Country code in ISO 3166-1 numeric.
+		 */
 		int m_Country;
 		int m_Team;
 		int m_PlayerFlags7;

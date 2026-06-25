@@ -1469,6 +1469,10 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		}
 		GET_STRING(pClient->m_aClan);
 		GET_INT(pClient->m_Country);
+		if(!in_range(pClient->m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+		{
+			pClient->m_Country = CountryCode::DEFAULT;
+		}
 		GET_INT(pClient->m_Score);
 		GET_INT(pClient->m_Player);
 		if(SavedType == SERVERINFO_EXTENDED)

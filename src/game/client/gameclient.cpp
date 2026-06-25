@@ -1808,6 +1808,10 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 					}
 					IntsToStr(pInfo->m_aClan, std::size(pInfo->m_aClan), pClient->m_aClan, std::size(pClient->m_aClan));
 					pClient->m_Country = pInfo->m_Country;
+					if(!in_range(pClient->m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+					{
+						pClient->m_Country = CountryCode::DEFAULT;
+					}
 
 					IntsToStr(pInfo->m_aSkin, std::size(pInfo->m_aSkin), pClient->m_aSkinName, std::size(pClient->m_aSkinName));
 					if(!CSkin::IsValidName(pClient->m_aSkinName) ||
@@ -3027,7 +3031,7 @@ void CGameClient::CClientData::Reset()
 
 	m_aName[0] = '\0';
 	m_aClan[0] = '\0';
-	m_Country = -1;
+	m_Country = CountryCode::DEFAULT;
 	str_copy(m_aSkinName, "default");
 
 	m_Team = 0;

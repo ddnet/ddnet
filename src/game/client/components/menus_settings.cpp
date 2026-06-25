@@ -348,7 +348,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
 		GameClient()->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
-		if(pEntry->m_Texture.IsValid() || pEntry->m_CountryCode == -1)
+		if(pEntry->m_Texture.IsValid() || pEntry->m_CountryCode == CountryCode::DEFAULT)
 		{
 			Ui()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_MC);
 		}

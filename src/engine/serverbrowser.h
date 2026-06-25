@@ -70,6 +70,9 @@ public:
 	public:
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
+		/**
+		 * Country code in ISO 3166-1 numeric.
+		 */
 		int m_Country;
 		int m_Score;
 		bool m_Player;
@@ -152,6 +155,9 @@ class CCommunityCountry
 	friend class CServerBrowser;
 
 	char m_aName[CServerInfo::MAX_COMMUNITY_COUNTRY_LENGTH];
+	/**
+	 * Country code in ISO 3166-1 numeric.
+	 */
 	int m_FlagId;
 	std::vector<CCommunityCountryServer> m_vServers;
 
