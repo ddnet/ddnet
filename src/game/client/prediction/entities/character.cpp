@@ -508,7 +508,13 @@ void CCharacter::HandleWeapons()
 
 	// check reload timer
 	if(m_ReloadTimer)
+	{
+		if(!GameWorld()->m_WorldConfig.m_SyncedReloadTimer)
+		{
+			m_ReloadTimer--;
+		}
 		return;
+	}
 
 	// fire Weapon, if wanted
 	FireWeapon();
@@ -604,7 +610,7 @@ void CCharacter::ResetInput()
 
 void CCharacter::SyncedPreTick()
 {
-	if(m_ReloadTimer)
+	if(GameWorld()->m_WorldConfig.m_SyncedReloadTimer && m_ReloadTimer)
 	{
 		// Pre-decrement all reload timers before any character ticks so that a tee unfrozen
 		// by a laser has a timer of 0 when HandleWeapons() runs, regardless of client ID order.

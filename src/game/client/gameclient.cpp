@@ -1650,6 +1650,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_NoSkinChangeForFrozen = false;
 	Info.m_DDRaceTeam = false;
 	Info.m_PredictEvents = Vanilla;
+	Info.m_SyncedReloadTimer = false;
 
 	if(Version >= 0)
 	{
@@ -1716,6 +1717,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 11)
 	{
 		Info.m_PredictEvents = Flags2 & GAMEINFOFLAG2_PREDICT_EVENTS;
+	}
+	if(Version >= 12)
+	{
+		Info.m_SyncedReloadTimer = Flags2 & GAMEINFOFLAG2_SYNCED_RELOADTIMER;
 	}
 
 	return Info;
@@ -3524,6 +3529,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_BugDDRaceInput = m_GameInfo.m_BugDDRaceInput;
 	m_GameWorld.m_WorldConfig.m_NoWeakHookAndBounce = m_GameInfo.m_NoWeakHookAndBounce;
 	m_GameWorld.m_WorldConfig.m_PredictEvents = m_GameInfo.m_PredictEvents;
+	m_GameWorld.m_WorldConfig.m_SyncedReloadTimer = m_GameInfo.m_SyncedReloadTimer;
 
 	if(!m_Snap.m_pLocalCharacter)
 	{
