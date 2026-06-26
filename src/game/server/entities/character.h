@@ -44,6 +44,8 @@ public:
 	void Snap(int SnappingClient) override;
 	void SwapClients(int Client1, int Client2) override;
 
+	void SyncedPreTick();
+
 	void PostGlobalSnap();
 
 	bool CanSnapCharacter(int SnappingClient);
