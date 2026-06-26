@@ -136,7 +136,7 @@ public:
 	bool IsSuper() const { return m_Core.m_Super; }
 
 	// antiping
-	void AntiPingInterference(int ClientId, bool DisallowReset = false);
+	void AntiPingInterference(int ClientId, bool DisallowReset = false, bool HasToBeUnfrozen = false);
 	bool IsInterfering() const { return m_Interfering; }
 
 private:
@@ -186,7 +186,6 @@ private:
 	int m_LastWeaponSwitchTick;
 	int m_LastTuneZoneTick;
 
-	static void AntiPingInterfereCb(int ClientId, bool DisallowReset, void *pUser);
 	bool m_Interfering;
 };
 

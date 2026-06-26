@@ -143,18 +143,9 @@ void CCharacterCore::SetCoreWorld(CWorldCore *pWorld, CCollision *pCollision, CT
 	m_pTeams = pTeams;
 }
 
-void CCharacterCore::SetAntiPingInterfereCallback(CALLBACK_ANTIPING_INTERFERE pfnCallback, void *pUser)
+void CCharacterCore::SetAntiPingInterfereCallback(FAntiPingInterfereCallback Callback)
 {
-	m_pfnAntiPingInterfereCb = pfnCallback;
-	m_pAntiPingUser = pUser;
-}
-
-void CCharacterCore::AntiPingInterference(int ClientId, bool DisallowReset)
-{
-	if(m_pfnAntiPingInterfereCb)
-	{
-		m_pfnAntiPingInterfereCb(ClientId, DisallowReset, m_pAntiPingUser);
-	}
+	m_AntiPingInterfereCallback = std::move(Callback);
 }
 
 void CCharacterCore::Reset()
@@ -195,9 +186,6 @@ void CCharacterCore::Reset()
 	m_IsInFreeze = false;
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
-
-	m_pfnAntiPingInterfereCb = nullptr;
-	m_pAntiPingUser = nullptr;
 
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
@@ -381,7 +369,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 							m_HookState = HOOK_GRABBED;
 							SetHookedPlayer(i);
 							Distance = distance(m_HookPos, pCharCore->m_Pos);
-							AntiPingInterference(i);
+							m_AntiPingInterfereCallback(i, false);
 						}
 					}
 				}
@@ -511,7 +499,7 @@ void CCharacterCore::TickDeferred()
 					m_Vel += Dir * a * (Velocity * 0.75f);
 					m_Vel *= 0.85f;
 
-					AntiPingInterference(i, true);
+					m_AntiPingInterfereCallback(i, true);
 				}
 
 				// handle hook influence

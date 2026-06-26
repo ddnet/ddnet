@@ -635,7 +635,8 @@ void CCharacter::Tick()
 	if(IsInterfering())
 	{
 		// Disable dynamic interaction based antiping when player moved or hooked a wall
-		if((!m_FreezeTime || g_Config.m_ClAntiPingPlayers != 3) && (m_Input.m_Direction != m_PrevInput.m_Direction || m_Input.m_Jump != m_PrevInput.m_Jump || m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_GROUND))
+		if((!m_FreezeTime || g_Config.m_ClAntiPingPlayers != 3) &&
+			(m_Input.m_Direction != m_PrevInput.m_Direction || m_Input.m_Jump != m_PrevInput.m_Jump || m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_GROUND))
 		{
 			m_Interfering = false;
 		}
@@ -1295,7 +1296,9 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = Id;
-	m_Core.SetAntiPingInterfereCallback(AntiPingInterfereCb, this);
+	m_Core.SetAntiPingInterfereCallback([this](int ClientId, bool DisallowReset) {
+		AntiPingInterference(ClientId, DisallowReset, true);
+	});
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
@@ -1316,20 +1319,14 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	Read(pChar, pExtended, false);
 }
 
-void CCharacter::AntiPingInterfereCb(int ClientId, bool DisallowReset, void *pUser)
+void CCharacter::AntiPingInterference(int ClientId, bool DisallowReset, bool HasToBeUnfrozen)
 {
-	CCharacter *pThis = (CCharacter *)pUser;
 	// Enable antiping for players that we hook or bump while unfrozen, the unfrozen check helps when being saved in gores
 	// If we interfered with a player that bounces or hooks someone else, we want to chain the prediction
 	// thus interfering players can enable antiping on others
-	if(!pThis->m_FreezeTime)
-	{
-		pThis->AntiPingInterference(ClientId, DisallowReset);
-	}
-}
+	if(HasToBeUnfrozen && m_FreezeTime)
+		return;
 
-void CCharacter::AntiPingInterference(int ClientId, bool DisallowReset)
-{
 	bool AllowEnablePrediction = m_IsLocal || m_Interfering;
 	if(!AllowEnablePrediction && !DisallowReset)
 	{

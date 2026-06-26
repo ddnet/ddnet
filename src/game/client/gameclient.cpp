@@ -974,7 +974,9 @@ int CGameClient::AntiPingPlayers() const
 		g_Config.m_ClAntiPingPlayers &&
 		!m_Snap.m_SpecInfo.m_Active &&
 		Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
 		return g_Config.m_ClAntiPingPlayers;
+	}
 	return 0;
 }
 
