@@ -2,6 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "motd.h"
 
+#include <base/color.h>
+#include <base/log.h>
+#include <base/log_color.h>
 #include <base/time.h>
 
 #include <engine/graphics.h>
@@ -112,6 +115,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 		const char *pMsgStr = pMsg->m_pMessage;
 		const size_t MotdLen = str_length(pMsgStr) + 1;
 		const char *pLast = m_aServerMotd; // for console printing
+		const LOG_COLOR LogColor = color_cast<LOG_COLOR>(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 		for(size_t i = 0, k = 0; i < MotdLen && k < sizeof(m_aServerMotd); i++, k++)
 		{
 			// handle incoming "\\n"
@@ -129,14 +133,16 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 			if(g_Config.m_ClPrintMotd && m_aServerMotd[k] == '\n')
 			{
 				m_aServerMotd[k] = '\0';
-				GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				log_info_color(LogColor, "motd", "%s", pLast);
 				m_aServerMotd[k] = '\n';
 				pLast = m_aServerMotd + k + 1;
 			}
 		}
 		m_aServerMotd[sizeof(m_aServerMotd) - 1] = '\0';
 		if(g_Config.m_ClPrintMotd && *pLast != '\0')
-			GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+		{
+			log_info_color(LogColor, "motd", "%s", pLast);
+		}
 
 		m_ServerMotdUpdateTime = time();
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
