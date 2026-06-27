@@ -4757,7 +4757,7 @@ void CGameContext::UpdatePlayerMaps()
 			if(!pChr->CanSnapCharacter(i))
 				Dist[j].first = 1e8;
 			else
-				Dist[j].first = length_squared(m_apPlayers[i]->m_ViewPos - pChr->GetPos());
+				Dist[j].first = distance_squared(m_apPlayers[i]->m_ViewPos, pChr->GetPos());
 		}
 
 		// always send the player themselves, even if all in same position

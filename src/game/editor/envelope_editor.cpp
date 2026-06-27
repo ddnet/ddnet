@@ -1613,7 +1613,7 @@ void CEditor::UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnv
 	const void *pMinPointId = nullptr;
 
 	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = length_squared(Position - MousePos);
+		const float CurrDist = distance_squared(Position, MousePos);
 		if(CurrDist < MinDist)
 		{
 			MinDist = CurrDist;
