@@ -1201,6 +1201,7 @@ bool CEditorMap::Append(const char *pFilename, int StorageType, bool IgnoreHisto
 		m_EditorHistory.RecordAction(std::make_shared<CEditorActionAppendMap>(this, pFilename, Info, IndexMap));
 
 	CheckIntegrity();
+	OnModify();
 
 	// all done \o/
 	return true;
