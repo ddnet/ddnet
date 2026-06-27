@@ -1121,9 +1121,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		// in sixup/translate_game.cpp
 		if(!Client()->IsSixup())
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler.GetMsgName(MsgId), MsgId, m_NetObjHandler.FailedMsgOn());
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
+			log_debug("client", "dropped weird message '%s' (%d), failed on '%s'",
+				m_NetObjHandler.GetMsgName(MsgId), MsgId, m_NetObjHandler.FailedMsgOn());
 		}
 		return;
 	}
@@ -2871,14 +2870,14 @@ void CGameClient::OnPredict()
 
 		if(mem_comp(&Before, &Now, sizeof(CNetObj_CharacterCore)) != 0)
 		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "prediction error");
+			log_trace("client", "prediction error");
 			for(unsigned i = 0; i < sizeof(CNetObj_CharacterCore) / sizeof(int); i++)
+			{
 				if(((int *)&Before)[i] != ((int *)&Now)[i])
 				{
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "	%d %d %d (%d %d)", i, ((int *)&Before)[i], ((int *)&Now)[i], ((int *)&BeforePrev)[i], ((int *)&NowPrev)[i]);
-					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", aBuf);
+					log_trace("client", "	%d %d %d (%d %d)", i, ((int *)&Before)[i], ((int *)&Now)[i], ((int *)&BeforePrev)[i], ((int *)&NowPrev)[i]);
 				}
+			}
 		}
 	}
 
@@ -3320,11 +3319,11 @@ void CGameClient::SendKill() const
 	}
 }
 
-void CGameClient::SendReadyChange7()
+void CGameClient::SendReadyChange7() const
 {
 	if(!Client()->IsSixup())
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "Error you have to be connected to a 0.7 server to use ready_change");
+		log_error("client", "You have to be connected to a 0.7 server to use 'ready_change'");
 		return;
 	}
 	protocol7::CNetMsg_Cl_ReadyChange Msg;

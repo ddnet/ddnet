@@ -3,7 +3,10 @@
 
 #include "chat.h"
 
+#include <base/color.h>
 #include <base/io.h>
+#include <base/log.h>
+#include <base/log_color.h>
 #include <base/time.h>
 
 #include <engine/editor.h>
@@ -180,7 +183,7 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 	else if(str_comp(pMode, "team") == 0)
 		((CChat *)pUserData)->EnableMode(1);
 	else
-		((CChat *)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
+		log_error("chat", "expected all or team as mode");
 
 	if(pResult->GetString(1)[0] || g_Config.m_ClChatReset)
 		((CChat *)pUserData)->m_Input.Set(pResult->GetString(1));
@@ -697,10 +700,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 
 	bool Highlighted = false;
 
-	auto &&FChatMsgCheckAndPrint = [this](const CLine &Line) {
-		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "%s%s%s", Line.m_aName, Line.m_ClientId >= 0 ? ": " : "", Line.m_aText);
-
+	auto &&FChatMsgCheckAndPrint = [](const CLine &Line) {
 		ColorRGBA ChatLogColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		if(Line.m_Highlighted)
 		{
@@ -732,7 +732,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		else
 			pFrom = "chat/all";
 
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pFrom, aBuf, ChatLogColor);
+		log_info_color(color_cast<LOG_COLOR>(ChatLogColor), pFrom, "%s%s%s", Line.m_aName, Line.m_ClientId >= 0 ? ": " : "", Line.m_aText);
 	};
 
 	// Custom color for new line
