@@ -1248,6 +1248,8 @@ void CEditorActionAppendMap::Undo()
 	{
 		Map()->m_vpImages.pop_back();
 	}
+
+	Map()->OnModify();
 }
 
 void CEditorActionAppendMap::Redo()
