@@ -401,6 +401,10 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 					// make sure to sanitize the error string from the other party
 					str_copy(aStr, (char *)&pPacket->m_aChunkData[1], std::min((size_t)pPacket->m_DataSize, sizeof(aStr)));
 					str_sanitize_cc(aStr);
+					if(!str_utf8_check(aStr))
+					{
+						str_copy(aStr, "(Invalid error message)");
+					}
 				}
 
 				if(!m_BlockCloseMsg)
