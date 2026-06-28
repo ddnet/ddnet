@@ -107,9 +107,16 @@ static void run_echo_shell(ssh_channel channel) {
     ssh_channel_write(channel, banner, strlen(banner));
 
     while (ssh_channel_is_open(channel) && !ssh_channel_is_eof(channel)) {
-        int n = ssh_channel_read(channel, buf, sizeof(buf) - 1, 0);
-        if (n <= 0) {
+
+        puts("read..");
+
+        int n = ssh_channel_read_nonblocking(channel, buf, sizeof(buf), 0);
+        if(n == SSH_EOF || n == SSH_ERROR) {
+            puts("got some error");
             break;
+        }
+        if(n == SSH_AGAIN || n == 0) {
+            continue;
         }
 
         buf[n] = '\0';
@@ -136,6 +143,8 @@ int main(void) {
         fprintf(stderr, "Failed to create ssh_bind\n");
         return 1;
     }
+
+    ssh_bind_set_blocking(sshbind, 0);
 
     ssh_bind_options_set(sshbind, SSH_BIND_OPTIONS_BINDADDR, "0.0.0.0");
     ssh_bind_options_set(sshbind, SSH_BIND_OPTIONS_BINDPORT_STR, PORT);
@@ -188,6 +197,8 @@ int main(void) {
             cleanup_session(session);
             continue;
         }
+
+        puts("accept shell");
 
         if (accept_shell(session) != 0) {
             fprintf(stderr, "Shell request failed\n");
