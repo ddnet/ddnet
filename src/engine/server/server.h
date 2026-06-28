@@ -19,6 +19,7 @@
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/ssh_server.h>
 #include <engine/shared/uuid_manager.h>
 
 #include <memory>
@@ -230,6 +231,7 @@ public:
 	CNetServer m_NetServer;
 	CEcon m_Econ;
 	CFifo m_Fifo;
+	CSshServer m_SshServer;
 	CServerBan m_ServerBan;
 
 	int64_t m_GameStartTime;
