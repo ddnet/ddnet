@@ -179,6 +179,7 @@ public:
 	bool CanSpec() const;
 
 	bool IsPlaying() const;
+	vec2 GetViewPos() const;
 	int64_t m_LastKickVote;
 	std::optional<int64_t> m_LastDDRaceTeamChange;
 	int m_ShowOthers;
@@ -198,6 +199,7 @@ public:
 		int m_FollowFactor;
 
 	public:
+		vec2 CameraOffset(vec2 Target) const;
 		vec2 ConvertTargetToWorld(vec2 Position, vec2 Target) const;
 		void Write(const CNetMsg_Cl_CameraInfo *pMsg);
 		void Reset();

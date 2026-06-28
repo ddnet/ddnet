@@ -1360,6 +1360,17 @@ int CCharacter::Team()
 	return Teams()->m_Core.Team(m_pPlayer->GetCid());
 }
 
+vec2 CCharacter::GetViewPos(const CPlayer *pPlayer) const
+{
+	const CPlayer *pOwner = pPlayer ? pPlayer : m_pPlayer;
+	if(pOwner)
+	{
+		vec2 Target = vec2(m_Core.m_Input.m_TargetX, m_Core.m_Input.m_TargetY);
+		return m_Pos + pOwner->m_CameraInfo.CameraOffset(Target);
+	}
+	return m_Pos;
+}
+
 void CCharacter::FillAntibot(CAntibotCharacterData *pData)
 {
 	pData->m_Pos = m_Pos;

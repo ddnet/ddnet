@@ -870,6 +870,28 @@ bool CPlayer::IsPlaying() const
 	return m_pCharacter && m_pCharacter->IsAlive();
 }
 
+vec2 CPlayer::GetViewPos() const
+{
+	if(m_Team == TEAM_SPECTATORS || m_Paused)
+	{
+		if(m_SpectatorId == SPEC_FREEVIEW)
+		{
+			return m_ViewPos;
+		}
+		const CPlayer *pSpecPlayer = GameServer()->m_apPlayers[m_SpectatorId];
+		if(pSpecPlayer && pSpecPlayer->GetCharacter())
+		{
+			return pSpecPlayer->GetCharacter()->GetViewPos(pSpecPlayer);
+		}
+		return m_ViewPos;
+	}
+	if(m_pCharacter)
+	{
+		return m_pCharacter->GetViewPos();
+	}
+	return m_ViewPos;
+}
+
 void CPlayer::SpectatePlayerName(const char *pName)
 {
 	auto ClientId = GameServer()->FindClientIdByName(pName);
@@ -977,7 +999,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 	}
 }
 
-vec2 CPlayer::CCameraInfo::ConvertTargetToWorld(vec2 Position, vec2 Target) const
+vec2 CPlayer::CCameraInfo::CameraOffset(vec2 Target) const
 {
 	vec2 TargetCameraOffset(0, 0);
 	float l = length(Target);
@@ -988,6 +1010,12 @@ vec2 CPlayer::CCameraInfo::ConvertTargetToWorld(vec2 Position, vec2 Target) cons
 		TargetCameraOffset = normalize_pre_length(Target, l) * OffsetAmount;
 	}
 
+	return TargetCameraOffset;
+}
+
+vec2 CPlayer::CCameraInfo::ConvertTargetToWorld(vec2 Position, vec2 Target) const
+{
+	vec2 TargetCameraOffset = CameraOffset(Target);
 	return Position + (Target - TargetCameraOffset) * m_Zoom + TargetCameraOffset;
 }
 
