@@ -44,8 +44,6 @@ enum Write
 	NORMAL_FAILED,
 };
 
-class IConsole;
-
 struct CMysqlConfig
 {
 	char m_aDatabase[64];
@@ -77,7 +75,7 @@ public:
 		NUM_MODES,
 	};
 
-	void Print(IConsole *pConsole, Mode DatabaseMode);
+	void Print(Mode DatabaseMode);
 
 	void RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64]);
 	void RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig);

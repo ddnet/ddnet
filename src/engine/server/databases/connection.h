@@ -14,8 +14,6 @@ enum
 	MAX_NAME_LENGTH_SQL = MAX_NAME_LENGTH - 1,
 };
 
-class IConsole;
-
 // can hold one PreparedStatement with Results
 class IDbConnection
 {
@@ -23,7 +21,7 @@ public:
 	IDbConnection(const char *pPrefix);
 	virtual ~IDbConnection() = default;
 	IDbConnection &operator=(const IDbConnection &) = delete;
-	virtual void Print(IConsole *pConsole, const char *pMode) = 0;
+	virtual void Print(const char *pMode) = 0;
 
 	// returns the database prefix
 	const char *GetPrefix() const { return m_aPrefix; }

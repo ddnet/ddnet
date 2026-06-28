@@ -4106,7 +4106,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	if(!MysqlAvailable())
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "can't add MySQL server: compiled without MySQL support");
+		log_error("server", "can't add MySQL server: compiled without MySQL support");
 		return;
 	}
 
@@ -4115,7 +4115,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments() != 7 && pResult->NumArguments() != 8)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "7 or 8 arguments are required");
+		log_error("server", "7 or 8 arguments are required");
 		return;
 	}
 
@@ -4131,7 +4131,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		log_error("server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
 
@@ -4144,12 +4144,10 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	Config.m_Port = pResult->GetInteger(6);
 	Config.m_Setup = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf),
+	log_info("server",
 		"Adding new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d",
 		Write ? "Write" : "Read",
 		Config.m_aDatabase, Config.m_aPrefix, Config.m_aUser, Config.m_aIp, Config.m_Port);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	pSelf->DbPool()->RegisterMysqlDatabase(Write ? CDbConnectionPool::WRITE : CDbConnectionPool::READ, &Config);
 }
 
@@ -4159,16 +4157,16 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 
 	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
 	{
-		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE);
-		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE_BACKUP);
+		pSelf->DbPool()->Print(CDbConnectionPool::WRITE);
+		pSelf->DbPool()->Print(CDbConnectionPool::WRITE_BACKUP);
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
 	{
-		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::READ);
+		pSelf->DbPool()->Print(CDbConnectionPool::READ);
 	}
 	else
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		log_error("server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
 }

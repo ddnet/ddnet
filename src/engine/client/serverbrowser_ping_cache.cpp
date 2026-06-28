@@ -43,7 +43,7 @@ private:
 CServerBrowserPingCache::CServerBrowserPingCache(IConsole *pConsole, IStorage *pStorage) :
 	m_pConsole(pConsole)
 {
-	m_pDisk = SqliteOpen(pConsole, pStorage, "ddnet-cache.sqlite3");
+	m_pDisk = SqliteOpen(pStorage, "ddnet-cache.sqlite3");
 	if(!m_pDisk)
 	{
 		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse_ping_cache", "failed to open ddnet-cache.sqlite3");
@@ -57,8 +57,8 @@ CServerBrowserPingCache::CServerBrowserPingCache(IConsole *pConsole, IStorage *p
 		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse_ping_cache", "failed to create server_pings table");
 		return;
 	}
-	m_pLoadStmt = SqlitePrepare(pConsole, pSqlite, "SELECT ip_address, ping FROM server_pings");
-	m_pStoreStmt = SqlitePrepare(pConsole, pSqlite, "INSERT OR REPLACE INTO server_pings (ip_address, ping, utc_timestamp) VALUES (?, ?, datetime('now'))");
+	m_pLoadStmt = SqlitePrepare(pSqlite, "SELECT ip_address, ping FROM server_pings");
+	m_pStoreStmt = SqlitePrepare(pSqlite, "INSERT OR REPLACE INTO server_pings (ip_address, ping, utc_timestamp) VALUES (?, ?, datetime('now'))");
 }
 
 void CServerBrowserPingCache::Load()

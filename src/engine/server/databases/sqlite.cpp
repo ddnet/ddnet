@@ -1,10 +1,9 @@
 #include "connection.h"
 
 #include <base/dbg.h>
+#include <base/log.h>
 #include <base/mem.h>
 #include <base/str.h>
-
-#include <engine/console.h>
 
 #include <sqlite3.h>
 
@@ -16,7 +15,7 @@ class CSqliteConnection : public IDbConnection
 public:
 	CSqliteConnection(const char *pFilename, bool Setup);
 	~CSqliteConnection() override;
-	void Print(IConsole *pConsole, const char *pMode) override;
+	void Print(const char *pMode) override;
 
 	const char *BinaryCollate() const override { return "BINARY"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
@@ -99,13 +98,11 @@ CSqliteConnection::~CSqliteConnection()
 	m_pDb = nullptr;
 }
 
-void CSqliteConnection::Print(IConsole *pConsole, const char *pMode)
+void CSqliteConnection::Print(const char *pMode)
 {
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf),
+	log_info("server",
 		"SQLite-%s: DB: '%s'",
 		pMode, m_aFilename);
-	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
 void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
