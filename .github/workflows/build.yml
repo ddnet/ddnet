@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-latest-fancy, macOS-latest, windows-latest, ubuntu-22.04, windows-latest-mingw]
+        name: [ubuntu-latest-fancy]
         include:
         - name: ubuntu-latest-fancy
           os: ubuntu-latest
@@ -80,6 +80,7 @@ jobs:
           libpng-dev
           libsdl2-dev
           libsqlite3-dev
+          libssh-dev
           libswresample-dev
           libswscale-dev
           libx264-dev
