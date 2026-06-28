@@ -30,9 +30,9 @@ void CLayerQuads::Render(bool QuadPicker)
 		Graphics()->TextureSet(Map()->m_vpImages[m_Image]->m_Texture);
 
 	Graphics()->BlendNone();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, Editor());
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, &Map()->m_EnvelopeEvaluator);
 	Graphics()->BlendNormal();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, Editor());
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, &Map()->m_EnvelopeEvaluator);
 }
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)

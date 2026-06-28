@@ -545,7 +545,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 
 			ColorRGBA BarColor;
-			if(Ui()->CheckActiveItem(&m_AnimateTime))
+			if(Ui()->CheckActiveItem(&Map()->m_EnvelopeEvaluator.m_AnimateTime))
 			{
 				if(s_Operation == EEnvelopeEditorOp::SELECT)
 				{
@@ -559,8 +559,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				if(s_Operation == EEnvelopeEditorOp::DRAG_TIME_BAR)
 				{
 					float DeltaX = ScreenToEnvelopeDX(View, Ui()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 0.05f : 1.0f);
-					m_AnimateTime += DeltaX / m_AnimateSpeed;
-					m_AnimateTime = std::max(m_AnimateTime, 0.0f);
+					Map()->m_EnvelopeEvaluator.m_AnimateTime += DeltaX / Map()->m_EnvelopeEvaluator.m_AnimateSpeed;
+					Map()->m_EnvelopeEvaluator.m_AnimateTime = std::max(Map()->m_EnvelopeEvaluator.m_AnimateTime, 0.0f);
 				}
 
 				if(!Ui()->MouseButton(0))
@@ -573,11 +573,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f);
 				str_copy(m_aTooltip, "Timebar. Press left-click to drag. Hold ctrl to be more precise.");
 			}
-			else if(Ui()->HotItem() == &m_AnimateTime)
+			else if(Ui()->HotItem() == &Map()->m_EnvelopeEvaluator.m_AnimateTime)
 			{
 				if(Ui()->MouseButton(0))
 				{
-					Ui()->SetActiveItem(&m_AnimateTime);
+					Ui()->SetActiveItem(&Map()->m_EnvelopeEvaluator.m_AnimateTime);
 					s_Operation = EEnvelopeEditorOp::SELECT;
 
 					s_MouseXStart = Ui()->MouseX();
@@ -591,7 +591,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			else
 				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.5f);
 
-			float Time = m_AnimateTime * m_AnimateSpeed;
+			float Time = Map()->m_EnvelopeEvaluator.m_AnimateTime * Map()->m_EnvelopeEvaluator.m_AnimateSpeed;
 			const float BarWidth = 1.5f;
 			CUIRect TimeBar{
 				EnvelopeToScreenX(View, Time) - BarWidth / 2.0f,
@@ -1655,13 +1655,13 @@ void CEditor::UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnv
 	{
 		Ui()->SetHotItem(pMinPointId);
 	}
-	else if(!m_Animate)
+	else if(!Map()->m_EnvelopeEvaluator.m_Animate)
 	{
-		float Time = m_AnimateTime * m_AnimateSpeed;
+		float Time = Map()->m_EnvelopeEvaluator.m_AnimateTime * Map()->m_EnvelopeEvaluator.m_AnimateSpeed;
 		float LoopedTime = std::fmod(Time, pEnvelope->EndTime());
 		if(absolute(EnvelopeToScreenX(View, Time) - MousePos.x) < 20.0f || absolute(EnvelopeToScreenX(View, LoopedTime) - MousePos.x) < 20.0f)
 		{
-			Ui()->SetHotItem(&m_AnimateTime);
+			Ui()->SetHotItem(&Map()->m_EnvelopeEvaluator.m_AnimateTime);
 		}
 	}
 }

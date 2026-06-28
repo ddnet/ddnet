@@ -82,18 +82,6 @@ bool CEditor::IsVanillaImage(const char *pImage)
 	return std::any_of(std::begin(VANILLA_IMAGES), std::end(VANILLA_IMAGES), [pImage](const char *pVanillaImage) { return str_comp(pImage, pVanillaImage) == 0; });
 }
 
-void CEditor::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels)
-{
-	if(EnvelopeIndex < 0 || EnvelopeIndex >= (int)Map()->m_vpEnvelopes.size())
-		return;
-
-	std::shared_ptr<CEnvelope> pEnvelope = Map()->m_vpEnvelopes[EnvelopeIndex];
-	float Time = m_AnimateTime;
-	Time *= m_AnimateSpeed;
-	Time += (TimeOffsetMillis / 1000.0f);
-	pEnvelope->Eval(Time, Result, Channels);
-}
-
 bool CEditor::CallbackOpenMap(const char *pFilename, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
@@ -404,17 +392,17 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		static char s_JumpStartButton = 0;
 		if(DoButton_FontIcon(&s_JumpStartButton, FontIcon::BACKWARD_STEP, false, &Button, BUTTONFLAG_LEFT, "Jump to beginning of animation.", IGraphics::CORNER_L))
 		{
-			m_AnimateTime = 0;
-			m_Animate = false;
+			Map()->m_EnvelopeEvaluator.m_AnimateTime = 0;
+			Map()->m_EnvelopeEvaluator.m_Animate = false;
 		}
 
 		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static char s_AnimateButton = 0;
-		if(DoButton_FontIcon(&s_AnimateButton, m_Animate ? FontIcon::PAUSE : FontIcon::PLAY, m_Animate, &Button, BUTTONFLAG_LEFT, "[Ctrl+M] Toggle animation.", IGraphics::CORNER_NONE) ||
+		if(DoButton_FontIcon(&s_AnimateButton, Map()->m_EnvelopeEvaluator.m_Animate ? FontIcon::PAUSE : FontIcon::PLAY, Map()->m_EnvelopeEvaluator.m_Animate, &Button, BUTTONFLAG_LEFT, "[Ctrl+M] Toggle animation.", IGraphics::CORNER_NONE) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_M) && ModPressed))
 		{
-			m_AnimateStart = Client()->GlobalTime() - m_AnimateTime;
-			m_Animate = !m_Animate;
+			Map()->m_EnvelopeEvaluator.m_AnimateStart = Client()->GlobalTime() - Map()->m_EnvelopeEvaluator.m_AnimateTime;
+			Map()->m_EnvelopeEvaluator.m_Animate = !Map()->m_EnvelopeEvaluator.m_Animate;
 		}
 
 		// animation settings button
@@ -422,7 +410,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		static char s_AnimateSettingsButton;
 		if(DoButton_FontIcon(&s_AnimateSettingsButton, FontIcon::CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, "Change the animation settings.", IGraphics::CORNER_R, 8.0f))
 		{
-			m_AnimateUpdatePopup = true;
+			Map()->m_EnvelopeEvaluator.m_AnimateUpdatePopup = true;
 			static SPopupMenuId s_PopupAnimateSettingsId;
 			Ui()->DoPopupMenu(&s_PopupAnimateSettingsId, Button.x, Button.y + Button.h, 150.0f, 37.0f, this, PopupAnimateSettings);
 		}
@@ -3608,7 +3596,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, T: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldPos().x / 32.0f, MapView()->MouseWorldPos().y / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateTime * m_AnimateSpeed, m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
+	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, T: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldPos().x / 32.0f, MapView()->MouseWorldPos().y / 32.0f, MapView()->Zoom()->GetValue(), Map()->m_EnvelopeEvaluator.m_AnimateTime * Map()->m_EnvelopeEvaluator.m_AnimateSpeed, Map()->m_EnvelopeEvaluator.m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_HelpButton = 0;
@@ -4410,9 +4398,6 @@ void CEditor::Reset(bool CreateDefault)
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
-	m_AnimateTime = 0;
-	m_Animate = false;
-
 	m_ResetZoomEnvelope = true;
 	m_SettingsCommandInput.Clear();
 	m_MapSettingsCommandContext.Reset();
@@ -4688,8 +4673,8 @@ void CEditor::OnRender()
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
 
-	if(m_Animate)
-		m_AnimateTime = Client()->GlobalTime() - m_AnimateStart;
+	if(Map()->m_EnvelopeEvaluator.m_Animate)
+		Map()->m_EnvelopeEvaluator.m_AnimateTime = Client()->GlobalTime() - Map()->m_EnvelopeEvaluator.m_AnimateStart;
 
 	m_pUiGotContext = nullptr;
 	Ui()->StartCheck();

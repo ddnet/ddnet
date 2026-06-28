@@ -34,7 +34,7 @@ void CLayerSounds::Render(bool Tileset)
 	for(const auto &Source : m_vSources)
 	{
 		ColorRGBA Offset = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		Editor()->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2);
+		Map()->m_EnvelopeEvaluator.EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2);
 		const vec2 Position = vec2(fx2f(Source.m_Position.x) + Offset.r, fx2f(Source.m_Position.y) + Offset.g);
 		const float Falloff = Source.m_Falloff / 255.0f;
 
@@ -74,7 +74,7 @@ void CLayerSounds::Render(bool Tileset)
 	for(const auto &Source : m_vSources)
 	{
 		ColorRGBA Offset = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		Editor()->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2);
+		Map()->m_EnvelopeEvaluator.EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2);
 		const vec2 Position = vec2(fx2f(Source.m_Position.x) + Offset.r, fx2f(Source.m_Position.y) + Offset.g);
 		Graphics()->DrawSprite(Position.x, Position.y, Editor()->MapView()->ScaleLength(s_SourceVisualSize));
 	}
