@@ -980,7 +980,9 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 				m_aDemoRecorder[RECORDER_AUTO].RecordMessage(Pack.Data(), Pack.Size());
 		}
 
-		if(!(Flags & MSGFLAG_NOSEND))
+		// Clients that purposefully do not send `NETMSG_ENTERGAME` should not receive chat messages.
+		bool Send = m_aClients[ClientId].m_State == CClient::STATE_INGAME || pMsg->m_System || pMsg->m_MsgId != NETMSGTYPE_SV_CHAT;
+		if(!(Flags & MSGFLAG_NOSEND) && Send)
 			m_NetServer.Send(&Packet);
 	}
 
