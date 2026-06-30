@@ -1,5 +1,6 @@
 #include "ssh_server.h"
 
+#include <base/dbg.h>
 #include <base/log.h>
 #include <base/str.h>
 
@@ -26,42 +27,40 @@ static void cleanup_session(ssh_session session)
 	}
 }
 
-static int authenticate_client(ssh_session session)
+static bool try_authenticate_client(CSshClient *pClient)
 {
-	ssh_message message;
-	int authenticated = 0;
+	ssh_session session = pClient->m_Session;
+	ssh_message message = ssh_message_get(session);
 
-	while(!authenticated && (message = ssh_message_get(session)) != NULL)
+	log_info("ssh", "trying to authenticate cid %d...", pClient->m_ClientId);
+
+	if(ssh_message_type(message) == SSH_REQUEST_AUTH &&
+		ssh_message_subtype(message) == SSH_AUTH_METHOD_PASSWORD)
 	{
-		if(ssh_message_type(message) == SSH_REQUEST_AUTH &&
-			ssh_message_subtype(message) == SSH_AUTH_METHOD_PASSWORD)
-		{
-			const char *user = ssh_message_auth_user(message);
-			const char *pass = ssh_message_auth_password(message);
+		const char *user = ssh_message_auth_user(message);
+		const char *pass = ssh_message_auth_password(message);
 
-			if(user && pass &&
-				strcmp(user, USERNAME) == 0 &&
-				strcmp(pass, PASSWORD) == 0)
-			{
-				ssh_message_auth_reply_success(message, 0);
-				authenticated = 1;
-			}
-			else
-			{
-				ssh_message_auth_set_methods(message, SSH_AUTH_METHOD_PASSWORD);
-				ssh_message_reply_default(message);
-			}
+		if(user && pass &&
+			strcmp(user, USERNAME) == 0 &&
+			strcmp(pass, PASSWORD) == 0)
+		{
+			ssh_message_auth_reply_success(message, 0);
+			pClient->m_Authenticated = true;
 		}
 		else
 		{
 			ssh_message_auth_set_methods(message, SSH_AUTH_METHOD_PASSWORD);
 			ssh_message_reply_default(message);
 		}
-
-		ssh_message_free(message);
+	}
+	else
+	{
+		ssh_message_auth_set_methods(message, SSH_AUTH_METHOD_PASSWORD);
+		ssh_message_reply_default(message);
 	}
 
-	return authenticated ? 0 : -1;
+	ssh_message_free(message);
+	return true;
 }
 
 static ssh_channel open_session_channel(ssh_session session)
@@ -133,34 +132,24 @@ static void run_echo_shell(ssh_channel channel)
 
 	ssh_channel_write(channel, banner, strlen(banner));
 
-	while(ssh_channel_is_open(channel) && !ssh_channel_is_eof(channel))
+	puts("read..");
+
+	int n = ssh_channel_read_nonblocking(channel, buf, sizeof(buf), 0);
+	if(n == SSH_EOF || n == SSH_ERROR)
 	{
-		puts("read..");
-
-		int n = ssh_channel_read_nonblocking(channel, buf, sizeof(buf), 0);
-		if(n == SSH_EOF || n == SSH_ERROR)
-		{
-			puts("got some error");
-			break;
-		}
-		if(n == SSH_AGAIN || n == 0)
-		{
-			continue;
-		}
-
-		buf[n] = '\0';
-
-		if(strcmp(buf, "exit\n") == 0 || strcmp(buf, "exit\r\n") == 0)
-		{
-			break;
-		}
-
-		ssh_channel_write(channel, "echo: ", 6);
-		ssh_channel_write(channel, buf, n);
+		puts("got some error");
+		dbg_assert_failed("TODO: handle this ssh error");
+		return;
+	}
+	if(n == SSH_AGAIN || n == 0)
+	{
+		return;
 	}
 
-	ssh_channel_send_eof(channel);
-	ssh_channel_close(channel);
+	buf[n] = '\0';
+
+	ssh_channel_write(channel, "echo: ", 6);
+	ssh_channel_write(channel, buf, n);
 }
 
 /*
@@ -291,12 +280,81 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 
 	ssh_bind_set_blocking(m_Bind, 0);
 
-	int raw_fd = ssh_bind_get_fd(m_Bind);
-	fcntl(raw_fd, F_SETFL, O_NONBLOCK);
+	int RawFd = ssh_bind_get_fd(m_Bind);
+	fcntl(RawFd, F_SETFL, O_NONBLOCK);
 
 	log_info("ssh", "Listening on 0.0.0.0:%s", PORT);
 	log_info("ssh", "Username: %s", USERNAME);
 	log_info("ssh", "Password: %s", PASSWORD);
+}
+
+std::optional<int> CSshServer::FindFreeSlot()
+{
+	for(int i = 0; i < MAX_SSH_CLIENTS; i++)
+		if(m_apClients[i] == nullptr)
+			return i;
+	return std::nullopt;
+}
+
+void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
+{
+	dbg_assert(m_apClients[ClientId] == nullptr, "ssh_server connect failed ClientId %d reused", ClientId);
+
+	log_info("ssh", "client with id %d connected", ClientId);
+
+	CSshClient *pClient = new CSshClient(ClientId, Session);
+
+	m_apClients[ClientId] = pClient;
+}
+
+void CSshServer::OnClientDisconnect(int ClientId)
+{
+	if(!m_apClients[ClientId])
+		return;
+
+	log_info("ssh", "client with id %d disconnected", ClientId);
+
+	if(m_apClients[ClientId]->m_Channel)
+		ssh_channel_free(m_apClients[ClientId]->m_Channel);
+	cleanup_session(m_apClients[ClientId]->m_Session);
+
+	delete m_apClients[ClientId];
+	m_apClients[ClientId] = nullptr;
+}
+
+void CSshServer::AcceptNewConnections()
+{
+	ssh_session NewSession = ssh_new();
+
+	// Non-blocking accept
+	int Rc = ssh_bind_accept(m_Bind, NewSession);
+	if(Rc == SSH_ERROR)
+	{
+		ssh_free(NewSession);
+		return; // No pending connection
+	}
+
+	auto Slot = FindFreeSlot();
+	if(!Slot.has_value())
+	{
+		ssh_disconnect(NewSession);
+		ssh_free(NewSession);
+		return;
+	}
+	int ClientId = Slot.value();
+
+	ssh_set_blocking(NewSession, 0);
+
+	// Start key exchange (will complete over multiple ticks)
+	if(ssh_handle_key_exchange(NewSession) == SSH_AGAIN ||
+		ssh_handle_key_exchange(NewSession) == SSH_OK)
+	{
+		OnClientConnect(ClientId, NewSession);
+	}
+	else
+	{
+		ssh_free(NewSession);
+	}
 }
 
 void CSshServer::Update()
@@ -304,65 +362,50 @@ void CSshServer::Update()
 	if(m_aError[0])
 		return;
 
-	ssh_session session = NULL;
-	ssh_channel channel = NULL;
+	AcceptNewConnections();
 
-	session = ssh_new();
-	if(session == NULL)
+	for(CSshClient *pClient : m_apClients)
 	{
-		fprintf(stderr, "Failed to create session\n");
-		return;
+		if(!pClient)
+			continue;
+
+		if(!pClient->m_Authenticated)
+		{
+			if(!try_authenticate_client(pClient))
+			{
+				fprintf(stderr, "Authentication failed\n");
+				OnClientDisconnect(pClient->m_ClientId);
+				return;
+			}
+			continue;
+		}
+
+		if(pClient->m_Channel == nullptr)
+		{
+			pClient->m_Channel = open_session_channel(pClient->m_Session);
+			if(pClient->m_Channel == nullptr)
+			{
+				fprintf(stderr, "Failed to open channel\n");
+				OnClientDisconnect(pClient->m_ClientId);
+				return;
+			}
+			if(accept_shell(pClient->m_Session) != 0)
+			{
+				fprintf(stderr, "Shell request failed\n");
+				OnClientDisconnect(pClient->m_ClientId);
+				return;
+			}
+		}
+
+		if(!ssh_channel_is_open(pClient->m_Channel) || ssh_channel_is_eof(pClient->m_Channel))
+		{
+			ssh_channel_send_eof(pClient->m_Channel);
+			ssh_channel_close(pClient->m_Channel);
+			OnClientDisconnect(pClient->m_ClientId);
+		}
+
+		run_echo_shell(pClient->m_Channel);
 	}
-
-	int rc = ssh_bind_accept(m_Bind, session);
-	if(rc == SSH_ERROR)
-	{
-		fprintf(stderr, "Accept error: %s\n", ssh_get_error(m_Bind));
-		cleanup_session(session);
-		return;
-	}
-
-	// FIXME: think about this one next
-
-	// ssh_set_blocking(session, 0);
-
-	rc = ssh_handle_key_exchange(session);
-	if(rc != SSH_OK)
-	{
-		fprintf(stderr, "Key exchange failed: %s\n", ssh_get_error(session));
-		cleanup_session(session);
-		return;
-	}
-
-	if(authenticate_client(session) != 0)
-	{
-		fprintf(stderr, "Authentication failed\n");
-		cleanup_session(session);
-		return;
-	}
-
-	channel = open_session_channel(session);
-	if(channel == NULL)
-	{
-		fprintf(stderr, "Failed to open channel\n");
-		cleanup_session(session);
-		return;
-	}
-
-	puts("accept shell");
-
-	if(accept_shell(session) != 0)
-	{
-		fprintf(stderr, "Shell request failed\n");
-		ssh_channel_free(channel);
-		cleanup_session(session);
-		return;
-	}
-
-	run_echo_shell(channel);
-
-	ssh_channel_free(channel);
-	cleanup_session(session);
 }
 
 void CSshServer::Shutdown()

@@ -11,10 +11,29 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <optional>
+
 #define PORT "2222"
 #define HOSTKEY_FILE "ssh_host_rsa_key"
 #define USERNAME "demo"
 #define PASSWORD "secret"
+
+static constexpr int MAX_SSH_CLIENTS = 16;
+
+class CSshClient
+{
+public:
+	CSshClient(int ClientId, ssh_session Session)
+	{
+		m_ClientId = ClientId;
+		m_Session = Session;
+	}
+
+	int m_ClientId;
+	bool m_Authenticated = false;
+	ssh_session m_Session;
+	ssh_channel m_Channel = nullptr;
+};
 
 class CSshServer
 {
@@ -31,6 +50,15 @@ class CSshServer
 	char m_aError[512] = "";
 
 	void GenerateHostKeyIfMissing();
+
+	CSshClient *m_apClients[MAX_SSH_CLIENTS] = {};
+
+	std::optional<int> FindFreeSlot();
+
+	void OnClientConnect(int ClientId, ssh_session Session);
+	void OnClientDisconnect(int ClientId);
+
+	void AcceptNewConnections();
 
 public:
 	IConsole *Console() { return m_pConsole; }
