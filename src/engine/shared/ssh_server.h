@@ -3,6 +3,7 @@
 
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
+#include <engine/storage.h>
 
 #include <libssh/libssh.h>
 #include <libssh/server.h>
@@ -17,18 +18,24 @@
 
 class CSshServer
 {
-	CConfig *m_pConfig;
-	IConsole *m_pConsole;
+	CConfig *m_pConfig = nullptr;
+	IConsole *m_pConsole = nullptr;
+	IStorage *m_pStorage = nullptr;
 	CNetConsole m_NetConsole;
+
+	const IStorage *Storage() const { return m_pStorage; }
+	IStorage *Storage() { return m_pStorage; }
 
 	ssh_bind m_Bind;
 
 	char m_aError[512] = "";
 
+	void GenerateHostKeyIfMissing();
+
 public:
 	IConsole *Console() { return m_pConsole; }
 
-	void Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan);
+	void Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, CNetBan *pNetBan);
 	void Update();
 	void Shutdown();
 };

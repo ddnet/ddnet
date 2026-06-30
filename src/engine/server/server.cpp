@@ -3398,7 +3398,7 @@ int CServer::Run()
 
 	m_Econ.Init(Config(), Console(), &m_ServerBan);
 	m_Fifo.Init(Console(), Config()->m_SvInputFifo, CFGFLAG_SERVER);
-	m_SshServer.Init(Config(), Console(), &m_ServerBan);
+	m_SshServer.Init(Config(), Console(), Storage(), &m_ServerBan);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", Config()->m_SvName);

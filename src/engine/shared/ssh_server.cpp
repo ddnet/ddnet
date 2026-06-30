@@ -3,6 +3,8 @@
 #include <base/log.h>
 #include <base/str.h>
 
+#include <engine/storage.h>
+
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 #include <stdio.h>
@@ -245,17 +247,33 @@ int main(void) {
 }
 */
 
-void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
+void CSshServer::GenerateHostKeyIfMissing()
+{
+#ifdef CONF_PLATFORM_LINUX
+	int Ret = system("bash -c \"[[ -f ssh_host_rsa_key ]] || ssh-keygen -t rsa -b 4096 -f ssh_host_rsa_key -N ''\"");
+	if(Ret != 0)
+	{
+		str_copy(m_aError, "host key generation failed");
+		log_error("ssh", "failed to generate host key");
+	}
+#endif
+}
+
+void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, CNetBan *pNetBan)
 {
 	m_pConfig = pConfig;
 	m_pConsole = pConsole;
+	m_pStorage = pStorage;
 
 	m_Bind = ssh_bind_new();
-	if (m_Bind == nullptr) {
+	if(m_Bind == nullptr)
+	{
 		str_copy(m_aError, "failed to bind");
 		log_error("ssh", "failed to create ssh_bind");
 		return;
 	}
+
+	GenerateHostKeyIfMissing();
 
 	ssh_bind_set_blocking(m_Bind, 0);
 
@@ -264,7 +282,8 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_RSAKEY, HOSTKEY_FILE);
 
 	int Ok = ssh_bind_listen(m_Bind);
-	if (Ok < 0) {
+	if(Ok < 0)
+	{
 		str_copy(m_aError, "listen error");
 		log_error("ssh", "listen error: %s", ssh_get_error(m_Bind));
 		ssh_bind_free(m_Bind);
