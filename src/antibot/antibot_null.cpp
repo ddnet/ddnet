@@ -47,4 +47,7 @@ void AntibotOnEngineClientDrop(int /*ClientId*/, const char * /*pReason*/) {}
 bool AntibotOnEngineClientMessage(int /*ClientId*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
 bool AntibotOnEngineServerMessage(int /*ClientId*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
 bool AntibotOnEngineSimulateClientMessage(int * /*pClientId*/, void * /*pBuffer*/, int /*BufferSize*/, int * /*pOutSize*/, int * /*pFlags*/) { return false; }
+void AntibotOnRconCommand(int /*ClientId*/, int /*AuthLevel*/, const char * /*pCommand*/) {}
+void AntibotOnBan(int /*TargetId*/, const char * /*pIp*/, int /*Seconds*/, const char * /*pReason*/, int /*RconClientId*/) {}
+void AntibotOnKick(int /*TargetId*/, const char * /*pReason*/, int /*RconClientId*/) {}
 }

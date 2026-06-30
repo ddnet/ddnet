@@ -39,6 +39,9 @@ public:
 	bool OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) override;
 	bool OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) override;
 	bool OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) override;
+	void OnRconCommand(int ClientId, int AuthLevel, const char *pCommand) override;
+	void OnBan(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId) override;
+	void OnKick(int TargetId, const char *pReason, int RconClientId) override;
 
 	// Game
 	void RoundStart(class IGameServer *pGameServer) override;

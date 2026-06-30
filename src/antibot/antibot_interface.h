@@ -34,6 +34,9 @@ ANTIBOTAPI bool AntibotOnEngineClientMessage(int ClientId, const void *pData, in
 ANTIBOTAPI bool AntibotOnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags);
 // Returns true if the server should simulate receiving a client message.
 ANTIBOTAPI bool AntibotOnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags);
+ANTIBOTAPI void AntibotOnRconCommand(int ClientId, int AuthLevel, const char *pCommand);
+ANTIBOTAPI void AntibotOnBan(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId);
+ANTIBOTAPI void AntibotOnKick(int TargetId, const char *pReason, int RconClientId);
 }
 
 #endif // ANTIBOT_ANTIBOT_INTERFACE_H

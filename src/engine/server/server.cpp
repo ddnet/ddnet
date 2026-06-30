@@ -111,6 +111,10 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 	if(Result != 0)
 		return Result;
 
+	char aAddrStr[256];
+	NetToString(pData, aAddrStr, sizeof(aAddrStr));
+
+	bool Match = false;
 	// drop banned clients
 	typename T::CDataType Data = *pData;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -120,11 +124,18 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 
 		if(NetMatch(&Data, Server()->ClientAddr(i)))
 		{
+			Match = true;
+			Server()->Antibot()->OnBan(i, aAddrStr, Seconds, pReason, Server()->m_RconClientId);
+
 			CNetHash NetHash(&Data);
 			char aBuf[256];
 			MakeBanInfo(pBanPool->Find(&Data, &NetHash), aBuf, sizeof(aBuf), MSGTYPE_PLAYER);
 			Server()->m_NetServer.Drop(i, aBuf);
 		}
+	}
+	if(!Match)
+	{
+		Server()->Antibot()->OnBan(-1, aAddrStr, Seconds, pReason, Server()->m_RconClientId);
 	}
 
 	return Result;
@@ -521,6 +532,7 @@ void CServer::Kick(int ClientId, const char *pReason)
 		return;
 	}
 
+	Antibot()->OnKick(ClientId, pReason, m_RconClientId);
 	m_NetServer.Drop(ClientId, pReason);
 }
 
@@ -2103,6 +2115,7 @@ void CServer::OnNetMsgRconCmd(int ClientId, const char *pCmd)
 			log_info("server", "ClientId=%d key='%s' rcon='%s'", ClientId, GetAuthName(ClientId), pCmd);
 			m_RconClientId = ClientId;
 			m_RconAuthLevel = GetAuthedState(ClientId);
+			Antibot()->OnRconCommand(ClientId, m_RconAuthLevel, pCmd);
 			{
 				CRconClientLogger Logger(this, ClientId);
 				CLogScope Scope(&Logger);

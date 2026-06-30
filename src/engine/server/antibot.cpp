@@ -213,6 +213,21 @@ bool CAntibot::OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int 
 	}
 	return Result;
 }
+void CAntibot::OnRconCommand(int ClientId, int AuthLevel, const char *pCommand)
+{
+	Update();
+	AntibotOnRconCommand(ClientId, AuthLevel, pCommand);
+}
+void CAntibot::OnBan(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId)
+{
+	Update();
+	AntibotOnBan(TargetId, pIp, Seconds, pReason, RconClientId);
+}
+void CAntibot::OnKick(int TargetId, const char *pReason, int RconClientId)
+{
+	Update();
+	AntibotOnKick(TargetId, pReason, RconClientId);
+}
 #else
 CAntibot::CAntibot() :
 	m_pServer(nullptr), m_pConsole(nullptr), m_pGameServer(nullptr), m_Initialized(false)
@@ -264,6 +279,9 @@ void CAntibot::OnEngineClientDrop(int ClientId, const char *pReason) {}
 bool CAntibot::OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) { return false; }
 bool CAntibot::OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) { return false; }
 bool CAntibot::OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) { return false; }
+void CAntibot::OnRconCommand(int ClientId, int AuthLevel, const char *pCommand) {}
+void CAntibot::OnBan(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId) {}
+void CAntibot::OnKick(int TargetId, const char *pReason, int RconClientId) {}
 #endif
 
 IEngineAntibot *CreateEngineAntibot()
