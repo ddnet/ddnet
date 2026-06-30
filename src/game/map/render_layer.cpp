@@ -307,38 +307,61 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 
 	if(IsVisibleInClipRegion(m_LayerClip))
 	{
-		// create the indice buffers we want to draw -- reuse them
-		std::vector<char *> vpIndexOffsets;
-		std::vector<unsigned int> vDrawCounts;
+		size_t X0 = std::max(ScreenRectX0, 0);
+		size_t X1 = std::clamp(ScreenRectX1, 0, (int)Visuals.m_Width);
 
-		int X0 = std::max(ScreenRectX0, 0);
-		int X1 = std::min(ScreenRectX1, (int)Visuals.m_Width);
-		int XR = X1 == std::numeric_limits<int>::min() ? X1 : X1 - 1;
-		if(X0 <= XR)
+		size_t Y0 = std::max(ScreenRectY0, 0);
+		size_t Y1 = std::clamp(ScreenRectY1, 0, (int)Visuals.m_Height);
+
+		// make sure we have any width and height
+		if(X0 < X1 && Y0 < Y1)
 		{
-			int Y0 = std::max(ScreenRectY0, 0);
-			int Y1 = std::min(ScreenRectY1, (int)Visuals.m_Height);
-
-			unsigned long long Reserve = absolute(Y1 - Y0) + 1;
-			vpIndexOffsets.reserve(Reserve);
-			vDrawCounts.reserve(Reserve);
-
-			for(int y = Y0; y < Y1; ++y)
+			// render all visible rows directly, because their start and end are are not offscreen
+			if(X0 == 0 && X1 == (size_t)Visuals.m_Width)
 			{
-				dbg_assert(Visuals.m_vTilesOfLayer[y * Visuals.m_Width + XR].IndexBufferByteOffset() >= Visuals.m_vTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset(), "Tile offsets are not monotone.");
-				unsigned int NumVertices = ((Visuals.m_vTilesOfLayer[y * Visuals.m_Width + XR].IndexBufferByteOffset() - Visuals.m_vTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_vTilesOfLayer[y * Visuals.m_Width + XR].DoDraw() ? 6lu : 0lu);
+				size_t StartIndex = Y0 * Visuals.m_Width;
+				size_t EndIndex = Y1 * Visuals.m_Width - 1;
+				const auto &Start = Visuals.m_vTilesOfLayer[StartIndex];
+				const auto &End = Visuals.m_vTilesOfLayer[EndIndex];
+				unsigned int NumVertices = ((End.IndexBufferByteOffset() - Start.IndexBufferByteOffset()) / sizeof(unsigned int)) + (End.DoDraw() ? 6lu : 0lu);
 
 				if(NumVertices)
 				{
-					vpIndexOffsets.push_back((offset_ptr_size)Visuals.m_vTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset());
-					vDrawCounts.push_back(NumVertices);
+					offset_ptr_size ByteOffset = (offset_ptr_size)Start.IndexBufferByteOffset();
+					Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, &ByteOffset, &NumVertices, 1);
 				}
 			}
-
-			int DrawCount = vpIndexOffsets.size();
-			if(DrawCount != 0)
+			// render slices of rows
+			else
 			{
-				Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, vpIndexOffsets.data(), vDrawCounts.data(), DrawCount);
+				// create the indice buffers we want to draw
+				std::vector<char *> vpIndexOffsets;
+				std::vector<unsigned int> vDrawCounts;
+
+				unsigned long long Reserve = Y1 - Y0 + 1;
+
+				vpIndexOffsets.reserve(Reserve);
+				vDrawCounts.reserve(Reserve);
+				for(size_t RowIndex = Y0; RowIndex < Y1; ++RowIndex)
+				{
+					size_t StartIndex = RowIndex * Visuals.m_Width + X0;
+					size_t EndIndex = RowIndex * Visuals.m_Width + (X1 - 1);
+					const auto &Start = Visuals.m_vTilesOfLayer[StartIndex];
+					const auto &End = Visuals.m_vTilesOfLayer[EndIndex];
+					dbg_assert(End.IndexBufferByteOffset() >= Start.IndexBufferByteOffset(), "Tile offsets are not monotone.");
+					unsigned int NumVertices = ((End.IndexBufferByteOffset() - Start.IndexBufferByteOffset()) / sizeof(unsigned int)) + (End.DoDraw() ? 6lu : 0lu);
+
+					if(NumVertices)
+					{
+						vpIndexOffsets.push_back((offset_ptr_size)Start.IndexBufferByteOffset());
+						vDrawCounts.push_back(NumVertices);
+					}
+				}
+
+				if(!vpIndexOffsets.empty())
+				{
+					Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, vpIndexOffsets.data(), vDrawCounts.data(), vpIndexOffsets.size());
+				}
 			}
 		}
 	}
