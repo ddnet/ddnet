@@ -299,6 +299,62 @@ void CSshServer::Update()
 {
 	if(m_aError[0])
 		return;
+
+	ssh_session session = NULL;
+	ssh_channel channel = NULL;
+
+	session = ssh_new();
+	if(session == NULL)
+	{
+		fprintf(stderr, "Failed to create session\n");
+		return;
+	}
+
+	int rc = ssh_bind_accept(m_Bind, session);
+	if(rc < 0)
+	{
+		fprintf(stderr, "Accept error: %s\n", ssh_get_error(m_Bind));
+		cleanup_session(session);
+		return;
+	}
+
+	rc = ssh_handle_key_exchange(session);
+	if(rc != SSH_OK)
+	{
+		fprintf(stderr, "Key exchange failed: %s\n", ssh_get_error(session));
+		cleanup_session(session);
+		return;
+	}
+
+	if(authenticate_client(session) != 0)
+	{
+		fprintf(stderr, "Authentication failed\n");
+		cleanup_session(session);
+		return;
+	}
+
+	channel = open_session_channel(session);
+	if(channel == NULL)
+	{
+		fprintf(stderr, "Failed to open channel\n");
+		cleanup_session(session);
+		return;
+	}
+
+	puts("accept shell");
+
+	if(accept_shell(session) != 0)
+	{
+		fprintf(stderr, "Shell request failed\n");
+		ssh_channel_free(channel);
+		cleanup_session(session);
+		return;
+	}
+
+	run_echo_shell(channel);
+
+	ssh_channel_free(channel);
+	cleanup_session(session);
 }
 
 void CSshServer::Shutdown()
