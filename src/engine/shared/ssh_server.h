@@ -30,8 +30,13 @@ public:
 	}
 
 	int m_ClientId;
+
+	// HOLY STATE HANDLING???
+	// refactor this?
 	bool m_Authenticated = false;
 	bool m_ShellReady = false;
+	bool m_ShowBanner = true;
+
 	ssh_session m_Session;
 	ssh_channel m_Channel = nullptr;
 };

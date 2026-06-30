@@ -125,16 +125,21 @@ static bool try_accept_shell(CSshClient *pClient)
 	return true;
 }
 
-static void run_echo_shell(ssh_channel channel)
+static void run_echo_shell(CSshClient *pClient)
 {
+	ssh_channel channel = pClient->m_Channel;
 	char buf[256];
-	const char *banner =
-		"Welcome to the toy SSH server.\r\n"
-		"This is not a real shell.\r\n"
-		"Anything you type will be echoed back.\r\n"
-		"Type 'exit' to quit.\r\n\r\n";
 
-	ssh_channel_write(channel, banner, strlen(banner));
+	if(pClient->m_ShowBanner)
+	{
+		const char *banner =
+			"Welcome to the toy SSH server.\r\n"
+			"This is not a real shell.\r\n"
+			"Anything you type will be echoed back.\r\n"
+			"Type 'exit' to quit.\r\n\r\n";
+		ssh_channel_write(channel, banner, strlen(banner));
+		pClient->m_ShowBanner = false;
+	}
 
 	puts("read..");
 
@@ -412,7 +417,7 @@ void CSshServer::Update()
 			OnClientDisconnect(pClient->m_ClientId);
 		}
 
-		run_echo_shell(pClient->m_Channel);
+		run_echo_shell(pClient);
 	}
 }
 
