@@ -284,5 +284,6 @@ void CSshServer::Update()
 
 void CSshServer::Shutdown()
 {
-	ssh_bind_free(m_Bind);
+	if(m_Bind != nullptr && m_aError[0] == '\0')
+		ssh_bind_free(m_Bind);
 }
