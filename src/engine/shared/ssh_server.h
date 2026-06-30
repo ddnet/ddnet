@@ -23,6 +23,8 @@ class CSshServer
 
 	ssh_bind m_Bind;
 
+	char m_aError[512] = "";
+
 public:
 	IConsole *Console() { return m_pConsole; }
 

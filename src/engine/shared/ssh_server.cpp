@@ -1,5 +1,8 @@
 #include "ssh_server.h"
 
+#include <base/log.h>
+#include <base/str.h>
+
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 #include <stdio.h>
@@ -246,12 +249,40 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 {
 	m_pConfig = pConfig;
 	m_pConsole = pConsole;
+
+	m_Bind = ssh_bind_new();
+	if (m_Bind == nullptr) {
+		str_copy(m_aError, "failed to bind");
+		log_error("ssh", "failed to create ssh_bind");
+		return;
+	}
+
+	ssh_bind_set_blocking(m_Bind, 0);
+
+	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_BINDADDR, "0.0.0.0");
+	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_BINDPORT_STR, PORT);
+	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_RSAKEY, HOSTKEY_FILE);
+
+	int Ok = ssh_bind_listen(m_Bind);
+	if (Ok < 0) {
+		str_copy(m_aError, "listen error");
+		log_error("ssh", "listen error: %s", ssh_get_error(m_Bind));
+		ssh_bind_free(m_Bind);
+		return;
+	}
+
+	log_info("ssh", "Listening on 0.0.0.0:%s", PORT);
+	log_info("ssh", "Username: %s", USERNAME);
+	log_info("ssh", "Password: %s", PASSWORD);
 }
 
 void CSshServer::Update()
 {
+	if(m_aError[0])
+		return;
 }
 
 void CSshServer::Shutdown()
 {
+	ssh_bind_free(m_Bind);
 }
