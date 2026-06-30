@@ -50,4 +50,5 @@ bool AntibotOnEngineSimulateClientMessage(int * /*pClientId*/, void * /*pBuffer*
 void AntibotOnRconCommand(int /*ClientId*/, int /*AuthLevel*/, const char * /*pCommand*/) {}
 void AntibotOnBan(int /*TargetId*/, const char * /*pIp*/, int /*Seconds*/, const char * /*pReason*/, int /*RconClientId*/) {}
 void AntibotOnKick(int /*TargetId*/, const char * /*pReason*/, int /*RconClientId*/) {}
+void AntibotOnMute(int /*TargetId*/, const char * /*pIp*/, int /*Seconds*/, const char * /*pReason*/, int /*RconClientId*/) {}
 }

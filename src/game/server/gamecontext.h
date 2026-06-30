@@ -79,6 +79,8 @@ private:
 	int m_ClientId;
 };
 
+class CGameContext;
+
 class CMute
 {
 public:
@@ -95,9 +97,9 @@ public:
 class CMutes
 {
 public:
-	CMutes(const char *pSystemName);
+	CMutes(class CGameContext *pGameContext, const char *pSystemName);
 
-	bool Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pClientName, bool InitialDelay);
+	bool Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pClientName, bool InitialDelay, int RconClientId = -1);
 	void UnmuteIndex(int Index);
 	void UnmuteAddr(const NETADDR *pAddr);
 	void UnmuteExpired();
@@ -106,6 +108,7 @@ public:
 
 private:
 	const char *m_pSystemName;
+	class CGameContext *m_pGameContext;
 	std::map<NETADDR, CMute> m_Mutes;
 };
 
@@ -590,8 +593,8 @@ private:
 
 	CMutes m_Mutes;
 	CMutes m_VoteMutes;
-	void MuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName);
-	void VoteMuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName);
+	void MuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName, int RconClientId = -1);
+	void VoteMuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName, int RconClientId = -1);
 
 	static void ConMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteId(IConsole::IResult *pResult, void *pUserData);

@@ -5,6 +5,7 @@
 #include <base/net.h>
 #include <base/time.h>
 
+#include <engine/antibot.h>
 #include <engine/shared/config.h>
 
 static NETADDR KeyAddress(NETADDR Addr)
@@ -26,12 +27,13 @@ int CMute::SecondsLeft() const
 	return m_Expire - time_timestamp();
 }
 
-CMutes::CMutes(const char *pSystemName) :
-	m_pSystemName(pSystemName)
+CMutes::CMutes(CGameContext *pGameContext, const char *pSystemName) :
+	m_pSystemName(pSystemName),
+	m_pGameContext(pGameContext)
 {
 }
 
-bool CMutes::Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pClientName, bool InitialDelay)
+bool CMutes::Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pClientName, bool InitialDelay, int RconClientId)
 {
 	if(!in_range(Seconds, 1, 365 * 24 * 60 * 60))
 	{
@@ -42,6 +44,7 @@ bool CMutes::Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const 
 	// Find a matching mute for this IP, update expiration time if found
 	const int64_t Expire = time_timestamp() + Seconds;
 	CMute &Mute = m_Mutes[KeyAddress(*pAddr)];
+	bool Muted = false;
 	if(!Mute.m_Initialized)
 	{
 		Mute.m_Initialized = true;
@@ -59,14 +62,35 @@ bool CMutes::Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const 
 			Mute.m_NameKnown = false;
 		}
 
-		return true;
+		Muted = true;
 	}
-	if(Expire > Mute.m_Expire)
+	else if(Expire > Mute.m_Expire)
 	{
 		Mute.m_Expire = Expire;
 		str_copy(Mute.m_aReason, pReason);
 		Mute.m_InitialDelay = InitialDelay;
+		Muted = true;
 	}
+
+	if(Muted && m_pGameContext && m_pGameContext->Antibot() && str_comp(m_pSystemName, "mutes") == 0)
+	{
+		int TargetId = -1;
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if(m_pGameContext->Server()->ClientSlotEmpty(i))
+				continue;
+
+			if(net_addr_comp_noport(pAddr, m_pGameContext->Server()->ClientAddr(i)) == 0)
+			{
+				TargetId = i;
+				break;
+			}
+		}
+		char aAddrStr[256];
+		net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
+		m_pGameContext->Antibot()->OnMute(TargetId, aAddrStr, Seconds, pReason, RconClientId);
+	}
+
 	return true;
 }
 
@@ -199,9 +223,9 @@ void CMutes::Print(int Page) const
 		(int)m_Mutes.size(), m_Mutes.size() == 1 ? "mute" : "mutes", Start, Count - 1, Page, NumPages);
 }
 
-void CGameContext::MuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName)
+void CGameContext::MuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName, int RconClientId)
 {
-	if(!m_Mutes.Mute(pAddr, Seconds, pReason, pDisplayName, false))
+	if(!m_Mutes.Mute(pAddr, Seconds, pReason, pDisplayName, false, RconClientId))
 	{
 		return;
 	}
@@ -218,9 +242,9 @@ void CGameContext::MuteWithMessage(const NETADDR *pAddr, int Seconds, const char
 	SendChat(-1, TEAM_ALL, aChatMessage);
 }
 
-void CGameContext::VoteMuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName)
+void CGameContext::VoteMuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName, int RconClientId)
 {
-	if(!m_VoteMutes.Mute(pAddr, Seconds, pReason, pDisplayName, false))
+	if(!m_VoteMutes.Mute(pAddr, Seconds, pReason, pDisplayName, false, RconClientId))
 	{
 		return;
 	}
@@ -254,7 +278,7 @@ void CGameContext::ConMuteId(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->MuteWithMessage(pSelf->Server()->ClientAddr(Victim), pResult->GetInteger(1), pReason, pSelf->Server()->ClientName(Victim));
+	pSelf->MuteWithMessage(pSelf->Server()->ClientAddr(Victim), pResult->GetInteger(1), pReason, pSelf->Server()->ClientName(Victim), pResult->m_ClientId);
 }
 
 void CGameContext::ConMuteIp(IConsole::IResult *pResult, void *pUserData)
@@ -270,7 +294,7 @@ void CGameContext::ConMuteIp(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 
-	pSelf->m_Mutes.Mute(&Addr, pResult->GetInteger(1), pReason, nullptr, false);
+	pSelf->m_Mutes.Mute(&Addr, pResult->GetInteger(1), pReason, nullptr, false, pResult->m_ClientId);
 }
 
 void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
@@ -332,7 +356,7 @@ void CGameContext::ConVoteMuteId(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->VoteMuteWithMessage(pSelf->Server()->ClientAddr(Victim), pResult->GetInteger(1), pReason, pSelf->Server()->ClientName(Victim));
+	pSelf->VoteMuteWithMessage(pSelf->Server()->ClientAddr(Victim), pResult->GetInteger(1), pReason, pSelf->Server()->ClientName(Victim), pResult->m_ClientId);
 }
 
 void CGameContext::ConVoteMuteIp(IConsole::IResult *pResult, void *pUserData)
@@ -348,7 +372,7 @@ void CGameContext::ConVoteMuteIp(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 
-	pSelf->m_VoteMutes.Mute(&Addr, pResult->GetInteger(1), pReason, nullptr, false);
+	pSelf->m_VoteMutes.Mute(&Addr, pResult->GetInteger(1), pReason, nullptr, false, pResult->m_ClientId);
 }
 
 void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)

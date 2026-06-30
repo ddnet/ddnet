@@ -80,8 +80,8 @@ void CClientChatLogger::Log(const CLogMessage *pMessage)
 }
 
 CGameContext::CGameContext(bool Resetting) :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
+	m_Mutes(this, "mutes"),
+	m_VoteMutes(this, "votemutes")
 {
 	m_Resetting = false;
 	m_pServer = nullptr;

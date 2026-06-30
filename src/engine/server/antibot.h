@@ -56,6 +56,7 @@ public:
 	void OnDirectInput(int ClientId) override;
 	void OnCharacterTick(int ClientId) override;
 	void OnHookAttach(int ClientId, bool Player) override;
+	void OnMute(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId) override;
 
 	void ConsoleCommand(const char *pCommand) override;
 };

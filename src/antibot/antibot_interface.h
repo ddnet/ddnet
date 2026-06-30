@@ -37,6 +37,7 @@ ANTIBOTAPI bool AntibotOnEngineSimulateClientMessage(int *pClientId, void *pBuff
 ANTIBOTAPI void AntibotOnRconCommand(int ClientId, int AuthLevel, const char *pCommand);
 ANTIBOTAPI void AntibotOnBan(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId);
 ANTIBOTAPI void AntibotOnKick(int TargetId, const char *pReason, int RconClientId);
+ANTIBOTAPI void AntibotOnMute(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId);
 }
 
 #endif // ANTIBOT_ANTIBOT_INTERFACE_H

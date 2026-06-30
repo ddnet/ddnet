@@ -228,6 +228,11 @@ void CAntibot::OnKick(int TargetId, const char *pReason, int RconClientId)
 	Update();
 	AntibotOnKick(TargetId, pReason, RconClientId);
 }
+void CAntibot::OnMute(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId)
+{
+	Update();
+	AntibotOnMute(TargetId, pIp, Seconds, pReason, RconClientId);
+}
 #else
 CAntibot::CAntibot() :
 	m_pServer(nullptr), m_pConsole(nullptr), m_pGameServer(nullptr), m_Initialized(false)
@@ -282,6 +287,7 @@ bool CAntibot::OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int 
 void CAntibot::OnRconCommand(int ClientId, int AuthLevel, const char *pCommand) {}
 void CAntibot::OnBan(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId) {}
 void CAntibot::OnKick(int TargetId, const char *pReason, int RconClientId) {}
+void CAntibot::OnMute(int TargetId, const char *pIp, int Seconds, const char *pReason, int RconClientId) {}
 #endif
 
 IEngineAntibot *CreateEngineAntibot()
