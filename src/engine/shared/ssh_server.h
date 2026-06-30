@@ -31,6 +31,7 @@ public:
 
 	int m_ClientId;
 	bool m_Authenticated = false;
+	bool m_ShellReady = false;
 	ssh_session m_Session;
 	ssh_channel m_Channel = nullptr;
 };

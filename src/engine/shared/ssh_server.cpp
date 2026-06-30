@@ -34,6 +34,9 @@ static bool try_authenticate_client(CSshClient *pClient)
 
 	log_info("ssh", "trying to authenticate cid %d...", pClient->m_ClientId);
 
+	if(message == nullptr)
+		return true;
+
 	if(ssh_message_type(message) == SSH_REQUEST_AUTH &&
 		ssh_message_subtype(message) == SSH_AUTH_METHOD_PASSWORD)
 	{
@@ -85,40 +88,41 @@ static ssh_channel open_session_channel(ssh_session session)
 	return NULL;
 }
 
-static int accept_shell(ssh_session session)
+static bool try_accept_shell(CSshClient *pClient)
 {
-	ssh_message message;
-	int shell_ready = 0;
+	ssh_session session = pClient->m_Session;
+	ssh_message message = ssh_message_get(session);
 
-	while(!shell_ready && (message = ssh_message_get(session)) != NULL)
+	log_info("ssh", "trying to shell ready cid %d...", pClient->m_ClientId);
+
+	if(message == nullptr)
+		return true;
+
+	if(ssh_message_type(message) == SSH_REQUEST_CHANNEL)
 	{
-		if(ssh_message_type(message) == SSH_REQUEST_CHANNEL)
+		switch(ssh_message_subtype(message))
 		{
-			switch(ssh_message_subtype(message))
-			{
-			case SSH_CHANNEL_REQUEST_PTY:
-				ssh_message_channel_request_reply_success(message);
-				break;
+		case SSH_CHANNEL_REQUEST_PTY:
+			ssh_message_channel_request_reply_success(message);
+			break;
 
-			case SSH_CHANNEL_REQUEST_SHELL:
-				ssh_message_channel_request_reply_success(message);
-				shell_ready = 1;
-				break;
+		case SSH_CHANNEL_REQUEST_SHELL:
+			ssh_message_channel_request_reply_success(message);
+			pClient->m_ShellReady = true;
+			break;
 
-			default:
-				ssh_message_reply_default(message);
-				break;
-			}
-		}
-		else
-		{
+		default:
 			ssh_message_reply_default(message);
+			break;
 		}
-
-		ssh_message_free(message);
+	}
+	else
+	{
+		ssh_message_reply_default(message);
 	}
 
-	return shell_ready ? 0 : -1;
+	ssh_message_free(message);
+	return true;
 }
 
 static void run_echo_shell(ssh_channel channel)
@@ -389,12 +393,16 @@ void CSshServer::Update()
 				OnClientDisconnect(pClient->m_ClientId);
 				return;
 			}
-			if(accept_shell(pClient->m_Session) != 0)
+		}
+		if(!pClient->m_ShellReady)
+		{
+			if(!try_accept_shell(pClient))
 			{
 				fprintf(stderr, "Shell request failed\n");
 				OnClientDisconnect(pClient->m_ClientId);
 				return;
 			}
+			continue;
 		}
 
 		if(!ssh_channel_is_open(pClient->m_Channel) || ssh_channel_is_eof(pClient->m_Channel))
