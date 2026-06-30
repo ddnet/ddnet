@@ -5,6 +5,7 @@
 
 #include <engine/storage.h>
 
+#include <fcntl.h>
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 #include <stdio.h>
@@ -275,8 +276,6 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 
 	GenerateHostKeyIfMissing();
 
-	ssh_bind_set_blocking(m_Bind, 0);
-
 	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_BINDADDR, "0.0.0.0");
 	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_BINDPORT_STR, PORT);
 	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_RSAKEY, HOSTKEY_FILE);
@@ -289,6 +288,11 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 		ssh_bind_free(m_Bind);
 		return;
 	}
+
+	ssh_bind_set_blocking(m_Bind, 0);
+
+	int raw_fd = ssh_bind_get_fd(m_Bind);
+	fcntl(raw_fd, F_SETFL, O_NONBLOCK);
 
 	log_info("ssh", "Listening on 0.0.0.0:%s", PORT);
 	log_info("ssh", "Username: %s", USERNAME);
@@ -311,12 +315,16 @@ void CSshServer::Update()
 	}
 
 	int rc = ssh_bind_accept(m_Bind, session);
-	if(rc < 0)
+	if(rc == SSH_ERROR)
 	{
 		fprintf(stderr, "Accept error: %s\n", ssh_get_error(m_Bind));
 		cleanup_session(session);
 		return;
 	}
+
+	// FIXME: think about this one next
+
+	// ssh_set_blocking(session, 0);
 
 	rc = ssh_handle_key_exchange(session);
 	if(rc != SSH_OK)
