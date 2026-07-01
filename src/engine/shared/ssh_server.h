@@ -75,6 +75,7 @@ public:
 	void Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, CNetBan *pNetBan);
 	void Update();
 	void Shutdown();
+	bool GotActiveConnections();
 };
 
 #endif

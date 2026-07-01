@@ -11,6 +11,7 @@
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 
@@ -383,4 +384,9 @@ void CSshServer::Shutdown()
 {
 	if(m_Bind != nullptr && m_aError[0] == '\0')
 		ssh_bind_free(m_Bind);
+}
+
+bool CSshServer::GotActiveConnections()
+{
+	return std::ranges::any_of(m_apClients, [](auto *pClient) { return pClient != nullptr; });
 }
