@@ -141,6 +141,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			"Anything you type will be echoed back.\r\n"
 			"Type 'exit' to quit.\r\n\r\n";
 		ssh_channel_write(Channel, pBanner, str_length(pBanner));
+		ssh_channel_write(Channel, "\r\n> ", 4);
 		pClient->m_ShowBanner = false;
 	}
 
@@ -179,11 +180,40 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			const char *pCmd = pClient->m_aInput;
 			log_info("ssh", "got enter running cmd '%s'", pCmd);
 
+			if(!str_comp(pCmd, "logout") || !str_comp(pCmd, "exit"))
+			{
+				OnClientDisconnect(pClient->m_ClientId, "logout");
+				return;
+			}
+
 			Console()->ExecuteLine(pCmd, IConsole::CLIENT_ID_UNSPECIFIED, true);
 
 			pClient->m_aInput[0] = '\0';
-
 			ssh_channel_write(Channel, "\r\n> ", 4);
+			return;
+		}
+		else if(Byte == 21) // ctrl+u
+		{
+			// ideally this would not be the same as ctrl+c
+			// and just clear the current prompt instead of
+			// opening a new one
+			pClient->m_aInput[0] = '\0';
+			ssh_channel_write(Channel, "\r\n> ", 4);
+		}
+		else if(Byte == 3) // ctrl+c
+		{
+			if(pClient->m_aInput[0] == '\0')
+			{
+				const char *pMsg = "\r\nUse ctrl+d or 'exit' to quit";
+				ssh_channel_write(Channel, pMsg, str_length(pMsg));
+			}
+
+			pClient->m_aInput[0] = '\0';
+			ssh_channel_write(Channel, "\r\n> ", 4);
+		}
+		else if(Byte == 4) // ctrl+d
+		{
+			OnClientDisconnect(pClient->m_ClientId, "logout");
 			return;
 		}
 		else if(Byte == 127)
@@ -194,8 +224,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		pClient->m_aInput[k + 1] = '\0';
 		ssh_channel_write(Channel, aBuf + i, 1);
 	}
-
-	str_append(pClient->m_aInput, aBuf);
 
 	log_info("ssh", "got msg '%s' id=%d", aBuf, aBuf[0]);
 	log_info("ssh", " id=%d", aBuf[0]);
