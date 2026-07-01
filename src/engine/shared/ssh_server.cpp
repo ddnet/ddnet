@@ -34,7 +34,7 @@ static bool try_authenticate_client(CSshClient *pClient)
 	ssh_session Session = pClient->m_Session;
 	ssh_message Message = ssh_message_get(Session);
 
-	log_info("ssh", "trying to authenticate cid %d...", pClient->m_ClientId);
+	// log_info("ssh", "trying to authenticate cid %d...", pClient->m_ClientId);
 
 	if(Message == nullptr)
 		return true;
@@ -95,7 +95,7 @@ static bool try_accept_shell(CSshClient *pClient)
 	ssh_session Session = pClient->m_Session;
 	ssh_message Message = ssh_message_get(Session);
 
-	log_info("ssh", "trying to shell ready cid %d...", pClient->m_ClientId);
+	// log_info("ssh", "trying to shell ready cid %d...", pClient->m_ClientId);
 
 	if(Message == nullptr)
 		return true;
