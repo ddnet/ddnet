@@ -9,141 +9,141 @@
 #include <fcntl.h>
 #include <libssh/libssh.h>
 #include <libssh/server.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#include <cstdio>
+#include <cstdlib>
 
 #define PORT "2222"
 #define HOSTKEY_FILE "ssh_host_rsa_key"
 #define USERNAME "demo"
 #define PASSWORD "secret"
 
-static void cleanup_session(ssh_session session)
+static void cleanup_session(ssh_session Session)
 {
-	if(session)
+	if(Session)
 	{
-		ssh_disconnect(session);
-		ssh_free(session);
+		ssh_disconnect(Session);
+		ssh_free(Session);
 	}
 }
 
 static bool try_authenticate_client(CSshClient *pClient)
 {
-	ssh_session session = pClient->m_Session;
-	ssh_message message = ssh_message_get(session);
+	ssh_session Session = pClient->m_Session;
+	ssh_message Message = ssh_message_get(Session);
 
 	log_info("ssh", "trying to authenticate cid %d...", pClient->m_ClientId);
 
-	if(message == nullptr)
+	if(Message == nullptr)
 		return true;
 
-	if(ssh_message_type(message) == SSH_REQUEST_AUTH &&
-		ssh_message_subtype(message) == SSH_AUTH_METHOD_PASSWORD)
+	if(ssh_message_type(Message) == SSH_REQUEST_AUTH &&
+		ssh_message_subtype(Message) == SSH_AUTH_METHOD_PASSWORD)
 	{
-		const char *user = ssh_message_auth_user(message);
-		const char *pass = ssh_message_auth_password(message);
+		const char *pUser = ssh_message_auth_user(Message);
+		const char *pPass = ssh_message_auth_password(Message);
 
-		if(user && pass &&
-			strcmp(user, USERNAME) == 0 &&
-			strcmp(pass, PASSWORD) == 0)
+		if(pUser && pPass &&
+			str_comp(pUser, USERNAME) == 0 &&
+			str_comp(pPass, PASSWORD) == 0)
 		{
-			ssh_message_auth_reply_success(message, 0);
+			ssh_message_auth_reply_success(Message, 0);
 			pClient->m_Authenticated = true;
 		}
 		else
 		{
-			ssh_message_auth_set_methods(message, SSH_AUTH_METHOD_PASSWORD);
-			ssh_message_reply_default(message);
+			ssh_message_auth_set_methods(Message, SSH_AUTH_METHOD_PASSWORD);
+			ssh_message_reply_default(Message);
 		}
 	}
 	else
 	{
-		ssh_message_auth_set_methods(message, SSH_AUTH_METHOD_PASSWORD);
-		ssh_message_reply_default(message);
+		ssh_message_auth_set_methods(Message, SSH_AUTH_METHOD_PASSWORD);
+		ssh_message_reply_default(Message);
 	}
 
-	ssh_message_free(message);
+	ssh_message_free(Message);
 	return true;
 }
 
-static ssh_channel open_session_channel(ssh_session session)
+static ssh_channel open_session_channel(ssh_session Session)
 {
-	ssh_message message;
-	ssh_channel channel = NULL;
+	ssh_message Message;
+	ssh_channel Channel = nullptr;
 
-	while((message = ssh_message_get(session)) != NULL)
+	while((Message = ssh_message_get(Session)) != nullptr)
 	{
-		if(ssh_message_type(message) == SSH_REQUEST_CHANNEL_OPEN &&
-			ssh_message_subtype(message) == SSH_CHANNEL_SESSION)
+		if(ssh_message_type(Message) == SSH_REQUEST_CHANNEL_OPEN &&
+			ssh_message_subtype(Message) == SSH_CHANNEL_SESSION)
 		{
-			channel = ssh_message_channel_request_open_reply_accept(message);
-			ssh_message_free(message);
-			return channel;
+			Channel = ssh_message_channel_request_open_reply_accept(Message);
+			ssh_message_free(Message);
+			return Channel;
 		}
 
-		ssh_message_reply_default(message);
-		ssh_message_free(message);
+		ssh_message_reply_default(Message);
+		ssh_message_free(Message);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 static bool try_accept_shell(CSshClient *pClient)
 {
-	ssh_session session = pClient->m_Session;
-	ssh_message message = ssh_message_get(session);
+	ssh_session Session = pClient->m_Session;
+	ssh_message Message = ssh_message_get(Session);
 
 	log_info("ssh", "trying to shell ready cid %d...", pClient->m_ClientId);
 
-	if(message == nullptr)
+	if(Message == nullptr)
 		return true;
 
-	if(ssh_message_type(message) == SSH_REQUEST_CHANNEL)
+	if(ssh_message_type(Message) == SSH_REQUEST_CHANNEL)
 	{
-		switch(ssh_message_subtype(message))
+		switch(ssh_message_subtype(Message))
 		{
 		case SSH_CHANNEL_REQUEST_PTY:
-			ssh_message_channel_request_reply_success(message);
+			ssh_message_channel_request_reply_success(Message);
 			break;
 
 		case SSH_CHANNEL_REQUEST_SHELL:
-			ssh_message_channel_request_reply_success(message);
+			ssh_message_channel_request_reply_success(Message);
 			pClient->m_ShellReady = true;
 			break;
 
 		default:
-			ssh_message_reply_default(message);
+			ssh_message_reply_default(Message);
 			break;
 		}
 	}
 	else
 	{
-		ssh_message_reply_default(message);
+		ssh_message_reply_default(Message);
 	}
 
-	ssh_message_free(message);
+	ssh_message_free(Message);
 	return true;
 }
 
 static void run_echo_shell(CSshClient *pClient)
 {
-	ssh_channel channel = pClient->m_Channel;
-	char buf[256];
+	ssh_channel Channel = pClient->m_Channel;
+	char aBuf[256];
 
 	if(pClient->m_ShowBanner)
 	{
-		const char *banner =
+		const char *pBanner =
 			"Welcome to the toy SSH server.\r\n"
 			"This is not a real shell.\r\n"
 			"Anything you type will be echoed back.\r\n"
 			"Type 'exit' to quit.\r\n\r\n";
-		ssh_channel_write(channel, banner, strlen(banner));
+		ssh_channel_write(Channel, pBanner, str_length(pBanner));
 		pClient->m_ShowBanner = false;
 	}
 
 	puts("read..");
 
-	int n = ssh_channel_read_nonblocking(channel, buf, sizeof(buf), 0);
+	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
 	if(n == SSH_EOF || n == SSH_ERROR)
 	{
 		puts("got some error");
@@ -155,10 +155,10 @@ static void run_echo_shell(CSshClient *pClient)
 		return;
 	}
 
-	buf[n] = '\0';
+	aBuf[n] = '\0';
 
-	ssh_channel_write(channel, "echo: ", 6);
-	ssh_channel_write(channel, buf, n);
+	ssh_channel_write(Channel, "echo: ", 6);
+	ssh_channel_write(Channel, aBuf, n);
 }
 
 /*
