@@ -2,6 +2,7 @@
 
 #include <base/dbg.h>
 #include <base/log.h>
+#include <base/logger.h>
 #include <base/str.h>
 #include <base/time.h>
 
@@ -20,6 +21,42 @@
 #define HOSTKEY_FILE "ssh_host_rsa_key"
 #define USERNAME "demo"
 #define PASSWORD "secret"
+
+// Not thread-safe!
+class CSshLogger : public ILogger
+{
+	CSshServer *m_pSshServer;
+	int m_ClientId;
+	ILogger *m_pOuterLogger;
+
+public:
+	CSshLogger(CSshServer *pSshServer, int ClientId, ILogger *pOuterLogger) :
+		m_pSshServer(pSshServer),
+		m_ClientId(ClientId),
+		m_pOuterLogger(pOuterLogger)
+	{
+	}
+	void Log(const CLogMessage *pMessage) override;
+};
+
+void CSshLogger::Log(const CLogMessage *pMessage)
+{
+	CSshClient *pClient = m_pSshServer->m_apClients[m_ClientId];
+	if(!pClient)
+	{
+		// TODO: assert instead?
+		//       can this happen if we disconnect during a running operation?
+		m_pOuterLogger->Log(pMessage);
+		return;
+	}
+
+	ssh_channel_write(pClient->m_Channel, "\r\n", 2);
+	ssh_channel_write(pClient->m_Channel, pMessage->Message(), str_length(pMessage->Message()));
+
+	// just mirror everything to regular log because the hiding is stupid
+	// https://github.com/ddnet/ddnet/issues/11095
+	m_pOuterLogger->Log(pMessage);
+}
 
 static void cleanup_session(ssh_session Session)
 {
@@ -186,7 +223,11 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				return;
 			}
 
-			Console()->ExecuteLine(pCmd, IConsole::CLIENT_ID_UNSPECIFIED, true);
+			{
+				CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
+				CLogScope Scope(&Logger);
+				Console()->ExecuteLine(pCmd, IConsole::CLIENT_ID_UNSPECIFIED, true);
+			}
 
 			pClient->m_aInput[0] = '\0';
 			ssh_channel_write(Channel, "\r\n> ", 4);
@@ -199,6 +240,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			// opening a new one
 			pClient->m_aInput[0] = '\0';
 			ssh_channel_write(Channel, "\r\n> ", 4);
+			continue;
 		}
 		else if(Byte == 3) // ctrl+c
 		{
@@ -210,16 +252,21 @@ void CSshServer::HandleInput(CSshClient *pClient)
 
 			pClient->m_aInput[0] = '\0';
 			ssh_channel_write(Channel, "\r\n> ", 4);
+			continue;
 		}
-		else if(Byte == 4 && pClient->m_aInput[0] == '\0') // ctrl+d
+		else if(Byte == 4) // ctrl+d
 		{
+			// silently ignore ctrl+d if there is still input
+			if(pClient->m_aInput[0])
+				continue;
+
 			OnClientDisconnect(pClient->m_ClientId, "logout");
 			return;
 		}
 		else if(Byte == 127 || Byte == '\b')
 		{
 			int LastChr = str_length(pClient->m_aInput);
-			LastChr = std::max(0, LastChr-1);
+			LastChr = std::max(0, LastChr - 1);
 			pClient->m_aInput[LastChr] = '\0';
 			ssh_channel_write(pClient->m_Channel, "\b \b", 3);
 			continue;

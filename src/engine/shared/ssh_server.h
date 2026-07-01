@@ -60,8 +60,6 @@ class CSshServer
 
 	void GenerateHostKeyIfMissing();
 
-	CSshClient *m_apClients[MAX_SSH_CLIENTS] = {};
-
 	std::optional<int> FindFreeSlot();
 
 	void OnClientConnect(int ClientId, ssh_session Session);
@@ -71,6 +69,8 @@ class CSshServer
 	void HandleInput(CSshClient *pClient);
 
 public:
+	CSshClient *m_apClients[MAX_SSH_CLIENTS] = {};
+
 	IConsole *Console() { return m_pConsole; }
 
 	void Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, CNetBan *pNetBan);
