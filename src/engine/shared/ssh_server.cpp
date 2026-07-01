@@ -128,7 +128,7 @@ static bool try_accept_shell(CSshClient *pClient)
 static void run_echo_shell(CSshClient *pClient)
 {
 	ssh_channel Channel = pClient->m_Channel;
-	char aBuf[256];
+	char aBuf[256] = {0};
 
 	if(pClient->m_ShowBanner)
 	{
@@ -155,10 +155,44 @@ static void run_echo_shell(CSshClient *pClient)
 		return;
 	}
 
-	aBuf[n] = '\0';
+	int k = str_length(pClient->m_aInput);
+	if(k + n > (int)sizeof(pClient->m_aInput) - 10)
+	{
+		// TODO: better error handling xd
+		ssh_channel_write(Channel, "INPUT FULL LOL ", 15);
+		return;
+	}
+	for(int i = 0; i < n; i++)
+	{
+		char Byte = aBuf[i];
+		if(Byte == 13)
+		{
+			const char *pCmd = pClient->m_aInput;
+			log_info("ssh", "got enter running cmd '%s'", pCmd);
 
-	ssh_channel_write(Channel, "echo: ", 6);
-	ssh_channel_write(Channel, aBuf, n);
+			pClient->m_aInput[0] = '\0';
+
+			ssh_channel_write(Channel, "\n> ", 3);
+			return;
+		}
+		else if(Byte == 127)
+		{
+			log_info("ssh", "got backspace");
+		}
+		pClient->m_aInput[k] = Byte;
+		pClient->m_aInput[k + 1] = '\0';
+		ssh_channel_write(Channel, aBuf + i, 1);
+	}
+
+	str_append(pClient->m_aInput, aBuf);
+
+	log_info("ssh", "got msg '%s' id=%d", aBuf, aBuf[0]);
+	log_info("ssh", " id=%d", aBuf[0]);
+	log_info("ssh", " new input '%s'", pClient->m_aInput);
+
+	// aBuf[n] = '\0';
+	// ssh_channel_write(Channel, "echo: ", 6);
+	// ssh_channel_write(Channel, aBuf, n);
 }
 
 /*

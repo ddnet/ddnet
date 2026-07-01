@@ -39,6 +39,8 @@ public:
 
 	ssh_session m_Session;
 	ssh_channel m_Channel = nullptr;
+
+	char m_aInput[2048] = "";
 };
 
 class CSshServer
