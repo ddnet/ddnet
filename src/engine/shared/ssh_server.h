@@ -67,6 +67,7 @@ class CSshServer
 	void OnClientDisconnect(int ClientId);
 
 	void AcceptNewConnections();
+	void HandleInput(CSshClient *pClient);
 
 public:
 	IConsole *Console() { return m_pConsole; }

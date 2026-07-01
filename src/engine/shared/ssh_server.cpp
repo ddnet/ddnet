@@ -4,6 +4,7 @@
 #include <base/log.h>
 #include <base/str.h>
 
+#include <engine/console.h>
 #include <engine/storage.h>
 
 #include <fcntl.h>
@@ -125,7 +126,7 @@ static bool try_accept_shell(CSshClient *pClient)
 	return true;
 }
 
-static void run_echo_shell(CSshClient *pClient)
+void CSshServer::HandleInput(CSshClient *pClient)
 {
 	ssh_channel Channel = pClient->m_Channel;
 	char aBuf[256] = {0};
@@ -169,6 +170,8 @@ static void run_echo_shell(CSshClient *pClient)
 		{
 			const char *pCmd = pClient->m_aInput;
 			log_info("ssh", "got enter running cmd '%s'", pCmd);
+
+			Console()->ExecuteLine(pCmd, IConsole::CLIENT_ID_UNSPECIFIED, true);
 
 			pClient->m_aInput[0] = '\0';
 
@@ -451,7 +454,7 @@ void CSshServer::Update()
 			OnClientDisconnect(pClient->m_ClientId);
 		}
 
-		run_echo_shell(pClient);
+		HandleInput(pClient);
 	}
 }
 
