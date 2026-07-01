@@ -173,10 +173,11 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	if(pClient->m_ShowBanner)
 	{
 		const char *pBanner =
-			"Welcome to the toy SSH server.\r\n"
-			"This is not a real shell.\r\n"
-			"Anything you type will be echoed back.\r\n"
-			"Type 'exit' to quit.\r\n\r\n";
+			"##################################\r\n"
+			"#                                #\r\n"
+			"#  welcome to the rcon console!  #\r\n"
+			"#                                #\r\n"
+			"##################################\r\n";
 		ssh_channel_write(Channel, pBanner, str_length(pBanner));
 		ssh_channel_write(Channel, "\r\n> ", 4);
 		pClient->m_ShowBanner = false;
@@ -215,7 +216,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		if(Byte == 13)
 		{
 			const char *pCmd = pClient->m_aInput;
-			log_info("ssh", "got enter running cmd '%s'", pCmd);
+			log_info("ssh", "cid=%d cmd='%s'", pClient->m_ClientId, pCmd);
 
 			if(!str_comp(pCmd, "logout") || !str_comp(pCmd, "exit"))
 			{
@@ -277,9 +278,9 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		ssh_channel_write(Channel, aBuf + i, 1);
 	}
 
-	log_info("ssh", "got msg '%s' id=%d", aBuf, aBuf[0]);
-	log_info("ssh", " id=%d", aBuf[0]);
-	log_info("ssh", " new input '%s'", pClient->m_aInput);
+	// log_info("ssh", "got msg '%s' id=%d", aBuf, aBuf[0]);
+	// log_info("ssh", " id=%d", aBuf[0]);
+	// log_info("ssh", " new input '%s'", pClient->m_aInput);
 
 	// aBuf[n] = '\0';
 	// ssh_channel_write(Channel, "echo: ", 6);
