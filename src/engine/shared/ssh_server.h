@@ -40,6 +40,7 @@ public:
 	ssh_session m_Session;
 	ssh_channel m_Channel = nullptr;
 
+	int64_t m_JoinTime = 0;
 	char m_aInput[2048] = "";
 };
 
@@ -64,7 +65,7 @@ class CSshServer
 	std::optional<int> FindFreeSlot();
 
 	void OnClientConnect(int ClientId, ssh_session Session);
-	void OnClientDisconnect(int ClientId);
+	void OnClientDisconnect(int ClientId, const char *pReason = "");
 
 	void AcceptNewConnections();
 	void HandleInput(CSshClient *pClient);

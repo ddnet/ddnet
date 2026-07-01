@@ -3,6 +3,7 @@
 #include <base/dbg.h>
 #include <base/log.h>
 #include <base/str.h>
+#include <base/time.h>
 
 #include <engine/console.h>
 #include <engine/storage.h>
@@ -271,11 +272,12 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 	log_info("ssh", "client with id %d connected", ClientId);
 
 	CSshClient *pClient = new CSshClient(ClientId, Session);
+	pClient->m_JoinTime = time_get();
 
 	m_apClients[ClientId] = pClient;
 }
 
-void CSshServer::OnClientDisconnect(int ClientId)
+void CSshServer::OnClientDisconnect(int ClientId, const char *pReason)
 {
 	if(!m_apClients[ClientId])
 		return;
@@ -336,6 +338,24 @@ void CSshServer::Update()
 	{
 		if(!pClient)
 			continue;
+
+		// TODO: should we also timeout sessions without keepalive?
+		// TODO: this is not optimal since during the password prompt we can not really send a message
+		//       there is no channel yet so the user can still be typing a password after already being disconnected
+		//       just to see "bye bye" in the end
+		//       but we also can not block a slot for everyone that is in the password state
+		//       i wonder how econ does it
+		//       can econ be denial of serviced with a bunch of clients in the asking for password state?
+		if(!pClient->m_ShellReady)
+		{
+			int64_t ConnectedSinceSeconds = (time_get() - pClient->m_JoinTime) / time_freq();
+			if(ConnectedSinceSeconds > 10)
+			{
+				log_info("ssh", "cid=%d did not get shell ready fast enough and timed out", pClient->m_ClientId);
+				OnClientDisconnect(pClient->m_ClientId, "timeout");
+				continue;
+			}
+		}
 
 		if(!pClient->m_Authenticated)
 		{
