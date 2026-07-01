@@ -373,7 +373,7 @@ void CSshServer::Update()
 			pClient->m_Channel = open_session_channel(pClient->m_Session);
 			if(pClient->m_Channel == nullptr)
 			{
-				fprintf(stderr, "Failed to open channel\n");
+				log_error("ssh", "failed to open channel");
 				OnClientDisconnect(pClient->m_ClientId);
 				return;
 			}
@@ -382,7 +382,7 @@ void CSshServer::Update()
 		{
 			if(!try_accept_shell(pClient))
 			{
-				fprintf(stderr, "Shell request failed\n");
+				log_error("ssh", "shell request failed");
 				OnClientDisconnect(pClient->m_ClientId);
 				return;
 			}
