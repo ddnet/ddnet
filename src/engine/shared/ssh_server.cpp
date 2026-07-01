@@ -211,7 +211,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			pClient->m_aInput[0] = '\0';
 			ssh_channel_write(Channel, "\r\n> ", 4);
 		}
-		else if(Byte == 4) // ctrl+d
+		else if(Byte == 4 && pClient->m_aInput[0] == '\0') // ctrl+d
 		{
 			OnClientDisconnect(pClient->m_ClientId, "logout");
 			return;
