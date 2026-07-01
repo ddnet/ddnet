@@ -216,12 +216,12 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			OnClientDisconnect(pClient->m_ClientId, "logout");
 			return;
 		}
-		else if(Byte == 127)
+		else if(Byte == 127 || Byte == '\b')
 		{
-			// TODO: visual feedback
 			int LastChr = str_length(pClient->m_aInput);
 			LastChr = std::max(0, LastChr-1);
 			pClient->m_aInput[LastChr] = '\0';
+			ssh_channel_write(pClient->m_Channel, "\b \b", 3);
 			continue;
 		}
 		pClient->m_aInput[k] = Byte;
