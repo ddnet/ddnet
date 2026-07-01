@@ -147,6 +147,10 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	//       would be better if this was handled in a different thread and only the final
 	//       command line string is synchronized with a safe mutex
 	//       but eh fakin multi threading
+	//       ---
+	//       ACTUALLY its waaaaaaayyyy smother when someone is connected to the server
+	//       i think this is the ddnet cpu saving in idle mode thingy that slows down our tick speed
+	//       we just need to speed it up as soon as one ssh client is connected and ez pz no threads needed
 	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
 	if(n == SSH_EOF || n == SSH_ERROR)
 	{
