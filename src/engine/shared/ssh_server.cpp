@@ -226,6 +226,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		pClient->m_aInput[k] = Byte;
 		pClient->m_aInput[k + 1] = '\0';
+		k++;
 		ssh_channel_write(Channel, aBuf + i, 1);
 	}
 
