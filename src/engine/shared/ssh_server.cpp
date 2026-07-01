@@ -218,7 +218,11 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == 127)
 		{
-			log_info("ssh", "got backspace");
+			// TODO: visual feedback
+			int LastChr = str_length(pClient->m_aInput);
+			LastChr = std::max(0, LastChr-1);
+			pClient->m_aInput[LastChr] = '\0';
+			continue;
 		}
 		pClient->m_aInput[k] = Byte;
 		pClient->m_aInput[k + 1] = '\0';
