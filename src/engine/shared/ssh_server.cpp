@@ -142,12 +142,14 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		pClient->m_ShowBanner = false;
 	}
 
-	puts("read..");
-
+	// TODO: the non blocking is cute but its horribly slow
+	//       also the authentication is suuuppper slow and typing too
+	//       would be better if this was handled in a different thread and only the final
+	//       command line string is synchronized with a safe mutex
+	//       but eh fakin multi threading
 	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
 	if(n == SSH_EOF || n == SSH_ERROR)
 	{
-		puts("got some error");
 		dbg_assert_failed("TODO: handle this ssh error");
 		return;
 	}
@@ -175,7 +177,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 
 			pClient->m_aInput[0] = '\0';
 
-			ssh_channel_write(Channel, "\n> ", 3);
+			ssh_channel_write(Channel, "\r\n> ", 4);
 			return;
 		}
 		else if(Byte == 127)
@@ -197,91 +199,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	// ssh_channel_write(Channel, "echo: ", 6);
 	// ssh_channel_write(Channel, aBuf, n);
 }
-
-/*
-int main(void) {
-    ssh_bind sshbind;
-    int rc;
-
-    sshbind = ssh_bind_new();
-    if (sshbind == NULL) {
-	fprintf(stderr, "Failed to create ssh_bind\n");
-	return 1;
-    }
-
-    ssh_bind_set_blocking(sshbind, 0);
-
-    ssh_bind_options_set(sshbind, SSH_BIND_OPTIONS_BINDADDR, "0.0.0.0");
-    ssh_bind_options_set(sshbind, SSH_BIND_OPTIONS_BINDPORT_STR, PORT);
-    ssh_bind_options_set(sshbind, SSH_BIND_OPTIONS_RSAKEY, HOSTKEY_FILE);
-
-    rc = ssh_bind_listen(sshbind);
-    if (rc < 0) {
-	fprintf(stderr, "Listen error: %s\n", ssh_get_error(sshbind));
-	ssh_bind_free(sshbind);
-	return 1;
-    }
-
-    printf("Listening on 0.0.0.0:%s\n", PORT);
-    printf("Username: %s\n", USERNAME);
-    printf("Password: %s\n", PASSWORD);
-
-    for (;;) {
-	ssh_session session = NULL;
-	ssh_channel channel = NULL;
-
-	session = ssh_new();
-	if (session == NULL) {
-	    fprintf(stderr, "Failed to create session\n");
-	    continue;
-	}
-
-	rc = ssh_bind_accept(sshbind, session);
-	if (rc < 0) {
-	    fprintf(stderr, "Accept error: %s\n", ssh_get_error(sshbind));
-	    cleanup_session(session);
-	    continue;
-	}
-
-	rc = ssh_handle_key_exchange(session);
-	if (rc != SSH_OK) {
-	    fprintf(stderr, "Key exchange failed: %s\n", ssh_get_error(session));
-	    cleanup_session(session);
-	    continue;
-	}
-
-	if (authenticate_client(session) != 0) {
-	    fprintf(stderr, "Authentication failed\n");
-	    cleanup_session(session);
-	    continue;
-	}
-
-	channel = open_session_channel(session);
-	if (channel == NULL) {
-	    fprintf(stderr, "Failed to open channel\n");
-	    cleanup_session(session);
-	    continue;
-	}
-
-	puts("accept shell");
-
-	if (accept_shell(session) != 0) {
-	    fprintf(stderr, "Shell request failed\n");
-	    ssh_channel_free(channel);
-	    cleanup_session(session);
-	    continue;
-	}
-
-	run_echo_shell(channel);
-
-	ssh_channel_free(channel);
-	cleanup_session(session);
-    }
-
-    ssh_bind_free(sshbind);
-    return 0;
-}
-*/
 
 void CSshServer::GenerateHostKeyIfMissing()
 {
