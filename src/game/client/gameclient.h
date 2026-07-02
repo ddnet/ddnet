@@ -332,8 +332,15 @@ public:
 
 	vec2 m_LocalCharacterPos;
 
-	// predicted players
+	/**
+	 * Our prediction for the local character at tick
+	 * `IClient::PredGameTick() - 1`.
+	 */
 	CCharacterCore m_PredictedPrevChar;
+	/**
+	 * Our prediction for the local character at tick
+	 * `IClient::PredGameTick()`.
+	 */
 	CCharacterCore m_PredictedChar;
 
 	// snap pointers
