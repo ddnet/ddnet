@@ -196,13 +196,3 @@ void CUuidManager::DebugDump() const
 		dbg_msg("uuid", "%s %s", aBuf, Name.m_pName);
 	}
 }
-
-std::unique_ptr<CUuidManager> CUuidManager::New()
-{
-	return std::make_unique<CUuidManager>();
-}
-
-const CUuidManager &CUuidManager::Global()
-{
-	return g_UuidManager;
-}
