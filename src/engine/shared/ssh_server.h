@@ -1,6 +1,10 @@
 #ifndef ENGINE_SHARED_SSH_SERVER_H
 #define ENGINE_SHARED_SSH_SERVER_H
 
+#include <base/detect.h>
+
+#if defined(CONF_FAMILY_UNIX)
+
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
@@ -78,5 +82,7 @@ public:
 	void Shutdown();
 	bool GotActiveConnections();
 };
+
+#endif
 
 #endif

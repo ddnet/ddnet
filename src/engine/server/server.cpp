@@ -3135,7 +3135,9 @@ void CServer::PumpNetwork()
 
 	m_ServerBan.Update();
 	m_Econ.Update();
+#if defined(CONF_FAMILY_UNIX)
 	m_SshServer.Update();
+#endif
 }
 
 void CServer::ChangeMap(const char *pMap)
@@ -3398,7 +3400,9 @@ int CServer::Run()
 
 	m_Econ.Init(Config(), Console(), &m_ServerBan);
 	m_Fifo.Init(Console(), Config()->m_SvInputFifo, CFGFLAG_SERVER);
+#if defined(CONF_FAMILY_UNIX)
 	m_SshServer.Init(Config(), Console(), Storage(), &m_ServerBan);
+#endif
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", Config()->m_SvName);
@@ -3672,8 +3676,10 @@ int CServer::Run()
 					break;
 				}
 			}
+#if defined(CONF_FAMILY_UNIX)
 			if(m_SshServer.GotActiveConnections())
 				NonActive = false;
+#endif
 
 			if(NonActive)
 			{
@@ -3738,7 +3744,9 @@ int CServer::Run()
 	m_pRegister->OnShutdown();
 	m_Econ.Shutdown();
 	m_Fifo.Shutdown();
+#if defined(CONF_FAMILY_UNIX)
 	m_SshServer.Shutdown();
+#endif
 	m_pHttp->Shutdown();
 	Engine()->ShutdownJobs();
 

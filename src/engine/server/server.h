@@ -231,7 +231,9 @@ public:
 	CNetServer m_NetServer;
 	CEcon m_Econ;
 	CFifo m_Fifo;
+#if defined(CONF_FAMILY_UNIX)
 	CSshServer m_SshServer;
+#endif
 	CServerBan m_ServerBan;
 
 	int64_t m_GameStartTime;
