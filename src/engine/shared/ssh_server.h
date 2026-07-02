@@ -1,9 +1,7 @@
 #ifndef ENGINE_SHARED_SSH_SERVER_H
 #define ENGINE_SHARED_SSH_SERVER_H
 
-#include <base/detect.h>
-
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_SSH)
 
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>

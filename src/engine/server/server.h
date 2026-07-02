@@ -231,7 +231,7 @@ public:
 	CNetServer m_NetServer;
 	CEcon m_Econ;
 	CFifo m_Fifo;
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_SSH)
 	CSshServer m_SshServer;
 #endif
 	CServerBan m_ServerBan;

@@ -1,8 +1,6 @@
+#if defined(CONF_SSH)
+
 #include "ssh_server.h"
-
-#include <base/detect.h>
-
-#if defined(CONF_FAMILY_UNIX)
 
 #include <base/dbg.h>
 #include <base/log.h>
