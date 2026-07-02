@@ -19,6 +19,7 @@
 #include <generated/protocol7.h>
 #include <generated/protocolglue.h>
 
+#include <algorithm>
 #include <array>
 #include <optional>
 #include <type_traits>
