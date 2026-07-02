@@ -81,6 +81,7 @@ jobs:
           libsdl2-dev
           libsqlite3-dev
           libssh-dev
+          libssh-dev
           libswresample-dev
           libswscale-dev
           libx264-dev

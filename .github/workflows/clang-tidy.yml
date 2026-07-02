@@ -43,6 +43,7 @@ jobs:
           libx264-dev \
           ninja-build \
           pkg-config \
+          libssh-dev \
           -y
 
     - name: Install Vulkan SDK
