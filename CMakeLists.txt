@@ -2676,6 +2676,8 @@ if(CLIENT)
     mapitems.h
     mapitems/envelope.cpp
     mapitems/envelope.h
+    mapitems/envelope_evaluator.cpp
+    mapitems/envelope_evaluator.h
     mapitems/image.cpp
     mapitems/image.h
     mapitems/layer.cpp

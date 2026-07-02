@@ -178,7 +178,7 @@ void CLayerTiles::Render(bool Tileset)
 	Graphics()->TextureSet(Texture);
 
 	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	Editor()->EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4);
+	Map()->m_EnvelopeEvaluator.EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4);
 	const ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f).Multiply(ColorEnv);
 
 	Graphics()->BlendNone();

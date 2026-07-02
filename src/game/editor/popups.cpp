@@ -2736,6 +2736,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	CMapEnvelopeEvaluator &EnvelopeEvaluator = pEditor->Map()->m_EnvelopeEvaluator;
 
 	static constexpr float MIN_ANIM_SPEED = 0.001f;
 	static constexpr float MAX_ANIM_SPEED = 1000000.0f;
@@ -2749,53 +2750,53 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	View.HSplitBottom(12.0f, &View, &ButtonReset);
 	pEditor->Ui()->DoLabel(&Label, "Speed", 10.0f, TEXTALIGN_ML);
 
-	const float OldAnimateSpeed = pEditor->m_AnimateSpeed;
+	const float OldAnimateSpeed = EnvelopeEvaluator.m_AnimateSpeed;
 
 	static char s_DecreaseButton;
 	if(pEditor->DoButton_FontIcon(&s_DecreaseButton, FontIcon::MINUS, 0, &ButtonDecrease, BUTTONFLAG_LEFT, "Decrease animation speed.", IGraphics::CORNER_L, 7.0f))
 	{
-		pEditor->m_AnimateSpeed -= pEditor->m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = std::max(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
-		pEditor->m_AnimateUpdatePopup = true;
+		EnvelopeEvaluator.m_AnimateSpeed -= EnvelopeEvaluator.m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
+		EnvelopeEvaluator.m_AnimateSpeed = std::max(EnvelopeEvaluator.m_AnimateSpeed, MIN_ANIM_SPEED);
+		EnvelopeEvaluator.m_AnimateUpdatePopup = true;
 	}
 
 	static char s_IncreaseButton;
 	if(pEditor->DoButton_FontIcon(&s_IncreaseButton, FontIcon::PLUS, 0, &ButtonIncrease, BUTTONFLAG_LEFT, "Increase animation speed.", IGraphics::CORNER_R, 7.0f))
 	{
-		if(pEditor->m_AnimateSpeed < 0.1f)
-			pEditor->m_AnimateSpeed = 0.1f;
+		if(EnvelopeEvaluator.m_AnimateSpeed < 0.1f)
+			EnvelopeEvaluator.m_AnimateSpeed = 0.1f;
 		else
-			pEditor->m_AnimateSpeed += pEditor->m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = std::min(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
-		pEditor->m_AnimateUpdatePopup = true;
+			EnvelopeEvaluator.m_AnimateSpeed += EnvelopeEvaluator.m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
+		EnvelopeEvaluator.m_AnimateSpeed = std::min(EnvelopeEvaluator.m_AnimateSpeed, MAX_ANIM_SPEED);
+		EnvelopeEvaluator.m_AnimateUpdatePopup = true;
 	}
 
 	static char s_DefaultButton;
 	if(pEditor->DoButton_Ex(&s_DefaultButton, "Default", 0, &ButtonReset, BUTTONFLAG_LEFT, "Reset to normal animation speed.", IGraphics::CORNER_ALL))
 	{
-		pEditor->m_AnimateSpeed = 1.0f;
-		pEditor->m_AnimateUpdatePopup = true;
+		EnvelopeEvaluator.m_AnimateSpeed = 1.0f;
+		EnvelopeEvaluator.m_AnimateUpdatePopup = true;
 	}
 
 	static CLineInputNumber s_SpeedInput;
-	if(pEditor->m_AnimateUpdatePopup)
+	if(EnvelopeEvaluator.m_AnimateUpdatePopup)
 	{
-		s_SpeedInput.SetFloat(pEditor->m_AnimateSpeed);
-		pEditor->m_AnimateUpdatePopup = false;
+		s_SpeedInput.SetFloat(EnvelopeEvaluator.m_AnimateSpeed);
+		EnvelopeEvaluator.m_AnimateUpdatePopup = false;
 	}
 
 	if(pEditor->DoEditBox(&s_SpeedInput, &EditBox, 10.0f, IGraphics::CORNER_NONE, "The animation speed."))
 	{
-		pEditor->m_AnimateSpeed = std::clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
+		EnvelopeEvaluator.m_AnimateSpeed = std::clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
 	}
 
 	// adjust start time to avoid jumps in animation
-	float AnimateSpeedRatio = OldAnimateSpeed / pEditor->m_AnimateSpeed;
+	float AnimateSpeedRatio = OldAnimateSpeed / EnvelopeEvaluator.m_AnimateSpeed;
 	float Time = pEditor->Client()->GlobalTime();
-	pEditor->m_AnimateStart = Time + (pEditor->m_AnimateStart - Time) * AnimateSpeedRatio;
-	if(!pEditor->m_Animate)
+	EnvelopeEvaluator.m_AnimateStart = Time + (EnvelopeEvaluator.m_AnimateStart - Time) * AnimateSpeedRatio;
+	if(!EnvelopeEvaluator.m_Animate)
 	{
-		pEditor->m_AnimateTime *= AnimateSpeedRatio;
+		EnvelopeEvaluator.m_AnimateTime *= AnimateSpeedRatio;
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
