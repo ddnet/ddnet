@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-latest-fancy]
+        name: [ubuntu-latest-fancy, macOS-latest, windows-latest, ubuntu-22.04, windows-latest-mingw]
         include:
         - name: ubuntu-latest-fancy
           os: ubuntu-latest
