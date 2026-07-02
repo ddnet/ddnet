@@ -24,9 +24,6 @@
 #define USERNAME "demo"
 #define PASSWORD "secret"
 
-// FIXME: remove this
-#define SSH_SUPPRESS_DEPRECATED 1
-
 // Not thread-safe!
 class CSshLogger : public ILogger
 {

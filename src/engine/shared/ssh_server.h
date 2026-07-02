@@ -3,6 +3,9 @@
 
 #if defined(CONF_SSH)
 
+// FIXME: remove this
+#define SSH_SUPPRESS_DEPRECATED 1
+
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
