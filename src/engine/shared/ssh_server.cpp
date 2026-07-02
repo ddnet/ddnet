@@ -62,16 +62,7 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	m_pOuterLogger->Log(pMessage);
 }
 
-static void cleanup_session(ssh_session Session)
-{
-	if(Session)
-	{
-		ssh_disconnect(Session);
-		ssh_free(Session);
-	}
-}
-
-static bool try_authenticate_client(CSshClient *pClient)
+bool CSshServer::TryAuthenticateClient(CSshClient *pClient)
 {
 	ssh_session Session = pClient->m_Session;
 	ssh_message Message = ssh_message_get(Session);
@@ -110,29 +101,30 @@ static bool try_authenticate_client(CSshClient *pClient)
 	return true;
 }
 
-static ssh_channel open_session_channel(ssh_session Session)
+bool CSshServer::TryOpenSessionChannel(CSshClient *pClient)
 {
-	ssh_message Message;
-	ssh_channel Channel = nullptr;
+	if(pClient->m_Channel)
+		return true;
 
-	while((Message = ssh_message_get(Session)) != nullptr)
+	ssh_message Message = ssh_message_get(pClient->m_Session);
+	if(Message == nullptr)
+		return true;
+
+	if(ssh_message_type(Message) == SSH_REQUEST_CHANNEL_OPEN &&
+		ssh_message_subtype(Message) == SSH_CHANNEL_SESSION)
 	{
-		if(ssh_message_type(Message) == SSH_REQUEST_CHANNEL_OPEN &&
-			ssh_message_subtype(Message) == SSH_CHANNEL_SESSION)
-		{
-			Channel = ssh_message_channel_request_open_reply_accept(Message);
-			ssh_message_free(Message);
-			return Channel;
-		}
-
-		ssh_message_reply_default(Message);
+		pClient->m_Channel = ssh_message_channel_request_open_reply_accept(Message);
 		ssh_message_free(Message);
+		return true;
 	}
 
-	return nullptr;
+	ssh_message_reply_default(Message);
+	ssh_message_free(Message);
+
+	return true;
 }
 
-static bool try_accept_shell(CSshClient *pClient)
+bool CSshServer::TryAcceptShell(CSshClient *pClient)
 {
 	ssh_session Session = pClient->m_Session;
 	ssh_message Message = ssh_message_get(Session);
@@ -355,14 +347,23 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 
 void CSshServer::OnClientDisconnect(int ClientId, const char *pReason)
 {
-	if(!m_apClients[ClientId])
+	CSshClient *pClient = m_apClients[ClientId];
+	if(!pClient)
 		return;
 
 	log_info("ssh", "client with id %d disconnected", ClientId);
 
-	if(m_apClients[ClientId]->m_Channel)
-		ssh_channel_free(m_apClients[ClientId]->m_Channel);
-	cleanup_session(m_apClients[ClientId]->m_Session);
+	ssh_channel Channel = pClient->m_Channel;
+	if(Channel)
+	{
+		ssh_channel_free(Channel);
+	}
+	ssh_session Session = m_apClients[ClientId]->m_Session;
+	if(Session)
+	{
+		ssh_disconnect(Session);
+		ssh_free(Session);
+	}
 
 	delete m_apClients[ClientId];
 	m_apClients[ClientId] = nullptr;
@@ -435,7 +436,7 @@ void CSshServer::Update()
 
 		if(!pClient->m_Authenticated)
 		{
-			if(!try_authenticate_client(pClient))
+			if(!TryAuthenticateClient(pClient))
 			{
 				fprintf(stderr, "Authentication failed\n");
 				OnClientDisconnect(pClient->m_ClientId);
@@ -446,8 +447,7 @@ void CSshServer::Update()
 
 		if(pClient->m_Channel == nullptr)
 		{
-			pClient->m_Channel = open_session_channel(pClient->m_Session);
-			if(pClient->m_Channel == nullptr)
+			if(TryOpenSessionChannel(pClient))
 			{
 				log_error("ssh", "failed to open channel");
 				OnClientDisconnect(pClient->m_ClientId);
@@ -456,7 +456,7 @@ void CSshServer::Update()
 		}
 		if(!pClient->m_ShellReady)
 		{
-			if(!try_accept_shell(pClient))
+			if(!TryAcceptShell(pClient))
 			{
 				log_error("ssh", "shell request failed");
 				OnClientDisconnect(pClient->m_ClientId);

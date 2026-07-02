@@ -64,6 +64,10 @@ class CSshServer
 
 	void GenerateHostKeyIfMissing();
 
+	bool TryAuthenticateClient(CSshClient *pClient);
+	bool TryOpenSessionChannel(CSshClient *pClient);
+	bool TryAcceptShell(CSshClient *pClient);
+
 	std::optional<int> FindFreeSlot();
 
 	void OnClientConnect(int ClientId, ssh_session Session);
