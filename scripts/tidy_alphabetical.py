@@ -183,6 +183,7 @@ TEXT_EXTS = set(
 )
 
 TOPLEVEL_DIRS = """tidy-alphabetical-start
+.github
 cmake
 data
 datsrc
