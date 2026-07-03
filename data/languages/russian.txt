@@ -2650,16 +2650,16 @@ Hook collision line tip
 == Кончик линии столкновения крюка
 
 Refresh the demo list
-== 
+== Обновить список демо
 
 Open the selected folder
-== 
+== Открыть выбранную папку
 
 Play the selected demo
-== 
+== Воспроизвести выбранную демо
 
 Prediction margin
-== 
+== Погрешность предсказания
 
 Predict events (experimental)
-== 
+== Предсказывать события (экспериментально)

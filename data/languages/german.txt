@@ -236,7 +236,7 @@ No servers found
 == Keine Server gefunden
 
 No servers match your filter criteria
-== Kein Server entspricht den Kriterien
+== Kein Server entspricht deinen Kriterien
 
 Ok
 == OK
@@ -332,7 +332,7 @@ Show DDRace HUD
 == DDRace-HUD anzeigen
 
 Show friends only
-== Nur Freunde zeigen
+== Nur Freunde anzeigen
 
 Show health, shields and ammo
 == Leben, Schilde und Munition anzeigen
@@ -533,7 +533,7 @@ Enable server message sound
 == Ton für Server-Nachrichten aktivieren
 
 Show votes window after voting
-== Abstimmungsfenster nach Abstimmung zeigen
+== Abstimmungsfenster nach Abstimmung anzeigen
 
 HUD
 == Aussehen
@@ -560,7 +560,7 @@ DDNet Client needs to be restarted to complete update!
 == Der DDNet-Client muss neu gestartet werden, um das Update abzuschließen!
 
 Show others
-== Andere zeigen
+== Andere anzeigen
 
 Restart
 == Neustart
@@ -680,7 +680,7 @@ Automatically create statboard csv
 == Automatisch Punktetafel-CSV erstellen
 
 Show tiles layers from BG map
-== Kachelebenen der Hintergrundkarte zeigen
+== Kachelebenen der Hintergrundkarte anzeigen
 
 Remove chat
 == Chat entfernen
@@ -764,7 +764,7 @@ Skin prefix
 == Skinpräfix
 
 Show HUD
-== HUD zeigen
+== HUD anzeigen
 
 9+ new mentions
 == 9+ Erwähnungen
@@ -923,7 +923,7 @@ Toggle dyncam
 == Dyncam wechseln
 
 Show others (own team only)
-== Andere Spieler zeigen (eigenes Team)
+== Andere Spieler anzeigen (eigenes Team)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Benutze die Taste k, um neuzustarten. Benutze q, um zu pausieren und andere Spieler zu beobachten. Weitere Tastenbelegungen findet man in den Einstellungen.
@@ -1215,16 +1215,16 @@ Show dummy actions
 == Dummy-Aktionen anzeigen
 
 Show freeze bars
-== Einfrier-Balken zeigen
+== Einfrier-Balken anzeigen
 
 Show player position
-== Spielerposition zeigen
+== Spielerposition anzeigen
 
 Show player speed
-== Spielergeschwindigkeit zeigen
+== Spielergeschwindigkeit anzeigen
 
 Show player target angle
-== Zielwinkel des Spielers zeigen
+== Zielwinkel des Spielers anzeigen
 
 Ingame mouse sens.
 == Maus-Empfind. im Spiel
@@ -1751,10 +1751,10 @@ Always show chat
 == Immer Chat anzeigen
 
 Show hook strength icon indicator
-== Hakenstärke Icon anzeigen
+== Hakenstärke-Icon anzeigen
 
 Show hook strength number indicator
-== Hakenstärke Zahl anzeigen
+== Hakenstärke-Zahl anzeigen
 
 Show own player's hook collision line
 == Eigene Hakenkollisionslinie anzeigen
@@ -1811,7 +1811,7 @@ Please wait…
 == Bitte warten…
 
 Show client IDs (scoreboard, chat, spectator)
-== Client-IDs anzeigen (Punktetafel, Chat, Beobachter)
+== Client-IDs anzeigen (Punktetafel, Chat, Zuschauer)
 
 Are you sure that you want to delete '%s'?
 == Bist du sicher dass du '%s' löschen willst?
@@ -2091,7 +2091,7 @@ Map size
 == Kartengröße
 
 Show number of spectators
-== Anzahl der Zuschauer zeigen
+== Anzahl der Zuschauer anzeigen
 
 [Show name plates]
 None
@@ -2113,16 +2113,16 @@ Name plates offset
 == Spielername-Abstand
 
 Show friend icon in name plates
-== Freund-Icon in Spielername zeigen
+== Freund-Icon in Spielername anzeigen
 
 Show client IDs on a separate line
-== Client-IDs in eigener Linie zeigen
+== Client-IDs in separater Zeile anzeigen
 
 Client IDs size
 == Client-ID-Größe
 
 Show players' key presses
-== Tastendruck-Symbole von Spielern zeigen
+== Tastendruck-Symbole von Spielern anzeigen
 
 [Show players' key presses]
 None
@@ -2141,7 +2141,7 @@ All
 == Alle
 
 Preview dummy's name plate
-== Dummy-Spielernamen vorher zeigen
+== Vorschau von Dummy-Spielernamen
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
@@ -2271,11 +2271,11 @@ Behavior type
 
 [Touch button behavior]
 Bind
-== Taste
+== Bind
 
 [Touch button behavior]
 Bind Toggle
-== Taste an/aus
+== Bind-Umschalten
 
 [Touch button behavior]
 Predefined
@@ -2309,46 +2309,46 @@ Ignore
 == Ignoriert
 
 New button
-== Neuer Button
+== Neue Taste
 
 Select button by touch
-== Drücke Button um ihn zu selektieren
+== Taste durch Berühren auszuwählen
 
 No buttons match your filter criteria
-== Kein Button entspricht deinen Kriterien
+== Kein Tasten entsprichen deinen Kriterien
 
 File
 == Datei
 
 Buttons
-== Buttons
+== Tasten
 
 Active color
-== Aktiver Button
+== Aktive Farbe
 
 Inactive color
-== Inaktiver Button
+== Inaktive Farbe
 
 Preview button visibility while the editor is active.
-== Buttonsichtbarkeitsvorschau während der Editor aktiv ist.
+== Sichtbarkeitenvorschau für Tasten während der Editor aktiv ist.
 
 Show all buttons
 == Zeige alle Tasten
 
 Save all changes before switching selected button?
-== Alle Änderungen speichern vor dem Tastenwechsel?
+== Alle Änderungen speichern vor dem Wechseln der ausgewählten Taste?
 
 Discard
 == Verwerfen
 
 There is not enough space available for the button. Check its visibilities and size.
-== Es gibt nicht genug Platz für den Button. Schau dir seine Sichtbarkeit und Größe an.
+== Es gibt nicht genug Platz für die Taste. Überprüfe die Sichtbarkeit und Größe.
 
 Selected button not visible
-== Ausgewählter Button nicht sichtbar
+== Ausgewählte Taste nicht sichtbar
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== Der ausgewählte Button ist nicht sichtbar. Möchtest du ihn abwählen oder seine Sichtbarkeit bearbeiten?
+== Die ausgewählte Taste ist nicht sichtbar. Möchtest du sie abwählen oder ihre Sichtbarkeit bearbeiten?
 
 Edit
 == Bearbeiten
@@ -2357,13 +2357,13 @@ Width and height are required to be within the range from %d to %d.
 == Breite und Höhe müssen zwischen %d und %d liegen.
 
 Button position is outside of the screen.
-== Der Button ist außerhalb des Bildschirms.
+== Die Taste ist außerhalb des Bildschirms.
 
 The selected button is overlapping with other buttons.
 == Die ausgewählte Taste überlappt andere Tasten.
 
 Wrong button settings
-== Ungültige Buttoneinstellungen
+== Ungültige Tasteneinstellungen
 
 [Touch button visibilities]
 Ingame
@@ -2375,7 +2375,7 @@ Zoom Allowed
 
 [Touch button visibilities]
 Vote Active
-== Abstimmung
+== Abstimmung aktiv
 
 [Touch button visibilities]
 Dummy Allowed
@@ -2419,7 +2419,7 @@ Swap Action
 
 [Predefined touch button behaviors]
 Use Action
-== Aktion ausführen
+== Aktion benutzen
 
 [Predefined touch button behaviors]
 Joystick Action
@@ -2511,7 +2511,7 @@ Retrying…
 == Neuer Versuch…
 
 Error joining Tutorial server
-== Fehler beim Verbinden mit Tutorial Server
+== Fehler beim Beitreten eines Tutorial Servers
 
 Could not find a Tutorial server. Check your internet connection.
 == Konnte keinen Tutorial Server finden. Bitte überprüfe deine Internetverbindung.
@@ -2541,28 +2541,28 @@ Click to add this community to your favorites.
 == Klicke um Community zu den Favoriten hinzuzufügen.
 
 Add clan
-== Füge Clan hinzu
+== Clan hinzufügen
 
 Info
 == Info
 
 Button browser
-== Tasten Browser
+== Tastenbrowser
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== Du kannst Tasten direkt in der liste unten oder durch langes Pressen einer Taste auswählen. Du kannst auch die Taste bewegen und die Größe ändern.
+== Du kannst Tasten direkt in der Liste unten oder durch langes Drücken einer Taste auf dem Bildschirm auswählen. Du kannst Tasten auch per Berührung bewegen und die Größe ändern.
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== Du kannst deine Tastensteuerung in dieser Seite einstellen. Nur Änderungen, die gespeichert werden, sind nach einem Neustart verfügbar. Du kannst deine Tastenkonfiguration mit anderen teilen, indem du sie ins Clipboard kopierst.\n\nDu kannst mehr Details über Touch-Tastensteuerung im DDNet Wiki finden.
+== Du kannst deine Tastensteuerung auf dieser Seite einstellen. Nur gespeicherte Änderungen sind nach einem Neustart verfügbar. Du kannst deine Tastenkonfiguration mit anderen teilen, indem du sie in die Zwischenablage exportierst.\n\nDu kannst mehr Details über die Berührungseingaben im DDNet Wiki finden.
 
 Open DDNet Wiki
-== Öffne DDNet Wiki
+== DDNet-Wiki öffnen
 
 Buttons with this behavior execute console commands like regular key binds.
-== Tasten mit diesem Verhalten führen Konsolenbefehle wie normale Tastenbinds aus.
+== Tasten mit diesem Verhalten führen Konsolenbefehle wie normale Binds aus.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== Tasten mit diesem Verhalten wechseln zwischen den spezifizierten Befehlen beim Ausführen.
+== Tasten mit diesem Verhalten wechseln zwischen der Ausführung von einem von zwei oder mehr spezifizierten Befehlen hin und her.
 
 Buttons with this behavior execute some predefined actions.
 == Tasten mit diesem Verhalten führen vordefinierte Aktionen aus.
@@ -2577,25 +2577,25 @@ Opens the spectator menu (this does not work with binds).
 == Öffnet das Zuschauer Menü (funktioniert nicht mit Binds).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== Tauscht die aktive Aktion (Schießen und Hooken) für direkten Tasten-Input und virtuelle Joysticks.
+== Tauscht die aktive Aktion (Feuern und Haken) für direkte Berührungseingaben und virtuelle Joysticks.
 
 Uses the active action with the current aiming position.
-== Benutzt die aktive Aktion mit der aktuellen Fadenkreuz-Position
+== Benutzt die aktive Aktion mit der aktuellen Fadenkreuz-Position.
 
 Virtual joystick which uses the active action.
 == Virtueller Joystick, der die aktive Aktion benutzt.
 
 Virtual joystick which only aims without using an action.
-== Virtueller Joystick, der nur ohne eine Aktion anvisiert.
+== Virtueller Joystick, der nur anvisiert ohne eine Aktion auszuführen.
 
 Virtual joystick which always uses fire.
-== Virtueller Joystick, der immer Schießen benutzt.
+== Virtueller Joystick, der immer Feuern benutzt.
 
 Virtual joystick which always uses hook.
-== Virtueller Joystick, der immer Hooken benutzt.
+== Virtueller Joystick, der immer Haken benutzt.
 
 Player is ingame, i.e. not spectating.
-== Spieler ist im Spiel und ist kein Zuschauer
+== Spieler ist im Spiel, also kein Zuschauer.
 
 Zoom is allowed on this server.
 == Zoom ist auf dem Server erlaubt.
@@ -2604,7 +2604,7 @@ Dummy is allowed on this server.
 == Dummies sind auf dem Server erlaubt.
 
 Dummy is currently connected.
-== Dummie ist aktuell verbunden.
+== Dummy ist aktuell verbunden.
 
 Player is currently authed in rcon.
 == Spieler ist aktuell mit rcon eingeloggt.
@@ -2613,10 +2613,10 @@ Demo player is currently active.
 == Demo-Wiedergabe ist aktuell aktiv.
 
 The extra menu with the given number is activated.
-== Das Extra Menü mit der gegeben Nummer wurde aktiviert.
+== Das Extramenü mit der gegeben Nummer ist aktiviert.
 
 Save power by lowering update rate (higher input latency)
-== Spare Energie mit einer niedrigeren Aktualisierungs-Rate (höhere Input Latenz)
+== Spare Energie mit einer niedrigeren Aktualisierungs-Rate (höhere Input-Latenz)
 
 Colors of the hook collision line:
 == Farben der Hook-Kollisions-Linie:
@@ -2638,28 +2638,28 @@ Hook collision line tip
 == Spitze der Hook-Kollisions-Linien
 
 Refresh the demo list
-== 
+== Liste der Aufnahmen aktualisieren
 
 Open the selected folder
-== 
+== Öffne den ausgewählten Ordner
 
 Play the selected demo
-== 
+== Ausgewählte Aufnahme abspielen
 
 Preview visibilities
-== 
+== Sichtbarkeitenvorschau
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== Die Extramenü-Taste welche die Sichtbarkeit von Tasten mit der Sichtbarkeitseinstellung "Extramenü" umschaltet. Öffnet außerdem bei langem Tastendruck das Spielmenü.
 
 A vote is currently active.
-== 
+== Eine Abstimmung läuft aktuell.
 
 Update Rate
-== 
+== Aktualisierungs-Rate
 
 Prediction margin
-== 
+== Vorberechnungsabstand
 
 Predict events (experimental)
-== 
+== Ereignisse vorausberechnen (experimentell)

@@ -2611,13 +2611,13 @@ Hook collision line tip
 == Końcówka linii
 
 Refresh the demo list
-== 
+== Odśwież listę dem
 
 Open the selected folder
-== 
+== Otwórz wybrany folder
 
 Play the selected demo
-== 
+== Odtwórz wybrane demo
 
 Preview visibilities
 == 
@@ -2659,7 +2659,7 @@ The extra menu with the given number is activated.
 == 
 
 Prediction margin
-== 
+== Zakres przewidywania
 
 Predict events (experimental)
-== 
+== Przewiduj wydarzenia (eksperymentalne)

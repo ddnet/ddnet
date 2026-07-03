@@ -188,7 +188,7 @@ Are you sure that you want to disconnect?
 == Ви дійсно бажаєте від’єднатися?
 
 Are you sure that you want to disconnect and switch to a different server?
-== Ви дійсно бажаєте від’єднатися й приєднатися до іншого сервера?
+== Ви дійсно бажаєте від’єднатися й приєднатися до іншого серверу?
 
 Are you sure that you want to disconnect your dummy?
 == Ви дійсно бажаєте від’єднати свого даммі?
@@ -267,7 +267,7 @@ Basic
 == Базовий
 
 Best
-== Найкращий
+== НКом
 
 Blue team
 == Сині
@@ -325,7 +325,7 @@ CHN
 == КИТ
 
 Choose default eyes when joining a server
-== Типові очі під час приєднання до сервера
+== Типові очі під час приєднання до серверу
 
 Clan
 == Клан
@@ -352,7 +352,7 @@ Close
 == Закрити
 
 Close the demo player
-== Закрити програвач демо
+== Закрити відтворювач демо
 
 Communities
 == Спільноти
@@ -489,7 +489,7 @@ Deactivate all
 == Деактивувати всіх
 
 Deaths
-== Смерті
+== С
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Увімкнено режим налагодження. Натисніть Ctrl+Shift+D, щоб його вимкнути.
@@ -629,7 +629,7 @@ Enable replays
 == Увімкнути повтори
 
 Enable server message sound
-== Звук повідомлення сервера
+== Звук повідомлення серверу
 
 Enable team chat sound
 == Звук повідомлення команди
@@ -815,7 +815,7 @@ Getting game info
 == Отримання інформації про гру
 
 Getting server list from master server
-== Отримання списку серверів з головного сервера
+== Отримання списку серверів з головного серверу
 
 Ghost
 == Привид
@@ -932,10 +932,10 @@ Ingame controller mode
 == Режим контролера у грі
 
 Ingame controller sens.
-== Чутливість контролера в грі.
+== Чутливість контролера в грі
 
 Ingame mouse sens.
-== Чутливість миші в грі.
+== Чутливість миші в грі
 
 Initializing assets
 == Ініціалізація текстур
@@ -953,7 +953,7 @@ Invalid Demo
 == Недійсне демо
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Перед тим, як приєднатися до сервера, рекомендуємо змінити налаштування до ваших уподобань.
+== Перед тим, як приєднатися до серверу, рекомендуємо змінити налаштування до ваших уподобань.
 
 Join blue
 == До синіх
@@ -965,7 +965,7 @@ Join red
 == До червоних
 
 Join Tutorial Server
-== Приєднатися до навчального сервера
+== Приєднатися до навчального серверу
 
 Jump
 == Стрибок
@@ -1165,7 +1165,7 @@ No
 == Ні
 
 No answer from server yet.
-== Поки що немає відповіді від сервера.
+== Поки що немає відповіді від серверу.
 
 No controller found. Plug in a controller.
 == Жодного контролера не знайдено. Під’єднайте контролер.
@@ -1186,10 +1186,10 @@ No results
 == Немає результатів
 
 No server selected
-== Жодного сервера не вибрано
+== Жодного серверу не вибрано
 
 No servers found
-== Не знайдено жодного сервера
+== Не знайдено жодного серверу
 
 No servers match your filter criteria
 == Немає серверів, що відповідають вашим критеріям
@@ -1495,16 +1495,16 @@ Sending initial client info
 == Надсилання початкових даних клієнта
 
 Server address:
-== Адреса сервера:
+== Адреса серверу:
 
 Server best:
-== Рекорд сервера:
+== Рекорд серверу:
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == Не вдалося запустити сервер. Переконайтеся, що ви дозволили сповіщення в налаштуваннях програми, щоб сервер міг працювати у фоновому режимі.
 
 Server executable not found, can't run server
-== Виконуваний файл сервера не знайдено, запустити сервер не вдалося
+== Виконуваний файл серверу не знайдено, не вдалося запустити сервер
 
 Server filter
 == Фільтр серверів
@@ -1745,7 +1745,7 @@ Sudden Death
 == Раптова смерть
 
 Suicides
-== Самогубства
+== СГ
 
 Super
 == Супер
@@ -1905,7 +1905,7 @@ Use current map as background
 == Використовувати поточну мапу як тло
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Натисніть «k», щоб умерти (почати спочатку), «q», щоб спостерігати за іншими гравцями. Інші призначення клавіш дивіться у налаштуваннях.
+== Натисніть «k», щоб умерти (почати спочатку), «q», щоб спостерігати за іншими гравцями. Інші призначення клавіш див. у налаштуваннях.
 
 Use old chat style
 == Старий стиль чату
@@ -2010,7 +2010,7 @@ Zoom out
 == Віддалити
 
 Auto-sync player camera
-== Авто. синхронізовувати камеру гравця
+== Авто-синхронізовувати камеру гравця
 
 [Auto camera]
 Disabled
@@ -2079,20 +2079,20 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Український переклад від .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453, veydzh3r та NyrrCly
+== Український переклад від .ua, Ivan., SwiatoslaW, 404_not_found, Andy Callisto, veydzh3r та NyrrCly
 
 Show spectator cursor
-== Показувати вказівник глядача
+== Показувати вказівник спостерігача
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== Недостатньо відеопам’яті (VRAM). Спробуйте зменшити значення параметра 'cl_skins_loaded_max' або видаліть користувацькі ресурси (скіни, сутності тощо), особливо ті, що мають високу роздільну здатність.
+== Недостатньо відеопам'яті. Спробуйте встановити менше значення параметру 'cl_skins_loaded_max' або видаліть власні текстури (скіни, сутності і т.д.), особливо ті, що мають високу роздільність.
 
 No demo with this filename exists
-== Демо з такою назвою не існує
+== Не існує демо з цією назвою файлу
 
 This name cannot be used for files and folders
-== Це ім’я недопустиме для файлів і папок
+== Це ім’я недопустиме для файлів і тек
 
 Map size
 == Розмір мапи
@@ -2101,16 +2101,16 @@ This skin name cannot be used.
 == Таке ім’я скіна недопустиме.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== Не вдалося завантажити скін через помилку. Перевірте локальну консоль для деталей.
+== Не вдалося завантажити скін через помилку. Див. локальну консоль для подробиць.
 
 Skin could not be found.
 == Не вдалося знайти скін.
 
 No skins match your filter criteria
-== Немає скінів, які відповідають вашому фільтру
+== Немає скінів, що відповідають вашим критеріям
 
 Show number of spectators
-== Показувати кількість глядачів за мною
+== Показувати кількість спостерігачів
 
 [Show name plates]
 None
@@ -2126,30 +2126,30 @@ Others
 
 [Show name plates]
 All
-== Всіх
+== Усіх
 
 Name plates offset
-== Зміщення імені
+== Зміщення ніку
 
 Show friend icon in name plates
-== Показувати іконку друга в імені
+== Показувати іконку друга в ніці
 
 Show client IDs on a separate line
-== Показувати клієнтські ID на окремій лінії
+== Показувати ID клієнта на окремому рядку
 
 Client IDs size
-== Розмір клієнтських ID
+== Розмір ID клієнта
 
 Show players' key presses
 == Показувати натискання клавіш гравців
 
 [Show players' key presses]
 None
-== Жоден
+== Жодні
 
 [Show players' key presses]
 Own
-== Свій
+== Свої
 
 [Show players' key presses]
 Others
@@ -2157,32 +2157,32 @@ Others
 
 [Show players' key presses]
 All
-== Всіх
+== Усіх
 
 Preview player's name plate
-== Попередній перегляд відображення імені гравця
+== Передперегляд ніку гравця
 
 Preview dummy's name plate
-== Попередній перегляд відображення імені даммі
+== Передперегляд ніку даммі
 
 Dragger Outline Color
-== Колір контуру драггера
+== Колір контуру притягувача
 
 Dragger Inner Color
-== Колір драггера
+== Колір притягувача
 
 [Spectating]
 Following %d: %s
-== Спостерігає за %d: %s
+== Спостерігання за %d: %s
 
 Loading map
 == Завантаження мапи
 
 Error checking player name
-== Помилка перевірки імені гравця
+== Помилка перевірки ніку
 
 Could not check for existing player with your name. Check your internet connection.
-== Не вдалося перевірити, чи існує гравець із таким іменем. Перевірте з'єднання з інтернетом.
+== Не вдалося перевірити, чи існує гравець з вашим ніком. Перевірте з'єднання з інтернетом.
 
 Press Ctrl+Shift+G to disable debug graphs.
 == Натисніть Ctrl+Shift+G, щоб вимкнути графіки відладки.
@@ -2191,7 +2191,7 @@ Server could not be started
 == Не вдалося запустити сервер
 
 Could not get server list from master server
-== Не вдалося отримати список серверів від майстер-сервера
+== Не вдалося отримати список серверів від головного серверу
 
 [Demo playback]
 Live
@@ -2217,7 +2217,7 @@ Delete button
 == Видалити кнопку
 
 Are you sure that you want to delete this button?
-== Ви впевнені, що хочете видалити цю кнопку?
+== Ви дійсно бажаєте видалити цю кнопку?
 
 Duplicate
 == Дублювати
@@ -2232,10 +2232,10 @@ There is not enough space available to place another button.
 == Недостатньо місця для розміщення ще однієї кнопки.
 
 Deselect
-== Скасувати вибір
+== Зняти вибір
 
 You'll lose unsaved changes after deselecting.
-== Ви втратите незбережені зміни після скасування вибору.
+== Ви втратите незбережені зміни після зняття вибору.
 
 Width
 == Ширина
@@ -2252,7 +2252,7 @@ Rectangle
 
 [Touch button shape]
 Circle
-== Коло
+== Круг
 
 [Touch button label type]
 Plain
@@ -2285,10 +2285,10 @@ Command
 == Команда
 
 Label
-== Підпис
+== Напис
 
 Label type
-== Тип підпису
+== Тип напису
 
 Add command
 == Додати команду
@@ -2302,7 +2302,7 @@ Included
 
 [Touch button visibility preview]
 Excluded
-== Вимкнено
+== Виключено
 
 [Touch button visibility preview]
 Ignore
@@ -2315,7 +2315,7 @@ Select button by touch
 == Вибір кнопки дотиком
 
 No buttons match your filter criteria
-== Жодна кнопка не відповідає критеріям фільтру
+== Немає кнопок, що відповідають вашим критеріям
 
 File
 == Файл
@@ -2330,7 +2330,7 @@ Inactive color
 == Неактивний колір
 
 Preview button visibility while the editor is active.
-== Попередній перегляд видимості кнопок під час активного редактора.
+== Попередній перегляд видимості кнопок поки редактор активний.
 
 Show all buttons
 == Показати всі кнопки
@@ -2342,13 +2342,13 @@ Discard
 == Відхилити
 
 There is not enough space available for the button. Check its visibilities and size.
-== Недостатньо місця для кнопки. Перевірте її видимість і розмір.
+== Недостатньо місця для кнопки. Перевірте її видимості і розмір.
 
 Selected button not visible
 == Вибрана кнопка невидима
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== Вибрана кнопка невидима. Хочете скасувати вибір чи змінити її видимість?
+== Вибрана кнопка невидима. Ви бажаєте зняти вибір чи змінити її видимість?
 
 Edit
 == Редагувати
@@ -2371,27 +2371,27 @@ Ingame
 
 [Touch button visibilities]
 Zoom Allowed
-== Дозволено масштабування
+== Наближення дозволено
 
 [Touch button visibilities]
 Vote Active
-== Активне голосування
+== Триває голосування
 
 [Touch button visibilities]
 Dummy Allowed
-== Дозволено даммі
+== Даммі дозволено
 
 [Touch button visibilities]
 Dummy Connected
-== Даммі підключено
+== Даммі приєднано
 
 [Touch button visibilities]
 Rcon Authed
-== Rcon авторизовано
+== Авторизовано в віддаленій консолі
 
 [Touch button visibilities]
 Demo Player
-== Перегляд демо
+== Відтворювач демо
 
 [Touch button visibilities]
 Extra Menu
@@ -2419,7 +2419,7 @@ Swap Action
 
 [Predefined touch button behaviors]
 Use Action
-== Використати дію
+== Використання
 
 [Predefined touch button behaviors]
 Joystick Action
@@ -2447,16 +2447,16 @@ Download
 == Завантажити
 
 Team save in progress. You'll be able to load with '/load %s'
-== Збереження команди триває. Ви зможете завантажити її командою '/load %s'
+== Триває збереження команди. Ви зможете завантажити її командою «/load %s»
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== Збереження команди триває. Ви зможете завантажити її командою '/load %s', якщо збереження буде успішним, або командою '/load %s', якщо воно не вдасться
+== Триває збереження команди. Ви зможете завантажити її командою /load %s», якщо збереження вдале, або командою «/load %s», якщо невдале
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== Команду успішно збережено гравцем %s. Підключення до бази даних не вдалося, використано згенерований код збереження, щоб уникнути конфліктів. Використайте '/load %s', щоб продовжити
+== Команду успішно збережено гравцем %s. З'єднання з базою даних не вдалося, натомість використано згенерований код збереження для запобігання конфліктів. Використайте команду «/load %s», щоб продовжити
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== Команду успішно збережено гравцем %s. Підключення до бази даних не вдалося, тому використано згенерований код збереження, щоб уникнути конфліктів. Використайте '/load %s' на %s, щоб продовжити
+== Команду успішно збережено гравцем %s. З'єднання з базою даних не вдалося, натомість використано згенерований код збереження для запобігання конфліктів. Використайте команду «/load %s» на %s, щоб продовжити
 
 Save failed!
 == Збереження не вдалося!
@@ -2466,70 +2466,70 @@ Press Esc or Tab to dismiss…
 == Натисніть Esc або Tab, щоб закрити…
 
 Server alert
-== Попередження сервера
+== Попередження серверу
 
 Moderator alert
 == Попередження модератора
 
 You will be disconnected from the server.
-== Вас буде від’єднано від сервера.
+== Вас буде від’єднано від серверу.
 
 Are you sure that you want to disconnect and play this demo?
-== Ви впевнені, що хочете від’єднатись та відтворити це демо?
+== Ви дійсно бажаєте від’єднатись та відтворити це демо?
 
 Show background quads
 == Показати фонові квади
 
 Scoreboard cursor
-== Курсор таблиці результатів
+== Курсор таблиці
 
 Add friend
 == Додати друга
 
 Unmute
-== Увімкнути повідомлення
+== Розглушити
 
 Mute
-== Вимкнути повідомлення
+== Заглушити
 
 Unmute emoticons
-== Увімкнути емоції
+== Розглушити смайлики
 
 Mute emoticons
-== Вимкнути емоції
+== Заглушити смайлики
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== У редакторі сенсорного управління є незбережена зміна, можливо, ви захочете її зберегти.
+== У редакторі сенсорного керування є незбережена зміна, можливо, ви бажаєте її зберегти.
 
 Start and connect to local server
-== Запустити та підключитися до локального сервера
+== Запустити та приєднатися до локального серверу
 
 Add clan
 == Додати клан
 
 Info
-== Інформація
+== Інфо
 
 Button browser
 == Браузер кнопок
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== Ви можете вибрати кнопки безпосередньо в списку нижче або натиснути і утримувати сенсорну кнопку на екрані, щоб вибрати її. Ви також можете переміщати та змінювати розмір кнопок за допомогою дотику.
+== Ви можете вибрати кнопки безпосередньо в списку нижче, або затиснути сенсорну кнопку на екрані, щоб вибрати її. Ви також можете переміщувати та змінювати розмір кнопок дотиком.
 
 Preview visibilities
-== Попередній перегляд видимості
+== Передперегляд видимостей
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== На цій сторінці ви можете керувати налаштуваннями сенсорного керування. Після перезапуску клієнта будуть доступні лише збережені зміни. Ви можете поділитися налаштуваннями сенсорного керування з іншими, експортувавши їх у буфер обміну.\n\nБільш детальну інформацію про сенсорне керування ви можете знайти на DDNet Wiki.
+== На цій сторінці ви можете керувати налаштуваннями сенсорного керування. Після перезапуску клієнта будуть доступні лише збережені зміни. Ви можете ділитися своїми налаштуваннями сенсорного керування з іншими, експортувавши їх до буферу обміну.\n\nВи можете знайти детальнішу інформацію про сенсорне керування на вікі DDNet.
 
 Open DDNet Wiki
-== Відкрити DDNet Wiki
+== Відкрити вікі DDNet
 
 Buttons with this behavior execute console commands like regular key binds.
-== Кнопки з такою поведінкою виконують консольні команди, як звичайні комбінації клавіш.
+== Кнопки з цією поведінкою виконують консольні команди, як звичайні прив'язки.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== Кнопки з такою поведінкою циклічно виконують одну з двох або більше заданих команд.
+== Кнопки з цією поведінкою перемикаються між виконанням однієї з двох чи більше вказаних команд.
 
 Buttons with this behavior execute some predefined actions.
 == Кнопки з такою поведінкою виконують деякі заздалегідь визначені дії.
@@ -2538,16 +2538,16 @@ Opens the ingame menu immediately when released.
 == Відкриває ігрове меню відразу після відпускання.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== Додаткова кнопка меню, яка вмикає/вимикає видимість кнопок з назвою "Додаткове меню". При тривалому натисканні також відкриває ігрове меню.
+== Кнопка додаткового меню, яка перемикає видимість кнопок з видимостями «Додаткове меню». Також відкриває ігрове меню при затисканні.
 
 Opens the emoticon selector (this does not work with binds).
-== Відкриває вибір смайликів (це не працює з прив’язками клавіш).
+== Відкриває вибір смайликів (не працює з прив’язками).
 
 Opens the spectator menu (this does not work with binds).
-== Відкриває меню спостерігача (не працює з прив’язками клавіш).
+== Відкриває меню спостерігача (не працює з прив’язками).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== Замінює активну дію (постріл і хук) на прямий сенсорний ввід і віртуальні джойстики.
+== Замінює активну дію (вогонь і гак) на прямий сенсорний ввід і віртуальні джойстики.
 
 Uses the active action with the current aiming position.
 == Використовує активну дію з поточним положенням прицілювання.
@@ -2559,37 +2559,37 @@ Virtual joystick which only aims without using an action.
 == Віртуальний джойстик, який тільки наводить, не виконуючи дій.
 
 Virtual joystick which always uses fire.
-== Віртуальний джойстик, який завжди використовує стрільбу.
+== Віртуальний джойстик, який завжди використовує вогонь.
 
 Virtual joystick which always uses hook.
-== Віртуальний джойстик, який завжди використовує хук.
+== Віртуальний джойстик, який завжди використовує гак.
 
 Player is ingame, i.e. not spectating.
 == Гравець у грі, тобто не в режимі спостереження.
 
 Zoom is allowed on this server.
-== На цьому сервері дозволено використовувати функцію масштабування.
+== Наближення дозволене на цьому сервері.
 
 A vote is currently active.
 == Наразі триває голосування.
 
 Dummy is allowed on this server.
-== На цьому сервері дозволено використання даммі.
+== Використання даммі заборонене на цьому сервері.
 
 Dummy is currently connected.
-== Даммі наразі підключений.
+== Даммі наразі під'єднаний.
 
 Player is currently authed in rcon.
-== Гравець наразі авторизований в rcon.
+== Гравець наразі авторизований у віддаленій консолі.
 
 Demo player is currently active.
-== Демо-плеєр наразі активний.
+== Відтворювач демо наразі активний.
 
 The extra menu with the given number is activated.
-== Додаткове меню з вказаним номером активоване.
+== Додаткове меню з вказаним номером активовано.
 
 Joining Tutorial server
-== Приєднання до навчального сервера
+== Приєднання до навчального серверу
 
 There are no Tutorial servers available
 == Немає доступних навчальних серверів
@@ -2598,19 +2598,19 @@ Retrying…
 == Повторна спроба…
 
 Error joining Tutorial server
-== Не вдалося підключитися до навчального сервера
+== Помилка приєднання до навчального серверу
 
 Could not find a Tutorial server. Check your internet connection.
-== Не вдалося знайти навчальний сервер. Перевірте підключення до Інтернету.
+== Не вдалося знайти навчальний сервер. Перевірте з'єднання з інтернетом.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== Ви граєте на локальному сервері, оскільки не вдалося знайти навчальний сервер.\n\nВаш результат буде збережено лише локально.
+== Ви граєте на локальному сервері, тому що не було знайдено жодного навчального серверу в мережі.\n\nВаш результат буде збережено лише локально.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== Не вдалося знайти навчальний сервер.\nЗапуск і підключення до локального серверу…
+== Не вдалося знайти навчальний сервер у мережі.\nЗапуск і приєднання до локального серверу…
 
 Waiting for local server to stop…
-== Очікування завершення роботи локального серверу…
+== Очікування зупинки локального серверу…
 
 Waiting for local server to start…
 == Очікування запуску локального серверу…
@@ -2619,7 +2619,7 @@ Error loading communities
 == Помилка завантаження спільнот
 
 Click to remove this community from your favorites.
-== Натисніть, щоб видалити цю спільноту з ваших улюблених.
+== Натисніть, щоб прибрати цю спільноту з ваших улюблених.
 
 Click to add this community to your favorites.
 == Натисніть, щоб додати цю спільноту до ваших улюблених.
@@ -2628,38 +2628,38 @@ Update Rate
 == Частота оновлення
 
 Save power by lowering update rate (higher input latency)
-== Економія енергії, зменшуючи частоту оновлення (збільшується затримка введення)
+== Зберегти енергію, зменшивши частоту оновлення (більша затримка введення)
 
 Colors of the hook collision line:
-== Кольори лінії зіткнення хука:
+== Кольори лінії зіткнення гака:
 
 [Hook collision line color]
 When nothing is hookable
-== Коли нічого не можна хукнути
+== Коли ні за що не можна зачепитися
 
 [Hook collision line color]
 When something is hookable
-== Коли щось є хукабельним
+== Коли за щось можна зачепитися
 
 [Hook collision line color]
 When a Tee is hookable
-== Коли Тії можна хукнути
+== Коли можна зачепитися за тії
 
 [Hook collision line color]
 Hook collision line tip
-== Підказка для лінії зіткнення хука
+== Кінчик лінії зіткнення гака
 
 Refresh the demo list
-== 
+== Оновити список демо
 
 Open the selected folder
-== 
+== Відкрити вибрану теку
 
 Play the selected demo
-== 
+== Відтворити вибране демо
 
 Prediction margin
-== 
+== Допуск передбачення
 
 Predict events (experimental)
-== 
+== Передбачувати події (експериментально)
