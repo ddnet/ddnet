@@ -323,8 +323,6 @@ public:
 
 	void List(int ClientId, const char *pFilter);
 
-	//
-	void CheckPureTuning();
 	void SendTuningParams(int ClientId, int Zone = 0);
 
 	const CVoteOptionServer *GetVoteOption(int Index) const;
