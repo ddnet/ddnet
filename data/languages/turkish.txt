@@ -2650,16 +2650,16 @@ Hook collision line tip
 == Kanca çizgisi ucu
 
 Refresh the demo list
-== 
+== Demo listesini yenile
 
 Open the selected folder
-== 
+== Seçili dosyayı aç
 
 Play the selected demo
-== 
+== Seçili demoyu oynat
 
 Prediction margin
-== 
+== Tahmin etme payı
 
 Predict events (experimental)
-== 
+== Olayları tahmin et (deneysel)
