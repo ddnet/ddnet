@@ -104,6 +104,7 @@ bool CSshServer::TryAuthenticateClient(CSshClient *pClient)
 			str_comp(pUser, USERNAME) == 0 &&
 			str_comp(pPass, PASSWORD) == 0)
 		{
+			log_info("ssh", "deprecated auth success");
 			ssh_message_auth_reply_success(Message, 0);
 			pClient->m_Authenticated = true;
 		}
@@ -576,18 +577,6 @@ void CSshServer::Update()
 			}
 		}
 
-		if(!pClient->m_Authenticated)
-		{
-			// TODO: remove this entire method once callbacks work
-			if(!TryAuthenticateClient(pClient))
-			{
-				fprintf(stderr, "Authentication failed\n");
-				OnClientDisconnect(pClient->m_ClientId);
-				return;
-			}
-			continue;
-		}
-
 		if(pClient->m_Channel == nullptr)
 		{
 			// TODO: remove this entire method once callbacks work
@@ -615,6 +604,11 @@ void CSshServer::Update()
 			ssh_channel_send_eof(pClient->m_Channel);
 			ssh_channel_close(pClient->m_Channel);
 			OnClientDisconnect(pClient->m_ClientId);
+		}
+
+		if(!pClient->m_Authenticated)
+		{
+			continue;
 		}
 
 
