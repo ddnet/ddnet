@@ -157,33 +157,6 @@ bool CSshServer::TryAcceptShell(CSshClient *pClient)
 	if(Message == nullptr)
 		return true;
 
-	if(ssh_message_type(Message) == SSH_REQUEST_CHANNEL)
-	{
-		switch(ssh_message_subtype(Message))
-		{
-		case SSH_CHANNEL_REQUEST_PTY:
-			log_info("ssh", "deprecated pty request success");
-			ssh_message_channel_request_reply_success(Message);
-			break;
-
-		case SSH_CHANNEL_REQUEST_SHELL:
-			log_info("ssh", "deprecated shell request success");
-			ssh_message_channel_request_reply_success(Message);
-			pClient->m_ShellReady = true;
-			break;
-
-		default:
-			log_info("ssh", "default reply???");
-			ssh_message_reply_default(Message);
-			break;
-		}
-	}
-	else
-	{
-		log_info("ssh", "default reply non channel message???");
-		ssh_message_reply_default(Message);
-	}
-
 	ssh_message_free(Message);
 	return true;
 }
