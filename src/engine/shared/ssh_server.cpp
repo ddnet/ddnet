@@ -84,69 +84,6 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	m_pOuterLogger->Log(pMessage);
 }
 
-bool CSshServer::TryAuthenticateClient(CSshClient *pClient)
-{
-	ssh_session Session = pClient->m_Session;
-	ssh_message Message = ssh_message_get(Session);
-
-	// log_info("ssh", "trying to authenticate cid %d...", pClient->m_ClientId);
-
-	if(Message == nullptr)
-		return true;
-
-	if(ssh_message_type(Message) == SSH_REQUEST_AUTH &&
-		ssh_message_subtype(Message) == SSH_AUTH_METHOD_PASSWORD)
-	{
-		const char *pUser = ssh_message_auth_user(Message);
-		const char *pPass = ssh_message_auth_password(Message);
-
-		if(pUser && pPass &&
-			str_comp(pUser, USERNAME) == 0 &&
-			str_comp(pPass, PASSWORD) == 0)
-		{
-			log_info("ssh", "deprecated auth success");
-			ssh_message_auth_reply_success(Message, 0);
-			pClient->m_Authenticated = true;
-		}
-		else
-		{
-			ssh_message_auth_set_methods(Message, SSH_AUTH_METHOD_PASSWORD);
-			ssh_message_reply_default(Message);
-		}
-	}
-	else
-	{
-		ssh_message_auth_set_methods(Message, SSH_AUTH_METHOD_PASSWORD);
-		ssh_message_reply_default(Message);
-	}
-
-	ssh_message_free(Message);
-	return true;
-}
-
-bool CSshServer::TryOpenSessionChannel(CSshClient *pClient)
-{
-	if(pClient->m_Channel)
-		return true;
-
-	ssh_message Message = ssh_message_get(pClient->m_Session);
-	if(Message == nullptr)
-		return true;
-
-	if(ssh_message_type(Message) == SSH_REQUEST_CHANNEL_OPEN &&
-		ssh_message_subtype(Message) == SSH_CHANNEL_SESSION)
-	{
-		pClient->m_Channel = ssh_message_channel_request_open_reply_accept(Message);
-		ssh_message_free(Message);
-		return true;
-	}
-
-	ssh_message_reply_default(Message);
-	ssh_message_free(Message);
-
-	return true;
-}
-
 void CSshServer::ProcessMessage(CSshClient *pClient)
 {
 	// we aren't interested in any specific message yet

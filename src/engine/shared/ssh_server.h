@@ -74,9 +74,6 @@ class CSshServer
 	char m_aError[512] = "";
 
 	void GenerateHostKeyIfMissing();
-
-	bool TryAuthenticateClient(CSshClient *pClient);
-	bool TryOpenSessionChannel(CSshClient *pClient);
 	void ProcessMessage(CSshClient *pClient);
 
 	std::optional<int> FindFreeSlot();
