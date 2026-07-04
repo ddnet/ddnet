@@ -188,19 +188,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	ssh_channel Channel = pClient->m_Channel;
 	char aBuf[256] = {0};
 
-	if(pClient->m_ShowBanner)
-	{
-		const char *pBanner =
-			"##################################\r\n"
-			"#                                #\r\n"
-			"#  welcome to the rcon console!  #\r\n"
-			"#                                #\r\n"
-			"##################################\r\n";
-		ssh_channel_write(Channel, pBanner, str_length(pBanner));
-		ssh_channel_write(Channel, "\r\n> ", 4);
-		pClient->m_ShowBanner = false;
-	}
-
 	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
 	if(n == SSH_EOF || n == SSH_ERROR)
 	{
@@ -461,12 +448,14 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 	pCtx->m_pClient->m_Channel = Channel;
 	pCtx->m_pClient->m_ShellReady = true;
 
-	// Optionally send a greeting immediately.
 	const char *pBanner =
-		"Welcome!\r\n"
-		"$ ";
-
-	ssh_channel_write(Channel, pBanner, strlen(pBanner));
+		"##################################\r\n"
+		"#                                #\r\n"
+		"#  welcome to the rcon console!  #\r\n"
+		"#                                #\r\n"
+		"##################################\r\n";
+	ssh_channel_write(Channel, pBanner, str_length(pBanner));
+	ssh_channel_write(Channel, "\r\n> ", 4);
 
 	return SSH_OK;
 }
@@ -628,6 +617,8 @@ void CSshServer::Update()
 			OnClientDisconnect(pClient->m_ClientId);
 		}
 
+
+		// TODO: should this be a callback too? Right now it seems to work as is so no urgency.
 		HandleInput(pClient);
 	}
 }
