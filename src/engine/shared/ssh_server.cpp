@@ -19,6 +19,12 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: log failed auth somewhere? ssh is a more popular attack target than teeworlds econ
+//       we might need extra protection by showing the admin how many incoming attacks are there
+
+// TODO: should there be some "w" or "who" command like in linux systems
+//       to see other ssh connections because they do not show up in "status"
+
 // TODO: should be a config
 #define PORT "2222"
 
@@ -213,6 +219,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	// TODO: ctrl+r history support
 	// TODO: movement with arrow keys
 	// TODO: word jumping and word deletion
+	// TODO: autocomplete
 	// TODO: can we use the readline library here somehow?
 
 	for(int i = 0; i < n; i++)
