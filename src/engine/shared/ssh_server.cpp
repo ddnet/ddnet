@@ -408,6 +408,15 @@ ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, v
 	// Optional: Store the channel in your client object so you can read/write to it later
 	pCtx->m_pClient->m_Channel = Channel;
 
+	pCtx->m_pClient->m_ChannelCallback = {
+		.userdata = pCtx,
+		.channel_pty_request_function = ChannelPtyRequestCallback,
+		.channel_shell_request_function = ChannelShellRequestCallback,
+		.channel_pty_window_change_function = ChannelPtyWindowChangeCallback,
+	};
+	ssh_callbacks_init(&pCtx->m_pClient->m_ChannelCallback);
+	ssh_set_channel_callbacks(Channel, &pCtx->m_pClient->m_ChannelCallback);
+
 	log_info("ssh", "Channel open: SUCCESS");
 	return Channel;
 }
@@ -451,15 +460,6 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 
 	pCtx->m_pClient->m_Channel = Channel;
 	pCtx->m_pClient->m_ShellReady = true;
-
-	pCtx->m_pClient->m_ChannelCallback = {
-		.userdata = pCtx,
-		.channel_pty_request_function = ChannelPtyRequestCallback,
-		.channel_shell_request_function = ChannelShellRequestCallback,
-		.channel_pty_window_change_function = ChannelPtyWindowChangeCallback,
-	};
-	ssh_callbacks_init(&pCtx->m_pClient->m_ChannelCallback);
-	ssh_set_channel_callbacks(Channel, &pCtx->m_pClient->m_ChannelCallback);
 
 	// Optionally send a greeting immediately.
 	const char *pBanner =
