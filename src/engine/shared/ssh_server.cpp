@@ -365,6 +365,9 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 {
 	dbg_assert(m_apClients[ClientId] == nullptr, "ssh_server connect failed ClientId %d reused", ClientId);
 
+	// TODO: this prints for every connection attempt so attackers without the password can spam the log
+	//       and occupy client ids
+	//       so ideally there would be a different connection pool just for the before auth state
 	log_info("ssh", "client with id %d connected", ClientId);
 
 	CSshClient *pClient = new CSshClient(ClientId, Session);
