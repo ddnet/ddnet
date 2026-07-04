@@ -173,6 +173,7 @@ bool CSshServer::TryAcceptShell(CSshClient *pClient)
 			break;
 
 		default:
+			log_info("ssh", "default reply???");
 			ssh_message_reply_default(Message);
 			break;
 		}
