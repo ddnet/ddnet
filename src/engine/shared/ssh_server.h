@@ -77,7 +77,7 @@ class CSshServer
 
 	bool TryAuthenticateClient(CSshClient *pClient);
 	bool TryOpenSessionChannel(CSshClient *pClient);
-	bool TryAcceptShell(CSshClient *pClient);
+	void ProcessMessage(CSshClient *pClient);
 
 	std::optional<int> FindFreeSlot();
 

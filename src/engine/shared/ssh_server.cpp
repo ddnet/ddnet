@@ -147,18 +147,19 @@ bool CSshServer::TryOpenSessionChannel(CSshClient *pClient)
 	return true;
 }
 
-bool CSshServer::TryAcceptShell(CSshClient *pClient)
+void CSshServer::ProcessMessage(CSshClient *pClient)
 {
+	// we aren't interested in any specific message yet
+	// all of the messages are handled in callbacks
+	// but if we do not call ssh_message_get() things get stuck
 	ssh_session Session = pClient->m_Session;
 	ssh_message Message = ssh_message_get(Session);
-
-	// log_info("ssh", "trying to shell ready cid %d...", pClient->m_ClientId);
-
 	if(Message == nullptr)
-		return true;
+		return;
+
+	// WARNING: if you check messages here make sure to check pClient->m_Authenticated first if needed
 
 	ssh_message_free(Message);
-	return true;
 }
 
 void CSshServer::HandleInput(CSshClient *pClient)
@@ -536,6 +537,8 @@ void CSshServer::Update()
 		if(!pClient)
 			continue;
 
+		ProcessMessage(pClient);
+
 		// TODO: should we also timeout sessions without keepalive?
 		// TODO: this is not optimal since during the password prompt we can not really send a message
 		//       there is no channel yet so the user can still be typing a password after already being disconnected
@@ -550,15 +553,6 @@ void CSshServer::Update()
 			{
 				log_info("ssh", "cid=%d did not get shell ready fast enough and timed out", pClient->m_ClientId);
 				OnClientDisconnect(pClient->m_ClientId, "timeout");
-				continue;
-			}
-
-			// TODO: don't we have a callback for this? why do we need it?
-			if(!TryAcceptShell(pClient))
-			{
-				log_error("ssh", "shell request failed");
-				OnClientDisconnect(pClient->m_ClientId);
-				return;
 			}
 			continue;
 		}
