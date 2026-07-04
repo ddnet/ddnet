@@ -19,10 +19,23 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: should be a config
 #define PORT "2222"
+
+// TODO: the default file location in the current dir is not ideal
+//       this should be in the storage save location
+//       or maybe even use the system wide location that also the regular host
+//       ssh server uses so we do not need to generate the key
 #define HOSTKEY_FILE "ssh_host_rsa_key"
+
+// TODO: have "root" user by default use the sv_rcon_password pass
+//       or maybe it should be "default_admin" thats how the status command calls it
+//       in addition to that register all keys added by the auth manager as valid credentials
+//       for moderators and helpers
 #define USERNAME "demo"
 #define PASSWORD "secret"
+
+// TODO: there should also be ssh pub key login
 
 // Not thread-safe!
 class CSshLogger : public ILogger
@@ -195,6 +208,13 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		ssh_channel_write(Channel, "INPUT FULL LOL ", 15);
 		return;
 	}
+
+	// TODO: improve this shell!
+	// TODO: ctrl+r history support
+	// TODO: movement with arrow keys
+	// TODO: word jumping and word deletion
+	// TODO: can we use the readline library here somehow?
+
 	for(int i = 0; i < n; i++)
 	{
 		char Byte = aBuf[i];
@@ -275,6 +295,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 void CSshServer::GenerateHostKeyIfMissing()
 {
 #ifdef CONF_PLATFORM_LINUX
+	// TODO: make this cross platform and use openssh C++ code
 	int Ret = system("bash -c \"[[ -f ssh_host_rsa_key ]] || ssh-keygen -t rsa -b 4096 -f ssh_host_rsa_key -N ''\"");
 	if(Ret != 0)
 	{
