@@ -430,6 +430,12 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 	return SSH_OK;
 }
 
+int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
+{
+	log_info("ssh", "pty window change");
+	return 0;
+}
+
 int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Channel, void *pUserData)
 {
 	CSshClient::CCallbackCtx *pCtx =
@@ -450,6 +456,7 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 		.userdata = pCtx,
 		.channel_pty_request_function = ChannelPtyRequestCallback,
 		.channel_shell_request_function = ChannelShellRequestCallback,
+		.channel_pty_window_change_function = ChannelPtyWindowChangeCallback,
 	};
 	ssh_callbacks_init(&pCtx->m_pClient->m_ChannelCallback);
 	ssh_set_channel_callbacks(Channel, &pCtx->m_pClient->m_ChannelCallback);

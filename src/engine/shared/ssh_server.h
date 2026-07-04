@@ -86,6 +86,7 @@ class CSshServer
 	static int AuthPasswordCallback(ssh_session Session, const char *pUsername, const char *pPassword, void *pUserData);
 	static ssh_channel ChannelOpenRequestSessionCallback(ssh_session Session, void *pUserData);
 	static int ChannelPtyRequestCallback(ssh_session Session, ssh_channel Channel, const char *pTerm, int Width, int Height, int PxWidth, int PwHeight, void *pUserData);
+	static int ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData);
 	static int ChannelShellRequestCallback(ssh_session Session, ssh_channel Channel, void *pUserData);
 
 	void OnClientConnect(int ClientId, ssh_session Session);
