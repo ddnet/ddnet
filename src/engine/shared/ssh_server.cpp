@@ -124,6 +124,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	}
 
 	// TODO: improve this shell!
+	// TODO: arrow key up for history
 	// TODO: ctrl+r history support
 	// TODO: movement with arrow keys
 	// TODO: word jumping and word deletion
@@ -136,18 +137,21 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		if(Byte == 13)
 		{
 			const char *pCmd = pClient->m_aInput;
-			log_info("ssh", "cid=%d cmd='%s'", pClient->m_ClientId, pCmd);
-
-			if(!str_comp(pCmd, "logout") || !str_comp(pCmd, "exit"))
+			if(pCmd[0])
 			{
-				OnClientDisconnect(pClient->m_ClientId, "logout");
-				return;
-			}
+				log_info("ssh", "cid=%d cmd='%s'", pClient->m_ClientId, pCmd);
 
-			{
-				CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
-				CLogScope Scope(&Logger);
-				Console()->ExecuteLine(pCmd, IConsole::CLIENT_ID_UNSPECIFIED, true);
+				if(!str_comp(pCmd, "logout") || !str_comp(pCmd, "exit"))
+				{
+					OnClientDisconnect(pClient->m_ClientId, "logout");
+					return;
+				}
+
+				{
+					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
+					CLogScope Scope(&Logger);
+					Console()->ExecuteLine(pCmd, IConsole::CLIENT_ID_UNSPECIFIED, true);
+				}
 			}
 
 			pClient->m_aInput[0] = '\0';
@@ -273,17 +277,13 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 {
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 
-	log_info("ssh", "password auth attempt — user='%s'", pUsername);
-
 	if(str_comp(pUsername, USERNAME) == 0 &&
 		str_comp(pPassword, PASSWORD) == 0)
 	{
-		log_info("ssh", "Password auth: SUCCESS");
 		pCtx->m_pClient->m_Authenticated = true;
 		return SSH_AUTH_SUCCESS;
 	}
 
-	log_info("ssh", "Password auth: DENIED");
 	return SSH_AUTH_DENIED;
 }
 
@@ -291,24 +291,20 @@ ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, v
 {
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 
-	log_info("ssh", "Client requesting to open a session channel...");
-
-	// Security check: Ensure the user actually authenticated
 	if(!pCtx->m_pClient->m_Authenticated)
 	{
 		log_info("ssh", "Channel open DENIED: User not authenticated.");
+		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "unauthed channel open");
 		return nullptr;
 	}
 
-	// Create a new channel for this session
 	ssh_channel Channel = ssh_channel_new(Session);
 	if(Channel == nullptr)
 	{
-		log_info("ssh", "Failed to create channel.");
+		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "failed to create channel");
 		return nullptr;
 	}
 
-	// Optional: Store the channel in your client object so you can read/write to it later
 	pCtx->m_pClient->m_Channel = Channel;
 
 	pCtx->m_pClient->m_ChannelCallback = {
@@ -320,32 +316,27 @@ ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, v
 	ssh_callbacks_init(&pCtx->m_pClient->m_ChannelCallback);
 	ssh_set_channel_callbacks(Channel, &pCtx->m_pClient->m_ChannelCallback);
 
-	log_info("ssh", "Channel open: SUCCESS");
 	return Channel;
 }
 
 int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Channel, const char *pTerm, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
-	CSshClient::CCallbackCtx *pCtx =
-		static_cast<CSshClient::CCallbackCtx *>(pUserData);
+	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 
 	if(!pCtx->m_pClient->m_Authenticated)
 	{
-		log_info("ssh", "PTY request denied: client not authenticated");
+		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "unauthed pty request");
 		return SSH_ERROR;
 	}
 
-	log_warn("ssh", "PTY NOT SUPPORTED");
-
 	// we don't support pty yet, only shell for now
-	// smh we still need to return ok here??
+	// but we need to return OK here otherwise the client shows an error
 	return SSH_OK;
 }
 
 int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
-	log_info("ssh", "pty window change");
-	return 0;
+	return SSH_OK;
 }
 
 int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Channel, void *pUserData)
@@ -355,11 +346,11 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 
 	if(!pCtx->m_pClient->m_Authenticated)
 	{
-		log_info("ssh", "Shell request denied: client not authenticated");
+		// TODO: are these disconnects with error return really the way to go?
+		//       is that safe or do we get into bad state if we drop a client from within the callback?
+		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "unauthed shell request");
 		return SSH_ERROR;
 	}
-
-	log_info("ssh", "Shell request accepted");
 
 	pCtx->m_pClient->m_Channel = Channel;
 	pCtx->m_pClient->m_ShellReady = true;
@@ -409,7 +400,7 @@ void CSshServer::OnClientDisconnect(int ClientId, const char *pReason)
 	if(!pClient)
 		return;
 
-	log_info("ssh", "client with id %d disconnected", ClientId);
+	log_info("ssh", "disconnect cid=%d reason='%s'", ClientId, pReason);
 
 	ssh_channel Channel = pClient->m_Channel;
 	if(Channel)
@@ -431,12 +422,11 @@ void CSshServer::AcceptNewConnections()
 {
 	ssh_session NewSession = ssh_new();
 
-	// Non-blocking accept
 	int Rc = ssh_bind_accept(m_Bind, NewSession);
 	if(Rc == SSH_ERROR)
 	{
 		ssh_free(NewSession);
-		return; // No pending connection
+		return;
 	}
 
 	auto Slot = FindFreeSlot();
@@ -450,7 +440,6 @@ void CSshServer::AcceptNewConnections()
 
 	ssh_set_blocking(NewSession, 0);
 
-	// Start key exchange (will complete over multiple ticks)
 	if(ssh_handle_key_exchange(NewSession) == SSH_AGAIN ||
 		ssh_handle_key_exchange(NewSession) == SSH_OK)
 	{
