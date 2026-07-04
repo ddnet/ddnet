@@ -44,12 +44,12 @@ static int HashLocation(uint32_t Seed, uint32_t Run, uint32_t Rule, uint32_t X, 
 	return Hash % HASH_MAX;
 }
 
-CAutoMapper::CAutoMapper(CEditorMap *pMap) :
+CAutomapper::CAutomapper(CEditorMap *pMap) :
 	CMapObject(pMap)
 {
 }
 
-void CAutoMapper::Load(const char *pTileName)
+void CAutomapper::Load(const char *pTileName)
 {
 	char aPath[IO_MAX_PATH_LENGTH];
 	str_format(aPath, sizeof(aPath), "editor/automap/%s.rules", pTileName);
@@ -361,13 +361,13 @@ void CAutoMapper::Load(const char *pTileName)
 	m_FileLoaded = true;
 }
 
-void CAutoMapper::Unload()
+void CAutomapper::Unload()
 {
 	m_FileLoaded = false;
 	m_vConfigs.clear();
 }
 
-int CAutoMapper::CheckIndexFlag(int Flag, const char *pFlag, bool CheckNone) const
+int CAutomapper::CheckIndexFlag(int Flag, const char *pFlag, bool CheckNone) const
 {
 	if(!str_comp(pFlag, "XFLIP"))
 		Flag |= TILEFLAG_XFLIP;
@@ -381,7 +381,7 @@ int CAutoMapper::CheckIndexFlag(int Flag, const char *pFlag, bool CheckNone) con
 	return Flag;
 }
 
-const char *CAutoMapper::GetConfigName(int Index) const
+const char *CAutomapper::GetConfigName(int Index) const
 {
 	if(Index < 0 || Index >= (int)m_vConfigs.size())
 	{
@@ -390,7 +390,7 @@ const char *CAutoMapper::GetConfigName(int Index) const
 	return m_vConfigs[Index].m_aName;
 }
 
-void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed, int X, int Y, int Width, int Height)
+void CAutomapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed, int X, int Y, int Width, int Height)
 {
 	if(!m_FileLoaded || pLayer->m_Readonly || ConfigId < 0 || ConfigId >= (int)m_vConfigs.size())
 		return;
@@ -458,7 +458,7 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 	delete pUpdateGame;
 }
 
-void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed, int SeedOffsetX, int SeedOffsetY)
+void CAutomapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed, int SeedOffsetX, int SeedOffsetY)
 {
 	if(!m_FileLoaded || pLayer->m_Readonly || ConfigId < 0 || ConfigId >= (int)m_vConfigs.size())
 		return;

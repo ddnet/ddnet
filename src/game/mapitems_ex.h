@@ -20,7 +20,7 @@ public:
 	int m_Field4;
 };
 
-class CMapItemAutoMapperConfig
+class CMapItemAutomapperConfig
 {
 public:
 	enum

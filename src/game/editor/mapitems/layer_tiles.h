@@ -191,10 +191,10 @@ public:
 
 	int m_FillGameTile = -1;
 	bool m_LiveGameTiles = false;
-	int m_AutoMapperConfig;
-	int m_AutoMapperReference;
+	int m_AutomapperConfig;
+	int m_AutomapperReference;
 	int m_Seed;
-	bool m_AutoAutoMap;
+	bool m_AutoAutomapper;
 	bool m_HasTele;
 	bool m_HasSpeedup;
 	bool m_HasFront;
@@ -213,7 +213,7 @@ protected:
 
 	void ShowPreventUnusedTilesWarning();
 
-	friend class CAutoMapper;
+	friend class CAutomapper;
 };
 
 #endif
