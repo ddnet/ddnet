@@ -162,10 +162,12 @@ bool CSshServer::TryAcceptShell(CSshClient *pClient)
 		switch(ssh_message_subtype(Message))
 		{
 		case SSH_CHANNEL_REQUEST_PTY:
+			log_info("ssh", "deprecated pty request success");
 			ssh_message_channel_request_reply_success(Message);
 			break;
 
 		case SSH_CHANNEL_REQUEST_SHELL:
+			log_info("ssh", "deprecated shell request success");
 			ssh_message_channel_request_reply_success(Message);
 			pClient->m_ShellReady = true;
 			break;
@@ -599,7 +601,6 @@ void CSshServer::Update()
 			continue;
 		if(!pClient->m_Authenticated)
 			continue;
-
 
 		// TODO: should this be a callback too? Right now it seems to work as is so no urgency.
 		HandleInput(pClient);
