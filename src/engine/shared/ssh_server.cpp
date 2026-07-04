@@ -180,6 +180,7 @@ bool CSshServer::TryAcceptShell(CSshClient *pClient)
 	}
 	else
 	{
+		log_info("ssh", "default reply non channel message???");
 		ssh_message_reply_default(Message);
 	}
 
