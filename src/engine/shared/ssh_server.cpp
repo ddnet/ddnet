@@ -149,6 +149,15 @@ bool CSshServer::TryOpenSessionChannel(CSshClient *pClient)
 
 bool CSshServer::TryAcceptShell(CSshClient *pClient)
 {
+	ssh_session Session = pClient->m_Session;
+	ssh_message Message = ssh_message_get(Session);
+
+	// log_info("ssh", "trying to shell ready cid %d...", pClient->m_ClientId);
+
+	if(Message == nullptr)
+		return true;
+
+	ssh_message_free(Message);
 	return true;
 }
 
