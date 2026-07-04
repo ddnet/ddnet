@@ -21,7 +21,23 @@
 #include <cerrno>
 #endif
 
-#if defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_PLATFORM_WIIU)
+void sphore_init(SEMAPHORE *sem)
+{
+	OSInitSemaphore(sem, 0);
+}
+void sphore_wait(SEMAPHORE *sem)
+{
+	OSWaitSemaphore(sem);
+}
+void sphore_signal(SEMAPHORE *sem)
+{
+	OSSignalSemaphore(sem);
+}
+void sphore_destroy(SEMAPHORE *sem)
+{
+}
+#elif defined(CONF_FAMILY_WINDOWS)
 void sphore_init(SEMAPHORE *sem)
 {
 	*sem = CreateSemaphoreW(nullptr, 0, std::numeric_limits<LONG>::max(), nullptr);

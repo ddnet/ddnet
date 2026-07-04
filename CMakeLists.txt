@@ -68,6 +68,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
   set(TARGET_OS "android")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   set(TARGET_OS "emscripten")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WiiU" OR CMAKE_SYSTEM_NAME STREQUAL "CafeOS")
+  set(TARGET_OS "wiiu")
 endif()
 
 include(CheckCCompilerFlag)
@@ -487,6 +489,8 @@ if(CMAKE_CROSSCOMPILING)
   if(TARGET_OS STREQUAL "android" OR TARGET_OS STREQUAL "emscripten")
     # be more aggressive with android toolchain
     set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  elseif(TARGET_OS STREQUAL "wiiu")
+    set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH)
   else()
     set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH)
   endif()
@@ -525,8 +529,16 @@ find_package(Freetype)
 if(DOWNLOAD_GTEST)
   find_package(Git)
 endif()
-if(NOT(TARGET_OS STREQUAL "android"))
+if(NOT(TARGET_OS STREQUAL "android") AND NOT(TARGET_OS STREQUAL "wiiu"))
   find_package(GLEW)
+endif()
+if(TARGET_OS STREQUAL "wiiu")
+  # No OpenGL/GLEW on Wii U — null backend needs none
+  set(GLEW_BUNDLED OFF)
+  set(GLEW_FOUND TRUE)  # pretend found so bundled path not triggered
+  set(GLEW_DEP)
+  set(GLEW_LIBRARIES)
+  set(GLEW_INCLUDE_DIRS)
 endif()
 find_package(GTest)
 if(UPNP)
@@ -653,7 +665,7 @@ endif()
 if(NOT(Python3_FOUND))
   message(SEND_ERROR "You must install Python to compile ${CMAKE_PROJECT_NAME}")
 endif()
-if(NOT(RUST_FOUND))
+if(NOT(RUST_FOUND) AND NOT(TARGET_OS STREQUAL "wiiu"))
   message(SEND_ERROR "You must install Rust and Cargo to compile ${CMAKE_PROJECT_NAME}")
 endif()
 if(NOT(SQLite3_FOUND))
@@ -766,6 +778,13 @@ elseif(TARGET_OS STREQUAL "emscripten")
   set(PLATFORM_LIBS)
   list(APPEND PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
   list(APPEND PLATFORM_LIBS dl) # for Rust
+elseif(TARGET_OS STREQUAL "wiiu")
+  # Wii U: no OpenGL, no Notify. GX2 is the native GPU API.
+  # Headless client uses null backend; networking via WUT nsysnet.
+  set(PLATFORM_CLIENT)
+  set(PLATFORM_CLIENT_LIBS)
+  set(PLATFORM_CLIENT_INCLUDE_DIRS)
+  set(PLATFORM_LIBS mbedtls mbedx509 mbedcrypto brotlidec brotlicommon bz2)
 else()
   find_package(Notify)
   find_package(OpenGL)
@@ -910,8 +929,13 @@ set_glob(RUST_MASTERSRV GLOB "rs;toml" src/mastersrv/src
   # tidy-alphabetical-end
 )
 
+if(NOT TARGET_OS STREQUAL "wiiu")
 add_library(rust-bridge-shared EXCLUDE_FROM_ALL OBJECT ${RUST_BRIDGE_SHARED})
 list(APPEND TARGETS_OWN rust-bridge-shared)
+else()
+# On Wii U, we skip the Rust bridge entirely and provide a no-op stub.
+add_library(rust-bridge-shared EXCLUDE_FROM_ALL OBJECT src/rust-bridge/wiiu_stub.cpp)
+endif()
 
 if(TARGET_OS STREQUAL "android")
   set(CARGO_BUILD_DIR "${CARGO_NDK_TARGET}/")
@@ -993,6 +1017,8 @@ set(RUST_SRC
       Cargo.toml
       Cargo.lock
 )
+if(NOT TARGET_OS STREQUAL "wiiu")
+
 set(RUST_TARGETS engine_shared)
 if(NOT CMAKE_OSX_ARCHITECTURES)
   set(RUST_OUTPUTS)
@@ -1051,6 +1077,12 @@ else()
     )
   endforeach()
 endif()
+
+else() # TARGET_OS STREQUAL "wiiu"
+  # Wii U: no Rust toolchain available for PPC bare-metal.
+  # Provide stub INTERFACE targets so link lines remain valid.
+  add_library(rust_engine_shared INTERFACE)
+endif() # NOT TARGET_OS STREQUAL "wiiu"
 
 ########################################################################
 # DATA
@@ -2141,6 +2173,13 @@ set_src(BASE GLOB_RECURSE src/base
   windows.h
   # tidy-alphabetical-end
 )
+# On Wii U there is no Rust cross-compiler, so we include a C++ stub for
+# the one symbol provided by the Rust base library.
+if(TARGET_OS STREQUAL "wiiu")
+  set(WIIU_EXTRA_BASE_SRC src/base/rust_stub_wiiu.cpp)
+else()
+  set(WIIU_EXTRA_BASE_SRC)
+endif()
 set_src(ENGINE_INTERFACE GLOB src/engine
   # tidy-alphabetical-start
   antibot.h
@@ -2360,7 +2399,7 @@ set(LIBS
 # Targets
 add_library(engine-gfx EXCLUDE_FROM_ALL OBJECT ${ENGINE_GFX})
 target_include_directories(engine-gfx PRIVATE ${PNG_INCLUDE_DIRS})
-add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE} ${WIIU_EXTRA_BASE_SRC})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 # tidy-alphabetical-start
 add_dependencies(engine-shared generate_protocol)
@@ -2739,6 +2778,9 @@ if(CLIENT)
     # tidy-alphabetical-end
   )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_MAP} ${GAME_GENERATED_CLIENT})
+  if(TARGET_OS STREQUAL "wiiu")
+    list(FILTER CLIENT_SRC EXCLUDE REGEX "backend/(opengl|opengles|vulkan)")
+  endif()
 
   set(DEPS_CLIENT ${DEPS} ${GLEW_DEP} ${WAVPACK_DEP})
 
@@ -3079,6 +3121,11 @@ if(SERVER)
       PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
   target_link_libraries(game-server ${LIBS_SERVER})
+  if(TARGET_OS STREQUAL "wiiu")
+    # curl on Wii U uses mbedTLS for TLS and depends on wut/network libs.
+    # These must be linked after libcurl due to GNU ld ordering.
+    target_link_libraries(game-server -lmbedtls -lmbedx509 -lmbedcrypto -lbrotlidec -lbrotlicommon -lz -lwut -lm)
+  endif()
   list(APPEND TARGETS_OWN game-server)
   list(APPEND TARGETS_LINK game-server)
 
@@ -3926,6 +3973,19 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE src/rust-bridge)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+  if(TARGET_OS STREQUAL "wiiu")
+    # Add stub headers directory (sys/un.h, sys/utsname.h, etc.) first in the search path
+    target_include_directories(${target} SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/wiiu_deps/include)
+    # Add devkitPro portlibs include paths so curl/curl.h, freetype, etc. are found
+    if(DEFINED ENV{DEVKITPRO})
+      target_include_directories(${target} SYSTEM PRIVATE
+        $ENV{DEVKITPRO}/portlibs/wiiu/include
+        $ENV{DEVKITPRO}/portlibs/ppc/include
+        $ENV{DEVKITPRO}/portlibs/ppc/include/freetype2
+        $ENV{DEVKITPRO}/wut/include
+      )
+    endif()
+  endif()
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   target_compile_definitions(${target} PRIVATE _FILE_OFFSET_BITS=64) # Ensure off_t is 64 bit for ftello and fseeko functions
 

@@ -16,6 +16,11 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
+#if defined(__WIIU__)
+#include <game/client/lineinput.h>
+#include <vpad/input.h>
+#endif
+
 #include <SDL.h>
 
 // support older SDL version (pre 2.0.6)
@@ -83,6 +88,7 @@ CInput::CInput()
 
 	m_InputCounter = 1;
 	m_InputGrabbed = false;
+	m_MenuInputActive = true;
 
 	m_MouseFocus = true;
 
@@ -90,6 +96,11 @@ CInput::CInput()
 	m_CandidateSelectedIndex = -1;
 
 	m_aDropFile[0] = '\0';
+#if defined(__WIIU__)
+	m_GyroX = 0.0f;
+	m_GyroY = 0.0f;
+	std::fill(std::begin(m_aWiiUStickValues), std::end(m_aWiiUStickValues), 0.0f);
+#endif
 }
 
 void CInput::Init()
@@ -213,6 +224,12 @@ void CInput::SetActiveJoystick(size_t Index)
 
 float CInput::CJoystick::GetAxisValue(int Axis)
 {
+#if defined(__WIIU__)
+	if(Axis >= 0 && Axis < 4)
+	{
+		return m_pInput->m_aWiiUStickValues[Axis];
+	}
+#endif
 	return (SDL_JoystickGetAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / (float)(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
 }
 
@@ -288,17 +305,42 @@ bool CInput::MouseRelative(float *pX, float *pY)
 void CInput::MouseModeAbsolute()
 {
 	m_InputGrabbed = false;
+#if !defined(__WIIU__)
 	SDL_SetRelativeMouseMode(SDL_FALSE);
 	Graphics()->SetWindowGrab(false);
+#endif
 }
 
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = true;
+#if !defined(__WIIU__)
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(nullptr, nullptr);
+#endif
+}
+
+void CInput::SetMenuActive(bool Active)
+{
+	m_MenuInputActive = Active;
+}
+
+bool CInput::MenuActive() const
+{
+	return m_MenuInputActive;
+}
+
+bool CInput::GetGyro(float *pX, float *pY) const
+{
+#if defined(__WIIU__)
+	*pX = m_GyroX;
+	*pY = m_GyroY;
+	return true;
+#else
+	return false;
+#endif
 }
 
 vec2 CInput::NativeMousePos() const
@@ -359,6 +401,9 @@ void CInput::StopTextInput()
 
 void CInput::EnsureScreenKeyboardShown()
 {
+#if defined(__WIIU__)
+	return;
+#else
 	if(!SDL_HasScreenKeyboardSupport() ||
 		Graphics()->IsScreenKeyboardShown())
 	{
@@ -366,6 +411,7 @@ void CInput::EnsureScreenKeyboardShown()
 	}
 	SDL_StopTextInput();
 	SDL_StartTextInput();
+#endif
 }
 
 void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const
@@ -473,7 +519,20 @@ void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 	if(Event.button >= NUM_JOYSTICK_BUTTONS)
 		return;
 
-	const int Key = Event.button + KEY_JOYSTICK_BUTTON_0;
+	int Key = Event.button + KEY_JOYSTICK_BUTTON_0;
+
+#if defined(__WIIU__)
+	// In menus, face buttons (A/B/X/Y) act as mouse click
+	if((m_MenuInputActive || !m_InputGrabbed) && Event.button <= 3)
+	{
+		Key = KEY_MOUSE_1;
+	}
+	// + (Start) button = Escape
+	if(Event.button == 10)
+	{
+		Key = KEY_ESCAPE;
+	}
+#endif
 
 	if(Event.type == SDL_JOYBUTTONDOWN)
 	{
@@ -539,6 +598,112 @@ void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 		UpdateActiveJoystick();
 	}
 }
+
+#if defined(__WIIU__)
+void CInput::PollWiiUGamePad()
+{
+	CJoystick *pJoystick = GetActiveJoystick();
+	if(!pJoystick)
+		return;
+
+	SDL_JoystickID jid = pJoystick->GetInstanceId();
+
+	VPADStatus status;
+	VPADReadError error;
+	int read = VPADRead(VPAD_CHAN_0, &status, 1, &error);
+	if(read > 0)
+	{
+		m_GyroX = status.gyro.z * (g_Config.m_InpGyroInvertX ? -1.0f : 1.0f);
+		m_GyroY = -status.gyro.x * (g_Config.m_InpGyroInvertY ? -1.0f : 1.0f);
+
+		static uint32_t s_LastHold = 0;
+		uint32_t changed = status.hold ^ s_LastHold;
+		s_LastHold = status.hold;
+
+		struct ButtonMap {
+			uint32_t vpad_mask;
+			int sdl_button;
+		} buttons[] = {
+			{VPAD_BUTTON_A, 0},
+			{VPAD_BUTTON_B, 1},
+			{VPAD_BUTTON_X, 2},
+			{VPAD_BUTTON_Y, 3},
+			{VPAD_BUTTON_L, 4},
+			{VPAD_BUTTON_R, 5},
+			{VPAD_BUTTON_ZL, 6},
+			{VPAD_BUTTON_ZR, 7},
+			{VPAD_BUTTON_PLUS, 10},
+			{VPAD_BUTTON_MINUS, 11},
+		};
+
+		for(auto &b : buttons)
+		{
+			if(changed & b.vpad_mask)
+			{
+				bool pressed = (status.hold & b.vpad_mask) != 0;
+
+				SDL_JoyButtonEvent event = {};
+				event.type = pressed ? SDL_JOYBUTTONDOWN : SDL_JOYBUTTONUP;
+				event.which = jid;
+				event.button = b.sdl_button;
+				event.state = pressed ? SDL_PRESSED : SDL_RELEASED;
+				HandleJoystickButtonEvent(event);
+			}
+		}
+
+		static uint8_t s_LastHatValue = SDL_HAT_CENTERED;
+		uint8_t hat_value = SDL_HAT_CENTERED;
+		if(status.hold & VPAD_BUTTON_UP) hat_value |= SDL_HAT_UP;
+		if(status.hold & VPAD_BUTTON_DOWN) hat_value |= SDL_HAT_DOWN;
+		if(status.hold & VPAD_BUTTON_LEFT) hat_value |= SDL_HAT_LEFT;
+		if(status.hold & VPAD_BUTTON_RIGHT) hat_value |= SDL_HAT_RIGHT;
+
+		if(hat_value != s_LastHatValue)
+		{
+			s_LastHatValue = hat_value;
+
+			SDL_JoyHatEvent event = {};
+			event.type = SDL_JOYHATMOTION;
+			event.which = jid;
+			event.hat = 0;
+			event.value = hat_value;
+			HandleJoystickHatMotionEvent(event);
+		}
+
+		static int16_t s_LastAxes[4] = {0, 0, 0, 0};
+		int16_t axes[4];
+		m_aWiiUStickValues[0] = status.leftStick.x;
+		m_aWiiUStickValues[1] = -status.leftStick.y;
+		m_aWiiUStickValues[2] = status.rightStick.x;
+		m_aWiiUStickValues[3] = -status.rightStick.y;
+
+		axes[0] = (int16_t)(m_aWiiUStickValues[0] * 32767.0f);
+		axes[1] = (int16_t)(m_aWiiUStickValues[1] * 32767.0f);
+		axes[2] = (int16_t)(m_aWiiUStickValues[2] * 32767.0f);
+		axes[3] = (int16_t)(m_aWiiUStickValues[3] * 32767.0f);
+
+		for(int i = 0; i < 4; i++)
+		{
+			if(abs(axes[i] - s_LastAxes[i]) > 100)
+			{
+				s_LastAxes[i] = axes[i];
+
+				SDL_JoyAxisEvent event = {};
+				event.type = SDL_JOYAXISMOTION;
+				event.which = jid;
+				event.axis = i;
+				event.value = axes[i];
+				HandleJoystickAxisMotionEvent(event);
+			}
+		}
+	}
+	else
+	{
+		m_GyroX = 0.0f;
+		m_GyroY = 0.0f;
+	}
+}
+#endif
 
 void CInput::HandleTouchDownEvent(const SDL_TouchFingerEvent &Event)
 {
@@ -731,6 +896,10 @@ int CInput::Update()
 	}
 #endif
 
+#if defined(__WIIU__)
+	PollWiiUGamePad();
+#endif
+
 	while(SDL_PollEvent(&Event))
 	{
 		switch(Event.type)
@@ -753,7 +922,34 @@ int CInput::Update()
 		case SDL_TEXTINPUT:
 			m_CompositionString = "";
 			m_CompositionCursor = 0;
+#if defined(__WIIU__)
+			{
+				// Cemu virtual keyboard re-sends text on OK press.
+				// For chat inputs, treat duplicate text as submit signal.
+				// For UI/filter fields, just ignore the duplicate.
+				static char s_aPrevText[32] = {0};
+				if(s_aPrevText[0] != '\0' && str_comp(Event.text.text, s_aPrevText) == 0)
+				{
+					if(CLineInput::GetActivePriority() == EInputPriority::CHAT)
+					{
+						AddKeyEventChecked(KEY_RETURN, IInput::FLAG_PRESS);
+						AddKeyEventChecked(KEY_RETURN, IInput::FLAG_RELEASE);
+					}
+					else
+					{
+						SDL_StopTextInput();
+					}
+					s_aPrevText[0] = '\0';
+				}
+				else
+				{
+					AddTextEvent(Event.text.text);
+					str_copy(s_aPrevText, Event.text.text);
+				}
+			}
+#else
 			AddTextEvent(Event.text.text);
+#endif
 			break;
 
 		// handle keys

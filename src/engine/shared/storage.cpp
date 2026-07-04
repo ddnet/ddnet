@@ -258,6 +258,9 @@ public:
 		// The current working directory is set to the app specific external storage location
 		// on Android. The user data is stored within a folder "user" in the external storage.
 		str_copy(m_aUserdir, "user");
+#elif defined(__WIIU__)
+		// Wii U: store user saves inside a relative 'user' directory on SD card.
+		str_copy(m_aUserdir, "user");
 #else
 		char aFallbackUserdir[IO_MAX_PATH_LENGTH];
 		if(fs_storage_path("DDNet", m_aUserdir, sizeof(m_aUserdir)))
@@ -325,6 +328,9 @@ public:
 		// 4) check for all default locations
 		{
 			const char *apDirs[] = {
+#if defined(__WIIU__)
+				"/vol/content",
+#endif
 				"/usr/share/ddnet",
 				"/usr/share/games/ddnet",
 				"/usr/local/share/ddnet",
@@ -840,6 +846,10 @@ public:
 		GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetPath(Type, pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
+#if defined(__WIIU__)
+		fs_remove(aNewBuffer);
+#endif
+
 		return fs_rename(aOldBuffer, aNewBuffer) == 0;
 	}
 
@@ -855,6 +865,10 @@ public:
 			log_error("storage", "failed to create folders for: %s", aNewBuffer);
 			return false;
 		}
+
+#if defined(__WIIU__)
+		fs_remove(aNewBuffer);
+#endif
 
 		return fs_rename(aOldBuffer, aNewBuffer) == 0;
 	}

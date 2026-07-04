@@ -16,6 +16,10 @@
 #include <wincrypt.h>
 #else
 #include "io.h"
+#if defined(__WIIU__)
+#include <coreinit/time.h>
+#include <cstdlib>
+#endif
 #endif
 
 struct SECURE_RANDOM_DATA
@@ -80,8 +84,39 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 	generate_password(buffer, length, random, pw_length / 2);
 }
 
+#if defined(__WIIU__)
+static unsigned long long wiiu_x = 123456789, wiiu_y = 362436069, wiiu_z = 521288629, wiiu_w = 88675123;
+
+static void wiiu_secure_random_init()
+{
+	unsigned long long seed = OSGetSystemTime();
+	wiiu_x ^= seed;
+	wiiu_y ^= (seed >> 8);
+	wiiu_z ^= (seed >> 16);
+	wiiu_w ^= (seed >> 24);
+}
+
+static void wiiu_secure_random_fill(void *bytes, unsigned length)
+{
+	static std::once_flag wiiu_random_once;
+	std::call_once(wiiu_random_once, wiiu_secure_random_init);
+
+	unsigned char *p = (unsigned char *)bytes;
+	for(unsigned i = 0; i < length; i++)
+	{
+		unsigned long long t = wiiu_x ^ (wiiu_x << 11);
+		wiiu_x = wiiu_y; wiiu_y = wiiu_z; wiiu_z = wiiu_w;
+		wiiu_w = wiiu_w ^ (wiiu_w >> 19) ^ (t ^ (t >> 8));
+		p[i] = wiiu_w & 0xFF;
+	}
+}
+#endif
+
 void secure_random_fill(void *bytes, unsigned length)
 {
+#if defined(__WIIU__)
+	wiiu_secure_random_fill(bytes, length);
+#else
 	ensure_secure_random_init();
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
@@ -91,6 +126,7 @@ void secure_random_fill(void *bytes, unsigned length)
 	}
 #else
 	dbg_assert(length == io_read(secure_random_data.urandom, bytes, length), "io_read returned with a short read");
+#endif
 #endif
 }
 

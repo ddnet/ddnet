@@ -25,7 +25,12 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#if defined(__WIIU__)
+#include <sys/ioctl.h> // FIONBIO — from WUT headers
+#include <wiiu_net_ipv6_stub.h> // IPv6 stub types (AF_INET6, sockaddr_in6)
+#else
 #include <sys/ioctl.h>
+#endif
 #include <sys/socket.h>
 
 #if defined(CONF_PLATFORM_SOLARIS)
@@ -128,6 +133,9 @@ static void netaddr_to_sockaddr_in(const NETADDR *src, sockaddr_in *dest)
 	mem_copy(&dest->sin_addr.s_addr, src->ip, 4);
 }
 
+
+static void netaddr_to_sockaddr_in6(const NETADDR *src, sockaddr_in6 *dest);
+#if !defined(__WIIU__)
 static void netaddr_to_sockaddr_in6(const NETADDR *src, sockaddr_in6 *dest)
 {
 	dbg_assert((src->type & NETTYPE_IPV6) != 0, "Invalid address type '%d' for netaddr_to_sockaddr_in6", src->type);
@@ -136,6 +144,9 @@ static void netaddr_to_sockaddr_in6(const NETADDR *src, sockaddr_in6 *dest)
 	dest->sin6_port = htons(src->port);
 	mem_copy(&dest->sin6_addr.s6_addr, src->ip, 16);
 }
+#else
+static void netaddr_to_sockaddr_in6(const NETADDR *, sockaddr_in6 *) { dbg_assert(false, "IPv6 not supported on Wii U"); }
+#endif
 
 static void sockaddr_to_netaddr(const sockaddr *src, socklen_t src_len, NETADDR *dst)
 {
@@ -148,6 +159,7 @@ static void sockaddr_to_netaddr(const sockaddr *src, socklen_t src_len, NETADDR 
 		static_assert(sizeof(dst->ip) >= sizeof(src_in->sin_addr.s_addr));
 		mem_copy(dst->ip, &src_in->sin_addr.s_addr, sizeof(src_in->sin_addr.s_addr));
 	}
+#if !defined(__WIIU__)
 	else if(src->sa_family == AF_INET6 && src_len >= (socklen_t)sizeof(sockaddr_in6))
 	{
 		const sockaddr_in6 *src_in6 = (const sockaddr_in6 *)src;
@@ -156,6 +168,7 @@ static void sockaddr_to_netaddr(const sockaddr *src, socklen_t src_len, NETADDR 
 		static_assert(sizeof(dst->ip) >= sizeof(src_in6->sin6_addr.s6_addr));
 		mem_copy(dst->ip, &src_in6->sin6_addr.s6_addr, sizeof(src_in6->sin6_addr.s6_addr));
 	}
+#endif
 	else
 	{
 		log_warn("net", "Cannot convert sockaddr of family %d", src->sa_family);
@@ -431,6 +444,7 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 
 	if(str[0] == '[')
 	{
+#if !defined(__WIIU__)
 		/* ipv6 */
 		sockaddr_in6 sa6;
 		char buf[128];
@@ -474,6 +488,10 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 			return -1;
 
 		return 0;
+#else
+		/* IPv6 not supported on Wii U */
+		return -1;
+#endif
 	}
 	else
 	{
@@ -582,8 +600,10 @@ static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 
 	if(types == NETTYPE_IPV4)
 		hints.ai_family = AF_INET;
+#if !defined(__WIIU__)
 	else if(types == NETTYPE_IPV6)
 		hints.ai_family = AF_INET6;
+#endif
 	else
 		hints.ai_family = AF_UNSPEC;
 
@@ -877,11 +897,13 @@ static int priv_net_create_socket(int domain, int type, const NETADDR *bindaddr)
 		netaddr_to_sockaddr_in(bindaddr, (sockaddr_in *)&addr);
 		addr_len = sizeof(sockaddr_in);
 	}
+#if !defined(__WIIU__)
 	else if(bindaddr->type == NETTYPE_IPV6)
 	{
 		netaddr_to_sockaddr_in6(bindaddr, (sockaddr_in6 *)&addr);
 		addr_len = sizeof(sockaddr_in6);
 	}
+#endif
 	else
 	{
 		dbg_assert_failed("socket type invalid: %d", type);
@@ -946,6 +968,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	}
 #endif
 
+#if !defined(__WIIU__)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		NETADDR bindaddr_ipv6 = bindaddr;
@@ -978,6 +1001,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 #endif
 		}
 	}
+#endif
 
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV6)
@@ -1057,6 +1081,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	}
 #endif
 
+#if !defined(__WIIU__)
 	if(addr->type & NETTYPE_IPV6)
 	{
 		if(sock->ipv6sock >= 0)
@@ -1083,6 +1108,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			log_error("net", "Cannot send IPv6 traffic to this socket");
 		}
 	}
+#endif
 
 #if defined(CONF_WEBSOCKETS)
 	if(addr->type & NETTYPE_WEBSOCKET_IPV6)
@@ -1321,6 +1347,7 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 		return connect(sock->ipv4sock, (sockaddr *)&addr, sizeof(addr));
 	}
 
+#if !defined(__WIIU__)
 	if(a->type & NETTYPE_IPV6)
 	{
 		if(sock->ipv6sock < 0)
@@ -1329,6 +1356,7 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 		netaddr_to_sockaddr_in6(a, &addr);
 		return connect(sock->ipv6sock, (sockaddr *)&addr, sizeof(addr));
 	}
+#endif
 
 	return -1;
 }
@@ -1379,6 +1407,7 @@ void net_tcp_close(NETSOCKET sock)
 }
 
 #if defined(CONF_FAMILY_UNIX)
+#if !defined(__WIIU__)
 UNIXSOCKET net_unix_create_unnamed()
 {
 	return socket(AF_UNIX, SOCK_DGRAM, 0);
@@ -1400,4 +1429,10 @@ void net_unix_close(UNIXSOCKET sock)
 {
 	close(sock);
 }
+#else // __WIIU__ - Unix domain sockets are not available
+UNIXSOCKET net_unix_create_unnamed() { return -1; }
+int net_unix_send(UNIXSOCKET, UNIXSOCKETADDR *, void *, int) { return -1; }
+void net_unix_set_addr(UNIXSOCKETADDR *, const char *) {}
+void net_unix_close(UNIXSOCKET) {}
+#endif
 #endif

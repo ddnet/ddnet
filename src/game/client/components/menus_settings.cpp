@@ -851,7 +851,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	static const int MAX_RESOLUTIONS = 256;
 	static CVideoMode s_aModes[MAX_RESOLUTIONS];
+#if defined(__WIIU__)
+	static int s_NumNodes = 0;
+#else
 	static int s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
+#endif
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static bool s_GfxBackendChanged = false;
 	static bool s_GfxGpuChanged = false;
@@ -869,12 +873,14 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		});
 	}
 
+#if !defined(__WIIU__)
 	if(s_ModesReload || g_Config.m_GfxDisplayAllVideoModes != s_InitDisplayAllVideoModes)
 	{
 		s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 		s_ModesReload = false;
 		s_InitDisplayAllVideoModes = g_Config.m_GfxDisplayAllVideoModes;
 	}
+#endif
 
 	CUIRect ModeList, ModeLabel;
 	MainView.VSplitLeft(350.0f, &MainView, &ModeList);
@@ -1051,6 +1057,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static CButtonContainer s_UiColorResetId;
 	DoLine_ColorPicker(&s_UiColorResetId, 25.0f, 13.0f, 2.0f, &MainView, Localize("UI Color"), &g_Config.m_UiColor, color_cast<ColorRGBA>(ColorHSLA(0xE4A046AFU, true)), false, nullptr, true);
 
+#if !defined(__WIIU__)
 	// Backend list
 	struct SMenuBackendInfo
 	{
@@ -1226,6 +1233,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxGpuChanged = NewGpu != s_OldSelectedGpu;
 		}
 	}
+#endif // !__WIIU__
 
 	// check if the new settings require a restart
 	if(CheckSettings)

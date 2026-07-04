@@ -503,7 +503,7 @@ private:
 	{
 		FT_Set_Pixel_Sizes(Glyph.m_Face, 0, Glyph.m_FontSize);
 
-		if(FT_Load_Glyph(Glyph.m_Face, Glyph.m_GlyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP))
+		if(FT_Load_Glyph(Glyph.m_Face, Glyph.m_GlyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP | FT_LOAD_NO_HINTING))
 		{
 			log_debug("textrender", "Error loading glyph. Chr=%d GlyphIndex=%u", Glyph.m_Chr, Glyph.m_GlyphIndex);
 			return false;
@@ -788,7 +788,7 @@ public:
 				}
 
 				FT_Set_Pixel_Sizes(Face, 0, FontSize);
-				if(FT_Load_Char(Face, NextCharacter, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP))
+				if(FT_Load_Char(Face, NextCharacter, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP | FT_LOAD_NO_HINTING))
 				{
 					log_debug("textrender", "Error loading glyph. Chr=%d GlyphIndex=%u", NextCharacter, GlyphIndex);
 					pCurrent = pTmp;

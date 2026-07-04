@@ -249,7 +249,7 @@ enum
 	TILESLAYERFLAG_TUNE = 1 << 5,
 };
 
-static constexpr size_t MAX_MAPIMAGES = 64;
+static constexpr size_t MAX_MAPIMAGES = 128;
 static constexpr size_t MAX_MAPSOUNDS = 64;
 
 typedef ivec2 CPoint; // 22.10 fixed point

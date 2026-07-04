@@ -1736,6 +1736,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				m_MapdownloadCrc = MapCrc;
 				m_MapdownloadTotalsize = MapSize;
 
+#if defined(__WIIU__)
+				// On Wii U, always use game-protocol map download
+				// to avoid potential curl/TLS crashes
+				SendMapRequest();
+#else
 				if(MapSha256.has_value())
 				{
 					char aUrl[256];
@@ -1754,6 +1759,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				{
 					SendMapRequest();
 				}
+#endif
 			}
 		}
 		else if(Conn == CONN_MAIN && Msg == NETMSG_MAP_DATA)

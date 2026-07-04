@@ -367,6 +367,22 @@ void CControls::OnRender()
 		}
 	}
 
+#if defined(__WIIU__)
+	if(g_Config.m_InpGyroEnable && GameClient()->m_Snap.m_pLocalCharacter)
+	{
+		float gyro_x = 0.0f;
+		float gyro_y = 0.0f;
+		if(Input()->GetGyro(&gyro_x, &gyro_y))
+		{
+			float sens = g_Config.m_InpGyroSens * 0.5f;
+			m_aMousePos[g_Config.m_ClDummy].x += gyro_x * sens;
+			m_aMousePos[g_Config.m_ClDummy].y += gyro_y * sens;
+			
+			ClampMousePos();
+		}
+	}
+#endif
+
 	// update target pos
 	if(GameClient()->m_Snap.m_pGameInfoObj && !GameClient()->m_Snap.m_SpecInfo.m_Active)
 	{

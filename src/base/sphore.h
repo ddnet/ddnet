@@ -14,7 +14,10 @@
  * @see Threads
  */
 
-#if defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_PLATFORM_WIIU)
+#include <coreinit/semaphore.h>
+typedef OSSemaphore SEMAPHORE;
+#elif defined(CONF_FAMILY_WINDOWS)
 /**
  * @ingroup Semaphore
  */

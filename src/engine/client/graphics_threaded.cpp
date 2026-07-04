@@ -2222,6 +2222,10 @@ int CGraphics_Threaded::IssueInit()
 		m_GLTextBufferingEnabled = (m_GLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
 		m_GLUses2DTextureArrays = m_pBackend->Uses2DTextureArrays();
 		m_GLHasTextureArraysSupport = m_pBackend->HasTextureArraysSupport();
+#if defined(__WIIU__)
+		g_Config.m_GfxScreenWidth = m_ScreenWidth;
+		g_Config.m_GfxScreenHeight = m_ScreenHeight;
+#endif
 		m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 		m_ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate;
 	}

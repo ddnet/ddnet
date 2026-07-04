@@ -3,6 +3,10 @@
 
 #include "dbg.h"
 
+#if defined(__WIIU__)
+#include <coreinit/debug.h>
+#endif
+
 #include "logger.h"
 #include "str.h"
 
@@ -29,6 +33,9 @@ extern "C" void dbg_assert_imp(const char *filename, int line, const char *fmt, 
 	char error[1024];
 	str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
 	va_end(args);
+#if defined(__WIIU__)
+	OSReport("ASSERTION FAILED: %s\n", error);
+#endif
 	log_error("assert", "%s", error);
 	if(!already_failing)
 	{

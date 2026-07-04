@@ -149,7 +149,9 @@ MACRO_CONFIG_INT(ClMapDownloadLowSpeedTime, cl_map_download_low_speed_time, 3, 0
 MACRO_CONFIG_STR(ClLanguagefile, cl_languagefile, 255, "", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What language file to use")
 
 // skin loading
-#if defined(CONF_ARCH_IA32)
+#if defined(__WIIU__)
+MACRO_CONFIG_INT(ClSkinsLoadedMax, cl_skins_loaded_max, 64, 16, 8192, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of skins that can be loaded at the same time")
+#elif defined(CONF_ARCH_IA32)
 MACRO_CONFIG_INT(ClSkinsLoadedMax, cl_skins_loaded_max, 256, 256, 8192, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of skins that can be loaded at the same time")
 #else
 MACRO_CONFIG_INT(ClSkinsLoadedMax, cl_skins_loaded_max, 512, 256, 8192, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of skins that can be loaded at the same time")
@@ -157,7 +159,11 @@ MACRO_CONFIG_INT(ClSkinsLoadedMax, cl_skins_loaded_max, 512, 256, 8192, CFGFLAG_
 MACRO_CONFIG_STR(ClSkinDownloadUrl, cl_skin_download_url, 100, "https://skins.ddnet.org/skin/", CFGFLAG_CLIENT | CFGFLAG_SAVE, "URL used to download skins")
 MACRO_CONFIG_STR(ClSkinCommunityDownloadUrl, cl_skin_community_download_url, 100, "https://skins.ddnet.org/skin/community/", CFGFLAG_CLIENT | CFGFLAG_SAVE, "URL used to download community skins")
 MACRO_CONFIG_INT(ClVanillaSkinsOnly, cl_vanilla_skins_only, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Only show skins available in Vanilla Teeworlds")
+#if defined(__WIIU__)
+MACRO_CONFIG_INT(ClDownloadSkins, cl_download_skins, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Download skins from cl_skin_download_url on-the-fly")
+#else
 MACRO_CONFIG_INT(ClDownloadSkins, cl_download_skins, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Download skins from cl_skin_download_url on-the-fly")
+#endif
 MACRO_CONFIG_INT(ClDownloadCommunitySkins, cl_download_community_skins, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Allow to download skins created by the community. Uses cl_skin_community_download_url instead of cl_skin_download_url for the download")
 
 MACRO_CONFIG_INT(ClAutoStatboardScreenshot, cl_auto_statboard_screenshot, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Automatically take game over statboard screenshot")
@@ -389,7 +395,11 @@ MACRO_CONFIG_INT(BrDemoFetchInfo, br_demo_fetch_info, 0, 0, 1, CFGFLAG_SAVE | CF
 MACRO_CONFIG_INT(GhSort, gh_sort, 1, 0, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sorting column in ghost list")
 MACRO_CONFIG_INT(GhSortOrder, gh_sort_order, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sorting order in ghost list")
 
+#if defined(__WIIU__)
+MACRO_CONFIG_INT(SndBufferSize, snd_buffer_size, 2048, 128, 32768, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound buffer size (may cause delay if large)")
+#else
 MACRO_CONFIG_INT(SndBufferSize, snd_buffer_size, 512, 128, 32768, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound buffer size (may cause delay if large)")
+#endif
 MACRO_CONFIG_INT(SndRate, snd_rate, 48000, 5512, 384000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound mixing rate")
 MACRO_CONFIG_INT(SndEnable, snd_enable, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound enable")
 MACRO_CONFIG_INT(SndMusic, snd_enable_music, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Play background music")
@@ -441,12 +451,27 @@ MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLA
 MACRO_CONFIG_INT(InpImeNativeUi, inp_ime_native_ui, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use native UI for IME (may cause IME to not work in fullscreen mode) (changing requires restart)")
 #endif
 
+#ifdef __WIIU__
+MACRO_CONFIG_INT(InpControllerEnable, inp_controller_enable, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable controller")
+#else
 MACRO_CONFIG_INT(InpControllerEnable, inp_controller_enable, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable controller")
+#endif
 MACRO_CONFIG_STR(InpControllerGUID, inp_controller_guid, 34, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller GUID which uniquely identifies the active controller")
+#if defined(__WIIU__)
+MACRO_CONFIG_INT(InpControllerAbsolute, inp_controller_absolute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable absolute controller aiming ingame")
+MACRO_CONFIG_INT(InpControllerSens, inp_controller_sens, 100, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ingame controller sensitivity")
+MACRO_CONFIG_INT(InpControllerX, inp_controller_x, 2, 0, 12, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller axis that controls X axis of cursor")
+MACRO_CONFIG_INT(InpControllerY, inp_controller_y, 3, 0, 12, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller axis that controls Y axis of cursor")
+MACRO_CONFIG_INT(InpGyroEnable, inp_gyro_enable, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable Wii U GamePad Gyroscope aiming")
+MACRO_CONFIG_INT(InpGyroSens, inp_gyro_sens, 300, 1, 5000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Wii U GamePad Gyroscope sensitivity")
+MACRO_CONFIG_INT(InpGyroInvertX, inp_gyro_invert_x, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Invert Wii U GamePad Gyroscope horizontal axis")
+MACRO_CONFIG_INT(InpGyroInvertY, inp_gyro_invert_y, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Invert Wii U GamePad Gyroscope vertical axis")
+#else
 MACRO_CONFIG_INT(InpControllerAbsolute, inp_controller_absolute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable absolute controller aiming ingame")
 MACRO_CONFIG_INT(InpControllerSens, inp_controller_sens, 100, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ingame controller sensitivity")
 MACRO_CONFIG_INT(InpControllerX, inp_controller_x, 0, 0, 12, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller axis that controls X axis of cursor")
 MACRO_CONFIG_INT(InpControllerY, inp_controller_y, 1, 0, 12, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller axis that controls Y axis of cursor")
+#endif
 MACRO_CONFIG_INT(InpControllerTolerance, inp_controller_tolerance, 5, 0, 50, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller axis tolerance to account for jitter")
 
 MACRO_CONFIG_INT(ClPort, cl_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for client connections to server (0 to choose a random port, 1024 or higher to set a manual port)")

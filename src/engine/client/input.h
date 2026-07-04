@@ -73,8 +73,15 @@ private:
 	void UpdateActiveJoystick();
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	float GetJoystickDeadzone();
+#if defined(__WIIU__)
+	float m_GyroX;
+	float m_GyroY;
+	float m_aWiiUStickValues[4];
+	void PollWiiUGamePad();
+#endif
 
 	bool m_InputGrabbed;
+	bool m_MenuInputActive;
 
 	bool m_MouseFocus;
 
@@ -138,6 +145,9 @@ public:
 	bool MouseRelative(float *pX, float *pY) override;
 	void MouseModeAbsolute() override;
 	void MouseModeRelative() override;
+	void SetMenuActive(bool Active) override;
+	bool MenuActive() const override;
+	bool GetGyro(float *pX, float *pY) const override;
 	vec2 NativeMousePos() const override;
 	bool NativeMousePressed(int Index) const override;
 

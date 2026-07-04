@@ -68,6 +68,9 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 	{
 		pthread_attr_t attr;
 		dbg_assert(pthread_attr_init(&attr) == 0, "pthread_attr_init failure");
+#if defined(__WIIU__)
+		pthread_attr_setstacksize(&attr, 1024 * 1024);
+#endif
 #if defined(CONF_PLATFORM_MACOS) && defined(__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10
 		dbg_assert(pthread_attr_set_qos_class_np(&attr, QOS_CLASS_USER_INTERACTIVE, 0) == 0, "pthread_attr_set_qos_class_np failure");
 #endif

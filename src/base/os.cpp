@@ -13,7 +13,9 @@
 #include "io.h"
 
 #include <sys/utsname.h> // uname, utsname
+#if !defined(__WIIU__)
 #include <unistd.h> // _exit, execlp, fork
+#endif
 
 #if defined(CONF_PLATFORM_MACOS)
 #include <CoreFoundation/CoreFoundation.h>
@@ -111,7 +113,7 @@ int os_open_link(const char *link)
 		_exit(1);
 	}
 	return pid > 0;
-#elif defined(CONF_FAMILY_UNIX)
+#elif defined(CONF_FAMILY_UNIX) && !defined(__WIIU__)
 	const int pid = fork();
 	if(pid == 0)
 	{
@@ -119,6 +121,8 @@ int os_open_link(const char *link)
 		_exit(1);
 	}
 	return pid > 0;
+#else
+	return 0; /* Not supported on Wii U */
 #endif
 }
 

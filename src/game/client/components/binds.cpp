@@ -307,6 +307,29 @@ void CBinds::SetDefaults()
 	Bind(KEY_Q, "say /spec");
 	Bind(KEY_P, "say /pause");
 
+#ifdef __WIIU__
+	// Face buttons: A=jump, B=fire, X=hook, Y=emote
+	Bind(KEY_JOYSTICK_BUTTON_0, "+jump");
+	Bind(KEY_JOYSTICK_BUTTON_1, "+fire");
+	Bind(KEY_JOYSTICK_BUTTON_2, "+hook");
+	Bind(KEY_JOYSTICK_BUTTON_3, "+emote");
+	// Shoulders/Triggers: L=prev weapon, R=next weapon, ZL=fire, ZR=hook
+	Bind(KEY_JOYSTICK_BUTTON_4, "+prevweapon");
+	Bind(KEY_JOYSTICK_BUTTON_5, "+nextweapon");
+	Bind(KEY_JOYSTICK_BUTTON_6, "+fire");
+	Bind(KEY_JOYSTICK_BUTTON_7, "+hook");
+	// Other buttons
+	Bind(KEY_JOYSTICK_BUTTON_8, "toggle_local_console");
+	// Left stick axes 0/1 = movement
+	Bind(KEY_JOY_AXIS_0_LEFT, "+left");
+	Bind(KEY_JOY_AXIS_0_RIGHT, "+right");
+	// D-pad: left/right=move, up=chat, down=scoreboard
+	Bind(KEY_JOY_HAT0_LEFT, "+left");
+	Bind(KEY_JOY_HAT0_RIGHT, "+right");
+	Bind(KEY_JOY_HAT0_UP, "+show_chat; chat all");
+	Bind(KEY_JOY_HAT0_DOWN, "+scoreboard");
+#endif
+
 	g_Config.m_ClDDRaceBindsSet = 0;
 	SetDDRaceBinds(false);
 }
@@ -542,5 +565,33 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_LALT, "toggle_scoreboard_cursor", FreeOnly);
 	}
 
+#ifdef __WIIU__
+	if(g_Config.m_ClDDRaceBindsSet < 3)
+	{
+		// Face buttons: A=jump, B=fire, X=hook, Y=emote
+		Bind(KEY_JOYSTICK_BUTTON_0, "+jump", false);
+		Bind(KEY_JOYSTICK_BUTTON_1, "+fire", false);
+		Bind(KEY_JOYSTICK_BUTTON_2, "+hook", false);
+		Bind(KEY_JOYSTICK_BUTTON_3, "+emote", false);
+		// Shoulders/Triggers: L=prev weapon, R=next weapon, ZL=fire, ZR=hook
+		Bind(KEY_JOYSTICK_BUTTON_4, "+prevweapon", false);
+		Bind(KEY_JOYSTICK_BUTTON_5, "+nextweapon", false);
+		Bind(KEY_JOYSTICK_BUTTON_6, "+fire", false);
+		Bind(KEY_JOYSTICK_BUTTON_7, "+hook", false);
+		// Other buttons
+		Bind(KEY_JOYSTICK_BUTTON_8, "toggle_local_console", false);
+		// Left stick axes 0/1 = movement
+		Bind(KEY_JOY_AXIS_0_LEFT, "+left", false);
+		Bind(KEY_JOY_AXIS_0_RIGHT, "+right", false);
+		// D-pad: left/right=move, up=chat, down=scoreboard
+		Bind(KEY_JOY_HAT0_LEFT, "+left", false);
+		Bind(KEY_JOY_HAT0_RIGHT, "+right", false);
+		Bind(KEY_JOY_HAT0_UP, "+show_chat; chat all", false);
+		Bind(KEY_JOY_HAT0_DOWN, "+scoreboard", false);
+
+		g_Config.m_ClDDRaceBindsSet = 3;
+	}
+#else
 	g_Config.m_ClDDRaceBindsSet = 2;
+#endif
 }

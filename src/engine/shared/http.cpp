@@ -237,6 +237,11 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 	curl_easy_setopt(pH, CURLOPT_CAPATH, "/system/etc/security/cacerts");
 #endif
 
+#if defined(__WIIU__)
+	curl_easy_setopt(pH, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(pH, CURLOPT_SSL_VERIFYHOST, 0L);
+#endif
+
 	switch(m_Type)
 	{
 	case REQUEST::GET:

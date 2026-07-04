@@ -10,6 +10,10 @@
 #include <cstdio>
 #include <memory>
 
+#if defined(__WIIU__)
+#include <coreinit/debug.h>
+#endif
+
 #if defined(CONF_FAMILY_WINDOWS)
 #include <fcntl.h>
 #include <io.h>
@@ -25,8 +29,8 @@
 #endif
 
 static std::atomic<ILogger *> global_logger = nullptr;
-thread_local ILogger *scope_logger = nullptr; // NOLINT(misc-use-internal-linkage) // TODO: remove NOLINT when updating clang-tidy version
-thread_local bool in_logger = false; // NOLINT(misc-use-internal-linkage) // TODO: remove NOLINT when updating clang-tidy version
+CONF_THREAD_LOCAL ILogger *scope_logger = nullptr; // NOLINT(misc-use-internal-linkage) // TODO: remove NOLINT when updating clang-tidy version
+CONF_THREAD_LOCAL bool in_logger = false; // NOLINT(misc-use-internal-linkage) // TODO: remove NOLINT when updating clang-tidy version
 
 void log_set_global_logger(ILogger *logger)
 {
@@ -215,10 +219,27 @@ std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogg
 	return std::make_unique<CLoggerCollection>(std::move(vpLoggers));
 }
 
+#if defined(__WIIU__)
+class CLoggerWiiU : public ILogger
+{
+public:
+	void Log(const CLogMessage *pMessage) override
+	{
+		if(m_Filter.Filters(pMessage))
+		{
+			return;
+		}
+		OSReport("%s", pMessage->m_aLine);
+	}
+};
+#endif
+
 std::unique_ptr<ILogger> log_logger_default()
 {
 #if defined(CONF_PLATFORM_ANDROID)
 	std::unique_ptr<ILogger> logger = log_logger_android();
+#elif defined(__WIIU__)
+	std::unique_ptr<ILogger> logger = std::make_unique<CLoggerWiiU>();
 #else
 	std::unique_ptr<ILogger> logger = log_logger_stdout();
 #endif
@@ -395,7 +416,9 @@ static IOHANDLE ConvertWindowsHandle(HANDLE pHandle, int OpenFlags)
 
 std::unique_ptr<ILogger> log_logger_stdout()
 {
-#if !defined(CONF_FAMILY_WINDOWS)
+#if defined(__WIIU__)
+	return std::make_unique<CLoggerWiiU>();
+#elif !defined(CONF_FAMILY_WINDOWS)
 	// TODO: Only enable true color when COLORTERM contains "truecolor".
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
 	const bool Colors = getenv("NO_COLOR") == nullptr && isatty(STDOUT_FILENO);

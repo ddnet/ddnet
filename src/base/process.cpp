@@ -4,7 +4,7 @@
 #include "str.h"
 #include "windows.h"
 
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_FAMILY_UNIX) && !defined(__WIIU__)
 #include <sys/wait.h> // waitpid
 #include <unistd.h> // _exit, fork, getpid
 
@@ -20,13 +20,17 @@
 
 #include <cfenv> // fesetenv
 #include <cstring> // std::wstring
+#elif defined(__WIIU__)
+// Wii U stubs: no multitasking/process headers needed
 #else
 #error NOT IMPLEMENTED
 #endif
 
 int process_id()
 {
-#if defined(CONF_FAMILY_WINDOWS)
+#if defined(__WIIU__)
+	return 1;
+#elif defined(CONF_FAMILY_WINDOWS)
 	return _getpid();
 #else
 	return getpid();
@@ -34,6 +38,22 @@ int process_id()
 }
 
 #if !defined(CONF_PLATFORM_ANDROID)
+#if defined(__WIIU__)
+PROCESS process_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments, const size_t num_arguments)
+{
+	return INVALID_PROCESS;
+}
+
+int process_kill(PROCESS process)
+{
+	return 0;
+}
+
+bool process_is_alive(PROCESS process)
+{
+	return false;
+}
+#else
 PROCESS process_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments, const size_t num_arguments)
 {
 	dbg_assert((arguments == nullptr) == (num_arguments == 0), "Invalid number of arguments");
@@ -127,5 +147,5 @@ bool process_is_alive(PROCESS process)
 	return waitpid(process, nullptr, WNOHANG) == 0;
 #endif
 }
-
+#endif
 #endif // !defined(CONF_PLATFORM_ANDROID)

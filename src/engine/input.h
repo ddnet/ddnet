@@ -116,6 +116,9 @@ public:
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual bool MouseRelative(float *pX, float *pY) = 0;
+	virtual void SetMenuActive(bool Active) = 0;
+	virtual bool MenuActive() const = 0;
+	virtual bool GetGyro(float *pX, float *pY) const { return false; }
 
 	// touch
 	/**

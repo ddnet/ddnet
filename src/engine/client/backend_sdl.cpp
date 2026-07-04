@@ -1,7 +1,9 @@
 #include <base/detect.h>
 
+#if !defined(CONF_HEADLESS_CLIENT)
 #ifndef CONF_BACKEND_OPENGL_ES
 #include <GL/glew.h>
+#endif
 #endif
 
 #include <base/log.h>
@@ -27,6 +29,7 @@
 #include "backend/null/backend_null.h"
 #endif
 
+#if !defined(CONF_HEADLESS_CLIENT)
 #if !defined(CONF_BACKEND_OPENGL_ES)
 #include "backend/opengl/backend_opengl3.h"
 #endif
@@ -38,6 +41,7 @@
 #if defined(CONF_BACKEND_VULKAN)
 #include "backend/vulkan/backend_vulkan.h"
 #endif
+#endif
 
 #include "graphics_threaded.h"
 
@@ -46,13 +50,18 @@
 #include <algorithm>
 #include <cstdlib>
 
+#if defined(CONF_PLATFORM_EMSCRIPTEN) || defined(__WIIU__)
+#define CONF_SINGLE_THREADED_GRAPHICS
+#endif
+
+
 class IStorage;
 
 // ------------ CGraphicsBackend_Threaded
 
 // Run everything single threaded when compiling for Emscripten, as context binding does not work outside of the main thread with SDL2.
 // TODO SDL3: Check if SDL3 supports threaded graphics and PROXY_TO_PTHREAD, OFFSCREENCANVAS_SUPPORT and OFFSCREEN_FRAMEBUFFER correctly.
-#if !defined(CONF_PLATFORM_EMSCRIPTEN)
+#if !defined(CONF_SINGLE_THREADED_GRAPHICS)
 void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 {
 	auto *pSelf = (CGraphicsBackend_Threaded *)pUser;
@@ -88,7 +97,7 @@ CGraphicsBackend_Threaded::CGraphicsBackend_Threaded(TTranslateFunc &&TranslateF
 {
 	m_pProcessor = nullptr;
 	m_Shutdown = true;
-#if !defined(CONF_PLATFORM_EMSCRIPTEN)
+#if !defined(CONF_SINGLE_THREADED_GRAPHICS)
 	m_pBuffer = nullptr;
 	m_BufferInProcess.store(false, std::memory_order_relaxed);
 #endif
@@ -99,7 +108,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	dbg_assert(m_Shutdown, "Processor was already not shut down.");
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
-#if !defined(CONF_PLATFORM_EMSCRIPTEN)
+#if !defined(CONF_SINGLE_THREADED_GRAPHICS)
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_pThread = thread_init(ThreadFunc, this, "Graphics thread");
 	// wait for the thread to start
@@ -111,7 +120,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 {
 	dbg_assert(!m_Shutdown, "Processor was already shut down.");
 	m_Shutdown = true;
-#if defined(CONF_PLATFORM_EMSCRIPTEN)
+#if defined(CONF_SINGLE_THREADED_GRAPHICS)
 	m_Warning = m_pProcessor->GetWarning();
 #else
 	{
@@ -126,7 +135,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
 	SGfxErrorContainer Error;
-#if defined(CONF_PLATFORM_EMSCRIPTEN)
+#if defined(CONF_SINGLE_THREADED_GRAPHICS)
 	Error = m_pProcessor->GetError();
 	if(Error.m_ErrorType == GFX_ERROR_TYPE_NONE)
 	{
@@ -164,7 +173,7 @@ void CGraphicsBackend_Threaded::RunBufferSingleThreadedUnsafe(CCommandBuffer *pB
 
 bool CGraphicsBackend_Threaded::IsIdle() const
 {
-#if defined(CONF_PLATFORM_EMSCRIPTEN)
+#if defined(CONF_SINGLE_THREADED_GRAPHICS)
 	return true;
 #else
 	return !m_BufferInProcess.load(std::memory_order_relaxed);
@@ -173,7 +182,7 @@ bool CGraphicsBackend_Threaded::IsIdle() const
 
 void CGraphicsBackend_Threaded::WaitForIdle()
 {
-#if !defined(CONF_PLATFORM_EMSCRIPTEN)
+#if !defined(CONF_SINGLE_THREADED_GRAPHICS)
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_BufferSwapCond.wait(Lock, [this]() { return m_pBuffer == nullptr; });
 #endif
@@ -1107,10 +1116,14 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, float HiD
 		{
 			int Width = 0;
 			int Height = 0;
+#if defined(__WIIU__)
+			SDL_GetWindowSize(m_pWindow, &Width, &Height);
+#else
 			if(m_BackendType != EBackendType::BACKEND_TYPE_VULKAN)
 				SDL_GL_GetDrawableSize(m_pWindow, &Width, &Height);
 			else
 				SDL_Vulkan_GetDrawableSize(m_pWindow, &Width, &Height);
+#endif
 			// SDL video modes are in screen space which are logical pixels
 			DpMode.w = Width / HiDPIScale;
 			DpMode.h = Height / HiDPIScale;
@@ -1137,11 +1150,25 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	int GlewMinor = 0;
 	int GlewPatch = 0;
 	*pScreen = 0;
+#if defined(__WIIU__)
+	*pWidth = *pDesktopWidth = *pCurrentWidth = 1280;
+	*pHeight = *pDesktopHeight = *pCurrentHeight = 720;
+	*pRefreshRate = 60;
+	*pFsaaSamples = 0;
+	m_pWindow = SDL_CreateWindow(pName, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, 0);
+	if(!m_pWindow)
+	{
+		log_error("gfx", "Failed to create SDL window on Wii U: %s", SDL_GetError());
+		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_INIT_FAILED;
+	}
+	log_info("gfx", "Created Wii U SDL window");
+#else
 	*pWidth = *pDesktopWidth = *pCurrentWidth = 800;
 	*pHeight = *pDesktopHeight = *pCurrentHeight = 600;
 	*pRefreshRate = 60;
 	*pFsaaSamples = 0;
 	log_info("gfx", "Created headless context");
+#endif
 #else
 	// print sdl version
 	{
@@ -1719,12 +1746,20 @@ int CGraphicsBackend_SDL_GL::GetWindowScreen()
 
 int CGraphicsBackend_SDL_GL::WindowActive()
 {
+#if defined(__WIIU__)
+	return m_pWindow != nullptr;
+#else
 	return m_pWindow && SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_INPUT_FOCUS;
+#endif
 }
 
 int CGraphicsBackend_SDL_GL::WindowOpen()
 {
+#if defined(__WIIU__)
+	return m_pWindow != nullptr;
+#else
 	return m_pWindow && SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_SHOWN;
+#endif
 }
 
 void CGraphicsBackend_SDL_GL::SetWindowGrab(bool Grab)
@@ -1776,10 +1811,14 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 
 void CGraphicsBackend_SDL_GL::GetViewportSize(int &w, int &h)
 {
+#if defined(__WIIU__)
+	SDL_GetWindowSize(m_pWindow, &w, &h);
+#else
 	if(m_BackendType != EBackendType::BACKEND_TYPE_VULKAN)
 		SDL_GL_GetDrawableSize(m_pWindow, &w, &h);
 	else
 		SDL_Vulkan_GetDrawableSize(m_pWindow, &w, &h);
+#endif
 }
 
 void CGraphicsBackend_SDL_GL::NotifyWindow()

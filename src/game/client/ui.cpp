@@ -234,6 +234,38 @@ void CUi::Update()
 		}
 	}
 
+#if defined(__WIIU__)
+	if(!m_TouchState.m_AnyPressed && !CheckMouseLock())
+	{
+		static bool s_CursorInit = false;
+		if(!s_CursorInit)
+		{
+			m_UpdatedMousePos.x = WindowSize.x * 0.5f;
+			m_UpdatedMousePos.y = WindowSize.y * 0.5f;
+			s_CursorInit = true;
+		}
+		IInput::IJoystick *pJoystick = Input()->GetActiveJoystick();
+		if(pJoystick)
+		{
+			float rsX = pJoystick->GetAxisValue(2);
+			float rsY = pJoystick->GetAxisValue(3);
+			if(rsX == 0.0f && rsY == 0.0f)
+			{
+				rsX = pJoystick->GetAxisValue(0);
+				rsY = pJoystick->GetAxisValue(1);
+			}
+			const float DeadZone = 0.25f;
+			const float Speed = 10.0f;
+			if(rsX > DeadZone || rsX < -DeadZone)
+				m_UpdatedMousePos.x += rsX * Speed;
+			if(rsY > DeadZone || rsY < -DeadZone)
+				m_UpdatedMousePos.y += rsY * Speed;
+			m_UpdatedMousePos.x = std::clamp(m_UpdatedMousePos.x, 0.0f, Graphics()->WindowWidth() - 1.0f);
+			m_UpdatedMousePos.y = std::clamp(m_UpdatedMousePos.y, 0.0f, Graphics()->WindowHeight() - 1.0f);
+		}
+	}
+#endif
+
 	m_MousePos = m_UpdatedMousePos * vec2(pScreen->w, pScreen->h) / WindowSize;
 	m_MouseDelta = m_UpdatedMouseDelta;
 	m_UpdatedMouseDelta = vec2(0.0f, 0.0f);

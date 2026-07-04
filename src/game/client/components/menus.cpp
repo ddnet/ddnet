@@ -853,6 +853,7 @@ void CMenus::OnInterfacesInit(CGameClient *pClient)
 
 void CMenus::OnInit()
 {
+	Input()->SetMenuActive(true);
 	if(g_Config.m_ClShowWelcome)
 	{
 		m_Popup = POPUP_LANGUAGE;
@@ -2391,6 +2392,7 @@ void CMenus::SetActive(bool Active)
 		Ui()->SetActiveItem(nullptr);
 	}
 	m_MenuActive = Active;
+	Input()->SetMenuActive(Active);
 	if(!m_MenuActive)
 	{
 		if(m_NeedSendinfo)

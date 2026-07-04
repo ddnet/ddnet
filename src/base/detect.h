@@ -82,6 +82,14 @@
 #define PLATFORM_STRING "macos"
 #endif
 
+#if defined(__WIIU__)
+#define CONF_FAMILY_UNIX 1
+#define CONF_FAMILY_STRING "unix"
+#define CONF_PLATFORM_WIIU 1
+#define PLATFORM_STRING "wiiu"
+#endif
+
+
 #if defined(__sun)
 #define CONF_FAMILY_UNIX 1
 #define CONF_FAMILY_STRING "unix"
@@ -108,14 +116,20 @@
 #if defined(__GNUC__) && !defined(__APPLE__) && !defined(__MINGW32__) && !defined(__sun)
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #include <sys/endian.h>
+#elif defined(__WIIU__)
+/* devkitPPC newlib does not have endian.h; Wii U is always big-endian */
+#define __BYTE_ORDER __BIG_ENDIAN
+#define CONF_ARCH_ENDIAN_BIG 1
 #else
 #include <endian.h>
 #endif
 
+#if defined(__BYTE_ORDER) && !defined(CONF_ARCH_ENDIAN_LITTLE) && !defined(CONF_ARCH_ENDIAN_BIG)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define CONF_ARCH_ENDIAN_LITTLE 1
 #elif __BYTE_ORDER == __BIG_ENDIAN
 #define CONF_ARCH_ENDIAN_BIG 1
+#endif
 #endif
 #endif
 
@@ -210,6 +224,15 @@
 #define CONF_ARCH_ENDIAN_STRING "big endian"
 #else
 #error "Unsupported endianness"
+#endif
+
+/* Thread-local storage. The Wii U's elf2rpl cannot handle TLS (TPREL)
+ * relocations, so thread_local is disabled there. The DDNet server does not
+ * rely on true per-thread separation for the affected variables. */
+#if defined(CONF_PLATFORM_WIIU)
+#define CONF_THREAD_LOCAL
+#else
+#define CONF_THREAD_LOCAL thread_local
 #endif
 
 #endif

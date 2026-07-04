@@ -152,3 +152,9 @@ tags
 *.vcxproj
 *.zip
 # tidy-alphabetical-end
+
+# AI Agent files
+.agents/
+skills-lock.json
+*handoff*.md
+handover*.md

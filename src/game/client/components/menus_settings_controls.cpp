@@ -588,6 +588,11 @@ float CMenusSettingsControls::MeasureSettingsJoystickHeight() const
 			NumOptions += 3; // mode, ui sens, tolerance
 			if(!g_Config.m_InpControllerAbsolute)
 				NumOptions++; // ingame sens
+#if defined(__WIIU__)
+			NumOptions += 1; // gyro enable
+			if(g_Config.m_InpGyroEnable)
+				NumOptions += 1; // gyro sens
+#endif
 			NumOptions += Input()->GetActiveJoystick()->GetNumAxes() + 1; // axis selection + header
 		}
 	}
@@ -670,6 +675,37 @@ void CMenusSettingsControls::RenderSettingsJoystick(CUIRect View)
 		View.HSplitTop(BUTTON_SPACING, nullptr, &View);
 		View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
 		Ui()->DoScrollbarOption(&g_Config.m_InpControllerTolerance, &g_Config.m_InpControllerTolerance, &Button, Localize("Controller jitter tolerance"), 0, 50);
+
+#if defined(__WIIU__)
+		View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+		View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+		if(GameClient()->m_Menus.DoButton_CheckBox(&g_Config.m_InpGyroEnable, Localize("Enable Wii U Gyro Aiming"), g_Config.m_InpGyroEnable, &Button))
+		{
+			g_Config.m_InpGyroEnable ^= 1;
+		}
+
+		if(g_Config.m_InpGyroEnable)
+		{
+			View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+			View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+			Ui()->DoScrollbarOption(&g_Config.m_InpGyroSens, &g_Config.m_InpGyroSens, &Button, Localize("Gyro sensitivity"), 1, 5000,
+				&CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
+
+			View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+			View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+			if(GameClient()->m_Menus.DoButton_CheckBox(&g_Config.m_InpGyroInvertX, Localize("Invert gyro left/right"), g_Config.m_InpGyroInvertX, &Button))
+			{
+				g_Config.m_InpGyroInvertX ^= 1;
+			}
+
+			View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+			View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+			if(GameClient()->m_Menus.DoButton_CheckBox(&g_Config.m_InpGyroInvertY, Localize("Invert gyro up/down"), g_Config.m_InpGyroInvertY, &Button))
+			{
+				g_Config.m_InpGyroInvertY ^= 1;
+			}
+		}
+#endif
 
 		View.HSplitTop(BUTTON_SPACING, nullptr, &View);
 		if(m_SettingsScrollRegion.AddRect(View))
