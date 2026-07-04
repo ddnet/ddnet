@@ -318,6 +318,8 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
 
+	log_info("ssh", "libssh %s", ssh_version(0));
+
 	m_Bind = ssh_bind_new();
 	if(m_Bind == nullptr)
 	{
@@ -346,9 +348,9 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 	int RawFd = ssh_bind_get_fd(m_Bind);
 	fcntl(RawFd, F_SETFL, O_NONBLOCK);
 
-	log_info("ssh", "Listening on 0.0.0.0:%s", PORT);
-	log_info("ssh", "Username: %s", USERNAME);
-	log_info("ssh", "Password: %s", PASSWORD);
+	log_info("ssh", "listening on 0.0.0.0:%s", PORT);
+	log_info("ssh", "username: %s", USERNAME);
+	log_info("ssh", "password: %s", PASSWORD);
 }
 
 std::optional<int> CSshServer::FindFreeSlot()
