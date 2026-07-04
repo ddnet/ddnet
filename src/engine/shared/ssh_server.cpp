@@ -12,12 +12,15 @@
 #include <engine/storage.h>
 
 #include <fcntl.h>
+#include <libssh/callbacks.h>
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+
+// TODO: ban ip after too many failed login attempts, do we also need some delay in the password check to protect against bruteforcing?
 
 // TODO: log failed auth somewhere? ssh is a more popular attack target than teeworlds econ
 //       we might need extra protection by showing the admin how many incoming attacks are there
@@ -363,12 +366,15 @@ std::optional<int> CSshServer::FindFreeSlot()
 
 int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername, const char *pPassword, void *pUserData)
 {
+	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
+
 	log_info("ssh", "password auth attempt — user='%s'", pUsername);
 
-	if (str_comp(pUsername, USERNAME) == 0 &&
+	if(str_comp(pUsername, USERNAME) == 0 &&
 		str_comp(pPassword, PASSWORD) == 0)
 	{
 		log_info("ssh", "Password auth: SUCCESS");
+		pCtx->m_pClient->m_Authenticated = true;
 		return SSH_AUTH_SUCCESS;
 	}
 
@@ -387,6 +393,16 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 
 	CSshClient *pClient = new CSshClient(ClientId, Session);
 	pClient->m_JoinTime = time_get();
+
+	pClient->m_CallbackCtx = {
+		.m_pClient = pClient,
+		.m_pServer = this};
+
+	pClient->m_Callback = {
+		.userdata = &pClient->m_CallbackCtx,
+		.auth_password_function = AuthPasswordCallback};
+	ssh_callbacks_init(&pClient->m_Callback);
+	ssh_set_server_callbacks(Session, &pClient->m_Callback);
 
 	m_apClients[ClientId] = pClient;
 }

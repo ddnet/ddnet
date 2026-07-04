@@ -3,13 +3,11 @@
 
 #if defined(CONF_SSH)
 
-// FIXME: remove this
-#define SSH_SUPPRESS_DEPRECATED 1
-
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
+#include <libssh/callbacks.h>
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 
@@ -44,6 +42,21 @@ public:
 
 	int64_t m_JoinTime = 0;
 	char m_aInput[2048] = "";
+
+	// We need to manage the memory for this struct
+	// because libssh does not copy it
+	struct ssh_server_callbacks_struct m_Callback = {};
+
+	// TODO: I wonder if just passing *this* would be enough
+	//       i think it works for now but then later we might need the entire server in scope
+	//       to ban on too many login attempts or something like that
+	class CCallbackCtx
+	{
+	public:
+		CSshClient *m_pClient = nullptr;
+		class CSshServer *m_pServer = nullptr;
+	};
+	CCallbackCtx m_CallbackCtx;
 };
 
 class CSshServer
