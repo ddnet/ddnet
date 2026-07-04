@@ -577,16 +577,6 @@ void CSshServer::Update()
 			}
 		}
 
-		if(pClient->m_Channel == nullptr)
-		{
-			// TODO: remove this entire method once callbacks work
-			if(!TryOpenSessionChannel(pClient))
-			{
-				log_error("ssh", "failed to open channel");
-				OnClientDisconnect(pClient->m_ClientId);
-				return;
-			}
-		}
 		if(!pClient->m_ShellReady)
 		{
 			// TODO: replace this with the callback
