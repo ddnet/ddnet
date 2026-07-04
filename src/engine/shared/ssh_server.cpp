@@ -412,6 +412,24 @@ ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, v
 	return Channel;
 }
 
+int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Channel, const char *pTerm, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
+{
+	CSshClient::CCallbackCtx *pCtx =
+		static_cast<CSshClient::CCallbackCtx *>(pUserData);
+
+	if(!pCtx->m_pClient->m_Authenticated)
+	{
+		log_info("ssh", "PTY request denied: client not authenticated");
+		return SSH_ERROR;
+	}
+
+	log_warn("ssh", "PTY NOT SUPPORTED");
+
+	// we don't support pty yet, only shell for now
+	// smh we still need to return ok here??
+	return SSH_OK;
+}
+
 int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Channel, void *pUserData)
 {
 	CSshClient::CCallbackCtx *pCtx =
@@ -430,6 +448,7 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 
 	pCtx->m_pClient->m_ChannelCallback = {
 		.userdata = pCtx,
+		.channel_pty_request_function = ChannelPtyRequestCallback,
 		.channel_shell_request_function = ChannelShellRequestCallback,
 	};
 	ssh_callbacks_init(&pCtx->m_pClient->m_ChannelCallback);
