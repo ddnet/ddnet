@@ -575,11 +575,8 @@ void CSshServer::Update()
 				OnClientDisconnect(pClient->m_ClientId, "timeout");
 				continue;
 			}
-		}
 
-		if(!pClient->m_ShellReady)
-		{
-			// TODO: replace this with the callback
+			// TODO: don't we have a callback for this? why do we need it?
 			if(!TryAcceptShell(pClient))
 			{
 				log_error("ssh", "shell request failed");
@@ -596,10 +593,12 @@ void CSshServer::Update()
 			OnClientDisconnect(pClient->m_ClientId);
 		}
 
-		if(!pClient->m_Authenticated)
-		{
+		if(!pClient->m_ShellReady)
 			continue;
-		}
+		if(!pClient->m_Channel)
+			continue;
+		if(!pClient->m_Authenticated)
+			continue;
 
 
 		// TODO: should this be a callback too? Right now it seems to work as is so no urgency.
