@@ -45,7 +45,8 @@ public:
 
 	// We need to manage the memory for this struct
 	// because libssh does not copy it
-	struct ssh_server_callbacks_struct m_Callback = {};
+	struct ssh_server_callbacks_struct m_ServerCallback = {};
+	struct ssh_channel_callbacks_struct m_ChannelCallback = {};
 
 	// TODO: I wonder if just passing *this* would be enough
 	//       i think it works for now but then later we might need the entire server in scope
@@ -83,6 +84,8 @@ class CSshServer
 
 	// libssh callbacks
 	static int AuthPasswordCallback(ssh_session Session, const char *pUsername, const char *pPassword, void *pUserData);
+	static ssh_channel ChannelOpenRequestSessionCallback(ssh_session Session, void *pUserData);
+	static int ChannelShellRequestCallback(ssh_session Session, ssh_channel Channel, void *pUserData);
 
 	void OnClientConnect(int ClientId, ssh_session Session);
 	void OnClientDisconnect(int ClientId, const char *pReason = "");

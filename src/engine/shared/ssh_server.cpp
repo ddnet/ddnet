@@ -20,6 +20,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: offer pty in addition to shell? I feel like it is more powerfull for stuff like autocomplete and shit
+
 // TODO: ban ip after too many failed login attempts, do we also need some delay in the password check to protect against bruteforcing?
 
 // TODO: log failed auth somewhere? ssh is a more popular attack target than teeworlds econ
@@ -382,6 +384,67 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 	return SSH_AUTH_DENIED;
 }
 
+ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, void *pUserData)
+{
+	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
+
+	log_info("ssh", "Client requesting to open a session channel...");
+
+	// Security check: Ensure the user actually authenticated
+	if(!pCtx->m_pClient->m_Authenticated)
+	{
+		log_info("ssh", "Channel open DENIED: User not authenticated.");
+		return nullptr;
+	}
+
+	// Create a new channel for this session
+	ssh_channel Channel = ssh_channel_new(Session);
+	if(Channel == nullptr)
+	{
+		log_info("ssh", "Failed to create channel.");
+		return nullptr;
+	}
+
+	// Optional: Store the channel in your client object so you can read/write to it later
+	pCtx->m_pClient->m_Channel = Channel;
+
+	log_info("ssh", "Channel open: SUCCESS");
+	return Channel;
+}
+
+int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Channel, void *pUserData)
+{
+	CSshClient::CCallbackCtx *pCtx =
+		static_cast<CSshClient::CCallbackCtx *>(pUserData);
+
+	if(!pCtx->m_pClient->m_Authenticated)
+	{
+		log_info("ssh", "Shell request denied: client not authenticated");
+		return SSH_ERROR;
+	}
+
+	log_info("ssh", "Shell request accepted");
+
+	pCtx->m_pClient->m_Channel = Channel;
+	pCtx->m_pClient->m_ShellReady = true;
+
+	pCtx->m_pClient->m_ChannelCallback = {
+		.userdata = pCtx,
+		.channel_shell_request_function = ChannelShellRequestCallback,
+	};
+	ssh_callbacks_init(&pCtx->m_pClient->m_ChannelCallback);
+	ssh_set_channel_callbacks(Channel, &pCtx->m_pClient->m_ChannelCallback);
+
+	// Optionally send a greeting immediately.
+	const char *pBanner =
+		"Welcome!\r\n"
+		"$ ";
+
+	ssh_channel_write(Channel, pBanner, strlen(pBanner));
+
+	return SSH_OK;
+}
+
 void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 {
 	dbg_assert(m_apClients[ClientId] == nullptr, "ssh_server connect failed ClientId %d reused", ClientId);
@@ -398,11 +461,13 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 		.m_pClient = pClient,
 		.m_pServer = this};
 
-	pClient->m_Callback = {
+	pClient->m_ServerCallback = {
 		.userdata = &pClient->m_CallbackCtx,
-		.auth_password_function = AuthPasswordCallback};
-	ssh_callbacks_init(&pClient->m_Callback);
-	ssh_set_server_callbacks(Session, &pClient->m_Callback);
+		.auth_password_function = AuthPasswordCallback,
+		.channel_open_request_session_function = ChannelOpenRequestSessionCallback,
+	};
+	ssh_callbacks_init(&pClient->m_ServerCallback);
+	ssh_set_server_callbacks(Session, &pClient->m_ServerCallback);
 
 	m_apClients[ClientId] = pClient;
 }
@@ -498,6 +563,7 @@ void CSshServer::Update()
 
 		if(!pClient->m_Authenticated)
 		{
+			// TODO: remove this entire method once callbacks work
 			if(!TryAuthenticateClient(pClient))
 			{
 				fprintf(stderr, "Authentication failed\n");
@@ -509,6 +575,7 @@ void CSshServer::Update()
 
 		if(pClient->m_Channel == nullptr)
 		{
+			// TODO: remove this entire method once callbacks work
 			if(!TryOpenSessionChannel(pClient))
 			{
 				log_error("ssh", "failed to open channel");
@@ -518,6 +585,7 @@ void CSshServer::Update()
 		}
 		if(!pClient->m_ShellReady)
 		{
+			// TODO: replace this with the callback
 			if(!TryAcceptShell(pClient))
 			{
 				log_error("ssh", "shell request failed");
