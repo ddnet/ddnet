@@ -466,7 +466,7 @@ void CSshServer::Update()
 
 		if(pClient->m_Channel == nullptr)
 		{
-			if(TryOpenSessionChannel(pClient))
+			if(!TryOpenSessionChannel(pClient))
 			{
 				log_error("ssh", "failed to open channel");
 				OnClientDisconnect(pClient->m_ClientId);
