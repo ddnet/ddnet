@@ -361,6 +361,21 @@ std::optional<int> CSshServer::FindFreeSlot()
 	return std::nullopt;
 }
 
+int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername, const char *pPassword, void *pUserData)
+{
+	log_info("ssh", "password auth attempt — user='%s'", pUsername);
+
+	if (str_comp(pUsername, USERNAME) == 0 &&
+		str_comp(pPassword, PASSWORD) == 0)
+	{
+		log_info("ssh", "Password auth: SUCCESS");
+		return SSH_AUTH_SUCCESS;
+	}
+
+	log_info("ssh", "Password auth: DENIED");
+	return SSH_AUTH_DENIED;
+}
+
 void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 {
 	dbg_assert(m_apClients[ClientId] == nullptr, "ssh_server connect failed ClientId %d reused", ClientId);

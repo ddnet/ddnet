@@ -68,6 +68,9 @@ class CSshServer
 
 	std::optional<int> FindFreeSlot();
 
+	// libssh callbacks
+	static int AuthPasswordCallback(ssh_session Session, const char *pUsername, const char *pPassword, void *pUserData);
+
 	void OnClientConnect(int ClientId, ssh_session Session);
 	void OnClientDisconnect(int ClientId, const char *pReason = "");
 
