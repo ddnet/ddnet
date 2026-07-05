@@ -63,8 +63,6 @@
 //       also not sure how authorized_keys would look like
 //       either there is one file per role or a custom format where the line with the key also contains the role name
 
-// TODO: there should also be ssh pub key login
-
 // the KEY_ prefix is already used by sdl
 // also it does not seem to perfectly fit
 // but idk what the better choice would be
