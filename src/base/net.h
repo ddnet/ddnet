@@ -33,7 +33,6 @@
 #error NOT IMPLEMENTED
 #endif
 
-
 /**
  * @defgroup Network Networking
  */
