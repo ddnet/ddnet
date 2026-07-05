@@ -10,6 +10,7 @@
 #include <base/time.h>
 
 #include <engine/console.h>
+#include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
@@ -48,13 +49,6 @@
 
 // TODO: would it be cool if ssh_pki_import_pubkey_file("~/.ssh/id_ed25519.pub", &key) and id_rsa.pub would be whitelisted by default?
 //       so you can just ssh into it without configuring your key anywhere?
-
-// TODO: have "root" user by default use the sv_rcon_password pass
-//       or maybe it should be "default_admin" thats how the status command calls it
-//       in addition to that register all keys added by the auth manager as valid credentials
-//       for moderators and helpers
-#define USERNAME "demo"
-#define PASSWORD "secret"
 
 // TODO: ^ should moderators and helpers really be able to login?
 //       i mean it would be cool but econ does not offer that
@@ -289,8 +283,6 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 	fcntl(RawFd, F_SETFL, O_NONBLOCK);
 
 	log_info("ssh", "listening on 0.0.0.0:%s", PORT);
-	log_info("ssh", "username: %s", USERNAME);
-	log_info("ssh", "password: %s", PASSWORD);
 }
 
 std::optional<int> CSshServer::FindFreeSlot()
@@ -305,8 +297,11 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 {
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 
-	if(str_comp(pUsername, USERNAME) == 0 &&
-		str_comp(pPassword, PASSWORD) == 0)
+	if(g_Config.m_SvRconPassword[0] == '\0')
+		return SSH_AUTH_DENIED;
+
+	bool AdminUsername = str_comp(pUsername, "root") == 0 || str_comp(pUsername, "admin") == 0 || str_comp(pUsername, "default_admin") == 0;
+	if(AdminUsername && str_comp(pPassword, g_Config.m_SvRconPassword) == 0)
 	{
 		pCtx->m_pClient->m_Authenticated = true;
 		return SSH_AUTH_SUCCESS;
