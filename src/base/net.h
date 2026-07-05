@@ -11,7 +11,9 @@
 #include <string>
 
 #ifdef CONF_FAMILY_UNIX
+#include <sys/socket.h> // sockaddr
 #include <sys/un.h> // sockaddr_un
+#include <unistd.h> // socklen_t
 #endif
 
 /**
@@ -46,6 +48,8 @@ typedef int UNIXSOCKET;
  */
 typedef struct sockaddr_un UNIXSOCKETADDR;
 #endif
+
+void sockaddr_to_netaddr(const sockaddr *src, socklen_t src_len, NETADDR *dst);
 
 /**
  * Compares two network addresses.

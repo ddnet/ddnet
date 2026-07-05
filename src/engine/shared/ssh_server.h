@@ -4,6 +4,7 @@
 #if defined(CONF_SSH)
 
 #include <base/logger.h>
+#include <base/types.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
@@ -51,6 +52,7 @@ public:
 	}
 
 	int m_ClientId;
+	NETADDR m_Addr;
 
 	// HOLY STATE HANDLING???
 	// refactor this?

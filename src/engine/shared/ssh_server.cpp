@@ -6,14 +6,17 @@
 #include <base/io.h>
 #include <base/log.h>
 #include <base/logger.h>
+#include <base/net.h>
 #include <base/str.h>
 #include <base/time.h>
+#include <base/types.h>
 
 #include <engine/console.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <libssh/callbacks.h>
 #include <libssh/libssh.h>
@@ -488,13 +491,30 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 {
 	dbg_assert(m_apClients[ClientId] == nullptr, "ssh_server connect failed ClientId %d reused", ClientId);
 
-	// TODO: this prints for every connection attempt so attackers without the password can spam the log
-	//       and occupy client ids
-	//       so ideally there would be a different connection pool just for the before auth state
-	log_info("ssh", "client with id %d connected", ClientId);
+	socket_t Socket = ssh_get_fd(Session);
+	struct sockaddr_storage SockAddr;
+	socklen_t SockAddrLen = sizeof(SockAddr);
+	if(getpeername(Socket, (struct sockaddr *)&SockAddr, &SockAddrLen))
+	{
+		dbg_assert_failed("failed to get ssh connection address");
+	}
 
 	CSshClient *pClient = new CSshClient(ClientId, Session);
 	pClient->m_JoinTime = time_get();
+
+	sockaddr_to_netaddr((sockaddr *)&SockAddr, SockAddrLen, &pClient->m_Addr);
+	if(net_addr_comp(&pClient->m_Addr, &NETADDR_ZEROED) == 0)
+	{
+		dbg_assert_failed("failed to convert ssh client address");
+	}
+
+	char aAddr[NETADDR_MAXSTRSIZE];
+	net_addr_str(&pClient->m_Addr, aAddr, sizeof(aAddr), true);
+
+	// TODO: this prints for every connection attempt so attackers without the password can spam the log
+	//       and occupy client ids
+	//       so ideally there would be a different connection pool just for the before auth state
+	log_info("ssh", "new connection cid=%d addr=<{%s}>", ClientId, aAddr);
 
 	pClient->m_CallbackCtx = {
 		.m_pClient = pClient,
