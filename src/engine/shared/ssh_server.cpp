@@ -20,6 +20,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: add a config to turn the ssh server on and off at runtime
+
 // TODO: offer pty in addition to shell? I feel like it is more powerfull for stuff like autocomplete and shit
 
 // TODO: ban ip after too many failed login attempts, do we also need some delay in the password check to protect against bruteforcing?
