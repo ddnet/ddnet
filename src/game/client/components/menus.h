@@ -562,7 +562,6 @@ protected:
 	bool RenderLanguageSelection(CUIRect MainView);
 	void RenderThemeSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);
-	void RenderSettingsGraphics(CUIRect MainView);
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 
@@ -573,6 +572,9 @@ protected:
 	// TODO: Change PopupConfirm to avoid using a function pointer to a CMenus
 	//       member function, to move this function to CMenusSettingsControls
 	void ResetSettingsControls();
+
+	// found in menus_settings_graphics.cpp
+	void RenderSettingsGraphics(CUIRect MainView);
 
 	// found in menus_settings_player.cpp
 	void RenderSettingsPlayer(CUIRect MainView);
