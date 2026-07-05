@@ -300,6 +300,8 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 	if(g_Config.m_SvRconPassword[0] == '\0')
 		return SSH_AUTH_DENIED;
 
+	// TODO: econ has a dedicated password instead of the default admin password
+	//       but why? does ssh need a dedicated password too? seems bloated to me
 	bool AdminUsername = str_comp(pUsername, "root") == 0 || str_comp(pUsername, "admin") == 0 || str_comp(pUsername, "default_admin") == 0;
 	if(AdminUsername && str_comp(pPassword, g_Config.m_SvRconPassword) == 0)
 	{
