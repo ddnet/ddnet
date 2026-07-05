@@ -99,6 +99,8 @@ static const CArgumentCompletionEntry gs_aArgumentCompletionEntries[] = {
 	{EArgumentCompletionType::TUNE, "tune_reset", 0},
 	{EArgumentCompletionType::TUNE, "toggle_tune", 0},
 	{EArgumentCompletionType::TUNE, "tune_zone", 1},
+	{EArgumentCompletionType::TUNE, "tune_lock", 1},
+	{EArgumentCompletionType::TUNE, "tune_lock_pl", 1},
 	{EArgumentCompletionType::SETTING, "reset", 0},
 	{EArgumentCompletionType::SETTING, "toggle", 0},
 	{EArgumentCompletionType::SETTING, "access_level", 0},

@@ -28,6 +28,7 @@ public:
 	bool NetIsInfoLegacyCompatible() const;
 	CNetObj_DDRaceProjectile NetInfoLegacy() const;
 	CNetObj_DDNetProjectile NetInfo() const;
+	CNetObj_Projectile NetInfoBackwardsCompatible();
 
 	void Reset() override;
 	void Tick() override;
@@ -49,10 +50,33 @@ private:
 	int m_Bouncing;
 	bool m_Freeze;
 	int m_TuneZone;
+	float m_Curvature;
+	float m_Speed;
 	bool m_BelongsToPracticeTeam;
 	int m_DDRaceTeam;
 	bool m_IsSolo;
 	vec2 m_InitDir;
+	int m_Lifetime;
+
+	vec2 m_CurPos;
+
+	void DetermineTuning();
+
+	// Backwards compatibility for tune locks
+	void TickDeferred() override;
+	void CalculateVel();
+	void GetTunings(CTuningParams *pTuning, float *pCurvature, float *pSpeed) const;
+
+	bool m_DefaultTuning;
+	bool IsDefaultTuning() const { return m_DefaultTuning; }
+
+	struct
+	{
+		bool m_CalculatedVel;
+		vec2 m_LastResetPos;
+		int m_LastResetTick;
+		ivec2 m_Vel;
+	} m_Snap;
 
 public:
 	void SetBouncing(int Value);
