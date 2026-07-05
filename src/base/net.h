@@ -16,6 +16,24 @@
 #include <unistd.h> // socklen_t
 #endif
 
+#if defined(CONF_FAMILY_UNIX)
+
+// UNIX net includes
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+
+#elif defined(CONF_FAMILY_WINDOWS)
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#error NOT IMPLEMENTED
+#endif
+
+
 /**
  * @defgroup Network Networking
  */
