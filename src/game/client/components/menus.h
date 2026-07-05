@@ -558,6 +558,7 @@ protected:
 
 	// found in menus_settings.cpp
 	void RenderSettings(CUIRect MainView);
+	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 
 	// found in menus_settings_assets.cpp
 	void RenderSettingsAssets(CUIRect MainView);
@@ -570,6 +571,9 @@ protected:
 	// TODO: Change PopupConfirm to avoid using a function pointer to a CMenus
 	//       member function, to move this function to CMenusSettingsControls
 	void ResetSettingsControls();
+
+	// found in menus_settings_ddnet.cpp
+	void RenderSettingsDDNet(CUIRect MainView);
 
 	// found in menus_settings_general.cpp
 	void RenderSettingsGeneral(CUIRect MainView);
@@ -846,9 +850,5 @@ private:
 	// found in menus_ingame.cpp
 	void RenderInGameNetwork(CUIRect MainView);
 	void RenderGhost(CUIRect MainView);
-
-	// found in menus_settings.cpp
-	void RenderSettingsDDNet(CUIRect MainView);
-	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 };
 #endif
