@@ -2546,6 +2546,7 @@ if(CLIENT)
     components/menus_settings_controls.cpp
     components/menus_settings_controls.h
     components/menus_settings_player.cpp
+    components/menus_settings_tee.cpp
     components/menus_start.cpp
     components/menus_start.h
     components/motd.cpp
