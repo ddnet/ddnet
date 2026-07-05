@@ -1,30 +1,30 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "countryflags.h"
 #include "menus.h"
-#include "skins.h"
 
 #include <base/dbg.h>
 #include <base/fs.h>
-#include <base/log.h>
 #include <base/math.h>
 #include <base/str.h>
 
 #include <engine/font_icons.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
-#include <engine/shared/localization.h>
-#include <engine/shared/protocol7.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 #include <engine/updater.h>
 
-#include <generated/protocol.h>
-
 #include <game/client/animstate.h>
+#include <game/client/components/background.h>
 #include <game/client/components/chat.h>
+#include <game/client/components/console.h>
+#include <game/client/components/countryflags.h>
+#include <game/client/components/emoticon.h>
+#include <game/client/components/mapimages.h>
 #include <game/client/components/menu_background.h>
-#include <game/client/components/sounds.h>
+#include <game/client/components/nameplates.h>
+#include <game/client/components/skins.h>
+#include <game/client/components/tooltips.h>
 #include <game/client/gameclient.h>
 #include <game/client/skin.h>
 #include <game/client/ui.h>
@@ -33,13 +33,10 @@
 #include <game/localization.h>
 
 #include <array>
-#include <chrono>
 #include <memory>
 #include <numeric>
 #include <string>
 #include <vector>
-
-using namespace std::chrono_literals;
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {

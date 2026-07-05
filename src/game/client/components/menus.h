@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
 #include <base/bytes.h>
+#include <base/str.h>
 #include <base/types.h>
 #include <base/vmath.h>
 
@@ -26,7 +27,6 @@
 #include <game/voting.h>
 
 #include <chrono>
-#include <deque>
 #include <optional>
 #include <vector>
 
