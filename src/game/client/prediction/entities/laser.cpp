@@ -26,6 +26,12 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Type = Type;
 	m_ZeroEnergyBounceInLastTick = false;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+	CTuningParams *pTuning = GameWorld()->TuningFromChrOrZone(m_Owner, m_TuneZone);
+	m_ShotgunStrength = pTuning->m_ShotgunStrength;
+	m_BounceNum = pTuning->m_LaserBounceNum;
+	m_BounceCost = pTuning->m_LaserBounceCost;
+	m_BounceDelay = pTuning->m_LaserBounceDelay;
+	m_LaserReach = pTuning->m_LaserReach;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -50,14 +56,12 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	m_Energy = -1;
 	if(m_Type == WEAPON_SHOTGUN)
 	{
-		float Strength = TuningList()[m_TuneZone].m_ShotgunStrength;
-
 		const vec2 &HitPos = pHit->Core()->m_Pos;
 		if(!g_Config.m_SvOldLaser)
 		{
 			if(m_PrevPos != HitPos)
 			{
-				pHit->AddVelocity(normalize(m_PrevPos - HitPos) * Strength);
+				pHit->AddVelocity(normalize(m_PrevPos - HitPos) * m_ShotgunStrength);
 			}
 			else
 			{
@@ -68,7 +72,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		{
 			if(pOwnerChar->Core()->m_Pos != HitPos)
 			{
-				pHit->AddVelocity(normalize(pOwnerChar->Core()->m_Pos - HitPos) * Strength);
+				pHit->AddVelocity(normalize(pOwnerChar->Core()->m_Pos - HitPos) * m_ShotgunStrength);
 			}
 			else
 			{
@@ -138,15 +142,13 @@ void CLaser::DoBounce()
 			}
 			else
 			{
-				m_Energy -= Distance + GetTuning(m_TuneZone)->m_LaserBounceCost;
+				m_Energy -= Distance + m_BounceCost;
 			}
 			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
 			m_Bounces++;
 
-			int BounceNum = GetTuning(m_TuneZone)->m_LaserBounceNum;
-
-			if(m_Bounces > BounceNum)
+			if(m_Bounces > m_BounceNum)
 				m_Energy = -1;
 
 			GameWorld()->CreatePredictedSound(m_Pos, SOUND_LASER_BOUNCE, m_Id);
@@ -165,16 +167,14 @@ void CLaser::DoBounce()
 
 void CLaser::Tick()
 {
-	float Delay = GetTuning(m_TuneZone)->m_LaserBounceDelay;
-
 	if(GameWorld()->m_WorldConfig.m_IsVanilla) // predict old physics on vanilla 0.6 servers
 	{
-		if(GameWorld()->GameTick() > m_EvalTick + (GameWorld()->GameTickSpeed() * Delay / 1000.0f))
+		if(GameWorld()->GameTick() > m_EvalTick + (GameWorld()->GameTickSpeed() * m_BounceDelay / 1000.0f))
 			DoBounce();
 	}
 	else
 	{
-		if((GameWorld()->GameTick() - m_EvalTick) > (GameWorld()->GameTickSpeed() * Delay / 1000.0f))
+		if((GameWorld()->GameTick() - m_EvalTick) > (GameWorld()->GameTickSpeed() * m_BounceDelay / 1000.0f))
 			DoBounce();
 	}
 }
@@ -185,9 +185,23 @@ CLaser::CLaser(CGameWorld *pGameWorld, int Id, CLaserData *pLaser) :
 	m_Pos = pLaser->m_To;
 	m_From = pLaser->m_From;
 	m_EvalTick = pLaser->m_StartTick;
-	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
-	m_Owner = -2;
-	m_Energy = GetTuning(m_TuneZone)->m_LaserReach;
+	if(pLaser->m_ExtraInfo)
+	{
+		m_Owner = pLaser->m_Owner;
+	}
+	else
+	{
+		m_Owner = -2;
+	}
+
+	m_TuneZone = pLaser->m_TuneZone;
+	m_ShotgunStrength = pLaser->m_ShotgunStrength;
+	m_BounceNum = pLaser->m_BounceNum;
+	m_BounceCost = pLaser->m_BounceCost;
+	m_BounceDelay = pLaser->m_BounceDelay;
+	m_LaserReach = pLaser->m_LaserReach;
+
+	m_Energy = m_LaserReach;
 	if(pGameWorld->m_WorldConfig.m_IsFNG && m_Energy < 10.f)
 		m_Energy = 800.0f;
 
@@ -227,5 +241,10 @@ CLaserData CLaser::GetData() const
 	Result.m_Subtype = -1;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_SwitchNumber = m_Number;
+	Result.m_ShotgunStrength = m_ShotgunStrength;
+	Result.m_BounceNum = m_BounceNum;
+	Result.m_BounceCost = m_BounceCost;
+	Result.m_BounceDelay = m_BounceDelay;
+	Result.m_LaserReach = m_LaserReach;
 	return Result;
 }

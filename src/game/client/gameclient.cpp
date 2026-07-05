@@ -198,6 +198,7 @@ void CGameClient::OnConsoleInit()
 	// register game commands to allow the client prediction to load settings from the map
 	Console()->Register("tune", "s[tuning] ?f[value]", CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("tune_lock", "i[number] s[tuning] f[value]", CFGFLAG_GAME, ConTuneLock, this, "Tune for lock a variable to value");
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
 	for(auto &pComponent : m_vpAll)
@@ -425,7 +426,7 @@ void CGameClient::OnInit()
 		m_Menus.RenderLoading(pLoadingDDNetCaption, pLoadingMessageAssets, 1);
 	}
 
-	m_GameWorld.Init(Collision(), m_aTuningList, &m_MapBugs);
+	m_GameWorld.Init(Collision(), m_aTuningList, m_aLockedTuning, &m_MapBugs);
 	OnReset();
 
 	// Set free binds to DDRace binds if it's active
@@ -1111,6 +1112,32 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		m_aReceivedTuning[Conn] = true;
 		// apply new tuning
 		m_aTuning[Conn] = NewTuning;
+		return;
+	}
+	else if(MsgId == NETMSGTYPE_SV_TUNELOCK)
+	{
+		int ClientId = pUnpacker->GetInt();
+		int Size = pUnpacker->GetInt();
+
+		if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+			return;
+
+		m_aClients[ClientId].m_LockedTunings.clear();
+
+		for(int i = 0; i < Size; i++)
+		{
+			int Index = pUnpacker->GetInt();
+			float Value = pUnpacker->GetInt() / 100.f;
+
+			if(pUnpacker->Error())
+				return;
+			if(Index < 0 || Index >= CTuningParams::Num())
+				continue;
+
+			CLockedTune LockedTune(Index, Value);
+			m_aClients[ClientId].m_LockedTunings.push_back(LockedTune);
+		}
+
 		return;
 	}
 
@@ -3105,6 +3132,8 @@ void CGameClient::CClientData::Reset()
 
 	for(auto &Info : m_aSixup)
 		Info.Reset();
+
+	m_LockedTunings.clear();
 }
 
 CSkinDescriptor CGameClient::CClientData::ToSkinDescriptor() const
@@ -3640,10 +3669,12 @@ void CGameClient::UpdatePrediction()
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
 			bool IsLocal = (i == m_Snap.m_LocalClientId || (PredictDummy() && i == m_aLocalIds[!g_Config.m_ClDummy]));
-			int GameTeam = IsTeamPlay() ? m_aClients[i].m_Team : i;
+			CGameWorld::SExtCharData ExtCharData;
+			ExtCharData.m_GameTeam = IsTeamPlay() ? m_aClients[i].m_Team : i;
+			ExtCharData.m_pLockedTunings = &m_aClients[i].m_LockedTunings; // Keep LockedTunings in tact even after resuming from '/pause'
 			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
 				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : nullptr,
-				GameTeam, IsLocal);
+				IsLocal, &ExtCharData);
 		}
 
 	for(const CSnapEntities &EntData : SnapEntities())
@@ -4782,6 +4813,20 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < TuneZone::NUM)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
+}
+
+void CGameClient::ConTuneLock(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	int List = pResult->GetInteger(0);
+	const char *pParamName = pResult->GetString(1);
+	float NewValue = pResult->GetFloat(2);
+
+	if(List >= 0 && List < TuneZone::NUM)
+	{
+		CLockedTune LockedTune(CTuningParams::GetIndex(pParamName), NewValue);
+		SetLockedTune(&pSelf->TuningList()[0], &pSelf->LockedTuning()[List], LockedTune, true);
+	}
 }
 
 void CGameClient::ConMapbug(IConsole::IResult *pResult, void *pUserData)

@@ -46,6 +46,7 @@ public:
 
 	void PostGlobalSnap();
 
+	void HandleTuneLock(int SnappingClient, int Id);
 	bool CanSnapCharacter(int SnappingClient);
 	bool IsSnappingCharacterInView(int SnappingClientId);
 
@@ -183,7 +184,7 @@ private:
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
-	void SendZoneMsgs();
+	void SendTuneMsg(const char *pMessage);
 	IAntibot *Antibot();
 
 	bool m_SetSavePos[NUM_RESCUEMODES];
@@ -213,6 +214,9 @@ public:
 	bool m_FrozenLastTick;
 	int m_TuneZone;
 	int m_TuneZoneOld;
+	LOCKED_TUNES m_LockedTunings;
+	LOCKED_TUNES m_LastLockedTunings;
+	bool m_aSentLockedTunings[MAX_CLIENTS];
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
@@ -278,7 +282,8 @@ public:
 	bool IsSuper() const { return m_Core.m_Super; }
 
 	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
-	CTuningParams *GetTuning(int Zone) { return &TuningList()[Zone]; }
+	CTuningParams *GetTuning();
+	void ApplyLockedTunings(bool SendTuningParams = true);
 };
 
 #endif

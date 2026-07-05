@@ -50,11 +50,21 @@ CGameWorld::~CGameWorld()
 		m_pParent->m_pChild = nullptr;
 }
 
-void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs)
+void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList, LOCKED_TUNES *pLockedTuningList, const CMapBugs *pMapBugs)
 {
 	m_pCollision = pCollision;
 	m_pTuningList = pTuningList;
+	m_vpLockedTuning = pLockedTuningList;
 	m_pMapBugs = pMapBugs;
+}
+
+CTuningParams *CGameWorld::TuningFromChrOrZone(int ClientId, int Zone)
+{
+	if(GetCharacterById(ClientId))
+		return GetCharacterById(ClientId)->GetTuning();
+	if(Zone > 0)
+		return GetTuning(Zone);
+	return GlobalTuning();
 }
 
 CEntity *CGameWorld::FindFirst(int Type)
@@ -372,7 +382,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		if(Owner == -1 || !GetCharacterById(Owner))
 			Strength = GlobalTuning()->m_ExplosionStrength;
 		else
-			Strength = GetCharacterById(Owner)->GetTuning(GetCharacterById(Owner)->GetOverriddenTuneZone())->m_ExplosionStrength;
+			Strength = GetCharacterById(Owner)->GetTuning()->m_ExplosionStrength;
 
 		float Dmg = Strength * l;
 		if((int)Dmg)
@@ -409,7 +419,7 @@ void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientId)
 	OnModified();
 }
 
-void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
+void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, bool IsLocal, SExtCharData *pExtCharData)
 {
 	if(IsLocalTeam(ObjId))
 	{
@@ -425,8 +435,11 @@ void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNe
 			InsertEntity(pChar);
 		}
 
-		if(pChar)
-			pChar->m_GameTeam = GameTeam;
+		if(pChar && pExtCharData)
+		{
+			pChar->m_GameTeam = pExtCharData->m_GameTeam;
+			pChar->m_LockedTunings = *pExtCharData->m_pLockedTunings;
+		}
 	}
 }
 
@@ -644,6 +657,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_pCollision = pFrom->m_pCollision;
 	m_WorldConfig = pFrom->m_WorldConfig;
 	m_pTuningList = pFrom->m_pTuningList;
+	m_vpLockedTuning = pFrom->m_vpLockedTuning;
 	m_pMapBugs = pFrom->m_pMapBugs;
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;

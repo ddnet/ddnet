@@ -51,6 +51,15 @@ void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList)
 	m_pTuningList = pTuningList;
 }
 
+CTuningParams *CGameWorld::TuningFromChrOrZone(int ClientId, int Zone)
+{
+	if(GameServer()->GetPlayerChar(ClientId))
+		return GameServer()->GetPlayerChar(ClientId)->GetTuning();
+	if(Zone > 0)
+		return GetTuning(Zone);
+	return GlobalTuning();
+}
+
 CEntity *CGameWorld::FindFirst(int Type)
 {
 	return Type < 0 || Type >= NUM_ENTTYPES ? nullptr : m_apFirstEntityTypes[Type];

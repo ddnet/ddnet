@@ -22,27 +22,6 @@
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 {
 	int CurWeapon = std::clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
-
-	// get positions
-	float Curvature = 0;
-	float Speed = 0;
-	const CTuningParams *pTuning = GameClient()->GetTuning(pCurrent->m_TuneZone);
-	if(CurWeapon == WEAPON_GRENADE)
-	{
-		Curvature = pTuning->m_GrenadeCurvature;
-		Speed = pTuning->m_GrenadeSpeed;
-	}
-	else if(CurWeapon == WEAPON_SHOTGUN)
-	{
-		Curvature = pTuning->m_ShotgunCurvature;
-		Speed = pTuning->m_ShotgunSpeed;
-	}
-	else if(CurWeapon == WEAPON_GUN)
-	{
-		Curvature = pTuning->m_GunCurvature;
-		Speed = pTuning->m_GunSpeed;
-	}
-
 	bool LocalPlayerInGame = false;
 
 	if(GameClient()->m_Snap.m_pLocalInfo)
@@ -84,8 +63,8 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 		}
 	}
 
-	vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct);
-	vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct - 0.001f);
+	vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, pCurrent->m_Curvature, pCurrent->m_Speed, Ct);
+	vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, pCurrent->m_Curvature, pCurrent->m_Speed, Ct - 0.001f);
 
 	float Alpha = 1.f;
 	if(IsOtherTeam)
@@ -686,27 +665,6 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	if(PredictionTick == pCurrent->m_StartTick)
 		return;
 
-	// get positions
-	float Curvature = 0;
-	float Speed = 0;
-	const CTuningParams *pTuning = GameClient()->GetTuning(pCurrent->m_TuneZone);
-
-	if(pCurrent->m_Type == WEAPON_GRENADE)
-	{
-		Curvature = pTuning->m_GrenadeCurvature;
-		Speed = pTuning->m_GrenadeSpeed;
-	}
-	else if(pCurrent->m_Type == WEAPON_SHOTGUN)
-	{
-		Curvature = pTuning->m_ShotgunCurvature;
-		Speed = pTuning->m_ShotgunSpeed;
-	}
-	else if(pCurrent->m_Type == WEAPON_GUN)
-	{
-		Curvature = pTuning->m_GunCurvature;
-		Speed = pTuning->m_GunSpeed;
-	}
-
 	float Pt = ((float)(PredictionTick - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
 	if(Pt < 0)
 		return; // projectile haven't been shot yet
@@ -728,8 +686,8 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	for(int i = 1 + (int)(Gt / Step); i < (int)(T / Step); i++)
 	{
 		float t = Step * (float)i + 0.4f * Step * random_float(-0.5f, 0.5f);
-		vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, t);
-		vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, t - 0.001f);
+		vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, pCurrent->m_Curvature, pCurrent->m_Speed, t);
+		vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, pCurrent->m_Curvature, pCurrent->m_Speed, t - 0.001f);
 		vec2 Vel = Pos - PrevPos;
 		float TimePassed = Pt - t;
 		if(Pt - MinTrailSpan > 0.01f)

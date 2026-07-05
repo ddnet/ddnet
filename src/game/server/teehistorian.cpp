@@ -209,7 +209,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		Write(aJson, str_length(aJson)); \
 		First = false; \
 	}
-#include <game/tuning.h>
+#include <game/tuning_params.h>
 #undef MACRO_TUNING_PARAM
 
 	str_copy(aJson, "},\"uuids\":[");

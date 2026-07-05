@@ -247,7 +247,7 @@ def export_settings_commands_table():
 
 	export_block(
 		"Tunings",
-		export_tunings(parse_tunings(read_files("src/game/tuning.h"))),
+		export_tunings(parse_tunings(read_files("src/game/tuning_params.h"))),
 	)
 
 
