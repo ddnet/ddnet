@@ -105,9 +105,14 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	char aBuf[256] = {0};
 
 	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
-	if(n == SSH_EOF || n == SSH_ERROR)
+	if(n == SSH_EOF)
 	{
-		dbg_assert_failed("TODO: handle this ssh error");
+		OnClientDisconnect(pClient->m_ClientId, "eof");
+		return;
+	}
+	if(n == SSH_ERROR)
+	{
+		OnClientDisconnect(pClient->m_ClientId, "channel read error");
 		return;
 	}
 	if(n == SSH_AGAIN || n == 0)
