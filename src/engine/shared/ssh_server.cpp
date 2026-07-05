@@ -53,23 +53,6 @@
 
 // TODO: there should also be ssh pub key login
 
-// Not thread-safe!
-class CSshLogger : public ILogger
-{
-	CSshServer *m_pSshServer;
-	int m_ClientId;
-	ILogger *m_pOuterLogger;
-
-public:
-	CSshLogger(CSshServer *pSshServer, int ClientId, ILogger *pOuterLogger) :
-		m_pSshServer(pSshServer),
-		m_ClientId(ClientId),
-		m_pOuterLogger(pOuterLogger)
-	{
-	}
-	void Log(const CLogMessage *pMessage) override;
-};
-
 void CSshLogger::Log(const CLogMessage *pMessage)
 {
 	CSshClient *pClient = m_pSshServer->m_apClients[m_ClientId];

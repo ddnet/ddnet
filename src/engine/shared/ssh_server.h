@@ -4,6 +4,7 @@
 #if defined(CONF_SSH)
 
 #include <engine/shared/config.h>
+#include <base/logger.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
@@ -19,6 +20,25 @@
 #define PASSWORD "secret"
 
 static constexpr int MAX_SSH_CLIENTS = 16;
+
+class CSshServer;
+
+// Not thread-safe!
+class CSshLogger : public ILogger
+{
+	CSshServer *m_pSshServer;
+	int m_ClientId;
+	ILogger *m_pOuterLogger;
+
+public:
+	CSshLogger(CSshServer *pSshServer, int ClientId, ILogger *pOuterLogger) :
+		m_pSshServer(pSshServer),
+		m_ClientId(ClientId),
+		m_pOuterLogger(pOuterLogger)
+	{
+	}
+	void Log(const CLogMessage *pMessage) override;
+};
 
 class CSshClient
 {
@@ -54,7 +74,7 @@ public:
 	{
 	public:
 		CSshClient *m_pClient = nullptr;
-		class CSshServer *m_pServer = nullptr;
+		CSshServer *m_pServer = nullptr;
 	};
 	CCallbackCtx m_CallbackCtx;
 };
