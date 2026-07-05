@@ -21,6 +21,9 @@
 #include <cstdlib>
 
 // TODO: add a config to turn the ssh server on and off at runtime
+//       make sure that does not get bugged if there is a on/off set in the autoexec_server.cfg
+//       and there is a map reload or something like that
+//       also if it is set multiple times in the config
 
 // TODO: offer pty in addition to shell? I feel like it is more powerfull for stuff like autocomplete and shit
 
