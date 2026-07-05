@@ -30,6 +30,10 @@
 //       make sure that does not get bugged if there is a on/off set in the autoexec_server.cfg
 //       and there is a map reload or something like that
 //       also if it is set multiple times in the config
+//       ----
+//       we also have to make sure to terminate all connections when turned off
+//       or check disabled state in all callbacks
+//       to avoid clients to progress during authentication while the server got turned off
 
 // TODO: offer pty in addition to shell? I feel like it is more powerfull for stuff like autocomplete and shit
 
