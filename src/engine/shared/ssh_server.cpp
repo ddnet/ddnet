@@ -41,9 +41,6 @@
 // TODO: should there be some "w" or "who" command like in linux systems
 //       to see other ssh connections because they do not show up in "status"
 
-// TODO: should be a config
-#define PORT "2222"
-
 // TODO: the default file location in the current dir is not ideal
 //       this should be in the storage save location
 //       or maybe even use the system wide location that also the regular host
@@ -255,6 +252,9 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
 
+	if(!g_Config.m_SvSsh)
+		return;
+
 	log_info("ssh", "libssh %s", ssh_version(0));
 
 	m_Bind = ssh_bind_new();
@@ -267,8 +267,11 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 
 	GenerateHostKeyIfMissing();
 
+	char aPort[32];
+	str_format(aPort, sizeof(aPort), "%d", g_Config.m_SvSshPort);
+
 	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_BINDADDR, "0.0.0.0");
-	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_BINDPORT_STR, PORT);
+	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_BINDPORT_STR, aPort);
 	ssh_bind_options_set(m_Bind, SSH_BIND_OPTIONS_RSAKEY, HOSTKEY_FILE);
 
 	int Ok = ssh_bind_listen(m_Bind);
@@ -285,7 +288,7 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, 
 	int RawFd = ssh_bind_get_fd(m_Bind);
 	fcntl(RawFd, F_SETFL, O_NONBLOCK);
 
-	log_info("ssh", "listening on 0.0.0.0:%s", PORT);
+	log_info("ssh", "listening on 0.0.0.0:%s", aPort);
 }
 
 std::optional<int> CSshServer::FindFreeSlot()
@@ -593,6 +596,8 @@ void CSshServer::Update()
 {
 	if(m_aError[0])
 		return;
+	if(m_Bind == nullptr)
+		return;
 
 	AcceptNewConnections();
 
@@ -643,7 +648,10 @@ void CSshServer::Update()
 void CSshServer::Shutdown()
 {
 	if(m_Bind != nullptr && m_aError[0] == '\0')
+	{
 		ssh_bind_free(m_Bind);
+		m_Bind = nullptr;
+	}
 }
 
 bool CSshServer::GotActiveConnections()

@@ -16,11 +16,6 @@
 
 #include <optional>
 
-#define PORT "2222"
-#define HOSTKEY_FILE "ssh_host_rsa_key"
-#define USERNAME "demo"
-#define PASSWORD "secret"
-
 static constexpr int MAX_SSH_CLIENTS = 16;
 
 class CSshServer;
@@ -92,7 +87,7 @@ class CSshServer
 	const IStorage *Storage() const { return m_pStorage; }
 	IStorage *Storage() { return m_pStorage; }
 
-	ssh_bind m_Bind;
+	ssh_bind m_Bind = nullptr;
 
 	char m_aError[512] = "";
 
