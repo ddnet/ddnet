@@ -558,8 +558,6 @@ protected:
 	void UpdateCommunityCache(bool Force);
 
 	// found in menus_settings.cpp
-	void RenderLanguageSettings(CUIRect MainView);
-	bool RenderLanguageSelection(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 
 	// found in menus_settings_assets.cpp
@@ -576,6 +574,10 @@ protected:
 
 	// found in menus_settings_graphics.cpp
 	void RenderSettingsGraphics(CUIRect MainView);
+
+	// found in menus_settings_language.cpp
+	void RenderLanguageSettings(CUIRect MainView);
+	bool RenderLanguageSelection(CUIRect MainView);
 
 	// found in menus_settings_player.cpp
 	void RenderSettingsPlayer(CUIRect MainView);
