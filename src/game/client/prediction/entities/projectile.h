@@ -54,6 +54,11 @@ private:
 	int m_Bouncing;
 	bool m_Freeze;
 	int m_TuneZone;
+	float m_Curvature;
+	float m_Speed;
+	float m_Lifetime;
+
+	void DetermineTuning();
 };
 
 #endif

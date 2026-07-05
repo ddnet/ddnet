@@ -137,7 +137,7 @@ bool IsSwitchTileDelayUsed(int Index)
 
 bool IsValidTuneTile(int Index)
 {
-	return Index == TILE_TUNE;
+	return Index == TILE_TUNE || Index == TILE_TUNELOCK || Index == TILE_TUNELOCK_RESET;
 }
 
 bool IsValidEntity(int Index)

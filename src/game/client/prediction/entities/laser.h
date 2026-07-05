@@ -41,6 +41,11 @@ private:
 	vec2 m_PrevPos;
 	int m_Type;
 	int m_TuneZone;
+	float m_ShotgunStrength;
+	float m_BounceNum;
+	float m_BounceCost;
+	float m_BounceDelay;
+	float m_LaserReach;
 };
 
 #endif
