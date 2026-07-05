@@ -53,6 +53,18 @@
 
 // TODO: there should also be ssh pub key login
 
+
+// the KEY_ prefix is already used by sdl
+// also it does not seem to perfectly fit
+// but idk what the better choice would be
+
+#define KEY_ENTER 13
+#define KEY_CTRL_U 21
+#define KEY_CTRL_C 3
+#define KEY_CTRL_D 4
+#define KEY_DEL 127
+#define KEY_BACKSPACE '\b'
+
 void CSshLogger::Log(const CLogMessage *pMessage)
 {
 	CSshClient *pClient = m_pSshServer->m_apClients[m_ClientId];
@@ -106,9 +118,23 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	int k = str_length(pClient->m_aInput);
 	if(k + n > (int)sizeof(pClient->m_aInput) - 10)
 	{
-		// TODO: better error handling xd
-		ssh_channel_write(Channel, "INPUT FULL LOL ", 15);
-		return;
+		// TODO: a \a bell would be nice in that case but I think it requires a PTY session
+
+		// do not allow multiple characters at once to keep things simple
+		if(n > 1)
+			return;
+
+		// allow operations that clear the input
+		char Chr = aBuf[0];
+		bool Whitelisted =
+			Chr == KEY_ENTER ||
+			Chr == KEY_CTRL_U ||
+			Chr == KEY_CTRL_C ||
+			Chr == KEY_CTRL_D ||
+			Chr == KEY_DEL ||
+			Chr == KEY_BACKSPACE;
+		if(!Whitelisted)
+			return;
 	}
 
 	// TODO: improve this shell!
@@ -122,7 +148,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	for(int i = 0; i < n; i++)
 	{
 		char Byte = aBuf[i];
-		if(Byte == 13)
+		if(Byte == KEY_ENTER)
 		{
 			const char *pCmd = pClient->m_aInput;
 			if(pCmd[0])
@@ -146,7 +172,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			ssh_channel_write(Channel, "\r\n> ", 4);
 			return;
 		}
-		else if(Byte == 21) // ctrl+u
+		else if(Byte == KEY_CTRL_U)
 		{
 			// ideally this would not be the same as ctrl+c
 			// and just clear the current prompt instead of
@@ -155,7 +181,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			ssh_channel_write(Channel, "\r\n> ", 4);
 			continue;
 		}
-		else if(Byte == 3) // ctrl+c
+		else if(Byte == KEY_CTRL_C)
 		{
 			if(pClient->m_aInput[0] == '\0')
 			{
@@ -167,7 +193,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			ssh_channel_write(Channel, "\r\n> ", 4);
 			continue;
 		}
-		else if(Byte == 4) // ctrl+d
+		else if(Byte == KEY_CTRL_D)
 		{
 			// silently ignore ctrl+d if there is still input
 			if(pClient->m_aInput[0])
@@ -176,7 +202,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			OnClientDisconnect(pClient->m_ClientId, "logout");
 			return;
 		}
-		else if(Byte == 127 || Byte == '\b')
+		else if(Byte == KEY_BACKSPACE || Byte == KEY_DEL)
 		{
 			int LastChr = str_length(pClient->m_aInput);
 			LastChr = std::max(0, LastChr - 1);
