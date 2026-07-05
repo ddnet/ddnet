@@ -3,12 +3,14 @@
 #include "ssh_server.h"
 
 #include <base/dbg.h>
+#include <base/io.h>
 #include <base/log.h>
 #include <base/logger.h>
 #include <base/str.h>
 #include <base/time.h>
 
 #include <engine/console.h>
+#include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
 #include <fcntl.h>
@@ -44,6 +46,9 @@
 //       ssh server uses so we do not need to generate the key
 #define HOSTKEY_FILE "ssh_host_rsa_key"
 
+// TODO: would it be cool if ssh_pki_import_pubkey_file("~/.ssh/id_ed25519.pub", &key) and id_rsa.pub would be whitelisted by default?
+//       so you can just ssh into it without configuring your key anywhere?
+
 // TODO: have "root" user by default use the sv_rcon_password pass
 //       or maybe it should be "default_admin" thats how the status command calls it
 //       in addition to that register all keys added by the auth manager as valid credentials
@@ -51,8 +56,14 @@
 #define USERNAME "demo"
 #define PASSWORD "secret"
 
-// TODO: there should also be ssh pub key login
+// TODO: ^ should moderators and helpers really be able to login?
+//       i mean it would be cool but econ does not offer that
+//       we have no client id so we are forced to use -1 which is the all powerful id
+//       so current ddnet code does not support less privilidged roles than SUPER OMEGA ADMIN for external sessions
+//       also not sure how authorized_keys would look like
+//       either there is one file per role or a custom format where the line with the key also contains the role name
 
+// TODO: there should also be ssh pub key login
 
 // the KEY_ prefix is already used by sdl
 // also it does not seem to perfectly fit
@@ -306,6 +317,98 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 	return SSH_AUTH_DENIED;
 }
 
+int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, struct ssh_key_struct *pClientPubKey, char SignatureState, void *pUserData)
+{
+	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
+	IStorage *pStorage = pCtx->m_pServer->Storage();
+
+	// TODO: the pUsername is not checked so a valid pub key can log into any name.
+	//       is that convenient for the admin or insecure?
+	//       right now there is only admin rank anyways
+	//       if there were more there would have to be a authorized_keys file for
+	//       helpers and one for moderators too
+	//       or it would need to be in a custom format to contain the auth level in each line
+
+	const char *pAuthorizedKeysFile = "authorized_keys";
+
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(pStorage->OpenFile(pAuthorizedKeysFile, IOFLAG_READ, IStorage::TYPE_SAVE)))
+	{
+		// no authorized_keys file
+		return SSH_AUTH_DENIED;
+	}
+
+	bool Match = false;
+
+	while(const char *pLine = LineReader.Get())
+	{
+		const char *pStr = str_skip_whitespaces_const(pLine);
+		if(pStr[0] == '#')
+			continue;
+
+		char aKeyType[512] = {0};
+		bool InvalidKey = false;
+		size_t i;
+		for(i = 0; i < sizeof(aKeyType); i++)
+		{
+			if(pStr[i] == ' ')
+				break;
+			if(pStr[i] == '\0')
+			{
+				InvalidKey = true;
+				break;
+			}
+
+			aKeyType[i] = pStr[i];
+		}
+		if(InvalidKey)
+			continue;
+		pStr = str_skip_whitespaces_const(pStr + i);
+
+		enum ssh_keytypes_e KeyType = ssh_key_type_from_name(aKeyType);
+		if(KeyType == SSH_KEYTYPE_UNKNOWN)
+		{
+			continue;
+		}
+
+		ssh_key FileKey = nullptr;
+		// Import public key from base64 string
+		int Rc = ssh_pki_import_pubkey_base64(pStr, KeyType, &FileKey);
+		if(Rc == SSH_OK && FileKey != nullptr)
+		{
+			// Compare the client's key with the key from the file
+			if(ssh_key_cmp(pClientPubKey, FileKey, SSH_KEY_CMP_PUBLIC) == 0)
+			{
+				Match = true;
+				ssh_key_free(FileKey);
+				break;
+			}
+			ssh_key_free(FileKey);
+		}
+		else
+		{
+			log_error("ssh", "failed to read public key '%s'", pStr);
+		}
+	}
+
+	if(Match)
+	{
+		if(SignatureState == SSH_PUBLICKEY_STATE_NONE)
+		{
+			// non verified probe
+			return SSH_AUTH_SUCCESS;
+		}
+		else if(SignatureState == SSH_PUBLICKEY_STATE_VALID)
+		{
+			// verified ownership -> authenticate
+			pCtx->m_pClient->m_Authenticated = true;
+			return SSH_AUTH_SUCCESS;
+		}
+	}
+
+	return SSH_AUTH_DENIED;
+}
+
 ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, void *pUserData)
 {
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
@@ -405,6 +508,7 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 	pClient->m_ServerCallback = {
 		.userdata = &pClient->m_CallbackCtx,
 		.auth_password_function = AuthPasswordCallback,
+		.auth_pubkey_function = AuthPubkeyCallback,
 		.channel_open_request_session_function = ChannelOpenRequestSessionCallback,
 	};
 	ssh_callbacks_init(&pClient->m_ServerCallback);

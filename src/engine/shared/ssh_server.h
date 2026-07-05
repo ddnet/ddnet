@@ -3,8 +3,9 @@
 
 #if defined(CONF_SSH)
 
-#include <engine/shared/config.h>
 #include <base/logger.h>
+
+#include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
@@ -100,6 +101,7 @@ class CSshServer
 
 	// libssh callbacks
 	static int AuthPasswordCallback(ssh_session Session, const char *pUsername, const char *pPassword, void *pUserData);
+	static int AuthPubkeyCallback(ssh_session Session, const char *pUsername, struct ssh_key_struct *pClientPubKey, char SignatureState, void *pUserData);
 	static ssh_channel ChannelOpenRequestSessionCallback(ssh_session Session, void *pUserData);
 	static int ChannelPtyRequestCallback(ssh_session Session, ssh_channel Channel, const char *pTerm, int Width, int Height, int PxWidth, int PwHeight, void *pUserData);
 	static int ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData);
