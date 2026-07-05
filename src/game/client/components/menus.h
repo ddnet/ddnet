@@ -562,7 +562,6 @@ protected:
 	bool RenderLanguageSelection(CUIRect MainView);
 	void RenderThemeSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);
-	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 
 	// found in menus_settings_assets.cpp
@@ -578,6 +577,9 @@ protected:
 
 	// found in menus_settings_player.cpp
 	void RenderSettingsPlayer(CUIRect MainView);
+
+	// found in menus_settings_sound.cpp
+	void RenderSettingsSound(CUIRect MainView);
 
 	// found in menus_settings_tee.cpp
 	void RenderSettingsTee(CUIRect MainView);
