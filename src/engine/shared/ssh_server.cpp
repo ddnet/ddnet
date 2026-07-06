@@ -362,6 +362,14 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 	if(g_Config.m_SvRconPassword[0] == '\0')
 		return SSH_AUTH_DENIED;
 
+	// TODO: we could store the pUsername in the pClient instance
+	//       and then show it in the "who" list
+	//       that could be nice to register bot connections with a name
+	//       but it would also leak unix usernames potentially
+	//       because if you use a regular ssh client and provide no username
+	//       it defaults to your current unix username which might be someones
+	//       real full name. So showing that to others in a game server could be considered a dox.
+
 	// TODO: econ has a dedicated password instead of the default admin password
 	//       but why? does ssh need a dedicated password too? seems bloated to me
 	bool AdminUsername = str_comp(pUsername, "root") == 0 || str_comp(pUsername, "admin") == 0 || str_comp(pUsername, "default_admin") == 0;
