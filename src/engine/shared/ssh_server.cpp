@@ -452,7 +452,10 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 		}
 		else
 		{
-			log_error("ssh", "failed to read public key '%s'", pStr);
+			log_error("ssh", "failed to read public key!");
+			log_error("ssh", " return_code=%d", Rc);
+			log_error("ssh", " key_type=%d", KeyType);
+			log_error("ssh", " key='%s'", pStr);
 		}
 	}
 
