@@ -11,26 +11,7 @@
 #include <string>
 
 #ifdef CONF_FAMILY_UNIX
-#include <sys/socket.h> // sockaddr
 #include <sys/un.h> // sockaddr_un
-#include <unistd.h> // socklen_t
-#endif
-
-#if defined(CONF_FAMILY_UNIX)
-
-// UNIX net includes
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-
-#elif defined(CONF_FAMILY_WINDOWS)
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#error NOT IMPLEMENTED
 #endif
 
 /**
@@ -65,8 +46,6 @@ typedef int UNIXSOCKET;
  */
 typedef struct sockaddr_un UNIXSOCKETADDR;
 #endif
-
-void sockaddr_to_netaddr(const sockaddr *src, socklen_t src_len, NETADDR *dst);
 
 /**
  * Compares two network addresses.

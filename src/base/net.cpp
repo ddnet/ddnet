@@ -141,7 +141,7 @@ static void netaddr_to_sockaddr_in6(const NETADDR *src, sockaddr_in6 *dest)
 	mem_copy(&dest->sin6_addr.s6_addr, src->ip, 16);
 }
 
-void sockaddr_to_netaddr(const sockaddr *src, socklen_t src_len, NETADDR *dst)
+static void sockaddr_to_netaddr(const sockaddr *src, socklen_t src_len, NETADDR *dst)
 {
 	*dst = NETADDR_ZEROED;
 	if(src->sa_family == AF_INET && src_len >= (socklen_t)sizeof(sockaddr_in))

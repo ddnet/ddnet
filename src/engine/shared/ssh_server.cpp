@@ -3,6 +3,7 @@
 #include "ssh_server.h"
 
 #include <base/dbg.h>
+#include <base/mem.h>
 #include <base/io.h>
 #include <base/log.h>
 #include <base/logger.h>
@@ -71,6 +72,34 @@
 #define KEY_CTRL_D 4
 #define KEY_DEL 127
 #define KEY_BACKSPACE '\b'
+
+// TODO: there is sockaddr_to_netaddr() in base/net.cpp but its static too there
+//       moving it in to the header creates a diff to ddnet that is hard to maintain
+//       also windows build is annoying because the signature requires includes
+static void SockaddrToNetaddr(const sockaddr *pSrc, socklen_t SrcLen, NETADDR *pDst)
+{
+	*pDst = NETADDR_ZEROED;
+	if(pSrc->sa_family == AF_INET && SrcLen >= (socklen_t)sizeof(sockaddr_in))
+	{
+		const sockaddr_in *pSrcIn = (const sockaddr_in *)pSrc;
+		pDst->type = NETTYPE_IPV4;
+		pDst->port = htons(pSrcIn->sin_port);
+		static_assert(sizeof(pDst->ip) >= sizeof(pSrcIn->sin_addr.s_addr));
+		mem_copy(pDst->ip, &pSrcIn->sin_addr.s_addr, sizeof(pSrcIn->sin_addr.s_addr));
+	}
+	else if(pSrc->sa_family == AF_INET6 && SrcLen >= (socklen_t)sizeof(sockaddr_in6))
+	{
+		const sockaddr_in6 *pSrcIn6 = (const sockaddr_in6 *)pSrc;
+		pDst->type = NETTYPE_IPV6;
+		pDst->port = htons(pSrcIn6->sin6_port);
+		static_assert(sizeof(pDst->ip) >= sizeof(pSrcIn6->sin6_addr.s6_addr));
+		mem_copy(pDst->ip, &pSrcIn6->sin6_addr.s6_addr, sizeof(pSrcIn6->sin6_addr.s6_addr));
+	}
+	else
+	{
+		log_warn("net", "Cannot convert sockaddr of family %d", pSrc->sa_family);
+	}
+}
 
 void CSshLogger::Log(const CLogMessage *pMessage)
 {
@@ -509,7 +538,7 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 	CSshClient *pClient = new CSshClient(ClientId, Session);
 	pClient->m_JoinTime = time_get();
 
-	sockaddr_to_netaddr((sockaddr *)&SockAddr, SockAddrLen, &pClient->m_Addr);
+	SockaddrToNetaddr((sockaddr *)&SockAddr, SockAddrLen, &pClient->m_Addr);
 	if(net_addr_comp(&pClient->m_Addr, &NETADDR_ZEROED) == 0)
 	{
 		dbg_assert_failed("failed to convert ssh client address");
