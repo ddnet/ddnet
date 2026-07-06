@@ -144,7 +144,7 @@ void CSshServer::ListConnections()
 		int64_t Seconds = (time_get() - pClient->m_JoinTime) / time_freq();
 		log_info(
 			"ssh",
-			"id=%d addr=%s authed=%d online since %" PRId64 " seconds",
+			"id=%d addr=<{%s}> authed=%d online since %" PRId64 " seconds",
 			pClient->m_ClientId,
 			aAddr,
 			pClient->m_Authenticated,
