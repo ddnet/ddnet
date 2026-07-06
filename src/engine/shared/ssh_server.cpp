@@ -436,6 +436,13 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 			continue;
 		}
 
+		// TODO: chop of the key name after the key otherwise the pubkey wont parse
+		//       it has to be JUST the base64 key value
+		//       ----
+		//       also while at it ideally also strip of leading stuff like this
+		//       permitopen="192.0.2.1:80",permitopen="192.0.2.2:25" ssh-rsa ..
+		//       which is also a valid authorized_keys line
+
 		ssh_key FileKey = nullptr;
 		// Import public key from base64 string
 		int Rc = ssh_pki_import_pubkey_base64(pStr, KeyType, &FileKey);
