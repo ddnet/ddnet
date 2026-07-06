@@ -35,7 +35,7 @@
 //       or check disabled state in all callbacks
 //       to avoid clients to progress during authentication while the server got turned off
 
-// TODO: offer pty in addition to shell? I feel like it is more powerfull for stuff like autocomplete and shit
+// TODO: offer pty in addition to shell? I feel like it is more powerful for stuff like autocomplete and shit
 
 // TODO: ban ip after too many failed login attempts, do we also need some delay in the password check to protect against bruteforcing?
 
@@ -57,7 +57,7 @@
 // TODO: ^ should moderators and helpers really be able to login?
 //       i mean it would be cool but econ does not offer that
 //       we have no client id so we are forced to use -1 which is the all powerful id
-//       so current ddnet code does not support less privilidged roles than SUPER OMEGA ADMIN for external sessions
+//       so current ddnet code does not support less privileged roles than SUPER OMEGA ADMIN for external sessions
 //       also not sure how authorized_keys would look like
 //       either there is one file per role or a custom format where the line with the key also contains the role name
 
