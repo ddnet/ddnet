@@ -108,6 +108,7 @@ class CSshServer
 	void OnClientDisconnect(int ClientId, const char *pReason = "");
 
 	void AcceptNewConnections();
+	void ListConnections();
 	void HandleInput(CSshClient *pClient);
 
 public:

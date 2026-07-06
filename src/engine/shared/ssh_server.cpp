@@ -43,9 +43,6 @@
 // TODO: log failed auth somewhere? ssh is a more popular attack target than teeworlds econ
 //       we might need extra protection by showing the admin how many incoming attacks are there
 
-// TODO: should there be some "w" or "who" command like in linux systems
-//       to see other ssh connections because they do not show up in "status"
-
 // TODO: the default file location in the current dir is not ideal
 //       this should be in the storage save location
 //       or maybe even use the system wide location that also the regular host
@@ -135,6 +132,26 @@ void CSshServer::ProcessMessage(CSshClient *pClient)
 	ssh_message_free(Message);
 }
 
+void CSshServer::ListConnections()
+{
+	for(CSshClient *pClient : m_apClients)
+	{
+		if(!pClient)
+			continue;
+
+		char aAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&pClient->m_Addr, aAddr, sizeof(aAddr), true);
+		int64_t Seconds = (time_get() - pClient->m_JoinTime) / time_freq();
+		log_info(
+			"ssh",
+			"id=%d addr=%s authed=%d online since %" PRId64 " seconds",
+			pClient->m_ClientId,
+			aAddr,
+			pClient->m_Authenticated,
+			Seconds);
+	}
+}
+
 void CSshServer::HandleInput(CSshClient *pClient)
 {
 	ssh_channel Channel = pClient->m_Channel;
@@ -201,7 +218,13 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					OnClientDisconnect(pClient->m_ClientId, "logout");
 					return;
 				}
-
+				else if(!str_comp(pCmd, "w") || !str_comp(pCmd, "who"))
+				{
+					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
+					CLogScope Scope(&Logger);
+					ListConnections();
+				}
+				else
 				{
 					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
 					CLogScope Scope(&Logger);
