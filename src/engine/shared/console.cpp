@@ -1107,18 +1107,10 @@ void CConsole::Con_Chain(IResult *pResult, void *pUserData)
 void CConsole::Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser)
 {
 	CCommand *pCommand = FindCommand(pName, m_FlagMask);
-
-	if(!pCommand)
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "failed to chain '%s'", pName);
-		Print(IConsole::OUTPUT_LEVEL_DEBUG, "console", aBuf);
-		return;
-	}
-
-	CChain *pChainInfo = new CChain();
+	dbg_assert(pCommand != nullptr, "Invalid command to chain: '%s'", pName);
 
 	// store info
+	CChain *pChainInfo = new CChain();
 	pChainInfo->m_pfnChainCallback = pfnChainFunc;
 	pChainInfo->m_pUserData = pUser;
 	pChainInfo->m_pfnCallback = pCommand->m_pfnCallback;
