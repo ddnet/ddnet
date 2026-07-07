@@ -35,6 +35,15 @@
 //       we also have to make sure to terminate all connections when turned off
 //       or check disabled state in all callbacks
 //       to avoid clients to progress during authentication while the server got turned off
+//       ----
+//       I gave this a try and I did not like where it was going
+//       it is possible to nicely add a OnConsoleInit() in here and chain sv_ssh
+//       but the real problem is that if we listen for sv_ssh and activate when it changes
+//       is that it gets triggered during the execution of the config file while sv_ssh_port might
+//       not be set yet
+//       there are ways around it but everything becomes a bit messy and i rather not do this now
+//       this is something that can still be done later if really needed
+//       for now turning sv_ssh off does still block updates and makes the console unusable
 
 // TODO: offer pty in addition to shell? I feel like it is more powerful for stuff like autocomplete and shit
 
@@ -671,6 +680,8 @@ void CSshServer::Update()
 	if(m_aError[0])
 		return;
 	if(m_Bind == nullptr)
+		return;
+	if(g_Config.m_SvSsh == 0)
 		return;
 
 	AcceptNewConnections();
