@@ -728,7 +728,6 @@ void CSshServer::Update()
 		if(!pClient->m_Authenticated)
 			continue;
 
-		// TODO: should this be a callback too? Right now it seems to work as is so no urgency.
 		HandleInput(pClient);
 	}
 }
