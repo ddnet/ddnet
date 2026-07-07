@@ -247,8 +247,9 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		{
 			int LastChr = str_length(pClient->m_aInput);
 			LastChr = std::max(0, LastChr - 1);
+			if(pClient->m_aInput[0])
+				ssh_channel_write(pClient->m_Channel, "\b \b", 3);
 			pClient->m_aInput[LastChr] = '\0';
-			ssh_channel_write(pClient->m_Channel, "\b \b", 3);
 			continue;
 		}
 		else if(Byte == 27) // escape sequence
