@@ -289,10 +289,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	// log_info("ssh", " n=%d", n);
 	// log_info("ssh", " n=%d", n);
 	// log_info("ssh", " new input '%s'", pClient->m_aInput);
-
-	// aBuf[n] = '\0';
-	// ssh_channel_write(Channel, "echo: ", 6);
-	// ssh_channel_write(Channel, aBuf, n);
 }
 
 void CSshServer::GenerateHostKeyIfMissing()
