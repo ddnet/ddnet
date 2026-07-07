@@ -82,7 +82,6 @@ class CSshServer
 	CConfig *m_pConfig = nullptr;
 	IConsole *m_pConsole = nullptr;
 	IStorage *m_pStorage = nullptr;
-	CNetConsole m_NetConsole;
 
 	const IStorage *Storage() const { return m_pStorage; }
 	IStorage *Storage() { return m_pStorage; }
@@ -116,7 +115,7 @@ public:
 
 	IConsole *Console() { return m_pConsole; }
 
-	void Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, CNetBan *pNetBan);
+	void Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage);
 	void Update();
 	void Shutdown();
 	bool GotActiveConnections();

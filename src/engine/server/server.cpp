@@ -3401,7 +3401,7 @@ int CServer::Run()
 	m_Econ.Init(Config(), Console(), &m_ServerBan);
 	m_Fifo.Init(Console(), Config()->m_SvInputFifo, CFGFLAG_SERVER);
 #if defined(CONF_SSH)
-	m_SshServer.Init(Config(), Console(), Storage(), &m_ServerBan);
+	m_SshServer.Init(Config(), Console(), Storage());
 #endif
 
 	char aBuf[256];

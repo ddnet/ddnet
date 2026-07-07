@@ -302,7 +302,7 @@ void CSshServer::GenerateHostKeyIfMissing()
 #endif
 }
 
-void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage, CNetBan *pNetBan)
+void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage)
 {
 	m_pConfig = pConfig;
 	m_pConsole = pConsole;
