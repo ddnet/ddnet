@@ -27,6 +27,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: pressing delete too often can delete the prompt!
+
 // TODO: add a config to turn the ssh server on and off at runtime
 //       make sure that does not get bugged if there is a on/off set in the autoexec_server.cfg
 //       and there is a map reload or something like that
