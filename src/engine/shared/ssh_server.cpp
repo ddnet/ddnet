@@ -24,6 +24,7 @@
 #include <libssh/server.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 
@@ -254,20 +255,21 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == 27) // escape sequence
 		{
-			if((n-i) < 2)
+			if((n - i) < 2)
 			{
 				// this is odd, do we just ignore this one?
+				// yes! regular ESC is just one byte of 27
 				continue;
 			}
 			// arrow keys
-			if((n-i) >= 3 && aBuf[i+1] == 91)
+			if((n - i) >= 3 && aBuf[i + 1] == 91)
 			{
-				if(aBuf[i+2] == 65) // arrow key up
+				if(aBuf[i + 2] == 65) // arrow key up
 				{
 					// skip the sequence
 					i += 2;
 				}
-				else if(aBuf[i+2] == 66) // arrow key down
+				else if(aBuf[i + 2] == 66) // arrow key down
 				{
 					// skip the sequence
 					i += 2;
@@ -284,15 +286,15 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		ssh_channel_write(Channel, aBuf + i, 1);
 	}
 
-	// log_info("ssh", "got msg '%s' id=%d", aBuf, aBuf[0]);
-	// log_info("ssh", " id=%d", aBuf[0]);
-	// log_info("ssh", " id[0]=%d", aBuf[0]);
-	// log_info("ssh", " id[1]=%d", aBuf[1]);
-	// log_info("ssh", " id[2]=%d", aBuf[2]);
-	// log_info("ssh", " n=%d", n);
-	// log_info("ssh", " n=%d", n);
-	// log_info("ssh", " n=%d", n);
-	// log_info("ssh", " new input '%s'", pClient->m_aInput);
+	// if(!std::isprint(aBuf[0]))
+	// {
+	// 	log_info("ssh", "-----");
+	// 	for(int i = 0; i < n; i++)
+	// 	{
+	// 		log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
+	// 	}
+	// }
+	// log_info("ssh", "input '%s'", pClient->m_aInput);
 }
 
 void CSshServer::GenerateHostKeyIfMissing()
