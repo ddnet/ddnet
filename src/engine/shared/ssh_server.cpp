@@ -481,7 +481,6 @@ ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, v
 
 	if(!pCtx->m_pClient->m_Authenticated)
 	{
-		log_info("ssh", "Channel open DENIED: User not authenticated.");
 		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "unauthed channel open");
 		return nullptr;
 	}
