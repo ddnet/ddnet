@@ -27,48 +27,11 @@
 #include <cstdio>
 #include <cstdlib>
 
-// TODO: pressing delete too often can delete the prompt!
-
-// TODO: add a config to turn the ssh server on and off at runtime
-//       make sure that does not get bugged if there is a on/off set in the autoexec_server.cfg
-//       and there is a map reload or something like that
-//       also if it is set multiple times in the config
-//       ----
-//       we also have to make sure to terminate all connections when turned off
-//       or check disabled state in all callbacks
-//       to avoid clients to progress during authentication while the server got turned off
-//       ----
-//       I gave this a try and I did not like where it was going
-//       it is possible to nicely add a OnConsoleInit() in here and chain sv_ssh
-//       but the real problem is that if we listen for sv_ssh and activate when it changes
-//       is that it gets triggered during the execution of the config file while sv_ssh_port might
-//       not be set yet
-//       there are ways around it but everything becomes a bit messy and i rather not do this now
-//       this is something that can still be done later if really needed
-//       for now turning sv_ssh off does still block updates and makes the console unusable
-
-// TODO: offer pty in addition to shell? I feel like it is more powerful for stuff like autocomplete and shit
-
-// TODO: ban ip after too many failed login attempts, do we also need some delay in the password check to protect against bruteforcing?
-
-// TODO: log failed auth somewhere? ssh is a more popular attack target than teeworlds econ
-//       we might need extra protection by showing the admin how many incoming attacks are there
-
 // TODO: the default file location in the current dir is not ideal
 //       this should be in the storage save location
 //       or maybe even use the system wide location that also the regular host
 //       ssh server uses so we do not need to generate the key
 #define HOSTKEY_FILE "ssh_host_rsa_key"
-
-// TODO: would it be cool if ssh_pki_import_pubkey_file("~/.ssh/id_ed25519.pub", &key) and id_rsa.pub would be whitelisted by default?
-//       so you can just ssh into it without configuring your key anywhere?
-
-// TODO: ^ should moderators and helpers really be able to login?
-//       i mean it would be cool but econ does not offer that
-//       we have no client id so we are forced to use -1 which is the all powerful id
-//       so current ddnet code does not support less privileged roles than SUPER OMEGA ADMIN for external sessions
-//       also not sure how authorized_keys would look like
-//       either there is one file per role or a custom format where the line with the key also contains the role name
 
 // the KEY_ prefix is already used by sdl
 // also it does not seem to perfectly fit
@@ -405,16 +368,6 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 	if(g_Config.m_SvRconPassword[0] == '\0')
 		return SSH_AUTH_DENIED;
 
-	// TODO: we could store the pUsername in the pClient instance
-	//       and then show it in the "who" list
-	//       that could be nice to register bot connections with a name
-	//       but it would also leak unix usernames potentially
-	//       because if you use a regular ssh client and provide no username
-	//       it defaults to your current unix username which might be someones
-	//       real full name. So showing that to others in a game server could be considered a dox.
-
-	// TODO: econ has a dedicated password instead of the default admin password
-	//       but why? does ssh need a dedicated password too? seems bloated to me
 	bool AdminUsername = str_comp(pUsername, "root") == 0 || str_comp(pUsername, "admin") == 0 || str_comp(pUsername, "default_admin") == 0;
 	if(AdminUsername && str_comp(pPassword, g_Config.m_SvRconPassword) == 0)
 	{
@@ -433,9 +386,6 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 	// TODO: the pUsername is not checked so a valid pub key can log into any name.
 	//       is that convenient for the admin or insecure?
 	//       right now there is only admin rank anyways
-	//       if there were more there would have to be a authorized_keys file for
-	//       helpers and one for moderators too
-	//       or it would need to be in a custom format to contain the auth level in each line
 
 	const char *pAuthorizedKeysFile = "authorized_keys";
 
@@ -481,10 +431,6 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 
 		// TODO: chop of the key name after the key otherwise the pubkey wont parse
 		//       it has to be JUST the base64 key value
-		//       ----
-		//       also while at it ideally also strip of leading stuff like this
-		//       permitopen="192.0.2.1:80",permitopen="192.0.2.2:25" ssh-rsa ..
-		//       which is also a valid authorized_keys line
 
 		ssh_key FileKey = nullptr;
 		// Import public key from base64 string
