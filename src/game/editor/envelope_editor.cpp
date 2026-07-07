@@ -126,8 +126,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	static EEnvelopeEditorOp s_Operation = EEnvelopeEditorOp::NONE;
 	static std::vector<float> s_vAccurateDragValuesX = {};
 	static std::vector<float> s_vAccurateDragValuesY = {};
-	static float s_MouseXStart = 0.0f;
-	static float s_MouseYStart = 0.0f;
+	static vec2 s_MouseStart = vec2(0.0f, 0.0f);
 
 	static CLineInput s_NameInput;
 
@@ -455,8 +454,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				if(s_Operation != EEnvelopeEditorOp::BOX_SELECT && !Input()->ModifierIsPressed())
 				{
 					s_Operation = EEnvelopeEditorOp::BOX_SELECT;
-					s_MouseXStart = Ui()->MouseX();
-					s_MouseYStart = Ui()->MouseY();
+					s_MouseStart = Ui()->MousePos();
 				}
 			}
 			else if(s_EnvelopeEditorButtonUsed == 0)
@@ -549,11 +547,10 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			{
 				if(s_Operation == EEnvelopeEditorOp::SELECT)
 				{
-					float dx = s_MouseXStart - Ui()->MouseX();
-					float dy = s_MouseYStart - Ui()->MouseY();
-
-					if(dx * dx + dy * dy > 20.0f)
+					if(distance_squared(s_MouseStart, Ui()->MousePos()) > 20.0f)
+					{
 						s_Operation = EEnvelopeEditorOp::DRAG_TIME_BAR;
+					}
 				}
 
 				if(s_Operation == EEnvelopeEditorOp::DRAG_TIME_BAR)
@@ -579,9 +576,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				{
 					Ui()->SetActiveItem(&Map()->m_EnvelopeEvaluator.m_AnimateTime);
 					s_Operation = EEnvelopeEditorOp::SELECT;
-
-					s_MouseXStart = Ui()->MouseX();
-					s_MouseYStart = Ui()->MouseY();
+					s_MouseStart = Ui()->MousePos();
 				}
 
 				m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
@@ -878,10 +873,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 							if(s_Operation == EEnvelopeEditorOp::SELECT)
 							{
-								float dx = s_MouseXStart - Ui()->MouseX();
-								float dy = s_MouseYStart - Ui()->MouseY();
-
-								if(dx * dx + dy * dy > 20.0f)
+								if(distance_squared(s_MouseStart, Ui()->MousePos()) > 20.0f)
 								{
 									s_Operation = EEnvelopeEditorOp::DRAG_POINT;
 
@@ -1015,9 +1007,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 								Ui()->SetActiveItem(pId);
 								s_Operation = EEnvelopeEditorOp::SELECT;
 								Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
-
-								s_MouseXStart = Ui()->MouseX();
-								s_MouseYStart = Ui()->MouseY();
+								s_MouseStart = Ui()->MousePos();
 							}
 							else if(Ui()->MouseButtonClicked(1))
 							{
@@ -1084,10 +1074,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 								if(s_Operation == EEnvelopeEditorOp::SELECT)
 								{
-									float dx = s_MouseXStart - Ui()->MouseX();
-									float dy = s_MouseYStart - Ui()->MouseY();
-
-									if(dx * dx + dy * dy > 20.0f)
+									if(distance_squared(s_MouseStart, Ui()->MousePos()) > 20.0f)
 									{
 										s_Operation = EEnvelopeEditorOp::DRAG_POINT;
 
@@ -1148,9 +1135,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									Ui()->SetActiveItem(pId);
 									s_Operation = EEnvelopeEditorOp::SELECT;
 									Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
-
-									s_MouseXStart = Ui()->MouseX();
-									s_MouseYStart = Ui()->MouseY();
+									s_MouseStart = Ui()->MousePos();
 								}
 								else if(Ui()->MouseButtonClicked(1))
 								{
@@ -1217,10 +1202,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 								if(s_Operation == EEnvelopeEditorOp::SELECT)
 								{
-									float dx = s_MouseXStart - Ui()->MouseX();
-									float dy = s_MouseYStart - Ui()->MouseY();
-
-									if(dx * dx + dy * dy > 20.0f)
+									if(distance_squared(s_MouseStart, Ui()->MousePos()) > 20.0f)
 									{
 										s_Operation = EEnvelopeEditorOp::DRAG_POINT;
 
@@ -1281,9 +1263,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									Ui()->SetActiveItem(pId);
 									s_Operation = EEnvelopeEditorOp::SELECT;
 									Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
-
-									s_MouseXStart = Ui()->MouseX();
-									s_MouseYStart = Ui()->MouseY();
+									s_MouseStart = Ui()->MousePos();
 								}
 								else if(Ui()->MouseButtonClicked(1))
 								{
@@ -1460,10 +1440,10 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			Ui()->ClipEnable(&View);
 			CUIRect SelectionRect;
-			SelectionRect.x = s_MouseXStart;
-			SelectionRect.y = s_MouseYStart;
-			SelectionRect.w = Ui()->MouseX() - s_MouseXStart;
-			SelectionRect.h = Ui()->MouseY() - s_MouseYStart;
+			SelectionRect.x = s_MouseStart.x;
+			SelectionRect.y = s_MouseStart.y;
+			SelectionRect.w = Ui()->MouseX() - s_MouseStart.x;
+			SelectionRect.h = Ui()->MouseY() - s_MouseStart.y;
 			SelectionRect.DrawOutline(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 			Ui()->ClipDisable();
 
@@ -1472,9 +1452,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				s_Operation = EEnvelopeEditorOp::NONE;
 				Ui()->SetActiveItem(nullptr);
 
-				float TimeStart = ScreenToEnvelopeX(View, s_MouseXStart);
+				float TimeStart = ScreenToEnvelopeX(View, s_MouseStart.x);
 				float TimeEnd = ScreenToEnvelopeX(View, Ui()->MouseX());
-				float ValueStart = ScreenToEnvelopeY(View, s_MouseYStart);
+				float ValueStart = ScreenToEnvelopeY(View, s_MouseStart.y);
 				float ValueEnd = ScreenToEnvelopeY(View, Ui()->MouseY());
 
 				float TimeMin = std::min(TimeStart, TimeEnd);
@@ -1613,7 +1593,7 @@ void CEditor::UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnv
 	const void *pMinPointId = nullptr;
 
 	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = length_squared(Position - MousePos);
+		const float CurrDist = distance_squared(Position, MousePos);
 		if(CurrDist < MinDist)
 		{
 			MinDist = CurrDist;
