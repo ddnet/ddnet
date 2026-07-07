@@ -495,6 +495,7 @@ ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, v
 		.channel_pty_request_function = ChannelPtyRequestCallback,
 		.channel_shell_request_function = ChannelShellRequestCallback,
 		.channel_pty_window_change_function = ChannelPtyWindowChangeCallback,
+		.channel_exec_request_function = ChannelExecRequestCallback,
 	};
 	ssh_callbacks_init(&pCtx->m_pClient->m_ChannelCallback);
 	ssh_set_channel_callbacks(Channel, &pCtx->m_pClient->m_ChannelCallback);
@@ -519,6 +520,25 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 
 int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
+	return SSH_OK;
+}
+
+int CSshServer::ChannelExecRequestCallback(ssh_session Session, ssh_channel Channel, const char *pCommand, void *pUserData)
+{
+	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
+
+	if(!pCtx->m_pClient->m_Authenticated)
+	{
+		return SSH_ERROR;
+	}
+
+	CSshLogger Logger(pCtx->m_pServer, pCtx->m_pClient->m_ClientId, log_get_scope_logger());
+	CLogScope Scope(&Logger);
+	pCtx->m_pServer->Console()->ExecuteLine(pCommand, IConsole::CLIENT_ID_UNSPECIFIED, true);
+	ssh_channel_write(pCtx->m_pClient->m_Channel, "\r\n", 2);
+
+	pCtx->m_pClient->m_Dropped = true;
+
 	return SSH_OK;
 }
 
@@ -669,6 +689,12 @@ void CSshServer::Update()
 			continue;
 
 		ProcessMessage(pClient);
+
+		if(pClient->m_Dropped)
+		{
+			OnClientDisconnect(pClient->m_ClientId);
+			continue;
+		}
 
 		// TODO: should we also timeout sessions without keepalive?
 		// TODO: this is not optimal since during the password prompt we can not really send a message
