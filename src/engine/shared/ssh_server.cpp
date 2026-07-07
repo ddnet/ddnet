@@ -83,8 +83,11 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		return;
 	}
 
-	ssh_channel_write(pClient->m_Channel, "\r\n", 2);
-	ssh_channel_write(pClient->m_Channel, pMessage->Message(), str_length(pMessage->Message()));
+	if(pClient->m_Channel)
+	{
+		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
+		ssh_channel_write(pClient->m_Channel, pMessage->Message(), str_length(pMessage->Message()));
+	}
 
 	// just mirror everything to regular log because the hiding is stupid
 	// https://github.com/ddnet/ddnet/issues/11095
@@ -477,14 +480,13 @@ ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, v
 
 	if(!pCtx->m_pClient->m_Authenticated)
 	{
-		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "unauthed channel open");
 		return nullptr;
 	}
 
 	ssh_channel Channel = ssh_channel_new(Session);
 	if(Channel == nullptr)
 	{
-		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "failed to create channel");
+		log_error("ssh", "failed to create new channel");
 		return nullptr;
 	}
 
@@ -509,7 +511,6 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 
 	if(!pCtx->m_pClient->m_Authenticated)
 	{
-		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "unauthed pty request");
 		return SSH_ERROR;
 	}
 
@@ -544,14 +545,10 @@ int CSshServer::ChannelExecRequestCallback(ssh_session Session, ssh_channel Chan
 
 int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Channel, void *pUserData)
 {
-	CSshClient::CCallbackCtx *pCtx =
-		static_cast<CSshClient::CCallbackCtx *>(pUserData);
+	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 
 	if(!pCtx->m_pClient->m_Authenticated)
 	{
-		// TODO: are these disconnects with error return really the way to go?
-		//       is that safe or do we get into bad state if we drop a client from within the callback?
-		pCtx->m_pServer->OnClientDisconnect(pCtx->m_pClient->m_ClientId, "unauthed shell request");
 		return SSH_ERROR;
 	}
 
