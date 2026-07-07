@@ -422,6 +422,11 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 		if(InvalidKey)
 			continue;
 		pStr = str_skip_whitespaces_const(pStr + i);
+		char aKeyBase64[2048];
+		str_copy(aKeyBase64, pStr);
+		char *pKeyEnd = str_skip_to_whitespace(aKeyBase64);
+		if(pKeyEnd)
+			*pKeyEnd = '\0';
 
 		enum ssh_keytypes_e KeyType = ssh_key_type_from_name(aKeyType);
 		if(KeyType == SSH_KEYTYPE_UNKNOWN)
@@ -429,12 +434,9 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 			continue;
 		}
 
-		// TODO: chop of the key name after the key otherwise the pubkey wont parse
-		//       it has to be JUST the base64 key value
-
 		ssh_key FileKey = nullptr;
 		// Import public key from base64 string
-		int Rc = ssh_pki_import_pubkey_base64(pStr, KeyType, &FileKey);
+		int Rc = ssh_pki_import_pubkey_base64(aKeyBase64, KeyType, &FileKey);
 		if(Rc == SSH_OK && FileKey != nullptr)
 		{
 			// Compare the client's key with the key from the file
@@ -451,7 +453,7 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 			log_error("ssh", "failed to read public key!");
 			log_error("ssh", " return_code=%d", Rc);
 			log_error("ssh", " key_type=%d", KeyType);
-			log_error("ssh", " key='%s'", pStr);
+			log_error("ssh", " key='%s'", aKeyBase64);
 		}
 	}
 
