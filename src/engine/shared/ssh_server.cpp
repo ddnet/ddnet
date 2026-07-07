@@ -286,15 +286,15 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		ssh_channel_write(Channel, aBuf + i, 1);
 	}
 
-	// if(!std::isprint(aBuf[0]))
-	// {
-	// 	log_info("ssh", "-----");
-	// 	for(int i = 0; i < n; i++)
-	// 	{
-	// 		log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
-	// 	}
-	// }
-	// log_info("ssh", "input '%s'", pClient->m_aInput);
+	if(!std::isprint(aBuf[0]))
+	{
+		log_info("ssh", "-----");
+		for(int i = 0; i < n; i++)
+		{
+			log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
+		}
+		log_info("ssh", "input '%s'", pClient->m_aInput);
+	}
 }
 
 void CSshServer::GenerateHostKeyIfMissing()
