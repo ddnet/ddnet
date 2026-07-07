@@ -283,6 +283,32 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			ssh_channel_write(pClient->m_Channel, "\b \b", 3);
 			continue;
 		}
+		else if(Byte == 27) // escape sequence
+		{
+			if((n-i) < 2)
+			{
+				// this is odd, do we just ignore this one?
+				continue;
+			}
+			// arrow keys
+			if((n-i) >= 3 && aBuf[i+1] == 91)
+			{
+				if(aBuf[i+2] == 65) // arrow key up
+				{
+					// skip the sequence
+					i += 2;
+				}
+				else if(aBuf[i+2] == 66) // arrow key down
+				{
+					// skip the sequence
+					i += 2;
+				}
+			}
+
+			// ignore unknown escape sequence for now
+			continue;
+		}
+
 		pClient->m_aInput[k] = Byte;
 		pClient->m_aInput[k + 1] = '\0';
 		k++;
@@ -291,6 +317,12 @@ void CSshServer::HandleInput(CSshClient *pClient)
 
 	// log_info("ssh", "got msg '%s' id=%d", aBuf, aBuf[0]);
 	// log_info("ssh", " id=%d", aBuf[0]);
+	// log_info("ssh", " id[0]=%d", aBuf[0]);
+	// log_info("ssh", " id[1]=%d", aBuf[1]);
+	// log_info("ssh", " id[2]=%d", aBuf[2]);
+	// log_info("ssh", " n=%d", n);
+	// log_info("ssh", " n=%d", n);
+	// log_info("ssh", " n=%d", n);
 	// log_info("ssh", " new input '%s'", pClient->m_aInput);
 
 	// aBuf[n] = '\0';
