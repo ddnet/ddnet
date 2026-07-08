@@ -132,6 +132,14 @@ void CSshServer::ListConnections()
 
 void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
 {
+	const char *pPrevEntry = pClient->m_History.Last();
+	if(pPrevEntry == nullptr || str_comp(pPrevEntry, pLine) != 0)
+	{
+		const size_t Size = str_length(pLine) + 1;
+		char *pEntry = pClient->m_History.Allocate(Size);
+		str_copy(pEntry, pLine, Size);
+	}
+
 	Console()->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED, true);
 }
 
@@ -279,6 +287,22 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				{
 					// skip the sequence
 					i += 2;
+
+					if(pClient->m_pHistoryEntry)
+					{
+						char *pTest = pClient->m_History.Prev(pClient->m_pHistoryEntry);
+
+						if(pTest)
+							pClient->m_pHistoryEntry = pTest;
+					}
+					else
+					{
+						pClient->m_pHistoryEntry = pClient->m_History.Last();
+					}
+
+					// this kinda works but only server side
+					if(pClient->m_pHistoryEntry)
+						str_copy(pClient->m_aInput, pClient->m_pHistoryEntry);
 				}
 				else if(aBuf[i + 2] == 66) // arrow key down
 				{

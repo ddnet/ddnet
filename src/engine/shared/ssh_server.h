@@ -8,6 +8,7 @@
 
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
+#include <engine/shared/ringbuffer.h>
 #include <engine/storage.h>
 
 #include <libssh/callbacks.h>
@@ -60,6 +61,8 @@ public:
 
 	int64_t m_JoinTime = 0;
 	char m_aInput[2048] = "";
+	CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
+	char *m_pHistoryEntry = nullptr;
 
 	// We need to manage the memory for this struct
 	// because libssh does not copy it
