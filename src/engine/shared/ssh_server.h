@@ -60,7 +60,13 @@ public:
 	ssh_channel m_Channel = nullptr;
 
 	int64_t m_JoinTime = 0;
+
 	char m_aInput[2048] = "";
+
+	// overwrites the entire m_aInput buffer
+	// and sends the new line to the client over the ssh channel
+	void SetInput(const char *pInput);
+
 	CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	char *m_pHistoryEntry = nullptr;
 

@@ -38,6 +38,8 @@
 // also it does not seem to perfectly fit
 // but idk what the better choice would be
 
+// TODO: implement ctrl+k and fix ctrl+u there are escape sequences to clear from cursor like \033[K
+
 #define KEY_ENTER 13
 #define KEY_CTRL_U 21
 #define KEY_CTRL_C 3
@@ -93,6 +95,18 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	// just mirror everything to regular log because the hiding is stupid
 	// https://github.com/ddnet/ddnet/issues/11095
 	m_pOuterLogger->Log(pMessage);
+}
+
+void CSshClient::SetInput(const char *pInput)
+{
+	str_copy(m_aInput, pInput);
+
+	if(m_Channel)
+	{
+		ssh_channel_write(m_Channel, "\r\033[2K", 6);
+		ssh_channel_write(m_Channel, "> ", 2); // TODO: move this to a write prompt method
+		ssh_channel_write(m_Channel, pInput, str_length(pInput));
+	}
 }
 
 void CSshServer::ProcessMessage(CSshClient *pClient)
@@ -191,12 +205,10 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	}
 
 	// TODO: improve this shell!
-	// TODO: arrow key up for history
 	// TODO: ctrl+r history support
 	// TODO: movement with arrow keys
 	// TODO: word jumping and word deletion
 	// TODO: autocomplete
-	// TODO: can we use the readline library here somehow?
 
 	for(int i = 0; i < n; i++)
 	{
@@ -300,14 +312,21 @@ void CSshServer::HandleInput(CSshClient *pClient)
 						pClient->m_pHistoryEntry = pClient->m_History.Last();
 					}
 
-					// this kinda works but only server side
 					if(pClient->m_pHistoryEntry)
-						str_copy(pClient->m_aInput, pClient->m_pHistoryEntry);
+						pClient->SetInput(pClient->m_pHistoryEntry);
 				}
 				else if(aBuf[i + 2] == 66) // arrow key down
 				{
 					// skip the sequence
 					i += 2;
+
+					if(pClient->m_pHistoryEntry)
+						pClient->m_pHistoryEntry = pClient->m_History.Next(pClient->m_pHistoryEntry);
+
+					if(pClient->m_pHistoryEntry)
+						pClient->SetInput(pClient->m_pHistoryEntry);
+					else
+						pClient->SetInput("");
 				}
 			}
 
