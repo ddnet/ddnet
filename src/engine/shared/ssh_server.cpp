@@ -130,6 +130,11 @@ void CSshServer::ListConnections()
 	}
 }
 
+void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
+{
+	Console()->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED, true);
+}
+
 void CSshServer::HandleInput(CSshClient *pClient)
 {
 	ssh_channel Channel = pClient->m_Channel;
@@ -210,7 +215,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				{
 					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
 					CLogScope Scope(&Logger);
-					Console()->ExecuteLine(pCmd, IConsole::CLIENT_ID_UNSPECIFIED, true);
+					ExecuteRconLine(pClient, pCmd);
 				}
 			}
 
@@ -544,7 +549,7 @@ int CSshServer::ChannelExecRequestCallback(ssh_session Session, ssh_channel Chan
 
 	CSshLogger Logger(pCtx->m_pServer, pCtx->m_pClient->m_ClientId, log_get_scope_logger());
 	CLogScope Scope(&Logger);
-	pCtx->m_pServer->Console()->ExecuteLine(pCommand, IConsole::CLIENT_ID_UNSPECIFIED, true);
+	pCtx->m_pServer->ExecuteRconLine(pCtx->m_pClient, pCommand);
 	ssh_channel_write(pCtx->m_pClient->m_Channel, "\r\n", 2);
 
 	pCtx->m_pClient->m_Dropped = true;

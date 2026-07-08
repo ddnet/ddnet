@@ -110,6 +110,7 @@ class CSshServer
 
 	void AcceptNewConnections();
 	void ListConnections();
+	void ExecuteRconLine(CSshClient *pClient, const char *pLine);
 	void HandleInput(CSshClient *pClient);
 
 public:
