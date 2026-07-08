@@ -154,8 +154,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	int k = str_length(pClient->m_aInput);
 	if(k + n > (int)sizeof(pClient->m_aInput) - 10)
 	{
-		// TODO: a \a bell would be nice in that case but I think it requires a PTY session
-
 		// do not allow multiple characters at once to keep things simple
 		if(n > 1)
 		{
