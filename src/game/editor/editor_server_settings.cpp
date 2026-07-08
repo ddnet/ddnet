@@ -11,12 +11,12 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/editor/editor_actions.h>
 #include <game/editor/editor_history.h>
+#include <game/gamecore.h>
 
 #include <iterator>
 
