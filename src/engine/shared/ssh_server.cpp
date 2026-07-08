@@ -158,7 +158,10 @@ void CSshServer::HandleInput(CSshClient *pClient)
 
 		// do not allow multiple characters at once to keep things simple
 		if(n > 1)
+		{
+			ssh_channel_write(pClient->m_Channel, "\a", 1);
 			return;
+		}
 
 		// allow operations that clear the input
 		char Chr = aBuf[0];
@@ -170,7 +173,10 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			Chr == KEY_DEL ||
 			Chr == KEY_BACKSPACE;
 		if(!Whitelisted)
+		{
+			ssh_channel_write(pClient->m_Channel, "\a", 1);
 			return;
+		}
 	}
 
 	// TODO: improve this shell!
@@ -250,6 +256,8 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			LastChr = std::max(0, LastChr - 1);
 			if(pClient->m_aInput[0])
 				ssh_channel_write(pClient->m_Channel, "\b \b", 3);
+			else
+				ssh_channel_write(pClient->m_Channel, "\a", 1);
 			pClient->m_aInput[LastChr] = '\0';
 			continue;
 		}
