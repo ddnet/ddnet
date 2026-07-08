@@ -138,8 +138,12 @@ void CLayerQuads::BrushFlipX()
 {
 	for(auto &Quad : m_vQuads)
 	{
-		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[1]);
-		std::swap(Quad.m_aPoints[2], Quad.m_aPoints[3]);
+		const CPoint &PivotPoint = Quad.m_aPoints[4];
+
+		for(size_t Index = 0; Index < 4; ++Index)
+		{
+			Quad.m_aPoints[Index].x = f2fx(2 * fx2f(PivotPoint.x) - fx2f(Quad.m_aPoints[Index].x));
+		}
 	}
 	Map()->OnModify();
 }
@@ -148,8 +152,12 @@ void CLayerQuads::BrushFlipY()
 {
 	for(auto &Quad : m_vQuads)
 	{
-		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[2]);
-		std::swap(Quad.m_aPoints[1], Quad.m_aPoints[3]);
+		const CPoint &PivotPoint = Quad.m_aPoints[4];
+
+		for(size_t Index = 0; Index < 4; ++Index)
+		{
+			Quad.m_aPoints[Index].y = f2fx(2 * fx2f(PivotPoint.y) - fx2f(Quad.m_aPoints[Index].y));
+		}
 	}
 	Map()->OnModify();
 }
