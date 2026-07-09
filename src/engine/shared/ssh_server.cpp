@@ -354,6 +354,11 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			{
 				log_info("ssh", "cid=%d cmd='%s'", pClient->m_ClientId, pCmd);
 
+				// TODO: how bad is it that these are fake commands?
+				//       meaning they have to be a full match
+				//       spaces, semicolons and arguments are not supported
+				//       alternatively we could also register them as actual commands in the console
+				//       and run this code in the callback
 				if(!str_comp(pCmd, "logout") || !str_comp(pCmd, "exit"))
 				{
 					OnClientDisconnect(pClient->m_ClientId, "logout");
