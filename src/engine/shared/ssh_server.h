@@ -71,6 +71,10 @@ public:
 	// sent to the client and used as insert offset when typing
 	ivec2 m_CursorPos = ivec2(0, 0);
 
+	// we sent a cursor pos fetch to the client
+	// and expect the next input to be the response to it
+	bool m_WaitingForCursorPos = false;
+
 	// overwrites the entire m_aInput buffer
 	// and sends the new line to the client over the ssh channel
 	void SetInput(const char *pInput);

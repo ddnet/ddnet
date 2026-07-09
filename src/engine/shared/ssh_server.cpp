@@ -279,6 +279,27 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		return;
 	}
 
+	if(pClient->m_WaitingForCursorPos)
+	{
+		// TODO: should we check the length of n?
+		//       how many terminals support this format?
+
+		int Row;
+		int Column;
+		if(sscanf(aBuf, "\x1B[%d;%dR", &Row, &Column) != 2)
+		{
+			log_error("ssh", "failed to read cursor input '%s'", aBuf);
+			OnClientDisconnect(pClient->m_ClientId, "invalid cursor pos");
+			return;
+		}
+
+		pClient->m_CursorPos.x = Column;
+		pClient->m_CursorPos.y = Row;
+		pClient->m_WaitingForCursorPos = false;
+		log_info("ssh", "got cursor pos x=%d y=%d", Column, Row);
+		return;
+	}
+
 	int k = str_length(pClient->m_aInput);
 	if(k + n > (int)sizeof(pClient->m_aInput) - 10)
 	{
@@ -444,11 +465,17 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				}
 				else if(aBuf[i + 2] == 68) // arrow key left
 				{
+					// skip the sequence
+					i += 2;
+
 					pClient->m_CursorPos.x--;
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
 				else if(aBuf[i + 2] == 67) // arrow key right
 				{
+					// skip the sequence
+					i += 2;
+
 					pClient->m_CursorPos.x++;
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
@@ -755,6 +782,10 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 	ssh_channel_write(Channel, pBanner, str_length(pBanner));
 	pCtx->m_pClient->NewPrompt();
 	pCtx->m_pClient->m_CursorPos.y = 8;
+
+	// fetch cursor pos
+	ssh_channel_write(Channel, "\x1B[6n", str_length("\x1B[6n"));
+	pCtx->m_pClient->m_WaitingForCursorPos = true;
 
 	return SSH_OK;
 }
