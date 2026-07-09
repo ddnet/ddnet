@@ -145,15 +145,25 @@ void CSshClient::SendCursorPos(ivec2 Pos) const
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "\x1B[%d;%dH", Pos.y, Pos.x);
 	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
+
+	// there would also be relative move left and right
+	// maybe that is more portable than sending absolute pos
+	// Action	Escape Sequence (Text)
+	// Move Up	\x1B[A
+	// Move Down	\x1B[B
+	// Move Right	\x1B[C
+	// Move Left	\x1B[D
+	// Move to (X,Y)	\x1B[%d;%dH
 }
 
-// TODO: add send cursor pos helper
-// Action	Escape Sequence (Text)
-// Move Up	\x1B[A
-// Move Down	\x1B[B
-// Move Right	\x1B[C
-// Move Left	\x1B[D
-// Move to (X,Y)	\x1B[%d;%dH
+void CSshClient::RequestCursorPos()
+{
+	if(!m_Channel)
+		return;
+
+	ssh_channel_write(m_Channel, "\x1B[6n", str_length("\x1B[6n"));
+	m_WaitingForCursorPos = true;
+}
 
 void CSshClient::ResetCompletion()
 {
@@ -781,11 +791,7 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 		"##################################\r\n";
 	ssh_channel_write(Channel, pBanner, str_length(pBanner));
 	pCtx->m_pClient->NewPrompt();
-	pCtx->m_pClient->m_CursorPos.y = 8;
-
-	// fetch cursor pos
-	ssh_channel_write(Channel, "\x1B[6n", str_length("\x1B[6n"));
-	pCtx->m_pClient->m_WaitingForCursorPos = true;
+	pCtx->m_pClient->RequestCursorPos();
 
 	return SSH_OK;
 }

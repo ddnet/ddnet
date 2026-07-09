@@ -86,6 +86,7 @@ public:
 	void NewPrompt() const;
 
 	void SendCursorPos(ivec2 Pos) const;
+	void RequestCursorPos();
 
 	void ResetCompletion();
 	void CompleteCommands(bool IsReverse);
