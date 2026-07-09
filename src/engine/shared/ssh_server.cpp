@@ -306,7 +306,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		pClient->m_CursorPos.x = Column;
 		pClient->m_CursorPos.y = Row;
 		pClient->m_WaitingForCursorPos = false;
-		log_info("ssh", "got cursor pos x=%d y=%d", Column, Row);
+		// log_info("ssh", "got cursor pos x=%d y=%d", Column, Row);
 		return;
 	}
 
@@ -518,15 +518,15 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		ssh_channel_write(Channel, aBuf + i, 1);
 	}
 
-	if(!std::isprint(aBuf[0]))
-	{
-		log_info("ssh", "-----");
-		for(int i = 0; i < n; i++)
-		{
-			log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
-		}
-		log_info("ssh", "input '%s'", pClient->m_aInput);
-	}
+	// if(!std::isprint(aBuf[0]))
+	// {
+	// 	log_info("ssh", "-----");
+	// 	for(int i = 0; i < n; i++)
+	// 	{
+	// 		log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
+	// 	}
+	// 	log_info("ssh", "input '%s'", pClient->m_aInput);
+	// }
 }
 
 void CSshServer::GenerateHostKeyIfMissing()
