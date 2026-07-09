@@ -44,6 +44,7 @@
 #define KEY_CTRL_U 21
 #define KEY_CTRL_C 3
 #define KEY_CTRL_D 4
+#define KEY_TAB 9
 #define KEY_DEL 127
 #define KEY_BACKSPACE '\b'
 
@@ -299,6 +300,11 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			else
 				ssh_channel_write(pClient->m_Channel, "\a", 1);
 			pClient->m_aInput[LastChr] = '\0';
+			continue;
+		}
+		else if(Byte == KEY_TAB)
+		{
+			pClient->SetInput("tabbed");
 			continue;
 		}
 		else if(Byte == 27) // escape sequence
