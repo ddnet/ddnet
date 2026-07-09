@@ -546,8 +546,8 @@ public:
 	static CUi::EPopupMenuFunctionResult PopupSelectImage(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSelectSound(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSelectGametileOp(void *pContext, CUIRect View, bool Active);
-	static CUi::EPopupMenuFunctionResult PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active);
-	static CUi::EPopupMenuFunctionResult PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectAutomapperConfig(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectAutomapperReference(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupTele(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSpeedup(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
@@ -576,14 +576,14 @@ public:
 	void PopupSelectGametileOpInvoke(float x, float y);
 	int PopupSelectGameTileOpResult();
 
-	void PopupSelectConfigAutoMapInvoke(int Current, float x, float y);
-	int PopupSelectConfigAutoMapResult();
+	void PopupSelectAutomapperConfigInvoke(int Current, float x, float y);
+	int PopupSelectAutomapperConfigResult();
 
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
 
-	void PopupSelectAutoMapReferenceInvoke(int Current, float x, float y);
-	int PopupSelectAutoMapReferenceResult();
+	void PopupSelectAutomapperReferenceInvoke(int Current, float x, float y);
+	int PopupSelectAutomapperReferenceResult();
 
 	void DoQuadEnvelopes(const CLayerQuads *pLayerQuads);
 	void DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex);

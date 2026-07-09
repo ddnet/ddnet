@@ -267,15 +267,15 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 				// save auto mapper of each tile layer (not physics layer)
 				if(!Item.m_Flags)
 				{
-					CMapItemAutoMapperConfig ItemAutomapper;
+					CMapItemAutomapperConfig ItemAutomapper;
 					ItemAutomapper.m_Version = 1;
 					ItemAutomapper.m_GroupId = GroupCount;
 					ItemAutomapper.m_LayerId = GItem.m_NumLayers;
-					ItemAutomapper.m_AutomapperConfig = pLayerTiles->m_AutoMapperConfig;
+					ItemAutomapper.m_AutomapperConfig = pLayerTiles->m_AutomapperConfig;
 					ItemAutomapper.m_AutomapperSeed = pLayerTiles->m_Seed;
 					ItemAutomapper.m_Flags = 0;
-					if(pLayerTiles->m_AutoAutoMap)
-						ItemAutomapper.m_Flags |= CMapItemAutoMapperConfig::FLAG_AUTOMATIC;
+					if(pLayerTiles->m_AutoAutomapper)
+						ItemAutomapper.m_Flags |= CMapItemAutomapperConfig::FLAG_AUTOMATIC;
 
 					Writer.AddItem(MAPITEMTYPE_AUTOMAPPER_CONFIG, AutomapperCount, sizeof(ItemAutomapper), &ItemAutomapper);
 					AutomapperCount++;
@@ -593,7 +593,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			}
 
 			// load auto mapper file
-			pImg->m_AutoMapper.Load(pImg->m_aName);
+			pImg->m_Automapper.Load(pImg->m_aName);
 
 			m_vpImages.push_back(pImg);
 
@@ -1031,7 +1031,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 		pMap->GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &AutomapperConfigStart, &AutomapperConfigNum);
 		for(int i = 0; i < AutomapperConfigNum; i++)
 		{
-			CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)pMap->GetItem(AutomapperConfigStart + i);
+			CMapItemAutomapperConfig *pItem = (CMapItemAutomapperConfig *)pMap->GetItem(AutomapperConfigStart + i);
 			if(pItem->m_Version == 1)
 			{
 				if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&
@@ -1045,9 +1045,9 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 						if(!(pTiles->m_HasGame || pTiles->m_HasTele || pTiles->m_HasSpeedup ||
 							   pTiles->m_HasFront || pTiles->m_HasSwitch || pTiles->m_HasTune))
 						{
-							pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
+							pTiles->m_AutomapperConfig = pItem->m_AutomapperConfig;
 							pTiles->m_Seed = pItem->m_AutomapperSeed;
-							pTiles->m_AutoAutoMap = !!(pItem->m_Flags & CMapItemAutoMapperConfig::FLAG_AUTOMATIC);
+							pTiles->m_AutoAutomapper = !!(pItem->m_Flags & CMapItemAutomapperConfig::FLAG_AUTOMATIC);
 						}
 					}
 				}

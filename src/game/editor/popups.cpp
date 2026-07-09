@@ -2138,27 +2138,27 @@ int CEditor::PopupSelectGameTileOpResult()
 	return Result;
 }
 
-static int s_AutoMapConfigSelected = -100;
-static int s_AutoMapConfigCurrent = -100;
+static int s_AutomapperConfigSelected = -100;
+static int s_AutomapperConfigCurrent = -100;
 
-CUi::EPopupMenuFunctionResult CEditor::PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutomapperConfig(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(pEditor->Map()->SelectedLayer(0));
-	CAutoMapper *pAutoMapper = &pEditor->Map()->m_vpImages[pLayer->m_Image]->m_AutoMapper;
+	CAutomapper *pAutomapper = &pEditor->Map()->m_vpImages[pLayer->m_Image]->m_Automapper;
 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(ButtonHeight, pAutoMapper->ConfigNamesNum() + 1, 1, 4, s_AutoMapConfigCurrent + 1, &View, false);
+	s_ListBox.DoStart(ButtonHeight, pAutomapper->ConfigNamesNum() + 1, 1, 4, s_AutomapperConfigCurrent + 1, &View, false);
 	s_ListBox.SetScrollbarWidth(15.0f);
 	s_ListBox.DoAutoSpacing(ButtonMargin);
 
-	for(int i = 0; i < pAutoMapper->ConfigNamesNum() + 1; i++)
+	for(int i = 0; i < pAutomapper->ConfigNamesNum() + 1; i++)
 	{
 		static int s_NoneButton = 0;
-		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i - 1), (i - 1) == s_AutoMapConfigCurrent, 3.0f);
+		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : pAutomapper->GetConfigName(i - 1), (i - 1) == s_AutomapperConfigCurrent, 3.0f);
 		if(!Item.m_Visible)
 			continue;
 
@@ -2168,41 +2168,41 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectConfigAutoMap(void *pContext, 
 		SLabelProperties Props;
 		Props.m_MaxWidth = Label.w;
 		Props.m_EllipsisAtEnd = true;
-		pEditor->Ui()->DoLabel(&Label, i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), EditorFontSizes::MENU, TEXTALIGN_ML, Props);
+		pEditor->Ui()->DoLabel(&Label, i == 0 ? "None" : pAutomapper->GetConfigName(i - 1), EditorFontSizes::MENU, TEXTALIGN_ML, Props);
 	}
 
 	int NewSelected = s_ListBox.DoEnd() - 1;
-	if(NewSelected != s_AutoMapConfigCurrent)
-		s_AutoMapConfigSelected = NewSelected;
+	if(NewSelected != s_AutomapperConfigCurrent)
+		s_AutomapperConfigSelected = NewSelected;
 
 	return CUi::POPUP_KEEP_OPEN;
 }
 
-void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
+void CEditor::PopupSelectAutomapperConfigInvoke(int Current, float x, float y)
 {
-	static SPopupMenuId s_PopupSelectConfigAutoMapId;
-	s_AutoMapConfigSelected = -100;
-	s_AutoMapConfigCurrent = Current;
+	static SPopupMenuId s_PopupSelectAutomapperConfigId;
+	s_AutomapperConfigSelected = -100;
+	s_AutomapperConfigCurrent = Current;
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayer(0));
-	const int ItemCount = std::min(Map()->m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
+	const int ItemCount = std::min(Map()->m_vpImages[pLayer->m_Image]->m_Automapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
-	Ui()->DoPopupMenu(&s_PopupSelectConfigAutoMapId, x, y, 120.0f + 15.0f + 2.0f, 10.0f + 12.0f * ItemCount + 2.0f * (ItemCount - 1), this, PopupSelectConfigAutoMap);
+	Ui()->DoPopupMenu(&s_PopupSelectAutomapperConfigId, x, y, 120.0f + 15.0f + 2.0f, 10.0f + 12.0f * ItemCount + 2.0f * (ItemCount - 1), this, PopupSelectAutomapperConfig);
 }
 
-int CEditor::PopupSelectConfigAutoMapResult()
+int CEditor::PopupSelectAutomapperConfigResult()
 {
-	if(s_AutoMapConfigSelected == -100)
+	if(s_AutomapperConfigSelected == -100)
 		return -100;
 
-	s_AutoMapConfigCurrent = s_AutoMapConfigSelected;
-	s_AutoMapConfigSelected = -100;
-	return s_AutoMapConfigCurrent;
+	s_AutomapperConfigCurrent = s_AutomapperConfigSelected;
+	s_AutomapperConfigSelected = -100;
+	return s_AutomapperConfigCurrent;
 }
 
-static int s_AutoMapReferenceSelected = -100;
-static int s_AutoMapReferenceCurrent = -100;
+static int s_AutomapperReferenceSelected = -100;
+static int s_AutomapperReferenceCurrent = -100;
 
-CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutomapperReference(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
@@ -2210,13 +2210,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContex
 	const float ButtonMargin = 2.0f;
 
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(ButtonHeight, std::size(AUTOMAP_REFERENCE_NAMES) + 1, 1, 4, s_AutoMapReferenceCurrent + 1, &View, false);
+	s_ListBox.DoStart(ButtonHeight, std::size(AUTOMAP_REFERENCE_NAMES) + 1, 1, 4, s_AutomapperReferenceCurrent + 1, &View, false);
 	s_ListBox.DoAutoSpacing(ButtonMargin);
 
 	for(int i = 0; i < static_cast<int>(std::size(AUTOMAP_REFERENCE_NAMES)) + 1; i++)
 	{
 		static int s_NoneButton = 0;
-		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : AUTOMAP_REFERENCE_NAMES[i - 1], (i - 1) == s_AutoMapReferenceCurrent, 3.0f);
+		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : AUTOMAP_REFERENCE_NAMES[i - 1], (i - 1) == s_AutomapperReferenceCurrent, 3.0f);
 		if(!Item.m_Visible)
 			continue;
 
@@ -2230,29 +2230,29 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContex
 	}
 
 	int NewSelected = s_ListBox.DoEnd() - 1;
-	if(NewSelected != s_AutoMapReferenceCurrent)
-		s_AutoMapReferenceSelected = NewSelected;
+	if(NewSelected != s_AutomapperReferenceCurrent)
+		s_AutomapperReferenceSelected = NewSelected;
 
 	return CUi::POPUP_KEEP_OPEN;
 }
 
-void CEditor::PopupSelectAutoMapReferenceInvoke(int Current, float x, float y)
+void CEditor::PopupSelectAutomapperReferenceInvoke(int Current, float x, float y)
 {
-	static SPopupMenuId s_PopupSelectAutoMapReferenceId;
-	s_AutoMapReferenceSelected = -100;
-	s_AutoMapReferenceCurrent = Current;
+	static SPopupMenuId s_PopupSelectAutomapperReferenceId;
+	s_AutomapperReferenceSelected = -100;
+	s_AutomapperReferenceCurrent = Current;
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
-	Ui()->DoPopupMenu(&s_PopupSelectAutoMapReferenceId, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * std::size(AUTOMAP_REFERENCE_NAMES) + 1, this, PopupSelectAutoMapReference);
+	Ui()->DoPopupMenu(&s_PopupSelectAutomapperReferenceId, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * std::size(AUTOMAP_REFERENCE_NAMES) + 1, this, PopupSelectAutomapperReference);
 }
 
-int CEditor::PopupSelectAutoMapReferenceResult()
+int CEditor::PopupSelectAutomapperReferenceResult()
 {
-	if(s_AutoMapReferenceSelected == -100)
+	if(s_AutomapperReferenceSelected == -100)
 		return -100;
 
-	s_AutoMapReferenceCurrent = s_AutoMapReferenceSelected;
-	s_AutoMapReferenceSelected = -100;
-	return s_AutoMapReferenceCurrent;
+	s_AutomapperReferenceCurrent = s_AutomapperReferenceSelected;
+	s_AutomapperReferenceSelected = -100;
+	return s_AutomapperReferenceCurrent;
 }
 
 // DDRace

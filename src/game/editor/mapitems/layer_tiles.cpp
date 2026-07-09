@@ -35,10 +35,10 @@ CLayerTiles::CLayerTiles(CEditorMap *pMap, int w, int h) :
 	m_HasFront = false;
 	m_HasSwitch = false;
 	m_HasTune = false;
-	m_AutoMapperConfig = -1;
-	m_AutoMapperReference = -1;
+	m_AutomapperConfig = -1;
+	m_AutomapperReference = -1;
 	m_Seed = 0;
-	m_AutoAutoMap = false;
+	m_AutoAutomapper = false;
 
 	m_pTiles = new CTile[m_Width * m_Height];
 	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
@@ -58,10 +58,10 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_ColorEnv = Other.m_ColorEnv;
 	m_ColorEnvOffset = Other.m_ColorEnvOffset;
 
-	m_AutoMapperConfig = Other.m_AutoMapperConfig;
-	m_AutoMapperReference = Other.m_AutoMapperReference;
+	m_AutomapperConfig = Other.m_AutomapperConfig;
+	m_AutomapperReference = Other.m_AutomapperReference;
 	m_Seed = Other.m_Seed;
-	m_AutoAutoMap = Other.m_AutoAutoMap;
+	m_AutoAutomapper = Other.m_AutoAutomapper;
 	m_HasTele = Other.m_HasTele;
 	m_HasSpeedup = Other.m_HasSpeedup;
 	m_HasFront = Other.m_HasFront;
@@ -992,7 +992,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	if(Map()->m_pGameLayer.get() != this)
 	{
-		if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size() && Map()->m_vpImages[m_Image]->m_AutoMapper.IsLoaded() && m_AutoMapperConfig != -1)
+		if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size() && Map()->m_vpImages[m_Image]->m_Automapper.IsLoaded() && m_AutomapperConfig != -1)
 		{
 			pToolBox->HSplitBottom(2.0f, pToolBox, nullptr);
 			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
@@ -1001,10 +1001,10 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				CUIRect ButtonAuto;
 				Button.VSplitRight(16.0f, &Button, &ButtonAuto);
 				Button.VSplitRight(2.0f, &Button, nullptr);
-				static int s_AutoMapperButtonAuto = 0;
-				if(Editor()->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, BUTTONFLAG_LEFT, "Automatically run the automapper after modifications."))
+				static int s_AutomapperButtonAuto = 0;
+				if(Editor()->DoButton_Editor(&s_AutomapperButtonAuto, "A", m_AutoAutomapper, &ButtonAuto, BUTTONFLAG_LEFT, "Automatically run the automapper after modifications."))
 				{
-					m_AutoAutoMap = !m_AutoAutoMap;
+					m_AutoAutomapper = !m_AutoAutomapper;
 					FlagModified(0, 0, m_Width, m_Height);
 					if(!m_TilesHistory.empty()) // Sometimes pressing that button causes the automap to run so we should be able to undo that
 					{
@@ -1015,10 +1015,10 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				}
 			}
 
-			static int s_AutoMapperButton = 0;
-			if(Editor()->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, BUTTONFLAG_LEFT, "Run the automapper."))
+			static int s_AutomapperButton = 0;
+			if(Editor()->DoButton_Editor(&s_AutomapperButton, "Automap", 0, &Button, BUTTONFLAG_LEFT, "Run the automapper."))
 			{
-				Map()->m_vpImages[m_Image]->m_AutoMapper.Proceed(this, Map()->m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed);
+				Map()->m_vpImages[m_Image]->m_Automapper.Proceed(this, Map()->m_pGameLayer.get(), m_AutomapperReference, m_AutomapperConfig, m_Seed);
 				// record undo
 				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 				ClearHistory();
@@ -1036,8 +1036,8 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Color", PackColor(m_Color), PROPTYPE_COLOR, 0, 0},
 		{"Color Env", m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
-		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
-		{"Reference", m_AutoMapperReference, PROPTYPE_AUTOMAPPER_REFERENCE, 0, 0},
+		{"Auto Rule", m_AutomapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
+		{"Reference", m_AutomapperReference, PROPTYPE_AUTOMAPPER_REFERENCE, 0, 0},
 		{"Live Gametiles", m_LiveGameTiles, PROPTYPE_BOOL, 0, 1},
 		{"Seed", m_Seed, PROPTYPE_INT, 0, 1000000000},
 		{nullptr},
@@ -1102,7 +1102,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		else
 		{
 			m_Image = NewVal % Map()->m_vpImages.size();
-			m_AutoMapperConfig = -1;
+			m_AutomapperConfig = -1;
 
 			if(Map()->m_vpImages[m_Image]->m_Width % 16 != 0 || Map()->m_vpImages[m_Image]->m_Height % 16 != 0)
 			{
@@ -1142,14 +1142,14 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == ETilesProp::AUTOMAPPER)
 	{
-		if(m_Image >= 0 && Map()->m_vpImages[m_Image]->m_AutoMapper.ConfigNamesNum() > 0 && NewVal >= 0)
-			m_AutoMapperConfig = NewVal % Map()->m_vpImages[m_Image]->m_AutoMapper.ConfigNamesNum();
+		if(m_Image >= 0 && Map()->m_vpImages[m_Image]->m_Automapper.ConfigNamesNum() > 0 && NewVal >= 0)
+			m_AutomapperConfig = NewVal % Map()->m_vpImages[m_Image]->m_Automapper.ConfigNamesNum();
 		else
-			m_AutoMapperConfig = -1;
+			m_AutomapperConfig = -1;
 	}
 	else if(Prop == ETilesProp::AUTOMAPPER_REFERENCE)
 	{
-		m_AutoMapperReference = NewVal;
+		m_AutomapperReference = NewVal;
 	}
 	else if(Prop == ETilesProp::LIVE_GAMETILES)
 	{
@@ -1164,7 +1164,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		FlagModified(0, 0, m_Width, m_Height);
 
 		// Record undo if automapper was ran
-		if(m_AutoAutoMap && !m_TilesHistory.empty())
+		if(m_AutoAutomapper && !m_TilesHistory.empty())
 		{
 			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 			ClearHistory();
@@ -1351,9 +1351,9 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 void CLayerTiles::FlagModified(int x, int y, int w, int h)
 {
 	Map()->OnModify();
-	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_Image >= 0)
+	if(m_Seed != 0 && m_AutomapperConfig != -1 && m_AutoAutomapper && m_Image >= 0)
 	{
-		Map()->m_vpImages[m_Image]->m_AutoMapper.ProceedLocalized(this, Map()->m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed, x, y, w, h);
+		Map()->m_vpImages[m_Image]->m_Automapper.ProceedLocalized(this, Map()->m_pGameLayer.get(), m_AutomapperReference, m_AutomapperConfig, m_Seed, x, y, w, h);
 	}
 }
 
