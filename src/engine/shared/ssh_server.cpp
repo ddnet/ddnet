@@ -507,34 +507,10 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 
 		pClient->ResetCompletion();
-
-		char aLeft[2048];
-		char aRight[2048];
-		// TODO: how well does str_copy work with partial utf8 when we go byte by byte here
-		str_copy(aLeft, pClient->m_aInput, pClient->m_CursorPos.x);
-		// TODO: maybe add a bit of cursor pos sanity checks where in case we go OOB
-		str_copy(aRight, pClient->m_aInput + pClient->m_CursorPos.x);
-
-		// TODO: maybe not going byte by byte here would make things simpler
-		// pClient->m_aInput[k] = Byte;
-		// pClient->m_aInput[k + 1] = '\0';
-
-		str_copy(pClient->m_aInput, aLeft);
-		pClient->m_aInput[pClient->m_CursorPos.x] = Byte;
-		pClient->m_aInput[pClient->m_CursorPos.x + 1] = '\0';
-		str_append(pClient->m_aInput, aRight);
-
-		pClient->ClearPrompt();
-		ssh_channel_write(pClient->m_Channel, pClient->m_aInput, str_length(pClient->m_aInput));
-
-		// TODO: make sure a multi byte utf8 symbol does not mess up the cursor
-		pClient->m_CursorPos.x++;
-
-		pClient->SendCursorPos(pClient->m_CursorPos);
-
+		pClient->m_aInput[k] = Byte;
+		pClient->m_aInput[k + 1] = '\0';
 		k++;
-		// TODO: can we write byte by byte again instead of rewriting the line
-		// ssh_channel_write(Channel, aBuf + i, 1);
+		ssh_channel_write(Channel, aBuf + i, 1);
 	}
 
 	if(!std::isprint(aBuf[0]))
