@@ -111,6 +111,7 @@ IConsole *CSshClient::Console()
 void CSshClient::SetInput(const char *pInput)
 {
 	str_copy(m_aInput, pInput);
+	m_InputCursor = str_length(pInput);
 
 	if(m_Channel)
 	{
@@ -136,6 +137,14 @@ void CSshClient::NewPrompt() const
 	ssh_channel_write(m_Channel, "\r\n> ", 2);
 	ssh_channel_write(m_Channel, "> ", 2);
 }
+
+// TODO: add send cursor pos helper
+// Action	Escape Sequence (Text)
+// Move Up	\x1B[A
+// Move Down	\x1B[B
+// Move Right	\x1B[C
+// Move Left	\x1B[D
+// Move to (X,Y)	\x1B[%d;%dH
 
 void CSshClient::ResetCompletion()
 {
@@ -423,6 +432,12 @@ void CSshServer::HandleInput(CSshClient *pClient)
 						pClient->SetInput(pClient->m_pHistoryEntry);
 					else
 						pClient->SetInput("");
+				}
+				else if(aBuf[i + 2] == 68) // arrow key left
+				{
+				}
+				else if(aBuf[i + 2] == 67) // arrow key right
+				{
 				}
 				else if(aBuf[i + 2] == 90) // shift+tab
 				{

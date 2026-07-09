@@ -66,6 +66,10 @@ public:
 
 	char m_aInput[2048] = "";
 
+	// position of the cursor in the m_aInput buffer
+	// sent to the client and used as insert offset when typing
+	int m_InputCursor = 0;
+
 	// overwrites the entire m_aInput buffer
 	// and sends the new line to the client over the ssh channel
 	void SetInput(const char *pInput);
