@@ -67,10 +67,8 @@ public:
 	// and sends the new line to the client over the ssh channel
 	void SetInput(const char *pInput);
 
-	// sends the prompt string to the client
-	// it does not clear out the previous one
-	// or does a new line
-	void SendPrompt() const;
+	// clears the current line and places an empty prompt
+	void ClearPrompt() const;
 
 	// sends new line and prompt
 	void NewPrompt() const;
