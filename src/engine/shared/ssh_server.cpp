@@ -98,6 +98,16 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	m_pOuterLogger->Log(pMessage);
 }
 
+const IConsole *CSshClient::Console() const
+{
+	return m_CallbackCtx.m_pServer->Console();
+}
+
+IConsole *CSshClient::Console()
+{
+	return m_CallbackCtx.m_pServer->Console();
+}
+
 void CSshClient::SetInput(const char *pInput)
 {
 	str_copy(m_aInput, pInput);
@@ -125,6 +135,61 @@ void CSshClient::NewPrompt() const
 
 	ssh_channel_write(m_Channel, "\r\n> ", 2);
 	ssh_channel_write(m_Channel, "> ", 2);
+}
+
+void CSshClient::ResetCompletion()
+{
+	m_aCompletionBuffer[0] = '\0';
+	m_CompletionIndex = -1;
+	m_CompletionEnumerationCount = -1;
+}
+
+void CSshClient::CompleteCommands(bool IsReverse)
+{
+	if(m_CompletionEnumerationCount == -1)
+		str_copy(m_aCompletionBuffer, m_aInput);
+
+	m_CompletionEnumerationCount = 0;
+
+	if(IsReverse)
+		m_CompletionIndex--;
+	else
+		m_CompletionIndex++;
+
+	Console()->PossibleCommands(m_aCompletionBuffer, CFGFLAG_SERVER, false, CompletionCallback, &m_CallbackCtx);
+
+	// handle wrapping
+	if(m_CompletionEnumerationCount && (m_CompletionIndex >= m_CompletionEnumerationCount || m_CompletionIndex < 0))
+	{
+		m_CompletionIndex = (m_CompletionIndex + m_CompletionEnumerationCount) % m_CompletionEnumerationCount;
+		m_CompletionEnumerationCount = 0;
+		Console()->PossibleCommands(m_aCompletionBuffer, CFGFLAG_SERVER, false, CompletionCallback, &m_CallbackCtx);
+	}
+}
+
+void CSshClient::CompletionCallback(int Index, const char *pCmd, void *pUser)
+{
+	CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
+	CSshClient *pClient = pCtx->m_pClient;
+
+	log_info("ssh", "completion callback idx=%d cmd=%s", Index, pCmd);
+
+	if(pClient->m_CompletionIndex == pClient->m_CompletionEnumerationCount)
+	{
+		pClient->SetInput(pCmd);
+	}
+
+	// TODO: should there be a preview below the prompt like in tw console?
+	//       or a inline preview greyed out for the next possible word like in shells?
+	//       or both?
+
+	// else if(pClient->m_CompletionIndex < pClient->m_CompletionEnumerationCount)
+	// {
+	// 	str_append(pClient->m_aCompletionPreview, pStr, sizeof(pClient->m_aCompletionPreview));
+	// 	str_append(pClient->m_aCompletionPreview, " ", sizeof(pClient->m_aCompletionPreview));
+	// }
+
+	pClient->m_CompletionEnumerationCount++;
 }
 
 void CSshServer::ProcessMessage(CSshClient *pClient)
@@ -293,6 +358,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_BACKSPACE || Byte == KEY_DEL)
 		{
+			pClient->ResetCompletion();
 			int LastChr = str_length(pClient->m_aInput);
 			LastChr = std::max(0, LastChr - 1);
 			if(pClient->m_aInput[0])
@@ -304,7 +370,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_TAB)
 		{
-			pClient->SetInput("tabbed");
+			pClient->CompleteCommands(false);
 			continue;
 		}
 		else if(Byte == 27) // escape sequence
@@ -315,7 +381,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				// yes! regular ESC is just one byte of 27
 				continue;
 			}
-			// arrow keys
 			if((n - i) >= 3 && aBuf[i + 1] == 91)
 			{
 				if(aBuf[i + 2] == 65) // arrow key up
@@ -351,11 +416,23 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					else
 						pClient->SetInput("");
 				}
+				else if(aBuf[i + 2] == 90) // shift+tab
+				{
+					// skip the sequence
+					i += 2;
+					pClient->CompleteCommands(true);
+				}
 			}
 
 			// ignore unknown escape sequence for now
 			continue;
 		}
+
+		// TODO: this has to be called in so many places
+		//       better call it at the top once for all cases
+		//       except explicitly when we dont want to reset it
+		//       which should be only tab, shift+tab and maybe arrow keys
+		pClient->ResetCompletion();
 
 		pClient->m_aInput[k] = Byte;
 		pClient->m_aInput[k + 1] = '\0';

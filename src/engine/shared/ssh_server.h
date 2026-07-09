@@ -41,6 +41,9 @@ public:
 class CSshClient
 {
 public:
+	const IConsole *Console() const;
+	IConsole *Console();
+
 	CSshClient(int ClientId, ssh_session Session)
 	{
 		m_ClientId = ClientId;
@@ -72,6 +75,15 @@ public:
 
 	// sends new line and prompt
 	void NewPrompt() const;
+
+	void ResetCompletion();
+	void CompleteCommands(bool IsReverse);
+
+	char m_aCompletionBuffer[2048] = "";
+	int m_CompletionIndex = -1;
+	int m_CompletionEnumerationCount = -1;
+
+	static void CompletionCallback(int Index, const char *pCmd, void *pUser);
 
 	CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	char *m_pHistoryEntry = nullptr;
