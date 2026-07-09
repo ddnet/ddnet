@@ -5,6 +5,7 @@
 
 #include <base/logger.h>
 #include <base/types.h>
+#include <base/vmath.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
@@ -68,7 +69,7 @@ public:
 
 	// position of the cursor in the m_aInput buffer
 	// sent to the client and used as insert offset when typing
-	int m_InputCursor = 0;
+	ivec2 m_CursorPos = ivec2(0, 0);
 
 	// overwrites the entire m_aInput buffer
 	// and sends the new line to the client over the ssh channel
@@ -80,6 +81,8 @@ public:
 	// sends new line and prompt
 	void NewPrompt() const;
 
+	void SendCursorPos(ivec2 Pos) const;
+
 	void ResetCompletion();
 	void CompleteCommands(bool IsReverse);
 
@@ -88,6 +91,14 @@ public:
 	int m_CompletionEnumerationCount = -1;
 
 	static void CompletionCallback(int Index, const char *pCmd, void *pUser);
+
+	class CTerminal
+	{
+	public:
+		int m_Width = 10;
+		int m_Height = 10;
+	};
+	CTerminal m_Term;
 
 	CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	char *m_pHistoryEntry = nullptr;

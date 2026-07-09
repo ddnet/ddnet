@@ -111,7 +111,7 @@ IConsole *CSshClient::Console()
 void CSshClient::SetInput(const char *pInput)
 {
 	str_copy(m_aInput, pInput);
-	m_InputCursor = str_length(pInput);
+	m_CursorPos.x = str_length(pInput);
 
 	if(m_Channel)
 	{
@@ -136,6 +136,15 @@ void CSshClient::NewPrompt() const
 
 	ssh_channel_write(m_Channel, "\r\n> ", 2);
 	ssh_channel_write(m_Channel, "> ", 2);
+}
+
+void CSshClient::SendCursorPos(ivec2 Pos) const
+{
+	// log_info("ssh", "sending pos x=%d y=%d", Pos.x, Pos.y);
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "\x1B[%d;%dH", Pos.y, Pos.x);
+	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 }
 
 // TODO: add send cursor pos helper
@@ -435,9 +444,13 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				}
 				else if(aBuf[i + 2] == 68) // arrow key left
 				{
+					pClient->m_CursorPos.x--;
+					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
 				else if(aBuf[i + 2] == 67) // arrow key right
 				{
+					pClient->m_CursorPos.x++;
+					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
 				else if(aBuf[i + 2] == 90) // shift+tab
 				{
@@ -696,6 +709,9 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 
 int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
+	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
+	pCtx->m_pClient->m_Term.m_Width = Width;
+	pCtx->m_pClient->m_Term.m_Height = Height;
 	return SSH_OK;
 }
 
@@ -738,6 +754,7 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 		"##################################\r\n";
 	ssh_channel_write(Channel, pBanner, str_length(pBanner));
 	pCtx->m_pClient->NewPrompt();
+	pCtx->m_pClient->m_CursorPos.y = 8;
 
 	return SSH_OK;
 }
