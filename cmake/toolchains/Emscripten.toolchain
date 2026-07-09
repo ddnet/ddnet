@@ -21,9 +21,14 @@ set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXIT_RUNTIME=1")
 
 # Filesystem support for loading files with C API functions.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FILESYSTEM=1 -s FORCE_FILESYSTEM=1")
+# Support for persistent file storage in IndexedDB.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -lidbfs.js")
 
 # TODO: Networking not supported. Full socket proxying is also blocked by PROXY_TO_PTHREAD not being supported.
 #set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -lwebsocket.js -s PROXY_POSIX_SOCKETS=1")
+
+# Enable Fetch API for HTTP requests
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FETCH=1")
 
 # Use Web Assembly & a WebGL2 compatible GLES3 implementation.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s WASM=1")
@@ -33,7 +38,7 @@ set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FULL_ES3=1")
 # Make sure C callback functions are available to JS.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\\$autoResumeAudioContext,\\$dynCall]")
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_FUNCTIONS=_main,_EmscriptenCallbackDropFile,_EmscriptenCallbackQuit,_EmscriptenCallbackQuitForce")
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_RUNTIME_METHODS=ccall")
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_RUNTIME_METHODS=callMain,ccall")
 
 # Very important: use same stack size that other platforms have, as the default of 64 KiB that Emscripten uses is too small for our code and causes stack overflows.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s STACK_SIZE=1MB")

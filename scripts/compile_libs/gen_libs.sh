@@ -109,8 +109,10 @@ log_info_header "Building libpng..."
 build_cmake_lib png https://github.com/glennrp/libpng "branch" "v1.6.43"
 
 # curl
-log_info_header "Building curl..."
-build_cmake_lib curl https://github.com/curl/curl "branch" "curl-8_8_0"
+if [[ "$TARGET_PLATFORM" != "webasm" ]]; then
+	log_info_header "Building curl..."
+	build_cmake_lib curl https://github.com/curl/curl "branch" "curl-8_8_0"
+fi
 
 # freetype
 log_info_header "Building freetype..."
@@ -185,12 +187,14 @@ function _copy_png() {
 }
 copy_libs_for_arches _copy_png
 
-function _copy_curl() {
-	local target_libs_folder="ddnet-libs/curl/$TARGET_PLATFORM/$2"
-	mkdir -p "$target_libs_folder"
-	cp compile_libs/curl/"$1"/lib/libcurl.a "$target_libs_folder"/libcurl.a
-}
-copy_libs_for_arches _copy_curl
+if [[ "$TARGET_PLATFORM" != "webasm" ]]; then
+	function _copy_curl() {
+		local target_libs_folder="ddnet-libs/curl/$TARGET_PLATFORM/$2"
+		mkdir -p "$target_libs_folder"
+		cp compile_libs/curl/"$1"/lib/libcurl.a "$target_libs_folder"/libcurl.a
+	}
+	copy_libs_for_arches _copy_curl
+fi
 
 function _copy_freetype() {
 	local target_libs_folder="ddnet-libs/freetype/$TARGET_PLATFORM/$2"
