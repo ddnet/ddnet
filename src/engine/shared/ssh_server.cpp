@@ -172,7 +172,7 @@ void CSshClient::CompletionCallback(int Index, const char *pCmd, void *pUser)
 	CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
 	CSshClient *pClient = pCtx->m_pClient;
 
-	log_info("ssh", "completion callback idx=%d cmd=%s", Index, pCmd);
+	// log_info("ssh", "completion callback idx=%d cmd=%s", Index, pCmd);
 
 	if(pClient->m_CompletionIndex == pClient->m_CompletionEnumerationCount)
 	{
@@ -298,6 +298,8 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		char Byte = aBuf[i];
 		if(Byte == KEY_ENTER)
 		{
+			pClient->ResetCompletion();
+
 			const char *pCmd = pClient->m_aInput;
 			if(pCmd[0])
 			{
@@ -328,6 +330,8 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_U)
 		{
+			pClient->ResetCompletion();
+
 			// ideally this would not be the same as ctrl+c
 			// and just clear the current prompt instead of
 			// opening a new one
@@ -337,6 +341,8 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_C)
 		{
+			pClient->ResetCompletion();
+
 			if(pClient->m_aInput[0] == '\0')
 			{
 				const char *pMsg = "\r\nUse ctrl+d or 'exit' to quit";
@@ -388,6 +394,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					// skip the sequence
 					i += 2;
 
+					pClient->ResetCompletion();
 					if(pClient->m_pHistoryEntry)
 					{
 						char *pTest = pClient->m_History.Prev(pClient->m_pHistoryEntry);
@@ -408,6 +415,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					// skip the sequence
 					i += 2;
 
+					pClient->ResetCompletion();
 					if(pClient->m_pHistoryEntry)
 						pClient->m_pHistoryEntry = pClient->m_History.Next(pClient->m_pHistoryEntry);
 
@@ -428,12 +436,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			continue;
 		}
 
-		// TODO: this has to be called in so many places
-		//       better call it at the top once for all cases
-		//       except explicitly when we dont want to reset it
-		//       which should be only tab, shift+tab and maybe arrow keys
 		pClient->ResetCompletion();
-
 		pClient->m_aInput[k] = Byte;
 		pClient->m_aInput[k + 1] = '\0';
 		k++;
