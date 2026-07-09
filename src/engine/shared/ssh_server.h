@@ -67,6 +67,14 @@ public:
 	// and sends the new line to the client over the ssh channel
 	void SetInput(const char *pInput);
 
+	// sends the prompt string to the client
+	// it does not clear out the previous one
+	// or does a new line
+	void SendPrompt() const;
+
+	// sends new line and prompt
+	void NewPrompt() const;
+
 	CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	char *m_pHistoryEntry = nullptr;
 

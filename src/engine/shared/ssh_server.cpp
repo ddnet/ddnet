@@ -104,9 +104,25 @@ void CSshClient::SetInput(const char *pInput)
 	if(m_Channel)
 	{
 		ssh_channel_write(m_Channel, "\r\033[2K", 6);
-		ssh_channel_write(m_Channel, "> ", 2); // TODO: move this to a write prompt method
+		SendPrompt();
 		ssh_channel_write(m_Channel, pInput, str_length(pInput));
 	}
+}
+
+void CSshClient::SendPrompt() const
+{
+	if(!m_Channel)
+		return;
+
+	ssh_channel_write(m_Channel, "> ", 2);
+}
+
+void CSshClient::NewPrompt() const
+{
+	if(!m_Channel)
+		return;
+
+	ssh_channel_write(m_Channel, "\r\n> ", 4);
 }
 
 void CSshServer::ProcessMessage(CSshClient *pClient)
@@ -240,7 +256,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			}
 
 			pClient->m_aInput[0] = '\0';
-			ssh_channel_write(Channel, "\r\n> ", 4);
+			pClient->NewPrompt();
 			return;
 		}
 		else if(Byte == KEY_CTRL_U)
@@ -249,7 +265,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			// and just clear the current prompt instead of
 			// opening a new one
 			pClient->m_aInput[0] = '\0';
-			ssh_channel_write(Channel, "\r\n> ", 4);
+			pClient->NewPrompt();
 			continue;
 		}
 		else if(Byte == KEY_CTRL_C)
@@ -261,7 +277,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			}
 
 			pClient->m_aInput[0] = '\0';
-			ssh_channel_write(Channel, "\r\n> ", 4);
+			pClient->NewPrompt();
 			continue;
 		}
 		else if(Byte == KEY_CTRL_D)
@@ -619,7 +635,7 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 		"#                                #\r\n"
 		"##################################\r\n";
 	ssh_channel_write(Channel, pBanner, str_length(pBanner));
-	ssh_channel_write(Channel, "\r\n> ", 4);
+	pCtx->m_pClient->NewPrompt();
 
 	return SSH_OK;
 }
