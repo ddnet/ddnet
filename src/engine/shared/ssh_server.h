@@ -100,7 +100,8 @@ public:
 	class CTerminal
 	{
 	public:
-		int m_Width = 10;
+		// TODO: use 10 as default once the size getter works on connect
+		int m_Width = 100;
 		int m_Height = 10;
 	};
 	CTerminal m_Term;

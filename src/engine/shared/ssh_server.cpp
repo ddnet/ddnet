@@ -478,7 +478,10 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					// skip the sequence
 					i += 2;
 
-					pClient->m_CursorPos.x--;
+					// TODO: ring bell when we go too far left
+					// TODO: do not hardcode prompt length here in case it changes or becomes flexible
+					const int PromptLen = 3;
+					pClient->m_CursorPos.x = std::clamp(pClient->m_CursorPos.x - 1, PromptLen, pClient->m_Term.m_Width);
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
 				else if(aBuf[i + 2] == 67) // arrow key right
@@ -486,7 +489,9 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					// skip the sequence
 					i += 2;
 
-					pClient->m_CursorPos.x++;
+					// TODO: handle line break well when we go too far right
+					// TODO: clamp at input text length
+					pClient->m_CursorPos.x = std::clamp(pClient->m_CursorPos.x + 1, 0, pClient->m_Term.m_Width);
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
 				else if(aBuf[i + 2] == 90) // shift+tab
@@ -746,6 +751,8 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 
 int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
+	// TODO: this is not fetched on connect smh
+	//       so cursor movement restrictions are wrong
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 	pCtx->m_pClient->m_Term.m_Width = Width;
 	pCtx->m_pClient->m_Term.m_Height = Height;
