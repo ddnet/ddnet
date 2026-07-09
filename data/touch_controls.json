@@ -3,6 +3,10 @@
 	"direct-touch-spectate": "aim",
 	"background-color-inactive": "00000040",
 	"background-color-active": "33333340",
+	"zoom-gesture-ingame": false,
+	"zoom-gesture-spectate": true,
+	"toggle-visibility-gesture-game": false,
+	"toggle-visibility-gesture-spec": true,
 	"touch-buttons": [
 		{
 			"x": 0,
