@@ -93,6 +93,10 @@ public:
 	// and sends the new line to the client over the ssh channel
 	void SetInput(const char *pInput);
 
+	// when the client sent a new byte
+	// that should be added to the input buffer
+	void InsertInputByte(char Byte);
+
 	// clears the current line and places an empty prompt
 	void ClearPrompt();
 
