@@ -298,6 +298,14 @@ void CSshClient::CompletionCallback(int Index, const char *pCmd, void *pUser)
 	pClient->m_CompletionEnumerationCount++;
 }
 
+void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pUser)
+{
+	// CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
+	// CSshClient *pClient = pCtx->m_pClient;
+
+	// log_info("ssh", "completion preview callback idx=%d cmd=%s", Index, pCmd);
+}
+
 void CSshServer::ProcessMessage(CSshClient *pClient)
 {
 	// we aren't interested in any specific message yet

@@ -114,6 +114,7 @@ public:
 	int m_CompletionEnumerationCount = -1;
 
 	static void CompletionCallback(int Index, const char *pCmd, void *pUser);
+	static void CompletionPreviewCallback(int Index, const char *pCmd, void *pUser);
 
 	class CTerminal
 	{
