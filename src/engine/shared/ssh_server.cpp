@@ -128,8 +128,6 @@ bool CSshClient::CursorMoveRight()
 	Max = std::min(Max, m_Term.m_Width);
 	Max += Min;
 
-	log_info("ssh", "min=%d max=%d", Min, Max);
-
 	int Prev = m_CursorPos.x;
 	m_CursorPos.x = std::clamp(m_CursorPos.x + 1, Min, Max);
 	return Prev != m_CursorPos.x;
@@ -499,6 +497,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				ssh_channel_write(pClient->m_Channel, "\a", 1);
 				continue;
 			}
+			pClient->CursorMoveLeft();
 			if(pClient->m_aInput[Idx + 1] == '\0')
 			{
 				// delete at the end of the input
@@ -513,9 +512,27 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			else
 			{
 				// delete with cursor inside of the input
-				log_info("ssh", "not implemetetd");
+
+				char aRight[2048];
+				// TODO: bound check this
+				str_copy(aRight, pClient->m_aInput + Idx);
+
+				// server side we need to shift the entire input
+				// TODO: bound check this
+				str_copy(pClient->m_aInput + Idx - 1, aRight, sizeof(pClient->m_aInput) - Idx);
+
+				// client side del is just sending a backspace
+				ssh_channel_write(pClient->m_Channel, "\b \b", 3);
+
+				// clear everything from the cursor till the end
+				ssh_channel_write(Channel, "\33[0K", str_length("\33[0K"));
+
+				// rewrite shifted line
+				ssh_channel_write(Channel, aRight, str_length(aRight));
+
+				// move cursor back into the input after rewriting the line
+				pClient->SendCursorPos(pClient->m_CursorPos);
 			}
-			pClient->CursorMoveLeft();
 			continue;
 		}
 		else if(Byte == KEY_TAB)
