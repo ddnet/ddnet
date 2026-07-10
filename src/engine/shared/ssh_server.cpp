@@ -416,8 +416,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 
 	// TODO: improve this shell!
 	// TODO: ctrl+r history support
-	// TODO: movement with arrow keys
-	// TODO: word jumping and word deletion
+	// TODO: word deletion
 	// TODO: autocomplete
 
 	for(int i = 0; i < n; i++)
@@ -721,9 +720,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			// move cursor back into the input after rewriting the line
 			pClient->SendCursorPos(pClient->m_CursorPos);
 		}
-
-		// TODO: unused?
-		k++;
 	}
 
 	if(!std::isprint(aBuf[0]))
