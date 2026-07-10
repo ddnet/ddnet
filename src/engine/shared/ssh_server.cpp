@@ -426,7 +426,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				continue;
 
 			ssh_channel_write(pClient->m_Channel, "\033[2J", str_length("\033[2J"));
-			pClient->m_CursorPos.y = 0;
+			pClient->m_CursorPos.y = 1;
 			pClient->SendCursorPos(pClient->m_CursorPos);
 			pClient->ClearPrompt();
 			continue;
