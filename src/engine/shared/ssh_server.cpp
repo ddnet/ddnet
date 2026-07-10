@@ -112,6 +112,29 @@ IConsole *CSshClient::Console()
 	return m_CallbackCtx.m_pServer->Console();
 }
 
+bool CSshClient::CursorMoveLeft()
+{
+	const int Min = PromptLength();
+	int Prev = m_CursorPos.x;
+	m_CursorPos.x = std::max(m_CursorPos.x - 1, Min);
+	return Prev != m_CursorPos.x;
+}
+
+bool CSshClient::CursorMoveRight()
+{
+	const int Min = PromptLength();
+	int Max = sizeof(m_aInput) - 1;
+	Max = std::min(Max, str_length(m_aInput));
+	Max = std::min(Max, m_Term.m_Width);
+	Max += Min;
+
+	log_info("ssh", "min=%d max=%d", Min, Max);
+
+	int Prev = m_CursorPos.x;
+	m_CursorPos.x = std::clamp(m_CursorPos.x + 1, Min, Max);
+	return Prev != m_CursorPos.x;
+}
+
 void CSshClient::SetInput(const char *pInput)
 {
 	str_copy(m_aInput, pInput);
@@ -154,6 +177,14 @@ void CSshClient::SetCursorPosToPromptStart()
 {
 	// not the most ideal method name but eh idk
 	m_CursorPos.x = PromptLength();
+}
+
+void CSshClient::SendBell() const
+{
+	if(!m_Channel)
+		return;
+
+	ssh_channel_write(m_Channel, "\a", 1);
 }
 
 void CSshClient::SendCursorPos(ivec2 Pos) const
@@ -334,7 +365,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		// do not allow multiple characters at once to keep things simple
 		if(n > 1)
 		{
-			ssh_channel_write(pClient->m_Channel, "\a", 1);
+			pClient->SendBell();
 			return;
 		}
 
@@ -349,7 +380,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			Chr == KEY_BACKSPACE;
 		if(!Whitelisted)
 		{
-			ssh_channel_write(pClient->m_Channel, "\a", 1);
+			pClient->SendBell();
 			return;
 		}
 	}
@@ -484,7 +515,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				// delete with cursor inside of the input
 				log_info("ssh", "not implemetetd");
 			}
-			pClient->m_CursorPos.x = std::clamp(pClient->m_CursorPos.x - 1, pClient->PromptLength(), pClient->m_Term.m_Width);
+			pClient->CursorMoveLeft();
 			continue;
 		}
 		else if(Byte == KEY_TAB)
@@ -542,8 +573,8 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					// skip the sequence
 					i += 2;
 
-					// TODO: ring bell when we go too far left
-					pClient->m_CursorPos.x = std::clamp(pClient->m_CursorPos.x - 1, pClient->PromptLength(), pClient->m_Term.m_Width);
+					if(!pClient->CursorMoveLeft())
+						pClient->SendBell();
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
 				else if(aBuf[i + 2] == 67) // arrow key right
@@ -552,8 +583,8 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					i += 2;
 
 					// TODO: handle line break well when we go too far right
-					// TODO: clamp at input text length
-					pClient->m_CursorPos.x = std::clamp(pClient->m_CursorPos.x + 1, 0, pClient->m_Term.m_Width);
+					if(!pClient->CursorMoveRight())
+						pClient->SendBell();
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
 				else if(aBuf[i + 2] == 90) // shift+tab

@@ -73,6 +73,12 @@ public:
 	// sent to the client and used as insert offset when typing
 	ivec2 m_CursorPos = ivec2(0, 0);
 
+	// returns false when it did not move
+	bool CursorMoveLeft();
+
+	// returns false when it did not move
+	bool CursorMoveRight();
+
 	// we sent a cursor pos fetch to the client
 	// and expect the next input to be the response to it
 	bool m_WaitingForCursorPos = false;
@@ -90,6 +96,7 @@ public:
 	int PromptLength();
 	void SetCursorPosToPromptStart();
 
+	void SendBell() const;
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();
 
