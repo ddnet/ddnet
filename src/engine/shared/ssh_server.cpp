@@ -44,6 +44,7 @@
 #define KEY_CTRL_U 21
 #define KEY_CTRL_C 3
 #define KEY_CTRL_D 4
+#define KEY_CTRL_L 12
 #define KEY_TAB 9
 #define KEY_DEL 127
 #define KEY_BACKSPACE '\b'
@@ -415,6 +416,14 @@ void CSshServer::HandleInput(CSshClient *pClient)
 
 			OnClientDisconnect(pClient->m_ClientId, "logout");
 			return;
+		}
+		else if(Byte == KEY_CTRL_L)
+		{
+			ssh_channel_write(pClient->m_Channel, "\033[2J", str_length("\033[2J"));
+			pClient->m_CursorPos.y = 0;
+			pClient->SendCursorPos(pClient->m_CursorPos);
+			pClient->ClearPrompt();
+			continue;
 		}
 		else if(Byte == KEY_BACKSPACE || Byte == KEY_DEL)
 		{
