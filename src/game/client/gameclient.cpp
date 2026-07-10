@@ -791,7 +791,6 @@ void CGameClient::OnRender()
 
 		if(!InitMultiView(TeamId))
 		{
-			dbg_msg("MultiView", "No players found to spectate");
 			ResetMultiView();
 		}
 	}
