@@ -80,7 +80,7 @@ public:
 	void SetInput(const char *pInput);
 
 	// clears the current line and places an empty prompt
-	void ClearPrompt() const;
+	void ClearPrompt();
 
 	// sends new line and prompt
 	void NewPrompt();

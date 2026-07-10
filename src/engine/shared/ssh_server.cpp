@@ -122,13 +122,17 @@ void CSshClient::SetInput(const char *pInput)
 	}
 }
 
-void CSshClient::ClearPrompt() const
+void CSshClient::ClearPrompt()
 {
 	if(!m_Channel)
 		return;
 
 	ssh_channel_write(m_Channel, "\r\033[2K", 6);
 	ssh_channel_write(m_Channel, "> ", 2);
+
+	// TODO: do not hardcode prompt length here in case it changes or becomes flexible
+	const int PromptLen = 3;
+	m_CursorPos.x = PromptLen;
 }
 
 void CSshClient::NewPrompt()
@@ -139,6 +143,10 @@ void CSshClient::NewPrompt()
 	ssh_channel_write(m_Channel, "\r\n> ", 2);
 	ssh_channel_write(m_Channel, "> ", 2);
 	m_CursorPos.y++;
+
+	// TODO: do not hardcode prompt length here in case it changes or becomes flexible
+	const int PromptLen = 3;
+	m_CursorPos.x = PromptLen;
 }
 
 void CSshClient::SendCursorPos(ivec2 Pos) const
