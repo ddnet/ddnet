@@ -2150,6 +2150,25 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutomapperConfig(void *pContex
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
+	CUIRect Button;
+	View.HSplitBottom(ButtonHeight, &View, &Button);
+	static char s_ShowDirectoryButton;
+	if(pEditor->DoButton_MenuItem(&s_ShowDirectoryButton, "Show directory", 0, &Button, BUTTONFLAG_LEFT, "Open the directory for automapper rules in the file browser."))
+	{
+		char aPath[IO_MAX_PATH_LENGTH];
+		pEditor->Storage()->GetCompletePath(IStorage::TYPE_SAVE, "editor/automap", aPath, sizeof(aPath));
+		pEditor->Storage()->CreateFolder("editor", IStorage::TYPE_SAVE);
+		pEditor->Storage()->CreateFolder("editor/automap", IStorage::TYPE_SAVE);
+		pEditor->Client()->ViewFile(aPath);
+	}
+
+	View.HSplitBottom(5.0f, &View, &Button);
+	IGraphics::CLineItem LineItem(Button.x, Button.y + Button.h / 2, Button.x + Button.w, Button.y + Button.h / 2);
+	pEditor->Graphics()->TextureClear();
+	pEditor->Graphics()->LinesBegin();
+	pEditor->Graphics()->LinesDraw(&LineItem, 1);
+	pEditor->Graphics()->LinesEnd();
+
 	static CListBox s_ListBox;
 	s_ListBox.DoStart(ButtonHeight, pAutomapper->ConfigNamesNum() + 1, 1, 4, s_AutomapperConfigCurrent + 1, &View, false);
 	s_ListBox.SetScrollbarWidth(15.0f);
@@ -2186,7 +2205,7 @@ void CEditor::PopupSelectAutomapperConfigInvoke(int Current, float x, float y)
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayer(0));
 	const int ItemCount = std::min(Map()->m_vpImages[pLayer->m_Image]->m_Automapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
-	Ui()->DoPopupMenu(&s_PopupSelectAutomapperConfigId, x, y, 120.0f + 15.0f + 2.0f, 10.0f + 12.0f * ItemCount + 2.0f * (ItemCount - 1), this, PopupSelectAutomapperConfig);
+	Ui()->DoPopupMenu(&s_PopupSelectAutomapperConfigId, x, y, 120.0f + 15.0f + 2.0f, 10.0f + 12.0f * ItemCount + 2.0f * (ItemCount - 1) + 5.0f + 12.0f, this, PopupSelectAutomapperConfig);
 }
 
 int CEditor::PopupSelectAutomapperConfigResult()
