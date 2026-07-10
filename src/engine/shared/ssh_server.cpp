@@ -419,6 +419,10 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_L)
 		{
+			// silently ignore ctrl+l if there is still input
+			if(pClient->m_aInput[0])
+				continue;
+
 			ssh_channel_write(pClient->m_Channel, "\033[2J", str_length("\033[2J"));
 			pClient->m_CursorPos.y = 0;
 			pClient->SendCursorPos(pClient->m_CursorPos);
