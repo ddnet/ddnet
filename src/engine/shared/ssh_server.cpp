@@ -558,6 +558,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		pClient->ResetCompletion();
 		pClient->m_aInput[k] = Byte;
 		pClient->m_aInput[k + 1] = '\0';
+		pClient->m_CursorPos.x++;
 		k++;
 		ssh_channel_write(Channel, aBuf + i, 1);
 	}
