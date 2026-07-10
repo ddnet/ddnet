@@ -401,7 +401,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			// and just clear the current prompt instead of
 			// opening a new one
 			pClient->m_aInput[0] = '\0';
-			pClient->NewPrompt();
+			pClient->ClearPrompt();
 			continue;
 		}
 		else if(Byte == KEY_CTRL_C)
