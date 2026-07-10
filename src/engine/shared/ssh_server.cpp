@@ -468,7 +468,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				ssh_channel_write(pClient->m_Channel, "\a", 1);
 				continue;
 			}
-			if(pClient->m_aInput[Idx+1] == '\0')
+			if(pClient->m_aInput[Idx + 1] == '\0')
 			{
 				// delete at the end of the input
 				int LastChr = str_length(pClient->m_aInput);
