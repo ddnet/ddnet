@@ -45,6 +45,8 @@
 #define KEY_CTRL_C 3
 #define KEY_CTRL_D 4
 #define KEY_CTRL_L 12
+#define KEY_CTRL_A 1
+#define KEY_CTRL_E 5
 #define KEY_TAB 9
 #define KEY_DEL 127
 #define KEY_BACKSPACE '\b'
@@ -143,6 +145,12 @@ void CSshClient::NewPrompt()
 	ssh_channel_write(m_Channel, "\r\n> ", 2);
 	ssh_channel_write(m_Channel, "> ", 2);
 	m_CursorPos.y++;
+	SetCursorPosToPromptStart();
+}
+
+void CSshClient::SetCursorPosToPromptStart()
+{
+	// not the most ideal method name but eh idk
 
 	// TODO: do not hardcode prompt length here in case it changes or becomes flexible
 	const int PromptLen = 3;
@@ -392,6 +400,19 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			pClient->m_aInput[0] = '\0';
 			pClient->NewPrompt();
 			return;
+		}
+		else if(Byte == KEY_CTRL_A)
+		{
+			pClient->SetCursorPosToPromptStart();
+			pClient->SendCursorPos(pClient->m_CursorPos);
+			continue;
+		}
+		else if(Byte == KEY_CTRL_E)
+		{
+			pClient->SetCursorPosToPromptStart();
+			pClient->m_CursorPos.x += str_length(pClient->m_aInput);
+			pClient->SendCursorPos(pClient->m_CursorPos);
+			continue;
 		}
 		else if(Byte == KEY_CTRL_U)
 		{

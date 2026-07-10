@@ -85,6 +85,8 @@ public:
 	// sends new line and prompt
 	void NewPrompt();
 
+	void SetCursorPosToPromptStart();
+
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();
 
