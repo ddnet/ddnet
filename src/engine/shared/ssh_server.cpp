@@ -133,6 +133,37 @@ bool CSshClient::CursorMoveRight()
 	return Prev != m_CursorPos.x;
 }
 
+bool CSshClient::CursorMoveWordLeft()
+{
+	while(true)
+	{
+		if(!CursorMoveLeft())
+			return false;
+
+		int Idx = m_CursorPos.x - PromptLength();
+		// TODO: bound check?
+		if(m_aInput[Idx] == ' ')
+			return true;
+	}
+	return false;
+}
+
+bool CSshClient::CursorMoveWordRight()
+{
+	log_info("ssh", "move rigjt");
+	while(true)
+	{
+		if(!CursorMoveRight())
+			return false;
+
+		int Idx = m_CursorPos.x - PromptLength();
+		// TODO: bound check?
+		if(m_aInput[Idx] == ' ')
+			return true;
+	}
+	return false;
+}
+
 void CSshClient::SetInput(const char *pInput)
 {
 	str_copy(m_aInput, pInput);
@@ -547,6 +578,42 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				// this is odd, do we just ignore this one?
 				// yes! regular ESC is just one byte of 27
 				continue;
+			}
+			if((n - i) >= 6 && aBuf[i + 1] == 91)
+			{
+				bool CtrlLeft =
+					aBuf[i + 1] == 91 &&
+					aBuf[i + 2] == 49 &&
+					aBuf[i + 3] == 59 &&
+					aBuf[i + 4] == 53 &&
+					aBuf[i + 5] == 68;
+				bool CtrlRight =
+					aBuf[i + 1] == 91 &&
+					aBuf[i + 2] == 49 &&
+					aBuf[i + 3] == 59 &&
+					aBuf[i + 4] == 53 &&
+					aBuf[i + 5] == 67;
+
+				if(CtrlLeft)
+				{
+					// skip the sequence
+					i += 5;
+
+					if(!pClient->CursorMoveWordLeft())
+						pClient->SendBell();
+					pClient->SendCursorPos(pClient->m_CursorPos);
+					continue;
+				}
+				else if(CtrlRight)
+				{
+					// skip the sequence
+					i += 5;
+
+					if(!pClient->CursorMoveWordRight())
+						pClient->SendBell();
+					pClient->SendCursorPos(pClient->m_CursorPos);
+					continue;
+				}
 			}
 			if((n - i) >= 3 && aBuf[i + 1] == 91)
 			{

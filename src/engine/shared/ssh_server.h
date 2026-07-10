@@ -79,6 +79,12 @@ public:
 	// returns false when it did not move
 	bool CursorMoveRight();
 
+	// returns false when it did not move
+	bool CursorMoveWordLeft();
+
+	// returns false when it did not move
+	bool CursorMoveWordRight();
+
 	// we sent a cursor pos fetch to the client
 	// and expect the next input to be the response to it
 	bool m_WaitingForCursorPos = false;
