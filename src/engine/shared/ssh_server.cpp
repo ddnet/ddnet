@@ -218,6 +218,11 @@ void CSshClient::InsertInputByte(char Byte)
 		// move cursor back into the input after rewriting the line
 		SendCursorPos(m_CursorPos);
 	}
+
+	// TODO: continue here with completion preview
+
+	// m_CompletionEnumerationCount = 0;
+	// Console()->PossibleCommands(m_aInput, CFGFLAG_SERVER, false, CompletionPreviewCallback, &m_CallbackCtx);
 }
 
 void CSshClient::ClearPrompt()
@@ -344,10 +349,21 @@ void CSshClient::CompletionCallback(int Index, const char *pCmd, void *pUser)
 
 void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pUser)
 {
-	// CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
-	// CSshClient *pClient = pCtx->m_pClient;
+	CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
+	CSshClient *pClient = pCtx->m_pClient;
 
 	// log_info("ssh", "completion preview callback idx=%d cmd=%s", Index, pCmd);
+
+	int NextIndex = 1;
+	if(pClient->m_CompletionIndex != -1)
+		NextIndex = pClient->m_CompletionIndex + 1;
+
+	if(NextIndex == pClient->m_CompletionEnumerationCount)
+	{
+		log_info("ssh", "at idx=%d next_idx=%d preview_cmd=%s", Index, NextIndex, pCmd);
+	}
+
+	pClient->m_CompletionEnumerationCount++;
 }
 
 void CSshServer::ProcessMessage(CSshClient *pClient)
