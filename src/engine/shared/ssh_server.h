@@ -83,7 +83,7 @@ public:
 	void ClearPrompt() const;
 
 	// sends new line and prompt
-	void NewPrompt() const;
+	void NewPrompt();
 
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();

@@ -92,6 +92,7 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	{
 		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
 		ssh_channel_write(pClient->m_Channel, pMessage->Message(), str_length(pMessage->Message()));
+		pClient->m_CursorPos.y++;
 	}
 
 	// just mirror everything to regular log because the hiding is stupid
@@ -130,13 +131,14 @@ void CSshClient::ClearPrompt() const
 	ssh_channel_write(m_Channel, "> ", 2);
 }
 
-void CSshClient::NewPrompt() const
+void CSshClient::NewPrompt()
 {
 	if(!m_Channel)
 		return;
 
 	ssh_channel_write(m_Channel, "\r\n> ", 2);
 	ssh_channel_write(m_Channel, "> ", 2);
+	m_CursorPos.y++;
 }
 
 void CSshClient::SendCursorPos(ivec2 Pos) const
