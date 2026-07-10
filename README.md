@@ -107,6 +107,12 @@ Or on Void Linux like this:
 sudo xbps-install -S base-devel cargo cmake ffmpeg6-devel freetype-devel git glew-devel glslang gtest-devel libcurl-devel libnotify-devel libogg-devel libpng-devel ninja openssl-devel opus-devel opusfile-devel sqlite-devel SPIRV-Tools-devel vulkan-loader wavpack-devel x264-devel SDL2-devel
 ```
 
+Or on openSUSE like this:
+
+```sh
+sudo zypper install cargo cmake ffmpeg-devel freetype2-devel gcc gcc-c++ git glew-devel glslang-devel libcurl-devel libnotify-devel libogg-devel libopenssl-devel libopus-devel libpng-devel make Mesa-libGLESv3-devel opusfile-devel pkgconf-pkg-config sdl2-compat-devel spirv-tools sqlite3-devel vulkan-devel wavpack-devel
+```
+
 On macOS you can use [homebrew](https://brew.sh/) to install build dependencies like this:
 
 ```sh
