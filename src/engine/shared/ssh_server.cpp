@@ -131,10 +131,7 @@ void CSshClient::ClearPrompt()
 
 	ssh_channel_write(m_Channel, "\r\033[2K", 6);
 	ssh_channel_write(m_Channel, "> ", 2);
-
-	// TODO: do not hardcode prompt length here in case it changes or becomes flexible
-	const int PromptLen = 3;
-	m_CursorPos.x = PromptLen;
+	SetCursorPosToPromptStart();
 }
 
 void CSshClient::NewPrompt()
@@ -148,13 +145,15 @@ void CSshClient::NewPrompt()
 	SetCursorPosToPromptStart();
 }
 
+int CSshClient::PromptLength()
+{
+	return 3;
+}
+
 void CSshClient::SetCursorPosToPromptStart()
 {
 	// not the most ideal method name but eh idk
-
-	// TODO: do not hardcode prompt length here in case it changes or becomes flexible
-	const int PromptLen = 3;
-	m_CursorPos.x = PromptLen;
+	m_CursorPos.x = PromptLength();
 }
 
 void CSshClient::SendCursorPos(ivec2 Pos) const
@@ -528,9 +527,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					i += 2;
 
 					// TODO: ring bell when we go too far left
-					// TODO: do not hardcode prompt length here in case it changes or becomes flexible
-					const int PromptLen = 3;
-					pClient->m_CursorPos.x = std::clamp(pClient->m_CursorPos.x - 1, PromptLen, pClient->m_Term.m_Width);
+					pClient->m_CursorPos.x = std::clamp(pClient->m_CursorPos.x - 1, pClient->PromptLength(), pClient->m_Term.m_Width);
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
 				else if(aBuf[i + 2] == 67) // arrow key right
@@ -556,9 +553,17 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 
 		pClient->ResetCompletion();
-		pClient->m_aInput[k] = Byte;
-		pClient->m_aInput[k + 1] = '\0';
+		int Idx = pClient->m_CursorPos.x - pClient->PromptLength();
+		if(pClient->m_aInput[Idx] == '\0')
+		{
+			// if we override the nullterm make sure to move it
+			// so the string stays terminated
+			// but not if we are in the middle of the input
+			pClient->m_aInput[Idx + 1] = '\0';
+		}
+		pClient->m_aInput[Idx] = Byte;
 		pClient->m_CursorPos.x++;
+
 		k++;
 		ssh_channel_write(Channel, aBuf + i, 1);
 	}

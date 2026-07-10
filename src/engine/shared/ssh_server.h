@@ -67,6 +67,8 @@ public:
 
 	char m_aInput[2048] = "";
 
+	// TODO: clamp cursor pos x by m_aInput size
+	//
 	// position of the cursor in the m_aInput buffer
 	// sent to the client and used as insert offset when typing
 	ivec2 m_CursorPos = ivec2(0, 0);
@@ -85,6 +87,7 @@ public:
 	// sends new line and prompt
 	void NewPrompt();
 
+	int PromptLength();
 	void SetCursorPosToPromptStart();
 
 	void SendCursorPos(ivec2 Pos) const;
