@@ -550,7 +550,7 @@ void CSkins::UpdateUnloadSkins(CSkinLoadingStats &Stats)
 	}
 
 	const std::chrono::nanoseconds UnloadStart = time_get_nanoseconds();
-	size_t NumToUnload = std::min<size_t>(Stats.m_NumPending + Stats.m_NumLoaded + Stats.m_NumLoading - (size_t)g_Config.m_ClSkinsLoadedMax, 16);
+	size_t NumToUnload = std::min(Stats.m_NumPending + Stats.m_NumLoaded + Stats.m_NumLoading - (size_t)g_Config.m_ClSkinsLoadedMax, (size_t)16);
 	const size_t MaxSkipped = m_SkinsUsageList.size() / 8;
 	size_t NumSkipped = 0;
 	for(auto It = m_SkinsUsageList.rbegin(); It != m_SkinsUsageList.rend() && NumToUnload != 0 && NumSkipped < MaxSkipped; ++It)

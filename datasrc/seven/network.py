@@ -203,7 +203,7 @@ Objects = [
 		NetArray(NetIntAny("m_aName"), 4),
 		NetArray(NetIntAny("m_aClan"), 3),
 
-		NetIntAny("m_Country"),
+		NetIntAny("m_Country"), # ISO 3166-1 numeric
 
 		NetArray(NetArray(NetIntAny("m_aaSkinPartNames"), 6), 6),
 		NetArray(NetBool("m_aUseCustomColors"), 6),
@@ -353,7 +353,7 @@ Messages = [
 		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_BLUE'),
 		NetStringStrict("m_pName"),
 		NetStringStrict("m_pClan"),
-		NetIntAny("m_Country"),
+		NetIntAny("m_Country"), # ISO 3166-1 numeric
 		NetArray(NetStringStrict("m_apSkinPartNames"), 6),
 		NetArray(NetBool("m_aUseCustomColors"), 6),
 		NetArray(NetIntAny("m_aSkinPartColors"), 6),
@@ -410,7 +410,7 @@ Messages = [
 	NetMessage("Cl_StartInfo", [
 		NetStringStrict("m_pName"),
 		NetStringStrict("m_pClan"),
-		NetIntAny("m_Country"),
+		NetIntAny("m_Country"), # ISO 3166-1 numeric
 		NetArray(NetStringStrict("m_apSkinPartNames"), 6),
 		NetArray(NetBool("m_aUseCustomColors"), 6),
 		NetArray(NetIntAny("m_aSkinPartColors"), 6),

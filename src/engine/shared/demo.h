@@ -15,7 +15,7 @@
 
 typedef std::function<void()> TUpdateIntraTimesFunc;
 
-struct CSnapshotDelta;
+class CSnapshotDelta;
 class IConsole;
 class IStorage;
 

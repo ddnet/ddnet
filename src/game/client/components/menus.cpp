@@ -7,7 +7,6 @@
 #include <base/dbg.h>
 #include <base/fs.h>
 #include <base/log.h>
-#include <base/math.h>
 #include <base/str.h>
 #include <base/time.h>
 #include <base/vmath.h>
@@ -2207,7 +2206,7 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 
 		str_format(aLabel1, sizeof(aLabel1), Localize("%d/%d KiB (%.1f KiB/s)"), Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024, m_DownloadSpeed / 1024.0f);
 
-		const int SecondsLeft = maximum(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize() - Client()->MapDownloadAmount()) / m_DownloadSpeed) : 1);
+		const int SecondsLeft = std::max(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize() - Client()->MapDownloadAmount()) / m_DownloadSpeed) : 1);
 		const int MinutesLeft = SecondsLeft / 60;
 		if(MinutesLeft > 0)
 		{

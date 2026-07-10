@@ -1,8 +1,8 @@
 #include "skin.h"
 
-#include <base/math.h>
 #include <base/str.h>
 
+#include <algorithm>
 #include <limits>
 
 void CSkin::CSkinTextures::Reset()
@@ -40,7 +40,7 @@ CSkin::CSkinMetricVariableInt::operator int() const
 
 CSkin::CSkinMetricVariableInt &CSkin::CSkinMetricVariableInt::operator=(int NewVal)
 {
-	m_Value = minimum(m_Value, NewVal);
+	m_Value = std::min(m_Value, NewVal);
 	return *this;
 }
 
@@ -61,7 +61,7 @@ CSkin::CSkinMetricVariableSize::operator int() const
 
 CSkin::CSkinMetricVariableSize &CSkin::CSkinMetricVariableSize::operator=(int NewVal)
 {
-	m_Value = maximum(m_Value, NewVal);
+	m_Value = std::max(m_Value, NewVal);
 	return *this;
 }
 

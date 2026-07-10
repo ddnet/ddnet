@@ -5,6 +5,7 @@
 
 #include "math.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 
@@ -94,6 +95,12 @@ template<Numeric T>
 inline T distance(const vector2_base<T> a, const vector2_base<T> &b)
 {
 	return length(a - b);
+}
+
+template<Numeric T>
+inline T distance_squared(const vector2_base<T> a, const vector2_base<T> &b)
+{
+	return length_squared(a - b);
 }
 
 template<Numeric T>

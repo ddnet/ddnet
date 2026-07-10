@@ -2,7 +2,6 @@
 
 #include <base/dbg.h>
 #include <base/log.h>
-#include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
 #include <base/time.h>
@@ -50,15 +49,12 @@ using namespace std::chrono_literals;
 
 class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 {
-	enum EMemoryBlockUsage
+	enum class EMemoryBlockUsage
 	{
-		MEMORY_BLOCK_USAGE_TEXTURE = 0,
-		MEMORY_BLOCK_USAGE_BUFFER,
-		MEMORY_BLOCK_USAGE_STREAM,
-		MEMORY_BLOCK_USAGE_STAGING,
-
-		// whenever dummy is used, make sure to deallocate all memory
-		MEMORY_BLOCK_USAGE_DUMMY,
+		TEXTURE,
+		BUFFER,
+		STREAM,
+		STAGING,
 	};
 
 	[[nodiscard]] bool IsVerbose()
@@ -70,13 +66,13 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	{
 		switch(MemUsage)
 		{
-		case MEMORY_BLOCK_USAGE_TEXTURE:
+		case EMemoryBlockUsage::TEXTURE:
 			return "texture";
-		case MEMORY_BLOCK_USAGE_BUFFER:
+		case EMemoryBlockUsage::BUFFER:
 			return "buffer";
-		case MEMORY_BLOCK_USAGE_STREAM:
+		case EMemoryBlockUsage::STREAM:
 			return "stream";
-		case MEMORY_BLOCK_USAGE_STAGING:
+		case EMemoryBlockUsage::STAGING:
 			return "staging buffer";
 		default:
 			dbg_assert_failed("Invalid MemUsage: %d", (int)MemUsage);
@@ -1481,7 +1477,7 @@ protected:
 			MemRange.size = VK_WHOLE_SIZE;
 			vkInvalidateMappedMemoryRanges(m_VKDevice, 1, &MemRange);
 
-			size_t RealFullImageSize = maximum(ImageTotalSize, (size_t)(Height * m_GetPresentedImgDataHelperMappedLayoutPitch));
+			size_t RealFullImageSize = std::max(ImageTotalSize, (size_t)(Height * m_GetPresentedImgDataHelperMappedLayoutPitch));
 			size_t ExtraRowSize = Width * 4;
 			if(vDstData.size() < RealFullImageSize + ExtraRowSize)
 				vDstData.resize(RealFullImageSize + ExtraRowSize);
@@ -1602,7 +1598,7 @@ protected:
 				typename SMemoryBlockCache<Id>::SMemoryCacheType::SMemoryCacheHeap *pNewHeap = new SMemoryBlockCache<Id>::SMemoryCacheType::SMemoryCacheHeap();
 
 				VkBuffer TmpBuffer;
-				if(!GetBufferImpl(MemoryBlockSize * BlockCount, RequiresMapping ? MEMORY_BLOCK_USAGE_STAGING : MEMORY_BLOCK_USAGE_BUFFER, TmpBuffer, TmpBufferMemory, BufferUsage, BufferProperties))
+				if(!GetBufferImpl(MemoryBlockSize * BlockCount, RequiresMapping ? EMemoryBlockUsage::STAGING : EMemoryBlockUsage::BUFFER, TmpBuffer, TmpBufferMemory, BufferUsage, BufferProperties))
 				{
 					delete pNewHeap;
 					return false;
@@ -1660,7 +1656,7 @@ protected:
 		{
 			VkBuffer TmpBuffer;
 			SDeviceMemoryBlock TmpBufferMemory;
-			if(!GetBufferImpl(RequiredSize, RequiresMapping ? MEMORY_BLOCK_USAGE_STAGING : MEMORY_BLOCK_USAGE_BUFFER, TmpBuffer, TmpBufferMemory, BufferUsage, BufferProperties))
+			if(!GetBufferImpl(RequiredSize, RequiresMapping ? EMemoryBlockUsage::STAGING : EMemoryBlockUsage::BUFFER, TmpBuffer, TmpBufferMemory, BufferUsage, BufferProperties))
 				return false;
 
 			void *pMapData = nullptr;
@@ -1686,12 +1682,12 @@ protected:
 
 	[[nodiscard]] bool GetStagingBuffer(SMemoryBlock<STAGING_BUFFER_CACHE_ID> &ResBlock, const void *pBufferData, VkDeviceSize RequiredSize)
 	{
-		return GetBufferBlockImpl<STAGING_BUFFER_CACHE_ID, 8 * 1024 * 1024, 3, true>(ResBlock, m_StagingBufferCache, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, pBufferData, RequiredSize, maximum<VkDeviceSize>(m_NonCoherentMemAlignment, 16));
+		return GetBufferBlockImpl<STAGING_BUFFER_CACHE_ID, 8 * 1024 * 1024, 3, true>(ResBlock, m_StagingBufferCache, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, pBufferData, RequiredSize, std::max(m_NonCoherentMemAlignment, (VkDeviceSize)16));
 	}
 
 	[[nodiscard]] bool GetStagingBufferImage(SMemoryBlock<STAGING_BUFFER_IMAGE_CACHE_ID> &ResBlock, const void *pBufferData, VkDeviceSize RequiredSize)
 	{
-		return GetBufferBlockImpl<STAGING_BUFFER_IMAGE_CACHE_ID, 8 * 1024 * 1024, 3, true>(ResBlock, m_StagingBufferCacheImage, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, pBufferData, RequiredSize, maximum<VkDeviceSize>(m_OptimalImageCopyMemAlignment, maximum<VkDeviceSize>(m_NonCoherentMemAlignment, 16)));
+		return GetBufferBlockImpl<STAGING_BUFFER_IMAGE_CACHE_ID, 8 * 1024 * 1024, 3, true>(ResBlock, m_StagingBufferCacheImage, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, pBufferData, RequiredSize, std::max({m_OptimalImageCopyMemAlignment, m_NonCoherentMemAlignment, (VkDeviceSize)16}));
 	}
 
 	template<size_t Id>
@@ -1759,7 +1755,7 @@ protected:
 
 	static size_t ImageMipLevelCount(size_t Width, size_t Height, size_t Depth)
 	{
-		return std::floor(std::log2(maximum(Width, maximum(Height, Depth)))) + 1;
+		return std::floor(std::log2(std::max({Width, Height, Depth}))) + 1;
 	}
 
 	static size_t ImageMipLevelCount(const VkExtent3D &ImgExtent)
@@ -1782,7 +1778,7 @@ protected:
 
 		if(IsVerbose())
 		{
-			VerboseAllocatedMemory(RequiredSize, m_CurImageIndex, MEMORY_BLOCK_USAGE_TEXTURE);
+			VerboseAllocatedMemory(RequiredSize, m_CurImageIndex, EMemoryBlockUsage::TEXTURE);
 		}
 
 		if(!AllocateVulkanMemory(&MemAllocInfo, &BufferMemory.m_Mem))
@@ -1791,7 +1787,7 @@ protected:
 			return false;
 		}
 
-		BufferMemory.m_UsageType = MEMORY_BLOCK_USAGE_TEXTURE;
+		BufferMemory.m_UsageType = EMemoryBlockUsage::TEXTURE;
 
 		return true;
 	}
@@ -1946,13 +1942,13 @@ protected:
 		if(BufferMem.m_Mem != VK_NULL_HANDLE)
 		{
 			vkFreeMemory(m_VKDevice, BufferMem.m_Mem, nullptr);
-			if(BufferMem.m_UsageType == MEMORY_BLOCK_USAGE_BUFFER)
+			if(BufferMem.m_UsageType == EMemoryBlockUsage::BUFFER)
 				m_pBufferMemoryUsage->store(m_pBufferMemoryUsage->load(std::memory_order_relaxed) - BufferMem.m_Size, std::memory_order_relaxed);
-			else if(BufferMem.m_UsageType == MEMORY_BLOCK_USAGE_TEXTURE)
+			else if(BufferMem.m_UsageType == EMemoryBlockUsage::TEXTURE)
 				m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - BufferMem.m_Size, std::memory_order_relaxed);
-			else if(BufferMem.m_UsageType == MEMORY_BLOCK_USAGE_STREAM)
+			else if(BufferMem.m_UsageType == EMemoryBlockUsage::STREAM)
 				m_pStreamMemoryUsage->store(m_pStreamMemoryUsage->load(std::memory_order_relaxed) - BufferMem.m_Size, std::memory_order_relaxed);
-			else if(BufferMem.m_UsageType == MEMORY_BLOCK_USAGE_STAGING)
+			else if(BufferMem.m_UsageType == EMemoryBlockUsage::STAGING)
 				m_pStagingMemoryUsage->store(m_pStagingMemoryUsage->load(std::memory_order_relaxed) - BufferMem.m_Size, std::memory_order_relaxed);
 
 			if(IsVerbose())
@@ -2607,8 +2603,8 @@ protected:
 
 			if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
 			{
-				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
-				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
+				int NewWidth = std::max(HighestBit(ConvertWidth), 16);
+				int NewHeight = std::max(HighestBit(ConvertHeight), 16);
 				uint8_t *pNewTexData = ResizeImage(pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
 				if(IsVerbose())
 				{
@@ -5662,11 +5658,11 @@ public:
 
 		VKBufferMemory.m_Size = MemRequirements.size;
 
-		if(MemUsage == MEMORY_BLOCK_USAGE_BUFFER)
+		if(MemUsage == EMemoryBlockUsage::BUFFER)
 			m_pBufferMemoryUsage->store(m_pBufferMemoryUsage->load(std::memory_order_relaxed) + MemRequirements.size, std::memory_order_relaxed);
-		else if(MemUsage == MEMORY_BLOCK_USAGE_STAGING)
+		else if(MemUsage == EMemoryBlockUsage::STAGING)
 			m_pStagingMemoryUsage->store(m_pStagingMemoryUsage->load(std::memory_order_relaxed) + MemRequirements.size, std::memory_order_relaxed);
-		else if(MemUsage == MEMORY_BLOCK_USAGE_STREAM)
+		else if(MemUsage == EMemoryBlockUsage::STREAM)
 			m_pStreamMemoryUsage->store(m_pStreamMemoryUsage->load(std::memory_order_relaxed) + MemRequirements.size, std::memory_order_relaxed);
 
 		if(IsVerbose())
@@ -5809,7 +5805,7 @@ public:
 				if(!AllocateDescriptorPool(DescriptorPools, DescriptorPools.m_DefaultAllocSize))
 					return false;
 
-				AllocatedInThisRun = minimum((size_t)DescriptorPools.m_DefaultAllocSize, CurAllocNum);
+				AllocatedInThisRun = std::min((size_t)DescriptorPools.m_DefaultAllocSize, CurAllocNum);
 
 				auto &Pool = DescriptorPools.m_vPools.back();
 				Pool.m_CurSize += AllocatedInThisRun;
@@ -6311,7 +6307,7 @@ public:
 			SDeviceMemoryBlock StreamBufferMemory;
 			const VkDeviceSize NewBufferSingleSize = sizeof(TInstanceTypeName) * InstanceTypeCount;
 			const VkDeviceSize NewBufferSize = NewBufferSingleSize * BufferCreateCount;
-			if(!CreateBuffer(NewBufferSize, MEMORY_BLOCK_USAGE_STREAM, Usage, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, StreamBuffer, StreamBufferMemory))
+			if(!CreateBuffer(NewBufferSize, EMemoryBlockUsage::STREAM, Usage, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, StreamBuffer, StreamBufferMemory))
 				return false;
 
 			void *pMappedData = nullptr;
@@ -6402,7 +6398,7 @@ public:
 
 		SDeviceMemoryBlock VertexBufferMemory;
 		VkBuffer VertexBuffer;
-		if(!CreateBuffer(BufferDataSize, MEMORY_BLOCK_USAGE_BUFFER, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VertexBuffer, VertexBufferMemory))
+		if(!CreateBuffer(BufferDataSize, EMemoryBlockUsage::BUFFER, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VertexBuffer, VertexBufferMemory))
 			return false;
 
 		if(!MemoryBarrier(VertexBuffer, 0, BufferDataSize, VK_ACCESS_INDEX_READ_BIT, true))
@@ -7535,7 +7531,7 @@ public:
 		}
 		else
 		{
-			m_ThreadCount = std::clamp<decltype(m_ThreadCount)>(m_ThreadCount, 3, std::max<decltype(m_ThreadCount)>(3, std::thread::hardware_concurrency()));
+			m_ThreadCount = std::clamp(m_ThreadCount, (size_t)3, std::max((size_t)3, (size_t)std::thread::hardware_concurrency()));
 		}
 
 		// start threads

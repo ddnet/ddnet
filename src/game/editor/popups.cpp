@@ -497,7 +497,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		{
 			pEditor->Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(pEditor->Map(), pEditor->Map()->m_SelectedGroup, true));
 			pEditor->Map()->DeleteGroup(pEditor->Map()->m_SelectedGroup);
-			pEditor->Map()->m_SelectedGroup = maximum(0, pEditor->Map()->m_SelectedGroup - 1);
+			pEditor->Map()->m_SelectedGroup = std::max(0, pEditor->Map()->m_SelectedGroup - 1);
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -1997,7 +1997,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectImage(void *pContext, CUIRect 
 			ImageView.w = ImageView.h;
 		else
 			ImageView.h = ImageView.w;
-		float Max = (float)(maximum(pEditor->Map()->m_vpImages[ShowImage]->m_Width, pEditor->Map()->m_vpImages[ShowImage]->m_Height));
+		float Max = std::max(pEditor->Map()->m_vpImages[ShowImage]->m_Width, pEditor->Map()->m_vpImages[ShowImage]->m_Height);
 		ImageView.w *= pEditor->Map()->m_vpImages[ShowImage]->m_Width / Max;
 		ImageView.h *= pEditor->Map()->m_vpImages[ShowImage]->m_Height / Max;
 		pEditor->Graphics()->TextureSet(pEditor->Map()->m_vpImages[ShowImage]->m_Texture);
@@ -2138,27 +2138,27 @@ int CEditor::PopupSelectGameTileOpResult()
 	return Result;
 }
 
-static int s_AutoMapConfigSelected = -100;
-static int s_AutoMapConfigCurrent = -100;
+static int s_AutomapperConfigSelected = -100;
+static int s_AutomapperConfigCurrent = -100;
 
-CUi::EPopupMenuFunctionResult CEditor::PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutomapperConfig(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(pEditor->Map()->SelectedLayer(0));
-	CAutoMapper *pAutoMapper = &pEditor->Map()->m_vpImages[pLayer->m_Image]->m_AutoMapper;
+	CAutomapper *pAutomapper = &pEditor->Map()->m_vpImages[pLayer->m_Image]->m_Automapper;
 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(ButtonHeight, pAutoMapper->ConfigNamesNum() + 1, 1, 4, s_AutoMapConfigCurrent + 1, &View, false);
+	s_ListBox.DoStart(ButtonHeight, pAutomapper->ConfigNamesNum() + 1, 1, 4, s_AutomapperConfigCurrent + 1, &View, false);
 	s_ListBox.SetScrollbarWidth(15.0f);
 	s_ListBox.DoAutoSpacing(ButtonMargin);
 
-	for(int i = 0; i < pAutoMapper->ConfigNamesNum() + 1; i++)
+	for(int i = 0; i < pAutomapper->ConfigNamesNum() + 1; i++)
 	{
 		static int s_NoneButton = 0;
-		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i - 1), (i - 1) == s_AutoMapConfigCurrent, 3.0f);
+		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : pAutomapper->GetConfigName(i - 1), (i - 1) == s_AutomapperConfigCurrent, 3.0f);
 		if(!Item.m_Visible)
 			continue;
 
@@ -2168,41 +2168,41 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectConfigAutoMap(void *pContext, 
 		SLabelProperties Props;
 		Props.m_MaxWidth = Label.w;
 		Props.m_EllipsisAtEnd = true;
-		pEditor->Ui()->DoLabel(&Label, i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), EditorFontSizes::MENU, TEXTALIGN_ML, Props);
+		pEditor->Ui()->DoLabel(&Label, i == 0 ? "None" : pAutomapper->GetConfigName(i - 1), EditorFontSizes::MENU, TEXTALIGN_ML, Props);
 	}
 
 	int NewSelected = s_ListBox.DoEnd() - 1;
-	if(NewSelected != s_AutoMapConfigCurrent)
-		s_AutoMapConfigSelected = NewSelected;
+	if(NewSelected != s_AutomapperConfigCurrent)
+		s_AutomapperConfigSelected = NewSelected;
 
 	return CUi::POPUP_KEEP_OPEN;
 }
 
-void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
+void CEditor::PopupSelectAutomapperConfigInvoke(int Current, float x, float y)
 {
-	static SPopupMenuId s_PopupSelectConfigAutoMapId;
-	s_AutoMapConfigSelected = -100;
-	s_AutoMapConfigCurrent = Current;
+	static SPopupMenuId s_PopupSelectAutomapperConfigId;
+	s_AutomapperConfigSelected = -100;
+	s_AutomapperConfigCurrent = Current;
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayer(0));
-	const int ItemCount = minimum(Map()->m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
+	const int ItemCount = std::min(Map()->m_vpImages[pLayer->m_Image]->m_Automapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
-	Ui()->DoPopupMenu(&s_PopupSelectConfigAutoMapId, x, y, 120.0f + 15.0f + 2.0f, 10.0f + 12.0f * ItemCount + 2.0f * (ItemCount - 1), this, PopupSelectConfigAutoMap);
+	Ui()->DoPopupMenu(&s_PopupSelectAutomapperConfigId, x, y, 120.0f + 15.0f + 2.0f, 10.0f + 12.0f * ItemCount + 2.0f * (ItemCount - 1), this, PopupSelectAutomapperConfig);
 }
 
-int CEditor::PopupSelectConfigAutoMapResult()
+int CEditor::PopupSelectAutomapperConfigResult()
 {
-	if(s_AutoMapConfigSelected == -100)
+	if(s_AutomapperConfigSelected == -100)
 		return -100;
 
-	s_AutoMapConfigCurrent = s_AutoMapConfigSelected;
-	s_AutoMapConfigSelected = -100;
-	return s_AutoMapConfigCurrent;
+	s_AutomapperConfigCurrent = s_AutomapperConfigSelected;
+	s_AutomapperConfigSelected = -100;
+	return s_AutomapperConfigCurrent;
 }
 
-static int s_AutoMapReferenceSelected = -100;
-static int s_AutoMapReferenceCurrent = -100;
+static int s_AutomapperReferenceSelected = -100;
+static int s_AutomapperReferenceCurrent = -100;
 
-CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutomapperReference(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
@@ -2210,13 +2210,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContex
 	const float ButtonMargin = 2.0f;
 
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(ButtonHeight, std::size(AUTOMAP_REFERENCE_NAMES) + 1, 1, 4, s_AutoMapReferenceCurrent + 1, &View, false);
+	s_ListBox.DoStart(ButtonHeight, std::size(AUTOMAP_REFERENCE_NAMES) + 1, 1, 4, s_AutomapperReferenceCurrent + 1, &View, false);
 	s_ListBox.DoAutoSpacing(ButtonMargin);
 
 	for(int i = 0; i < static_cast<int>(std::size(AUTOMAP_REFERENCE_NAMES)) + 1; i++)
 	{
 		static int s_NoneButton = 0;
-		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : AUTOMAP_REFERENCE_NAMES[i - 1], (i - 1) == s_AutoMapReferenceCurrent, 3.0f);
+		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : AUTOMAP_REFERENCE_NAMES[i - 1], (i - 1) == s_AutomapperReferenceCurrent, 3.0f);
 		if(!Item.m_Visible)
 			continue;
 
@@ -2230,29 +2230,29 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContex
 	}
 
 	int NewSelected = s_ListBox.DoEnd() - 1;
-	if(NewSelected != s_AutoMapReferenceCurrent)
-		s_AutoMapReferenceSelected = NewSelected;
+	if(NewSelected != s_AutomapperReferenceCurrent)
+		s_AutomapperReferenceSelected = NewSelected;
 
 	return CUi::POPUP_KEEP_OPEN;
 }
 
-void CEditor::PopupSelectAutoMapReferenceInvoke(int Current, float x, float y)
+void CEditor::PopupSelectAutomapperReferenceInvoke(int Current, float x, float y)
 {
-	static SPopupMenuId s_PopupSelectAutoMapReferenceId;
-	s_AutoMapReferenceSelected = -100;
-	s_AutoMapReferenceCurrent = Current;
+	static SPopupMenuId s_PopupSelectAutomapperReferenceId;
+	s_AutomapperReferenceSelected = -100;
+	s_AutomapperReferenceCurrent = Current;
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
-	Ui()->DoPopupMenu(&s_PopupSelectAutoMapReferenceId, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * std::size(AUTOMAP_REFERENCE_NAMES) + 1, this, PopupSelectAutoMapReference);
+	Ui()->DoPopupMenu(&s_PopupSelectAutomapperReferenceId, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * std::size(AUTOMAP_REFERENCE_NAMES) + 1, this, PopupSelectAutomapperReference);
 }
 
-int CEditor::PopupSelectAutoMapReferenceResult()
+int CEditor::PopupSelectAutomapperReferenceResult()
 {
-	if(s_AutoMapReferenceSelected == -100)
+	if(s_AutomapperReferenceSelected == -100)
 		return -100;
 
-	s_AutoMapReferenceCurrent = s_AutoMapReferenceSelected;
-	s_AutoMapReferenceSelected = -100;
-	return s_AutoMapReferenceCurrent;
+	s_AutomapperReferenceCurrent = s_AutomapperReferenceSelected;
+	s_AutomapperReferenceSelected = -100;
+	return s_AutomapperReferenceCurrent;
 }
 
 // DDRace
@@ -2736,6 +2736,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	CMapEnvelopeEvaluator &EnvelopeEvaluator = pEditor->Map()->m_EnvelopeEvaluator;
 
 	static constexpr float MIN_ANIM_SPEED = 0.001f;
 	static constexpr float MAX_ANIM_SPEED = 1000000.0f;
@@ -2749,53 +2750,53 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	View.HSplitBottom(12.0f, &View, &ButtonReset);
 	pEditor->Ui()->DoLabel(&Label, "Speed", 10.0f, TEXTALIGN_ML);
 
-	const float OldAnimateSpeed = pEditor->m_AnimateSpeed;
+	const float OldAnimateSpeed = EnvelopeEvaluator.m_AnimateSpeed;
 
 	static char s_DecreaseButton;
 	if(pEditor->DoButton_FontIcon(&s_DecreaseButton, FontIcon::MINUS, 0, &ButtonDecrease, BUTTONFLAG_LEFT, "Decrease animation speed.", IGraphics::CORNER_L, 7.0f))
 	{
-		pEditor->m_AnimateSpeed -= pEditor->m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = maximum(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
-		pEditor->m_AnimateUpdatePopup = true;
+		EnvelopeEvaluator.m_AnimateSpeed -= EnvelopeEvaluator.m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
+		EnvelopeEvaluator.m_AnimateSpeed = std::max(EnvelopeEvaluator.m_AnimateSpeed, MIN_ANIM_SPEED);
+		EnvelopeEvaluator.m_AnimateUpdatePopup = true;
 	}
 
 	static char s_IncreaseButton;
 	if(pEditor->DoButton_FontIcon(&s_IncreaseButton, FontIcon::PLUS, 0, &ButtonIncrease, BUTTONFLAG_LEFT, "Increase animation speed.", IGraphics::CORNER_R, 7.0f))
 	{
-		if(pEditor->m_AnimateSpeed < 0.1f)
-			pEditor->m_AnimateSpeed = 0.1f;
+		if(EnvelopeEvaluator.m_AnimateSpeed < 0.1f)
+			EnvelopeEvaluator.m_AnimateSpeed = 0.1f;
 		else
-			pEditor->m_AnimateSpeed += pEditor->m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = minimum(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
-		pEditor->m_AnimateUpdatePopup = true;
+			EnvelopeEvaluator.m_AnimateSpeed += EnvelopeEvaluator.m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
+		EnvelopeEvaluator.m_AnimateSpeed = std::min(EnvelopeEvaluator.m_AnimateSpeed, MAX_ANIM_SPEED);
+		EnvelopeEvaluator.m_AnimateUpdatePopup = true;
 	}
 
 	static char s_DefaultButton;
 	if(pEditor->DoButton_Ex(&s_DefaultButton, "Default", 0, &ButtonReset, BUTTONFLAG_LEFT, "Reset to normal animation speed.", IGraphics::CORNER_ALL))
 	{
-		pEditor->m_AnimateSpeed = 1.0f;
-		pEditor->m_AnimateUpdatePopup = true;
+		EnvelopeEvaluator.m_AnimateSpeed = 1.0f;
+		EnvelopeEvaluator.m_AnimateUpdatePopup = true;
 	}
 
 	static CLineInputNumber s_SpeedInput;
-	if(pEditor->m_AnimateUpdatePopup)
+	if(EnvelopeEvaluator.m_AnimateUpdatePopup)
 	{
-		s_SpeedInput.SetFloat(pEditor->m_AnimateSpeed);
-		pEditor->m_AnimateUpdatePopup = false;
+		s_SpeedInput.SetFloat(EnvelopeEvaluator.m_AnimateSpeed);
+		EnvelopeEvaluator.m_AnimateUpdatePopup = false;
 	}
 
 	if(pEditor->DoEditBox(&s_SpeedInput, &EditBox, 10.0f, IGraphics::CORNER_NONE, "The animation speed."))
 	{
-		pEditor->m_AnimateSpeed = std::clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
+		EnvelopeEvaluator.m_AnimateSpeed = std::clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
 	}
 
 	// adjust start time to avoid jumps in animation
-	float AnimateSpeedRatio = OldAnimateSpeed / pEditor->m_AnimateSpeed;
+	float AnimateSpeedRatio = OldAnimateSpeed / EnvelopeEvaluator.m_AnimateSpeed;
 	float Time = pEditor->Client()->GlobalTime();
-	pEditor->m_AnimateStart = Time + (pEditor->m_AnimateStart - Time) * AnimateSpeedRatio;
-	if(!pEditor->m_Animate)
+	EnvelopeEvaluator.m_AnimateStart = Time + (EnvelopeEvaluator.m_AnimateStart - Time) * AnimateSpeedRatio;
+	if(!EnvelopeEvaluator.m_Animate)
 	{
-		pEditor->m_AnimateTime *= AnimateSpeedRatio;
+		EnvelopeEvaluator.m_AnimateTime *= AnimateSpeedRatio;
 	}
 
 	return CUi::POPUP_KEEP_OPEN;

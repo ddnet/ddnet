@@ -226,7 +226,7 @@ Objects = [
 	NetObject("ClientInfo", [
 		NetTwIntString("m_aName", 16),
 		NetTwIntString("m_aClan", 12),
-		NetIntAny("m_Country"),
+		NetIntAny("m_Country"), # ISO 3166-1 numeric
 		NetTwIntString("m_aSkin", 24),
 		NetIntRange("m_UseCustomColor", 0, 1),
 		NetIntAny("m_ColorBody"),
@@ -493,7 +493,7 @@ Messages = [
 	NetMessage("Cl_StartInfo", [
 		NetStringStrict("m_pName"),
 		NetStringStrict("m_pClan"),
-		NetIntAny("m_Country"),
+		NetIntAny("m_Country"), # ISO 3166-1 numeric
 		NetStringStrict("m_pSkin"),
 		NetBool("m_UseCustomColor"),
 		NetIntAny("m_ColorBody"),
@@ -503,7 +503,7 @@ Messages = [
 	NetMessage("Cl_ChangeInfo", [
 		NetStringStrict("m_pName"),
 		NetStringStrict("m_pClan"),
-		NetIntAny("m_Country"),
+		NetIntAny("m_Country"), # ISO 3166-1 numeric
 		NetStringStrict("m_pSkin"),
 		NetBool("m_UseCustomColor"),
 		NetIntAny("m_ColorBody"),

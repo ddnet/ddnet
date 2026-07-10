@@ -127,7 +127,7 @@ void CMapView::Render(CUIRect View)
 	else
 	{
 		// fix aspect ratio of the image in the picker
-		float Max = minimum(View.w, View.h);
+		float Max = std::min(View.w, View.h);
 		View.w = View.h = Max;
 	}
 

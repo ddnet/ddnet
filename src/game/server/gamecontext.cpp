@@ -543,9 +543,9 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 	std::fill(std::begin(SwitchState.m_aEndTicks), std::end(SwitchState.m_aEndTicks), 0);
 
 	std::sort(vEndTicks.begin(), vEndTicks.end());
-	const int NumTimedSwitchers = minimum((int)vEndTicks.size(), (int)std::size(SwitchState.m_aEndTicks));
+	const size_t NumTimedSwitchers = std::min(vEndTicks.size(), std::size(SwitchState.m_aEndTicks));
 
-	for(int i = 0; i < NumTimedSwitchers; i++)
+	for(size_t i = 0; i < NumTimedSwitchers; i++)
 	{
 		SwitchState.m_aSwitchNumbers[i] = vEndTicks[i].second;
 		SwitchState.m_aEndTicks[i] = vEndTicks[i].first;
@@ -848,7 +848,7 @@ void CGameContext::SendServerAlert(const char *pMessage)
 	Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, 0);
 }
 
-void CGameContext::SendModeratorAlert(const char *pMessage, int ToClientId)
+void CGameContext::SendModeratorAlert(int ToClientId, const char *pMessage)
 {
 	dbg_assert(in_range(ToClientId, 0, MAX_CLIENTS - 1), "SendImportantAlert ToClientId invalid: %d", ToClientId);
 	dbg_assert(m_apPlayers[ToClientId] != nullptr, "Client not online: %d", ToClientId);
@@ -1044,24 +1044,6 @@ void CGameContext::AbortVoteKickOnDisconnect(int ClientId)
 		m_VoteEnforce = VOTE_ENFORCE_ABORT;
 }
 
-void CGameContext::CheckPureTuning()
-{
-	// might not be created yet during start up
-	if(!m_pController)
-		return;
-
-	if(str_comp(m_pController->m_pGameType, "DM") == 0 ||
-		str_comp(m_pController->m_pGameType, "TDM") == 0 ||
-		str_comp(m_pController->m_pGameType, "CTF") == 0)
-	{
-		if(mem_comp(&CTuningParams::DEFAULT, &m_aTuningList[0], sizeof(CTuningParams)) != 0)
-		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "resetting tuning due to pure server");
-			m_aTuningList[0] = CTuningParams::DEFAULT;
-		}
-	}
-}
-
 void CGameContext::SendTuningParams(int ClientId, int Zone)
 {
 	if(ClientId == -1)
@@ -1083,8 +1065,6 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 		}
 		return;
 	}
-
-	CheckPureTuning();
 
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	dbg_assert(m_apPlayers[ClientId], "client %d without player", ClientId);
@@ -1159,9 +1139,6 @@ void CGameContext::OnPreTickTeehistorian()
 
 void CGameContext::OnTick()
 {
-	// check tuning
-	CheckPureTuning();
-
 	if(m_TeeHistorianActive)
 	{
 		int Error = aio_error(m_pTeeHistorianFile);
@@ -1608,7 +1585,7 @@ void CGameContext::ProgressVoteOptions(int ClientId)
 		return; // shouldn't happen / fail silently
 
 	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
-	int NumVotesToSend = minimum(g_Config.m_SvSendVotesPerTick, VotesLeft);
+	int NumVotesToSend = std::min(g_Config.m_SvSendVotesPerTick, VotesLeft);
 
 	if(!VotesLeft)
 	{
@@ -3441,7 +3418,7 @@ void CGameContext::ConModAlert(IConsole::IResult *pResult, void *pUserData)
 	str_copy(aBuf, pResult->GetString(1));
 	UnescapeNewlines(aBuf);
 
-	pSelf->SendModeratorAlert(aBuf, Victim);
+	pSelf->SendModeratorAlert(Victim, aBuf);
 }
 
 void CGameContext::ConBroadcast(IConsole::IResult *pResult, void *pUserData)
@@ -3808,7 +3785,7 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 
 		if(!str_comp(Item.m_aName, ".."))
 		{
-			fs_parent_dir(aDirectory);
+			dbg_assert(fs_parent_dir(aDirectory) == 0, "Parent folder vote selected but there is no parent folder");
 			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectory);
 		}
 		else if(Item.m_IsDirectory)
@@ -4295,6 +4272,11 @@ void CGameContext::OnInit(const void *pPersistentData)
 	else
 		m_pController = new CGameControllerDDNet(this);
 
+	for(const char *pReservedGameType : {"DM", "TDM", "CTF", "LMS", "LTS"})
+	{
+		dbg_assert(str_comp(m_pController->m_pGameType, pReservedGameType) != 0, "Using reserved gametype '%s' is not allowed", m_pController->m_pGameType);
+	}
+
 	ReadCensorList();
 
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
@@ -4518,7 +4500,7 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		TotalLength += str_length(pLine) + 1;
 	}
 
-	char *pSettings = (char *)malloc(maximum(1, TotalLength));
+	char *pSettings = (char *)malloc(std::max(1, TotalLength));
 	int Offset = 0;
 	for(const char *pLine : vpLines)
 	{
@@ -4775,7 +4757,7 @@ void CGameContext::UpdatePlayerMaps()
 			if(!pChr->CanSnapCharacter(i))
 				Dist[j].first = 1e8;
 			else
-				Dist[j].first = length_squared(m_apPlayers[i]->m_ViewPos - pChr->GetPos());
+				Dist[j].first = distance_squared(m_apPlayers[i]->m_ViewPos, pChr->GetPos());
 		}
 
 		// always send the player themselves, even if all in same position
@@ -4794,7 +4776,7 @@ void CGameContext::UpdatePlayerMaps()
 
 		// sort by real client ids, guarantee order on distance changes, O(Nlog(N)) worst case
 		// sort just clients in game always except first (self client id) and last (fake client id) indexes
-		std::sort(&pMap[1], &pMap[minimum(Index, VANILLA_MAX_CLIENTS - 1)]);
+		std::sort(&pMap[1], &pMap[std::min(Index, VANILLA_MAX_CLIENTS - 1)]);
 	}
 }
 

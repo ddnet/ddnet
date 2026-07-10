@@ -342,7 +342,7 @@ void CEditorMap::SelectNextLayer()
 {
 	int CurrentLayer = 0;
 	for(const auto &Selected : m_vSelectedLayers)
-		CurrentLayer = maximum(Selected, CurrentLayer);
+		CurrentLayer = std::max(Selected, CurrentLayer);
 	SelectLayer(CurrentLayer);
 
 	if(m_vSelectedLayers[0] < (int)m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1)
@@ -366,7 +366,7 @@ void CEditorMap::SelectPreviousLayer()
 {
 	int CurrentLayer = std::numeric_limits<int>::max();
 	for(const auto &Selected : m_vSelectedLayers)
-		CurrentLayer = minimum(Selected, CurrentLayer);
+		CurrentLayer = std::min(Selected, CurrentLayer);
 	SelectLayer(CurrentLayer);
 
 	if(m_vSelectedLayers[0] > 0)

@@ -297,12 +297,12 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 	return pResult;
 }
 
-void EscapeUrl(char *pBuf, int Size, const char *pStr);
+void EscapeUrl(char *pBuf, size_t Size, const char *pStr);
 
-template<int N>
-void EscapeUrl(char (&aBuf)[N], const char *pStr)
+template<size_t Size>
+void EscapeUrl(char (&aBuf)[Size], const char *pStr)
 {
-	EscapeUrl(aBuf, N, pStr);
+	EscapeUrl(aBuf, Size, pStr);
 }
 
 bool HttpHasIpresolveBug();

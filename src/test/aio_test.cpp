@@ -25,11 +25,11 @@ protected:
 		Delete = false;
 	}
 
-	~Async()
+	void TearDown() override
 	{
 		if(Delete)
 		{
-			fs_remove(m_Info.m_aFilename);
+			EXPECT_FALSE(fs_remove(m_Info.m_aFilename));
 		}
 	}
 

@@ -713,7 +713,7 @@ void CEditorActionGroup::Undo()
 	{
 		// Undo: delete the group
 		Map()->DeleteGroup(m_GroupIndex);
-		Map()->m_SelectedGroup = maximum(0, m_GroupIndex - 1);
+		Map()->m_SelectedGroup = std::max(0, m_GroupIndex - 1);
 	}
 
 	Map()->OnModify();
@@ -731,7 +731,7 @@ void CEditorActionGroup::Redo()
 	{
 		// Redo: delete the group
 		Map()->DeleteGroup(m_GroupIndex);
-		Map()->m_SelectedGroup = maximum(0, m_GroupIndex - 1);
+		Map()->m_SelectedGroup = std::max(0, m_GroupIndex - 1);
 	}
 
 	Map()->OnModify();
@@ -938,7 +938,7 @@ void CEditorActionEditLayerTilesProp::Undo()
 		else
 		{
 			pLayerTiles->m_Image = m_Previous % Map()->m_vpImages.size();
-			pLayerTiles->m_AutoMapperConfig = -1;
+			pLayerTiles->m_AutomapperConfig = -1;
 		}
 	}
 	else if(m_Prop == ETilesProp::COLOR)
@@ -964,7 +964,7 @@ void CEditorActionEditLayerTilesProp::Undo()
 	}
 	else if(m_Prop == ETilesProp::AUTOMAPPER)
 	{
-		pLayerTiles->m_AutoMapperConfig = m_Previous;
+		pLayerTiles->m_AutomapperConfig = m_Previous;
 	}
 	else if(m_Prop == ETilesProp::LIVE_GAMETILES)
 	{
@@ -1022,7 +1022,7 @@ void CEditorActionEditLayerTilesProp::Redo()
 		else
 		{
 			pLayerTiles->m_Image = m_Current % Map()->m_vpImages.size();
-			pLayerTiles->m_AutoMapperConfig = -1;
+			pLayerTiles->m_AutomapperConfig = -1;
 		}
 	}
 	else if(m_Prop == ETilesProp::COLOR)
@@ -1048,7 +1048,7 @@ void CEditorActionEditLayerTilesProp::Redo()
 	}
 	else if(m_Prop == ETilesProp::AUTOMAPPER)
 	{
-		pLayerTiles->m_AutoMapperConfig = m_Current;
+		pLayerTiles->m_AutomapperConfig = m_Current;
 	}
 	else if(m_Prop == ETilesProp::LIVE_GAMETILES)
 	{
@@ -1248,6 +1248,8 @@ void CEditorActionAppendMap::Undo()
 	{
 		Map()->m_vpImages.pop_back();
 	}
+
+	Map()->OnModify();
 }
 
 void CEditorActionAppendMap::Redo()

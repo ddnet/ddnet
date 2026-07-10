@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "render_map.h"
 
-#include <base/math.h>
 #include <base/str.h>
 
 #include <engine/graphics.h>
@@ -17,6 +16,7 @@
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cmath>
@@ -109,7 +109,7 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap)
 void CMapBasedEnvelopePointAccess::SetPointsRange(int StartPoint, int NumPoints)
 {
 	m_StartPoint = std::clamp(StartPoint, 0, m_NumPointsMax);
-	m_NumPoints = std::clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
+	m_NumPoints = std::clamp(NumPoints, 0, std::max(m_NumPointsMax - StartPoint, 0));
 }
 
 int CMapBasedEnvelopePointAccess::StartPoint() const

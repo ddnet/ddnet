@@ -891,7 +891,7 @@ void CGameClient::OnRender()
 
 		if(m_aCheckInfo[0] > 0)
 		{
-			m_aCheckInfo[0] -= minimum(Client()->GameTick(0) - Client()->PrevGameTick(0), m_aCheckInfo[0]);
+			m_aCheckInfo[0] -= std::min(Client()->GameTick(0) - Client()->PrevGameTick(0), m_aCheckInfo[0]);
 		}
 
 		if(m_aLocalIds[1] >= 0)
@@ -923,7 +923,7 @@ void CGameClient::OnRender()
 
 			if(m_aCheckInfo[1] > 0)
 			{
-				m_aCheckInfo[1] -= minimum(Client()->GameTick(1) - Client()->PrevGameTick(1), m_aCheckInfo[1]);
+				m_aCheckInfo[1] -= std::min(Client()->GameTick(1) - Client()->PrevGameTick(1), m_aCheckInfo[1]);
 			}
 		}
 	}
@@ -1553,7 +1553,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	}
 	else if(InfoExSize >= 8)
 	{
-		Version = minimum(pInfoEx->m_Version, 4);
+		Version = std::min(pInfoEx->m_Version, 4);
 	}
 	else if(InfoExSize >= 4)
 	{
@@ -1808,6 +1808,10 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 					}
 					IntsToStr(pInfo->m_aClan, std::size(pInfo->m_aClan), pClient->m_aClan, std::size(pClient->m_aClan));
 					pClient->m_Country = pInfo->m_Country;
+					if(!in_range(pClient->m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+					{
+						pClient->m_Country = CountryCode::DEFAULT;
+					}
 
 					IntsToStr(pInfo->m_aSkin, std::size(pInfo->m_aSkin), pClient->m_aSkinName, std::size(pClient->m_aSkinName));
 					if(!CSkin::IsValidName(pClient->m_aSkinName) ||
@@ -1844,7 +1848,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 						}
 					}
 
-					m_Snap.m_HighestClientId = maximum(m_Snap.m_HighestClientId, pInfo->m_ClientId);
+					m_Snap.m_HighestClientId = std::max(m_Snap.m_HighestClientId, pInfo->m_ClientId);
 
 					// calculate team-balance
 					if(pInfo->m_Team != TEAM_SPECTATORS)
@@ -2081,7 +2085,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 				int Team = std::clamp(Item.m_Id, (int)TEAM_FLOCK, 63);
 
 				int HighestSwitchNumber = std::clamp(pSwitchStateData->m_HighestSwitchNumber, 0, 255);
-				if(HighestSwitchNumber != maximum(0, (int)Switchers().size() - 1))
+				if(HighestSwitchNumber != std::max(0, (int)Switchers().size() - 1))
 				{
 					m_GameWorld.m_Core.InitSwitchers(HighestSwitchNumber);
 					Collision()->m_HighestSwitchNumber = HighestSwitchNumber;
@@ -2796,7 +2800,7 @@ void CGameClient::OnPredict()
 			if(!m_Snap.m_aCharacters[i].m_Active || i == m_Snap.m_LocalClientId || !m_aLastActive[i])
 				continue;
 			vec2 NewPos = (m_PredictedTick == Client()->PredGameTick(g_Config.m_ClDummy)) ? m_aClients[i].m_Predicted.m_Pos : m_aClients[i].m_PrevPredicted.m_Pos;
-			vec2 PredErr = (m_aLastPos[i] - NewPos) / (float)minimum(Client()->GetPredictionTime(), 200);
+			vec2 PredErr = (m_aLastPos[i] - NewPos) / (float)std::min(Client()->GetPredictionTime(), 200);
 			if(in_range(length(PredErr), 0.05f, 5.f))
 			{
 				vec2 PredPos = mix(m_aClients[i].m_PrevPredicted.m_Pos, m_aClients[i].m_Predicted.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
@@ -2822,14 +2826,19 @@ void CGameClient::OnPredict()
 					}
 					int64_t TimePassed = time_get() - m_aClients[i].m_aSmoothStart[j];
 					if(in_range(TimePassed, (int64_t)0, Len - 1))
-						aMixAmount[j] = minimum(aMixAmount[j], (float)(TimePassed / (double)Len));
+						aMixAmount[j] = std::min(aMixAmount[j], (float)(TimePassed / (double)Len));
 				}
 				for(int j = 0; j < 2; j++)
 					if(absolute(RenderDiff[j]) < 0.01f && absolute(PredDiff[j]) < 0.01f && absolute(m_aClients[i].m_PrevPredicted.m_Pos[j] - m_aClients[i].m_Predicted.m_Pos[j]) < 0.01f && aMixAmount[j] > aMixAmount[j ^ 1])
 						aMixAmount[j] = aMixAmount[j ^ 1];
 				for(int j = 0; j < 2; j++)
 				{
-					int64_t Remaining = minimum((1.f - aMixAmount[j]) * Len, minimum(time_freq() * 0.700f, (1.f - aMixAmount[j ^ 1]) * Len + time_freq() * 0.300f)); // don't smooth for longer than 700ms, or more than 300ms longer along one axis than the other axis
+					// don't smooth for longer than 700ms, or more than 300ms longer along one axis than the other axis
+					int64_t Remaining = std::min({
+						(1.f - aMixAmount[j]) * Len,
+						time_freq() * 0.700f,
+						(1.f - aMixAmount[j ^ 1]) * Len + time_freq() * 0.300f,
+					});
 					int64_t Start = time_get() - (Len - Remaining);
 					if(!in_range(Start + Len, m_aClients[i].m_aSmoothStart[j], m_aClients[i].m_aSmoothStart[j] + Len))
 					{
@@ -3022,7 +3031,7 @@ void CGameClient::CClientData::Reset()
 
 	m_aName[0] = '\0';
 	m_aClan[0] = '\0';
-	m_Country = -1;
+	m_Country = CountryCode::DEFAULT;
 	str_copy(m_aSkinName, "default");
 
 	m_Team = 0;
@@ -3778,7 +3787,7 @@ void CGameClient::UpdateSpectatorCursor()
 
 	if(l > 0.0001f) // make sure that this isn't 0
 	{
-		float OffsetAmount = maximum(l - m_Snap.m_SpecInfo.m_Deadzone, 0.0f) * (m_Snap.m_SpecInfo.m_FollowFactor / 100.0f);
+		float OffsetAmount = std::max(l - m_Snap.m_SpecInfo.m_Deadzone, 0.0f) * (m_Snap.m_SpecInfo.m_FollowFactor / 100.0f);
 		TargetCameraOffset = normalize(m_CursorInfo.m_Target) * OffsetAmount;
 	}
 
@@ -3900,7 +3909,7 @@ void CGameClient::DetectStrongHook()
 		int ToPlayer = m_Snap.m_aCharacters[FromPlayer].m_Prev.m_HookedPlayer;
 		if(ToPlayer < 0 || ToPlayer >= MAX_CLIENTS || !m_Snap.m_aCharacters[ToPlayer].m_Active || ToPlayer != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_HookedPlayer)
 			continue;
-		if(absolute(minimum(m_aLastUpdateTick[ToPlayer], m_aLastUpdateTick[FromPlayer]) - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed() / 4)
+		if(absolute(std::min(m_aLastUpdateTick[ToPlayer], m_aLastUpdateTick[FromPlayer]) - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed() / 4)
 			continue;
 		if(m_Snap.m_aCharacters[FromPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_Direction || m_Snap.m_aCharacters[ToPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[ToPlayer].m_Cur.m_Direction)
 			continue;

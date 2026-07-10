@@ -3,24 +3,28 @@
 #ifndef GAME_CLIENT_COMPONENTS_COUNTRYFLAGS_H
 #define GAME_CLIENT_COMPONENTS_COUNTRYFLAGS_H
 
-#include <base/str.h>
-
 #include <engine/graphics.h>
+#include <engine/shared/protocol.h>
 
 #include <game/client/component.h>
 
+#include <cstddef>
 #include <vector>
 
 class CCountryFlags : public CComponent
 {
 public:
-	struct CCountryFlag
+	class CCountryFlag
 	{
+	public:
+		/**
+		 * Country code in ISO 3166-1 numeric.
+		 */
 		int m_CountryCode;
 		char m_aCountryCodeString[8];
 		IGraphics::CTextureHandle m_Texture;
 
-		bool operator<(const CCountryFlag &Other) const { return str_comp(m_aCountryCodeString, Other.m_aCountryCodeString) < 0; }
+		bool operator<(const CCountryFlag &Other) const;
 	};
 
 	int Sizeof() const override { return sizeof(*this); }
@@ -33,17 +37,12 @@ public:
 	void Render(int CountryCode, ColorRGBA Color, float x, float y, float w, float h);
 
 private:
-	enum
-	{
-		CODE_LB = -1,
-		CODE_UB = 999,
-		CODE_RANGE = CODE_UB - CODE_LB + 1,
-	};
 	std::vector<CCountryFlag> m_vCountryFlags;
-	size_t m_aCodeIndexLUT[CODE_RANGE];
+	size_t m_aCountryCodeToIndexTable[CountryCode::MAXIMUM - CountryCode::MINIMUM + 1];
 
 	int m_FlagsQuadContainerIndex;
 
+	static bool ValidateCountryCodeString(const char *pString);
 	void LoadCountryflagsIndexfile();
 };
 #endif

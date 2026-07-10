@@ -4,11 +4,10 @@
 
 #if defined(CONF_MYSQL)
 #include <base/dbg.h>
+#include <base/log.h>
 #include <base/mem.h>
 #include <base/sphore.h>
 #include <base/str.h>
-
-#include <engine/console.h>
 
 #include <mysql.h>
 
@@ -71,7 +70,7 @@ class CMysqlConnection : public IDbConnection
 public:
 	explicit CMysqlConnection(CMysqlConfig Config);
 	~CMysqlConnection() override;
-	void Print(IConsole *pConsole, const char *pMode) override;
+	void Print(const char *pMode) override;
 
 	const char *BinaryCollate() const override { return "utf8mb4_bin"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
@@ -191,13 +190,11 @@ bool CMysqlConnection::PrepareAndExecuteStatement(const char *pStmt)
 	return true;
 }
 
-void CMysqlConnection::Print(IConsole *pConsole, const char *pMode)
+void CMysqlConnection::Print(const char *pMode)
 {
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf),
+	log_info("server",
 		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
 		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port);
-	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
 void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)

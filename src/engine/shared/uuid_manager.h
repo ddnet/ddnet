@@ -1,7 +1,6 @@
 #ifndef ENGINE_SHARED_UUID_MANAGER_H
 #define ENGINE_SHARED_UUID_MANAGER_H
 
-#include <memory>
 #include <vector>
 
 enum
@@ -67,9 +66,6 @@ public:
 	void PackUuid(int Id, CPacker *pPacker) const;
 
 	void DebugDump() const;
-
-	static std::unique_ptr<CUuidManager> New();
-	static const CUuidManager &Global();
 };
 
 extern CUuidManager g_UuidManager;

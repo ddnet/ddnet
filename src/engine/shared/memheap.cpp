@@ -2,9 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "memheap.h"
 
-#include <base/math.h>
 #include <base/str.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 
@@ -26,7 +26,7 @@ void CHeap::NewChunk(size_t ChunkSize)
 }
 
 //****************
-void *CHeap::AllocateFromChunk(unsigned int Size, unsigned Alignment)
+void *CHeap::AllocateFromChunk(size_t Size, size_t Alignment)
 {
 	size_t Offset = reinterpret_cast<uintptr_t>(m_pCurrent->m_pCurrent) % Alignment;
 	if(Offset)
@@ -72,14 +72,14 @@ void CHeap::Clear()
 }
 
 //
-void *CHeap::Allocate(unsigned Size, unsigned Alignment)
+void *CHeap::Allocate(size_t Size, size_t Alignment)
 {
 	// try to allocate from current chunk
 	void *pMem = AllocateFromChunk(Size, Alignment);
 	if(!pMem)
 	{
 		// allocate new chunk and add it to the heap
-		NewChunk(maximum<size_t>(CHUNK_SIZE, Size + Alignment));
+		NewChunk(std::max(CHUNK_SIZE, Size + Alignment));
 
 		// try to allocate again
 		pMem = AllocateFromChunk(Size, Alignment);

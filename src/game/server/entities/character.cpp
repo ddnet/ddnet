@@ -1170,7 +1170,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		// m_HookTick can be negative when using the hook_duration tune, which 0.7 clients
 		// will consider invalid. https://github.com/ddnet/ddnet/issues/3915
-		Character.m_HookTick = maximum(0, Character.m_HookTick);
+		Character.m_HookTick = std::max(0, Character.m_HookTick);
 
 		Character.m_Tick = Tick;
 		Character.m_Emote = Emote;
@@ -1541,8 +1541,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 			constexpr float MaxSpeedScale = 5.0f;
 			if(MaxSpeed == 0)
 			{
-				float MaxRampSpeed = GetTuning(m_TuneZone)->m_VelrampRange / (50 * log(maximum((float)GetTuning(m_TuneZone)->m_VelrampCurvature, 1.01f)));
-				MaxSpeed = maximum(MaxRampSpeed, GetTuning(m_TuneZone)->m_VelrampStart / 50) * MaxSpeedScale;
+				float MaxRampSpeed = GetTuning(m_TuneZone)->m_VelrampRange / (50 * log(std::max((float)GetTuning(m_TuneZone)->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = std::max(MaxRampSpeed, GetTuning(m_TuneZone)->m_VelrampStart / 50) * MaxSpeedScale;
 			}
 
 			// (signed) length of projection

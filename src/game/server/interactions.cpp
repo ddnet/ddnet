@@ -65,8 +65,6 @@ bool CInteractions::CanSee(const CGameContext *pGameServer, int ClientId) const
 	{ // Not spectator
 		if(ClientId != m_OwnerId)
 		{ // Actions of other players
-			if(!Character(pGameServer, ClientId))
-				return false; // Player is currently dead
 			if(pPlayer->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 			{
 				if(GetDDRaceTeam(pGameServer, ClientId) != m_DDRaceTeam && GetDDRaceTeam(pGameServer, ClientId) != TEAM_SUPER)

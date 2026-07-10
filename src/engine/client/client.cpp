@@ -99,24 +99,22 @@ CSnapshotDelta *CClient::SnapshotDelta()
 {
 	if(IsSixup())
 	{
-		return &*m_pSnapshotDeltaSixup;
+		return &m_SnapshotDeltaSixup;
 	}
-	return &*m_pSnapshotDelta;
+	return &m_SnapshotDelta;
 }
 
 CClient::CClient() :
-	m_pSnapshotDelta(CSnapshotDelta::New()),
-	m_pSnapshotDeltaSixup(CSnapshotDelta::New()),
-	m_DemoPlayer(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
+	m_DemoPlayer(&m_SnapshotDelta, &m_SnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_aInputtimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_FpsGraph(4096, 0, true)
 {
 	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorders)
-		DemoRecorder = CDemoRecorder(&*m_pSnapshotDelta);
+		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 	for(auto &DemoRecorder : m_aDemoRecordersSixup)
-		DemoRecorder = CDemoRecorder(&*m_pSnapshotDeltaSixup);
+		DemoRecorder = CDemoRecorder(&m_SnapshotDeltaSixup);
 	m_LastRenderTime = time_get();
 	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
@@ -938,12 +936,12 @@ int CClient::SnapNumItems(int SnapId) const
 
 void CClient::SnapSetStaticsize(int ItemType, int Size)
 {
-	m_pSnapshotDelta->SetStaticsize(ItemType, Size);
+	m_SnapshotDelta.SetStaticsize(ItemType, Size);
 }
 
 void CClient::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_pSnapshotDeltaSixup->SetStaticsize(ItemType, Size);
+	m_SnapshotDeltaSixup.SetStaticsize(ItemType, Size);
 }
 
 void CClient::RenderDebug()
@@ -1469,6 +1467,10 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		}
 		GET_STRING(pClient->m_aClan);
 		GET_INT(pClient->m_Country);
+		if(!in_range(pClient->m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+		{
+			pClient->m_Country = CountryCode::DEFAULT;
+		}
 		GET_INT(pClient->m_Score);
 		GET_INT(pClient->m_Player);
 		if(SavedType == SERVERINFO_EXTENDED)
@@ -1738,7 +1740,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				{
 					char aUrl[256];
 					char aEscaped[256];
-					EscapeUrl(aEscaped, m_aMapdownloadFilename + 15); // cut off downloadedmaps/
+					EscapeUrl(aEscaped, str_startswith(m_aMapdownloadFilename, "downloadedmaps/"));
 					bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps.ddnet.org") != 0 || m_aMapDownloadUrl[0] == '\0';
 					str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
@@ -1775,7 +1777,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				}
 				MapCRC = m_MapdownloadCrc;
 				Chunk = m_MapdownloadChunk;
-				Size = minimum(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
+				Size = std::min(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
 			}
 			else
 			{
@@ -2136,7 +2138,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// decompress snapshot
-					const void *pDeltaData = SnapshotDelta()->EmptyDelta().data();
+					const void *pDeltaData = SnapshotDelta()->EmptyDelta();
 					int DeltaSize = sizeof(int) * 3;
 
 					if(m_aSnapshotIncomingDataSize[Conn])
@@ -2151,12 +2153,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// unpack delta
-					// TODO: this needs alignment for
-					// `m_aChunkData` of 4, but this is not
-					// guaranteed. This is assumed above,
-					// too, anyway, in
-					// `CVariableInt::Decompress`.
-					const int SnapSize = SnapshotDelta()->UnpackDelta(*pDeltaShot, TmpBuffer3, rust::Slice((const int32_t *)pDeltaData, DeltaSize / sizeof(int32_t)));
+					const int SnapSize = SnapshotDelta()->UnpackDelta(pDeltaShot, &TmpBuffer3, pDeltaData, DeltaSize);
 					if(SnapSize < 0)
 					{
 						dbg_msg("client", "delta unpack failed. error=%d", SnapSize);
@@ -2383,8 +2380,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 {
 	CUnpacker Unpacker;
-	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder::New();
-	pBuilder->Init(false);
+	CSnapshotBuilder Builder;
+	Builder.Init();
 	CNetObjHandler *pNetObjHandler = GameClient()->GetNetObjHandler();
 
 	int Num = pFrom->NumItems();
@@ -2393,14 +2390,6 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 		const CSnapshotItem *pFromItem = pFrom->GetItem(Index);
 		const int FromItemSize = pFrom->GetItemSize(Index);
 		const int ItemType = pFrom->GetItemType(Index);
-		if(ItemType <= 0)
-		{
-			// Don't add extended item type descriptions, they get
-			// added implicitly (== 0).
-			//
-			// Don't add items of unknown item types either (< 0).
-			continue;
-		}
 		const void *pData = pFromItem->Data();
 		Unpacker.Reset(pData, FromItemSize);
 
@@ -2413,7 +2402,7 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 			continue;
 		}
 
-		const void *pSecuredData = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
+		void *pSecuredData = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
 		if(!pSecuredData)
 		{
 			if(g_Config.m_Debug && ItemType != UUID_UNKNOWN)
@@ -2426,13 +2415,13 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 		}
 		const int ItemSize = pNetObjHandler->GetUnpackedObjSize(ItemType);
 
-		if(!pBuilder->NewItem(ItemType, pFromItem->Id(), rust::Slice((const int32_t *)pSecuredData, ItemSize / sizeof(int32_t))))
+		if(!Builder.NewItem(ItemType, pFromItem->Id(), pSecuredData, ItemSize))
 		{
 			return -4;
 		}
 	}
 
-	return pBuilder->Finish(*pTo);
+	return Builder.Finish(pTo);
 }
 
 void CClient::ResetMapDownload(bool ResetActive)
@@ -3116,7 +3105,7 @@ void CClient::InitInterfaces()
 	m_pNotifications = Kernel()->RequestInterface<INotifications>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	m_DemoEditor.Init(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, m_pConsole, m_pStorage);
+	m_DemoEditor.Init(&m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pConsole, m_pStorage);
 
 	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
 
@@ -4008,7 +3997,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
-		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
+		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
 		m_EditJobs.push_back(pDemoEditTask);
 
@@ -4336,8 +4325,8 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		return 2;
 	}
 	int End = Start + Length;
-	int ChecksumBytesEnd = minimum(End, (int)sizeof(m_Checksum.m_aBytes));
-	int FileStart = maximum(Start, (int)sizeof(m_Checksum.m_aBytes));
+	int ChecksumBytesEnd = std::min(End, (int)sizeof(m_Checksum.m_aBytes));
+	int FileStart = std::max(Start, (int)sizeof(m_Checksum.m_aBytes));
 	unsigned char aStartBytes[sizeof(int32_t)];
 	unsigned char aEndBytes[sizeof(int32_t)];
 	uint_to_bytes_be(aStartBytes, Start);
@@ -4407,7 +4396,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		}
 		for(int i = FileStart; i < End; i += sizeof(aBuf))
 		{
-			int Read = io_read(m_OwnExecutable, aBuf, minimum((int)sizeof(aBuf), End - i));
+			int Read = io_read(m_OwnExecutable, aBuf, std::min((int)sizeof(aBuf), End - i));
 			sha256_update(&Sha256Ctxt, aBuf, Read);
 		}
 	}
@@ -5272,7 +5261,7 @@ void CClient::RequestDDNetInfo()
 	if(g_Config.m_BrIndicateFinished)
 	{
 		char aEscaped[128];
-		EscapeUrl(aEscaped, sizeof(aEscaped), PlayerName());
+		EscapeUrl(aEscaped, PlayerName());
 		str_append(aUrl, "?name=");
 		str_append(aUrl, aEscaped);
 	}

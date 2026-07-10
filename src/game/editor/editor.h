@@ -38,7 +38,6 @@
 #include <game/editor/mapitems/map.h>
 #include <game/editor/prompt.h>
 #include <game/editor/quick_action.h>
-#include <game/map/render_interfaces.h>
 #include <game/mapitems.h>
 
 #include <deque>
@@ -105,7 +104,7 @@ enum
 	PROPTYPE_AUTOMAPPER_REFERENCE,
 };
 
-class CEditor : public IEditor, public IEnvelopeEval
+class CEditor : public IEditor
 {
 	class IInput *m_pInput = nullptr;
 	class IClient *m_pClient = nullptr;
@@ -230,11 +229,6 @@ public:
 
 		m_ShowTileInfo = SHOW_TILE_OFF;
 		m_ShowDetail = true;
-		m_Animate = false;
-		m_AnimateStart = 0.0f;
-		m_AnimateTime = 0.0f;
-		m_AnimateSpeed = 1.0f;
-		m_AnimateUpdatePopup = false;
 
 		for(size_t i = 0; i < std::size(m_aSavedColors); ++i)
 		{
@@ -418,12 +412,6 @@ public:
 	EShowTile m_ShowTileInfo;
 	bool m_ShowDetail;
 
-	bool m_Animate;
-	float m_AnimateStart;
-	float m_AnimateTime;
-	float m_AnimateSpeed;
-	bool m_AnimateUpdatePopup;
-
 	enum EExtraEditor
 	{
 		EXTRAEDITOR_NONE = -1,
@@ -481,8 +469,6 @@ public:
 	const void *m_pUiGotContext = nullptr;
 
 	std::deque<std::shared_ptr<CDataFileWriterFinishJob>> m_WriterFinishJobs;
-
-	void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) override;
 
 	CLineInputBuffered<256> m_SettingsCommandInput;
 	CMapSettingsBackend m_MapSettingsBackend;
@@ -560,8 +546,8 @@ public:
 	static CUi::EPopupMenuFunctionResult PopupSelectImage(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSelectSound(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSelectGametileOp(void *pContext, CUIRect View, bool Active);
-	static CUi::EPopupMenuFunctionResult PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active);
-	static CUi::EPopupMenuFunctionResult PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectAutomapperConfig(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectAutomapperReference(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupTele(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSpeedup(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
@@ -590,14 +576,14 @@ public:
 	void PopupSelectGametileOpInvoke(float x, float y);
 	int PopupSelectGameTileOpResult();
 
-	void PopupSelectConfigAutoMapInvoke(int Current, float x, float y);
-	int PopupSelectConfigAutoMapResult();
+	void PopupSelectAutomapperConfigInvoke(int Current, float x, float y);
+	int PopupSelectAutomapperConfigResult();
 
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
 
-	void PopupSelectAutoMapReferenceInvoke(int Current, float x, float y);
-	int PopupSelectAutoMapReferenceResult();
+	void PopupSelectAutomapperReferenceInvoke(int Current, float x, float y);
+	int PopupSelectAutomapperReferenceResult();
 
 	void DoQuadEnvelopes(const CLayerQuads *pLayerQuads);
 	void DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex);

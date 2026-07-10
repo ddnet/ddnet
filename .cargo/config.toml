@@ -1,9 +1,2 @@
 [target.'cfg(target_env = "msvc")']
 rustflags = ["-C", "target-feature=+crt-static"]
-
-[source."git+https://github.com/heinrich5991/libtw2"]
-git = "https://github.com/heinrich5991/libtw2"
-replace-with = "vendored-sources"
-
-[source.vendored-sources]
-directory = "vendor"

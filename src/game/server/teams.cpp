@@ -568,9 +568,9 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 
 	CPlayer *pAsker = GetPlayer(Asker);
 	CInteractions Interact;
-	Interact.Init(Asker, pAsker->GetUniqueCid());
+	Interact.Init(Asker, pAsker ? pAsker->GetUniqueCid() : 0);
 	Interact.FillOwnerConnected(
-		pAsker->GetCharacter() && pAsker->GetCharacter()->IsAlive(),
+		pAsker && pAsker->GetCharacter() && pAsker->GetCharacter()->IsAlive(),
 		m_Core.Team(Asker),
 		m_Core.GetSolo(Asker),
 		false,

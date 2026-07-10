@@ -2009,657 +2009,657 @@ English translation by the DDNet Team
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Falta de VRAM. Tente definir 'cl_skins_loaded_max' para um valor menor ou remova recursos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== Pressione Ctrl+Shift+G para desativar grafos de depuração.
 
 No demo with this filename exists
-== 
+== Não existe nnhuma demo com este nome
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== Gravação de grupo em andamento. Poderá carregar o jogo com '/load %s'
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== Gravação da grupo em andamento. Poderá carregar o jogo com '/load %s' se a gravação for bem-sucedido ou com '/load %s' se falhar
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== O grupo foi gravado com sucesso por %s. A conexão com a base de dados falhou; usando o código de gravação gerado para evitar conflitos. Use '/load %s' para continuar
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
+== O grupo foi gravado com sucesso por %s. A conexão com a base de dados falhou; usando o código de gravação gerado para evitar conflitos. Use '/load %s' em %s para continuar
 
 Save failed!
-== 
+== A gravação falhou!
 
 Auto-sync player camera
-== 
+== Sincroniza automaticamente a câmara do jogador
 
 [Auto camera]
 Disabled
-== 
+== Desativada
 
 [Auto camera]
 Enabled
-== 
+== Ativada
 
 [Auto camera]
 Unavailable for this player
-== 
+== Não disponível para este jogador
 
 [Auto camera]
 Inactive
-== 
+== Inativa
 
 [Auto camera]
 Active
-== 
+== Ativa
 
 Loading maps…
-== 
+== A carregar mapas…
 
 [Spectating]
 Following %d: %s
-== 
+== A seguir %d: %s
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== Pressione Esc ou Tab para dispensar…
 
 Server alert
-== 
+== Alerta do servidor
 
 Moderator alert
-== 
+== Alerta da moderação
 
 Server could not be started
-== 
+== O servidor não pôde ser iniciado
 
 Loading map
-== 
+== A carregar mapa
 
 Joining Tutorial server
-== 
+== A entrar no servidor de tutorial
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== Há uma alteração não gravada no editor de controlos de toque, quer salvá-la.
 
 This name cannot be used for files and folders
-== 
+== Este nome não pode ser usado para ficheiros e pastas
 
 You will be disconnected from the server.
-== 
+== Será desconectado do servidor.
 
 Could not get server list from master server
-== 
+== Não foi possível obter a lista de servidores do servidor mestre
 
 There are no Tutorial servers available
-== 
+== Não há servidor de tutorial disponível
 
 Retrying…
-== 
+== A tentar novamente…
 
 Error joining Tutorial server
-== 
+== Erro ao entrar num servidor de tutorial
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== Não foi possível encontrar um servidor de tutorial. Confira a sua conexão com a Internet.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== Está a jogar num servidor local porque nenhum servidor tutorial online foi encontrado.\n\nSeu registo será gravado apenas localmente.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== Não foi possível encontrar o servidor de tutorial online.\nA iniciar e conectar ao servidor local…
 
 Waiting for local server to stop…
-== 
+== A aguardar o servidor local parar…
 
 Waiting for local server to start…
-== 
+== A aguardar o servidor local iniciar…
 
 Error checking player name
-== 
+== Erro ao verificar nome de jogador
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== Não foi possível verificar se há um jogador com o seu nome. Verifique a sua conexão de internet.
 
 Start and connect to local server
-== 
+== Iniciar e conectar a um servidor local
 
 Error loading communities
-== 
+== Erro ao carregar comunidades
 
 Click to remove this community from your favorites.
-== 
+== Clique para remover esta comunidade dos seus favoritos.
 
 Click to add this community to your favorites.
-== 
+== Clique para adicionar esta comunidade aos seus favoritos.
 
 Add clan
-== 
+== Adicionar clã
 
 Add friend
-== 
+== Adicionar amigo
 
 [Demo playback]
 Live
-== 
+== Em direto
 
 [Demo playback]
 Go to Live
-== 
+== Ir para em direto
 
 Map size
-== 
+== Tamanho do mapa
 
 Refresh the demo list
-== 
+== Atualizar a lista de demos
 
 Are you sure that you want to disconnect and play this demo?
-== 
+== Tem certeza que deseja desconectar e reproduzir esta demo?
 
 Open the selected folder
-== 
+== Abrir a pasta selecionada
 
 Play the selected demo
-== 
+== Reproduzir a demo selecionada
 
 Save all changes before turning off the editor?
-== 
+== Gravar todas as alterações antes de desligar o editor?
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Community
-== 
+== Comunidade
 
 [Team status]
 forbidden
-== 
+== proibido
 
 [Team status]
 solo
-== 
+== solo
 
 [Team status]
 allowed
-== 
+== permitido
 
 [Team status]
 required
-== 
+== exigido
 
 Teams
-== 
+== Grupos
 
 [Team size]
 minimum
-== 
+== mínimo
 
 [Team size]
 maximum
-== 
+== máximo
 
 Layout
-== 
+== Layout
 
 Visibility
-== 
+== Visibilidade
 
 Behavior
-== 
+== Comportamento
 
 Delete button
-== 
+== Apagar botão
 
 Are you sure that you want to delete this button?
-== 
+== Tem certeza que deseja apagar este botão?
 
 Duplicate
-== 
+== Duplicar
 
 Please save your changes before duplicating a button.
-== 
+== Grave as suas alterações antes de duplicar um botão.
 
 Deselect
-== 
+== Desmarcar
 
 You'll lose unsaved changes after deselecting.
-== 
+== Vai perder as alterações não gravadas após desmarcar.
 
 Width
-== 
+== Largura
 
 Height
-== 
+== Altura
 
 Shape
-== 
+== Formato
 
 [Touch button shape]
 Rectangle
-== 
+== Retângulo
 
 [Touch button shape]
 Circle
-== 
+== Círculo
 
 [Touch button label type]
 Plain
-== 
+== Plano
 
 [Touch button label type]
 Localized
-== 
+== Localizado
 
 [Touch button label type]
 Icon
-== 
+== Ícone
 
 Behavior type
-== 
+== Tipo de comportamento
 
 [Touch button behavior]
 Bind
-== 
+== Atribuição
 
 [Touch button behavior]
 Bind Toggle
-== 
+== Alternar atribuição
 
 [Touch button behavior]
 Predefined
-== 
+== Predefinido
 
 Info
-== 
+== Info
 
 Command
-== 
+== Comando
 
 Label
-== 
+== Rótulo
 
 Label type
-== 
+== Tipo de rótulo
 
 Add command
-== 
+== Adicionar comando
 
 Delete command
-== 
+== Apagar comando
 
 [Touch button visibility preview]
 Included
-== 
+== Incluído
 
 [Touch button visibility preview]
 Excluded
-== 
+== Excluído
 
 [Touch button visibility preview]
 Ignore
-== 
+== Ignorar
 
 Button browser
-== 
+== Navegador de botões
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== Pode selecionar botões diretamente na lista abaixo, ou segurar um botão no ecrã para selecioná-lo. Também pode mover e redimensionar botões por toque.
 
 New button
-== 
+== Novo botão
 
 Select button by touch
-== 
+== Selecione o botão por toque
 
 No buttons match your filter criteria
-== 
+== Novos botões correspondem ao seu critério de filtro
 
 File
-== 
+== Ficheiro
 
 Buttons
-== 
+== Botões
 
 Active color
-== 
+== Cor ativa
 
 Inactive color
-== 
+== Cor inativa
 
 Preview visibilities
-== 
+== Pré-visualizar visibilidades
 
 Preview button visibility while the editor is active.
-== 
+== Confira a visibilidade do botão enquanto o editor está ativo.
 
 Show all buttons
-== 
+== Mostrar todos os botões
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== Pode gerir as suas configurações de controlos de toque nesta página. Somente alterações que estão gravadas estarão disponíveis após reiniciar o cliente. Pode partilhar os seus controlos de toque com outros exportando-os para a área de transferências\n\nPode encontrar informações mais detalhadas sobre os controlos de toque no DDNet Wiki.
 
 Open DDNet Wiki
-== 
+== Abrir DDNet Wiki
 
 Save all changes before switching selected button?
-== 
+== Gravar todas as alterações antes de trocar o botão selecionado?
 
 Discard
-== 
+== Descartar
 
 No space for button
-== 
+== Sem espaço para botão
 
 There is not enough space available for the button. Check its visibilities and size.
-== 
+== Não há espaço suficiente disponível para o botão. Confirma as suas visibilidades e o seu tamanho.
 
 Selected button not visible
-== 
+== Botão selecionado não visível
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
+== O botão selecionado não está visível. Deseja desmarcá-lo ou editar a sua visibilidade?
 
 Edit
-== 
+== Editar
 
 Width and height are required to be within the range from %d to %d.
-== 
+== Largura e altura são exigidas para estar dentro do intervalo de %d e %d.
 
 Button position is outside of the screen.
-== 
+== A posição do botão está fora do ecrã.
 
 The selected button is overlapping with other buttons.
-== 
+== O botão selecionado está a sobrepôr-se a outros botões.
 
 Wrong button settings
-== 
+== Configurações de botão incorretas
 
 There is not enough space available to place another button.
-== 
+== Não há espaço disponível para posicionar outro botão.
 
 [Touch button visibilities]
 Ingame
-== 
+== No jogo
 
 [Touch button visibilities]
 Zoom Allowed
-== 
+== Zoom permitido
 
 [Touch button visibilities]
 Vote Active
-== 
+== Voto ativo
 
 [Touch button visibilities]
 Dummy Allowed
-== 
+== Dummy permitido
 
 [Touch button visibilities]
 Dummy Connected
-== 
+== Dummy conectado
 
 [Touch button visibilities]
 Rcon Authed
-== 
+== Rcon autenticado
 
 [Touch button visibilities]
 Demo Player
-== 
+== Reprodutor de demo
 
 [Touch button visibilities]
 Extra Menu
-== 
+== Menu extra
 
 [Predefined touch button behaviors]
 Ingame Menu
-== 
+== Menu no jogo
 
 [Predefined touch button behaviors]
 Extra Menu
-== 
+== Menu extra
 
 [Predefined touch button behaviors]
 Emoticon
-== 
+== Emoticon
 
 [Predefined touch button behaviors]
 Spectate
-== 
+== Observar
 
 [Predefined touch button behaviors]
 Swap Action
-== 
+== Trocar ação
 
 [Predefined touch button behaviors]
 Use Action
-== 
+== Ação de usar
 
 [Predefined touch button behaviors]
 Joystick Action
-== 
+== Ação com joystick
 
 [Predefined touch button behaviors]
 Joystick Aim
-== 
+== Mirar com joystick
 
 [Predefined touch button behaviors]
 Joystick Fire
-== 
+== Atirar com joystick
 
 [Predefined touch button behaviors]
 Joystick Hook
-== 
+== Gancho com joystick
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== Botões com este comportamento executam comandos de console assim como associações de teclas.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== Botões com este comportamento alternam entre a execução de um de dois ou mais comandos especificados.
 
 Buttons with this behavior execute some predefined actions.
-== 
+== Botões com este comportamento executam algumas ações predefinidas.
 
 Opens the ingame menu immediately when released.
-== 
+== Abre o menu do jogo imediatamente quando liberado.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== O botão de menu extra alterna a visibilidade dos botões com a opção "Menu extra". Também abre o menu do jogo ao ser pressionado e mantido pressionado.
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== Abre o seletor de emoticons (isto não funciona com binds).
 
 Opens the spectator menu (this does not work with binds).
-== 
+== Abre o menu de observador (isto não funciona com associações de teclas).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== Troca a ação ativa (atirar e gancho) para entrada por toque direto e joysticks virtuais.
 
 Uses the active action with the current aiming position.
-== 
+== Usa a ação ativa com a atual posição da mira.
 
 Virtual joystick which uses the active action.
-== 
+== Joystick virtual que usa a ação ativa.
 
 Virtual joystick which only aims without using an action.
-== 
+== Joystick virtual que só mira sem usar uma ação.
 
 Virtual joystick which always uses fire.
-== 
+== Joystick virtual que sempre usa atirar.
 
 Virtual joystick which always uses hook.
-== 
+== Joystick virtual que sempre usa gancho.
 
 Player is ingame, i.e. not spectating.
-== 
+== Jogador está a jogar, ou seja, não está como observador.
 
 Zoom is allowed on this server.
-== 
+== Zoom é permitido neste servidor.
 
 A vote is currently active.
-== 
+== Uma votação está atualmente em andamento.
 
 Dummy is allowed on this server.
-== 
+== Dummy é permitido neste servidor.
 
 Dummy is currently connected.
-== 
+== Dummy está atualmente conectado.
 
 Player is currently authed in rcon.
-== 
+== Jogador está atualmente autenticado no rcon.
 
 Demo player is currently active.
-== 
+== O reprodutor de demos está atualmente ativo.
 
 The extra menu with the given number is activated.
-== 
+== O menu extra com o número fornecido está ativo.
 
 Update Rate
-== 
+== Taxa de atualização
 
 Save power by lowering update rate (higher input latency)
-== 
+== Economize energia a reduzir a taxa de atualização (maior latência de entrada)
 
 Saves file
-== 
+== Ficheiro de gravações
 
 Open the saves file
-== 
+== Abre o ficheiro de gravações
 
 This skin name cannot be used.
-== 
+== Este nome de skin não pode ser usado.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== Não foi possível carregar a skin devido a um erro. Verifique o console local para pormenores.
 
 Skin could not be found.
-== 
+== Não foi possível encontrar a skin.
 
 No skins match your filter criteria
-== 
+== Nenhuma skin corresponde aos seus critérios de filtro
 
 Show FPS
-== 
+== Mostrar FPS
 
 Renders your frame rate in the top right
-== 
+== Renderiza a sua taxa de quadros no canto direito superior
 
 Show spectator cursor
-== 
+== Mostrar cursor do observador
 
 Show number of spectators
-== 
+== Mostrar número de observadores
 
 Censor profanity
-== 
+== Censurar palavrões
 
 Chat background color
-== 
+== Cor de fundo do chat
 
 [Show name plates]
 None
-== 
+== Nenhum
 
 [Show name plates]
 Own
-== 
+== Próprio
 
 [Show name plates]
 Others
-== 
+== Outros
 
 [Show name plates]
 All
-== 
+== Todos
 
 Name plates offset
-== 
+== Posição de placas de nome
 
 Show friend icon in name plates
-== 
+== Mostrar ícone de amigo em placas de nome
 
 Show client IDs on a separate line
-== 
+== Mostrar IDs de clientes numa linha separada
 
 Client IDs size
-== 
+== Tamanho de IDs de cliente
 
 Show players' key presses
-== 
+== Mostrar pressionamentos de teclas dos jogadores
 
 [Show players' key presses]
 None
-== 
+== Nenhum
 
 [Show players' key presses]
 Own
-== 
+== Próprio
 
 [Show players' key presses]
 Others
-== 
+== Outros
 
 [Show players' key presses]
 All
-== 
+== Todos
 
 Preview player's name plate
-== 
+== Pré-visualizar placa de identificação do jogador
 
 Preview dummy's name plate
-== 
+== Pré-visualizar placas de nome do dummy
 
 Colors of the hook collision line:
-== 
+== Cores da linha de colisão do gancho:
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== Quando nada pode ser enganchado
 
 [Hook collision line color]
 When something is hookable
-== 
+== Quando algo pode ser enganchado
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== Quando um Tee pode ser enganchado
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== Dica da linha de colisão do gancho
 
 Dragger Outline Color
-== 
+== Cor de contorno do dragger
 
 Dragger Inner Color
-== 
+== Cor interna do dragger
 
 Show background quads
-== 
+== Mostrar quads de fundo
 
 Prediction margin
-== 
+== Margem de predição
 
 Predict events (experimental)
-== 
+== Predizer eventos (experimental)
 
 Scoreboard cursor
-== 
+== Cursor no placar
 
 Download
-== 
+== Descarregar
 
 Unmute
-== 
+== Ativar conversa
 
 Mute
-== 
+== Silenciar
 
 Unmute emoticons
-== 
+== Ativar emoticons
 
 Mute emoticons
-== 
+== Silenciar emoticons
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping

@@ -28,7 +28,7 @@ public:
 	bool m_InGame;
 	ColorRGBA m_Color;
 	bool m_ShowName;
-	char m_aName[std::max<size_t>(MAX_NAME_LENGTH, protocol7::MAX_NAME_ARRAY_SIZE)];
+	char m_aName[std::max((size_t)MAX_NAME_LENGTH, (size_t)protocol7::MAX_NAME_ARRAY_SIZE)];
 	bool m_ShowFriendMark;
 	bool m_ShowClientId;
 	int m_ClientId;
@@ -36,7 +36,7 @@ public:
 	bool m_ClientIdSeparateLine;
 	float m_FontSize;
 	bool m_ShowClan;
-	char m_aClan[std::max<size_t>(MAX_CLAN_LENGTH, protocol7::MAX_CLAN_ARRAY_SIZE)];
+	char m_aClan[std::max((size_t)MAX_CLAN_LENGTH, (size_t)protocol7::MAX_CLAN_ARRAY_SIZE)];
 	float m_FontSizeClan;
 	bool m_ShowDirection;
 	bool m_DirLeft;
@@ -340,7 +340,7 @@ public:
 class CNamePlatePartName : public CNamePlatePartText
 {
 private:
-	char m_aText[std::max<size_t>(MAX_NAME_LENGTH, protocol7::MAX_NAME_ARRAY_SIZE)] = "";
+	char m_aText[std::max((size_t)MAX_NAME_LENGTH, (size_t)protocol7::MAX_NAME_ARRAY_SIZE)] = "";
 	float m_FontSize = -INFINITY;
 
 protected:
@@ -369,7 +369,7 @@ public:
 class CNamePlatePartClan : public CNamePlatePartText
 {
 private:
-	char m_aText[std::max<size_t>(MAX_CLAN_LENGTH, protocol7::MAX_CLAN_ARRAY_SIZE)] = "";
+	char m_aText[std::max((size_t)MAX_CLAN_LENGTH, (size_t)protocol7::MAX_CLAN_ARRAY_SIZE)] = "";
 	float m_FontSize = -INFINITY;
 
 protected:
@@ -841,7 +841,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	const vec2 DeltaPosition = Ui()->MousePos() - Position;
 	const float Distance = length(DeltaPosition);
 	const float InteractionDistance = 20.0f;
-	const vec2 TeeDirection = Distance < InteractionDistance ? normalize(vec2(DeltaPosition.x, maximum(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
+	const vec2 TeeDirection = Distance < InteractionDistance ? normalize(vec2(DeltaPosition.x, std::max(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
 	const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : (Dummy ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, TeeEmote, TeeDirection, Position);
 	Position.y -= (float)g_Config.m_ClNamePlatesOffset;

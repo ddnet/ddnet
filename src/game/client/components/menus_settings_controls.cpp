@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "menus_settings_controls.h"
 
-#include <base/math.h>
 #include <base/str.h>
 
 #include <engine/font_icons.h>
@@ -19,6 +18,7 @@
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
+#include <algorithm>
 #include <functional>
 #include <string>
 #include <vector>
@@ -707,7 +707,7 @@ void CMenusSettingsControls::RenderJoystickAxisPicker(CUIRect View)
 	Ui()->DoLabel(&AimBind, Localize("Aim bind"), FONT_SIZE, TEXTALIGN_MC);
 
 	IInput::IJoystick *pJoystick = Input()->GetActiveJoystick();
-	for(int i = 0; i < std::min<int>(pJoystick->GetNumAxes(), NUM_JOYSTICK_AXES); i++)
+	for(int i = 0; i < std::min(pJoystick->GetNumAxes(), (int)NUM_JOYSTICK_AXES); i++)
 	{
 		View.HSplitTop(BUTTON_SPACING, nullptr, &View);
 		View.HSplitTop(BUTTON_HEIGHT, &Row, &View);

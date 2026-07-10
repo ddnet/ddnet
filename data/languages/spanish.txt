@@ -2650,16 +2650,16 @@ Mute emoticons
 == Mutear emoticonos
 
 Refresh the demo list
-== 
+== Actualizar la lista de demos
 
 Open the selected folder
-== 
+== Abrir la carpeta seleccionada
 
 Play the selected demo
-== 
+== Reproducir la demo seleccionada
 
 Prediction margin
-== 
+== Margen de predicción
 
 Predict events (experimental)
-== 
+== Predecir eventos (experimental)

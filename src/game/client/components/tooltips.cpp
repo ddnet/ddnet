@@ -92,8 +92,8 @@ void CTooltips::OnRender()
 		Rect.h = BoundingBox.m_H + 2 * Padding;
 
 		const CUIRect *pScreen = Ui()->Screen();
-		Rect.w = minimum(Rect.w, pScreen->w - 2 * Margin);
-		Rect.h = minimum(Rect.h, pScreen->h - 2 * Margin);
+		Rect.w = std::min(Rect.w, pScreen->w - 2 * Margin);
+		Rect.h = std::min(Rect.h, pScreen->h - 2 * Margin);
 
 		// Try the top side.
 		if(Tooltip.m_Rect.y - Rect.h - Margin > pScreen->y)

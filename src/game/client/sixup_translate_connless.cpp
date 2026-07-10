@@ -36,6 +36,10 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 			GetString(Info.m_aClients[i].m_aName);
 			GetString(Info.m_aClients[i].m_aClan);
 			Info.m_aClients[i].m_Country = Up.GetInt();
+			if(!in_range(Info.m_aClients[i].m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+			{
+				Info.m_aClients[i].m_Country = CountryCode::DEFAULT;
+			}
 			Info.m_aClients[i].m_Score = Up.GetInt();
 			Info.m_aClients[i].m_Player = !(Up.GetInt() & 1);
 		}

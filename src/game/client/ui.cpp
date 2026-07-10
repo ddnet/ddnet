@@ -750,7 +750,7 @@ static SCursorAndBoundingBox CalcFontSizeCursorHeightAndBoundingBox(ITextRender 
 	float TextWidth;
 	do
 	{
-		Size = maximum(Size, LabelProps.m_MinimumFontSize);
+		Size = std::max(Size, LabelProps.m_MinimumFontSize);
 		// Only consider stop-at-end and ellipsis-at-end when minimum font size reached or font scaling disabled
 		if((Size == LabelProps.m_MinimumFontSize || !LabelProps.m_EnableWidthCheck) && Flags != FlagsWithoutStop)
 			TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);
@@ -1540,7 +1540,7 @@ bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect,
 	if(MultiLine)
 		pRect->HSplitMid(&Label, &ScrollBar);
 	else
-		pRect->VSplitMid(&Label, &ScrollBar, minimum(10.0f, pRect->w * 0.05f));
+		pRect->VSplitMid(&Label, &ScrollBar, std::min(10.0f, pRect->w * 0.05f));
 
 	const float FontSize = Label.h * CUi::ms_FontmodHeight * 0.8f;
 	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_ML);
@@ -1572,9 +1572,9 @@ bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect,
 
 void CUi::RenderProgressBar(CUIRect ProgressBar, float Progress)
 {
-	const float Rounding = minimum(5.0f, ProgressBar.h / 2.0f);
+	const float Rounding = std::min(5.0f, ProgressBar.h / 2.0f);
 	ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rounding);
-	ProgressBar.w = maximum(ProgressBar.w * Progress, 2 * Rounding);
+	ProgressBar.w = std::max(ProgressBar.w * Progress, 2 * Rounding);
 	ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, Rounding);
 }
 
@@ -1656,7 +1656,7 @@ void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressS
 
 	const float FilledRatio = Props.m_Progress < 0.0f ? 0.333f : Props.m_Progress;
 	const int FilledSegmentOffset = Props.m_Progress < 0.0f ? round_to_int(m_ProgressSpinnerOffset * Props.m_Segments) : 0;
-	const int FilledNumSegments = minimum<int>(Props.m_Segments * FilledRatio + (Props.m_Progress < 0.0f ? 0 : 1), Props.m_Segments);
+	const int FilledNumSegments = std::min((int)(Props.m_Segments * FilledRatio) + (Props.m_Progress < 0.0f ? 0 : 1), Props.m_Segments);
 	Graphics()->SetColor(Props.m_Color);
 	for(int i = 0; i < FilledNumSegments; ++i)
 	{
@@ -1774,9 +1774,9 @@ void CUi::DoPopupMenu(const SPopupMenuId *pId, float X, float Y, float Width, fl
 {
 	constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
 	if(X + Width > Screen()->w - Margin)
-		X = maximum<float>(X - Width, Margin);
+		X = std::max(X - Width, Margin);
 	if(Y + Height > Screen()->h - Margin)
-		Y = maximum<float>(Y - Height, Margin);
+		Y = std::max(Y - Height, Margin);
 
 	m_vPopupMenus.emplace_back();
 	SPopupMenu *pNewMenu = &m_vPopupMenus.back();
@@ -1914,7 +1914,7 @@ CUi::EPopupMenuFunctionResult CUi::PopupMessage(void *pContext, CUIRect View, bo
 
 void CUi::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 {
-	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SMessagePopupContext::POPUP_MAX_WIDTH);
+	const float TextWidth = std::min(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SMessagePopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
 	STextSizeProperties TextSizeProps{};
 	TextSizeProps.m_pHeight = &TextHeight;
@@ -1941,7 +1941,7 @@ void CUi::SConfirmPopupContext::YesNoButtons()
 
 void CUi::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 {
-	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SConfirmPopupContext::POPUP_MAX_WIDTH);
+	const float TextWidth = std::min(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SConfirmPopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
 	STextSizeProperties TextSizeProps{};
 	TextSizeProps.m_pHeight = &TextHeight;
@@ -2051,7 +2051,7 @@ CUi::EPopupMenuFunctionResult CUi::PopupSelection(void *pContext, CUIRect View, 
 void CUi::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 {
 	const STextBoundingBox TextBoundingBox = TextRender()->TextBoundingBox(pContext->m_FontSize, pContext->m_aMessage, -1, pContext->m_Width);
-	const float PopupHeight = minimum((pContext->m_aMessage[0] == '\0' ? -pContext->m_EntrySpacing : TextBoundingBox.m_H) + pContext->m_vEntries.size() * (pContext->m_EntryHeight + pContext->m_EntrySpacing) + (SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN) * 2, Screen()->h * 0.4f);
+	const float PopupHeight = std::min((pContext->m_aMessage[0] == '\0' ? -pContext->m_EntrySpacing : TextBoundingBox.m_H) + pContext->m_vEntries.size() * (pContext->m_EntryHeight + pContext->m_EntrySpacing) + (SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN) * 2, Screen()->h * 0.4f);
 	pContext->m_pUI = this;
 	pContext->m_pSelection = nullptr;
 	pContext->m_SelectionIndex = -1;
@@ -2061,7 +2061,7 @@ void CUi::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 		constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
 		if(X + pContext->m_Width > Screen()->w - Margin)
 		{
-			X = maximum<float>(X - pContext->m_Width, Margin);
+			X = std::max(X - pContext->m_Width, Margin);
 		}
 		if(Y + pContext->m_AlignmentHeight + PopupHeight > Screen()->h - Margin)
 		{

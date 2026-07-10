@@ -2459,32 +2459,32 @@ Team successfully saved by %s. The database connection failed, using generated s
 == 
 
 Save failed!
-== 
+== Uloženie zlyhalo!
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== Stlačte Esc alebo Tab pre odmietnutie…
 
 Server alert
-== 
+== Upozornenie servera
 
 Moderator alert
-== 
+== Upozornenie moderátora
 
 Joining Tutorial server
-== 
+== Prípajanie na Tutoriálny server
 
 There's an unsaved change in the touch controls editor, you might want to save it.
 == 
 
 You will be disconnected from the server.
-== 
+== Budete odpojený zo servera
 
 There are no Tutorial servers available
 == 
 
 Retrying…
-== 
+== Skúšanie znova…
 
 Error joining Tutorial server
 == 
@@ -2505,7 +2505,7 @@ Waiting for local server to start…
 == 
 
 Start and connect to local server
-== 
+== Začat a pripojiť sa k lokálnemu serveru
 
 Error loading communities
 == 

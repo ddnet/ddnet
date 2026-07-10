@@ -2650,16 +2650,16 @@ Hook collision line tip
 == 갈고리 보조선 끝부분
 
 Refresh the demo list
-== 
+== 데모 목록 새로고침
 
 Open the selected folder
-== 
+== 선택한 폴더 열기
 
 Play the selected demo
-== 
+== 선택한 데모 재생
 
 Prediction margin
-== 
+== 예측 허용 범위
 
 Predict events (experimental)
-== 
+== 이벤트 예측 (실험적)
