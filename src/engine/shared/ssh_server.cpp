@@ -560,12 +560,39 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			// so the string stays terminated
 			// but not if we are in the middle of the input
 			pClient->m_aInput[Idx + 1] = '\0';
+			pClient->m_aInput[Idx] = Byte;
+			pClient->m_CursorPos.x++;
+			ssh_channel_write(Channel, aBuf + i, 1);
 		}
-		pClient->m_aInput[Idx] = Byte;
-		pClient->m_CursorPos.x++;
+		else
+		{
+			// if we are in the middle of the string
+			// we need to shift all the input
 
+			// clear everything from the cursor till the end
+			ssh_channel_write(Channel, "\33[0K", str_length("\33[0K"));
+			ssh_channel_write(Channel, aBuf + i, 1);
+
+			char aRight[2048];
+			// TODO: this for sure can go OOB pls add some checks
+			str_copy(aRight, pClient->m_aInput + Idx);
+
+			ssh_channel_write(Channel, aRight, str_length(aRight));
+
+			pClient->m_aInput[Idx] = Byte;
+			pClient->m_aInput[Idx + 1] = '\0';
+
+			// how well does str_append work with partial utf8?
+			str_append(pClient->m_aInput, aRight);
+
+			pClient->m_CursorPos.x++;
+
+			// move cursor back into the input after rewriting the line
+			pClient->SendCursorPos(pClient->m_CursorPos);
+		}
+
+		// TODO: unused?
 		k++;
-		ssh_channel_write(Channel, aBuf + i, 1);
 	}
 
 	if(!std::isprint(aBuf[0]))
