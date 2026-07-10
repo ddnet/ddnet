@@ -63,7 +63,7 @@ esperanto
 estonian
 == Eesti
 == 233
-== ee
+== et
 
 finnish
 == Suomi
