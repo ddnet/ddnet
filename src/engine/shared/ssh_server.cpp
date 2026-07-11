@@ -181,7 +181,8 @@ void CSshClient::InsertInputByte(char Byte)
 	char aByteBuf[2] = {Byte, 0x00};
 	ssh_channel Channel = m_Channel;
 	int Idx = m_CursorPos.x - PromptLength();
-	if(m_aInput[Idx] == '\0')
+	bool CursorAtEnd = m_aInput[Idx] == '\0';
+	if(CursorAtEnd)
 	{
 		// if we override the nullterm make sure to move it
 		// so the string stays terminated
@@ -218,10 +219,8 @@ void CSshClient::InsertInputByte(char Byte)
 		SendCursorPos(m_CursorPos);
 	}
 
-	// TODO: continue here with completion preview
-
-	// m_CompletionEnumerationCount = 0;
-	// Console()->PossibleCommands(m_aInput, CFGFLAG_SERVER, false, CompletionPreviewCallback, &m_CallbackCtx);
+	if(CursorAtEnd)
+		Console()->PossibleCommands(m_aInput, CFGFLAG_SERVER, false, CompletionPreviewCallback, &m_CallbackCtx);
 }
 
 void CSshClient::ClearPrompt()
@@ -353,16 +352,22 @@ void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pU
 
 	// log_info("ssh", "completion preview callback idx=%d cmd=%s", Index, pCmd);
 
-	int NextIndex = 1;
-	if(pClient->m_CompletionIndex != -1)
-		NextIndex = pClient->m_CompletionIndex + 1;
-
-	if(NextIndex == pClient->m_CompletionEnumerationCount)
+	if(Index == 0 && pClient->m_CompletionEnumerationCount == -1)
 	{
-		log_info("ssh", "at idx=%d next_idx=%d preview_cmd=%s", Index, NextIndex, pCmd);
+		// the console completion uses string find and not str starts with
+		// unlike for example the bash shell
+		// so previewing the possible completion in line
+		// gets quite complicated for a match in the middle of the command
+		// so we only preview the simple case
+		const char *pPreview = str_startswith(pCmd, pClient->m_aInput);
+		if(pPreview)
+		{
+			ssh_channel_write(pClient->m_Channel, "\033[36m", str_length("\033[36m"));
+			ssh_channel_write(pClient->m_Channel, pPreview, str_length(pPreview));
+			ssh_channel_write(pClient->m_Channel, "\033[0m", str_length("\033[0m"));
+			pClient->SendCursorPos(pClient->m_CursorPos);
+		}
 	}
-
-	pClient->m_CompletionEnumerationCount++;
 }
 
 void CSshServer::ProcessMessage(CSshClient *pClient)
