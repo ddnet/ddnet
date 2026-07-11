@@ -347,7 +347,6 @@ public:
 	bool DummyAllowed() const override;
 
 	const CServerInfo &ServerInfo() const override;
-	void GetServerInfo(CServerInfo *pServerInfo) const override;
 	void ServerInfoRequest();
 	void SetCurrentServerInfo(const CServerInfo &ServerInfo);
 

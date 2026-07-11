@@ -883,11 +883,6 @@ const CServerInfo &CClient::ServerInfo() const
 	return m_CurrentServerInfo;
 }
 
-void CClient::GetServerInfo(CServerInfo *pServerInfo) const
-{
-	*pServerInfo = m_CurrentServerInfo;
-}
-
 void CClient::ServerInfoRequest()
 {
 	m_CurrentServerInfo = {};
