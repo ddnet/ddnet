@@ -2616,6 +2616,7 @@ if(CLIENT)
     ui.h
     ui_listbox.cpp
     ui_listbox.h
+    ui_popups.cpp
     ui_rect.cpp
     ui_rect.h
     ui_scrollregion.cpp
