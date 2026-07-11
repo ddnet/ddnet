@@ -150,7 +150,6 @@ bool CSshClient::CursorMoveWordLeft()
 
 bool CSshClient::CursorMoveWordRight()
 {
-	log_info("ssh", "move rigjt");
 	while(true)
 	{
 		if(!CursorMoveRight())
