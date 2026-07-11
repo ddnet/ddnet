@@ -394,7 +394,7 @@ void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pU
 			ssh_channel_write(pClient->m_Channel, pPreview, str_length(pPreview));
 			ssh_channel_write(pClient->m_Channel, "\033[0m", str_length("\033[0m"));
 			pClient->SendCursorPos(pClient->m_CursorPos);
-			pClient->m_pCompletionPreview = nullptr;
+			pClient->m_pCompletionPreview = pPreview;
 		}
 	}
 }
@@ -677,6 +677,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == 27) // escape sequence
 		{
+			pClient->ClearCompletionPreview();
 			if((n - i) < 2)
 			{
 				// this is odd, do we just ignore this one?
@@ -721,7 +722,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			}
 			if((n - i) >= 3 && aBuf[i + 1] == 91)
 			{
-				pClient->ClearCompletionPreview();
 				if(aBuf[i + 2] == 65) // arrow key up
 				{
 					// skip the sequence
