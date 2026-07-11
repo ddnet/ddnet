@@ -4592,9 +4592,7 @@ void CEditor::HandleWriterFinishJobs()
 	// send rcon.. if we can
 	if(Client()->RconAuthed() && g_Config.m_EdAutoMapReload)
 	{
-		CServerInfo CurrentServerInfo;
-		Client()->GetServerInfo(&CurrentServerInfo);
-
+		const CServerInfo &CurrentServerInfo = Client()->ServerInfo();
 		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
 			char aMapName[MAX_MAP_LENGTH];

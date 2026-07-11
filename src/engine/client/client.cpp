@@ -878,6 +878,11 @@ bool CClient::DummyAllowed() const
 	return m_ServerCapabilities.m_AllowDummy;
 }
 
+const CServerInfo &CClient::ServerInfo() const
+{
+	return m_CurrentServerInfo;
+}
+
 void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 {
 	*pServerInfo = m_CurrentServerInfo;
