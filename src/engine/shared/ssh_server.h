@@ -106,6 +106,7 @@ public:
 	int PromptLength();
 	void SetCursorPosToPromptStart();
 
+	void ClearCompletionPreview();
 	void SendBell() const;
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();
@@ -116,6 +117,7 @@ public:
 	char m_aCompletionBuffer[2048] = "";
 	int m_CompletionIndex = -1;
 	int m_CompletionEnumerationCount = -1;
+	const char *m_pCompletionPreview = nullptr;
 
 	static void CompletionCallback(int Index, const char *pCmd, void *pUser);
 	static void CompletionPreviewCallback(int Index, const char *pCmd, void *pUser);

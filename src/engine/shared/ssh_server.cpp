@@ -220,7 +220,12 @@ void CSshClient::InsertInputByte(char Byte)
 	}
 
 	if(CursorAtEnd)
+	{
+		m_pCompletionPreview = nullptr;
 		Console()->PossibleCommands(m_aInput, CFGFLAG_SERVER, false, CompletionPreviewCallback, &m_CallbackCtx);
+		if(!m_pCompletionPreview)
+			ClearCompletionPreview();
+	}
 }
 
 void CSshClient::ClearPrompt()
@@ -253,6 +258,22 @@ void CSshClient::SetCursorPosToPromptStart()
 {
 	// not the most ideal method name but eh idk
 	m_CursorPos.x = PromptLength();
+}
+
+void CSshClient::ClearCompletionPreview()
+{
+	int Idx = m_CursorPos.x - PromptLength();
+	bool CursorAtEnd = m_aInput[Idx] == '\0';
+	// there can only be a completion string if our cursor is
+	// at the end of the input
+	if(!CursorAtEnd)
+		return;
+	if(!m_pCompletionPreview)
+		return;
+
+	// clear everything from the cursor till the end
+	ssh_channel_write(m_Channel, "\33[0K", str_length("\33[0K"));
+	m_pCompletionPreview = nullptr;
 }
 
 void CSshClient::SendBell() const
@@ -292,6 +313,7 @@ void CSshClient::RequestCursorPos()
 
 void CSshClient::ResetCompletion()
 {
+	ClearCompletionPreview();
 	m_aCompletionBuffer[0] = '\0';
 	m_CompletionIndex = -1;
 	m_CompletionEnumerationCount = -1;
@@ -362,10 +384,17 @@ void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pU
 		const char *pPreview = str_startswith(pCmd, pClient->m_aInput);
 		if(pPreview)
 		{
+			// if there previously was a longer completion preview
+			// we need to clear it out because we will only partially override it
+			// could also check the string length of m_pCompletionPreview compared to pPreview
+			// and only then clear but eh idk seems cheap enough to just always clear
+			ssh_channel_write(pClient->m_Channel, "\33[0K", str_length("\33[0K"));
+
 			ssh_channel_write(pClient->m_Channel, "\033[36m", str_length("\033[36m"));
 			ssh_channel_write(pClient->m_Channel, pPreview, str_length(pPreview));
 			ssh_channel_write(pClient->m_Channel, "\033[0m", str_length("\033[0m"));
 			pClient->SendCursorPos(pClient->m_CursorPos);
+			pClient->m_pCompletionPreview = nullptr;
 		}
 	}
 }
@@ -533,12 +562,14 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_A)
 		{
+			pClient->ClearCompletionPreview();
 			pClient->SetCursorPosToPromptStart();
 			pClient->SendCursorPos(pClient->m_CursorPos);
 			continue;
 		}
 		else if(Byte == KEY_CTRL_E)
 		{
+			pClient->ClearCompletionPreview();
 			pClient->SetCursorPosToPromptStart();
 			pClient->m_CursorPos.x += str_length(pClient->m_aInput);
 			pClient->SendCursorPos(pClient->m_CursorPos);
@@ -584,6 +615,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			if(pClient->m_aInput[0])
 				continue;
 
+			pClient->ClearCompletionPreview();
 			ssh_channel_write(pClient->m_Channel, "\033[2J", str_length("\033[2J"));
 			pClient->m_CursorPos.y = 1;
 			pClient->SendCursorPos(pClient->m_CursorPos);
@@ -639,6 +671,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_TAB)
 		{
+			pClient->ClearCompletionPreview();
 			pClient->CompleteCommands(false);
 			continue;
 		}
@@ -688,6 +721,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			}
 			if((n - i) >= 3 && aBuf[i + 1] == 91)
 			{
+				pClient->ClearCompletionPreview();
 				if(aBuf[i + 2] == 65) // arrow key up
 				{
 					// skip the sequence
