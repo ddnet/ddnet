@@ -347,22 +347,10 @@ void CSshClient::CompletionCallback(int Index, const char *pCmd, void *pUser)
 	CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
 	CSshClient *pClient = pCtx->m_pClient;
 
-	// log_info("ssh", "completion callback idx=%d cmd=%s", Index, pCmd);
-
 	if(pClient->m_CompletionIndex == pClient->m_CompletionEnumerationCount)
 	{
 		pClient->SetInput(pCmd);
 	}
-
-	// TODO: should there be a preview below the prompt like in tw console?
-	//       or a inline preview greyed out for the next possible word like in shells?
-	//       or both?
-
-	// else if(pClient->m_CompletionIndex < pClient->m_CompletionEnumerationCount)
-	// {
-	// 	str_append(pClient->m_aCompletionPreview, pStr, sizeof(pClient->m_aCompletionPreview));
-	// 	str_append(pClient->m_aCompletionPreview, " ", sizeof(pClient->m_aCompletionPreview));
-	// }
 
 	pClient->m_CompletionEnumerationCount++;
 }
@@ -371,8 +359,6 @@ void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pU
 {
 	CCallbackCtx *pCtx = static_cast<CCallbackCtx *>(pUser);
 	CSshClient *pClient = pCtx->m_pClient;
-
-	// log_info("ssh", "completion preview callback idx=%d cmd=%s", Index, pCmd);
 
 	if(Index == 0 && pClient->m_CompletionEnumerationCount == -1)
 	{
@@ -518,7 +504,6 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	// TODO: improve this shell!
 	// TODO: ctrl+r history support
 	// TODO: word deletion
-	// TODO: autocomplete
 
 	for(int i = 0; i < n; i++)
 	{
