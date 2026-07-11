@@ -167,13 +167,13 @@ bool CSshClient::CursorMoveWordRight()
 void CSshClient::SetInput(const char *pInput)
 {
 	str_copy(m_aInput, pInput);
-	m_CursorPos.x = str_length(pInput);
 
 	if(m_Channel)
 	{
 		ClearPrompt();
 		ssh_channel_write(m_Channel, pInput, str_length(pInput));
 	}
+	m_CursorPos.x = PromptLength() + str_length(pInput);
 }
 
 void CSshClient::InsertInputByte(char Byte)
