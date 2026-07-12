@@ -481,7 +481,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 		pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 		for(int i = Start; i < Start + Num; i++)
 		{
-			int ItemSize = pMap->GetItemSize(Start);
+			int ItemSize = pMap->GetItemSize(i);
 			int ItemId;
 			CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &ItemId);
 			if(!pItem || ItemId != 0)
