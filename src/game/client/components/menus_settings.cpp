@@ -310,13 +310,29 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	// country flag selector
 	static CLineInputBuffered<25> s_FlagFilterInput;
 
-	std::vector<const CCountryFlags::CCountryFlag *> vpFilteredFlags;
+	class CCountryFlagEntry
+	{
+	public:
+		const CCountryFlags::CCountryFlag *m_pFlag;
+		std::optional<std::pair<int, int>> m_NameMatch;
+	};
+	std::vector<CCountryFlagEntry> vFilteredFlags;
 	for(size_t i = 0; i < GameClient()->m_CountryFlags.Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag &Entry = GameClient()->m_CountryFlags.GetByIndex(i);
-		if(!str_find_nocase(Entry.m_aCountryCodeString, s_FlagFilterInput.GetString()))
-			continue;
-		vpFilteredFlags.push_back(&Entry);
+		if(!s_FlagFilterInput.IsEmpty())
+		{
+			const char *pNameMatchEnd;
+			const char *pNameMatchStart = str_utf8_find_nocase(Entry.m_aCountryCodeString, s_FlagFilterInput.GetString(), &pNameMatchEnd);
+			if(pNameMatchStart != nullptr)
+			{
+				vFilteredFlags.emplace_back(&Entry, std::make_pair<int, int>(pNameMatchStart - Entry.m_aCountryCodeString, pNameMatchEnd - pNameMatchStart));
+			}
+		}
+		else
+		{
+			vFilteredFlags.emplace_back(&Entry, std::nullopt);
+		}
 	}
 
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
@@ -326,16 +342,16 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 	int OldSelected = -1;
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(48.0f, vpFilteredFlags.size(), 10, 3, OldSelected, &MainView);
+	s_ListBox.DoStart(48.0f, vFilteredFlags.size(), 10, 3, OldSelected, &MainView);
 
-	for(size_t i = 0; i < vpFilteredFlags.size(); i++)
+	for(size_t i = 0; i < vFilteredFlags.size(); i++)
 	{
-		const CCountryFlags::CCountryFlag *pEntry = vpFilteredFlags[i];
+		const CCountryFlagEntry &Entry = vFilteredFlags[i];
 
-		if(pEntry->m_CountryCode == *pCountry)
+		if(Entry.m_pFlag->m_CountryCode == *pCountry)
 			OldSelected = i;
 
-		const CListboxItem Item = s_ListBox.DoNextItem(&pEntry->m_CountryCode, OldSelected >= 0 && (size_t)OldSelected == i);
+		const CListboxItem Item = s_ListBox.DoNextItem(&Entry.m_pFlag->m_CountryCode, OldSelected >= 0 && (size_t)OldSelected == i);
 		if(!Item.m_Visible)
 			continue;
 
@@ -346,19 +362,41 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		const float OldWidth = FlagRect.w;
 		FlagRect.w = FlagRect.h * 2;
 		FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
-		GameClient()->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+		GameClient()->m_CountryFlags.Render(Entry.m_pFlag->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
-		if(pEntry->m_Texture.IsValid() || pEntry->m_CountryCode == CountryCode::DEFAULT)
+		if(Entry.m_pFlag->m_Texture.IsValid() || Entry.m_pFlag->m_CountryCode == CountryCode::DEFAULT)
 		{
-			Ui()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_MC);
+			SLabelProperties Props;
+			Props.m_MaxWidth = Label.w - 5.0f;
+			if(Entry.m_NameMatch.has_value())
+			{
+				const auto [MatchStart, MatchLength] = Entry.m_NameMatch.value();
+				Props.m_vColorSplits.emplace_back(MatchStart, MatchLength, ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f));
+			}
+			Ui()->DoLabel(&Label, Entry.m_pFlag->m_aCountryCodeString, 10.0f, TEXTALIGN_MC, Props);
 		}
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
 	if(OldSelected != NewSelected)
 	{
-		*pCountry = vpFilteredFlags[NewSelected]->m_CountryCode;
+		*pCountry = vFilteredFlags[NewSelected].m_pFlag->m_CountryCode;
 		SetNeedSendInfo();
+	}
+
+	if(GameClient()->m_CountryFlags.Num() > 0 && vFilteredFlags.empty())
+	{
+		CUIRect FilterLabel, ResetButton;
+		MainView.HMargin((MainView.h - (16.0f + 18.0f + 8.0f)) / 2.0f, &FilterLabel);
+		FilterLabel.HSplitTop(16.0f, &FilterLabel, &ResetButton);
+		ResetButton.HSplitTop(8.0f, nullptr, &ResetButton);
+		ResetButton.VMargin((ResetButton.w - 200.0f) / 2.0f, &ResetButton);
+		Ui()->DoLabel(&FilterLabel, Localize("No country flags match your filter criteria"), 16.0f, TEXTALIGN_MC);
+		static CButtonContainer s_ResetButton;
+		if(DoButton_Menu(&s_ResetButton, Localize("Reset filter"), 0, &ResetButton))
+		{
+			s_FlagFilterInput.Clear();
+		}
 	}
 
 	Ui()->DoEditBox_Search(&s_FlagFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !GameClient()->m_GameConsole.IsActive());
