@@ -98,14 +98,14 @@ void CEditorHistory::EndBulk(int DisplayToUse)
 
 void CEditor::RenderEditorHistory(CUIRect View)
 {
-	enum EHistoryType
+	enum class EHistoryType
 	{
-		EDITOR_HISTORY,
-		ENVELOPE_HISTORY,
-		SERVER_SETTINGS_HISTORY
+		EDITOR,
+		ENVELOPE,
+		SERVER_SETTINGS,
 	};
 
-	static EHistoryType s_HistoryType = EDITOR_HISTORY;
+	static EHistoryType s_HistoryType = EHistoryType::EDITOR;
 	static int s_ActionSelectedIndex = 0;
 	static CListBox s_ListBox;
 	s_ListBox.SetActive(m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen());
@@ -130,23 +130,23 @@ void CEditor::RenderEditorHistory(CUIRect View)
 	{
 		TypeButtons.VSplitLeft(HistoryTypeBtnSize, &HistoryTypeButton, &TypeButtons);
 		static int s_EditorHistoryButton = 0;
-		if(DoButton_Ex(&s_EditorHistoryButton, "Editor", s_HistoryType == EDITOR_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show map editor history.", IGraphics::CORNER_L))
+		if(DoButton_Ex(&s_EditorHistoryButton, "Editor", s_HistoryType == EHistoryType::EDITOR, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show map editor history.", IGraphics::CORNER_L))
 		{
-			s_HistoryType = EDITOR_HISTORY;
+			s_HistoryType = EHistoryType::EDITOR;
 		}
 
 		TypeButtons.VSplitLeft(HistoryTypeBtnSize, &HistoryTypeButton, &TypeButtons);
 		static int s_EnvelopeEditorHistoryButton = 0;
-		if(DoButton_Ex(&s_EnvelopeEditorHistoryButton, "Envelope", s_HistoryType == ENVELOPE_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show envelope editor history.", IGraphics::CORNER_NONE))
+		if(DoButton_Ex(&s_EnvelopeEditorHistoryButton, "Envelope", s_HistoryType == EHistoryType::ENVELOPE, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show envelope editor history.", IGraphics::CORNER_NONE))
 		{
-			s_HistoryType = ENVELOPE_HISTORY;
+			s_HistoryType = EHistoryType::ENVELOPE;
 		}
 
 		TypeButtons.VSplitLeft(HistoryTypeBtnSize, &HistoryTypeButton, &TypeButtons);
 		static int s_ServerSettingsHistoryButton = 0;
-		if(DoButton_Ex(&s_ServerSettingsHistoryButton, "Settings", s_HistoryType == SERVER_SETTINGS_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show server settings editor history.", IGraphics::CORNER_R))
+		if(DoButton_Ex(&s_ServerSettingsHistoryButton, "Settings", s_HistoryType == EHistoryType::SERVER_SETTINGS, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show server settings editor history.", IGraphics::CORNER_R))
 		{
-			s_HistoryType = SERVER_SETTINGS_HISTORY;
+			s_HistoryType = EHistoryType::SERVER_SETTINGS;
 		}
 	}
 
@@ -157,11 +157,11 @@ void CEditor::RenderEditorHistory(CUIRect View)
 	Ui()->DoLabel(&Label, "Editor history. Click on an action to undo all actions above.", 10.0f, TEXTALIGN_ML, InfoProps);
 
 	CEditorHistory *pCurrentHistory;
-	if(s_HistoryType == EDITOR_HISTORY)
+	if(s_HistoryType == EHistoryType::EDITOR)
 		pCurrentHistory = &Map()->m_EditorHistory;
-	else if(s_HistoryType == ENVELOPE_HISTORY)
+	else if(s_HistoryType == EHistoryType::ENVELOPE)
 		pCurrentHistory = &Map()->m_EnvelopeEditorHistory;
-	else if(s_HistoryType == SERVER_SETTINGS_HISTORY)
+	else if(s_HistoryType == EHistoryType::SERVER_SETTINGS)
 		pCurrentHistory = &Map()->m_ServerSettingsHistory;
 	else
 		return;
