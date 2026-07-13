@@ -92,9 +92,10 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 
 	if(pClient->m_Channel)
 	{
+		int MsgLen = str_length(pMessage->Message());
 		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
-		ssh_channel_write(pClient->m_Channel, pMessage->Message(), str_length(pMessage->Message()));
-		pClient->m_CursorPos.y++;
+		ssh_channel_write(pClient->m_Channel, pMessage->Message(), MsgLen);
+		pClient->m_CursorPos.y += (MsgLen / pClient->m_Term.m_Width) + 1;
 	}
 
 	// just mirror everything to regular log because the hiding is stupid
@@ -783,6 +784,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		{
 			log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
 		}
+		log_info("ssh", "cursor x=%d y=%d term w=%d h=%d", pClient->m_CursorPos.x, pClient->m_CursorPos.y, pClient->m_Term.m_Width, pClient->m_Term.m_Height);
 		log_info("ssh", "input '%s'", pClient->m_aInput);
 	}
 }
