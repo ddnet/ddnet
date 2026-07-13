@@ -54,6 +54,10 @@ TEST(Ssh, LineWrap)
 	Linebreaks = CSshLogger::LineWrapForSsh("hello world!", aSshLine, sizeof(aSshLine), 10);
 	EXPECT_EQ(Linebreaks, 2);
 	EXPECT_STREQ(aSshLine, "hello world!");
+
+	// Linebreaks = CSshLogger::LineWrapForSsh("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅", aSshLine, sizeof(aSshLine), 36);
+	// EXPECT_EQ(Linebreaks, 1);
+	// EXPECT_STREQ(aSshLine, "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
 }
 
 #endif

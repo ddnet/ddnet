@@ -179,6 +179,8 @@ int CSshClient::InputIdx()
 	return std::clamp(Idx, 0, (int)sizeof(m_aInput) - 2);
 }
 
+// TODO: support moving cursor through multi byte unicode characters
+
 bool CSshClient::CursorMoveLeft()
 {
 	const int Min = PromptLength();
@@ -601,8 +603,8 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					CLogScope Scope(&Logger);
 					// log_info("ssh", "debug command aaaaaaaaaaaaa aaaxxxxxxxxxxxT");
 					// log_info("ssh", "new\nline that would be long\nbuline breakslolxx");
-					// log_info("ssh", "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
-					log_info("ssh", "hello world");
+					// log_info("ssh", "hello world");
+					log_info("ssh", "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
 				}
 				else
 				{
