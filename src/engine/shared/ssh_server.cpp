@@ -106,7 +106,28 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		//       or fetch the cursor position from the client after these complicated cases
 		//       does the ssh channel even support \n because it usually needs \r\n
 
-		pClient->m_CursorPos.y += (MsgLen / pClient->m_Term.m_Width) + 1;
+		// there is always one new line per log that is the one we append
+		pClient->m_CursorPos.y++;
+
+		int SubLen = 0;
+		const char *pLine = pMessage->Message();
+		for(int i = 0; i < MsgLen; i++)
+		{
+			SubLen++;
+			if(SubLen > pClient->m_Term.m_Width)
+			{
+				// if the log line is longer than the terminal width we might wrap
+				pClient->m_CursorPos.y++;
+				SubLen = 0;
+			}
+			if(pLine[i] == '\n')
+			{
+				// if the log line contains a \n newline escape sequence we also need to
+				// update the cursor position and clear out the sub line length
+				pClient->m_CursorPos.y++;
+				SubLen = 0;
+			}
+		}
 	}
 
 	// just mirror everything to regular log because the hiding is stupid
@@ -545,6 +566,14 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
 					CLogScope Scope(&Logger);
 					ListConnections();
+				}
+				else if(!str_comp(pCmd, "x")) // FIXME: remove debug
+				{
+					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
+					CLogScope Scope(&Logger);
+					log_info("ssh", "debug command aaaaaaaaaaaaa aaaxxxxxxxxxxxT");
+					log_info("ssh", "new\nline");
+					log_info("ssh", "new\nline that would be long\nbutthere are\nenuff line breaks\nlol");
 				}
 				else
 				{
