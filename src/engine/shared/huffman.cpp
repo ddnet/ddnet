@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "huffman.h"
 
+#include <base/dbg.h>
 #include <base/mem.h>
 
 #include <algorithm>
@@ -19,10 +20,11 @@ const unsigned CHuffman::ms_aFreqTable[HUFFMAN_MAX_SYMBOLS] = {
 	136, 53, 180, 57, 142, 57, 158, 61, 166, 112, 152, 92, 26, 22, 21, 28, 20, 26, 30, 21,
 	32, 27, 20, 17, 23, 21, 30, 22, 22, 21, 27, 25, 17, 27, 23, 18, 39, 26, 15, 21,
 	12, 18, 18, 27, 20, 18, 15, 19, 11, 17, 33, 12, 18, 15, 19, 18, 16, 26, 17, 18,
-	9, 10, 25, 22, 22, 17, 20, 16, 6, 16, 15, 20, 14, 18, 24, 335, 1517};
+	9, 10, 25, 22, 22, 17, 20, 16, 6, 16, 15, 20, 14, 18, 24, 335, 1};
 
-struct CHuffmanConstructNode
+class CHuffmanConstructNode
 {
+public:
 	unsigned short m_NodeId;
 	int m_Frequency;
 };
@@ -32,12 +34,12 @@ static bool CompareNodesByFrequencyDesc(const CHuffmanConstructNode *pNode1, con
 	return pNode2->m_Frequency < pNode1->m_Frequency;
 }
 
-void CHuffman::Setbits_r(CNode *pNode, int Bits, unsigned Depth)
+void CHuffman::SetBitsRecursive(CNode *pNode, int Bits, unsigned Depth)
 {
 	if(pNode->m_aLeaves[1] != 0xffff)
-		Setbits_r(&m_aNodes[pNode->m_aLeaves[1]], Bits | (1 << Depth), Depth + 1);
+		SetBitsRecursive(&m_aNodes[pNode->m_aLeaves[1]], Bits | (1 << Depth), Depth + 1);
 	if(pNode->m_aLeaves[0] != 0xffff)
-		Setbits_r(&m_aNodes[pNode->m_aLeaves[0]], Bits, Depth + 1);
+		SetBitsRecursive(&m_aNodes[pNode->m_aLeaves[0]], Bits, Depth + 1);
 
 	if(pNode->m_NumBits)
 	{
@@ -60,10 +62,7 @@ void CHuffman::ConstructTree(const unsigned *pFrequencies)
 		m_aNodes[i].m_aLeaves[0] = 0xffff;
 		m_aNodes[i].m_aLeaves[1] = 0xffff;
 
-		if(i == HUFFMAN_EOF_SYMBOL)
-			aNodesLeftStorage[i].m_Frequency = 1;
-		else
-			aNodesLeftStorage[i].m_Frequency = pFrequencies[i];
+		aNodesLeftStorage[i].m_Frequency = pFrequencies[i];
 		aNodesLeftStorage[i].m_NodeId = i;
 		apNodesLeft[i] = &aNodesLeftStorage[i];
 	}
@@ -89,10 +88,10 @@ void CHuffman::ConstructTree(const unsigned *pFrequencies)
 	m_pStartNode = &m_aNodes[m_NumNodes - 1];
 
 	// build symbol bits
-	Setbits_r(m_pStartNode, 0, 0);
+	SetBitsRecursive(m_pStartNode, 0, 0);
 }
 
-void CHuffman::Init(const unsigned *pFrequencies)
+void CHuffman::Init()
 {
 	// make sure to cleanout every thing
 	mem_zero(m_aNodes, sizeof(m_aNodes));
@@ -101,7 +100,7 @@ void CHuffman::Init(const unsigned *pFrequencies)
 	m_NumNodes = 0;
 
 	// construct the tree
-	ConstructTree(pFrequencies);
+	ConstructTree(ms_aFreqTable);
 
 	// build decode LUT
 	for(int i = 0; i < HUFFMAN_LUTSIZE; i++)
@@ -113,9 +112,6 @@ void CHuffman::Init(const unsigned *pFrequencies)
 		{
 			pNode = &m_aNodes[pNode->m_aLeaves[Bits & 1]];
 			Bits >>= 1;
-
-			if(!pNode)
-				break;
 
 			if(pNode->m_NumBits)
 			{
@@ -132,6 +128,9 @@ void CHuffman::Init(const unsigned *pFrequencies)
 //***************************************************************
 int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int OutputSize) const
 {
+	dbg_assert(InputSize >= 0, "Invalid InputSize: %d", InputSize);
+	dbg_assert(OutputSize > 0, "Invalid OutputSize: %d", OutputSize);
+
 	// this macro loads a symbol for a byte into bits and bitcount
 #define HUFFMAN_MACRO_LOADSYMBOL(Sym) \
 	do \
@@ -146,9 +145,9 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 	{ \
 		while(Bitcount >= 8) \
 		{ \
-			*pDst++ = (unsigned char)(Bits & 0xff); \
 			if(pDst == pDstEnd) \
 				return -1; \
+			*pDst++ = (unsigned char)(Bits & 0xff); \
 			Bits >>= 8; \
 			Bitcount -= 8; \
 		} \
@@ -191,8 +190,13 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 	HUFFMAN_MACRO_LOADSYMBOL(HUFFMAN_EOF_SYMBOL);
 	HUFFMAN_MACRO_WRITE();
 
-	// write out the last bits
-	*pDst++ = Bits;
+	// write out the last bits if we have any
+	if(Bitcount != 0)
+	{
+		if(pDst == pDstEnd)
+			return -1;
+		*pDst++ = Bits;
+	}
 
 	// return the size of the output
 	return (int)(pDst - (const unsigned char *)pOutput);
@@ -205,11 +209,14 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 //***************************************************************
 int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int OutputSize) const
 {
+	dbg_assert(InputSize >= 0, "Invalid InputSize: %d", InputSize);
+	dbg_assert(OutputSize > 0, "Invalid OutputSize: %d", OutputSize);
+
 	// setup buffer pointers
+	const unsigned char *pSrc = (const unsigned char *)pInput;
+	const unsigned char *pSrcEnd = pSrc + InputSize;
 	unsigned char *pDst = (unsigned char *)pOutput;
-	unsigned char *pSrc = (unsigned char *)pInput;
 	unsigned char *pDstEnd = pDst + OutputSize;
-	unsigned char *pSrcEnd = pSrc + InputSize;
 
 	unsigned Bits = 0;
 	unsigned Bitcount = 0;
@@ -241,12 +248,20 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 		if(pNode->m_NumBits)
 		{
 			// remove the bits for that symbol
+			if(Bitcount < pNode->m_NumBits)
+			{
+				return -1;
+			}
 			Bits >>= pNode->m_NumBits;
 			Bitcount -= pNode->m_NumBits;
 		}
 		else
 		{
 			// remove the bits that the lut checked up for us
+			if(Bitcount < HUFFMAN_LUTBITS)
+			{
+				return -1;
+			}
 			Bits >>= HUFFMAN_LUTBITS;
 			Bitcount -= HUFFMAN_LUTBITS;
 
