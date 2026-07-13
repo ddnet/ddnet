@@ -94,14 +94,6 @@ static void SockaddrToNetaddr(const sockaddr *pSrc, socklen_t SrcLen, NETADDR *p
 // And it writes the reformartted log line to the output buffer pSshLine
 int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth)
 {
-	int LineLen = str_length(pServerLine);
-	// return early in the simple case
-	if(str_find(pServerLine, "\n") == nullptr && LineLen < TerminalWidth)
-	{
-		str_copy(pSshLine, pServerLine, SshLineSize);
-		return 1;
-	}
-
 	// TODO: support multi byte utf8 char width
 	// TODO: support utf8 wide character width
 
@@ -126,8 +118,15 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 			NumLines++;
 			SubLineLen = 0;
 		}
-		pSshLine[OutIdx++] = pServerLine[InIdx];
-		InIdx++;
+		const char *pStr = pServerLine + InIdx;
+		int CodePoint = str_utf8_decode(&pStr);
+		dbg_assert(CodePoint != 0, "Unexpected NULL at index=%" PRIzu " line='%s'", InIdx, pServerLine);
+		dbg_assert(CodePoint != -1, "Unexpected invalid utf-8 at index=%" PRIzu " in line='%s'", InIdx, pServerLine);
+		int Bytes = pStr - (pServerLine + InIdx);
+		for(int i = 0; i < Bytes; i++)
+		{
+			pSshLine[OutIdx++] = pServerLine[InIdx++];
+		}
 	};
 	pSshLine[OutIdx] = '\0';
 
