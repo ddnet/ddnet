@@ -95,6 +95,17 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		int MsgLen = str_length(pMessage->Message());
 		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
 		ssh_channel_write(pClient->m_Channel, pMessage->Message(), MsgLen);
+
+		// determining the new y offset is not easy
+		// most of the time a new log line is y + 1
+		// but of the terminal width is smaller than the log line it might be y + 2 or more
+		// it gets tricky when the log line contains \n newline characters
+		// especially when that gets mixed with long lines
+
+		// TODO: either properly test the \n plus long line case and implement it good enough
+		//       or fetch the cursor position from the client after these complicated cases
+		//       does the ssh channel even support \n because it usually needs \r\n
+
 		pClient->m_CursorPos.y += (MsgLen / pClient->m_Term.m_Width) + 1;
 	}
 
