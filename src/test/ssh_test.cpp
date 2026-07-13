@@ -1,3 +1,5 @@
+#ifdef CONF_SSH
+
 #include <base/str.h>
 
 #include <engine/shared/ssh_server.h>
@@ -53,3 +55,5 @@ TEST(Ssh, LineWrap)
 	EXPECT_EQ(Linebreaks, 2);
 	EXPECT_STREQ(aSshLine, "hello world!");
 }
+
+#endif
