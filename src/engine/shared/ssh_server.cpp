@@ -1020,8 +1020,18 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 		return SSH_ERROR;
 	}
 
+	pCtx->m_pClient->m_Term.m_Width = Width;
+	pCtx->m_pClient->m_Term.m_Height = Height;
+
 	// we don't support pty yet, only shell for now
 	// but we need to return OK here otherwise the client shows an error
+
+	// update: actually I feel like we require a pty by now :D
+	//         because we use height and width and ansi escape sequences
+	//         i feel like that is exactly what a pty is, but not sure
+	//         maybe we should drop the connection if there was no pty request
+	//         or have a fallback to a less fancy shell
+
 	return SSH_OK;
 }
 
