@@ -123,6 +123,11 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 		{
 			pSshLine[OutIdx++] = pServerLine[InIdx++];
 		}
+
+		// FIXME: I AM CURRENTLY WORKING ON THE CODE BELOW
+		//        it is untested because code dpoesnt compile yet
+		//        and i have to go
+
 		int Width = unicode_width_process(pUnicodeWidthState, CodePoint);
 		SubLineLen += Width;
 		if(SubLineLen > TerminalWidth)
