@@ -13,6 +13,7 @@
 #include <base/types.h>
 
 #include <engine/console.h>
+#include <engine/external/unicode-width/unicode_width.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
@@ -92,7 +93,7 @@ static void SockaddrToNetaddr(const sockaddr *pSrc, socklen_t SrcLen, NETADDR *p
 // This method should be called for every log line the server printed and that we send to the ssh client.
 // It returns the amount of rows written (so by how much the cursor pos y should be incremented)
 // And it writes the reformartted log line to the output buffer pSshLine
-int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth)
+int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth, unicode_width_state_t *pUnicodeWidthState)
 {
 	// TODO: support multi byte utf8 char width
 	// TODO: support utf8 wide character width
@@ -113,11 +114,6 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 			NumLines++;
 			SubLineLen = 0;
 		}
-		else if(++SubLineLen > TerminalWidth)
-		{
-			NumLines++;
-			SubLineLen = 0;
-		}
 		const char *pStr = pServerLine + InIdx;
 		int CodePoint = str_utf8_decode(&pStr);
 		dbg_assert(CodePoint != 0, "Unexpected NULL at index=%" PRIzu " line='%s'", InIdx, pServerLine);
@@ -126,6 +122,13 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 		for(int i = 0; i < Bytes; i++)
 		{
 			pSshLine[OutIdx++] = pServerLine[InIdx++];
+		}
+		int Width = unicode_width_process(pUnicodeWidthState, CodePoint);
+		SubLineLen += Width;
+		if(SubLineLen > TerminalWidth)
+		{
+			NumLines++;
+			SubLineLen = 0;
 		}
 	};
 	pSshLine[OutIdx] = '\0';
@@ -151,7 +154,7 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	if(pClient->m_Channel)
 	{
 		char aSshLine[8192];
-		int NumLines = LineWrapForSsh(pMessage->Message(), aSshLine, sizeof(aSshLine), pClient->m_Term.m_Width);
+		int NumLines = LineWrapForSsh(pMessage->Message(), aSshLine, sizeof(aSshLine), pClient->m_Term.m_Width, &m_pSshServer->m_UnicodeWidthState);
 		pClient->m_CursorPos.y += NumLines;
 		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
 		ssh_channel_write(pClient->m_Channel, aSshLine, str_length(aSshLine));
@@ -880,6 +883,8 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage)
 
 	if(!g_Config.m_SvSsh)
 		return;
+
+	unicode_width_init(&m_UnicodeWidthState);
 
 	log_info("ssh", "libssh %s", ssh_version(0));
 

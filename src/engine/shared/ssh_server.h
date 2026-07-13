@@ -7,6 +7,7 @@
 #include <base/types.h>
 #include <base/vmath.h>
 
+#include <engine/external/unicode-width/unicode_width.h>
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/shared/ringbuffer.h>
@@ -38,7 +39,7 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override;
 
-	static int LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth);
+	static int LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth, unicode_width_state_t *pUnicodeWidthState);
 };
 
 class CSshClient
@@ -194,6 +195,7 @@ class CSshServer
 
 public:
 	CSshClient *m_apClients[MAX_SSH_CLIENTS] = {};
+	unicode_width_state_t m_UnicodeWidthState;
 
 	IConsole *Console() { return m_pConsole; }
 
