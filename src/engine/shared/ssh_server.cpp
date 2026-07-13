@@ -79,7 +79,7 @@ static void SockaddrToNetaddr(const sockaddr *pSrc, socklen_t SrcLen, NETADDR *p
 	}
 }
 
-// We keep track of the client's ssh session cursor positon on the server side.
+// We keep track of the client's ssh session cursor position on the server side.
 // For that we need to update the y position on every new log line.
 // This gets complicated as soon as the log line contains \n newline escape sequences
 // and the line is longer than the terminal width because then we need to increase the y
