@@ -112,6 +112,12 @@ IConsole *CSshClient::Console()
 	return m_CallbackCtx.m_pServer->Console();
 }
 
+int CSshClient::InputIdx()
+{
+	int Idx = m_CursorPos.x - PromptLength();
+	return std::clamp(Idx, 0, (int)sizeof(m_aInput) - 2);
+}
+
 bool CSshClient::CursorMoveLeft()
 {
 	const int Min = PromptLength();
@@ -140,9 +146,7 @@ bool CSshClient::CursorMoveWordLeft()
 		if(!CursorMoveLeft())
 			return false;
 
-		int Idx = m_CursorPos.x - PromptLength();
-		// TODO: bound check?
-		if(m_aInput[Idx] == ' ')
+		if(m_aInput[InputIdx()] == ' ')
 			return true;
 	}
 	return false;
@@ -155,9 +159,7 @@ bool CSshClient::CursorMoveWordRight()
 		if(!CursorMoveRight())
 			return false;
 
-		int Idx = m_CursorPos.x - PromptLength();
-		// TODO: bound check?
-		if(m_aInput[Idx] == ' ')
+		if(m_aInput[InputIdx()] == ' ')
 			return true;
 	}
 	return false;
@@ -180,7 +182,7 @@ void CSshClient::InsertInputByte(char Byte)
 	ResetCompletion();
 	char aByteBuf[2] = {Byte, 0x00};
 	ssh_channel Channel = m_Channel;
-	int Idx = m_CursorPos.x - PromptLength();
+	int Idx = InputIdx();
 	bool CursorAtEnd = m_aInput[Idx] == '\0';
 	if(CursorAtEnd)
 	{
@@ -262,8 +264,7 @@ void CSshClient::SetCursorPosToPromptStart()
 
 void CSshClient::ClearCompletionPreview()
 {
-	int Idx = m_CursorPos.x - PromptLength();
-	bool CursorAtEnd = m_aInput[Idx] == '\0';
+	bool CursorAtEnd = m_aInput[InputIdx()] == '\0';
 	// there can only be a completion string if our cursor is
 	// at the end of the input
 	if(!CursorAtEnd)
@@ -610,7 +611,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 		else if(Byte == KEY_BACKSPACE || Byte == KEY_DEL)
 		{
 			pClient->ResetCompletion();
-			int Idx = pClient->m_CursorPos.x - pClient->PromptLength();
+			int Idx = pClient->InputIdx();
 			if(Idx == 0)
 			{
 				ssh_channel_write(pClient->m_Channel, "\a", 1);

@@ -73,6 +73,11 @@ public:
 	// sent to the client and used as insert offset when typing
 	ivec2 m_CursorPos = ivec2(0, 0);
 
+	// current index in the m_aInput array
+	// based on the cursor position
+	// this is safe and should never go out of bounds
+	int InputIdx();
+
 	// returns false when it did not move
 	bool CursorMoveLeft();
 
