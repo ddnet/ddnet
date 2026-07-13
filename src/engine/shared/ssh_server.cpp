@@ -121,7 +121,7 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 			NumLines++;
 			SubLineLen = 0;
 		}
-		else if(SubLineLen++ > TerminalWidth)
+		else if(++SubLineLen > TerminalWidth)
 		{
 			NumLines++;
 			SubLineLen = 0;
@@ -144,6 +144,10 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		m_pOuterLogger->Log(pMessage);
 		return;
 	}
+
+	// TODO: also print log system
+	//       right now only the message is printed
+	//       we could even color the system
 
 	if(pClient->m_Channel)
 	{
@@ -596,8 +600,9 @@ void CSshServer::HandleInput(CSshClient *pClient)
 					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
 					CLogScope Scope(&Logger);
 					// log_info("ssh", "debug command aaaaaaaaaaaaa aaaxxxxxxxxxxxT");
-					// log_info("ssh", "new\nline");
-					log_info("ssh", "new\nline that would be long\nbuline breakslolxx");
+					// log_info("ssh", "new\nline that would be long\nbuline breakslolxx");
+					// log_info("ssh", "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
+					log_info("ssh", "hello world");
 				}
 				else
 				{

@@ -19,8 +19,34 @@ TEST(Ssh, LineWrap)
 	EXPECT_EQ(Linebreaks, 2);
 	EXPECT_STREQ(aSshLine, "hello\r\nworld");
 
-	Linebreaks = CSshLogger::LineWrapForSsh("hello world", aSshLine, sizeof(aSshLine), 10);
+	// this is from a real terminal with width 10
+	//
+	// +----------+
+	// |> test_cmd|
+	// |hello worl|
+	// |>         |
+	// +----------+
+	//
+	// +----------+
+	// |> test_cmd|
+	// |hello worl|
+	// |d         |
+	// |>         |
+	// +----------+
+	//
+	// +----------+
+	// |> test_cmd|
+	// |hello worl|
+	// |d!        |
+	// |>         |
+	// +----------+
+
+	Linebreaks = CSshLogger::LineWrapForSsh("hello worl", aSshLine, sizeof(aSshLine), 10);
 	EXPECT_EQ(Linebreaks, 1);
+	EXPECT_STREQ(aSshLine, "hello worl");
+
+	Linebreaks = CSshLogger::LineWrapForSsh("hello world", aSshLine, sizeof(aSshLine), 10);
+	EXPECT_EQ(Linebreaks, 2);
 	EXPECT_STREQ(aSshLine, "hello world");
 
 	Linebreaks = CSshLogger::LineWrapForSsh("hello world!", aSshLine, sizeof(aSshLine), 10);
