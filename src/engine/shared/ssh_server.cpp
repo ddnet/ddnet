@@ -79,6 +79,61 @@ static void SockaddrToNetaddr(const sockaddr *pSrc, socklen_t SrcLen, NETADDR *p
 	}
 }
 
+// We keep track of the client's ssh session cursor positon on the server side.
+// For that we need to update the y position on every new log line.
+// This gets complicated as soon as the log line contains \n newline escape sequences
+// and the line is longer than the terminal width because then we need to increase the y
+// pos more than once.
+//
+// Another problem is that we need to send \r\n over the ssh connection and the logger just needs \n
+// for a proper line break. So to visually represent everything correct on the client side we also
+// need to edit the log line to replace all \n with \r\n
+//
+// This method should be called for every log line the server printed and that we send to the ssh client.
+// It returns the amount of rows written (so by how much the cursor pos y should be incremented)
+// And it writes the reformartted log line to the output buffer pSshLine
+int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth)
+{
+	int LineLen = str_length(pServerLine);
+	// return early in the simple case
+	if(str_find(pServerLine, "\n") == nullptr && LineLen < TerminalWidth)
+	{
+		str_copy(pSshLine, pServerLine, SshLineSize);
+		return 1;
+	}
+
+	// TODO: support multi byte utf8 char width
+	// TODO: support utf8 wide character width
+
+	// TODO: output buf bound check
+
+	size_t InIdx = 0;
+	size_t OutIdx = 0;
+	int NumLines = 1;
+	int SubLineLen = 0;
+	while(pServerLine[InIdx])
+	{
+		// TODO: what if the line already contained \r\n should we detect that?
+		//       or is translating it to \r\r\n fine either way
+		if(pServerLine[InIdx] == '\n')
+		{
+			pSshLine[OutIdx++] = '\r';
+			NumLines++;
+			SubLineLen = 0;
+		}
+		else if(SubLineLen++ > TerminalWidth)
+		{
+			NumLines++;
+			SubLineLen = 0;
+		}
+		pSshLine[OutIdx++] = pServerLine[InIdx];
+		InIdx++;
+	};
+	pSshLine[OutIdx] = '\0';
+
+	return NumLines;
+}
+
 void CSshLogger::Log(const CLogMessage *pMessage)
 {
 	CSshClient *pClient = m_pSshServer->m_apClients[m_ClientId];
@@ -92,42 +147,11 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 
 	if(pClient->m_Channel)
 	{
-		int MsgLen = str_length(pMessage->Message());
+		char aSshLine[8192];
+		int NumLines = LineWrapForSsh(pMessage->Message(), aSshLine, sizeof(aSshLine), pClient->m_Term.m_Width);
+		pClient->m_CursorPos.y += NumLines;
 		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
-		ssh_channel_write(pClient->m_Channel, pMessage->Message(), MsgLen);
-
-		// determining the new y offset is not easy
-		// most of the time a new log line is y + 1
-		// but of the terminal width is smaller than the log line it might be y + 2 or more
-		// it gets tricky when the log line contains \n newline characters
-		// especially when that gets mixed with long lines
-
-		// TODO: either properly test the \n plus long line case and implement it good enough
-		//       or fetch the cursor position from the client after these complicated cases
-		//       does the ssh channel even support \n because it usually needs \r\n
-
-		// there is always one new line per log that is the one we append
-		pClient->m_CursorPos.y++;
-
-		int SubLen = 0;
-		const char *pLine = pMessage->Message();
-		for(int i = 0; i < MsgLen; i++)
-		{
-			SubLen++;
-			if(SubLen > pClient->m_Term.m_Width)
-			{
-				// if the log line is longer than the terminal width we might wrap
-				pClient->m_CursorPos.y++;
-				SubLen = 0;
-			}
-			if(pLine[i] == '\n')
-			{
-				// if the log line contains a \n newline escape sequence we also need to
-				// update the cursor position and clear out the sub line length
-				pClient->m_CursorPos.y++;
-				SubLen = 0;
-			}
-		}
+		ssh_channel_write(pClient->m_Channel, aSshLine, str_length(aSshLine));
 	}
 
 	// just mirror everything to regular log because the hiding is stupid
@@ -571,9 +595,9 @@ void CSshServer::HandleInput(CSshClient *pClient)
 				{
 					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
 					CLogScope Scope(&Logger);
-					log_info("ssh", "debug command aaaaaaaaaaaaa aaaxxxxxxxxxxxT");
-					log_info("ssh", "new\nline");
-					log_info("ssh", "new\nline that would be long\nbutthere are\nenuff line breaks\nlol");
+					// log_info("ssh", "debug command aaaaaaaaaaaaa aaaxxxxxxxxxxxT");
+					// log_info("ssh", "new\nline");
+					log_info("ssh", "new\nline that would be long\nbuline breakslolxx");
 				}
 				else
 				{

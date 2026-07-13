@@ -37,6 +37,8 @@ public:
 	{
 	}
 	void Log(const CLogMessage *pMessage) override;
+
+	static int LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth);
 };
 
 class CSshClient
