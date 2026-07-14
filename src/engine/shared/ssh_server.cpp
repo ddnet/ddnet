@@ -29,6 +29,9 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: there are lots of calls to str_length to set the m_CursorPos.x they all should use
+//       a proper utf8 supporting str_width function instead otherwise the offets will be wrong
+
 // TODO: the default file location in the current dir is not ideal
 //       this should be in the storage save location
 //       or maybe even use the system wide location that also the regular host

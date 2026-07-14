@@ -86,7 +86,11 @@ public:
 	ivec2 m_CursorPos = ivec2(0, 0);
 
 	// TODO: remove InputIdx() method?
+	//
 	// current index in the m_aInput array
+	// related to m_Term.m_CursorPos.x but not the same
+	// it is not shifted by the prompt length
+	// and always points to the beginning of a valid unicode sequence
 	int m_InputIdx = 0;
 
 	// current index in the m_aInput array
@@ -148,6 +152,15 @@ public:
 	public:
 		int m_Width = 10;
 		int m_Height = 10;
+
+		// cursor position on the clients screen
+		// this value is mostly written by the server
+		// but sometimes also fetched from the client
+		//
+		// Be careful m_CursorPos.x can NOT be used as an index to m_aInput
+		// because the value is offset by the prompt length
+		// and also by utf8 characters that span only one column but have multiple bytes
+		ivec2 m_CursorPos = ivec2(0, 0);
 	};
 	CTerminal m_Term;
 
