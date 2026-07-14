@@ -17,13 +17,13 @@ TEST(Ssh, LineWrap)
 	char aSshLine[512];
 	int Linebreaks;
 
-	// Linebreaks = CSshLogger::LineWrapForSsh("hello world", aSshLine, sizeof(aSshLine), 256);
-	// EXPECT_EQ(Linebreaks, 1);
-	// EXPECT_STREQ(aSshLine, "hello world");
+	Linebreaks = CSshLogger::LineWrapForSsh("hello world", aSshLine, sizeof(aSshLine), 256, &State);
+	EXPECT_EQ(Linebreaks, 1);
+	EXPECT_STREQ(aSshLine, "hello world");
 
-	// Linebreaks = CSshLogger::LineWrapForSsh("hello\nworld", aSshLine, sizeof(aSshLine), 256);
-	// EXPECT_EQ(Linebreaks, 2);
-	// EXPECT_STREQ(aSshLine, "hello\r\nworld");
+	Linebreaks = CSshLogger::LineWrapForSsh("hello\nworld", aSshLine, sizeof(aSshLine), 256, &State);
+	EXPECT_EQ(Linebreaks, 2);
+	EXPECT_STREQ(aSshLine, "hello\r\nworld");
 
 	// this is from a real terminal with width 10
 	//
@@ -47,21 +47,25 @@ TEST(Ssh, LineWrap)
 	// |>         |
 	// +----------+
 
-	// Linebreaks = CSshLogger::LineWrapForSsh("hello worl", aSshLine, sizeof(aSshLine), 10);
-	// EXPECT_EQ(Linebreaks, 1);
-	// EXPECT_STREQ(aSshLine, "hello worl");
+	Linebreaks = CSshLogger::LineWrapForSsh("hello worl", aSshLine, sizeof(aSshLine), 10, &State);
+	EXPECT_EQ(Linebreaks, 1);
+	EXPECT_STREQ(aSshLine, "hello worl");
 
-	// Linebreaks = CSshLogger::LineWrapForSsh("hello world", aSshLine, sizeof(aSshLine), 10);
-	// EXPECT_EQ(Linebreaks, 2);
-	// EXPECT_STREQ(aSshLine, "hello world");
+	Linebreaks = CSshLogger::LineWrapForSsh("hello world", aSshLine, sizeof(aSshLine), 10, &State);
+	EXPECT_EQ(Linebreaks, 2);
+	EXPECT_STREQ(aSshLine, "hello world");
 
-	// Linebreaks = CSshLogger::LineWrapForSsh("hello world!", aSshLine, sizeof(aSshLine), 10);
-	// EXPECT_EQ(Linebreaks, 2);
-	// EXPECT_STREQ(aSshLine, "hello world!");
+	Linebreaks = CSshLogger::LineWrapForSsh("hello world!", aSshLine, sizeof(aSshLine), 10, &State);
+	EXPECT_EQ(Linebreaks, 2);
+	EXPECT_STREQ(aSshLine, "hello world!");
 
-	// Linebreaks = CSshLogger::LineWrapForSsh("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅", aSshLine, sizeof(aSshLine), 36);
-	// EXPECT_EQ(Linebreaks, 1);
-	// EXPECT_STREQ(aSshLine, "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
+	Linebreaks = CSshLogger::LineWrapForSsh("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅", aSshLine, sizeof(aSshLine), 30, &State);
+	EXPECT_EQ(Linebreaks, 1);
+	EXPECT_STREQ(aSshLine, "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
+
+	Linebreaks = CSshLogger::LineWrapForSsh("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅", aSshLine, sizeof(aSshLine), 29, &State);
+	EXPECT_EQ(Linebreaks, 2);
+	EXPECT_STREQ(aSshLine, "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
 
 	Linebreaks = CSshLogger::LineWrapForSsh("abc✅✅✅", aSshLine, sizeof(aSshLine), 36, &State);
 	EXPECT_EQ(Linebreaks, 1);
