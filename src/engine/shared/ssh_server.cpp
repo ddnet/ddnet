@@ -272,6 +272,11 @@ void CSshClient::InsertInputByte(char Byte)
 		m_aInput[Idx] = Byte;
 		m_CursorPos.x++;
 		ssh_channel_write(Channel, aByteBuf, 1);
+
+		// TODO: remove this the client already does this correctly
+		//       this is only help to debug utf8 cursor offset issues
+		//       by visualazing what the server currently thinks the cursor pos is
+		SendCursorPos(m_CursorPos);
 	}
 	else
 	{
