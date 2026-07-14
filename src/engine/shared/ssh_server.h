@@ -42,6 +42,19 @@ public:
 	static int LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth, unicode_width_state_t *pUnicodeWidthState);
 };
 
+class CByteBuffer
+{
+	unsigned char m_aBuf[512];
+	size_t m_Size = 0;
+
+public:
+	void AddByte(char Byte);
+	void AddBytes(unsigned char *pBytes, size_t Size);
+	void Clear();
+	size_t Size() const { return m_Size; }
+	const unsigned char *Data() const { return m_aBuf; }
+};
+
 class CSshClient
 {
 public:
@@ -67,7 +80,12 @@ public:
 	ssh_channel m_Channel = nullptr;
 
 	int64_t m_JoinTime = 0;
+	// The current ssh channel read buffer.
+	// These are all the bytes the ssh client sent to use
+	// that we have not processed yet
+	CByteBuffer m_Buffer;
 
+	// The text input in the current console prompt
 	char m_aInput[2048] = "";
 
 	// TODO: there should be two variables
@@ -219,7 +237,8 @@ class CSshServer
 	void AcceptNewConnections();
 	void ListConnections();
 	void ExecuteRconLine(CSshClient *pClient, const char *pLine);
-	void HandleInput(CSshClient *pClient);
+	void TryProcessCurrentInput(CSshClient *pClient);
+	void ReadNewInput(CSshClient *pClient);
 
 public:
 	CSshClient *m_apClients[MAX_SSH_CLIENTS] = {};

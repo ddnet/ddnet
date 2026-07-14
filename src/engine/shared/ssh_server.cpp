@@ -179,6 +179,27 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	m_pOuterLogger->Log(pMessage);
 }
 
+void CByteBuffer::AddByte(char Byte)
+{
+	dbg_assert(m_Size + 1 < sizeof(m_aBuf) - 1, "byte buffer full");
+	m_aBuf[m_Size++] = Byte;
+}
+
+void CByteBuffer::AddBytes(unsigned char *pBytes, size_t Size)
+{
+	if(Size == 0)
+		return;
+
+	dbg_assert(m_Size + Size < sizeof(m_aBuf) - 1, "byte buffer full");
+	mem_copy(m_aBuf + m_Size, pBytes, Size);
+	m_Size += Size;
+}
+
+void CByteBuffer::Clear()
+{
+	m_Size = 0;
+}
+
 const IConsole *CSshClient::Console() const
 {
 	return m_CallbackCtx.m_pServer->Console();
@@ -526,10 +547,14 @@ void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
 	Console()->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED, true);
 }
 
-void CSshServer::HandleInput(CSshClient *pClient)
+void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
+{
+}
+
+void CSshServer::ReadNewInput(CSshClient *pClient)
 {
 	ssh_channel Channel = pClient->m_Channel;
-	char aBuf[256] = {0};
+	unsigned char aBuf[256] = {0};
 
 	// TODO: so far in all my tests the non blocking read gave me all escape sequences
 	//       as a whole chunk
@@ -555,6 +580,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	{
 		return;
 	}
+	pClient->m_Buffer.AddBytes(aBuf, n);
 
 	if(pClient->m_WaitingForCursorPos)
 	{
@@ -563,7 +589,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 
 		int Row;
 		int Column;
-		if(sscanf(aBuf, "\x1B[%d;%dR", &Row, &Column) != 2)
+		if(sscanf((const char *)aBuf, "\x1B[%d;%dR", &Row, &Column) != 2)
 		{
 			log_error("ssh", "failed to read cursor input '%s'", aBuf);
 			OnClientDisconnect(pClient->m_ClientId, "invalid cursor pos");
@@ -1357,7 +1383,7 @@ void CSshServer::Update()
 		if(!pClient->m_Authenticated)
 			continue;
 
-		HandleInput(pClient);
+		ReadNewInput(pClient);
 	}
 }
 
