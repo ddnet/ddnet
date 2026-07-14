@@ -277,6 +277,13 @@ void CSshClient::SetInput(const char *pInput)
 	m_CursorPos.x = PromptLength() + str_length(pInput);
 }
 
+bool CSshClient::IsSimpleAsciiLetter(char Byte)
+{
+	if(Byte >= ' ' && Byte <= '~')
+		return true;
+	return false;
+}
+
 // TODO: maybe keep AddSingleAsciiLetterToInput() as simple as it is for now
 //       and add an entirely new method for utf8
 //       where we detect utf8 based on the first byte
@@ -915,8 +922,14 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			// ignore unknown escape sequence for now
 			continue;
 		}
-		// TODO: throw unhandled error down here and handle ascii and utf inserts explicitly
-		pClient->AddSingleAsciiLetterToInput(Byte);
+		else if(CSshClient::IsSimpleAsciiLetter(Byte))
+		{
+			pClient->AddSingleAsciiLetterToInput(Byte);
+		}
+		else
+		{
+			log_error("ssh", "got unsupported byte %d from cid=%d (unsupported utf-8 or escape sequence maybe)", Byte, pClient->m_ClientId);
+		}
 	}
 
 	// TODO: only clear if we actually read the data

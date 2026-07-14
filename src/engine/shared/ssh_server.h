@@ -138,6 +138,8 @@ public:
 	// and sends the new line to the client over the ssh channel
 	void SetInput(const char *pInput);
 
+	static bool IsSimpleAsciiLetter(char Byte);
+
 	// when the client sent a new byte
 	// that should be added to the input buffer
 	//
