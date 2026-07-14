@@ -199,7 +199,6 @@ void CByteBuffer::AddBytes(unsigned char *pBytes, size_t Size)
 
 void CByteBuffer::TrimLeading(size_t Amount)
 {
-	dbg_assert(Amount >= 0, "Can't trim negative amount");
 	if(Amount >= m_Size)
 	{
 		m_Size = 0;
@@ -217,7 +216,6 @@ void CByteBuffer::TrimLeading(size_t Amount)
 
 void CByteBuffer::TrimTrailing(size_t Amount)
 {
-	dbg_assert(Amount >= 0, "Can't trim negative amount");
 	m_Size = std::max((size_t)0, m_Size - Amount);
 	m_aBuf[m_Size] = 0x00;
 }
