@@ -116,23 +116,24 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 		}
 		const char *pStr = pServerLine + InIdx;
 		int CodePoint = str_utf8_decode(&pStr);
-		// FIXME: these asserts are not being printed smh -.-
-		//        maybe using asserts that print using the logger within
-		//        the logger callback is a bad idea
-		//        but the utf-8 branch can possibly be hit if somewhere unsanitized user input gets printed
-		//        right now it is possible with "no such command: invalid utf"
-		dbg_assert(CodePoint != 0, "Unexpected NULL at index=%" PRIzu " line='%s'", InIdx, pServerLine);
-		dbg_assert(CodePoint != -1, "Unexpected invalid utf-8 at index=%" PRIzu " in line='%s'", InIdx, pServerLine);
+
+		// neither end of string not invalid utf8
+		// are expected here
+		// this should be an assert but we are in the log callback
+		// we cant log on log so the assert error message would always be hidden
+		// and we crash the server for nothing
+		// so instead we just do some safe fallback which will mess up the cursor position potentially
+		if(CodePoint == 0 || CodePoint == -1)
+		{
+			str_copy(pSshLine, pServerLine, SshLineSize);
+			return 1;
+		}
+
 		int Bytes = pStr - (pServerLine + InIdx);
 		for(int i = 0; i < Bytes; i++)
 		{
 			pSshLine[OutIdx++] = pServerLine[InIdx++];
 		}
-
-		// FIXME: I AM CURRENTLY WORKING ON THE CODE BELOW
-		//        it is untested because code dpoesnt compile yet
-		//        and i have to go
-
 		int Width = unicode_width_process(pUnicodeWidthState, CodePoint);
 		SubLineLen += Width;
 		if(SubLineLen > TerminalWidth)
