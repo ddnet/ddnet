@@ -140,7 +140,9 @@ public:
 
 	// when the client sent a new byte
 	// that should be added to the input buffer
-	void InsertInputByte(char Byte);
+	//
+	// not called for escape sequences or multi byte utf8 symbols
+	void AddSingleAsciiLetterToInput(char Byte);
 
 	// clears the current line and places an empty prompt
 	void ClearPrompt();

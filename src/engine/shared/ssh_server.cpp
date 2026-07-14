@@ -277,7 +277,7 @@ void CSshClient::SetInput(const char *pInput)
 	m_CursorPos.x = PromptLength() + str_length(pInput);
 }
 
-// TODO: maybe keep InsertInputByte() as simple as it is for now
+// TODO: maybe keep AddSingleAsciiLetterToInput() as simple as it is for now
 //       and add an entirely new method for utf8
 //       where we detect utf8 based on the first byte
 //       and then error out if the utf8 was not sent as a single message
@@ -285,7 +285,7 @@ void CSshClient::SetInput(const char *pInput)
 //       well even if they do we just dont support that for now
 //       and then the regular ascii code can keep working will the new stuff is being built
 
-void CSshClient::InsertInputByte(char Byte)
+void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 {
 	ResetCompletion();
 	char aByteBuf[2] = {Byte, 0x00};
@@ -915,7 +915,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			// ignore unknown escape sequence for now
 			continue;
 		}
-		pClient->InsertInputByte(Byte);
+		// TODO: throw unhandled error down here and handle ascii and utf inserts explicitly
+		pClient->AddSingleAsciiLetterToInput(Byte);
 	}
 
 	// TODO: only clear if we actually read the data
