@@ -116,6 +116,11 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 		}
 		const char *pStr = pServerLine + InIdx;
 		int CodePoint = str_utf8_decode(&pStr);
+		// FIXME: these asserts are not being printed smh -.-
+		//        maybe using asserts that print using the logger within
+		//        the logger callback is a bad idea
+		//        but the utf-8 branch can possibly be hit if somewhere unsanitized user input gets printed
+		//        right now it is possible with "no such command: invalid utf"
 		dbg_assert(CodePoint != 0, "Unexpected NULL at index=%" PRIzu " line='%s'", InIdx, pServerLine);
 		dbg_assert(CodePoint != -1, "Unexpected invalid utf-8 at index=%" PRIzu " in line='%s'", InIdx, pServerLine);
 		int Bytes = pStr - (pServerLine + InIdx);
