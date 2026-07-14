@@ -2510,7 +2510,7 @@ set(GAME_GENERATED_SHARED
   src/generated/protocolglue.h
   # tidy-alphabetical-end
 )
-set(DEPS ${DEP_JSON} ${DEP_MD5} ${UNICODE_WIDTH} ${ZLIB_DEP})
+set(DEPS ${DEP_JSON} ${DEP_MD5} ${DEP_UNICODE_WIDTH} ${ZLIB_DEP})
 
 # Libraries
 set(LIBS
