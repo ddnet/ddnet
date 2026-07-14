@@ -979,6 +979,17 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				// TODO: test this branch, this might require some hacking to actually hit it and send partial utf8
 
 				log_error("ssh", "cid=%d sent invalid utf-8 which might be partial but that is not supported yet", pClient->m_ClientId);
+				log_error("ssh", "       or it might be a unsupported escape sequence");
+				log_error("ssh", "       amount of bytes in recv buffer: %" PRIzu, BufSize);
+				log_error("ssh", "       invalid utf-8 at index: %" PRIzu, i);
+				log_error("ssh", "       full buffer:");
+				for(size_t k = 0; k < BufSize;k++)
+				{
+					const char *pNote = "";
+					if(k == i)
+						pNote = " <-- invalid utf-8 starts here";
+					log_error("ssh", "         buf[%" PRIzu "] = %d%s", k, pBuf[k], pNote);
+				}
 
 				// clear out the previous bytes we successfully handled already
 				// so they do not get processed again
