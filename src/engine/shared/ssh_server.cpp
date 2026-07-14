@@ -986,7 +986,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					const char *pNote = "";
 					if(DbgBufIdx == i)
 						pNote = " <-- invalid utf-8 starts here";
-					log_error("ssh", "         buf[%" PRIzu "] = %d%s", DbgBufIdx, pBuf[DbgBufIdx], pNote);
+					log_error("ssh", "         buf[%" PRIzu "] = %d%s", DbgBufIdx, (unsigned char)pBuf[DbgBufIdx], pNote);
 				}
 
 				// clear out the previous bytes we successfully handled already
