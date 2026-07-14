@@ -591,6 +591,15 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			const char *pCmd = pClient->m_aInput;
 			if(pCmd[0])
 			{
+				if(!str_utf8_check(pCmd))
+				{
+					log_warn("ssh", "cid=%d sent invalid utf-8 command", pClient->m_ClientId);
+					ssh_channel_write(Channel, "\r\ninvalid utf-8", 16);
+					pClient->m_CursorPos.y++;
+					pClient->m_aInput[0] = '\0';
+					pClient->NewPrompt();
+					continue;
+				}
 				log_info("ssh", "cid=%d cmd='%s'", pClient->m_ClientId, pCmd);
 
 				// TODO: how bad is it that these are fake commands?
@@ -628,7 +637,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 
 			pClient->m_aInput[0] = '\0';
 			pClient->NewPrompt();
-			return;
+			continue;
 		}
 		else if(Byte == KEY_CTRL_A)
 		{
@@ -664,6 +673,7 @@ void CSshServer::HandleInput(CSshClient *pClient)
 			{
 				const char *pMsg = "\r\nUse ctrl+d or 'exit' to quit";
 				ssh_channel_write(Channel, pMsg, str_length(pMsg));
+				pClient->m_CursorPos.y++;
 			}
 
 			pClient->m_aInput[0] = '\0';
