@@ -42,6 +42,10 @@ public:
 	static int LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth, unicode_width_state_t *pUnicodeWidthState);
 };
 
+// supposed to hold raw data
+// it does place a null byte at the end
+// (after the size bound)
+// so that even a partial data can be used like a valid C string
 class CByteBuffer
 {
 	unsigned char m_aBuf[512];

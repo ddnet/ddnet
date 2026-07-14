@@ -181,8 +181,9 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 
 void CByteBuffer::AddByte(char Byte)
 {
-	dbg_assert(m_Size + 1 < sizeof(m_aBuf) - 1, "byte buffer full");
+	dbg_assert(m_Size + 1 < sizeof(m_aBuf) - 2, "byte buffer full");
 	m_aBuf[m_Size++] = Byte;
+	m_aBuf[m_Size] = 0x00;
 }
 
 void CByteBuffer::AddBytes(unsigned char *pBytes, size_t Size)
@@ -190,9 +191,10 @@ void CByteBuffer::AddBytes(unsigned char *pBytes, size_t Size)
 	if(Size == 0)
 		return;
 
-	dbg_assert(m_Size + Size < sizeof(m_aBuf) - 1, "byte buffer full");
+	dbg_assert(m_Size + Size < sizeof(m_aBuf) - 2, "byte buffer full");
 	mem_copy(m_aBuf + m_Size, pBytes, Size);
 	m_Size += Size;
+	m_aBuf[m_Size] = 0x00;
 }
 
 void CByteBuffer::Clear()
@@ -634,6 +636,10 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 	// TODO: ctrl+r history support
 	// TODO: word deletion
 
+	// TODO: for waiting on more data this loop is not ideal
+	//       because when we do not call m_Buffer.Clear() we did potentially
+	//       already handle previous bytes in the loop
+
 	for(size_t i = 0; i < BufSize; i++)
 	{
 		char Byte = pBuf[i];
@@ -925,9 +931,33 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		else if(CSshClient::IsSimpleAsciiLetter(Byte))
 		{
 			pClient->AddSingleAsciiLetterToInput(Byte);
+			continue;
 		}
 		else
 		{
+			const char *pStr = pBuf + i;
+			int CodePoint = str_utf8_decode(&pStr);
+			if(CodePoint == 0)
+			{
+				// the client sending a null byte would be weird huh?
+				// lets silently ignore it for now
+				continue;
+			}
+			// the read buffer is null terminated
+			// str_utf8_decode() might read beyond the buffer size
+			// but then it will hit the null term and the utf8 decode will
+			// fail if another byte was expected
+			// in that case we have possibly partial utf8 that is yet
+			// to be fully sent over the network or another error
+			if(CodePoint == -1)
+			{
+				// TODO: in here we need to return and not call m_Buffer.Clear()
+				//       but we can only do that if i == 0 because otherwise we handle
+				//       the previous bytes again
+				//       which is ugly so what we actually need to do is shift the buffer to i instead of clearing it
+				log_error("ssh", "cid=%d sent invalid utf-8 which might be partial but that is not supported yet", pClient->m_ClientId);
+				continue;
+			}
 			log_error("ssh", "got unsupported byte %d from cid=%d (unsupported utf-8 or escape sequence maybe)", Byte, pClient->m_ClientId);
 		}
 	}
