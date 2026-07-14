@@ -256,6 +256,14 @@ void CSshClient::SetInput(const char *pInput)
 	m_CursorPos.x = PromptLength() + str_length(pInput);
 }
 
+// TODO: maybe keep InsertInputByte() as simple as it is for now
+//       and add an entirely new method for utf8
+//       where we detect utf8 based on the first byte
+//       and then error out if the utf8 was not sent as a single message
+//       i feel like no ssh client should ever send partial utf8 as one message right?
+//       well even if they do we just dont support that for now
+//       and then the regular ascii code can keep working will the new stuff is being built
+
 void CSshClient::InsertInputByte(char Byte)
 {
 	ResetCompletion();
