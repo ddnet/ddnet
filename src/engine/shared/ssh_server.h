@@ -90,7 +90,9 @@ public:
 	// current index in the m_aInput array
 	// related to m_Term.m_CursorPos.x but not the same
 	// it is not shifted by the prompt length
-	// and always points to the beginning of a valid unicode sequence
+	// ideally this would always point to a valid utf8 codepoint
+	// but for now this is also the index for the partial write
+	// of a multi byte utf8 character
 	int m_InputIdx = 0;
 
 	// current index in the m_aInput array
