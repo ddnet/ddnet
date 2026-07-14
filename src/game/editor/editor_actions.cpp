@@ -289,37 +289,53 @@ void CEditorActionSoundPlace::Redo()
 
 // ---------------------------------------------------------------------------------------
 
-CEditorActionDeleteQuad::CEditorActionDeleteQuad(CEditorMap *pMap, int GroupIndex, int LayerIndex, std::vector<int> const &vQuadsIndices, std::vector<CQuad> const &vDeletedQuads) :
-	CEditorActionLayerBase(pMap, GroupIndex, LayerIndex), m_vQuadsIndices(vQuadsIndices), m_vDeletedQuads(vDeletedQuads)
+CEditorActionDeleteQuad::CEditorActionDeleteQuad(CEditorMap *pMap, int GroupIndex, int LayerIndex) :
+	CEditorActionLayerBase(pMap, GroupIndex, LayerIndex)
 {
+	std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(m_pLayer);
+	m_vQuadsIndices = Map()->m_vSelectedQuads;
+
+	// make sure the indices are descending
+	std::sort(m_vQuadsIndices.begin(), m_vQuadsIndices.end(), std::greater<>());
+
+	dbg_assert(m_vQuadsIndices[0] < (int)pLayerQuads->m_vQuads.size(), "Tried to delete quad with Id %d, while the layer only contains %d quads", m_vQuadsIndices[0], (int)pLayerQuads->m_vQuads.size());
+	dbg_assert(m_vQuadsIndices.back() >= 0, "Tried to delete quad with negative Id %d", m_vQuadsIndices.back());
+
+	m_vDeletedQuads.reserve(Map()->m_vSelectedQuads.size());
+	for(int QuadId : m_vQuadsIndices)
+	{
+		m_vDeletedQuads.emplace_back(pLayerQuads->m_vQuads[QuadId]);
+	}
+
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Delete quad (x%d)", (int)m_vDeletedQuads.size());
 }
 
 void CEditorActionDeleteQuad::Undo()
 {
 	std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(m_pLayer);
-	for(size_t k = 0; k < m_vQuadsIndices.size(); k++)
+
+	// Quad indices are in descending order, so we add them back in ascending order
+	for(int IndexId = (int)m_vQuadsIndices.size() - 1; IndexId >= 0; --IndexId)
 	{
-		pLayerQuads->m_vQuads.insert(pLayerQuads->m_vQuads.begin() + m_vQuadsIndices[k], m_vDeletedQuads[k]);
+		pLayerQuads->m_vQuads.insert(pLayerQuads->m_vQuads.begin() + m_vQuadsIndices[IndexId], m_vDeletedQuads[IndexId]);
 	}
+	Map()->m_vSelectedQuads = m_vQuadsIndices;
+
+	Map()->OnModify();
 }
 
 void CEditorActionDeleteQuad::Redo()
 {
 	std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(m_pLayer);
-	std::vector<int> vQuads(m_vQuadsIndices);
 
-	for(int i = 0; i < (int)vQuads.size(); ++i)
+	// Quad indices are in descending order
+	for(const int &QuadId : m_vQuadsIndices)
 	{
-		pLayerQuads->m_vQuads.erase(pLayerQuads->m_vQuads.begin() + vQuads[i]);
-		for(int j = i + 1; j < (int)vQuads.size(); ++j)
-			if(vQuads[j] > vQuads[i])
-				vQuads[j]--;
-
-		vQuads.erase(vQuads.begin() + i);
-
-		i--;
+		pLayerQuads->m_vQuads.erase(pLayerQuads->m_vQuads.begin() + QuadId);
 	}
+	Map()->m_vSelectedQuads.clear();
+
+	Map()->OnModify();
 }
 
 // ---------------------------------------------------------------------------------------
