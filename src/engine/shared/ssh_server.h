@@ -77,10 +77,17 @@ public:
 	//       but once we introduce multi byte unicode that takes up only
 	//       one terminal column of width everything becomes too hard to
 	//       store in only one variable
+	//       --
+	//       Not sure but could move this one to m_Term to make it more clear
+	//       that its not the input index
 	//
 	// position of the cursor in the m_aInput buffer
 	// sent to the client and used as insert offset when typing
 	ivec2 m_CursorPos = ivec2(0, 0);
+
+	// TODO: remove InputIdx() method?
+	// current index in the m_aInput array
+	int m_InputIdx = 0;
 
 	// current index in the m_aInput array
 	// based on the cursor position
