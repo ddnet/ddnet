@@ -531,6 +531,15 @@ void CSshServer::HandleInput(CSshClient *pClient)
 	ssh_channel Channel = pClient->m_Channel;
 	char aBuf[256] = {0};
 
+	// TODO: so far in all my tests the non blocking read gave me all escape sequences
+	//       as a whole chunk
+	//       and also all utf8 characters
+	//       but i think this is not guranteed
+	//       which makes everything just so much more complicated
+	//       in theory all reads should be collected in a buffer and then
+	//       parsed there
+	//       the question is just when do we start parsing
+
 	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
 	if(n == SSH_EOF)
 	{
