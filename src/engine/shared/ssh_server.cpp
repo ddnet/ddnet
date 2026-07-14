@@ -560,7 +560,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 	//       and the compiler will help us on the return statement to do things correctly
 	//       and think about every case
 
-
 	// TODO: none of the buffering and partial reads are implemented yet
 	//       ideally only simple single byte printable ascii characters should be handled instantly
 	//       and all the multi byte utf and escape sequences should properly be buf size checked
@@ -595,7 +594,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		return;
 	}
 
-	// TODO: what is this "k" i am pretty sure this is oudated at best or more likely wrong because of utf and stuff
+	// TODO: what is this "k" i am pretty sure this is outdated at best or more likely wrong because of utf and stuff
 	int k = str_length(pClient->m_aInput);
 	if(k + BufSize > (int)sizeof(pClient->m_aInput) - 10)
 	{
@@ -931,7 +930,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 	// TODO: so far in all my tests the non blocking read gave me all escape sequences
 	//       as a whole chunk
 	//       and also all utf8 characters
-	//       but i think this is not guranteed
+	//       but i think this is not guaranteed
 	//       which makes everything just so much more complicated
 	//       in theory all reads should be collected in a buffer and then
 	//       parsed there
