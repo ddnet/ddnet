@@ -70,7 +70,13 @@ public:
 
 	char m_aInput[2048] = "";
 
-	// TODO: clamp cursor pos x by m_aInput size
+	// TODO: there should be two variables
+	//       one is the cursor position in the clients terminal
+	//       and the other one is a offset index into m_aInput
+	//       they are shifted by the prompt length already
+	//       but once we introduce multi byte unicode that takes up only
+	//       one terminal column of width everything becomes too hard to
+	//       store in only one variable
 	//
 	// position of the cursor in the m_aInput buffer
 	// sent to the client and used as insert offset when typing
