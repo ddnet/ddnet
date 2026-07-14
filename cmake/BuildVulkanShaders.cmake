@@ -142,4 +142,5 @@ generate_shader_file("-DTW_QUAD_TEXTURED" "-DTW_QUAD_GROUPED" "quad.frag" "quad_
 generate_shader_file("-DTW_QUAD_TEXTURED" "-DTW_QUAD_GROUPED" "quad.vert" "quad_grouped_textured.vert.spv")
 
 set(VULKAN_SHADER_FILE_LIST ${VULKAN_SHADER_FILE_LIST} CACHE STRING "Vulkan shader file list" FORCE)
+set(VULKAN_SHADER_OUTPUT_PATHS ${VULKAN_SHADER_OUTPUT_PATHS} CACHE STRING "Vulkan shader output list" FORCE)
 add_custom_target(build_vulkan_shaders DEPENDS ${VULKAN_SHADER_OUTPUT_PATHS})
