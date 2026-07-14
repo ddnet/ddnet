@@ -552,52 +552,37 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 	if(!pClient->m_Buffer.Size())
 		return;
 
-	// TODO: only clear if we actually read the data
-	pClient->m_Buffer.Clear();
-}
+	// TODO: it is not ideal that every return statement needs a explicit buffer clear
+	//       it is easy to introduce read twice errors with this design
+	//       is there something that can be done about that?
+	//       give the function a return type that is how many bytes were consumed
+	//       or bool clear maybe and then do it in the outer scope
+	//       and the compiler will help us on the return statement to do things correctly
+	//       and think about every case
 
-void CSshServer::ReadNewInput(CSshClient *pClient)
-{
+
+	// TODO: none of the buffering and partial reads are implemented yet
+	//       ideally only simple single byte printable ascii characters should be handled instantly
+	//       and all the multi byte utf and escape sequences should properly be buf size checked
+	//       and potentially not clear the buffer if incomplete and wait for more data
+	//       if the data is too slow to arrive throw a timeout error on a partial read of
+	//       an expectected multi byte sequence
+
+	const char *pBuf = (const char *)pClient->m_Buffer.Data();
+	size_t BufSize = pClient->m_Buffer.Size();
 	ssh_channel Channel = pClient->m_Channel;
-	unsigned char aBuf[256] = {0};
-
-	// TODO: so far in all my tests the non blocking read gave me all escape sequences
-	//       as a whole chunk
-	//       and also all utf8 characters
-	//       but i think this is not guranteed
-	//       which makes everything just so much more complicated
-	//       in theory all reads should be collected in a buffer and then
-	//       parsed there
-	//       the question is just when do we start parsing
-
-	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
-	if(n == SSH_EOF)
-	{
-		OnClientDisconnect(pClient->m_ClientId, "eof");
-		return;
-	}
-	if(n == SSH_ERROR)
-	{
-		OnClientDisconnect(pClient->m_ClientId, "channel read error");
-		return;
-	}
-	if(n == SSH_AGAIN || n == 0)
-	{
-		return;
-	}
-	pClient->m_Buffer.AddBytes(aBuf, n);
-	TryProcessCurrentInput(pClient);
 
 	if(pClient->m_WaitingForCursorPos)
 	{
-		// TODO: should we check the length of n?
-		//       how many terminals support this format?
+		// TODO: check if buffer size is full enough for the sscanf to pass
+		//       otherwise either delay the parse or throw an error on timeout
+		// TODO: how many terminals support this format?
 
 		int Row;
 		int Column;
-		if(sscanf((const char *)aBuf, "\x1B[%d;%dR", &Row, &Column) != 2)
+		if(sscanf(pBuf, "\x1B[%d;%dR", &Row, &Column) != 2)
 		{
-			log_error("ssh", "failed to read cursor input '%s'", aBuf);
+			log_error("ssh", "failed to read cursor input '%s'", pBuf);
 			OnClientDisconnect(pClient->m_ClientId, "invalid cursor pos");
 			return;
 		}
@@ -606,21 +591,24 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 		pClient->m_CursorPos.y = Row;
 		pClient->m_WaitingForCursorPos = false;
 		log_info("ssh", "got cursor pos x=%d y=%d", Column, Row);
+		pClient->m_Buffer.Clear();
 		return;
 	}
 
+	// TODO: what is this "k" i am pretty sure this is oudated at best or more likely wrong because of utf and stuff
 	int k = str_length(pClient->m_aInput);
-	if(k + n > (int)sizeof(pClient->m_aInput) - 10)
+	if(k + BufSize > (int)sizeof(pClient->m_aInput) - 10)
 	{
 		// do not allow multiple characters at once to keep things simple
-		if(n > 1)
+		if(BufSize > 1)
 		{
 			pClient->SendBell();
+			pClient->m_Buffer.Clear();
 			return;
 		}
 
 		// allow operations that clear the input
-		char Chr = aBuf[0];
+		char Chr = pBuf[0];
 		bool Whitelisted =
 			Chr == KEY_ENTER ||
 			Chr == KEY_CTRL_U ||
@@ -631,6 +619,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 		if(!Whitelisted)
 		{
 			pClient->SendBell();
+			pClient->m_Buffer.Clear();
 			return;
 		}
 	}
@@ -639,9 +628,9 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 	// TODO: ctrl+r history support
 	// TODO: word deletion
 
-	for(int i = 0; i < n; i++)
+	for(size_t i = 0; i < BufSize; i++)
 	{
-		char Byte = aBuf[i];
+		char Byte = pBuf[i];
 		if(Byte == KEY_ENTER)
 		{
 			pClient->ResetCompletion();
@@ -668,6 +657,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 				if(!str_comp(pCmd, "logout") || !str_comp(pCmd, "exit"))
 				{
 					OnClientDisconnect(pClient->m_ClientId, "logout");
+					pClient->m_Buffer.Clear();
 					return;
 				}
 				else if(!str_comp(pCmd, "w") || !str_comp(pCmd, "who"))
@@ -745,6 +735,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 				continue;
 
 			OnClientDisconnect(pClient->m_ClientId, "logout");
+			pClient->m_Buffer.Clear();
 			return;
 		}
 		else if(Byte == KEY_CTRL_L)
@@ -816,26 +807,26 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 		else if(Byte == 27) // escape sequence
 		{
 			pClient->ClearCompletionPreview();
-			if((n - i) < 2)
+			if((BufSize - i) < 2)
 			{
 				// this is odd, do we just ignore this one?
 				// yes! regular ESC is just one byte of 27
 				continue;
 			}
-			if((n - i) >= 6 && aBuf[i + 1] == 91)
+			if((BufSize - i) >= 6 && pBuf[i + 1] == 91)
 			{
 				bool CtrlLeft =
-					aBuf[i + 1] == 91 &&
-					aBuf[i + 2] == 49 &&
-					aBuf[i + 3] == 59 &&
-					aBuf[i + 4] == 53 &&
-					aBuf[i + 5] == 68;
+					pBuf[i + 1] == 91 &&
+					pBuf[i + 2] == 49 &&
+					pBuf[i + 3] == 59 &&
+					pBuf[i + 4] == 53 &&
+					pBuf[i + 5] == 68;
 				bool CtrlRight =
-					aBuf[i + 1] == 91 &&
-					aBuf[i + 2] == 49 &&
-					aBuf[i + 3] == 59 &&
-					aBuf[i + 4] == 53 &&
-					aBuf[i + 5] == 67;
+					pBuf[i + 1] == 91 &&
+					pBuf[i + 2] == 49 &&
+					pBuf[i + 3] == 59 &&
+					pBuf[i + 4] == 53 &&
+					pBuf[i + 5] == 67;
 
 				if(CtrlLeft)
 				{
@@ -858,9 +849,9 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 					continue;
 				}
 			}
-			if((n - i) >= 3 && aBuf[i + 1] == 91)
+			if((BufSize - i) >= 3 && pBuf[i + 1] == 91)
 			{
-				if(aBuf[i + 2] == 65) // arrow key up
+				if(pBuf[i + 2] == 65) // arrow key up
 				{
 					// skip the sequence
 					i += 2;
@@ -881,7 +872,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 					if(pClient->m_pHistoryEntry)
 						pClient->SetInput(pClient->m_pHistoryEntry);
 				}
-				else if(aBuf[i + 2] == 66) // arrow key down
+				else if(pBuf[i + 2] == 66) // arrow key down
 				{
 					// skip the sequence
 					i += 2;
@@ -895,7 +886,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 					else
 						pClient->SetInput("");
 				}
-				else if(aBuf[i + 2] == 68) // arrow key left
+				else if(pBuf[i + 2] == 68) // arrow key left
 				{
 					// skip the sequence
 					i += 2;
@@ -904,7 +895,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 						pClient->SendBell();
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
-				else if(aBuf[i + 2] == 67) // arrow key right
+				else if(pBuf[i + 2] == 67) // arrow key right
 				{
 					// skip the sequence
 					i += 2;
@@ -914,7 +905,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 						pClient->SendBell();
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
-				else if(aBuf[i + 2] == 90) // shift+tab
+				else if(pBuf[i + 2] == 90) // shift+tab
 				{
 					// skip the sequence
 					i += 2;
@@ -927,6 +918,42 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 		}
 		pClient->InsertInputByte(Byte);
 	}
+
+	// TODO: only clear if we actually read the data
+	pClient->m_Buffer.Clear();
+}
+
+void CSshServer::ReadNewInput(CSshClient *pClient)
+{
+	ssh_channel Channel = pClient->m_Channel;
+	unsigned char aBuf[256] = {0};
+
+	// TODO: so far in all my tests the non blocking read gave me all escape sequences
+	//       as a whole chunk
+	//       and also all utf8 characters
+	//       but i think this is not guranteed
+	//       which makes everything just so much more complicated
+	//       in theory all reads should be collected in a buffer and then
+	//       parsed there
+	//       the question is just when do we start parsing
+
+	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
+	if(n == SSH_EOF)
+	{
+		OnClientDisconnect(pClient->m_ClientId, "eof");
+		return;
+	}
+	if(n == SSH_ERROR)
+	{
+		OnClientDisconnect(pClient->m_ClientId, "channel read error");
+		return;
+	}
+	if(n == SSH_AGAIN || n == 0)
+	{
+		return;
+	}
+	pClient->m_Buffer.AddBytes(aBuf, n);
+	TryProcessCurrentInput(pClient);
 
 	if(!std::isprint(aBuf[0]))
 	{
