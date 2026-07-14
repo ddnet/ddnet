@@ -199,7 +199,7 @@ void CByteBuffer::AddBytes(unsigned char *pBytes, size_t Size)
 
 void CByteBuffer::TrimLeading(size_t Amount)
 {
-	dbg_assert(Amount > 0, "Can't trim negative amount");
+	dbg_assert(Amount >= 0, "Can't trim negative amount");
 	if(Amount >= m_Size)
 	{
 		m_Size = 0;
@@ -217,7 +217,7 @@ void CByteBuffer::TrimLeading(size_t Amount)
 
 void CByteBuffer::TrimTrailing(size_t Amount)
 {
-	dbg_assert(Amount > 0, "Can't trim negative amount");
+	dbg_assert(Amount >= 0, "Can't trim negative amount");
 	m_Size = std::max((size_t)0, m_Size - Amount);
 	m_aBuf[m_Size] = 0x00;
 }
@@ -983,12 +983,12 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				log_error("ssh", "       amount of bytes in recv buffer: %" PRIzu, BufSize);
 				log_error("ssh", "       invalid utf-8 at index: %" PRIzu, i);
 				log_error("ssh", "       full buffer:");
-				for(size_t k = 0; k < BufSize;k++)
+				for(size_t DbgBufIdx = 0; DbgBufIdx < BufSize; DbgBufIdx++)
 				{
 					const char *pNote = "";
-					if(k == i)
+					if(DbgBufIdx == i)
 						pNote = " <-- invalid utf-8 starts here";
-					log_error("ssh", "         buf[%" PRIzu "] = %d%s", k, pBuf[k], pNote);
+					log_error("ssh", "         buf[%" PRIzu "] = %d%s", DbgBufIdx, pBuf[DbgBufIdx], pNote);
 				}
 
 				// clear out the previous bytes we successfully handled already
@@ -1002,7 +1002,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 
 				return;
 			}
-			log_error("ssh", "got unsupported byte %d from cid=%d (unsupported utf-8 or escape sequence maybe)", Byte, pClient->m_ClientId);
+			log_error("ssh", "cid=%d sent the valid utf-8 code point %d", pClient->m_ClientId, CodePoint);
 		}
 	}
 
