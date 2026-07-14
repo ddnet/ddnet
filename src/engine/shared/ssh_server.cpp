@@ -549,6 +549,11 @@ void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
 
 void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 {
+	if(!pClient->m_Buffer.Size())
+		return;
+
+	// TODO: only clear if we actually read the data
+	pClient->m_Buffer.Clear();
 }
 
 void CSshServer::ReadNewInput(CSshClient *pClient)
@@ -581,6 +586,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 		return;
 	}
 	pClient->m_Buffer.AddBytes(aBuf, n);
+	TryProcessCurrentInput(pClient);
 
 	if(pClient->m_WaitingForCursorPos)
 	{
