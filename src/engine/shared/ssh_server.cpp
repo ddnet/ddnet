@@ -1001,6 +1001,28 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				return;
 			}
 			log_error("ssh", "cid=%d sent the valid utf-8 code point %d", pClient->m_ClientId, CodePoint);
+
+			int LengthInBytes = pStr - (pBuf + i);
+			int TerminalWidth = unicode_width_process(&m_UnicodeWidthState, CodePoint);
+
+			// process terminal cursor accordingly
+			pClient->m_CursorPos.x += TerminalWidth;
+
+			if(BufSize > (size_t)LengthInBytes)
+			{
+				// TODO: should go one unicode at a time so using str_append won't work if BufSize is bigger than LengthInBytes
+
+				log_warn("ssh", "slow network connection sending multiple utf-8 characters in one read is not supported yet");
+			}
+
+			log_info("ssh", "TODO: append str '%s' to input buffer at correct offset", pBuf + i);
+
+			// FIXME: I am currently working on this code
+			//        implement a method similar to AddSingleAsciiLetterToInput()
+			//        which adds one utf8 code point to the input and call it here
+
+			// skip n bytes in loop
+			i += LengthInBytes;
 		}
 	}
 
