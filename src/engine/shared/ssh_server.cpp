@@ -197,6 +197,31 @@ void CByteBuffer::AddBytes(unsigned char *pBytes, size_t Size)
 	m_aBuf[m_Size] = 0x00;
 }
 
+void CByteBuffer::TrimLeading(size_t Amount)
+{
+	dbg_assert(Amount > 0, "Can't trim negative amount");
+	if(Amount >= m_Size)
+	{
+		m_Size = 0;
+		m_aBuf[m_Size] = 0x00;
+		return;
+	}
+	if(!Amount)
+		return;
+	unsigned char *aTmp[sizeof(m_aBuf)];
+	m_Size -= Amount;
+	mem_copy(aTmp, m_aBuf + Amount, m_Size);
+	mem_copy(m_aBuf, aTmp, m_Size);
+	m_aBuf[m_Size] = 0x00;
+}
+
+void CByteBuffer::TrimTrailing(size_t Amount)
+{
+	dbg_assert(Amount > 0, "Can't trim negative amount");
+	m_Size = std::max((size_t)0, m_Size - Amount);
+	m_aBuf[m_Size] = 0x00;
+}
+
 void CByteBuffer::Clear()
 {
 	m_Size = 0;
@@ -951,12 +976,20 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			// to be fully sent over the network or another error
 			if(CodePoint == -1)
 			{
-				// TODO: in here we need to return and not call m_Buffer.Clear()
-				//       but we can only do that if i == 0 because otherwise we handle
-				//       the previous bytes again
-				//       which is ugly so what we actually need to do is shift the buffer to i instead of clearing it
+				// TODO: test this branch, this might require some hacking to actually hit it and send partial utf8
+
 				log_error("ssh", "cid=%d sent invalid utf-8 which might be partial but that is not supported yet", pClient->m_ClientId);
-				continue;
+
+				// clear out the previous bytes we successfully handled already
+				// so they do not get processed again
+				pClient->m_Buffer.TrimLeading(i);
+
+				// and then we return without calling Clear() on the buffer so the partial utf8
+				// stays for the next tick
+
+				// TODO: here we need to add a timeout because we can not wait forever for partial utf8
+
+				return;
 			}
 			log_error("ssh", "got unsupported byte %d from cid=%d (unsupported utf-8 or escape sequence maybe)", Byte, pClient->m_ClientId);
 		}

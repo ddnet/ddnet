@@ -54,6 +54,13 @@ class CByteBuffer
 public:
 	void AddByte(char Byte);
 	void AddBytes(unsigned char *pBytes, size_t Size);
+
+	// delete Amount bytes at the start of the buffer
+	void TrimLeading(size_t Amount);
+
+	// delete Amount bytes at the end of the buffer
+	void TrimTrailing(size_t Amount);
+
 	void Clear();
 	size_t Size() const { return m_Size; }
 	const unsigned char *Data() const { return m_aBuf; }
