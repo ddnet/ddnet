@@ -1771,8 +1771,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 		}
 	}
 
-	CServerInfo ServerInfo;
-	Client()->GetServerInfo(&ServerInfo);
+	const CServerInfo &ServerInfo = Client()->ServerInfo();
 
 	bool FoundGameInfoEx = false;
 	bool GotSwitchStateTeam = false;

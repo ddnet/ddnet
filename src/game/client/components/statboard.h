@@ -18,7 +18,7 @@ private:
 	void AutoStatScreenshot();
 	void AutoStatCSV();
 
-	std::string ReplaceCommata(char *pStr);
+	std::string ReplaceCommata(const char *pStr);
 	void FormatStats(char *pDest, size_t DestSize);
 
 public:
