@@ -12,8 +12,8 @@
 #include <engine/engine.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
+#include <engine/http.h>
 #include <engine/shared/config.h>
-#include <engine/shared/http.h>
 #include <engine/storage.h>
 
 #include <generated/client_data.h>
@@ -1006,7 +1006,7 @@ void CSkins::CSkinDownloadJob::Run()
 	const CTimeout Timeout{10000, 0, 8192, 10};
 	const size_t MaxResponseSize = 10 * 1024 * 1024; // 10 MiB
 
-	std::shared_ptr<CHttpRequest> pGet = HttpGetBoth(aUrl, m_pSkins->Storage(), aPathReal, IStorage::TYPE_SAVE);
+	std::shared_ptr<IHttpRequest> pGet = HttpGetBoth(aUrl, m_pSkins->Storage(), aPathReal, IStorage::TYPE_SAVE);
 	pGet->Timeout(Timeout);
 	pGet->MaxResponseSize(MaxResponseSize);
 	pGet->ValidateBeforeOverwrite(true);

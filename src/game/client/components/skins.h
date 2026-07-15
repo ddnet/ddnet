@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
-class CHttpRequest;
+class IHttpRequest;
 
 class CSkins : public CComponent
 {
@@ -290,7 +290,7 @@ private:
 
 	private:
 		CLock m_Lock;
-		std::shared_ptr<CHttpRequest> m_pGetRequest GUARDED_BY(m_Lock);
+		std::shared_ptr<IHttpRequest> m_pGetRequest GUARDED_BY(m_Lock);
 	};
 
 	std::unordered_map<std::string_view, std::unique_ptr<CSkinContainer>> m_Skins;
