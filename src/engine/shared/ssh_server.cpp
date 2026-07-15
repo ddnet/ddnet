@@ -899,10 +899,13 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			}
 			pClient->CursorMoveLeft();
 			// delete at the end of the input
-			if(pClient->m_aInput[Idx + 1] == '\0')
+			if(pClient->m_aInput[Idx] == '\0')
 			{
 				if(pClient->m_aInput[0])
+				{
+					ssh_channel_write(pClient->m_Channel, "\b \b", 3);
 					pClient->SendCursorPos(pClient->m_CursorPos);
+				}
 				else
 					pClient->SendBell();
 				pClient->m_aInput[pClient->m_InputIdx] = '\0';
