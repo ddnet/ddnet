@@ -242,6 +242,7 @@ int CSshClient::InputIdx()
 }
 
 // TODO: support moving cursor through multi byte unicode characters
+//       see str_utf8_rewind() and str_utf8_forward()
 
 bool CSshClient::CursorMoveLeft()
 {
@@ -373,6 +374,63 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 		if(!m_pCompletionPreview)
 			ClearCompletionPreview();
 	}
+}
+
+void CSshClient::AddSingleUtf8CodePointToInput(const char *pUtf8, size_t Utf8Size)
+{
+	ResetCompletion();
+	ssh_channel Channel = m_Channel;
+	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
+	if(CursorAtEnd)
+	{
+		str_append(m_aInput, pUtf8);
+		m_InputIdx += Utf8Size;
+
+		// if we override the nullterm make sure to move it
+		// so the string stays terminated
+		// but not if we are in the middle of the input
+		m_aInput[m_InputIdx] = '\0';
+
+		ssh_channel_write(Channel, pUtf8, Utf8Size);
+
+		// TODO: remove this the client already does this correctly
+		//       this is only help to debug utf8 cursor offset issues
+		//       by visualazing what the server currently thinks the cursor pos is
+		// TODO: x2 we dont even move the cursor the outer scope does is that ok?
+		SendCursorPos(m_CursorPos);
+	}
+	else
+	{
+		// if we are in the middle of the string
+		// we need to shift all the input
+
+		// clear everything from the cursor till the end
+		ssh_channel_write(Channel, "\33[0K", str_length("\33[0K"));
+		ssh_channel_write(Channel, pUtf8, Utf8Size);
+
+		char aRight[2048];
+		// TODO: this for sure can go OOB pls add some checks
+		str_copy(aRight, m_aInput + m_InputIdx);
+
+		ssh_channel_write(Channel, aRight, str_length(aRight));
+
+		str_append(m_aInput, pUtf8);
+		m_InputIdx += Utf8Size;
+		m_aInput[m_InputIdx] = '\0';
+
+		str_append(m_aInput, aRight);
+
+		// m_CursorPos.x++;
+
+		// TODO: ^v  the cursor is not set in this method but the outer scope is that ok? why do we send it here
+
+		// move cursor back into the input after rewriting the line
+		SendCursorPos(m_CursorPos);
+	}
+
+	// could do completion preview here
+	// but we neither expect utf8 to be typed by hand where completion makes sense
+	// nor do we expect command names to contain utf8 symbols
 }
 
 void CSshClient::ClearPrompt()
@@ -1017,9 +1075,9 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 
 			log_info("ssh", "TODO: append str '%s' to input buffer at correct offset", pBuf + i);
 
-			// FIXME: I am currently working on this code
-			//        implement a method similar to AddSingleAsciiLetterToInput()
-			//        which adds one utf8 code point to the input and call it here
+			char aUtf8Str[32] = {0};
+			str_copy(aUtf8Str, pBuf + i);
+			pClient->AddSingleUtf8CodePointToInput(aUtf8Str, LengthInBytes);
 
 			// skip n bytes in loop
 			i += LengthInBytes;

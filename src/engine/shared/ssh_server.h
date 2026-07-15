@@ -157,6 +157,12 @@ public:
 	// not called for escape sequences or multi byte utf8 symbols
 	void AddSingleAsciiLetterToInput(char Byte);
 
+	// when the client sent enough bytes to form one valid utf8 code point
+	// that should be added to the input buffer
+	//
+	// pUtf8 is one utf8 symbol that could be muliple bytes long and is null terminated
+	void AddSingleUtf8CodePointToInput(const char *pUtf8, size_t Utf8Size);
+
 	// clears the current line and places an empty prompt
 	void ClearPrompt();
 
