@@ -29,9 +29,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-// TODO: there are lots of calls to str_length to set the m_CursorPos.x they all should use
-//       a proper utf8 supporting str_width function instead otherwise the offsets will be wrong
-
 // TODO: the default file location in the current dir is not ideal
 //       this should be in the storage save location
 //       or maybe even use the system wide location that also the regular host
@@ -344,7 +341,7 @@ void CSshClient::SetInput(const char *pInput)
 		ClearPrompt();
 		ssh_channel_write(m_Channel, pInput, str_length(pInput));
 	}
-	m_CursorPos.x = PromptLength() + str_length(pInput);
+	m_CursorPos.x = PromptLength() + StringTerminalWidth(pInput, &m_CallbackCtx.m_pServer->m_UnicodeWidthState);
 }
 
 bool CSshClient::IsSimpleAsciiLetter(char Byte)
@@ -734,9 +731,9 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		return;
 	}
 
-	// TODO: what is this "k" i am pretty sure this is outdated at best or more likely wrong because of utf and stuff
-	int k = str_length(pClient->m_aInput);
-	if(k + BufSize > (int)sizeof(pClient->m_aInput) - 10)
+	// catch reaching the buffer size limit early
+	// and drop all input except it is a delete instruction
+	if(str_length(pClient->m_aInput) + BufSize > (int)sizeof(pClient->m_aInput) - 10)
 	{
 		// do not allow multiple characters at once to keep things simple
 		if(BufSize > 1)
@@ -1159,6 +1156,8 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 	//       in theory all reads should be collected in a buffer and then
 	//       parsed there
 	//       the question is just when do we start parsing
+	//       ---
+	//       UPDATE: there is the buffer now but still no flushing or timeouts
 
 	int n = ssh_channel_read_nonblocking(Channel, aBuf, sizeof(aBuf), 0);
 	if(n == SSH_EOF)
