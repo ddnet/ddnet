@@ -117,19 +117,27 @@ static int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicode
 // And it writes the reformartted log line to the output buffer pSshLine
 int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth, unicode_width_state_t *pUnicodeWidthState)
 {
-	// TODO: output buf bound check
-
 	size_t InIdx = 0;
 	size_t OutIdx = 0;
 	int NumLines = 1;
 	int SubLineLen = 0;
+
+	auto WriteOutputByte = [&OutIdx, SshLineSize, &pSshLine](char Byte) {
+		if(OutIdx + 1 > SshLineSize - 2)
+			return false;
+
+		pSshLine[OutIdx++] = Byte;
+		return true;
+	};
+
 	while(pServerLine[InIdx])
 	{
 		// TODO: what if the line already contained \r\n should we detect that?
 		//       or is translating it to \r\r\n fine either way
 		if(pServerLine[InIdx] == '\n')
 		{
-			pSshLine[OutIdx++] = '\r';
+			if(!WriteOutputByte('\r'))
+				break;
 			NumLines++;
 			SubLineLen = 0;
 		}
@@ -151,7 +159,11 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 		int Bytes = pStr - (pServerLine + InIdx);
 		for(int i = 0; i < Bytes; i++)
 		{
-			pSshLine[OutIdx++] = pServerLine[InIdx++];
+			// this only breaks the inner loop but thats fine
+			// on the next write it will break the outer loop
+			// and it anyways nerver will write if full
+			if(!WriteOutputByte(pServerLine[InIdx++]))
+				break;
 		}
 		int Width = unicode_width_process(pUnicodeWidthState, CodePoint);
 		SubLineLen += Width;
