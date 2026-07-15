@@ -878,16 +878,14 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				continue;
 			}
 			pClient->CursorMoveLeft();
+			// delete at the end of the input
 			if(pClient->m_aInput[Idx + 1] == '\0')
 			{
-				// delete at the end of the input
-				int LastChr = str_length(pClient->m_aInput);
-				LastChr = std::max(0, LastChr - 1);
 				if(pClient->m_aInput[0])
-					ssh_channel_write(pClient->m_Channel, "\b \b", 3);
+					pClient->SendCursorPos(pClient->m_CursorPos);
 				else
-					ssh_channel_write(pClient->m_Channel, "\a", 1);
-				pClient->m_aInput[LastChr] = '\0';
+					pClient->SendBell();
+				pClient->m_aInput[pClient->m_InputIdx] = '\0';
 			}
 			else
 			{
