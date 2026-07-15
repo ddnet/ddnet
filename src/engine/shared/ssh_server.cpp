@@ -117,9 +117,6 @@ static int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicode
 // And it writes the reformartted log line to the output buffer pSshLine
 int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth, unicode_width_state_t *pUnicodeWidthState)
 {
-	// TODO: support multi byte utf8 char width
-	// TODO: support utf8 wide character width
-
 	// TODO: output buf bound check
 
 	size_t InIdx = 0;
@@ -252,9 +249,6 @@ IConsole *CSshClient::Console()
 	return m_CallbackCtx.m_pServer->Console();
 }
 
-// TODO: support moving cursor through multi byte unicode characters
-//       see str_utf8_rewind() and str_utf8_forward()
-
 bool CSshClient::CursorMoveLeft()
 {
 	if(m_InputIdx == 0)
@@ -348,14 +342,6 @@ bool CSshClient::IsSimpleAsciiLetter(char Byte)
 		return true;
 	return false;
 }
-
-// TODO: maybe keep AddSingleAsciiLetterToInput() as simple as it is for now
-//       and add an entirely new method for utf8
-//       where we detect utf8 based on the first byte
-//       and then error out if the utf8 was not sent as a single message
-//       i feel like no ssh client should ever send partial utf8 as one message right?
-//       well even if they do we just dont support that for now
-//       and then the regular ascii code can keep working will the new stuff is being built
 
 void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 {
@@ -1426,8 +1412,6 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 
 int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
-	// TODO: this is not fetched on connect smh
-	//       so cursor movement restrictions are wrong
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 	pCtx->m_pClient->m_Term.m_Width = Width;
 	pCtx->m_pClient->m_Term.m_Height = Height;
