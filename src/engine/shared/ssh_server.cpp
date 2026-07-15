@@ -1078,7 +1078,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			pClient->AddSingleUtf8CodePointToInput(aUtf8Str, LengthInBytes);
 
 			// skip n bytes in loop
-			i += LengthInBytes;
+			// but -1 because the for loop already does i++
+			i += LengthInBytes - 1;
 		}
 	}
 
