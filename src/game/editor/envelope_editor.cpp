@@ -585,6 +585,7 @@ void CEnvelopeEditor::Render(CUIRect View)
 			else
 				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.5f);
 
+			Ui()->ClipEnable(&View);
 			float Time = Map()->m_EnvelopeEvaluator.m_AnimateTime * Map()->m_EnvelopeEvaluator.m_AnimateSpeed;
 			const float BarWidth = 1.5f;
 			CUIRect TimeBar{
@@ -601,6 +602,7 @@ void CEnvelopeEditor::Render(CUIRect View)
 				TimeBar.x = EnvelopeToScreenX(View, LoopedTime) - BarWidth / 2.0f;
 				TimeBar.Draw(BarColor, IGraphics::CORNER_NONE, 0.0f);
 			}
+			Ui()->ClipDisable();
 		}
 
 		{
