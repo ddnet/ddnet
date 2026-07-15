@@ -29,6 +29,20 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: experiment with some fancy features
+//       in theory this thing could be a full TUI
+//       for example typing in the "kick" command could
+//       and pressing tab there could be a player selection menu
+//       for the id argument with a list of names
+//       and the server will verify the selected name did not get invalidated
+//       by disconnect once the command is being executed
+//       ---
+//       can also extend the console scripting language with additional syntax
+//       like loops, sleep statement, variables, pipes/filters and functions that get parsed and interpreted before being passed
+//       to console execute line
+//       just imagine "kick 0 $reason"
+//       or "status | grep xx"
+
 // TODO: reaching terminal width length with the input is not supported yet
 //       things get weird
 //       i mean ideally it would line wrap like a terminal does but thats kinda tricky
