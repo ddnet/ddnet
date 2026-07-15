@@ -29,6 +29,17 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: reaching terminal width length with the input is not supported yet
+//       things get weird
+//       i mean ideally it would line wrap like a terminal does but thats kinda tricky
+//       for now i would like to just cap it at terminal width and have limited but
+//       clear and bug free behavior
+//       ---
+//       of course that gets tricky when shrinking the terminal window
+//       maybe the only really stable way to go is to implement proper wrapping
+//       or at least rewrite the entire input on resize to allow users to get out of
+//       the bad state by just expanding the terminal again without having to rewrite input
+
 // TODO: the default file location in the current dir is not ideal
 //       this should be in the storage save location
 //       or maybe even use the system wide location that also the regular host
