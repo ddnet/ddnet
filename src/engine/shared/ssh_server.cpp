@@ -240,11 +240,24 @@ IConsole *CSshClient::Console()
 
 bool CSshClient::CursorMoveLeft()
 {
+	if(m_InputIdx == 0)
+		return false;
+
 	const int Min = PromptLength();
-	int Prev = m_CursorPos.x;
-	m_CursorPos.x = std::max(m_CursorPos.x - 1, Min);
-	m_InputIdx = std::max(m_InputIdx - 1, 0);
-	return Prev != m_CursorPos.x;
+	m_InputIdx = str_utf8_rewind(m_aInput, m_InputIdx);
+	int Width = 1;
+	const char *pStr = m_aInput + m_InputIdx;
+	int CodePoint = str_utf8_decode(&pStr);
+	if(CodePoint == 0 || CodePoint == -1)
+	{
+		log_warn("ssh", "Move cursor left failed. Invalid CodePoint: %d", CodePoint);
+	}
+	else
+	{
+		Width = unicode_width_process(&m_CallbackCtx.m_pServer->m_UnicodeWidthState, CodePoint);
+	}
+	m_CursorPos.x = std::max(m_CursorPos.x - Width, Min);
+	return true;
 }
 
 bool CSshClient::CursorMoveRight()
