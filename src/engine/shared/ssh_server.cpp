@@ -235,12 +235,6 @@ IConsole *CSshClient::Console()
 	return m_CallbackCtx.m_pServer->Console();
 }
 
-int CSshClient::InputIdx()
-{
-	int Idx = m_CursorPos.x - PromptLength();
-	return std::clamp(Idx, 0, (int)sizeof(m_aInput) - 2);
-}
-
 // TODO: support moving cursor through multi byte unicode characters
 //       see str_utf8_rewind() and str_utf8_forward()
 
@@ -249,6 +243,7 @@ bool CSshClient::CursorMoveLeft()
 	const int Min = PromptLength();
 	int Prev = m_CursorPos.x;
 	m_CursorPos.x = std::max(m_CursorPos.x - 1, Min);
+	m_InputIdx = std::max(m_InputIdx - 1, 0);
 	return Prev != m_CursorPos.x;
 }
 
@@ -262,6 +257,7 @@ bool CSshClient::CursorMoveRight()
 
 	int Prev = m_CursorPos.x;
 	m_CursorPos.x = std::clamp(m_CursorPos.x + 1, Min, Max);
+	m_InputIdx = std::min(m_InputIdx + 1, Max);
 	return Prev != m_CursorPos.x;
 }
 
@@ -272,7 +268,7 @@ bool CSshClient::CursorMoveWordLeft()
 		if(!CursorMoveLeft())
 			return false;
 
-		if(m_aInput[InputIdx()] == ' ')
+		if(m_aInput[m_InputIdx] == ' ')
 			return true;
 	}
 	return false;
@@ -285,7 +281,7 @@ bool CSshClient::CursorMoveWordRight()
 		if(!CursorMoveRight())
 			return false;
 
-		if(m_aInput[InputIdx()] == ' ')
+		if(m_aInput[m_InputIdx] == ' ')
 			return true;
 	}
 	return false;
@@ -323,15 +319,14 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 	ResetCompletion();
 	char aByteBuf[2] = {Byte, 0x00};
 	ssh_channel Channel = m_Channel;
-	int Idx = InputIdx();
-	bool CursorAtEnd = m_aInput[Idx] == '\0';
+	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
 	if(CursorAtEnd)
 	{
 		// if we override the nullterm make sure to move it
 		// so the string stays terminated
 		// but not if we are in the middle of the input
-		m_aInput[Idx + 1] = '\0';
-		m_aInput[Idx] = Byte;
+		m_aInput[m_InputIdx++] = Byte;
+		m_aInput[m_InputIdx] = '\0';
 		m_CursorPos.x++;
 		ssh_channel_write(Channel, aByteBuf, 1);
 
@@ -351,12 +346,12 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 
 		char aRight[2048];
 		// TODO: this for sure can go OOB pls add some checks
-		str_copy(aRight, m_aInput + Idx);
+		str_copy(aRight, m_aInput + m_InputIdx);
 
 		ssh_channel_write(Channel, aRight, str_length(aRight));
 
-		m_aInput[Idx] = Byte;
-		m_aInput[Idx + 1] = '\0';
+		m_aInput[m_InputIdx++] = Byte;
+		m_aInput[m_InputIdx] = '\0';
 
 		// how well does str_append work with partial utf8?
 		str_append(m_aInput, aRight);
@@ -463,11 +458,12 @@ void CSshClient::SetCursorPosToPromptStart()
 {
 	// not the most ideal method name but eh idk
 	m_CursorPos.x = PromptLength();
+	m_InputIdx = 0;
 }
 
 void CSshClient::ClearCompletionPreview()
 {
-	bool CursorAtEnd = m_aInput[InputIdx()] == '\0';
+	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
 	// there can only be a completion string if our cursor is
 	// at the end of the input
 	if(!CursorAtEnd)
@@ -791,7 +787,9 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		{
 			pClient->ClearCompletionPreview();
 			pClient->SetCursorPosToPromptStart();
-			pClient->m_CursorPos.x += str_length(pClient->m_aInput);
+			// TODO: str_length is not correct for unicode width
+			pClient->m_CursorPos.x = str_length(pClient->m_aInput);
+			pClient->m_InputIdx = str_length(pClient->m_aInput);
 			pClient->SendCursorPos(pClient->m_CursorPos);
 			continue;
 		}
@@ -847,7 +845,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		else if(Byte == KEY_BACKSPACE || Byte == KEY_DEL)
 		{
 			pClient->ResetCompletion();
-			int Idx = pClient->InputIdx();
+			int Idx = pClient->m_InputIdx;
 			if(Idx == 0)
 			{
 				ssh_channel_write(pClient->m_Channel, "\a", 1);
@@ -1128,7 +1126,7 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 			log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
 		}
 		log_info("ssh", "cursor x=%d y=%d term w=%d h=%d", pClient->m_CursorPos.x, pClient->m_CursorPos.y, pClient->m_Term.m_Width, pClient->m_Term.m_Height);
-		log_info("ssh", "input '%s'", pClient->m_aInput);
+		log_info("ssh", "input bufidx=%d '%s'", pClient->m_InputIdx, pClient->m_aInput);
 	}
 }
 

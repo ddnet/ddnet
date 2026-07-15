@@ -114,8 +114,6 @@ public:
 	// sent to the client and used as insert offset when typing
 	ivec2 m_CursorPos = ivec2(0, 0);
 
-	// TODO: remove InputIdx() method?
-	//
 	// current index in the m_aInput array
 	// related to m_Term.m_CursorPos.x but not the same
 	// it is not shifted by the prompt length
@@ -123,11 +121,6 @@ public:
 	// but for now this is also the index for the partial write
 	// of a multi byte utf8 character
 	int m_InputIdx = 0;
-
-	// current index in the m_aInput array
-	// based on the cursor position
-	// this is safe and should never go out of bounds
-	int InputIdx();
 
 	// returns false when it did not move
 	bool CursorMoveLeft();
