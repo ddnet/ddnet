@@ -162,6 +162,7 @@ public:
 	// sends new line and prompt
 	void NewPrompt();
 
+	const char *PromptStr();
 	int PromptLength();
 	void SetCursorPosToPromptStart();
 

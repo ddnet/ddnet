@@ -482,7 +482,7 @@ void CSshClient::ClearPrompt()
 		return;
 
 	ssh_channel_write(m_Channel, "\r\033[2K", 6);
-	ssh_channel_write(m_Channel, "> ", 2);
+	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	SetCursorPosToPromptStart();
 }
 
@@ -491,15 +491,21 @@ void CSshClient::NewPrompt()
 	if(!m_Channel)
 		return;
 
-	ssh_channel_write(m_Channel, "\r\n> ", 2);
-	ssh_channel_write(m_Channel, "> ", 2);
+	ssh_channel_write(m_Channel, "\r\n", 2);
+	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	m_CursorPos.y++;
 	SetCursorPosToPromptStart();
 }
 
+const char *CSshClient::PromptStr()
+{
+	return "> ";
+}
+
 int CSshClient::PromptLength()
 {
-	return 3;
+	// TODO: off by one -,- ?
+	return str_length(PromptStr()) + 1;
 }
 
 void CSshClient::SetCursorPosToPromptStart()
@@ -918,18 +924,34 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				// TODO: bound check this
 				str_copy(aRight, pClient->m_aInput + Idx);
 
+				int Size = Idx - pClient->m_InputIdx;
+
 				// server side we need to shift the entire input
 				// TODO: bound check this
-				str_copy(pClient->m_aInput + Idx - 1, aRight, sizeof(pClient->m_aInput) - Idx);
+				str_copy(pClient->m_aInput + Idx - Size, aRight, sizeof(pClient->m_aInput) - Idx);
 
-				// client side del is just sending a backspace
-				ssh_channel_write(pClient->m_Channel, "\b \b", 3);
+				// simple ascii
+				if(Size == 1)
+				{
+					// client side del is just sending a backspace
+					ssh_channel_write(pClient->m_Channel, "\b \b", 3);
 
-				// clear everything from the cursor till the end
-				ssh_channel_write(Channel, "\33[0K", str_length("\33[0K"));
+					// clear everything from the cursor till the end
+					ssh_channel_write(Channel, "\33[0K", str_length("\33[0K"));
 
-				// rewrite shifted line
-				ssh_channel_write(Channel, aRight, str_length(aRight));
+					// rewrite shifted line
+					ssh_channel_write(Channel, aRight, str_length(aRight));
+				}
+				else
+				{
+					// with multi byte and multi span col width utf8 things can get messy
+					// to avoid any client desync we just rewrite the entire line
+					// might not be as performant but it only affects inline utf8 editing so its fine
+
+					ssh_channel_write(Channel, "\r\033[2K", 6);
+					ssh_channel_write(Channel, pClient->PromptStr(), str_length(pClient->PromptStr()));
+					ssh_channel_write(Channel, pClient->m_aInput, str_length(pClient->m_aInput));
+				}
 
 				// move cursor back into the input after rewriting the line
 				pClient->SendCursorPos(pClient->m_CursorPos);
