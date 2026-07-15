@@ -174,8 +174,6 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	CSshClient *pClient = m_pSshServer->m_apClients[m_ClientId];
 	if(!pClient)
 	{
-		// TODO: assert instead?
-		//       can this happen if we disconnect during a running operation?
 		m_pOuterLogger->Log(pMessage);
 		return;
 	}
