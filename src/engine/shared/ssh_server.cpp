@@ -262,16 +262,29 @@ bool CSshClient::CursorMoveLeft()
 
 bool CSshClient::CursorMoveRight()
 {
-	const int Min = PromptLength();
-	int Max = sizeof(m_aInput) - 1;
-	Max = std::min(Max, str_length(m_aInput));
-	Max = std::min(Max, m_Term.m_Width);
-	Max += Min;
+	const char *pStr = m_aInput + m_InputIdx;
+	int CodePoint = str_utf8_decode(&pStr);
+	int Size = pStr - (m_aInput + m_InputIdx);
+	int Width = 1;
+	if(CodePoint == 0 || CodePoint == -1)
+	{
+		log_warn("ssh", "Move cursor right failed. Invalid CodePoint: %d", CodePoint);
+	}
+	else
+	{
+		Width = unicode_width_process(&m_CallbackCtx.m_pServer->m_UnicodeWidthState, CodePoint);
+	}
 
-	int Prev = m_CursorPos.x;
-	m_CursorPos.x = std::clamp(m_CursorPos.x + 1, Min, Max);
-	m_InputIdx = std::min(m_InputIdx + 1, Max);
-	return Prev != m_CursorPos.x;
+	if(m_CursorPos.x + Width >= m_Term.m_Width)
+		return false;
+	if(m_InputIdx + Size >= (int)sizeof(m_aInput) - 1)
+		return false;
+	if(m_InputIdx + Size >= str_length(m_aInput))
+		return false;
+
+	m_InputIdx += Size;
+	m_CursorPos.x += Width;
+	return true;
 }
 
 bool CSshClient::CursorMoveWordLeft()
