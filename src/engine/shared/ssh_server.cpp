@@ -83,6 +83,28 @@ static void SockaddrToNetaddr(const sockaddr *pSrc, socklen_t SrcLen, NETADDR *p
 	}
 }
 
+// Get the amount of terminal columns this string will take up.
+// It supports multi byte utf-8 characters and also wide characters
+static int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicodeWidthState)
+{
+	int Width = 0;
+	while(*pStr)
+	{
+		int CodePoint = str_utf8_decode(&pStr);
+		if(CodePoint == 0)
+		{
+			return Width;
+		}
+		if(CodePoint == -1)
+		{
+			// meh
+			return Width;
+		}
+		Width += unicode_width_process(pUnicodeWidthState, CodePoint);
+	}
+	return Width;
+}
+
 // We keep track of the client's ssh session cursor position on the server side.
 // For that we need to update the y position on every new log line.
 // This gets complicated as soon as the log line contains \n newline escape sequences
@@ -812,9 +834,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		else if(Byte == KEY_CTRL_E)
 		{
 			pClient->ClearCompletionPreview();
-			pClient->SetCursorPosToPromptStart();
-			// TODO: str_length is not correct for unicode width
-			pClient->m_CursorPos.x = str_length(pClient->m_aInput);
+			pClient->m_CursorPos.x = pClient->PromptLength() + StringTerminalWidth(pClient->m_aInput, &m_UnicodeWidthState);
 			pClient->m_InputIdx = str_length(pClient->m_aInput);
 			pClient->SendCursorPos(pClient->m_CursorPos);
 			continue;
