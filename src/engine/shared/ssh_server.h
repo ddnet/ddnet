@@ -97,6 +97,9 @@ public:
 	// that we have not processed yet
 	CByteBuffer m_Buffer;
 
+	// Users can cut and paste text with ctrl+k and ctrl+y
+	char m_aYankBuffer[2048] = "";
+
 	// The text input in the current console prompt
 	char m_aInput[2048] = "";
 
@@ -156,6 +159,12 @@ public:
 	//
 	// pUtf8 is one utf8 symbol that could be multiple bytes long and is null terminated
 	void AddSingleUtf8CodePointToInput(const char *pUtf8, size_t Utf8Size);
+
+	// Similar to SetInput() but does not override but insert.
+	// Similar to AddSingleAsciiLetterToInput() and AddSingleUtf8CodePointToInput()
+	// but is not limited in length.
+	// Utf-8 is supported.
+	void InsertToInputAtCursor(const char *pText);
 
 	// clears the current line and places an empty prompt
 	void ClearPrompt();

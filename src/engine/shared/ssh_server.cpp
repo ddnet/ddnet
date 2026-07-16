@@ -76,6 +76,7 @@
 
 #define KEY_ENTER 13
 #define KEY_CTRL_U 21
+#define KEY_CTRL_Y 25
 #define KEY_CTRL_C 3
 #define KEY_CTRL_D 4
 #define KEY_CTRL_L 12
@@ -531,6 +532,15 @@ void CSshClient::AddSingleUtf8CodePointToInput(const char *pUtf8, size_t Utf8Siz
 	// nor do we expect command names to contain utf8 symbols
 }
 
+// TODO: once this one works fully we might be able to replace these two with it
+//       AddSingleAsciiLetterToInput();
+//       AddSingleUtf8CodePointToInput();
+
+void CSshClient::InsertToInputAtCursor(const char *pText)
+{
+	SetInput(pText);
+}
+
 void CSshClient::ClearPrompt()
 {
 	if(!m_Channel)
@@ -926,12 +936,24 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		else if(Byte == KEY_CTRL_U)
 		{
 			pClient->ResetCompletion();
-
-			// ideally this would not be the same as ctrl+c
-			// and just clear the current prompt instead of
-			// opening a new one
-			pClient->m_aInput[0] = '\0';
-			pClient->ClearPrompt();
+			bool CursorAtEnd = pClient->m_aInput[pClient->m_InputIdx] == '\0';
+			if(CursorAtEnd)
+			{
+				str_copy(pClient->m_aYankBuffer, pClient->m_aInput);
+				pClient->m_aInput[0] = '\0';
+				pClient->ClearPrompt();
+			}
+			else
+			{
+				log_warn("ssh", "not supported yet");
+			}
+			continue;
+		}
+		else if(Byte == KEY_CTRL_Y)
+		{
+			pClient->ResetCompletion();
+			pClient->InsertToInputAtCursor(pClient->m_aYankBuffer);
+			pClient->SendCursorPos(pClient->m_CursorPos);
 			continue;
 		}
 		else if(Byte == KEY_CTRL_C)
