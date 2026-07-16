@@ -399,6 +399,7 @@ void CSshClient::SetInput(const char *pInput)
 		ssh_channel_write(m_Channel, pInput, str_length(pInput));
 	}
 	m_CursorPos.x = PromptLength() + StringTerminalWidth(pInput, &m_CallbackCtx.m_pServer->m_UnicodeWidthState);
+	m_InputIdx = str_length(m_aInput);
 }
 
 bool CSshClient::IsSimpleAsciiLetter(char Byte)
