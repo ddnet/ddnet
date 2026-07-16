@@ -475,63 +475,6 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 	}
 }
 
-void CSshClient::AddSingleUtf8CodePointToInput(const char *pUtf8, size_t Utf8Size)
-{
-	ResetCompletion();
-	ssh_channel Channel = m_Channel;
-	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
-	if(CursorAtEnd)
-	{
-		str_append(m_aInput, pUtf8);
-		m_InputIdx += Utf8Size;
-
-		// if we override the nullterm make sure to move it
-		// so the string stays terminated
-		// but not if we are in the middle of the input
-		m_aInput[m_InputIdx] = '\0';
-
-		ssh_channel_write(Channel, pUtf8, Utf8Size);
-
-		// TODO: remove this the client already does this correctly
-		//       this is only help to debug utf8 cursor offset issues
-		//       by visualazing what the server currently thinks the cursor pos is
-		// TODO: x2 we dont even move the cursor the outer scope does is that ok?
-		SendCursorPos(m_CursorPos);
-	}
-	else
-	{
-		// if we are in the middle of the string
-		// we need to shift all the input
-
-		// clear everything from the cursor till the end
-		ssh_channel_write(Channel, "\33[0K", str_length("\33[0K"));
-		ssh_channel_write(Channel, pUtf8, Utf8Size);
-
-		char aRight[2048];
-		// TODO: this for sure can go OOB pls add some checks
-		str_copy(aRight, m_aInput + m_InputIdx);
-
-		ssh_channel_write(Channel, aRight, str_length(aRight));
-
-		str_append(m_aInput, pUtf8);
-		m_InputIdx += Utf8Size;
-		m_aInput[m_InputIdx] = '\0';
-
-		str_append(m_aInput, aRight);
-
-		// m_CursorPos.x++;
-
-		// TODO: ^v  the cursor is not set in this method but the outer scope is that ok? why do we send it here
-
-		// move cursor back into the input after rewriting the line
-		SendCursorPos(m_CursorPos);
-	}
-
-	// could do completion preview here
-	// but we neither expect utf8 to be typed by hand where completion makes sense
-	// nor do we expect command names to contain utf8 symbols
-}
-
 // TODO: once this one works fully we might be able to replace these two with it
 //       AddSingleAsciiLetterToInput();
 //       AddSingleUtf8CodePointToInput();
@@ -550,7 +493,9 @@ bool CSshClient::InsertToInputAtCursor(const char *pText)
 		{
 			return false;
 		}
-		if(TextWidth + InputWidth >= m_Term.m_Width)
+		// Ideally this would be PromptWidth() not PromptLength() but
+		// lets keep things simple for now as the prompt is hardcodet ascii
+		if(TextWidth + InputWidth + PromptLength() >= m_Term.m_Width)
 		{
 			return false;
 		}
@@ -581,6 +526,15 @@ bool CSshClient::InsertToInputAtCursor(const char *pText)
 	}
 	m_InputIdx += TextSize;
 	m_CursorPos.x += TextWidth;
+
+	if(!CursorAtEnd)
+	{
+		// if we had to clear and rewrite the right side
+		// of the cursor that will shift the cursor implicitly client sided
+		// so we need to resend the pos to be still in the middle of the input
+		SendCursorPos(m_CursorPos);
+	}
+
 	return true;
 }
 
@@ -997,7 +951,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			pClient->ResetCompletion();
 			if(!pClient->InsertToInputAtCursor(pClient->m_aYankBuffer))
 				pClient->SendBell();
-			pClient->SendCursorPos(pClient->m_CursorPos);
 			continue;
 		}
 		else if(Byte == KEY_CTRL_C)
@@ -1271,14 +1224,11 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			}
 
 			int LengthInBytes = pStr - (pBuf + i);
-			int TerminalWidth = unicode_width_process(&m_UnicodeWidthState, CodePoint);
-
-			// process terminal cursor accordingly
-			pClient->m_CursorPos.x += TerminalWidth;
-
 			char aUtf8Str[32] = {0};
 			str_copy(aUtf8Str, pBuf + i);
-			pClient->AddSingleUtf8CodePointToInput(aUtf8Str, LengthInBytes);
+			aUtf8Str[LengthInBytes] = '\0';
+			if(!pClient->InsertToInputAtCursor(aUtf8Str))
+				pClient->SendBell();
 
 			// skip n bytes in loop
 			// but -1 because the for loop already does i++

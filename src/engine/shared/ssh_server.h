@@ -154,17 +154,11 @@ public:
 	// not called for escape sequences or multi byte utf8 symbols
 	void AddSingleAsciiLetterToInput(char Byte);
 
-	// when the client sent enough bytes to form one valid utf8 code point
-	// that should be added to the input buffer
-	//
-	// pUtf8 is one utf8 symbol that could be multiple bytes long and is null terminated
-	void AddSingleUtf8CodePointToInput(const char *pUtf8, size_t Utf8Size);
-
 	// Similar to SetInput() but does not override but insert.
 	// Similar to AddSingleAsciiLetterToInput() and AddSingleUtf8CodePointToInput()
 	// but is not limited in length.
 	// Utf-8 is supported.
-	// It does also move the cursor.
+	// It does also move the cursor client and server side.
 	// returns false if the input was not changed and a size limit was reached.
 	bool InsertToInputAtCursor(const char *pText);
 
