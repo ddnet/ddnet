@@ -29,6 +29,10 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: somewhere the command help text has to be previewed!
+//       right now users have to manually use "help sv_name" to get that which is worse
+//       ux than the remote console in the client! Uacceptable!
+
 // TODO: add some delay in the password check to combat bruteforcing
 //       if there are too many requests from different ips slow down every check
 //       after every failed attempt slow down that ip
