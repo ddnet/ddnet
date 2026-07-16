@@ -233,7 +233,11 @@ pub async fn handle_client_connection(
     handle_task_pool(
         |handle| handle_client_connection_impl(handle, reader, writer2, state, backend),
         |close_message| async move {
-            writer.lock().await.write(&close_message.into()).await?;
+            {
+                let mut writer = writer.lock().await;
+                writer.write(&close_message.into()).await?;
+                writer.close().await?;
+            }
             Ok(())
         },
     ).await
@@ -264,7 +268,11 @@ async fn handle_client_connection_impl(
         let ban_message: protocol::BanMessage = match reader.read().await? {
             ClientHello(_) => bail!("second client hello received"),
             Close(CloseMessage { error }) => {
-                writer.lock().await.write(&CloseMessage { error: None }.into()).await?;
+                {
+                    let mut writer = writer.lock().await;
+                    writer.write(&CloseMessage { error: None }.into()).await?;
+                    writer.close().await?;
+                }
                 return Ok(());
             }
 
@@ -327,7 +335,11 @@ pub async fn handle_server_connection(
     handle_task_pool(
         |_| handle_server_connection_impl(reader, writer2, state),
         |close_message| async move {
-            writer.lock().await.write(&close_message.into()).await?;
+            {
+                let mut writer = writer.lock().await;
+                writer.write(&close_message.into()).await?;
+                writer.close().await?;
+            }
             Ok(())
         },
     ).await

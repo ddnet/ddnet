@@ -149,4 +149,10 @@ impl<M: Message> Writer<M> {
             Ok(())
         }).await
     }
+    pub async fn close(&mut self) -> anyhow::Result<()> {
+        self.inner.call_async_mut(async move |inner| {
+            inner.bytes.shutdown().await?;
+            Ok(())
+        }).await
+    }
 }
