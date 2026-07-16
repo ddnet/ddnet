@@ -29,6 +29,12 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: add some delay in the password check to combat bruteforcing
+//       if there are too many requests from different ips slow down every check
+//       after every failed attempt slow down that ip
+//       --
+//       or does libssh does this a bit already? or offer something?
+
 // TODO: experiment with some fancy features
 //       in theory this thing could be a full TUI
 //       for example typing in the "kick" command could
