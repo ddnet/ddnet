@@ -163,8 +163,6 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 
 	while(pServerLine[InIdx])
 	{
-		// TODO: what if the line already contained \r\n should we detect that?
-		//       or is translating it to \r\r\n fine either way
 		if(pServerLine[InIdx] == '\n')
 		{
 			if(!WriteOutputByte('\r'))
