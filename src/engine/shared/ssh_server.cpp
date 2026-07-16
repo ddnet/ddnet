@@ -953,6 +953,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			}
 			else
 			{
+				// TODO: implement inline ctrl+u
 				log_warn("ssh", "not supported yet");
 			}
 			continue;
