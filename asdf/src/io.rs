@@ -5,7 +5,6 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt;
 use std::pin::Pin;
-use std::sync::Arc;
 use std::marker::PhantomData;
 use tokio::io::AsyncBufReadExt as _;
 use tokio::io::AsyncRead;
@@ -13,7 +12,6 @@ use tokio::io::AsyncWrite;
 use tokio::io::AsyncWriteExt as _;
 use tokio::io::BufReader;
 use tokio::io::BufWriter;
-use tokio::sync::SetOnce;
 
 pub trait Message: fmt::Debug + DeserializeOwned + Serialize {}
 
@@ -38,28 +36,29 @@ struct WriterInner<M: Message> {
     phantom: PhantomData<fn(M)>,
 }
 
+#[derive(Default)]
 struct Errored<I> {
-    errored: Arc<SetOnce<()>>,
+    errored: bool,
     inner: I,
 }
 
-// Pass a reference to `Arc` instead of a direct reference so that the
-// dereference happens inside this cold function, not outside of it.
-#[cold]
-fn on_error(errored: &Arc<SetOnce<()>>) {
-    // We ignore the error because we don't care if someone already set the
-    // error flag.
-    let _ = errored.set(());
+impl<I> From<I> for Errored<I> {
+    fn from(inner: I) -> Errored<I> {
+        Errored {
+            errored: false,
+            inner,
+        }
+    }
 }
 
 #[allow(unused)]
 impl<I> Errored<I> {
     fn check_errored(&self) -> anyhow::Result<()> {
-        ensure!(self.errored.get().is_none(), "stream has errored");
+        ensure!(!self.errored, "stream has errored");
         Ok(())
     }
-    fn on_error(&self) {
-        on_error(&self.errored)
+    fn on_error(&mut self) {
+        self.errored = true;
     }
     fn call<T, F: FnOnce(&I) -> anyhow::Result<T>>(&mut self, f: F) -> anyhow::Result<T> {
         self.check_errored()?;
@@ -96,20 +95,11 @@ impl<I> Errored<I> {
 }
 
 pub fn from<RM: Message, WM: Message>(reader: Pin<Box<dyn AsyncRead + Send + Sync>>, writer: Pin<Box<dyn AsyncWrite + Send + Sync>>) -> (Reader<RM>, Writer<WM>) {
-    let errored = Arc::new(SetOnce::new());
     let reader = Reader {
-        inner: Errored {
-            // TODO: only error reader when writer fails, not the other way around
-            // errored: errored.clone(),
-            errored: Arc::new(SetOnce::new()),
-            inner: ReaderInner::new(BufReader::new(Box::pin(reader))),
-        },
+        inner: Errored::from(ReaderInner::new(BufReader::new(Box::pin(reader)))),
     };
     let writer = Writer {
-        inner: Errored {
-            errored,
-            inner: WriterInner::new(BufWriter::new(Box::pin(writer))),
-        },
+        inner: Errored::from(WriterInner::new(BufWriter::new(Box::pin(writer)))),
     };
     (reader, writer)
 }
