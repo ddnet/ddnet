@@ -226,11 +226,9 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	// For now I don't have a use case for it but in the future there could be an option
 	// to enable printing more than just the message.
 
-	// TODO: because we do not print the log level anywhere
-	//       should we color all warning orange and all error red?
-
 	if(pClient->m_Channel)
 	{
+		bool NeedColorReset = true;
 		// I tested it and coloring does work
 		// but had to patch the server code for it
 		// because as far as I can tell no server side log uses colors for now
@@ -238,12 +236,24 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		{
 			pClient->SendColor(pMessage->m_Color);
 		}
+		else if(pMessage->m_Level == LEVEL_ERROR)
+		{
+			pClient->SendColor({.r = 220, .g = 53, .b = 69});
+		}
+		else if(pMessage->m_Level == LEVEL_WARN)
+		{
+			pClient->SendColor({.r = 225, .g = 193, .b = 7});
+		}
+		else
+		{
+			NeedColorReset = false;
+		}
 		char aSshLine[8192];
 		int NumLines = LineWrapForSsh(pMessage->Message(), aSshLine, sizeof(aSshLine), pClient->m_Term.m_Width, &m_pSshServer->m_UnicodeWidthState);
 		pClient->m_CursorPos.y += NumLines;
 		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
 		ssh_channel_write(pClient->m_Channel, aSshLine, str_length(aSshLine));
-		if(pMessage->m_HaveColor)
+		if(NeedColorReset)
 		{
 			pClient->ResetColor();
 		}
