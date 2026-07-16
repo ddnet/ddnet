@@ -627,9 +627,8 @@ void CHud::RenderCursor()
 	float Alpha = 1.0f;
 
 	const vec2 Center = GameClient()->m_Camera.m_Center;
-	float aPoints[4];
-	Graphics()->MapScreenToWorld(Center.x, Center.y, 100.0f, 100.0f, 100.0f, 0, 0, Graphics()->ScreenAspect(), 1.0f, aPoints);
-	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+	CScreenRect ScreenRect = Graphics()->MapScreenToWorld(Center.x, Center.y, 100.0f, 100.0f, 100.0f, 0, 0, Graphics()->ScreenAspect(), 1.0f);
+	Graphics()->MapScreen(ScreenRect);
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && GameClient()->m_Snap.m_pLocalCharacter)
 	{
@@ -649,7 +648,7 @@ void CHud::RenderCursor()
 			return;
 
 		// Calculate factor to keep cursor on screen
-		const vec2 HalfSize = vec2(Center.x - aPoints[0], Center.y - aPoints[1]);
+		const vec2 HalfSize = Center - ScreenRect.m_TopLeft;
 		const vec2 ScreenPos = (GameClient()->m_CursorInfo.WorldTarget() - Center) / GameClient()->m_Camera.m_Zoom;
 		const float ClampFactor = std::max({
 			1.0f,
@@ -1689,7 +1688,7 @@ void CHud::OnRender()
 
 	m_Width = 300.0f * Graphics()->ScreenAspect();
 	m_Height = 300.0f;
-	Graphics()->MapScreen(0.0f, 0.0f, m_Width, m_Height);
+	Graphics()->MapScreenToSize(m_Width, m_Height);
 
 #if defined(CONF_VIDEORECORDER)
 	if((IVideo::Current() && g_Config.m_ClVideoShowhud) || (!IVideo::Current() && g_Config.m_ClShowhud))

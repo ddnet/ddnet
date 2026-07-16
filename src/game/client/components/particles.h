@@ -121,6 +121,6 @@ private:
 	CRenderGroup<GROUP_EXTRA> m_RenderExtra;
 	CRenderGroup<GROUP_GENERAL> m_RenderGeneral;
 
-	bool ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize);
+	bool ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize) const;
 };
 #endif

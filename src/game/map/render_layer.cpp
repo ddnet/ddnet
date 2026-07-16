@@ -210,14 +210,13 @@ bool CRenderLayer::IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipR
 	if(!ClipRegion.has_value())
 		return true;
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	CScreenRect ScreenRect = Graphics()->GetScreen();
 	float Left = ClipRegion->m_X;
 	float Top = ClipRegion->m_Y;
 	float Right = ClipRegion->m_X + ClipRegion->m_Width;
 	float Bottom = ClipRegion->m_Y + ClipRegion->m_Height;
 
-	return Right >= ScreenX0 && Left <= ScreenX1 && Bottom >= ScreenY0 && Top <= ScreenY1;
+	return Right >= ScreenRect.m_TopLeft.x && Left <= ScreenRect.m_BottomRight.x && Bottom >= ScreenRect.m_TopLeft.y && Top <= ScreenRect.m_BottomRight.y;
 }
 
 /**************
@@ -237,14 +236,13 @@ bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params)
 			// set clipping
 			Graphics()->MapScreenToInterface(Params.m_Center.x, Params.m_Center.y, Params.m_Zoom);
 
-			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-			Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-			float ScreenWidth = ScreenX1 - ScreenX0;
-			float ScreenHeight = ScreenY1 - ScreenY0;
-			float Left = m_pGroup->m_ClipX - ScreenX0;
-			float Top = m_pGroup->m_ClipY - ScreenY0;
-			float Right = m_pGroup->m_ClipX + m_pGroup->m_ClipW - ScreenX0;
-			float Bottom = m_pGroup->m_ClipY + m_pGroup->m_ClipH - ScreenY0;
+			CScreenRect ScreenRect = Graphics()->GetScreen();
+			float ScreenWidth = ScreenRect.Width();
+			float ScreenHeight = ScreenRect.Height();
+			float Left = m_pGroup->m_ClipX - ScreenRect.m_TopLeft.x;
+			float Top = m_pGroup->m_ClipY - ScreenRect.m_TopLeft.y;
+			float Right = m_pGroup->m_ClipX + m_pGroup->m_ClipW - ScreenRect.m_TopLeft.x;
+			float Bottom = m_pGroup->m_ClipY + m_pGroup->m_ClipH - ScreenRect.m_TopLeft.y;
 
 			if(Right < 0.0f || Left > ScreenWidth || Bottom < 0.0f || Top > ScreenHeight)
 				return false;
@@ -273,10 +271,9 @@ bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params)
 void CRenderLayerGroup::Render(const CRenderLayerParams &Params)
 {
 	int ParallaxZoom = std::clamp(std::max(m_pGroup->m_ParallaxX, m_pGroup->m_ParallaxY), 0, 100);
-	float aPoints[4];
-	Graphics()->MapScreenToWorld(Params.m_Center.x, Params.m_Center.y, m_pGroup->m_ParallaxX, m_pGroup->m_ParallaxY, (float)ParallaxZoom,
-		m_pGroup->m_OffsetX, m_pGroup->m_OffsetY, Graphics()->ScreenAspect(), Params.m_Zoom, aPoints);
-	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+	CScreenRect ScreenRect = Graphics()->MapScreenToWorld(Params.m_Center.x, Params.m_Center.y, m_pGroup->m_ParallaxX, m_pGroup->m_ParallaxY, (float)ParallaxZoom,
+		m_pGroup->m_OffsetX, m_pGroup->m_OffsetY, Graphics()->ScreenAspect(), Params.m_Zoom);
+	Graphics()->MapScreen(ScreenRect);
 }
 
 /**************
@@ -297,13 +294,12 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; // no visuals were created
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	CScreenRect ScreenRect = Graphics()->GetScreen();
 
-	int ScreenRectY0 = std::floor(ScreenY0 / 32);
-	int ScreenRectX0 = std::floor(ScreenX0 / 32);
-	int ScreenRectY1 = std::ceil(ScreenY1 / 32);
-	int ScreenRectX1 = std::ceil(ScreenX1 / 32);
+	int ScreenRectY0 = std::floor(ScreenRect.m_TopLeft.y / 32);
+	int ScreenRectX0 = std::floor(ScreenRect.m_TopLeft.x / 32);
+	int ScreenRectY1 = std::ceil(ScreenRect.m_BottomRight.y / 32);
+	int ScreenRectX1 = std::ceil(ScreenRect.m_BottomRight.x / 32);
 
 	if(IsVisibleInClipRegion(m_LayerClip))
 	{
@@ -479,13 +475,12 @@ void CRenderLayerTile::RenderKillTileBorder(const ColorRGBA &Color)
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; // no visuals were created
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	CScreenRect ScreenRect = Graphics()->GetScreen();
 
-	int BorderY0 = std::floor(ScreenY0 / 32);
-	int BorderX0 = std::floor(ScreenX0 / 32);
-	int BorderY1 = std::ceil(ScreenY1 / 32);
-	int BorderX1 = std::ceil(ScreenX1 / 32);
+	int BorderY0 = std::floor(ScreenRect.m_TopLeft.y / 32);
+	int BorderX0 = std::floor(ScreenRect.m_TopLeft.x / 32);
+	int BorderY1 = std::ceil(ScreenRect.m_BottomRight.y / 32);
+	int BorderX1 = std::ceil(ScreenRect.m_BottomRight.x / 32);
 
 	if(BorderX0 >= -BorderRenderDistance && BorderY0 >= -BorderRenderDistance && BorderX1 <= (int)Visuals.m_Width + BorderRenderDistance && BorderY1 <= (int)Visuals.m_Height + BorderRenderDistance)
 		return;

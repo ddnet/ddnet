@@ -182,6 +182,55 @@ typedef std::function<bool(uint32_t &Width, uint32_t &Height, CImageInfo::EImage
 
 struct CDataSprite;
 
+class CScreenRect
+{
+public:
+	CScreenRect(float Left, float Top, float Width, float Height) :
+		m_TopLeft(Left, Top), m_BottomRight(Left + Width, Top + Height) {}
+
+	CScreenRect(const vec2 &TopLeft, const vec2 &BottomRight) :
+		m_TopLeft(TopLeft), m_BottomRight(BottomRight) {}
+
+	CScreenRect Move(const vec2 &Position) const
+	{
+		CScreenRect Rect(*this);
+		Rect.m_TopLeft += Position;
+		Rect.m_BottomRight += Position;
+		return Rect;
+	}
+
+	constexpr vec2 Size() const
+	{
+		return m_BottomRight - m_TopLeft;
+	}
+
+	constexpr float Width() const
+	{
+		return m_BottomRight.x - m_TopLeft.x;
+	}
+
+	constexpr float Height() const
+	{
+		return m_BottomRight.y - m_TopLeft.y;
+	}
+
+	constexpr bool Inside(const vec2 &Position) const
+	{
+		return !(!in_range(Position.x, m_TopLeft.x, m_BottomRight.x) || !in_range(Position.y, m_TopLeft.y, m_BottomRight.y));
+	}
+
+	void Expand(float Size)
+	{
+		m_TopLeft.x -= Size;
+		m_BottomRight.x += Size;
+		m_TopLeft.y -= Size;
+		m_BottomRight.y += Size;
+	}
+
+	vec2 m_TopLeft;
+	vec2 m_BottomRight;
+};
+
 class IGraphics : public IInterface
 {
 	MACRO_INTERFACE("graphics")
@@ -219,6 +268,7 @@ public:
 
 	int ScreenWidth() const { return m_ScreenWidth; }
 	int ScreenHeight() const { return m_ScreenHeight; }
+	vec2 ScreenSize() const { return vec2(m_ScreenWidth, m_ScreenHeight); }
 	float ScreenAspect() const { return (float)ScreenWidth() / (float)ScreenHeight(); }
 	float ScreenHiDPIScale() const { return m_ScreenHiDPIScale; }
 	int WindowWidth() const { return m_ScreenWidth / m_ScreenHiDPIScale; }
@@ -257,15 +307,16 @@ public:
 	virtual void ClipEnable(int x, int y, int w, int h) = 0;
 	virtual void ClipDisable() = 0;
 
-	virtual void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) = 0;
+	virtual void MapScreen(const CScreenRect &ScreenRect) = 0;
 
 	// helper functions
 	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight) const;
-	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
-		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints) const;
+	CScreenRect MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
+		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom) const;
 	void MapScreenToInterface(float CenterX, float CenterY, float Zoom = 1.0f);
+	void MapScreenToSize(float Width, float Height);
 
-	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) const = 0;
+	virtual CScreenRect GetScreen() const = 0;
 
 	// TODO: These should perhaps not be virtuals
 	virtual void BlendNone() = 0;

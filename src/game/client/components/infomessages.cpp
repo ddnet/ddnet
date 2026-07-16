@@ -130,16 +130,15 @@ void CInfoMessages::AddInfoMsg(const CInfoMsg &InfoMsg)
 	const float Height = 1.5f * 400.0f * 3.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	Graphics()->MapScreen(0, 0, Width, Height);
+	CScreenRect ScreenRect = Graphics()->GetScreen();
+	Graphics()->MapScreenToSize(Width, Height);
 
 	m_InfoMsgCurrent = (m_InfoMsgCurrent + 1) % MAX_INFOMSGS;
 	DeleteTextContainers(m_aInfoMsgs[m_InfoMsgCurrent]);
 	m_aInfoMsgs[m_InfoMsgCurrent] = InfoMsg;
 	CreateTextContainersIfNotCreated(m_aInfoMsgs[m_InfoMsgCurrent]);
 
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	Graphics()->MapScreen(ScreenRect);
 }
 
 void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
@@ -450,7 +449,7 @@ void CInfoMessages::OnRender()
 	const float Height = 1.5f * 400.0f * 3.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
 
-	Graphics()->MapScreen(0, 0, Width, Height);
+	Graphics()->MapScreenToSize(Width, Height);
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	int Showfps = g_Config.m_ClShowfps;

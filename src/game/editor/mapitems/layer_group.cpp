@@ -1,5 +1,6 @@
 #include "layer_group.h"
 
+#include <engine/graphics.h>
 #include <engine/shared/config.h>
 
 #include <game/editor/editor.h>
@@ -41,27 +42,24 @@ void CLayerGroup::Convert(CUIRect *pRect) const
 	pRect->y += m_OffsetY;
 }
 
-void CLayerGroup::Mapping(float *pPoints) const
+CScreenRect CLayerGroup::Mapping() const
 {
 	float NormalParallaxZoom = std::clamp((float)std::max(m_ParallaxX, m_ParallaxY), 0.0f, 100.0f);
 	float ParallaxZoom = Editor()->m_PreviewZoom ? NormalParallaxZoom : 100.0f;
 
-	Graphics()->MapScreenToWorld(
+	CScreenRect ScreenRect = Graphics()->MapScreenToWorld(
 		Editor()->MapView()->GetWorldOffset().x, Editor()->MapView()->GetWorldOffset().y,
 		m_ParallaxX, m_ParallaxY, ParallaxZoom, m_OffsetX, m_OffsetY,
-		Graphics()->ScreenAspect(), Editor()->MapView()->GetWorldZoom(), pPoints);
+		Graphics()->ScreenAspect(), Editor()->MapView()->GetWorldZoom());
 
-	pPoints[0] += Editor()->MapView()->GetEditorOffset().x;
-	pPoints[1] += Editor()->MapView()->GetEditorOffset().y;
-	pPoints[2] += Editor()->MapView()->GetEditorOffset().x;
-	pPoints[3] += Editor()->MapView()->GetEditorOffset().y;
+	ScreenRect = ScreenRect.Move(Editor()->MapView()->GetEditorOffset());
+	return ScreenRect;
 }
 
 void CLayerGroup::MapScreen()
 {
-	float aPoints[4];
-	Mapping(aPoints);
-	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+	CScreenRect ScreenRect = Mapping();
+	Graphics()->MapScreen(ScreenRect);
 }
 
 void CLayerGroup::Render()
@@ -70,14 +68,13 @@ void CLayerGroup::Render()
 
 	if(m_UseClipping)
 	{
-		float aPoints[4];
-		Map()->m_pGameGroup->Mapping(aPoints);
-		float ScreenWidth = aPoints[2] - aPoints[0];
-		float ScreenHeight = aPoints[3] - aPoints[1];
-		float Left = m_ClipX - aPoints[0];
-		float Top = m_ClipY - aPoints[1];
-		float Right = (m_ClipX + m_ClipW) - aPoints[0];
-		float Bottom = (m_ClipY + m_ClipH) - aPoints[1];
+		CScreenRect ScreenRect = Map()->m_pGameGroup->Mapping();
+		float ScreenWidth = ScreenRect.Width();
+		float ScreenHeight = ScreenRect.Height();
+		float Left = m_ClipX - ScreenRect.m_TopLeft.x;
+		float Top = m_ClipY - ScreenRect.m_TopLeft.y;
+		float Right = (m_ClipX + m_ClipW) - ScreenRect.m_TopLeft.x;
+		float Bottom = (m_ClipY + m_ClipH) - ScreenRect.m_TopLeft.y;
 
 		int ClipX = (int)std::round(Left * Graphics()->ScreenWidth() / ScreenWidth);
 		int ClipY = (int)std::round(Top * Graphics()->ScreenHeight() / ScreenHeight);
