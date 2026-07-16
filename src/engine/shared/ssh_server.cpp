@@ -48,6 +48,8 @@
 //       to console execute line
 //       just imagine "kick 0 $reason"
 //       or "status | grep xx"
+//       or "logs" which opens a less/more like curses app
+//       or "dump_xx | less"
 
 // TODO: reaching terminal width length with the input is not supported yet
 //       things get weird
