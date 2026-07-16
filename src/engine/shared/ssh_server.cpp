@@ -236,13 +236,7 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		// because as far as I can tell no server side log uses colors for now
 		if(pMessage->m_HaveColor)
 		{
-			char aAnsi[32];
-			str_format(aAnsi, sizeof(aAnsi),
-				"\x1b[38;2;%d;%d;%dm",
-				pMessage->m_Color.r,
-				pMessage->m_Color.g,
-				pMessage->m_Color.b);
-			ssh_channel_write(pClient->m_Channel, aAnsi, str_length(aAnsi));
+			pClient->SendColor(pMessage->m_Color);
 		}
 		char aSshLine[8192];
 		int NumLines = LineWrapForSsh(pMessage->Message(), aSshLine, sizeof(aSshLine), pClient->m_Term.m_Width, &m_pSshServer->m_UnicodeWidthState);
@@ -251,8 +245,7 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		ssh_channel_write(pClient->m_Channel, aSshLine, str_length(aSshLine));
 		if(pMessage->m_HaveColor)
 		{
-			const char aResetColor[] = "\x1b[0m";
-			ssh_channel_write(pClient->m_Channel, aResetColor, str_length(aResetColor)); // reset
+			pClient->ResetColor();
 		}
 	}
 
@@ -586,6 +579,29 @@ void CSshClient::SendBell() const
 		return;
 
 	ssh_channel_write(m_Channel, "\a", 1);
+}
+
+void CSshClient::SendColor(LOG_COLOR Color) const
+{
+	if(!m_Channel)
+		return;
+
+	char aAnsi[32];
+	str_format(aAnsi, sizeof(aAnsi),
+		"\x1b[38;2;%d;%d;%dm",
+		Color.r,
+		Color.g,
+		Color.b);
+	ssh_channel_write(m_Channel, aAnsi, str_length(aAnsi));
+}
+
+void CSshClient::ResetColor() const
+{
+	if(!m_Channel)
+		return;
+
+	const char aResetColor[] = "\x1b[0m";
+	ssh_channel_write(m_Channel, aResetColor, str_length(aResetColor));
 }
 
 void CSshClient::SendCursorPos(ivec2 Pos) const

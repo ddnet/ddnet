@@ -3,6 +3,7 @@
 
 #if defined(CONF_SSH)
 
+#include <base/log.h>
 #include <base/logger.h>
 #include <base/types.h>
 #include <base/vmath.h>
@@ -168,6 +169,8 @@ public:
 
 	void ClearCompletionPreview();
 	void SendBell() const;
+	void SendColor(LOG_COLOR Color) const;
+	void ResetColor() const;
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();
 
