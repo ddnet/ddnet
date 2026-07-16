@@ -26,10 +26,12 @@ use tokio::task::JoinError;
 // Reexports.
 use self::pool::TaskPool;
 use self::pool::TaskPoolHandle;
+use self::time::Timestamp;
 
 mod io;
 mod pool;
 mod protocol;
+mod time;
 
 // TODO: expiry
 #[derive(Default)]
@@ -117,7 +119,7 @@ impl Bans {
 
 #[derive(Deserialize, Serialize)]
 struct BanData {
-    expiry: u64,
+    expiry: Timestamp,
     reason: Arc<str>,
 }
 
@@ -401,7 +403,7 @@ pub async fn connect() -> anyhow::Result<()> {
     let (mut reader, mut writer) = io::from::<protocol::ServerMessage, protocol::ClientMessage>(Box::pin(reader), Box::pin(writer));
     writer.write(&protocol::ClientMessage::ClientHello(protocol::ClientHelloMessage::default())).await?;
     writer.write(&protocol::ClientMessage::AddBan(protocol::AddBanMessage {
-        expiry: 12345678,
+        expiry: "2100-01-01T12:34:56Z".parse().unwrap(),
         reason: "foobar".into(),
         net: "127.0.0.1/32".parse().unwrap(),
     })).await?;

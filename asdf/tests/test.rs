@@ -102,12 +102,17 @@ async fn test_server_smoke() {
     one_client().conversation(r#"
 > {"kind":"client_hello","protocol_version_min":1,"protocol_version_max":1}
 < {"kind":"server_hello","protocol_version":1}
-> {"kind":"add_ban","net":"127.0.0.1/32","expiry":12345,"reason":"foobar"}
+> {"kind":"add_ban","net":"127.0.0.1/32","expiry":"2100-01-01T12:34:56Z","reason":"foobar"}
 > {"kind":"subscribe_bans"}
-< {"kind":"replace_bans","bans":[{"net":"127.0.0.1/32","expiry":12345,"reason":"foobar"}]}
-> {"kind":"add_ban","net":"127.0.0.1/32","expiry":12345,"reason":"foobar"}
-> {"kind":"add_ban","net":"127.0.0.2/32","expiry":54321,"reason":"barfoo"}
-< {"kind":"replace_bans","bans":[{"net":"127.0.0.1/32","expiry":12345,"reason":"foobar"},{"net":"127.0.0.2/32","expiry":54321,"reason":"barfoo"}]}
+< {"kind":"replace_bans","bans":[{"net":"127.0.0.1/32","expiry":"2100-01-01T12:34:56Z","reason":"foobar"}]}
+> {"kind":"add_ban","net":"127.0.0.1/32","expiry":"2100-01-01T12:34:56Z","reason":"foobar"}
+> {"kind":"add_ban","net":"127.0.0.2/32","expiry":"2100-01-01T05:43:21Z","reason":"barfoo"}
+< {"kind":"replace_bans","bans":[{"net":"127.0.0.1/32","expiry":"2100-01-01T12:34:56Z","reason":"foobar"},{"net":"127.0.0.2/32","expiry":"2100-01-01T05:43:21Z","reason":"barfoo"}]}
+> {"kind":"remove_ban","net":"127.0.0.3/32"}
+> {"kind":"remove_ban","net":"127.0.0.1/32"}
+< {"kind":"replace_bans","bans":[{"net":"127.0.0.2/32","expiry":"2100-01-01T05:43:21Z","reason":"barfoo"}]}
+> {"kind":"remove_ban","net":"127.0.0.2/32"}
+< {"kind":"replace_bans","bans":[]}
 > {"kind":"close"}
 > EOF
 < {"kind":"close"}
