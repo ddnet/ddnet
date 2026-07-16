@@ -226,13 +226,31 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 	// For now I don't have a use case for it but in the future there could be an option
 	// to enable printing more than just the message.
 
+	// TODO: because we do not print the log level anywhere
+	//       should we color all warning orange and all error red?
+
 	if(pClient->m_Channel)
 	{
+		if(pMessage->m_HaveColor)
+		{
+			char aAnsi[32];
+			str_format(aAnsi, sizeof(aAnsi),
+				"\x1b[38;2;%d;%d;%dm",
+				pMessage->m_Color.r,
+				pMessage->m_Color.g,
+				pMessage->m_Color.b);
+			ssh_channel_write(pClient->m_Channel, aAnsi, str_length(aAnsi));
+		}
 		char aSshLine[8192];
 		int NumLines = LineWrapForSsh(pMessage->Message(), aSshLine, sizeof(aSshLine), pClient->m_Term.m_Width, &m_pSshServer->m_UnicodeWidthState);
 		pClient->m_CursorPos.y += NumLines;
 		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
 		ssh_channel_write(pClient->m_Channel, aSshLine, str_length(aSshLine));
+		if(pMessage->m_HaveColor)
+		{
+			const char aResetColor[] = "\x1b[0m";
+			ssh_channel_write(pClient->m_Channel, aResetColor, str_length(aResetColor)); // reset
+		}
 	}
 
 	// just mirror everything to regular log because the hiding is stupid
