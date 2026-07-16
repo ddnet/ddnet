@@ -551,7 +551,30 @@ void CSshClient::InsertToInputAtCursor(const char *pText)
 	}
 	else
 	{
-		log_warn("ssh", "insert only supported at end of buffer for now");
+		// if we are in the middle of the string
+		// we need to shift all the input
+
+		// clear everything from the cursor till the end
+		ssh_channel_write(Channel, "\33[0K", str_length("\33[0K"));
+		ssh_channel_write(Channel, pText, TextSize);
+
+		char aRight[2048];
+		// TODO: this for sure can go OOB pls add some checks
+		str_copy(aRight, m_aInput + m_InputIdx);
+
+		ssh_channel_write(Channel, aRight, str_length(aRight));
+
+		str_append(m_aInput, pText);
+		m_InputIdx += TextSize;
+		m_aInput[m_InputIdx] = '\0';
+		str_append(m_aInput, aRight);
+
+		m_CursorPos.x += TextWidth;
+
+		// FIXME: i am currently editing this branch
+		//        i messed a bit with the null term
+		//        and the input used to be duplicated on paste
+		//        reason about this a bit
 	}
 }
 
