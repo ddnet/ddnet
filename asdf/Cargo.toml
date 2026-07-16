@@ -1,0 +1,22 @@
+[workspace]
+
+[package]
+name = "asdf"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+publish = false
+
+[dependencies]
+anyhow = "1.0.66"
+derive_more = { version = "2.1", features = ["from"] }
+futures-util = { version = "0.3" }
+ipnet = { version = "2.9.0", features = ["serde"] }
+serde = { version = "1.0.126", features = ["derive", "rc"] }
+serde_json = "1.0.64"
+# TODO: remove "time" feature
+tokio = { version = "1.43.0", features = ["io-util", "macros", "net", "rt", "sync", "time"] }
+uuid = { version = "1.0", features = ["serde"] }
+
+[dev-dependencies]
+tokio-util = { version = "0.7", features = ["io"] }
