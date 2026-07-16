@@ -1,3 +1,4 @@
+use crate::Timestamp;
 use derive_more::From;
 use ipnet::IpNet;
 use serde::Deserialize;
@@ -11,7 +12,7 @@ pub const PROTOCOL_VERSION: u32 = 1;
 #[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Ban {
     pub net: IpNet,
-    pub expiry: u64,
+    pub expiry: Timestamp,
     pub reason: Arc<str>,
 }
 
@@ -60,9 +61,9 @@ pub struct CloseMessage {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AddBanMessage {
-    pub expiry: u64,
-    pub reason: Arc<str>,
     pub net: IpNet,
+    pub expiry: Timestamp,
+    pub reason: Arc<str>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
