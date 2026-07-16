@@ -165,7 +165,8 @@ public:
 	// but is not limited in length.
 	// Utf-8 is supported.
 	// It does also move the cursor.
-	void InsertToInputAtCursor(const char *pText);
+	// returns false if the input was not changed and a size limit was reached.
+	bool InsertToInputAtCursor(const char *pText);
 
 	// clears the current line and places an empty prompt
 	void ClearPrompt();

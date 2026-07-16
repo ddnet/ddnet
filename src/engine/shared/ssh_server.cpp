@@ -536,19 +536,29 @@ void CSshClient::AddSingleUtf8CodePointToInput(const char *pUtf8, size_t Utf8Siz
 //       AddSingleAsciiLetterToInput();
 //       AddSingleUtf8CodePointToInput();
 
-void CSshClient::InsertToInputAtCursor(const char *pText)
+bool CSshClient::InsertToInputAtCursor(const char *pText)
 {
-	// TODO: bound check if we exceed any width or size
-
 	ssh_channel Channel = m_Channel;
 	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
 	const int TextSize = str_length(pText);
 	const int TextWidth = StringTerminalWidth(pText, &m_CallbackCtx.m_pServer->m_UnicodeWidthState);
+
+	{
+		const int InputSize = str_length(m_aInput);
+		const int InputWidth = StringTerminalWidth(m_aInput, &m_CallbackCtx.m_pServer->m_UnicodeWidthState);
+		if(InputSize + TextSize >= (int)sizeof(m_aInput) - 1)
+		{
+			return false;
+		}
+		if(TextWidth + InputWidth >= m_Term.m_Width)
+		{
+			return false;
+		}
+	}
+
 	if(CursorAtEnd)
 	{
 		str_append(m_aInput, pText);
-		m_InputIdx += TextSize;
-		m_CursorPos.x += TextWidth;
 		ssh_channel_write(Channel, pText, TextSize);
 	}
 	else
@@ -568,10 +578,10 @@ void CSshClient::InsertToInputAtCursor(const char *pText)
 		m_aInput[m_InputIdx] = '\0';
 		str_append(m_aInput, pText);
 		str_append(m_aInput, aRight);
-
-		m_InputIdx += TextSize;
-		m_CursorPos.x += TextWidth;
 	}
+	m_InputIdx += TextSize;
+	m_CursorPos.x += TextWidth;
+	return true;
 }
 
 void CSshClient::ClearPrompt()
@@ -985,7 +995,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		else if(Byte == KEY_CTRL_Y)
 		{
 			pClient->ResetCompletion();
-			pClient->InsertToInputAtCursor(pClient->m_aYankBuffer);
+			if(!pClient->InsertToInputAtCursor(pClient->m_aYankBuffer))
+				pClient->SendBell();
 			pClient->SendCursorPos(pClient->m_CursorPos);
 			continue;
 		}
