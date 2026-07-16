@@ -180,7 +180,6 @@ impl Remote {
     }
 }
 
-// TODO: only pass receiver, not sender
 async fn handle_ban_subscription(
     writer: Arc<AsyncMutex<io::Writer<protocol::ServerMessage>>>,
     state: State,
@@ -214,7 +213,7 @@ fn error_close(name: &str, result: &Result<anyhow::Result<Infallible>, JoinError
         } else {
             format!("task {name} error: {err:#}")
         },
-        Err(err) => format!("task {name} panicked: {err}"),
+        Err(err) => format!("task {name}: {err}"),
     };
     protocol::CloseMessage {
         error: Some(message.into()),
@@ -314,7 +313,8 @@ async fn handle_task_pool<M, E, MF, EF>(main: M, error: E) -> anyhow::Result<()>
         let close_message = error_close(task.name, &result);
         let error_result = error(close_message).await;
         task_pool.close().await;
-        // TODO: handle error_result
+        let () = error_result
+            .with_context(|| format!("sending error failed while processing another error: {}", error_close(task.name, &result).error.unwrap()))?;
         let infallible = result
             .with_context(|| format!("task {} errored", task.name))?
             .with_context(|| format!("task {} panicked", task.name))?;
@@ -360,8 +360,8 @@ async fn handle_server_connection_impl(
                 = server_hello else {
             bail!("expected server hello, got {server_hello:?}");
         };
-        // TODO: do something with protocol_version
-        let _ = protocol_version;
+        // There's only one protocol version right now.
+        assert_eq!(protocol_version, 1);
 
         writer.write(&protocol::SubscribeBansMessage.into()).await?;
     }
@@ -385,7 +385,6 @@ pub async fn bind() -> anyhow::Result<()> {
     loop {
         let (stream, _) = listener.accept().await.context("failed to accept")?;
         let (reader, writer) = stream.into_split();
-        // TODO: handle errors, tie to connection
         tokio::spawn({
             let state = state.clone();
             let backend = backend.clone();
