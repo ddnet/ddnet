@@ -538,7 +538,21 @@ void CSshClient::AddSingleUtf8CodePointToInput(const char *pUtf8, size_t Utf8Siz
 
 void CSshClient::InsertToInputAtCursor(const char *pText)
 {
-	SetInput(pText);
+	ssh_channel Channel = m_Channel;
+	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
+	const int TextSize = str_length(pText);
+	const int TextWidth = StringTerminalWidth(pText, &m_CallbackCtx.m_pServer->m_UnicodeWidthState);
+	if(CursorAtEnd)
+	{
+		str_append(m_aInput, pText);
+		m_InputIdx += TextSize;
+		m_CursorPos.x += TextWidth;
+		ssh_channel_write(Channel, pText, TextSize);
+	}
+	else
+	{
+		log_warn("ssh", "insert only supported at end of buffer for now");
+	}
 }
 
 void CSshClient::ClearPrompt()

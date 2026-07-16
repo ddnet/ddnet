@@ -164,6 +164,7 @@ public:
 	// Similar to AddSingleAsciiLetterToInput() and AddSingleUtf8CodePointToInput()
 	// but is not limited in length.
 	// Utf-8 is supported.
+	// It does also move the cursor.
 	void InsertToInputAtCursor(const char *pText);
 
 	// clears the current line and places an empty prompt
