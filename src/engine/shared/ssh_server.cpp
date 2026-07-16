@@ -216,9 +216,15 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		return;
 	}
 
-	// TODO: also print log system
-	//       right now only the message is printed
-	//       we could even color the system
+	// We intentionally only print the Message() here not the m_aLine
+	// the timestamp is quite long and usually not interesting for a prompt
+	// the system is often "chatresp" which just looks ugly and also makes
+	// the output harder to read.
+	// Just showing the message might in some rare cases cause confusion where
+	// this log line comes from but in the majority of cases makes the console
+	// way more clean which is the main selling point of this entire thing.
+	// For now I don't have a use case for it but in the future there could be an option
+	// to enable printing more than just the message.
 
 	if(pClient->m_Channel)
 	{
