@@ -51,6 +51,11 @@
 //       or "logs" which opens a less/more like curses app
 //       or "dump_xx | less"
 
+// TODO: add an option to edit config variables not just override them.
+//       so for example "edit sv_name" or "e sv_name" fills the prompt with the
+//       current value and lets the user edit it in place
+//       for this we need a new prompt mode similar to the sarch mode to show that the user what is being edited
+
 // TODO: reaching terminal width length with the input is not supported yet
 //       things get weird
 //       i mean ideally it would line wrap like a terminal does but thats kinda tricky
