@@ -4216,13 +4216,12 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 	const ColorRGBA DoorOuterColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserDoorOutlineColor));
 	const ColorRGBA DoorInnerColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserDoorInnerColor));
 
-	float aPoints[4];
-	Group.Mapping(aPoints);
+	CScreenRect ScreenRect = Group.Mapping();
 	const int ExtraBorder = 9; // doors extend beyond the tile on which they are placed
-	const int StartX = std::max(0, (int)std::floor(aPoints[0] / TileSize) - ExtraBorder);
-	const int EndX = std::min(TilesLayer.m_Width, (int)std::ceil(aPoints[2] / TileSize) + ExtraBorder);
-	const int StartY = std::max(0, (int)std::floor(aPoints[1] / TileSize) - ExtraBorder);
-	const int EndY = std::min(TilesLayer.m_Height, (int)std::ceil(aPoints[3] / TileSize) + ExtraBorder);
+	const int StartX = std::max(0, (int)std::floor(ScreenRect.m_TopLeft.x / TileSize) - ExtraBorder);
+	const int EndX = std::min(TilesLayer.m_Width, (int)std::ceil(ScreenRect.m_BottomRight.x / TileSize) + ExtraBorder);
+	const int StartY = std::max(0, (int)std::floor(ScreenRect.m_TopLeft.y / TileSize) - ExtraBorder);
+	const int EndY = std::min(TilesLayer.m_Height, (int)std::ceil(ScreenRect.m_BottomRight.y / TileSize) + ExtraBorder);
 	for(int y = StartY; y < EndY; y++)
 	{
 		for(int x = StartX; x < EndX; x++)

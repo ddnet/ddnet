@@ -63,7 +63,7 @@ void CMotd::OnRender()
 	const float FontSize = 32.0f; // also the size of the margin and rect rounding
 	const float ScreenHeight = 40.0f * FontSize; // multiple of the font size to get perfect alignment
 	const float ScreenWidth = ScreenHeight * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, ScreenWidth, ScreenHeight);
+	Graphics()->MapScreenToSize(ScreenWidth, ScreenHeight);
 
 	const float RectHeight = (MaxLines + 2) * FontSize;
 	const float RectWidth = 630.0f + 2.0f * FontSize;

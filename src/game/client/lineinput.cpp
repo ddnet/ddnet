@@ -8,6 +8,7 @@
 #include <base/mem.h>
 #include <base/str.h>
 
+#include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
@@ -570,10 +571,9 @@ void CLineInput::RenderCandidates()
 	const float Margin = 4.0f;
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
-	const int ScreenWidth = Graphics()->ScreenWidth();
-	const int ScreenHeight = Graphics()->ScreenHeight();
+	const vec2 ScreenSize = Graphics()->ScreenSize();
 
-	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+	Graphics()->MapScreenToSize(Width, Height);
 
 	// Determine longest candidate width
 	float LongestCandidateWidth = 0.0f;
@@ -584,7 +584,7 @@ void CLineInput::RenderCandidates()
 	const float RectWidth = LongestCandidateWidth + Margin + NumOffset + 2.0f * Padding;
 	const float RectHeight = Input()->GetCandidateCount() * (FontSize + 2.0f * Padding) + Margin;
 
-	vec2 Position = ms_CompositionWindowPosition / vec2(ScreenWidth, ScreenHeight) * vec2(Width, Height);
+	vec2 Position = ms_CompositionWindowPosition / ScreenSize * vec2(Width, Height);
 	Position.y += Margin;
 
 	// Move candidate window left if needed
@@ -593,7 +593,7 @@ void CLineInput::RenderCandidates()
 
 	// Move candidate window up if needed
 	if(Position.y + RectHeight + Margin > Height)
-		Position.y -= RectHeight + ms_CompositionLineHeight / ScreenHeight * Height + 2.0f * Margin;
+		Position.y -= RectHeight + ms_CompositionLineHeight / ScreenSize.y * Height + 2.0f * Margin;
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
@@ -631,12 +631,7 @@ void CLineInput::RenderCandidates()
 
 void CLineInput::SetCompositionWindowPosition(vec2 Anchor, float LineHeight)
 {
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	const int ScreenWidth = Graphics()->ScreenWidth();
-	const int ScreenHeight = Graphics()->ScreenHeight();
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-
-	const vec2 ScreenScale = vec2(ScreenWidth / (ScreenX1 - ScreenX0), ScreenHeight / (ScreenY1 - ScreenY0));
+	const vec2 ScreenScale = Graphics()->ScreenSize() / Graphics()->GetScreen().Size();
 	ms_CompositionWindowPosition = Anchor * ScreenScale;
 	ms_CompositionLineHeight = LineHeight * ScreenScale.y;
 	Input()->SetCompositionWindowPosition(ms_CompositionWindowPosition.x, ms_CompositionWindowPosition.y, ms_CompositionLineHeight);

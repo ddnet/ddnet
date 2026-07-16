@@ -817,7 +817,7 @@ void CTouchControls::OnRender()
 	}
 
 	const vec2 ScreenSize = CalculateScreenSize();
-	Graphics()->MapScreen(0.0f, 0.0f, ScreenSize.x, ScreenSize.y);
+	Graphics()->MapScreenToSize(ScreenSize.x, ScreenSize.y);
 
 	if(m_EditingActive)
 	{
