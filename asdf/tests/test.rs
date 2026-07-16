@@ -113,7 +113,6 @@ async fn test_server_smoke() {
 < {"kind":"close"}
 < EOF
 "#).await;
-    // TODO: server closes socket: assert_eq!(connection.read_line().await, None);
 }
 
 #[tokio::test]

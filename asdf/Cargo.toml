@@ -14,8 +14,7 @@ futures-util = { version = "0.3" }
 ipnet = { version = "2.9.0", features = ["serde"] }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 serde_json = "1.0.64"
-# TODO: remove "time" feature
-tokio = { version = "1.43.0", features = ["io-util", "macros", "net", "rt", "sync", "time"] }
+tokio = { version = "1.43.0", features = ["io-util", "macros", "net", "rt", "sync"] }
 uuid = { version = "1.0", features = ["serde"] }
 
 [dev-dependencies]
