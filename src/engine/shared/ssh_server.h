@@ -152,7 +152,8 @@ public:
 	// that should be added to the input buffer
 	//
 	// not called for escape sequences or multi byte utf8 symbols
-	void AddSingleAsciiLetterToInput(char Byte);
+	// returns false if the input was not changed and a size limit was reached.
+	bool AddSingleAsciiLetterToInput(char Byte);
 
 	// Similar to SetInput() but does not override but insert.
 	// Similar to AddSingleAsciiLetterToInput() and AddSingleUtf8CodePointToInput()

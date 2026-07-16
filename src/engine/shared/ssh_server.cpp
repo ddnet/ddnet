@@ -418,9 +418,24 @@ bool CSshClient::IsSimpleAsciiLetter(char Byte)
 	return false;
 }
 
-void CSshClient::AddSingleAsciiLetterToInput(char Byte)
+bool CSshClient::AddSingleAsciiLetterToInput(char Byte)
 {
-	ResetCompletion();
+	{
+		const int InputSize = str_length(m_aInput);
+		const int InputWidth = StringTerminalWidth(m_aInput, &m_CallbackCtx.m_pServer->m_UnicodeWidthState);
+
+		if(InputSize + 1 >= (int)sizeof(m_aInput) - 1)
+		{
+			return false;
+		}
+		// Ideally this would be PromptWidth() not PromptLength() but
+		// lets keep things simple for now as the prompt is hardcodet ascii
+		if(InputWidth + 1 + PromptLength() >= m_Term.m_Width)
+		{
+			return false;
+		}
+	}
+
 	char aByteBuf[2] = {Byte, 0x00};
 	ssh_channel Channel = m_Channel;
 	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
@@ -433,11 +448,6 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 		m_aInput[m_InputIdx] = '\0';
 		m_CursorPos.x++;
 		ssh_channel_write(Channel, aByteBuf, 1);
-
-		// TODO: remove this the client already does this correctly
-		//       this is only help to debug utf8 cursor offset issues
-		//       by visualazing what the server currently thinks the cursor pos is
-		SendCursorPos(m_CursorPos);
 	}
 	else
 	{
@@ -449,7 +459,6 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 		ssh_channel_write(Channel, aByteBuf, 1);
 
 		char aRight[2048];
-		// TODO: this for sure can go OOB pls add some checks
 		str_copy(aRight, m_aInput + m_InputIdx);
 
 		ssh_channel_write(Channel, aRight, str_length(aRight));
@@ -457,7 +466,6 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 		m_aInput[m_InputIdx++] = Byte;
 		m_aInput[m_InputIdx] = '\0';
 
-		// how well does str_append work with partial utf8?
 		str_append(m_aInput, aRight);
 
 		m_CursorPos.x++;
@@ -473,6 +481,7 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 		if(!m_pCompletionPreview)
 			ClearCompletionPreview();
 	}
+	return true;
 }
 
 // InsertToInputAtCursor() could be used to replace AddSingleAsciiLetterToInput()
@@ -515,7 +524,6 @@ bool CSshClient::InsertToInputAtCursor(const char *pText)
 		// we need to shift all the input
 
 		char aRight[2048];
-		// TODO: this for sure can go OOB pls add some checks
 		str_copy(aRight, m_aInput + m_InputIdx);
 
 		// clear everything from the cursor till the end
@@ -1178,11 +1186,15 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 		else if(CSshClient::IsSimpleAsciiLetter(Byte))
 		{
-			pClient->AddSingleAsciiLetterToInput(Byte);
+			pClient->ResetCompletion();
+			if(!pClient->AddSingleAsciiLetterToInput(Byte))
+				pClient->SendBell();
 			continue;
 		}
-		else
+		else // assume multi byte unicode
 		{
+			pClient->ResetCompletion();
+
 			const char *pStr = pBuf + i;
 			int CodePoint = str_utf8_decode(&pStr);
 			if(CodePoint == 0)
