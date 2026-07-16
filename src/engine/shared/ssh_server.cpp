@@ -475,9 +475,12 @@ void CSshClient::AddSingleAsciiLetterToInput(char Byte)
 	}
 }
 
-// TODO: once this one works fully we might be able to replace these two with it
-//       AddSingleAsciiLetterToInput();
-//       AddSingleUtf8CodePointToInput();
+// InsertToInputAtCursor() could be used to replace AddSingleAsciiLetterToInput()
+// and also the string could be buffered and inserted at once and not inserted for every code point
+// but that makes the code a bit more complex because we will need to flush the buffered strings correctly
+// if there are escape sequences mixed in.
+// InsertToInputAtCursor() could be used right now to replace AddSingleAsciiLetterToInput() but it would
+// be a bit less performant. So lets keep the common ascii case light weight.
 
 bool CSshClient::InsertToInputAtCursor(const char *pText)
 {
