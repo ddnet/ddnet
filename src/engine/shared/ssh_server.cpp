@@ -779,6 +779,8 @@ void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
 		char *pEntry = pClient->m_History.Allocate(Size);
 		str_copy(pEntry, pLine, Size);
 	}
+	// reset history "scroll" to recent command
+	pClient->m_pHistoryEntry = nullptr;
 
 	Console()->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED, true);
 }
