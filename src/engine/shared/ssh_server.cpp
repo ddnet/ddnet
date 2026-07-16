@@ -231,6 +231,9 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 
 	if(pClient->m_Channel)
 	{
+		// I tested it and coloring does work
+		// but had to patch the server code for it
+		// because as far as I can tell no server side log uses colors for now
 		if(pMessage->m_HaveColor)
 		{
 			char aAnsi[32];
