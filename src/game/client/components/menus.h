@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
 #include <base/bytes.h>
+#include <base/str.h>
 #include <base/types.h>
 #include <base/vmath.h>
 
@@ -26,7 +27,6 @@
 #include <game/voting.h>
 
 #include <chrono>
-#include <deque>
 #include <optional>
 #include <vector>
 
@@ -244,7 +244,6 @@ protected:
 	bool m_NeedRestartUpdate;
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
-	int m_SettingPlayerPage;
 
 	// 0.7 skins
 	bool m_CustomSkinMenu = false;
@@ -581,7 +580,9 @@ protected:
 	void RenderSettingsGraphics(CUIRect MainView);
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
-	void RenderSettingsCustom(CUIRect MainView);
+
+	// found in menus_settings_assets.cpp
+	void RenderSettingsAssets(CUIRect MainView);
 
 	// found in menus_settings_controls.cpp
 	// TODO: Change PopupConfirm to avoid using a function pointer to a CMenus
