@@ -426,13 +426,8 @@ bool CSshClient::DeleteWordAtCursor()
 	if(BeginIdx >= EndIdx)
 		return false;
 
-	// FIXME: this is off by one or worse
-	//        my bash shell does not copy the space after the word
-	//        and the ssh one does do that or miss a letter at the end of the input
-	//        check word boundary space and end of input something is off
-
 	char aRigth[sizeof(m_aInput)];
-	str_copy(aRigth, m_aInput + EndIdx + 1);
+	str_copy(aRigth, m_aInput + EndIdx);
 	str_copy(m_aYankBuffer, m_aInput + BeginIdx, (EndIdx - BeginIdx) + 1);
 	m_aInput[BeginIdx] = '\0';
 	str_append(m_aInput, aRigth);
