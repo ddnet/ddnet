@@ -29,6 +29,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: have a shortcut like / to fuzzy search in command names and their help text
+
 // TODO: somewhere the command help text has to be previewed!
 //       right now users have to manually use "help sv_name" to get that which is worse
 //       ux than the remote console in the client! Uacceptable!
@@ -361,7 +363,9 @@ bool CSshClient::CursorMoveRight()
 	int CodePoint = str_utf8_decode(&pStr);
 	int Size = pStr - (m_aInput + m_InputIdx);
 	int Width = 1;
-	if(CodePoint == 0 || CodePoint == -1)
+	if(CodePoint == 0)
+		return false;
+	if(CodePoint == -1)
 	{
 		log_warn("ssh", "Move cursor right failed. Invalid CodePoint: %d", CodePoint);
 	}
@@ -397,14 +401,45 @@ bool CSshClient::CursorMoveWordLeft()
 
 bool CSshClient::CursorMoveWordRight()
 {
+	bool Moved = false;
 	while(true)
 	{
 		if(!CursorMoveRight())
-			return false;
+			return Moved;
 
+		Moved = true;
 		if(m_aInput[m_InputIdx] == ' ')
 			return true;
 	}
+	return Moved;
+}
+
+bool CSshClient::DeleteWordAtCursor()
+{
+	ivec2 OldCursorPos = m_CursorPos;
+	int BeginIdx = m_InputIdx;
+	if(!CursorMoveWordRight())
+		return false;
+	int EndIdx = m_InputIdx;
+	m_InputIdx = BeginIdx;
+	m_CursorPos = OldCursorPos;
+	if(BeginIdx >= EndIdx)
+		return false;
+
+	// FIXME: this is off by one or worse
+	//        my bash shell does not copy the space after the word
+	//        and the ssh one does do that or miss a letter at the end of the input
+	//        check word boundary space and end of input something is off
+
+	char aRigth[sizeof(m_aInput)];
+	str_copy(aRigth, m_aInput + EndIdx + 1);
+	str_copy(m_aYankBuffer, m_aInput + BeginIdx, (EndIdx - BeginIdx) + 1);
+	m_aInput[BeginIdx] = '\0';
+	str_append(m_aInput, aRigth);
+
+	ssh_channel_write(m_Channel, "\033[K", str_length("\033[K"));
+	ssh_channel_write(m_Channel, aRigth, str_length(aRigth));
+
 	return false;
 }
 
@@ -1217,6 +1252,20 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					// skip the sequence
 					i += 2;
 					pClient->CompleteCommands(true);
+				}
+			}
+			if((BufSize - i) >= 1)
+			{
+				// alt+d
+				if(pBuf[i + 1] == 100)
+				{
+					// skip the sequence
+					i++;
+
+					if(!pClient->DeleteWordAtCursor())
+						pClient->SendBell();
+					pClient->SendCursorPos(pClient->m_CursorPos);
+					continue;
 				}
 			}
 

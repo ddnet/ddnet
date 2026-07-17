@@ -138,6 +138,9 @@ public:
 	// returns false when it did not move
 	bool CursorMoveWordRight();
 
+	// returns false when there was no input to be deleted
+	bool DeleteWordAtCursor();
+
 	// we sent a cursor pos fetch to the client
 	// and expect the next input to be the response to it
 	bool m_WaitingForCursorPos = false;
