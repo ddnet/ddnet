@@ -980,6 +980,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		{
 			pClient->ResetCompletion();
 
+			ssh_channel_write(Channel, "^C", 2);
+
 			if(pClient->m_aInput[0] == '\0')
 			{
 				const char *pMsg = "\r\nUse ctrl+d or 'exit' to quit";
