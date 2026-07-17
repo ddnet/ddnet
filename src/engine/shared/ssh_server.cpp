@@ -388,6 +388,16 @@ bool CSshClient::CursorMoveRight()
 
 bool CSshClient::CursorMoveWordLeft()
 {
+	// skip to first word
+	while(m_aInput[m_InputIdx] == ' ')
+	{
+		if(m_InputIdx == 0)
+			return false;
+
+		m_InputIdx--;
+		m_CursorPos.x--;
+	}
+
 	while(true)
 	{
 		if(!CursorMoveLeft())
@@ -402,6 +412,14 @@ bool CSshClient::CursorMoveWordLeft()
 bool CSshClient::CursorMoveWordRight()
 {
 	bool Moved = false;
+
+	// skip to first word
+	while(m_aInput[m_InputIdx] == ' ')
+	{
+		m_InputIdx++;
+		m_CursorPos.x++;
+	}
+
 	while(true)
 	{
 		if(!CursorMoveRight())
