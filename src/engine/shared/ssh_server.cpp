@@ -378,7 +378,7 @@ bool CSshClient::CursorMoveRight()
 		return false;
 	if(m_InputIdx + Size >= (int)sizeof(m_aInput) - 1)
 		return false;
-	if(m_InputIdx + Size >= str_length(m_aInput))
+	if(m_InputIdx + Size > str_length(m_aInput))
 		return false;
 
 	m_InputIdx += Size;
