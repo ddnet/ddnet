@@ -964,8 +964,13 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			}
 			else
 			{
-				// TODO: implement inline ctrl+u
-				log_warn("ssh", "not supported yet");
+				char aRigth[sizeof(CSshClient::m_aInput)];
+				str_copy(aRigth, pClient->m_aInput + pClient->m_InputIdx);
+				str_copy(pClient->m_aYankBuffer, pClient->m_aInput, pClient->m_InputIdx + 1);
+				pClient->ClearPrompt();
+				ssh_channel_write(Channel, aRigth, str_length(aRigth));
+				str_copy(pClient->m_aInput, aRigth);
+				pClient->SendCursorPos(pClient->m_CursorPos);
 			}
 			continue;
 		}
