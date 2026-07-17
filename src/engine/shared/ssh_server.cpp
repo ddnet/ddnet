@@ -202,7 +202,7 @@ int CSshLogger::LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t S
 		{
 			// this only breaks the inner loop but thats fine
 			// on the next write it will break the outer loop
-			// and it anyways nerver will write if full
+			// and it anyways never will write if full
 			if(!WriteOutputByte(pServerLine[InIdx++]))
 				break;
 		}
