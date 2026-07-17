@@ -85,6 +85,7 @@
 
 #define KEY_ENTER 13
 #define KEY_CTRL_U 21
+#define KEY_CTRL_K 11
 #define KEY_CTRL_Y 25
 #define KEY_CTRL_C 3
 #define KEY_CTRL_D 4
@@ -858,6 +859,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		bool Whitelisted =
 			Chr == KEY_ENTER ||
 			Chr == KEY_CTRL_U ||
+			Chr == KEY_CTRL_K ||
 			Chr == KEY_CTRL_C ||
 			Chr == KEY_CTRL_D ||
 			Chr == KEY_DEL ||
@@ -950,6 +952,24 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			pClient->m_CursorPos.x = pClient->PromptLength() + StringTerminalWidth(pClient->m_aInput, &m_UnicodeWidthState);
 			pClient->m_InputIdx = str_length(pClient->m_aInput);
 			pClient->SendCursorPos(pClient->m_CursorPos);
+			continue;
+		}
+		else if(Byte == KEY_CTRL_K)
+		{
+			pClient->ResetCompletion();
+			bool CursorAtStart = pClient->m_InputIdx == 0;
+			if(CursorAtStart)
+			{
+				str_copy(pClient->m_aYankBuffer, pClient->m_aInput);
+				pClient->m_aInput[0] = '\0';
+				pClient->ClearPrompt();
+			}
+			else
+			{
+				str_copy(pClient->m_aYankBuffer, pClient->m_aInput + pClient->m_InputIdx);
+				pClient->m_aInput[pClient->m_InputIdx] = '\0';
+				ssh_channel_write(Channel, "\033[K", str_length("\033[K"));
+			}
 			continue;
 		}
 		else if(Byte == KEY_CTRL_U)
