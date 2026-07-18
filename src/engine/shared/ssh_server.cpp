@@ -1733,6 +1733,12 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 		.channel_open_request_session_function = ChannelOpenRequestSessionCallback,
 	};
 	ssh_callbacks_init(&pClient->m_ServerCallback);
+
+	int AuthMethods = SSH_AUTH_METHOD_PUBLICKEY;
+	if(g_Config.m_SvSshPasswordAuthentication)
+		AuthMethods |= SSH_AUTH_METHOD_PASSWORD;
+	ssh_set_auth_methods(Session, AuthMethods);
+
 	ssh_set_server_callbacks(Session, &pClient->m_ServerCallback);
 
 	m_apClients[ClientId] = pClient;
