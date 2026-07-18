@@ -1235,6 +1235,10 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			pClient->ClearCompletionPreview();
 			if((BufSize - i) < 2)
 			{
+				// TODO: check if there was an alt screen active and only then disable it
+				//       we need some kind of popup and screen system
+				//       but lets hack together some kind of view first so we can think about
+				//       how to structure the code
 				pClient->DisableAltBuf();
 
 				// this is odd, do we just ignore this one?
