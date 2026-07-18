@@ -1,11 +1,22 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
 import subprocess
 import sys
-import argparse
+import tomllib
 
 os.chdir(os.path.dirname(__file__) + "/..")
+
+
+def find_cxxbridge_version():
+	with open("Cargo.toml") as f:
+		cargo_toml = f.read()
+	cargo_toml = tomllib.loads(cargo_toml)
+	cxx_version = cargo_toml["workspace"]["dependencies"]["cxx"]
+	if not cxx_version.startswith("="):
+		raise RuntimeError("expected cxx package to pin a specific version")
+	return cxx_version[1:]
 
 
 def find_cxxbridge(version):
@@ -28,9 +39,14 @@ FILES = {
 
 def main():
 	p = argparse.ArgumentParser(description="Generate src/rust-bridge")
-	_args = p.parse_args()
+	p.add_argument("--cxx-version", action="store_true", help="Print cxx version and exit")
+	args = p.parse_args()
 
-	cxxbridge = find_cxxbridge(version="1.0.194")
+	cxxbridge_version = find_cxxbridge_version()
+	if args.cxx_version:
+		print(cxxbridge_version)
+		return
+	cxxbridge = find_cxxbridge(version=cxxbridge_version)
 	for input_, output_prefix in FILES.items():
 		subprocess.check_call([
 			cxxbridge,
