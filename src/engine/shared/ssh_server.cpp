@@ -83,8 +83,6 @@
 // also it does not seem to perfectly fit
 // but idk what the better choice would be
 
-// TODO: implement ctrl+k and fix ctrl+u there are escape sequences to clear from cursor like \033[K
-
 #define KEY_ENTER 13
 #define KEY_CTRL_U 21
 #define KEY_CTRL_K 11
@@ -922,7 +920,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 
 	// TODO: improve this shell!
 	// TODO: ctrl+r history support
-	// TODO: word deletion
 
 	// TODO: for waiting on more data this loop is not ideal
 	//       because when we do not call m_Buffer.Clear() we did potentially
@@ -1255,7 +1252,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					// skip the sequence
 					i += 2;
 
-					// TODO: handle line break well when we go too far right
 					if(!pClient->CursorMoveRight())
 						pClient->SendBell();
 					pClient->SendCursorPos(pClient->m_CursorPos);
