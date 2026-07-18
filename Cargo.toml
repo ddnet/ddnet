@@ -8,6 +8,11 @@ members = [
 
 resolver = "2"
 
+[workspace.dependencies]
+# After updating the cxx version, you need to run
+# `python scripts/generate_rust_bridge.py`.
+cxx = "=1.0.194"
+
 [profile.dev]
 panic = "abort"
 

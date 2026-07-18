@@ -14,7 +14,7 @@ path = "lib.rs"
 ddnet-base = { path = "../../base" }
 ddnet-engine = { path = ".." }
 
-cxx = "=1.0.194"
+cxx = { workspace = true }
 
 [dev-dependencies]
 ddnet-test = { path = "../../rust-bridge/test", features = ["link-test-libraries"] }

@@ -10,7 +10,7 @@ license = "Zlib"
 path = "lib.rs"
 
 [dependencies]
-cxx = "=1.0.194"
+cxx = { workspace = true }
 libc = "0.2"
 
 [dev-dependencies]
