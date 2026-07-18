@@ -179,6 +179,17 @@ public:
 	void SetCursorPosToPromptStart();
 
 	void ClearCompletionPreview();
+
+	// sends ansi escape sequence to start drawing
+	// on a new terminal buffer/screen
+	// this is used to render popups and then return back
+	// to the old prompt
+	void EnableAltBuf() const;
+
+	// sends ansi escape sequence to return to original
+	// buffer/screen
+	void DisableAltBuf() const;
+
 	void SendBell() const;
 	void SendColor(LOG_COLOR Color) const;
 	void ResetColor() const;

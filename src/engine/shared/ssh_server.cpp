@@ -93,6 +93,7 @@
 #define KEY_CTRL_L 12
 #define KEY_CTRL_A 1
 #define KEY_CTRL_E 5
+#define KEY_CTRL_R 18
 #define KEY_TAB 9
 #define KEY_DEL 127
 #define KEY_BACKSPACE '\b'
@@ -660,6 +661,22 @@ void CSshClient::ClearCompletionPreview()
 	m_pCompletionPreview = nullptr;
 }
 
+void CSshClient::EnableAltBuf() const
+{
+	if(!m_Channel)
+		return;
+
+	ssh_channel_write(m_Channel, "\033[?1049h", 9);
+}
+
+void CSshClient::DisableAltBuf() const
+{
+	if(!m_Channel)
+		return;
+
+	ssh_channel_write(m_Channel, "\033[?1049l", 9);
+}
+
 void CSshClient::SendBell() const
 {
 	if(!m_Channel)
@@ -1041,6 +1058,21 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			pClient->SendCursorPos(pClient->m_CursorPos);
 			continue;
 		}
+		else if(Byte == KEY_CTRL_R)
+		{
+			pClient->EnableAltBuf();
+
+			const char *pPopup =
+				"XXXXXXXXXXXXXXXXXXXXXXXXXX\r\n"
+				"X                        X\r\n"
+				"X   yellow world         X\r\n"
+				"X                        X\r\n"
+				"XXXXXXXXXXXXXXXXXXXXXXXXXX\r\n";
+
+			ssh_channel_write(Channel, pPopup, str_length(pPopup));
+
+			continue;
+		}
 		else if(Byte == KEY_CTRL_K)
 		{
 			pClient->ResetCompletion();
@@ -1203,6 +1235,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			pClient->ClearCompletionPreview();
 			if((BufSize - i) < 2)
 			{
+				pClient->DisableAltBuf();
+
 				// this is odd, do we just ignore this one?
 				// yes! regular ESC is just one byte of 27
 				continue;
