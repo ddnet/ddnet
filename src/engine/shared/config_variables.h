@@ -517,6 +517,7 @@ MACRO_CONFIG_INT(EcOutputLevel, ec_output_level, 0, -3, 2, CFGFLAG_ECON, "Adjust
 
 MACRO_CONFIG_INT(SvSsh, sv_ssh, 0, 0, 1, CFGFLAG_SERVER, "Enable the ssh server for the remote console")
 MACRO_CONFIG_INT(SvSshPort, sv_ssh_port, 2222, 0, 65535, CFGFLAG_SERVER, "The port the ssh server for the remote console will listen on")
+MACRO_CONFIG_INT(SvSshPasswordAuthentication, sv_ssh_password_authentication, 1, 0, 1, CFGFLAG_SERVER, "Use 0 to disable clear text passwords and allow only ssh keys to login")
 
 MACRO_CONFIG_INT(Debug, debug, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Debug mode")
 MACRO_CONFIG_INT(DbgSql, dbg_sql, 1, 0, 1, CFGFLAG_SERVER, "Debug SQL")

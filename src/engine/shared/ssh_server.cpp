@@ -1476,6 +1476,8 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 
 	if(g_Config.m_SvRconPassword[0] == '\0')
 		return SSH_AUTH_DENIED;
+	if(!g_Config.m_SvSshPasswordAuthentication)
+		return SSH_AUTH_DENIED;
 
 	bool AdminUsername = str_comp(pUsername, "root") == 0 || str_comp(pUsername, "admin") == 0 || str_comp(pUsername, "default_admin") == 0;
 	if(AdminUsername && str_comp(pPassword, g_Config.m_SvRconPassword) == 0)
