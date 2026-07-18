@@ -444,14 +444,14 @@ bool CSshClient::DeleteWordAtCursor()
 	if(BeginIdx >= EndIdx)
 		return false;
 
-	char aRigth[sizeof(m_aInput)];
-	str_copy(aRigth, m_aInput + EndIdx);
+	char aRight[sizeof(m_aInput)];
+	str_copy(aRight, m_aInput + EndIdx);
 	str_copy(m_aYankBuffer, m_aInput + BeginIdx, (EndIdx - BeginIdx) + 1);
 	m_aInput[BeginIdx] = '\0';
-	str_append(m_aInput, aRigth);
+	str_append(m_aInput, aRight);
 
 	ssh_channel_write(m_Channel, "\033[K", str_length("\033[K"));
-	ssh_channel_write(m_Channel, aRigth, str_length(aRigth));
+	ssh_channel_write(m_Channel, aRight, str_length(aRight));
 
 	return false;
 }
@@ -1032,12 +1032,12 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			}
 			else
 			{
-				char aRigth[sizeof(CSshClient::m_aInput)];
-				str_copy(aRigth, pClient->m_aInput + pClient->m_InputIdx);
+				char aRight[sizeof(CSshClient::m_aInput)];
+				str_copy(aRight, pClient->m_aInput + pClient->m_InputIdx);
 				str_copy(pClient->m_aYankBuffer, pClient->m_aInput, pClient->m_InputIdx + 1);
 				pClient->ClearPrompt();
-				ssh_channel_write(Channel, aRigth, str_length(aRigth));
-				str_copy(pClient->m_aInput, aRigth);
+				ssh_channel_write(Channel, aRight, str_length(aRight));
+				str_copy(pClient->m_aInput, aRight);
 				pClient->SendCursorPos(pClient->m_CursorPos);
 			}
 			continue;
