@@ -39,6 +39,11 @@
 #include <utility>
 #include <vector>
 
+// Set on render worker threads so that memory-allocation recovery (which drives
+// the frame loop and issues queue submit/present) is only ever attempted on the
+// main render thread. See AllocateVulkanMemory().
+static thread_local bool s_ThreadIsRenderWorker = false;
+
 #ifndef VK_API_VERSION_MAJOR
 #define VK_API_VERSION_MAJOR VK_VERSION_MAJOR
 #define VK_API_VERSION_MINOR VK_VERSION_MINOR
@@ -995,6 +1000,14 @@ private:
 	VkDebugUtilsMessengerEXT m_DebugMessenger;
 #endif
 
+#ifdef VK_EXT_DEVICE_FAULT_EXTENSION_NAME
+	// Optional VK_EXT_device_fault support. When the driver exposes the extension
+	// we enable it so that a VK_ERROR_DEVICE_LOST can be followed up with detailed
+	// fault information (faulting GPU addresses and vendor specific fault codes).
+	bool m_DeviceFaultAvailable = false;
+	PFN_vkGetDeviceFaultInfoEXT m_vkGetDeviceFaultInfoEXT = nullptr;
+#endif
+
 	VkDescriptorSetLayout m_StandardTexturedDescriptorSetLayout;
 	VkDescriptorSetLayout m_Standard3DTexturedDescriptorSetLayout;
 
@@ -1147,6 +1160,61 @@ protected:
 		m_Warning.m_WarningType = WarningType;
 	}
 
+#ifdef VK_EXT_DEVICE_FAULT_EXTENSION_NAME
+	static const char *DeviceFaultAddressTypeName(VkDeviceFaultAddressTypeEXT Type)
+	{
+		switch(Type)
+		{
+		case VK_DEVICE_FAULT_ADDRESS_TYPE_NONE_EXT: return "none";
+		case VK_DEVICE_FAULT_ADDRESS_TYPE_READ_INVALID_EXT: return "read_invalid";
+		case VK_DEVICE_FAULT_ADDRESS_TYPE_WRITE_INVALID_EXT: return "write_invalid";
+		case VK_DEVICE_FAULT_ADDRESS_TYPE_EXECUTE_INVALID_EXT: return "execute_invalid";
+		case VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_UNKNOWN_EXT: return "instruction_pointer_unknown";
+		case VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_INVALID_EXT: return "instruction_pointer_invalid";
+		case VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_FAULT_EXT: return "instruction_pointer_fault";
+		default: return "unknown";
+		}
+	}
+
+	// Queries and logs VK_EXT_device_fault information. Safe to call unconditionally:
+	// it is a no-op unless the extension was enabled at device creation.
+	void LogDeviceFaultInfo()
+	{
+		if(!m_DeviceFaultAvailable || m_vkGetDeviceFaultInfoEXT == nullptr)
+			return;
+
+		VkDeviceFaultCountsEXT FaultCounts = {};
+		FaultCounts.sType = VK_STRUCTURE_TYPE_DEVICE_FAULT_COUNTS_EXT;
+		if(m_vkGetDeviceFaultInfoEXT(m_VKDevice, &FaultCounts, nullptr) != VK_SUCCESS)
+			return;
+
+		std::vector<VkDeviceFaultAddressInfoEXT> vAddressInfos(FaultCounts.addressInfoCount);
+		std::vector<VkDeviceFaultVendorInfoEXT> vVendorInfos(FaultCounts.vendorInfoCount);
+
+		VkDeviceFaultInfoEXT FaultInfo = {};
+		FaultInfo.sType = VK_STRUCTURE_TYPE_DEVICE_FAULT_INFO_EXT;
+		FaultInfo.pAddressInfos = vAddressInfos.data();
+		FaultInfo.pVendorInfos = vVendorInfos.data();
+		// We do not request the (potentially large) vendor binary crash dump here.
+		if(m_vkGetDeviceFaultInfoEXT(m_VKDevice, &FaultCounts, &FaultInfo) != VK_SUCCESS)
+			return;
+
+		log_error("gfx/vulkan", "Device fault info (VK_EXT_device_fault): %s", FaultInfo.description);
+		for(uint32_t i = 0; i < FaultCounts.addressInfoCount; ++i)
+		{
+			const VkDeviceFaultAddressInfoEXT &Info = vAddressInfos[i];
+			log_error("gfx/vulkan", "  address fault: type=%s reportedAddress=0x%" PRIx64 " precision=0x%" PRIx64,
+				DeviceFaultAddressTypeName(Info.addressType), (uint64_t)Info.reportedAddress, (uint64_t)Info.addressPrecision);
+		}
+		for(uint32_t i = 0; i < FaultCounts.vendorInfoCount; ++i)
+		{
+			const VkDeviceFaultVendorInfoEXT &Info = vVendorInfos[i];
+			log_error("gfx/vulkan", "  vendor fault: %s code=0x%" PRIx64 " data=0x%" PRIx64,
+				Info.description, (uint64_t)Info.vendorFaultCode, (uint64_t)Info.vendorFaultData);
+		}
+	}
+#endif
+
 	const char *CheckVulkanCriticalError(VkResult CallResult)
 	{
 		const char *pCriticalError = nullptr;
@@ -1163,6 +1231,9 @@ protected:
 		case VK_ERROR_DEVICE_LOST:
 			pCriticalError = "Device lost.";
 			log_error("gfx/vulkan", "%s", pCriticalError);
+#ifdef VK_EXT_DEVICE_FAULT_EXTENSION_NAME
+			LogDeviceFaultInfo();
+#endif
 			break;
 		case VK_ERROR_OUT_OF_DATE_KHR:
 		{
@@ -1544,7 +1615,16 @@ protected:
 		if(Res != VK_SUCCESS)
 		{
 			log_warn("gfx/vulkan", "Memory allocation failed, trying to recover.");
-			if(Res == VK_ERROR_OUT_OF_HOST_MEMORY || Res == VK_ERROR_OUT_OF_DEVICE_MEMORY)
+			// The recovery below advances the frame loop (vkDeviceWaitIdle +
+			// NextFrame -> WaitFrame -> FinishRenderThreads -> queue submit/present)
+			// to free delayed-cleanup resources and retry. That is only valid on
+			// the main render thread. On a render worker thread it would wait on
+			// the worker executing it (and re-lock that worker's own mutex),
+			// deadlocking the renderer, and issue queue operations concurrently
+			// with the main thread (-> VK_ERROR_DEVICE_LOST). From a worker we
+			// therefore fail cleanly; the failing allocation's caller reports an
+			// out-of-memory error and the main thread handles it.
+			if((Res == VK_ERROR_OUT_OF_HOST_MEMORY || Res == VK_ERROR_OUT_OF_DEVICE_MEMORY) && !s_ThreadIsRenderWorker)
 			{
 				// aggressively try to get more memory
 				vkDeviceWaitIdle(m_VKDevice);
@@ -3500,6 +3580,11 @@ public:
 	{
 		std::set<std::string> OurExt;
 		OurExt.emplace(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+#ifdef VK_EXT_DEVICE_FAULT_EXTENSION_NAME
+		// Only used when actually supported by the device (see device creation);
+		// enables detailed diagnostics after a VK_ERROR_DEVICE_LOST.
+		OurExt.emplace(VK_EXT_DEVICE_FAULT_EXTENSION_NAME);
+#endif
 		return OurExt;
 	}
 
@@ -3907,6 +3992,33 @@ public:
 			}
 		}
 
+#ifdef VK_EXT_DEVICE_FAULT_EXTENSION_NAME
+		bool DeviceFaultRequested = false;
+		for(const char *pDevExt : vDevPropCNames)
+		{
+			if(str_comp(pDevExt, VK_EXT_DEVICE_FAULT_EXTENSION_NAME) == 0)
+			{
+				DeviceFaultRequested = true;
+				break;
+			}
+		}
+
+		VkPhysicalDeviceFaultFeaturesEXT FaultFeatures = {};
+		FaultFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_FEATURES_EXT;
+		if(DeviceFaultRequested)
+		{
+			auto pfnGetPhysicalDeviceFeatures2 = (PFN_vkGetPhysicalDeviceFeatures2)vkGetInstanceProcAddr(m_VKInstance, "vkGetPhysicalDeviceFeatures2");
+			if(pfnGetPhysicalDeviceFeatures2 != nullptr)
+			{
+				// The extension's core deviceFault feature must be enabled explicitly.
+				VkPhysicalDeviceFeatures2 PhysFeatures2 = {};
+				PhysFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+				PhysFeatures2.pNext = &FaultFeatures;
+				pfnGetPhysicalDeviceFeatures2(m_VKGPU, &PhysFeatures2);
+			}
+		}
+#endif
+
 		VkDeviceQueueCreateInfo VKQueueCreateInfo;
 		VKQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		VKQueueCreateInfo.queueFamilyIndex = m_VKGraphicsQueueIndex;
@@ -3928,11 +4040,29 @@ public:
 		VKCreateInfo.pEnabledFeatures = nullptr;
 		VKCreateInfo.flags = 0;
 
+#ifdef VK_EXT_DEVICE_FAULT_EXTENSION_NAME
+		if(DeviceFaultRequested && FaultFeatures.deviceFault)
+		{
+			FaultFeatures.pNext = nullptr;
+			VKCreateInfo.pNext = &FaultFeatures;
+		}
+#endif
+
 		if(vkCreateDevice(m_VKGPU, &VKCreateInfo, nullptr, &m_VKDevice) != VK_SUCCESS)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Logical device could not be created.");
 			return false;
 		}
+
+#ifdef VK_EXT_DEVICE_FAULT_EXTENSION_NAME
+		if(DeviceFaultRequested && FaultFeatures.deviceFault)
+		{
+			m_vkGetDeviceFaultInfoEXT = (PFN_vkGetDeviceFaultInfoEXT)vkGetDeviceProcAddr(m_VKDevice, "vkGetDeviceFaultInfoEXT");
+			m_DeviceFaultAvailable = m_vkGetDeviceFaultInfoEXT != nullptr;
+			if(m_DeviceFaultAvailable)
+				log_debug("gfx/vulkan", "VK_EXT_device_fault enabled; detailed fault info will be logged on device loss.");
+		}
+#endif
 
 		return true;
 	}
@@ -7604,6 +7734,7 @@ public:
 
 	void RunThread(size_t ThreadIndex)
 	{
+		s_ThreadIsRenderWorker = true;
 		auto *pThread = m_vpRenderThreads[ThreadIndex].get();
 		std::unique_lock<std::mutex> Lock(pThread->m_Mutex);
 		pThread->m_Started = true;
