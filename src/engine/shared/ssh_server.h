@@ -215,6 +215,8 @@ public:
 	char *m_pHistoryEntry = nullptr;
 
 	void AddToInputHistory(const char *pInput);
+	const char *PrevInputFromHistory();
+	const char *NextInputFromHistory();
 
 	// We need to manage the memory for this struct
 	// because libssh does not copy it

@@ -804,6 +804,33 @@ void CSshClient::AddToInputHistory(const char *pInput)
 	m_pHistoryEntry = nullptr;
 }
 
+const char *CSshClient::PrevInputFromHistory()
+{
+	if(m_pHistoryEntry)
+	{
+		char *pTest = m_History.Prev(m_pHistoryEntry);
+		if(pTest)
+			m_pHistoryEntry = pTest;
+	}
+	else
+	{
+		m_pHistoryEntry = m_History.Last();
+	}
+
+	if(m_pHistoryEntry)
+		return m_pHistoryEntry;
+	return "";
+}
+
+const char *CSshClient::NextInputFromHistory()
+{
+	if(m_pHistoryEntry)
+		m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
+	if(m_pHistoryEntry)
+		return m_pHistoryEntry;
+	return "";
+}
+
 void CSshServer::ProcessMessage(CSshClient *pClient)
 {
 	// we aren't interested in any specific message yet
@@ -1214,20 +1241,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					i += 2;
 
 					pClient->ResetCompletion();
-					if(pClient->m_pHistoryEntry)
-					{
-						char *pTest = pClient->m_History.Prev(pClient->m_pHistoryEntry);
-
-						if(pTest)
-							pClient->m_pHistoryEntry = pTest;
-					}
-					else
-					{
-						pClient->m_pHistoryEntry = pClient->m_History.Last();
-					}
-
-					if(pClient->m_pHistoryEntry)
-						pClient->SetInput(pClient->m_pHistoryEntry);
+					pClient->SetInput(pClient->PrevInputFromHistory());
 				}
 				else if(pBuf[i + 2] == 66) // arrow key down
 				{
@@ -1235,13 +1249,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					i += 2;
 
 					pClient->ResetCompletion();
-					if(pClient->m_pHistoryEntry)
-						pClient->m_pHistoryEntry = pClient->m_History.Next(pClient->m_pHistoryEntry);
-
-					if(pClient->m_pHistoryEntry)
-						pClient->SetInput(pClient->m_pHistoryEntry);
-					else
-						pClient->SetInput("");
+					pClient->SetInput(pClient->NextInputFromHistory());
 				}
 				else if(pBuf[i + 2] == 68) // arrow key left
 				{
