@@ -89,7 +89,7 @@ private:
 class CEditorActionDeleteQuad : public CEditorActionLayerBase
 {
 public:
-	CEditorActionDeleteQuad(CEditorMap *pMap, int GroupIndex, int LayerIndex, std::vector<int> const &vQuadsIndices, std::vector<CQuad> const &vDeletedQuads);
+	CEditorActionDeleteQuad(CEditorMap *pMap, int GroupIndex, int LayerIndex);
 
 	void Undo() override;
 	void Redo() override;
