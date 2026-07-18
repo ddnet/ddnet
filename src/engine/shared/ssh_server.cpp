@@ -791,6 +791,19 @@ void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pU
 	}
 }
 
+void CSshClient::AddToInputHistory(const char *pInput)
+{
+	const char *pPrevEntry = m_History.Last();
+	if(pPrevEntry == nullptr || str_comp(pPrevEntry, pInput) != 0)
+	{
+		const size_t Size = str_length(pInput) + 1;
+		char *pEntry = m_History.Allocate(Size);
+		str_copy(pEntry, pInput, Size);
+	}
+	// reset history "scroll" to recent command
+	m_pHistoryEntry = nullptr;
+}
+
 void CSshServer::ProcessMessage(CSshClient *pClient)
 {
 	// we aren't interested in any specific message yet
@@ -828,16 +841,6 @@ void CSshServer::ListConnections()
 
 void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
 {
-	const char *pPrevEntry = pClient->m_History.Last();
-	if(pPrevEntry == nullptr || str_comp(pPrevEntry, pLine) != 0)
-	{
-		const size_t Size = str_length(pLine) + 1;
-		char *pEntry = pClient->m_History.Allocate(Size);
-		str_copy(pEntry, pLine, Size);
-	}
-	// reset history "scroll" to recent command
-	pClient->m_pHistoryEntry = nullptr;
-
 	Console()->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED, true);
 }
 
@@ -944,7 +947,9 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					pClient->NewPrompt();
 					continue;
 				}
+
 				log_info("ssh", "cid=%d cmd='%s'", pClient->m_ClientId, pCmd);
+				pClient->AddToInputHistory(pCmd);
 
 				// TODO: how bad is it that these are fake commands?
 				//       meaning they have to be a full match

@@ -214,6 +214,8 @@ public:
 	CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 	char *m_pHistoryEntry = nullptr;
 
+	void AddToInputHistory(const char *pInput);
+
 	// We need to manage the memory for this struct
 	// because libssh does not copy it
 	struct ssh_server_callbacks_struct m_ServerCallback = {};
