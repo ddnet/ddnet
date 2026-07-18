@@ -25,6 +25,7 @@
 #include <libssh/server.h>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
@@ -793,42 +794,51 @@ void CSshClient::CompletionPreviewCallback(int Index, const char *pCmd, void *pU
 
 void CSshClient::AddToInputHistory(const char *pInput)
 {
-	const char *pPrevEntry = m_History.Last();
-	if(pPrevEntry == nullptr || str_comp(pPrevEntry, pInput) != 0)
+	// check duplicates
+	// for now only filter out consecutive duplicates
+	if(!m_InputHistory.empty())
 	{
-		const size_t Size = str_length(pInput) + 1;
-		char *pEntry = m_History.Allocate(Size);
-		str_copy(pEntry, pInput, Size);
+		auto &Prev = m_InputHistory.back();
+		if(!str_comp(Prev.data(), pInput))
+		{
+			return;
+		}
 	}
-	// reset history "scroll" to recent command
-	m_pHistoryEntry = nullptr;
+
+	auto &Entry = m_InputHistory.emplace_back();
+	str_copy(Entry.data(), pInput, Entry.size());
+	if(m_InputHistory.size() > MAX_HISTORY_ENTRIES)
+	{
+		m_InputHistory.pop_front();
+	}
+
+	// WARNING: here we go intentionally out of bounds by one
+	m_HistoryIdx = m_InputHistory.size();
 }
 
 const char *CSshClient::PrevInputFromHistory()
 {
-	if(m_pHistoryEntry)
-	{
-		char *pTest = m_History.Prev(m_pHistoryEntry);
-		if(pTest)
-			m_pHistoryEntry = pTest;
-	}
-	else
-	{
-		m_pHistoryEntry = m_History.Last();
-	}
+	if(m_InputHistory.empty())
+		return "";
 
-	if(m_pHistoryEntry)
-		return m_pHistoryEntry;
-	return "";
+	if(m_HistoryIdx > 0)
+		m_HistoryIdx--;
+	auto &Entry = m_InputHistory.at(m_HistoryIdx);
+	return Entry.data();
 }
 
 const char *CSshClient::NextInputFromHistory()
 {
-	if(m_pHistoryEntry)
-		m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
-	if(m_pHistoryEntry)
-		return m_pHistoryEntry;
-	return "";
+	if(m_InputHistory.empty())
+		return "";
+	// WARNING: here we go intentionally out of bounds by one
+	if(m_HistoryIdx < m_InputHistory.size())
+		m_HistoryIdx++;
+	if(m_HistoryIdx >= m_InputHistory.size())
+		return "";
+
+	auto &Entry = m_InputHistory.at(m_HistoryIdx);
+	return Entry.data();
 }
 
 void CSshServer::ProcessMessage(CSshClient *pClient)

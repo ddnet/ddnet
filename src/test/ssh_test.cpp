@@ -22,6 +22,7 @@ TEST(Ssh, History)
 	EXPECT_STREQ(Client.NextInputFromHistory(), "");
 
 	Client.AddToInputHistory("world");
+
 	EXPECT_STREQ(Client.PrevInputFromHistory(), "world");
 	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
 	EXPECT_STREQ(Client.NextInputFromHistory(), "world");

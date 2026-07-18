@@ -18,9 +18,11 @@
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 
+#include <deque>
 #include <optional>
 
 static constexpr int MAX_SSH_CLIENTS = 16;
+static constexpr int MAX_HISTORY_ENTRIES = 512;
 
 class CSshServer;
 
@@ -211,8 +213,12 @@ public:
 	};
 	CTerminal m_Term;
 
-	CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
-	char *m_pHistoryEntry = nullptr;
+	std::deque<std::array<char, sizeof(m_aInput)>> m_InputHistory;
+
+	// WARNING: this index is expected to go out of bounds by one
+	//          we reach history size so one element after the end of the queue
+	//          when the user scrolls down to the very bottom and we clear the input
+	size_t m_HistoryIdx = 0;
 
 	void AddToInputHistory(const char *pInput);
 	const char *PrevInputFromHistory();
