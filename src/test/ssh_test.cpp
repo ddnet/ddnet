@@ -9,6 +9,57 @@
 
 #include <gtest/gtest.h>
 
+TEST(Ssh, History)
+{
+	CSshClient Client(0, nullptr);
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+
+	Client.AddToInputHistory("hello");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+
+	Client.AddToInputHistory("world");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "world");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "world");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+
+	Client.AddToInputHistory("foo");
+	Client.AddToInputHistory("bar");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "bar");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "foo");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "world");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "world");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "foo");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "bar");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "bar");
+}
+
+TEST(Ssh, HistoryDuplicates)
+{
+	CSshClient Client(0, nullptr);
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "");
+	EXPECT_STREQ(Client.NextInputFromHistory(), "");
+
+	Client.AddToInputHistory("hello");
+	Client.AddToInputHistory("world");
+	Client.AddToInputHistory("world");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "world");
+	EXPECT_STREQ(Client.PrevInputFromHistory(), "hello");
+}
+
 TEST(Ssh, LineWrap)
 {
 	unicode_width_state_t State;
