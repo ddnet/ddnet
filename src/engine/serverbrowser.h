@@ -93,7 +93,6 @@ public:
 
 	int m_Type;
 	uint64_t m_ReceivedPackets;
-	int m_NumReceivedClients;
 
 	int m_NumAddresses;
 	NETADDR m_aAddresses[MAX_SERVER_ADDRESSES];
@@ -125,7 +124,7 @@ public:
 	int m_MapSize;
 	char m_aVersion[32];
 	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
-	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
+	std::vector<CClient> m_vClients;
 	int m_NumFilteredPlayers;
 	bool m_RequiresLogin;
 
