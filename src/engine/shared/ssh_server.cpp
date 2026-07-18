@@ -685,6 +685,14 @@ void CSshClient::SendBell() const
 	ssh_channel_write(m_Channel, "\a", 1);
 }
 
+void CSshClient::SendClearScreen() const
+{
+	if(!m_Channel)
+		return;
+
+	ssh_channel_write(m_Channel, "\033[2J\r", 6);
+}
+
 void CSshClient::SendColor(LOG_COLOR Color) const
 {
 	if(!m_Channel)
@@ -741,6 +749,35 @@ void CSshClient::ResetCompletion()
 	m_aCompletionBuffer[0] = '\0';
 	m_CompletionIndex = -1;
 	m_CompletionEnumerationCount = -1;
+}
+
+void CSshClient::RenderHistorySearch()
+{
+	EnableAltBuf();
+	SendClearScreen();
+
+	// TODO: should - 1 be - PromptHeight()?
+	int MaxLines = m_Term.m_Height - 1;
+	int NumPaddings = MaxLines - m_InputHistory.size();
+	for(int Pad = 0; Pad < NumPaddings; Pad++)
+	{
+		// TODO: probably dont event need padding
+		//       we cleared the screen we could just move the cursor down instead of writing this
+		ssh_channel_write(m_Channel, "padding\r\n", 10);
+	}
+	int NumLines = 0;
+	for(auto Entry : m_InputHistory)
+	{
+		if(NumLines++ >= MaxLines)
+			break;
+
+		log_info("ssh", "sending line %s", Entry.data());
+		ssh_channel_write(m_Channel, Entry.data(), str_length(Entry.data()));
+		ssh_channel_write(m_Channel, "\r\n", 2);
+	}
+
+	ClearPrompt();
+	ssh_channel_write(m_Channel, m_aInput, str_length(m_aInput));
 }
 
 void CSshClient::CompleteCommands(bool IsReverse)
@@ -1060,17 +1097,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_R)
 		{
-			pClient->EnableAltBuf();
-
-			const char *pPopup =
-				"XXXXXXXXXXXXXXXXXXXXXXXXXX\r\n"
-				"X                        X\r\n"
-				"X   yellow world         X\r\n"
-				"X                        X\r\n"
-				"XXXXXXXXXXXXXXXXXXXXXXXXXX\r\n";
-
-			ssh_channel_write(Channel, pPopup, str_length(pPopup));
-
+			pClient->RenderHistorySearch();
+			pClient->m_Mode = EClientMode::HISTORY_SEARCH;
 			continue;
 		}
 		else if(Byte == KEY_CTRL_K)
@@ -1154,7 +1182,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				continue;
 
 			pClient->ClearCompletionPreview();
-			ssh_channel_write(pClient->m_Channel, "\033[2J", str_length("\033[2J"));
+			pClient->SendClearScreen();
 			pClient->m_CursorPos.y = 1;
 			pClient->SendCursorPos(pClient->m_CursorPos);
 			pClient->ClearPrompt();
@@ -1240,6 +1268,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				//       but lets hack together some kind of view first so we can think about
 				//       how to structure the code
 				pClient->DisableAltBuf();
+				pClient->m_Mode = EClientMode::PROMPT;
 
 				// this is odd, do we just ignore this one?
 				// yes! regular ESC is just one byte of 27
@@ -1408,6 +1437,12 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			i += LengthInBytes - 1;
 		}
 	}
+
+	// TODO: this should not be here
+	//       we also need to blacklist some commands during special modes
+
+	if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+		pClient->RenderHistorySearch();
 
 	// TODO: only clear if we actually read the data
 	pClient->m_Buffer.Clear();

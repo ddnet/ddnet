@@ -69,6 +69,12 @@ public:
 	const unsigned char *Data() const { return m_aBuf; }
 };
 
+enum class EClientMode
+{
+	PROMPT,
+	HISTORY_SEARCH,
+};
+
 class CSshClient
 {
 public:
@@ -94,6 +100,9 @@ public:
 	ssh_channel m_Channel = nullptr;
 
 	int64_t m_JoinTime = 0;
+
+	EClientMode m_Mode = EClientMode::PROMPT;
+
 	// The current ssh channel read buffer.
 	// These are all the bytes the ssh client sent to use
 	// that we have not processed yet
@@ -191,10 +200,13 @@ public:
 	void DisableAltBuf() const;
 
 	void SendBell() const;
+	void SendClearScreen() const;
 	void SendColor(LOG_COLOR Color) const;
 	void ResetColor() const;
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();
+
+	void RenderHistorySearch();
 
 	void ResetCompletion();
 	void CompleteCommands(bool IsReverse);
