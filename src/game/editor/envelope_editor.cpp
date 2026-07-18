@@ -705,13 +705,14 @@ void CEnvelopeEditor::Render(CUIRect View)
 		CUIRect InactiveRegionLeft{
 			View.x,
 			View.y,
-			std::max(0.0f, EnvelopeToScreenX(View, 0.0f) - View.x),
+			std::clamp(EnvelopeToScreenX(View, 0.0f) - View.x, 0.0f, View.w),
 			View.h,
 		};
+		const float EndX = EnvelopeToScreenX(View, pEnvelope->EndTime());
 		CUIRect InactiveRegionRight{
-			EnvelopeToScreenX(View, pEnvelope->EndTime()),
+			std::max(View.x, EndX),
 			View.y,
-			std::max(0.0f, View.x + View.w - EnvelopeToScreenX(View, pEnvelope->EndTime())),
+			std::clamp(View.x + View.w - EndX, 0.0f, View.w),
 			View.h,
 		};
 		InactiveRegionLeft.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_NONE, 0.0f);
