@@ -814,12 +814,18 @@ void CSshClient::RenderHistorySearch()
 		//       we cleared the screen we could just move the cursor down instead of writing this
 		ssh_channel_write(m_Channel, "padding\r\n", 10);
 	}
+
+	m_HistorySearchScroll = std::clamp(m_HistorySearchScroll, 0, NumLines);
+
+	// crazy invert wtf
+	int InvertedScroll = NumLines - m_HistorySearchScroll;
+
 	int i = 0;
 	for(const char *pMatch : apMatches)
 	{
 		if(!pMatch)
 			break;
-		bool IsCandidate = ++i == NumLines;
+		bool IsCandidate = ++i == InvertedScroll;
 		if(IsCandidate)
 		{
 			SendColor({.r = 0, .g = 255, .b = 0});
@@ -1110,7 +1116,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					pClient->ResendPrompt();
 					pClient->SendCursorPos(pClient->m_CursorPos);
 				}
-				return;
+
+				continue;
 			}
 
 			pClient->ResetCompletion();
@@ -1186,13 +1193,21 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_R)
 		{
-			pClient->EnableAltBuf();
-			str_copy(pClient->m_aPromptInput, pClient->m_aInput);
-			pClient->m_aInput[0] = '\0';
-			pClient->ClearPrompt();
-			pClient->m_CursorPos.y = pClient->m_Term.m_Height;
-			pClient->RenderHistorySearch();
-			pClient->m_Mode = EClientMode::HISTORY_SEARCH;
+			if(pClient->m_Mode == EClientMode::PROMPT)
+			{
+				pClient->EnableAltBuf();
+				str_copy(pClient->m_aPromptInput, pClient->m_aInput);
+				pClient->m_aInput[0] = '\0';
+				pClient->ClearPrompt();
+				pClient->m_CursorPos.y = pClient->m_Term.m_Height;
+				pClient->m_HistorySearchScroll = 0;
+				pClient->RenderHistorySearch();
+				pClient->m_Mode = EClientMode::HISTORY_SEARCH;
+			}
+			else
+			{
+				pClient->SendBell();
+			}
 			continue;
 		}
 		else if(Byte == KEY_CTRL_K)
@@ -1416,16 +1431,31 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					// skip the sequence
 					i += 2;
 
-					pClient->ResetCompletion();
-					pClient->SetInput(pClient->PrevInputFromHistory());
+
+					if(pClient->m_Mode == EClientMode::PROMPT)
+					{
+						pClient->ResetCompletion();
+						pClient->SetInput(pClient->PrevInputFromHistory());
+					}
+					else if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+					{
+						pClient->m_HistorySearchScroll++;
+					}
 				}
 				else if(pBuf[i + 2] == 66) // arrow key down
 				{
 					// skip the sequence
 					i += 2;
 
-					pClient->ResetCompletion();
-					pClient->SetInput(pClient->NextInputFromHistory());
+					if(pClient->m_Mode == EClientMode::PROMPT)
+					{
+						pClient->ResetCompletion();
+						pClient->SetInput(pClient->NextInputFromHistory());
+					}
+					else if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+					{
+						pClient->m_HistorySearchScroll--;
+					}
 				}
 				else if(pBuf[i + 2] == 68) // arrow key left
 				{
@@ -1475,6 +1505,11 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			pClient->ResetCompletion();
 			if(!pClient->AddSingleAsciiLetterToInput(Byte))
 				pClient->SendBell();
+
+			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			{
+				pClient->m_HistorySearchScroll = 0;
+			}
 			continue;
 		}
 		else // assume multi byte unicode

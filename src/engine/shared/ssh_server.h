@@ -229,6 +229,7 @@ public:
 
 	void RenderHistorySearch();
 	const char *m_pHistorySearchMatch = nullptr;
+	int m_HistorySearchScroll = 0;
 
 	void ResetCompletion();
 	void CompleteCommands(bool IsReverse);
