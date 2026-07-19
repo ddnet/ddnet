@@ -183,6 +183,11 @@ public:
 	// sends new line and prompt
 	void NewPrompt();
 
+	// resend the prompt line together with input
+	// to the client to render it again if it got hidden by
+	// a popup or something like that
+	void ResendPrompt();
+
 	const char *PromptStr();
 	int PromptLength();
 	void SetCursorPosToPromptStart();

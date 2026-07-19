@@ -126,6 +126,25 @@ static void SockaddrToNetaddr(const sockaddr *pSrc, socklen_t SrcLen, NETADDR *p
 	}
 }
 
+// static bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
+// {
+// 	if(!pNeedle || !pNeedle[0])
+// 		return false;
+// 	char aBuf[2] = {0};
+// 	const char *pHit = pHaystack;
+// 	int NeedleLen = str_length(pNeedle);
+// 	for(int i = 0; i < NeedleLen; i++)
+// 	{
+// 		if(!pHit)
+// 			return false;
+// 		aBuf[0] = pNeedle[i];
+// 		pHit = str_find_nocase(pHit, aBuf);
+// 		if(pHit)
+// 			pHit++;
+// 	}
+// 	return pHit;
+// }
+
 // Get the amount of terminal columns this string will take up.
 // It supports multi byte utf-8 characters and also wide characters
 static int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicodeWidthState)
@@ -628,6 +647,16 @@ void CSshClient::NewPrompt()
 	SetCursorPosToPromptStart();
 }
 
+void CSshClient::ResendPrompt()
+{
+	if(!m_Channel)
+		return;
+
+	ssh_channel_write(m_Channel, "\r\033[2K", 6);
+	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
+	ssh_channel_write(m_Channel, m_aInput, str_length(m_aInput));
+}
+
 const char *CSshClient::PromptStr()
 {
 	return "> ";
@@ -753,8 +782,15 @@ void CSshClient::ResetCompletion()
 
 void CSshClient::RenderHistorySearch()
 {
-	EnableAltBuf();
+	// TODO: this causes a bit of graphical glitching
+	//       find something smoother
+	//       maybe do less updates if the input did not affect the search
+	//       or just override the text instead of clearing all
 	SendClearScreen();
+
+	// TODO: have const char *apMatches[]; here and add all the fuzzy matches
+	//       and then get the count and render padding
+	//       and then render the matches
 
 	// TODO: should - 1 be - PromptHeight()?
 	int MaxLines = m_Term.m_Height - 1;
@@ -776,8 +812,8 @@ void CSshClient::RenderHistorySearch()
 		ssh_channel_write(m_Channel, "\r\n", 2);
 	}
 
-	ClearPrompt();
-	ssh_channel_write(m_Channel, m_aInput, str_length(m_aInput));
+	ResendPrompt();
+	SendCursorPos(m_CursorPos);
 }
 
 void CSshClient::CompleteCommands(bool IsReverse)
@@ -1097,6 +1133,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_R)
 		{
+			pClient->EnableAltBuf();
 			pClient->RenderHistorySearch();
 			pClient->m_Mode = EClientMode::HISTORY_SEARCH;
 			continue;
@@ -1269,6 +1306,13 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				//       how to structure the code
 				pClient->DisableAltBuf();
 				pClient->m_Mode = EClientMode::PROMPT;
+
+				// TODO: this needs a lot of attention wtf is this
+
+				// draw prompt at the correct position
+				pClient->SendCursorPos(pClient->m_CursorPos);
+				pClient->ResendPrompt();
+				pClient->SendCursorPos(pClient->m_CursorPos);
 
 				// this is odd, do we just ignore this one?
 				// yes! regular ESC is just one byte of 27
