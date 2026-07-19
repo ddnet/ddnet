@@ -1074,6 +1074,14 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 	size_t BufSize = pClient->m_Buffer.Size();
 	ssh_channel Channel = pClient->m_Channel;
 
+	// FIXME: this is not stable!
+	//        for example if you already start typing during ssh connect we get dropped
+	//        but that also means that later in the connection when we want to get the cursor
+	//        position it is a race conditon
+	//        so we actually would need to skip invalid bytes
+	//        right now we always try to read the buffer from the start
+	//        but at the start there might be something other than the cursor pos
+
 	if(pClient->m_WaitingForCursorPos)
 	{
 		// TODO: check if buffer size is full enough for the sscanf to pass
