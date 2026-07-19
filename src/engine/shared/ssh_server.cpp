@@ -808,12 +808,11 @@ void CSshClient::RenderHistorySearch()
 		apMatches[NumLines++] = Entry.data();
 	}
 	int NumPaddings = MaxLines - NumLines;
-	for(int Pad = 0; Pad < NumPaddings; Pad++)
-	{
-		// TODO: probably dont event need padding
-		//       we cleared the screen we could just move the cursor down instead of writing this
-		ssh_channel_write(m_Channel, "padding\r\n", 10);
-	}
+	// for(int Pad = 0; Pad < NumPaddings; Pad++)
+	// {
+	// 	ssh_channel_write(m_Channel, "padding\r\n", 10);
+	// }
+	SendCursorPos({0, NumPaddings + 1});
 
 	m_HistorySearchScroll = std::clamp(m_HistorySearchScroll, 0, NumLines);
 
