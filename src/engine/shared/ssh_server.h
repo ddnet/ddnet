@@ -23,7 +23,7 @@
 
 static constexpr int MAX_SSH_CLIENTS = 16;
 static constexpr int MAX_HISTORY_ENTRIES = 512;
-static constexpr size_t MAX_TERMINAL_HEIGTH = 1024;
+static constexpr size_t MAX_TERMINAL_HEIGHT = 1024;
 
 class CSshServer;
 
@@ -223,6 +223,7 @@ public:
 	void SendBell() const;
 	void SendClearScreen() const;
 	void SendColor(LOG_COLOR Color) const;
+	void SendBackgroundColor(LOG_COLOR Color) const;
 	void ResetColor() const;
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();

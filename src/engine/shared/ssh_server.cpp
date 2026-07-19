@@ -738,6 +738,20 @@ void CSshClient::SendColor(LOG_COLOR Color) const
 	ssh_channel_write(m_Channel, aAnsi, str_length(aAnsi));
 }
 
+void CSshClient::SendBackgroundColor(LOG_COLOR Color) const
+{
+	if(!m_Channel)
+		return;
+
+	char aAnsi[32];
+	str_format(aAnsi, sizeof(aAnsi),
+		"\033[48;2;%d;%d;%dm",
+		Color.r,
+		Color.g,
+		Color.b);
+	ssh_channel_write(m_Channel, aAnsi, str_length(aAnsi));
+}
+
 void CSshClient::ResetColor() const
 {
 	if(!m_Channel)
@@ -790,11 +804,11 @@ void CSshClient::RenderHistorySearch()
 	//       or just override the text instead of clearing all
 	SendClearScreen();
 
-	const char *apMatches[MAX_TERMINAL_HEIGTH + 1] = {nullptr};
+	const char *apMatches[MAX_TERMINAL_HEIGHT + 1] = {nullptr};
 	m_pHistorySearchMatch = nullptr;
 
 	// TODO: should - 1 be - PromptHeight()?
-	int MaxLines = std::min(m_Term.m_Height - 1, (int)MAX_TERMINAL_HEIGTH);
+	int MaxLines = std::min(m_Term.m_Height - 1, (int)MAX_TERMINAL_HEIGHT);
 	int NumLines = 0;
 	for(auto &Entry : m_InputHistory)
 	{
@@ -814,7 +828,7 @@ void CSshClient::RenderHistorySearch()
 	// }
 	SendCursorPos({0, NumPaddings + 1});
 
-	m_HistorySearchScroll = std::clamp(m_HistorySearchScroll, 0, NumLines);
+	m_HistorySearchScroll = std::clamp(m_HistorySearchScroll, 0, NumLines - 1);
 
 	// crazy invert wtf
 	int InvertedScroll = NumLines - m_HistorySearchScroll;
@@ -827,8 +841,11 @@ void CSshClient::RenderHistorySearch()
 		bool IsCandidate = ++i == InvertedScroll;
 		if(IsCandidate)
 		{
-			SendColor({.r = 0, .g = 255, .b = 0});
+			SendBackgroundColor({.r = 55, .g = 55, .b = 55});
 			m_pHistorySearchMatch = pMatch;
+
+			// indent the candidate
+			ssh_channel_write(m_Channel, " ", 1);
 		}
 
 		ssh_channel_write(m_Channel, pMatch, str_length(pMatch));
@@ -1087,9 +1104,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			return;
 		}
 	}
-
-	// TODO: improve this shell!
-	// TODO: ctrl+r history support
 
 	// TODO: for waiting on more data this loop is not ideal
 	//       because when we do not call m_Buffer.Clear() we did potentially
@@ -1429,7 +1443,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				{
 					// skip the sequence
 					i += 2;
-
 
 					if(pClient->m_Mode == EClientMode::PROMPT)
 					{
