@@ -1081,6 +1081,11 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 	//        so we actually would need to skip invalid bytes
 	//        right now we always try to read the buffer from the start
 	//        but at the start there might be something other than the cursor pos
+	//        --
+	//        possible solution would be to not read this value
+	//        with a m_WaitingForCursorPos bool
+	//        but instead parse the \x1B byte like we also parse all other
+	//        escape sequences byte by byte
 
 	if(pClient->m_WaitingForCursorPos)
 	{
