@@ -23,6 +23,7 @@
 
 static constexpr int MAX_SSH_CLIENTS = 16;
 static constexpr int MAX_HISTORY_ENTRIES = 512;
+static constexpr size_t MAX_TERMINAL_HEIGTH = 1024;
 
 class CSshServer;
 
@@ -212,6 +213,7 @@ public:
 	void RequestCursorPos();
 
 	void RenderHistorySearch();
+	const char *m_pHistorySearchMatch = nullptr;
 
 	void ResetCompletion();
 	void CompleteCommands(bool IsReverse);

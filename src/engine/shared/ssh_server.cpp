@@ -126,24 +126,24 @@ static void SockaddrToNetaddr(const sockaddr *pSrc, socklen_t SrcLen, NETADDR *p
 	}
 }
 
-// static bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
-// {
-// 	if(!pNeedle || !pNeedle[0])
-// 		return false;
-// 	char aBuf[2] = {0};
-// 	const char *pHit = pHaystack;
-// 	int NeedleLen = str_length(pNeedle);
-// 	for(int i = 0; i < NeedleLen; i++)
-// 	{
-// 		if(!pHit)
-// 			return false;
-// 		aBuf[0] = pNeedle[i];
-// 		pHit = str_find_nocase(pHit, aBuf);
-// 		if(pHit)
-// 			pHit++;
-// 	}
-// 	return pHit;
-// }
+static bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
+{
+	if(!pNeedle || !pNeedle[0])
+		return false;
+	char aBuf[2] = {0};
+	const char *pHit = pHaystack;
+	int NeedleLen = str_length(pNeedle);
+	for(int i = 0; i < NeedleLen; i++)
+	{
+		if(!pHit)
+			return false;
+		aBuf[0] = pNeedle[i];
+		pHit = str_find_nocase(pHit, aBuf);
+		if(pHit)
+			pHit++;
+	}
+	return pHit;
+}
 
 // Get the amount of terminal columns this string will take up.
 // It supports multi byte utf-8 characters and also wide characters
@@ -788,28 +788,48 @@ void CSshClient::RenderHistorySearch()
 	//       or just override the text instead of clearing all
 	SendClearScreen();
 
-	// TODO: have const char *apMatches[]; here and add all the fuzzy matches
-	//       and then get the count and render padding
-	//       and then render the matches
+	const char *apMatches[MAX_TERMINAL_HEIGTH + 1] = {nullptr};
 
 	// TODO: should - 1 be - PromptHeight()?
-	int MaxLines = m_Term.m_Height - 1;
-	int NumPaddings = MaxLines - m_InputHistory.size();
+	int MaxLines = std::min(m_Term.m_Height - 1, (int)MAX_TERMINAL_HEIGTH);
+	int NumLines = 0;
+	for(auto &Entry : m_InputHistory)
+	{
+		if(m_aInput[0])
+			if(!FuzzyMatch(Entry.data(), m_aInput))
+				continue;
+
+		if(NumLines >= MaxLines)
+			break;
+
+		apMatches[NumLines++] = Entry.data();
+	}
+	int NumPaddings = MaxLines - NumLines;
 	for(int Pad = 0; Pad < NumPaddings; Pad++)
 	{
 		// TODO: probably dont event need padding
 		//       we cleared the screen we could just move the cursor down instead of writing this
 		ssh_channel_write(m_Channel, "padding\r\n", 10);
 	}
-	int NumLines = 0;
-	for(auto Entry : m_InputHistory)
+	int i = 0;
+	for(const char *pMatch : apMatches)
 	{
-		if(NumLines++ >= MaxLines)
+		if(!pMatch)
 			break;
+		bool IsCandidate = ++i == NumLines;
+		if(IsCandidate)
+		{
+			SendColor({.r = 0, .g = 255, .b = 0});
+			m_pHistorySearchMatch = pMatch;
+		}
 
-		log_info("ssh", "sending line %s", Entry.data());
-		ssh_channel_write(m_Channel, Entry.data(), str_length(Entry.data()));
+		ssh_channel_write(m_Channel, pMatch, str_length(pMatch));
 		ssh_channel_write(m_Channel, "\r\n", 2);
+
+		if(IsCandidate)
+		{
+			ResetColor();
+		}
 	}
 
 	ResendPrompt();
@@ -969,10 +989,10 @@ void CSshServer::ListConnections()
 void CSshServer::MergeInputHistory(CSshClient *pClient)
 {
 	m_InputHistory.insert(m_InputHistory.end(),
-		       pClient->m_InputHistory.begin(),
-		       pClient->m_InputHistory.end());
+		pClient->m_InputHistory.begin(),
+		pClient->m_InputHistory.end());
 
-	while (m_InputHistory.size() > MAX_HISTORY_ENTRIES)
+	while(m_InputHistory.size() > MAX_HISTORY_ENTRIES)
 	{
 		m_InputHistory.pop_front();
 	}
@@ -1072,6 +1092,24 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		char Byte = pBuf[i];
 		if(Byte == KEY_ENTER)
 		{
+			// this if statement is a bit ugly move the mode somewhere else
+			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			{
+				pClient->DisableAltBuf();
+				pClient->m_Mode = EClientMode::PROMPT;
+				pClient->SendCursorPos(pClient->m_CursorPos);
+				if(pClient->m_pHistorySearchMatch)
+				{
+					pClient->SetInput(pClient->m_pHistorySearchMatch);
+				}
+				else
+				{
+					pClient->ResendPrompt();
+					pClient->SendCursorPos(pClient->m_CursorPos);
+				}
+				return;
+			}
+
 			pClient->ResetCompletion();
 
 			const char *pCmd = pClient->m_aInput;
@@ -1618,8 +1656,7 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage)
 		"sv_shutdown_when_empty 0",
 		"say foo bar baz",
 		"echo hello world",
-		"say foo;say bar;say baz"
-	};
+		"say foo;say bar;say baz"};
 	for(const char *pLine : apHistory)
 	{
 		auto &Entry = m_InputHistory.emplace_back();
