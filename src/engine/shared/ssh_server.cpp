@@ -966,6 +966,18 @@ void CSshServer::ListConnections()
 	}
 }
 
+void CSshServer::MergeInputHistory(CSshClient *pClient)
+{
+	m_InputHistory.insert(m_InputHistory.end(),
+		       pClient->m_InputHistory.begin(),
+		       pClient->m_InputHistory.end());
+
+	while (m_InputHistory.size() > MAX_HISTORY_ENTRIES)
+	{
+		m_InputHistory.pop_front();
+	}
+}
+
 void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
 {
 	Console()->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED, true);
@@ -1596,6 +1608,23 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage)
 	fcntl(RawFd, F_SETFL, O_NONBLOCK);
 
 	log_info("ssh", "listening on 0.0.0.0:%s", aPort);
+
+	// placeholder history for testing the search feature
+	// in the future we can load it from a file here
+	// so the history survives server restarts
+	// which is super handy for local development where
+	// the server restarts all the time
+	const char *apHistory[] = {
+		"sv_shutdown_when_empty 0",
+		"say foo bar baz",
+		"echo hello world",
+		"say foo;say bar;say baz"
+	};
+	for(const char *pLine : apHistory)
+	{
+		auto &Entry = m_InputHistory.emplace_back();
+		str_copy(Entry.data(), pLine, Entry.size());
+	}
 }
 
 std::optional<int> CSshServer::FindFreeSlot()
@@ -1858,6 +1887,9 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 	//       so ideally there would be a different connection pool just for the before auth state
 	log_info("ssh", "new connection cid=%d addr=<{%s}>", ClientId, aAddr);
 
+	pClient->m_InputHistory = m_InputHistory;
+	pClient->m_HistoryIdx = pClient->m_InputHistory.size();
+
 	pClient->m_CallbackCtx = {
 		.m_pClient = pClient,
 		.m_pServer = this};
@@ -1887,6 +1919,7 @@ void CSshServer::OnClientDisconnect(int ClientId, const char *pReason)
 		return;
 
 	log_info("ssh", "disconnect cid=%d reason='%s'", ClientId, pReason);
+	MergeInputHistory(pClient);
 
 	ssh_channel Channel = pClient->m_Channel;
 	if(Channel)

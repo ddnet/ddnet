@@ -280,6 +280,12 @@ class CSshServer
 
 	ssh_bind m_Bind = nullptr;
 
+	// global shared stored history
+	// every client also has its session history
+	// and newly connected clients base their session history
+	// on this central history
+	std::deque<std::array<char, sizeof(CSshClient::m_aInput)>> m_InputHistory;
+
 	char m_aError[512] = "";
 
 	void GenerateHostKeyIfMissing();
@@ -301,6 +307,7 @@ class CSshServer
 
 	void AcceptNewConnections();
 	void ListConnections();
+	void MergeInputHistory(CSshClient *pClient);
 	void ExecuteRconLine(CSshClient *pClient, const char *pLine);
 	void TryProcessCurrentInput(CSshClient *pClient);
 	void ReadNewInput(CSshClient *pClient);
