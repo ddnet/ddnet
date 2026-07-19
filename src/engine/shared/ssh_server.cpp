@@ -843,34 +843,41 @@ void CSshClient::RenderHistorySearch()
 	// }
 	SendCursorPos({0, NumPaddings + 1});
 
-	m_HistorySearchScroll = std::clamp(m_HistorySearchScroll, 0, NumLines - 1);
-
-	// crazy invert wtf
-	int InvertedScroll = NumLines - m_HistorySearchScroll;
-
-	int i = 0;
-	for(const char *pMatch : apMatches)
+	if(NumLines >= 1)
 	{
-		if(!pMatch)
-			break;
-		bool IsCandidate = ++i == InvertedScroll;
-		if(IsCandidate)
+		m_HistorySearchScroll = std::clamp(m_HistorySearchScroll, 0, NumLines - 1);
+
+		// crazy invert wtf
+		int InvertedScroll = NumLines - m_HistorySearchScroll;
+
+		int i = 0;
+		for(const char *pMatch : apMatches)
 		{
-			SendBackgroundColor({.r = 55, .g = 55, .b = 55});
-			m_pHistorySearchMatch = pMatch;
+			if(!pMatch)
+				break;
+			bool IsCandidate = ++i == InvertedScroll;
+			if(IsCandidate)
+			{
+				SendBackgroundColor({.r = 55, .g = 55, .b = 55});
+				m_pHistorySearchMatch = pMatch;
 
-			// indent the candidate
-			ssh_channel_write(m_Channel, " ", 1);
-		}
+				// indent the candidate
+				ssh_channel_write(m_Channel, " ", 1);
+			}
 
-		ssh_channel_write(m_Channel, pMatch, str_length(pMatch));
-		ssh_channel_write(m_Channel, "\r\n", 2);
+			ssh_channel_write(m_Channel, pMatch, str_length(pMatch));
+			ssh_channel_write(m_Channel, "\r\n", 2);
 
-		if(IsCandidate)
-		{
-			ResetColor();
+			if(IsCandidate)
+			{
+				ResetColor();
+			}
 		}
 	}
+	// could render a "no matches here"
+	// we need to if statement so the clamp() does not explode
+	// if we never render "no matches" we could also get rid of the indent
+	// by doing a safer clamp
 
 	ResendPrompt();
 	SendCursorPos(m_CursorPos);
