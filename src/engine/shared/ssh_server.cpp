@@ -659,6 +659,11 @@ void CSshClient::ResendPrompt()
 
 const char *CSshClient::PromptStr()
 {
+	// TODO: this works really bad!
+	// if(m_Mode == EClientMode::HISTORY_SEARCH)
+	// {
+	// 	return "search: ";
+	// }
 	return "> ";
 }
 
@@ -794,6 +799,16 @@ void CSshClient::ResetCompletion()
 	m_aCompletionBuffer[0] = '\0';
 	m_CompletionIndex = -1;
 	m_CompletionEnumerationCount = -1;
+}
+
+void CSshClient::AbortHistorySearch()
+{
+	if(m_Mode != EClientMode::HISTORY_SEARCH)
+		return;
+
+	DisableAltBuf();
+	m_Mode = EClientMode::PROMPT;
+	SetInput(m_aPromptInput);
 }
 
 void CSshClient::RenderHistorySearch()
@@ -1272,19 +1287,27 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_C)
 		{
-			pClient->ResetCompletion();
 
-			ssh_channel_write(Channel, "^C", 2);
-
-			if(pClient->m_aInput[0] == '\0')
+			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
 			{
-				const char *pMsg = "\r\nUse ctrl+d or 'exit' to quit";
-				ssh_channel_write(Channel, pMsg, str_length(pMsg));
-				pClient->m_CursorPos.y++;
+				pClient->AbortHistorySearch();
 			}
+			else
+			{
+				pClient->ResetCompletion();
 
-			pClient->m_aInput[0] = '\0';
-			pClient->NewPrompt();
+				ssh_channel_write(Channel, "^C", 2);
+
+				if(pClient->m_aInput[0] == '\0')
+				{
+					const char *pMsg = "\r\nUse ctrl+d or 'exit' to quit";
+					ssh_channel_write(Channel, pMsg, str_length(pMsg));
+					pClient->m_CursorPos.y++;
+				}
+
+				pClient->m_aInput[0] = '\0';
+				pClient->NewPrompt();
+			}
 			continue;
 		}
 		else if(Byte == KEY_CTRL_D)
@@ -1391,10 +1414,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				//       how to structure the code
 				if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
 				{
-					pClient->DisableAltBuf();
-					pClient->m_Mode = EClientMode::PROMPT;
-
-					pClient->SetInput(pClient->m_aPromptInput);
+					pClient->AbortHistorySearch();
 				}
 
 				// this is odd, do we just ignore this one?

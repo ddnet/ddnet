@@ -228,6 +228,7 @@ public:
 	void SendCursorPos(ivec2 Pos) const;
 	void RequestCursorPos();
 
+	void AbortHistorySearch();
 	void RenderHistorySearch();
 	const char *m_pHistorySearchMatch = nullptr;
 	int m_HistorySearchScroll = 0;
