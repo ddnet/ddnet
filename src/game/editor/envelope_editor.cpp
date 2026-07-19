@@ -1463,7 +1463,7 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 				for(int i = 0; i < (int)pEnvelope->m_vPoints.size(); i++)
 				{
-					for(int c = 0; c < CEnvPoint::MAX_CHANNELS; c++)
+					for(int c = 0; c < pEnvelope->GetChannels(); c++)
 					{
 						if(!(State.m_ActiveChannels & (1 << c)))
 							continue;
