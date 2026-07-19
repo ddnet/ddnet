@@ -115,6 +115,15 @@ public:
 	// The text input in the current console prompt
 	char m_aInput[2048] = "";
 
+	// This is a backup copy of the m_aInput buffer in case we
+	// reuse it for a popup or menu
+	// similar to m_CursorPosMainBuf
+	//
+	// TODO: these backup copies get weird we should probably have proper struct
+	//       that represents a terminal window or popup that has all the properties
+	//       stored in there so we can switch between them
+	char m_aPromptInput[2048] = "";
+
 	// TODO: there should be two variables
 	//       one is the cursor position in the clients terminal
 	//       and the other one is a offset index into m_aInput
@@ -129,6 +138,12 @@ public:
 	// position of the cursor in the m_aInput buffer
 	// sent to the client and used as insert offset when typing
 	ivec2 m_CursorPos = ivec2(0, 0);
+
+	// here we store the cursor position
+	// when a new buffer is rendered
+	// so a popup or menu with its own cursor position
+	// we restore this once we get back to the main prompt
+	ivec2 m_CurorPosMainBuf = ivec2(0, 0);
 
 	// current index in the m_aInput array
 	// related to m_Term.m_CursorPos.x but not the same
@@ -199,11 +214,11 @@ public:
 	// on a new terminal buffer/screen
 	// this is used to render popups and then return back
 	// to the old prompt
-	void EnableAltBuf() const;
+	void EnableAltBuf();
 
 	// sends ansi escape sequence to return to original
 	// buffer/screen
-	void DisableAltBuf() const;
+	void DisableAltBuf();
 
 	void SendBell() const;
 	void SendClearScreen() const;

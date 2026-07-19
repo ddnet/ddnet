@@ -690,20 +690,22 @@ void CSshClient::ClearCompletionPreview()
 	m_pCompletionPreview = nullptr;
 }
 
-void CSshClient::EnableAltBuf() const
+void CSshClient::EnableAltBuf()
 {
 	if(!m_Channel)
 		return;
 
 	ssh_channel_write(m_Channel, "\033[?1049h", 9);
+	m_CurorPosMainBuf = m_CursorPos;
 }
 
-void CSshClient::DisableAltBuf() const
+void CSshClient::DisableAltBuf()
 {
 	if(!m_Channel)
 		return;
 
 	ssh_channel_write(m_Channel, "\033[?1049l", 9);
+	m_CursorPos = m_CurorPosMainBuf;
 }
 
 void CSshClient::SendBell() const
@@ -789,6 +791,7 @@ void CSshClient::RenderHistorySearch()
 	SendClearScreen();
 
 	const char *apMatches[MAX_TERMINAL_HEIGTH + 1] = {nullptr};
+	m_pHistorySearchMatch = nullptr;
 
 	// TODO: should - 1 be - PromptHeight()?
 	int MaxLines = std::min(m_Term.m_Height - 1, (int)MAX_TERMINAL_HEIGTH);
@@ -1184,6 +1187,10 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		else if(Byte == KEY_CTRL_R)
 		{
 			pClient->EnableAltBuf();
+			str_copy(pClient->m_aPromptInput, pClient->m_aInput);
+			pClient->m_aInput[0] = '\0';
+			pClient->ClearPrompt();
+			pClient->m_CursorPos.y = pClient->m_Term.m_Height;
 			pClient->RenderHistorySearch();
 			pClient->m_Mode = EClientMode::HISTORY_SEARCH;
 			continue;
@@ -1354,15 +1361,13 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				//       we need some kind of popup and screen system
 				//       but lets hack together some kind of view first so we can think about
 				//       how to structure the code
-				pClient->DisableAltBuf();
-				pClient->m_Mode = EClientMode::PROMPT;
+				if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+				{
+					pClient->DisableAltBuf();
+					pClient->m_Mode = EClientMode::PROMPT;
 
-				// TODO: this needs a lot of attention wtf is this
-
-				// draw prompt at the correct position
-				pClient->SendCursorPos(pClient->m_CursorPos);
-				pClient->ResendPrompt();
-				pClient->SendCursorPos(pClient->m_CursorPos);
+					pClient->SetInput(pClient->m_aPromptInput);
+				}
 
 				// this is odd, do we just ignore this one?
 				// yes! regular ESC is just one byte of 27
