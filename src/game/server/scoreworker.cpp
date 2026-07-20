@@ -385,13 +385,11 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	char aTimestamp[512];
 	pSqlServer->ToUnixTimestamp("l.Timestamp", aTimestamp, sizeof(aTimestamp));
 
-	char aMedianMapTime[2048];
 	char aBuf[4096];
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT l.Map, l.Server, Mapper, Points, Stars, "
 		"  (SELECT COUNT(Name) FROM %s_race WHERE Map = l.Map) AS Finishes, "
 		"  (SELECT COUNT(DISTINCT Name) FROM %s_race WHERE Map = l.Map) AS Finishers, "
-		"  (%s) AS Median, "
 		"  %s AS Stamp, "
 		"  %s-%s AS Ago, "
 		"  (SELECT MIN(Time) FROM %s_race WHERE Map = l.Map AND Name = ?) AS OwnTime "
@@ -406,7 +404,6 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"  LIMIT 1"
 		") as l",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
-		pSqlServer->MedianMapTime(aMedianMapTime, sizeof(aMedianMapTime)),
 		aTimestamp, aCurrentTimestamp, aTimestamp,
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
 		pSqlServer->CollateNocase());
@@ -436,10 +433,34 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		int Stars = pSqlServer->GetInt(5);
 		int Finishes = pSqlServer->GetInt(6);
 		int Finishers = pSqlServer->GetInt(7);
-		float Median = pSqlServer->GetOptionalFloat(8).value_or(-1.0f);
-		int Stamp = pSqlServer->GetInt(9);
-		int Ago = pSqlServer->GetInt(10);
-		float OwnTime = pSqlServer->GetOptionalFloat(11).value_or(-1.0f);
+		int Stamp = pSqlServer->GetInt(8);
+		int Ago = pSqlServer->GetInt(9);
+		float OwnTime = pSqlServer->GetOptionalFloat(10).value_or(-1.0f);
+
+		float Median = -1.0f;
+		if(Finishes > 0)
+		{
+			char aMedianBuf[256];
+			str_format(aMedianBuf, sizeof(aMedianBuf),
+				"SELECT AVG(Time) FROM ("
+				"  SELECT Time FROM %s_race WHERE Map = ? ORDER BY Time LIMIT %d OFFSET %d"
+				") AS m",
+				pSqlServer->GetPrefix(), 2 - (Finishes % 2), (Finishes - 1) / 2);
+			if(!pSqlServer->PrepareStatement(aMedianBuf, pError, ErrorSize))
+			{
+				return false;
+			}
+			pSqlServer->BindString(1, aMap);
+			bool MedianEnd;
+			if(!pSqlServer->Step(&MedianEnd, pError, ErrorSize))
+			{
+				return false;
+			}
+			if(!MedianEnd)
+			{
+				Median = pSqlServer->GetOptionalFloat(1).value_or(-1.0f);
+			}
+		}
 
 		char aAgoString[40] = "\0";
 		char aReleasedString[60] = "\0";
