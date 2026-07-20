@@ -1050,6 +1050,136 @@ void CSshServer::ExecuteRconLine(CSshClient *pClient, const char *pLine)
 	Console()->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED, true);
 }
 
+int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, size_t BufSize)
+{
+	if(BufSize < 1 || pBuf[0] != 27)
+		return 0;
+
+	// KEY_ESCAPE
+	if(BufSize == 1)
+	{
+		// TODO: check if there was an alt screen active and only then disable it
+		//       we need some kind of popup and screen system
+		//       but lets hack together some kind of view first so we can think about
+		//       how to structure the code
+		if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+		{
+			pClient->AbortHistorySearch();
+		}
+		return 1;
+	}
+
+	if(BufSize >= 6 && pBuf[1] == 91)
+	{
+		bool CtrlLeft =
+			pBuf[1] == 91 &&
+			pBuf[2] == 49 &&
+			pBuf[3] == 59 &&
+			pBuf[4] == 53 &&
+			pBuf[5] == 68;
+		bool CtrlRight =
+			pBuf[1] == 91 &&
+			pBuf[2] == 49 &&
+			pBuf[3] == 59 &&
+			pBuf[4] == 53 &&
+			pBuf[5] == 67;
+
+		if(CtrlLeft)
+		{
+			if(!pClient->CursorMoveWordLeft())
+				pClient->SendBell();
+			pClient->SendCursorPos(pClient->m_CursorPos);
+
+			// skip the sequence
+			return 5;
+		}
+		else if(CtrlRight)
+		{
+			if(!pClient->CursorMoveWordRight())
+				pClient->SendBell();
+			pClient->SendCursorPos(pClient->m_CursorPos);
+
+			// skip the sequence
+			return 5;
+		}
+	}
+	if(BufSize >= 3 && pBuf[1] == 91)
+	{
+		if(pBuf[2] == 65) // arrow key up
+		{
+			if(pClient->m_Mode == EClientMode::PROMPT)
+			{
+				pClient->ResetCompletion();
+				pClient->SetInput(pClient->PrevInputFromHistory());
+			}
+			else if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			{
+				pClient->m_HistorySearchScroll++;
+			}
+
+			// skip the sequence
+			return 2;
+		}
+		else if(pBuf[2] == 66) // arrow key down
+		{
+			if(pClient->m_Mode == EClientMode::PROMPT)
+			{
+				pClient->ResetCompletion();
+				pClient->SetInput(pClient->NextInputFromHistory());
+			}
+			else if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			{
+				pClient->m_HistorySearchScroll--;
+			}
+
+			// skip the sequence
+			return 2;
+		}
+		else if(pBuf[2] == 68) // arrow key left
+		{
+			if(!pClient->CursorMoveLeft())
+				pClient->SendBell();
+			pClient->SendCursorPos(pClient->m_CursorPos);
+
+			// skip the sequence
+			return 2;
+		}
+		else if(pBuf[2] == 67) // arrow key right
+		{
+			if(!pClient->CursorMoveRight())
+				pClient->SendBell();
+			pClient->SendCursorPos(pClient->m_CursorPos);
+
+			// skip the sequence
+			return 2;
+		}
+		else if(pBuf[2] == 90) // shift+tab
+		{
+			pClient->CompleteCommands(true);
+
+			// skip the sequence
+			return 2;
+		}
+	}
+	if(BufSize >= 1)
+	{
+		// alt+d
+		if(pBuf[1] == 100)
+		{
+			if(!pClient->DeleteWordAtCursor())
+				pClient->SendBell();
+			pClient->SendCursorPos(pClient->m_CursorPos);
+
+			return 1;
+		}
+	}
+
+	// TODO: partially skipping unknown escape sequences will result into
+	//       parsing the remaining bytes as something else
+	//       which can cause some weird bugs
+	return 0;
+}
+
 void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 {
 	if(!pClient->m_Buffer.Size())
@@ -1211,6 +1341,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					// log_info("ssh", "new\nline that would be long\nbuline breakslolxx");
 					// log_info("ssh", "hello world");
 					log_info("ssh", "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
+					pClient->RequestCursorPos();
 				}
 				else
 				{
@@ -1425,130 +1556,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		else if(Byte == 27) // escape sequence
 		{
 			pClient->ClearCompletionPreview();
-			if((BufSize - i) < 2)
-			{
-				// TODO: check if there was an alt screen active and only then disable it
-				//       we need some kind of popup and screen system
-				//       but lets hack together some kind of view first so we can think about
-				//       how to structure the code
-				if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
-				{
-					pClient->AbortHistorySearch();
-				}
-
-				// this is odd, do we just ignore this one?
-				// yes! regular ESC is just one byte of 27
-				continue;
-			}
-			if((BufSize - i) >= 6 && pBuf[i + 1] == 91)
-			{
-				bool CtrlLeft =
-					pBuf[i + 1] == 91 &&
-					pBuf[i + 2] == 49 &&
-					pBuf[i + 3] == 59 &&
-					pBuf[i + 4] == 53 &&
-					pBuf[i + 5] == 68;
-				bool CtrlRight =
-					pBuf[i + 1] == 91 &&
-					pBuf[i + 2] == 49 &&
-					pBuf[i + 3] == 59 &&
-					pBuf[i + 4] == 53 &&
-					pBuf[i + 5] == 67;
-
-				if(CtrlLeft)
-				{
-					// skip the sequence
-					i += 5;
-
-					if(!pClient->CursorMoveWordLeft())
-						pClient->SendBell();
-					pClient->SendCursorPos(pClient->m_CursorPos);
-					continue;
-				}
-				else if(CtrlRight)
-				{
-					// skip the sequence
-					i += 5;
-
-					if(!pClient->CursorMoveWordRight())
-						pClient->SendBell();
-					pClient->SendCursorPos(pClient->m_CursorPos);
-					continue;
-				}
-			}
-			if((BufSize - i) >= 3 && pBuf[i + 1] == 91)
-			{
-				if(pBuf[i + 2] == 65) // arrow key up
-				{
-					// skip the sequence
-					i += 2;
-
-					if(pClient->m_Mode == EClientMode::PROMPT)
-					{
-						pClient->ResetCompletion();
-						pClient->SetInput(pClient->PrevInputFromHistory());
-					}
-					else if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
-					{
-						pClient->m_HistorySearchScroll++;
-					}
-				}
-				else if(pBuf[i + 2] == 66) // arrow key down
-				{
-					// skip the sequence
-					i += 2;
-
-					if(pClient->m_Mode == EClientMode::PROMPT)
-					{
-						pClient->ResetCompletion();
-						pClient->SetInput(pClient->NextInputFromHistory());
-					}
-					else if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
-					{
-						pClient->m_HistorySearchScroll--;
-					}
-				}
-				else if(pBuf[i + 2] == 68) // arrow key left
-				{
-					// skip the sequence
-					i += 2;
-
-					if(!pClient->CursorMoveLeft())
-						pClient->SendBell();
-					pClient->SendCursorPos(pClient->m_CursorPos);
-				}
-				else if(pBuf[i + 2] == 67) // arrow key right
-				{
-					// skip the sequence
-					i += 2;
-
-					if(!pClient->CursorMoveRight())
-						pClient->SendBell();
-					pClient->SendCursorPos(pClient->m_CursorPos);
-				}
-				else if(pBuf[i + 2] == 90) // shift+tab
-				{
-					// skip the sequence
-					i += 2;
-					pClient->CompleteCommands(true);
-				}
-			}
-			if((BufSize - i) >= 1)
-			{
-				// alt+d
-				if(pBuf[i + 1] == 100)
-				{
-					// skip the sequence
-					i++;
-
-					if(!pClient->DeleteWordAtCursor())
-						pClient->SendBell();
-					pClient->SendCursorPos(pClient->m_CursorPos);
-					continue;
-				}
-			}
-
-			// ignore unknown escape sequence for now
+			i += TryProcessEscapeSequence(pClient, pBuf + i, BufSize - i);
 			continue;
 		}
 		else if(CSshClient::IsSimpleAsciiLetter(Byte))

@@ -329,7 +329,19 @@ class CSshServer
 	void ListConnections();
 	void MergeInputHistory(CSshClient *pClient);
 	void ExecuteRconLine(CSshClient *pClient, const char *pLine);
+
+	// pBuf should be pointing into the clients input buffer
+	// but it is not guranteed to be pointing into the start
+	// this method should also not modifiy the clients buffer
+	//
+	// the first byte of pBuf is expected to be 0x1b (decimal 27)
+	// which initiates the escape sequence
+	//
+	// returns the amount of bytes consumed
+	int TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, size_t BufSize);
+
 	void TryProcessCurrentInput(CSshClient *pClient);
+
 	void ReadNewInput(CSshClient *pClient);
 
 public:
