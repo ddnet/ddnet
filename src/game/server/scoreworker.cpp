@@ -830,20 +830,22 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char aServerLike[16];
 	str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
 
-	// check sort method
-	char aBuf[600];
+	// Counting how many players are faster than the requesting player is cheaper
+	// than ranking every player with a window function. Best holds the best time
+	// of every player, Own the best time of the requesting player.
+	char aBuf[1024];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Ranking, Time, PercentRank "
+		"SELECT SUM(Best.Time < Own.Time) + 1 AS Ranking, Own.Time AS Time, "
+		"  CASE WHEN COUNT(*) > 1 THEN SUM(Best.Time < Own.Time) * 1.0 / (COUNT(*) - 1) ELSE 0 END AS PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w as PercentRank, MIN(Time) AS Time, Name "
-		"  FROM %s_race "
-		"  WHERE Map = ? "
-		"  AND Server LIKE ? "
-		"  GROUP BY Name "
-		"  WINDOW w AS (ORDER BY MIN(Time))"
-		") as a "
-		"WHERE Name = ?",
-		pSqlServer->GetPrefix());
+		"  SELECT MIN(Time) AS Time FROM %s_race WHERE Map = ? AND Server LIKE ? GROUP BY Name"
+		") AS Best "
+		"CROSS JOIN ("
+		"  SELECT MIN(Time) AS Time FROM %s_race WHERE Map = ? AND Server LIKE ? AND Name = ?"
+		") AS Own "
+		"WHERE Own.Time IS NOT NULL "
+		"GROUP BY Own.Time",
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 
 	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -851,7 +853,9 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, aServerLike);
-	pSqlServer->BindString(3, pData->m_aName);
+	pSqlServer->BindString(3, pData->m_aMap);
+	pSqlServer->BindString(4, aServerLike);
+	pSqlServer->BindString(5, pData->m_aName);
 
 	bool End;
 	if(!pSqlServer->Step(&End, pError, ErrorSize))
@@ -877,7 +881,9 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, pAny);
-	pSqlServer->BindString(3, pData->m_aName);
+	pSqlServer->BindString(3, pData->m_aMap);
+	pSqlServer->BindString(4, pAny);
+	pSqlServer->BindString(5, pData->m_aName);
 
 	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
