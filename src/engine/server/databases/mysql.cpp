@@ -78,7 +78,6 @@ public:
 	const char *CollateNocase() const override { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
 	const char *InsertIgnore() const override { return "INSERT IGNORE"; }
 	const char *Random() const override { return "RAND()"; }
-	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
 	const char *False() const override { return "FALSE"; }
 	const char *True() const override { return "TRUE"; }
 
@@ -643,18 +642,6 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	dbg_assert(!IsNull, "Error in GetBlob(%d): NULL", Col + 1);
 	dbg_assert(!Error, "Error in GetBlob(%d): truncation occurred", Col + 1);
 	return Length;
-}
-
-const char *CMysqlConnection::MedianMapTime(char *pBuffer, int BufferSize) const
-{
-	str_format(pBuffer, BufferSize,
-		"SELECT MEDIAN(Time) "
-		"OVER (PARTITION BY Map) "
-		"FROM %s_race "
-		"WHERE Map = l.Map "
-		"LIMIT 1",
-		GetPrefix());
-	return pBuffer;
 }
 
 bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
