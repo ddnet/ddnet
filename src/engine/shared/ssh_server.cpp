@@ -1077,7 +1077,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 	// FIXME: this is not stable!
 	//        for example if you already start typing during ssh connect we get dropped
 	//        but that also means that later in the connection when we want to get the cursor
-	//        position it is a race conditon
+	//        position it is a race condition
 	//        so we actually would need to skip invalid bytes
 	//        right now we always try to read the buffer from the start
 	//        but at the start there might be something other than the cursor pos
@@ -1307,7 +1307,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 		else if(Byte == KEY_CTRL_C)
 		{
-
 			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
 			{
 				pClient->AbortHistorySearch();
