@@ -831,19 +831,19 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
 
 	// check sort method
-	char aBuf[600];
+	char aBuf[1024];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Ranking, Time, PercentRank "
+		"SELECT SUM(g.mt < p.pt) + 1 AS Ranking, p.pt AS Time, "
+		"  CASE WHEN COUNT(*) > 1 THEN SUM(g.mt < p.pt) / (COUNT(*) - 1) ELSE 0 END AS PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w as PercentRank, MIN(Time) AS Time, Name "
-		"  FROM %s_race "
-		"  WHERE Map = ? "
-		"  AND Server LIKE ? "
-		"  GROUP BY Name "
-		"  WINDOW w AS (ORDER BY MIN(Time))"
-		") as a "
-		"WHERE Name = ?",
-		pSqlServer->GetPrefix());
+		"  SELECT MIN(Time) AS mt FROM %s_race WHERE Map = ? AND Server LIKE ? GROUP BY Name"
+		") AS g "
+		"CROSS JOIN ("
+		"  SELECT MIN(Time) AS pt FROM %s_race WHERE Map = ? AND Server LIKE ? AND Name = ?"
+		") AS p "
+		"WHERE p.pt IS NOT NULL "
+		"GROUP BY p.pt",
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 
 	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -851,7 +851,9 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, aServerLike);
-	pSqlServer->BindString(3, pData->m_aName);
+	pSqlServer->BindString(3, pData->m_aMap);
+	pSqlServer->BindString(4, aServerLike);
+	pSqlServer->BindString(5, pData->m_aName);
 
 	bool End;
 	if(!pSqlServer->Step(&End, pError, ErrorSize))
@@ -877,7 +879,9 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, pAny);
-	pSqlServer->BindString(3, pData->m_aName);
+	pSqlServer->BindString(3, pData->m_aMap);
+	pSqlServer->BindString(4, pAny);
+	pSqlServer->BindString(5, pData->m_aName);
 
 	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
