@@ -19,11 +19,15 @@ def read_plist(path):
 #   dmgbuild -s settings.py -D app=/path/to/My.app "My Application" MyApp.dmg
 
 # .. Useful stuff ..............................................................
+ServerDisabled: bool = False
+if 'server' not in defines:
+	ServerDisabled = True
 
 application_client = defines.get('client', 'DDNet.app')
-application_server = defines.get('server', 'DDNet-Server.app')
 appname_client = os.path.basename(application_client)
-appname_server = os.path.basename(application_server)
+if not ServerDisabled:
+	application_server = defines.get('server', 'DDNet-Server.app')
+	appname_server = os.path.basename(application_server)
 
 def icon_from_app(app_path):
 	plist_path = os.path.join(app_path, 'Contents', 'Info.plist')
@@ -53,7 +57,10 @@ compression_level = 9
 size = defines.get('size', None)
 
 # Files to include
-files = [ application_client, application_server ]
+if ServerDisabled:
+	files = [ application_client ]
+else:
+	files = [ application_client, application_server ]
 
 # Symlinks to create
 symlinks = { 'Applications': '/Applications' }
@@ -62,7 +69,10 @@ symlinks = { 'Applications': '/Applications' }
 # hide = [ 'Secret.data' ]
 
 # Files to hide the extension of
-hide_extension = [ appname_client, appname_server ]
+if ServerDisabled:
+	hide_extension = [ appname_client ]
+else:
+	hide_extension = [ appname_client, appname_server ]
 
 # Volume icon
 #
@@ -72,15 +82,20 @@ hide_extension = [ appname_client, appname_server ]
 # pyobjc-framework-Quartz.
 #
 #icon = '/path/to/icon.icns'
-badge_icon_client = icon_from_app(application_client)
-badge_icon_server = icon_from_app(application_server)
+badge_icon = icon_from_app(application_client)
 
 # Where to put the icons
-icon_locations = {
-	appname_client: (128, 288),
-	appname_server: (272, 288),
-	'Applications': (512, 288)
+if ServerDisabled:
+	icon_locations = {
+		appname_client: (200, 288),
+		'Applications': (440, 288)
 	}
+else:
+	icon_locations = {
+		appname_client: (128, 288),
+		appname_server: (272, 288),
+		'Applications': (512, 288)
+		}
 
 # .. Window configuration ......................................................
 
