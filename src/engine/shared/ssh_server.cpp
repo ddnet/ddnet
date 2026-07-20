@@ -1102,6 +1102,33 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 			// skip the sequence
 			return 5;
 		}
+
+		if(pClient->m_WaitingForCursorPos)
+		{
+			int Row;
+			int Column;
+			int BytesScanned;
+			if(sscanf(pBuf, "\x1B[%d;%dR%n", &Row, &Column, &BytesScanned) != 2)
+			{
+				log_error("ssh", "failed to read cursor input, invalid escape sequence");
+				return BufSize - 1;
+			}
+
+			pClient->m_CursorPos.x = Column;
+			pClient->m_CursorPos.y = Row;
+			pClient->m_WaitingForCursorPos = false;
+			log_info("ssh", "got cursor pos x=%d y=%d", Column, Row);
+
+			// yes we ask the client for the cursor position
+			// then we force the clients position to that position
+			// this is to double ensure we are synced
+			// because by the time we exchanged the position the client
+			// could have drifted again
+			pClient->SendCursorPos(pClient->m_CursorPos);
+
+			// skip the sequence
+			return BytesScanned - 1;
+		}
 	}
 	if(BufSize >= 3 && pBuf[1] == 91)
 	{
@@ -1203,42 +1230,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 	const char *pBuf = (const char *)pClient->m_Buffer.Data();
 	size_t BufSize = pClient->m_Buffer.Size();
 	ssh_channel Channel = pClient->m_Channel;
-
-	// FIXME: this is not stable!
-	//        for example if you already start typing during ssh connect we get dropped
-	//        but that also means that later in the connection when we want to get the cursor
-	//        position it is a race condition
-	//        so we actually would need to skip invalid bytes
-	//        right now we always try to read the buffer from the start
-	//        but at the start there might be something other than the cursor pos
-	//        --
-	//        possible solution would be to not read this value
-	//        with a m_WaitingForCursorPos bool
-	//        but instead parse the \x1B byte like we also parse all other
-	//        escape sequences byte by byte
-
-	if(pClient->m_WaitingForCursorPos)
-	{
-		// TODO: check if buffer size is full enough for the sscanf to pass
-		//       otherwise either delay the parse or throw an error on timeout
-		// TODO: how many terminals support this format?
-
-		int Row;
-		int Column;
-		if(sscanf(pBuf, "\x1B[%d;%dR", &Row, &Column) != 2)
-		{
-			log_error("ssh", "failed to read cursor input '%s'", pBuf);
-			OnClientDisconnect(pClient->m_ClientId, "invalid cursor pos");
-			return;
-		}
-
-		pClient->m_CursorPos.x = Column;
-		pClient->m_CursorPos.y = Row;
-		pClient->m_WaitingForCursorPos = false;
-		log_info("ssh", "got cursor pos x=%d y=%d", Column, Row);
-		pClient->m_Buffer.Clear();
-		return;
-	}
 
 	// catch reaching the buffer size limit early
 	// and drop all input except it is a delete instruction
@@ -1556,7 +1547,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		else if(Byte == 27) // escape sequence
 		{
 			pClient->ClearCompletionPreview();
-			i += TryProcessEscapeSequence(pClient, pBuf + i, BufSize - i);
+			int SkipBytes = TryProcessEscapeSequence(pClient, pBuf + i, BufSize - i);
+			i += SkipBytes;
 			continue;
 		}
 		else if(CSshClient::IsSimpleAsciiLetter(Byte))
