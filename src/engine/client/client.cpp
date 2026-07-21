@@ -84,6 +84,7 @@
 #undef main
 #endif
 
+#include <algorithm>
 #include <chrono>
 #include <limits>
 #include <stack>
@@ -2222,26 +2223,31 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					{
 						GameClient()->ProcessDemoSnapshot(TmpBuffer3.AsSnapshot());
 
-						CSnapshotBuffer SnapSeven;
-						int DemoSnapSize = SnapSize;
-						if(IsSixup())
+						auto &DemoRecordersRef = DemoRecorders();
+						const bool AnyRecording = std::any_of(std::begin(DemoRecordersRef), std::end(DemoRecordersRef), [](const CDemoRecorder &DemoRecorder) { return DemoRecorder.IsRecording(); });
+						if(AnyRecording)
 						{
-							DemoSnapSize = GameClient()->OnDemoRecSnap7(TmpBuffer3.AsSnapshot(), &SnapSeven, Conn);
-							if(DemoSnapSize < 0)
+							CSnapshotBuffer SnapSeven;
+							int DemoSnapSize = SnapSize;
+							if(IsSixup())
 							{
-								dbg_msg("sixup", "demo snapshot failed. error=%d", DemoSnapSize);
-							}
-						}
-
-						if(DemoSnapSize >= 0)
-						{
-							// add snapshot to demo
-							for(auto &DemoRecorder : DemoRecorders())
-							{
-								if(DemoRecorder.IsRecording())
+								DemoSnapSize = GameClient()->OnDemoRecSnap7(TmpBuffer3.AsSnapshot(), &SnapSeven, Conn);
+								if(DemoSnapSize < 0)
 								{
-									// write snapshot
-									DemoRecorder.RecordSnapshot(GameTick, IsSixup() ? SnapSeven.AsSnapshot() : TmpBuffer3.AsSnapshot(), DemoSnapSize);
+									dbg_msg("sixup", "demo snapshot failed. error=%d", DemoSnapSize);
+								}
+							}
+
+							if(DemoSnapSize >= 0)
+							{
+								// add snapshot to demo
+								for(auto &DemoRecorder : DemoRecorders())
+								{
+									if(DemoRecorder.IsRecording())
+									{
+										// write snapshot
+										DemoRecorder.RecordSnapshot(GameTick, IsSixup() ? SnapSeven.AsSnapshot() : TmpBuffer3.AsSnapshot(), DemoSnapSize);
+									}
 								}
 							}
 						}
