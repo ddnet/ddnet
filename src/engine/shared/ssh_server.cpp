@@ -1464,9 +1464,17 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			if(pClient->m_aInput[0])
 				continue;
 
-			OnClientDisconnect(pClient->m_ClientId, "logout");
-			pClient->m_Buffer.Clear();
-			return;
+
+			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
+			{
+				pClient->AbortHistorySearch();
+			}
+			else
+			{
+				OnClientDisconnect(pClient->m_ClientId, "logout");
+				pClient->m_Buffer.Clear();
+				return;
+			}
 		}
 		else if(Byte == KEY_CTRL_L)
 		{
