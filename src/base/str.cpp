@@ -479,7 +479,7 @@ const char *str_find(const char *haystack, const char *needle)
 	return nullptr;
 }
 
-static const char *str_token_get(const char *str, const char *delim, int *length)
+static const char *str_token_get(const char *str, const char *delim, size_t *length)
 {
 	size_t len = strspn(str, delim);
 	if(len > 1)
@@ -493,11 +493,13 @@ static const char *str_token_get(const char *str, const char *delim, int *length
 	return str;
 }
 
-const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size)
+const char *str_next_token(const char *str, const char *delim, char *buffer, size_t buffer_size)
 {
-	int len = 0;
+	dbg_assert(buffer_size > 0, "buffer size 0");
+
+	size_t len = 0;
 	const char *tok = str_token_get(str, delim, &len);
-	if(len < 0 || tok == nullptr)
+	if(tok == nullptr)
 	{
 		buffer[0] = '\0';
 		return nullptr;
@@ -513,7 +515,7 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 int str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
-	int len = 0, notfound = 1, needlelen = str_length(needle);
+	size_t len = 0, notfound = 1, needlelen = str_length(needle);
 
 	while(notfound && (tok = str_token_get(tok, delim, &len)))
 	{
