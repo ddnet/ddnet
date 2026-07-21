@@ -287,30 +287,30 @@ CServerInfo2::operator CServerInfo() const
 	str_copy(Result.m_aMap, m_aMapName);
 	str_copy(Result.m_aVersion, m_aVersion);
 
-	for(int i = 0; i < std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
+	Result.m_vClients.resize(std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS));
+	for(size_t i = 0; i < Result.m_vClients.size(); i++)
 	{
-		str_copy(Result.m_aClients[i].m_aName, m_aClients[i].m_aName);
-		str_copy(Result.m_aClients[i].m_aClan, m_aClients[i].m_aClan);
-		Result.m_aClients[i].m_Country = m_aClients[i].m_Country;
-		Result.m_aClients[i].m_Score = m_aClients[i].m_Score;
-		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;
-		Result.m_aClients[i].m_Afk = m_aClients[i].m_IsAfk;
+		str_copy(Result.m_vClients[i].m_aName, m_aClients[i].m_aName);
+		str_copy(Result.m_vClients[i].m_aClan, m_aClients[i].m_aClan);
+		Result.m_vClients[i].m_Country = m_aClients[i].m_Country;
+		Result.m_vClients[i].m_Score = m_aClients[i].m_Score;
+		Result.m_vClients[i].m_Player = m_aClients[i].m_IsPlayer;
+		Result.m_vClients[i].m_Afk = m_aClients[i].m_IsAfk;
 
 		// 0.6 skin
-		str_copy(Result.m_aClients[i].m_aSkin, m_aClients[i].m_aSkin);
-		Result.m_aClients[i].m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;
-		Result.m_aClients[i].m_CustomSkinColorBody = m_aClients[i].m_CustomSkinColorBody;
-		Result.m_aClients[i].m_CustomSkinColorFeet = m_aClients[i].m_CustomSkinColorFeet;
+		str_copy(Result.m_vClients[i].m_aSkin, m_aClients[i].m_aSkin);
+		Result.m_vClients[i].m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;
+		Result.m_vClients[i].m_CustomSkinColorBody = m_aClients[i].m_CustomSkinColorBody;
+		Result.m_vClients[i].m_CustomSkinColorFeet = m_aClients[i].m_CustomSkinColorFeet;
 		// 0.7 skin
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			str_copy(Result.m_aClients[i].m_aaSkin7[Part], m_aClients[i].m_aaSkin7[Part]);
-			Result.m_aClients[i].m_aUseCustomSkinColor7[Part] = m_aClients[i].m_aUseCustomSkinColor7[Part];
-			Result.m_aClients[i].m_aCustomSkinColor7[Part] = m_aClients[i].m_aCustomSkinColor7[Part];
+			str_copy(Result.m_vClients[i].m_aaSkin7[Part], m_aClients[i].m_aaSkin7[Part]);
+			Result.m_vClients[i].m_aUseCustomSkinColor7[Part] = m_aClients[i].m_aUseCustomSkinColor7[Part];
+			Result.m_vClients[i].m_aCustomSkinColor7[Part] = m_aClients[i].m_aCustomSkinColor7[Part];
 		}
 	}
 
-	Result.m_NumReceivedClients = std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);
 	Result.m_Latency = -1;
 
 	return Result;
