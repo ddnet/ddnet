@@ -693,6 +693,8 @@ void CSshClient::UpdateStatusLine()
 	// avoid cursor restore bugs
 	if(m_WaitingForCursorPos)
 		return;
+	if(!m_GotInitialCursorPos)
+		return;
 	if(!m_Config.m_StatusLine)
 		return;
 
@@ -716,11 +718,17 @@ void CSshClient::UpdateStatusLine()
 
 void CSshClient::SendScrollRegion()
 {
+
+	if(!m_GotInitialCursorPos)
+		return;
+
 	// exclude the status bar from the scroll region
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "\033[1;%dr", m_Term.m_Height - 1);
 	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
+
+	SendCursorPos(m_CursorPos);
 }
 
 void CSshClient::ClearCompletionPreview()
@@ -1177,6 +1185,15 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 			// because by the time we exchanged the position the client
 			// could have drifted again
 			pClient->SendCursorPos(pClient->m_CursorPos);
+
+			if(!pClient->m_GotInitialCursorPos)
+			{
+				pClient->m_GotInitialCursorPos = true;
+				if(pClient->m_Config.m_StatusLine)
+				{
+					pClient->SendScrollRegion();
+				}
+			}
 
 			// skip the sequence
 			return BytesScanned - 1;

@@ -79,7 +79,7 @@ enum class EClientMode
 class CUserConfig
 {
 public:
-	bool m_StatusLine = false;
+	bool m_StatusLine = true;
 };
 
 class CSshClient
@@ -102,6 +102,7 @@ public:
 	bool m_Authenticated = false;
 	bool m_ShellReady = false;
 	bool m_Dropped = false;
+	bool m_GotInitialCursorPos = false;
 
 	ssh_session m_Session;
 	ssh_channel m_Channel = nullptr;
