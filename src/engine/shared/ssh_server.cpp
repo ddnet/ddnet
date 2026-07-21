@@ -659,11 +659,10 @@ void CSshClient::ResendPrompt()
 
 const char *CSshClient::PromptStr()
 {
-	// TODO: this works really bad!
-	// if(m_Mode == EClientMode::HISTORY_SEARCH)
-	// {
-	// 	return "search: ";
-	// }
+	if(m_Mode == EClientMode::HISTORY_SEARCH)
+	{
+		return "search: ";
+	}
 	return "> ";
 }
 
@@ -1375,6 +1374,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		{
 			if(pClient->m_Mode == EClientMode::PROMPT)
 			{
+				pClient->m_Mode = EClientMode::HISTORY_SEARCH;
 				pClient->EnableAltBuf();
 				str_copy(pClient->m_aPromptInput, pClient->m_aInput);
 				pClient->m_aInput[0] = '\0';
@@ -1382,7 +1382,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				pClient->m_CursorPos.y = pClient->m_Term.m_Height;
 				pClient->m_HistorySearchScroll = 0;
 				pClient->RenderHistorySearch();
-				pClient->m_Mode = EClientMode::HISTORY_SEARCH;
 			}
 			else
 			{
