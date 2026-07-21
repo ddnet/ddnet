@@ -672,6 +672,11 @@ int CSshClient::PromptLength()
 	return str_length(PromptStr()) + 1;
 }
 
+int CSshClient::PromptHeight()
+{
+	return 1;
+}
+
 void CSshClient::SetCursorPosToPromptStart()
 {
 	// not the most ideal method name but eh idk
@@ -831,8 +836,7 @@ void CSshClient::RenderHistorySearch()
 	const char *apMatches[MAX_TERMINAL_HEIGHT + 1] = {nullptr};
 	m_pHistorySearchMatch = nullptr;
 
-	// TODO: should - 1 be - PromptHeight()?
-	int MaxLines = std::min(m_Term.m_Height - 1, (int)MAX_TERMINAL_HEIGHT);
+	int MaxLines = std::min(m_Term.m_Height - PromptHeight(), (int)MAX_TERMINAL_HEIGHT);
 	int NumLines = 0;
 	for(auto &Entry : m_InputHistory)
 	{
@@ -1379,7 +1383,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				str_copy(pClient->m_aPromptInput, pClient->m_aInput);
 				pClient->m_aInput[0] = '\0';
 				pClient->ClearPrompt();
-				pClient->m_CursorPos.y = pClient->m_Term.m_Height;
+				pClient->m_CursorPos.y = pClient->m_Term.m_Height - (pClient->PromptHeight() - 1);
 				pClient->m_HistorySearchScroll = 0;
 				pClient->RenderHistorySearch();
 			}

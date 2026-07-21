@@ -206,6 +206,7 @@ public:
 
 	const char *PromptStr();
 	int PromptLength();
+	int PromptHeight();
 	void SetCursorPosToPromptStart();
 
 	void ClearCompletionPreview();
