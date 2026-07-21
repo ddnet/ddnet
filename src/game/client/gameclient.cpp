@@ -544,7 +544,8 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	{
 		if(m_DummyFire != 0)
 		{
-			m_DummyInput.m_Fire = (m_HammerInput.m_Fire + 1) & ~1;
+			int Parity = m_DummyInput.m_Fire & 1;
+			m_DummyInput.m_Fire = ((m_HammerInput.m_Fire + 1) & ~1) | Parity;
 			m_DummyFire = 0;
 		}
 
