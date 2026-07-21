@@ -718,6 +718,8 @@ void CSshClient::UpdateStatusLine()
 
 void CSshClient::SendScrollRegion()
 {
+	// TODO: clear up scroll region and status line on disconnect
+	//       i get a terminal artifact once the connection closes
 
 	if(!m_GotInitialCursorPos)
 		return;
@@ -2015,6 +2017,12 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 
 int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
+	// TODO: better handle resize
+	//       have some on resize callback here
+	//       with before width and height
+	//       and handle too long input lines and wrapping
+	//       also redraw the status line and clear out the old one
+
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 	CSshClient *pClient = pCtx->m_pClient;
 	pClient->m_Term.m_Width = Width;
