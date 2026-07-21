@@ -2603,7 +2603,9 @@ bool CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
 		return false;
 #endif
 
-	if(WindowWidth() == w && WindowHeight() == h && RefreshRate == m_ScreenRefreshRate)
+	int CurW, CurH;
+	m_pBackend->GetWindowSize(CurW, CurH);
+	if(CurW == w && CurH == h && RefreshRate == m_ScreenRefreshRate)
 		return false;
 
 	// if the size is changed manually, only set the window resize, a window size changed event is triggered anyway
@@ -2623,8 +2625,10 @@ void CGraphics_Threaded::ResizeToScreen()
 		return;
 
 	// Revert config variables if the change was not accepted
-	g_Config.m_GfxScreenWidth = ScreenWidth();
-	g_Config.m_GfxScreenHeight = ScreenHeight();
+	int CurW, CurH;
+	m_pBackend->GetWindowSize(CurW, CurH);
+	g_Config.m_GfxScreenWidth = CurW;
+	g_Config.m_GfxScreenHeight = CurH;
 	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
 }
 

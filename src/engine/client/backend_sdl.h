@@ -257,6 +257,7 @@ public:
 	int WindowOpen() override;
 	void SetWindowGrab(bool Grab) override;
 	bool ResizeWindow(int w, int h, int RefreshRate) override;
+	void GetWindowSize(int &w, int &h) override;
 	void GetViewportSize(int &w, int &h) override;
 	void NotifyWindow() override;
 	bool IsScreenKeyboardShown() override;
