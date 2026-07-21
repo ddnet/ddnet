@@ -721,6 +721,13 @@ void CSshClient::SendBell() const
 	ssh_channel_write(m_Channel, "\a", 1);
 }
 
+// TODO: never use this except ctrl+l
+//       when redrawing frames do not clear the screen
+//       this will cause visual glitches
+//       ----
+//       redraw by overriding and hide the cursor while doing so
+//       keep a buffer representing the screen on the server side and
+//       only send the diff
 void CSshClient::SendClearScreen() const
 {
 	if(!m_Channel)
