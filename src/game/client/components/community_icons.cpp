@@ -148,7 +148,7 @@ void CCommunityIcons::Update()
 		std::shared_ptr<CCommunityIconLoadJob> pJob = m_CommunityIconLoadJobs.front();
 		if(pJob->Done())
 		{
-			if(pJob->Success())
+			if(pJob->State() == IJob::STATE_DONE && pJob->Success())
 			{
 				LoadFinish(pJob->CommunityId(), pJob->ImageInfo(), pJob->ImageInfoGrayscale(), pJob->Sha256());
 			}
