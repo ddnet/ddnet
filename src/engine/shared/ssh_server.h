@@ -76,6 +76,12 @@ enum class EClientMode
 	HISTORY_SEARCH,
 };
 
+class CUserConfig
+{
+public:
+	bool m_StatusLine = false;
+};
+
 class CSshClient
 {
 public:
@@ -108,6 +114,8 @@ public:
 	// These are all the bytes the ssh client sent to use
 	// that we have not processed yet
 	CByteBuffer m_Buffer;
+
+	CUserConfig m_Config;
 
 	// Users can cut and paste text with ctrl+k and ctrl+y
 	char m_aYankBuffer[2048] = "";
@@ -208,6 +216,8 @@ public:
 	int PromptLength();
 	int PromptHeight();
 	void SetCursorPosToPromptStart();
+	void UpdateStatusLine();
+	void SendScrollRegion();
 
 	void ClearCompletionPreview();
 

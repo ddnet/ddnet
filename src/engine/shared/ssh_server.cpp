@@ -634,6 +634,8 @@ void CSshClient::ClearPrompt()
 	ssh_channel_write(m_Channel, "\r\033[2K", 6);
 	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	SetCursorPosToPromptStart();
+
+	UpdateStatusLine();
 }
 
 void CSshClient::NewPrompt()
@@ -645,6 +647,8 @@ void CSshClient::NewPrompt()
 	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	m_CursorPos.y++;
 	SetCursorPosToPromptStart();
+
+	UpdateStatusLine();
 }
 
 void CSshClient::ResendPrompt()
@@ -682,6 +686,41 @@ void CSshClient::SetCursorPosToPromptStart()
 	// not the most ideal method name but eh idk
 	m_CursorPos.x = PromptLength();
 	m_InputIdx = 0;
+}
+
+void CSshClient::UpdateStatusLine()
+{
+	// avoid cursor restore bugs
+	if(m_WaitingForCursorPos)
+		return;
+	if(!m_Config.m_StatusLine)
+		return;
+
+	int Width = m_Term.m_Width;
+	int Height = m_Term.m_Height;
+
+	char aLine[512];
+	str_format(aLine, sizeof(aLine), "hello %d", rand() % 20);
+
+	char aBuf[2048];
+	str_format(aBuf, sizeof(aBuf),
+		"\0337" // Save cursor
+		"\033[%d;1H" // Move to bottom line, col 1
+		"\033[7m" // Reverse video (optional, makes it look like a status bar)
+		"%-*.*s" // Left-aligned, padded to width
+		"\033[0m" // Reset attributes
+		"\0338", // Restore cursor
+		Height, Width, Width, aLine);
+	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
+}
+
+void CSshClient::SendScrollRegion()
+{
+	// exclude the status bar from the scroll region
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "\033[1;%dr", m_Term.m_Height - 1);
+	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 }
 
 void CSshClient::ClearCompletionPreview()
@@ -785,7 +824,7 @@ void CSshClient::SendCursorPos(ivec2 Pos) const
 	// log_info("ssh", "sending pos x=%d y=%d", Pos.x, Pos.y);
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "\x1B[%d;%dH", Pos.y, Pos.x);
+	str_format(aBuf, sizeof(aBuf), "\x1B[%d;%dH", std::min(Pos.y, m_Term.m_Height - 1), Pos.x);
 	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 
 	// there would also be relative move left and right
@@ -1134,7 +1173,7 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 
 			// yes we ask the client for the cursor position
 			// then we force the clients position to that position
-			// this is to double ensure we are synced
+			// this is to double ensure we aee synced
 			// because by the time we exchanged the position the client
 			// could have drifted again
 			pClient->SendCursorPos(pClient->m_CursorPos);
@@ -1933,14 +1972,17 @@ ssh_channel CSshServer::ChannelOpenRequestSessionCallback(ssh_session Session, v
 int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Channel, const char *pTerm, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
+	CSshClient *pClient = pCtx->m_pClient;
 
-	if(!pCtx->m_pClient->m_Authenticated)
+	if(!pClient->m_Authenticated)
 	{
 		return SSH_ERROR;
 	}
 
-	pCtx->m_pClient->m_Term.m_Width = Width;
-	pCtx->m_pClient->m_Term.m_Height = Height;
+	pClient->m_Term.m_Width = Width;
+	pClient->m_Term.m_Height = Height;
+	if(pClient->m_Config.m_StatusLine)
+		pClient->SendScrollRegion();
 
 	// we don't support pty yet, only shell for now
 	// but we need to return OK here otherwise the client shows an error
@@ -1957,8 +1999,11 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
-	pCtx->m_pClient->m_Term.m_Width = Width;
-	pCtx->m_pClient->m_Term.m_Height = Height;
+	CSshClient *pClient = pCtx->m_pClient;
+	pClient->m_Term.m_Width = Width;
+	pClient->m_Term.m_Height = Height;
+	if(pClient->m_Config.m_StatusLine)
+		pClient->SendScrollRegion();
 	return SSH_OK;
 }
 
