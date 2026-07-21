@@ -16,7 +16,7 @@ void CMapRenderer::Clear()
 	m_vpRenderLayers.clear();
 }
 
-void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FRenderUploadCallback> RenderCallbackOptional)
+void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional)
 {
 	Clear();
 
@@ -27,7 +27,16 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 	{
 		CMapItemGroup *pGroup = pLayers->GetGroup(GroupId);
 		std::unique_ptr<CRenderLayer> pRenderLayerGroup = std::make_unique<CRenderLayerGroup>(GroupId, pGroup);
-		pRenderLayerGroup->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, RenderCallbackOptional);
+
+		std::optional<FCallbackLayerInit> CallbackLayerInitOptional;
+		if(CallbackMapRendererInitOptional.has_value())
+		{
+			CallbackLayerInitOptional = [&](int LayerGroupId, int LayerId) {
+				(*CallbackMapRendererInitOptional)(LayerGroupId, pLayers->NumGroups(), LayerId, pGroup->m_NumLayers);
+			};
+		}
+
+		pRenderLayerGroup->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, CallbackLayerInitOptional);
 		if(!pRenderLayerGroup->IsValid())
 		{
 			log_error("map_renderer", "error group was null, group number = %d, total groups = %d", GroupId, pLayers->NumGroups());
@@ -131,7 +140,7 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 			// just ignore invalid layers from rendering
 			if(pRenderLayer)
 			{
-				pRenderLayer->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, RenderCallbackOptional);
+				pRenderLayer->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, CallbackLayerInitOptional);
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();

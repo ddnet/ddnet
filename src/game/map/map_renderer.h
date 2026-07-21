@@ -7,13 +7,15 @@
 #include <game/map/render_component.h>
 #include <game/map/render_layer.h>
 
+typedef std::function<void(int GroupId, int NumGroups, int LayerId, int NumLayers)> FCallbackMapRendererInit;
+
 class CMapRenderer : public CRenderComponent
 {
 public:
 	CMapRenderer() = default;
 
 	void Clear();
-	void Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FRenderUploadCallback> RenderCallbackOptional);
+	void Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional);
 	void Render(const CRenderLayerParams &Params);
 
 private:
