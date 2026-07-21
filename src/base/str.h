@@ -516,7 +516,7 @@ const char *str_find(const char *haystack, const char *needle);
  *
  * @remark The token is always null-terminated.
  */
-const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size);
+const char *str_next_token(const char *str, const char *delim, char *buffer, size_t buffer_size);
 
 /**
  * Checks if needle is in list delimited by delim.
