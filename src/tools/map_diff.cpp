@@ -82,7 +82,14 @@ static bool Process(IStorage *pStorage, const char **pMapNames)
 		}
 		CTile *apTile[2];
 		for(int i = 0; i < 2; ++i)
+		{
 			apTile[i] = (CTile *)aMaps[i].GetData(apTilemap[i]->m_Data);
+			if(apTile[i] == nullptr || (size_t)aMaps[i].GetDataSize(apTilemap[i]->m_Data) < (size_t)apTilemap[i]->m_Width * apTilemap[i]->m_Height * sizeof(CTile))
+			{
+				dbg_msg("map_diff", "invalid tile layer data in \"%s\"", pMapNames[i]);
+				return false;
+			}
+		}
 
 		for(int y = 0; y < apTilemap[0]->m_Height; y++)
 		{
