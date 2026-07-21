@@ -1467,7 +1467,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			if(pClient->m_aInput[0])
 				continue;
 
-
 			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
 			{
 				pClient->AbortHistorySearch();
