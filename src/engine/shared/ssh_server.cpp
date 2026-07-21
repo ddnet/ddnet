@@ -728,6 +728,9 @@ void CSshClient::SendBell() const
 //       redraw by overriding and hide the cursor while doing so
 //       keep a buffer representing the screen on the server side and
 //       only send the diff
+//       --
+//       also batch the writes
+//       dont do many ssh_channel_write calls if it in the end should be one frame
 void CSshClient::SendClearScreen() const
 {
 	if(!m_Channel)
