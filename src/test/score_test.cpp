@@ -67,8 +67,8 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),
 			"%s into %s_maps(Map, Server, Mapper, Points, Stars, Timestamp) "
-			"VALUES (\"%s\", \"%s\", \"%s\", %d, %d, %s)",
-			m_pConn->InsertIgnore(), m_pConn->GetPrefix(), pName, pServer, pMapper, Points, Stars, m_pConn->InsertTimestampAsUtc());
+			"VALUES ('%s', '%s', '%s', %d, %d, %s)%s",
+			m_pConn->InsertIgnore(), m_pConn->GetPrefix(), pName, pServer, pMapper, Points, Stars, m_pConn->InsertTimestampAsUtc(1).c_str(), m_pConn->InsertIgnoreEnd());
 		ASSERT_TRUE(m_pConn->PrepareStatement(aBuf, m_aError, sizeof(m_aError))) << m_aError;
 		m_pConn->BindString(1, aTimestamp);
 		int NumInserted = 0;
@@ -640,23 +640,47 @@ CMysqlConfig gMysqlConfig{
 };
 auto g_pMysqlConn = CreateMysqlConnection(gMysqlConfig);
 #endif
+#if defined(CONF_TEST_POSTGRESQL)
+CPostgresqlConfig gPostgresqlConfig{
+	"ddnet", // database
+	"record", // prefix
+	"ddnet", // user
+	"thebestpassword", // password
+	"localhost", // ip
+	5432, // port
+	true, // setup
+};
+auto g_pPostgresqlConn = CreatePostgresqlConnection(gPostgresqlConfig);
+#endif
 
 auto g_TestValues{
 	testing::Values(
 #if defined(CONF_TEST_MYSQL)
 		g_pMysqlConn.get(),
 #endif
+#if defined(CONF_TEST_POSTGRESQL)
+		g_pPostgresqlConn.get(),
+#endif
 		g_pSqliteConn.get())};
+
+// Identify the backend from its `BinaryCollate()` (SQLite "BINARY", MySQL
+// "utf8mb4_bin", PostgreSQL "\"C\"") so the name is correct no matter which
+// backends are compiled in.
+static const char *SqlBackendName(IDbConnection *pConn)
+{
+	switch(pConn->BinaryCollate()[0])
+	{
+	case 'B': return "SQLite";
+	case 'u': return "MySQL";
+	case '"': return "PostgreSQL";
+	default: return "Unknown";
+	}
+}
 
 #define INSTANTIATE(SUITE) \
 	INSTANTIATE_TEST_SUITE_P(Sql, SUITE, g_TestValues, \
 		[](const testing::TestParamInfo<Score::ParamType> &Info) { \
-			switch(Info.index) \
-			{ \
-			case 0: return "SQLite"; \
-			case 1: return "MySQL"; \
-			default: return "Unknown"; \
-			} \
+			return SqlBackendName(Info.param); \
 		})
 
 INSTANTIATE(SingleScore);

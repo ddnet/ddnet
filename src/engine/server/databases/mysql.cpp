@@ -74,8 +74,9 @@ public:
 
 	const char *BinaryCollate() const override { return "utf8mb4_bin"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
-	const char *InsertTimestampAsUtc() const override { return "?"; }
-	const char *CollateNocase() const override { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
+	std::string Placeholder(int) const override { return "?"; }
+	std::string InsertTimestampAsUtc(int) const override { return "?"; }
+	std::string LikeNocase(int) const override { return "LIKE CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
 	const char *InsertIgnore() const override { return "INSERT IGNORE"; }
 	const char *Random() const override { return "RAND()"; }
 	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
@@ -130,6 +131,9 @@ private:
 
 	bool m_NewQuery = false;
 	bool m_HaveConnection = false;
+	// MariaDB and Oracle MySQL differ in a few places (e.g. MEDIAN(), correlated
+	// derived tables), so remember which server we're talking to.
+	bool m_IsMariaDb = false;
 	MYSQL m_Mysql;
 	std::unique_ptr<MYSQL_STMT, CStmtDeleter> m_pStmt = nullptr;
 	std::vector<MYSQL_BIND> m_vStmtParameters;
@@ -258,6 +262,7 @@ bool CMysqlConnection::ConnectImpl()
 		return false;
 	}
 	m_HaveConnection = true;
+	m_IsMariaDb = str_find_nocase(mysql_get_server_info(&m_Mysql), "MariaDB") != nullptr;
 
 	m_pStmt = std::unique_ptr<MYSQL_STMT, CStmtDeleter>(mysql_stmt_init(&m_Mysql));
 
@@ -456,6 +461,29 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 			str_copy(pError, m_aErrorDetail, ErrorSize);
 			return false;
 		}
+		// Oracle's libmysqlclient only lets mysql_stmt_fetch_column read a column
+		// after the result columns have been bound with mysql_stmt_bind_result;
+		// without it every column is reported as NULL. We fetch columns lazily by
+		// type in the getters instead of binding real buffers up front, so bind
+		// each column to a MYSQL_TYPE_NULL placeholder purely to satisfy that
+		// requirement. libmariadb doesn't need this but accepts it.
+		// mysql_stmt_bind_result copies the array, so a local one is enough.
+		unsigned int NumResultColumns = mysql_stmt_field_count(m_pStmt.get());
+		if(NumResultColumns > 0)
+		{
+			std::vector<MYSQL_BIND> vResultBinds(NumResultColumns);
+			mem_zero(vResultBinds.data(), sizeof(vResultBinds[0]) * vResultBinds.size());
+			for(MYSQL_BIND &Bind : vResultBinds)
+			{
+				Bind.buffer_type = MYSQL_TYPE_NULL;
+			}
+			if(mysql_stmt_bind_result(m_pStmt.get(), vResultBinds.data()))
+			{
+				StoreErrorStmt("bind_result");
+				str_copy(pError, m_aErrorDetail, ErrorSize);
+				return false;
+			}
+		}
 	}
 	int Result = mysql_stmt_fetch(m_pStmt.get());
 	if(Result == 1)
@@ -647,11 +675,34 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 
 const char *CMysqlConnection::MedianMapTime(char *pBuffer, int BufferSize) const
 {
+	if(m_IsMariaDb)
+	{
+		// MariaDB has the MEDIAN() window function. It also doesn't support the
+		// correlated derived table (WHERE Map = l.Map) that the MySQL variant
+		// below relies on, so the two paths can't be merged.
+		str_format(pBuffer, BufferSize,
+			"SELECT MEDIAN(Time) "
+			"OVER (PARTITION BY Map) "
+			"FROM %s_race "
+			"WHERE Map = l.Map "
+			"LIMIT 1",
+			GetPrefix());
+		return pBuffer;
+	}
+	// Oracle MySQL has no MEDIAN(), so compute the median with standard window
+	// functions instead. DIV is used for integer division, as MySQL's `/` is
+	// floating point.
 	str_format(pBuffer, BufferSize,
-		"SELECT MEDIAN(Time) "
-		"OVER (PARTITION BY Map) "
-		"FROM %s_race "
-		"WHERE Map = l.Map "
+		"SELECT AVG("
+		"  CASE counter %% 2 "
+		"    WHEN 0 THEN CASE WHEN rn IN (counter DIV 2, counter DIV 2 + 1) THEN Time END "
+		"    WHEN 1 THEN CASE WHEN rn = counter DIV 2 + 1 THEN Time END END) "
+		"  OVER (PARTITION BY Map) AS Median "
+		"FROM ("
+		"  SELECT Map, Time, ROW_NUMBER() "
+		"  OVER (PARTITION BY Map ORDER BY Time) rn, COUNT(*) "
+		"  OVER (PARTITION BY Map) counter "
+		"  FROM %s_race where Map = l.Map) as r "
 		"LIMIT 1",
 		GetPrefix());
 	return pBuffer;

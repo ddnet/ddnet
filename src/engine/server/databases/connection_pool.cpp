@@ -36,6 +36,9 @@ struct CSqlExecData
 	CSqlExecData(
 		CDbConnectionPool::Mode m,
 		const CMysqlConfig *pMysqlConfig);
+	CSqlExecData(
+		CDbConnectionPool::Mode m,
+		const CPostgresqlConfig *pPostgresqlConfig);
 	CSqlExecData(CDbConnectionPool::Mode m);
 	~CSqlExecData() = default;
 
@@ -44,6 +47,7 @@ struct CSqlExecData
 		READ_ACCESS,
 		WRITE_ACCESS,
 		ADD_MYSQL,
+		ADD_POSTGRESQL,
 		ADD_SQLITE,
 		PRINT,
 	} m_Mode;
@@ -56,6 +60,11 @@ struct CSqlExecData
 			CDbConnectionPool::Mode m_Mode;
 			CMysqlConfig m_Config;
 		} m_Mysql;
+		struct
+		{
+			CDbConnectionPool::Mode m_Mode;
+			CPostgresqlConfig m_Config;
+		} m_Postgresql;
 		struct
 		{
 			CDbConnectionPool::Mode m_Mode;
@@ -112,6 +121,15 @@ CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m,
 	m_Ptr.m_Mysql.m_Mode = m;
 	mem_copy(&m_Ptr.m_Mysql.m_Config, pMysqlConfig, sizeof(m_Ptr.m_Mysql.m_Config));
 }
+CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m,
+	const CPostgresqlConfig *pPostgresqlConfig) :
+	m_Mode(ADD_POSTGRESQL),
+	m_pThreadData(nullptr),
+	m_pName("add postgresql server")
+{
+	m_Ptr.m_Postgresql.m_Mode = m;
+	mem_copy(&m_Ptr.m_Postgresql.m_Config, pPostgresqlConfig, sizeof(m_Ptr.m_Postgresql.m_Config));
+}
 
 CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m) :
 	m_Mode(PRINT),
@@ -138,6 +156,13 @@ void CDbConnectionPool::RegisterSqliteDatabase(Mode DatabaseMode, const char aFi
 void CDbConnectionPool::RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig)
 {
 	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode, pMysqlConfig);
+	m_InsertIdx %= std::size(m_pShared->m_aQueries);
+	m_pShared->m_NumBackup.Signal();
+}
+
+void CDbConnectionPool::RegisterPostgresqlDatabase(Mode DatabaseMode, const CPostgresqlConfig *pPostgresqlConfig)
+{
+	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode, pPostgresqlConfig);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
 	m_pShared->m_NumBackup.Signal();
 }
@@ -375,6 +400,26 @@ void CWorker::ProcessQueries()
 				break;
 			case CDbConnectionPool::Mode::WRITE_BACKUP:
 				m_pWriteBackup = std::move(pMysql);
+				break;
+			case CDbConnectionPool::Mode::NUM_MODES:
+				break;
+			}
+			Success = true;
+			break;
+		}
+		case CSqlExecData::ADD_POSTGRESQL:
+		{
+			auto pPostgresql = CreatePostgresqlConnection(pThreadData->m_Ptr.m_Postgresql.m_Config);
+			switch(pThreadData->m_Ptr.m_Postgresql.m_Mode)
+			{
+			case CDbConnectionPool::Mode::READ:
+				m_vpReadConnections.push_back(std::move(pPostgresql));
+				break;
+			case CDbConnectionPool::Mode::WRITE:
+				m_pWriteConnection = std::move(pPostgresql);
+				break;
+			case CDbConnectionPool::Mode::WRITE_BACKUP:
+				m_pWriteBackup = std::move(pPostgresql);
 				break;
 			case CDbConnectionPool::Mode::NUM_MODES:
 				break;

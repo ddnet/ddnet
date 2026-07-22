@@ -19,8 +19,9 @@ public:
 
 	const char *BinaryCollate() const override { return "BINARY"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
-	const char *InsertTimestampAsUtc() const override { return "DATETIME(?, 'utc')"; }
-	const char *CollateNocase() const override { return "? COLLATE NOCASE"; }
+	std::string Placeholder(int) const override { return "?"; }
+	std::string InsertTimestampAsUtc(int) const override { return "DATETIME(?, 'utc')"; }
+	std::string LikeNocase(int) const override { return "LIKE ? COLLATE NOCASE"; }
 	const char *InsertIgnore() const override { return "INSERT OR IGNORE"; }
 	const char *Random() const override { return "RANDOM()"; }
 	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;

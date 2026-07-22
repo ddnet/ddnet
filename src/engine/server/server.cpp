@@ -4148,6 +4148,56 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	pSelf->DbPool()->RegisterMysqlDatabase(Write ? CDbConnectionPool::WRITE : CDbConnectionPool::READ, &Config);
 }
 
+void CServer::ConAddPgsqlServer(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+
+	if(!PostgresqlAvailable())
+	{
+		log_error("server", "can't add PostgreSQL server: compiled without PostgreSQL support");
+		return;
+	}
+
+	if(!pSelf->Config()->m_SvUseSql)
+		return;
+
+	if(pResult->NumArguments() != 7 && pResult->NumArguments() != 8)
+	{
+		log_error("server", "7 or 8 arguments are required");
+		return;
+	}
+
+	CPostgresqlConfig Config;
+	bool Write;
+	if(str_comp_nocase(pResult->GetString(0), "r") == 0)
+	{
+		Write = false;
+	}
+	else if(str_comp_nocase(pResult->GetString(0), "w") == 0)
+	{
+		Write = true;
+	}
+	else
+	{
+		log_error("server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		return;
+	}
+
+	str_copy(Config.m_aDatabase, pResult->GetString(1));
+	str_copy(Config.m_aPrefix, pResult->GetString(2));
+	str_copy(Config.m_aUser, pResult->GetString(3));
+	str_copy(Config.m_aPass, pResult->GetString(4));
+	str_copy(Config.m_aIp, pResult->GetString(5));
+	Config.m_Port = pResult->GetInteger(6);
+	Config.m_Setup = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
+
+	log_info("server",
+		"Adding new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d",
+		Write ? "Write" : "Read",
+		Config.m_aDatabase, Config.m_aPrefix, Config.m_aUser, Config.m_aIp, Config.m_Port);
+	pSelf->DbPool()->RegisterPostgresqlDatabase(Write ? CDbConnectionPool::WRITE : CDbConnectionPool::READ, &Config);
+}
+
 void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
@@ -4466,6 +4516,7 @@ void CServer::RegisterCommands()
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
 
 	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAddSqlServer, this, "add a sqlserver");
+	Console()->Register("add_pgsqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAddPgsqlServer, this, "add a postgresql server");
 	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
 
 	Console()->Register("auth_add", "s[ident] s[level] r[pw]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key");
