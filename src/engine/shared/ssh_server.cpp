@@ -1865,15 +1865,15 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 	if(AuthSuccess)
 	{
 		// the client can not avoid failed key attempts that happen in the background
-		// when doing password auth so we have to clear it on succesfull password auth
+		// when doing password auth so we have to clear it on successful password auth
 		Entry.m_NumWrongKeyAttempts = 0;
+		Entry.m_NumTimeouts = 0;
 	}
 	else
 	{
 		Entry.m_NumWrongPasswords++;
 		Entry.m_LastFailedPassword = time_get();
 	}
-
 
 	if(AuthSuccess)
 	{
@@ -1975,6 +1975,7 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 		// so we clear the tracker as soon as one of them worked
 		// but if that number keeps growing super large then something suspicious is going on
 		Entry.m_NumWrongKeyAttempts = 0;
+		Entry.m_NumTimeouts = 0;
 	}
 
 	if(Match)
@@ -2131,10 +2132,11 @@ void CSshServer::LogRatelimitStatus()
 
 		log_info(
 			"ssh",
-			" %-16s failed_keys=%d failed_pass=%d",
+			" %-16s failed_keys=%d failed_pass=%d timeouts=%d",
 			aAddr,
 			Entry.m_NumWrongKeyAttempts,
-			Entry.m_NumWrongPasswords);
+			Entry.m_NumWrongPasswords,
+			Entry.m_NumTimeouts);
 	}
 }
 
@@ -2171,6 +2173,15 @@ bool CSshServer::Ratelimit(const NETADDR *pAddr)
 			if(Entry.m_NumWrongPasswords > 6)
 				return SecondsSinceFail < 60;
 			return SecondsSinceFail < 3;
+		}
+		if(Entry.m_LastTimeout)
+		{
+			int64_t SecondsSinceTimeout = (time_get() - Entry.m_LastTimeout) / time_freq();
+			if(Entry.m_NumTimeouts > 3)
+				return SecondsSinceTimeout < 60;
+			if(Entry.m_NumTimeouts > 6)
+				return SecondsSinceTimeout < 400;
+			return SecondsSinceTimeout < 3;
 		}
 		if(Entry.m_NumWrongKeyAttempts > 100)
 		{
@@ -2356,7 +2367,19 @@ void CSshServer::Update()
 			int64_t ConnectedSinceSeconds = (time_get() - pClient->m_JoinTime) / time_freq();
 			if(ConnectedSinceSeconds > 10)
 			{
-				log_info("ssh", "cid=%d did not get shell ready fast enough and timed out", pClient->m_ClientId);
+				auto [It, Inserted] = m_Ratelimits.try_emplace(pClient->m_AddrNoPort, pClient->m_AddrNoPort);
+				CRatelimitSshCon &Entry = It->second;
+				Entry.m_NumTimeouts++;
+				Entry.m_LastTimeout = time_get();
+
+				char aAddr[NETADDR_MAXSTRSIZE];
+				net_addr_str(&pClient->m_AddrNoPort, aAddr, sizeof(aAddr), false);
+				log_info(
+					"ssh",
+					"cid=%d addr=%s did not get shell ready fast enough and timed out (%d timeouts)",
+					pClient->m_ClientId,
+					aAddr,
+					Entry.m_NumTimeouts);
 				OnClientDisconnect(pClient->m_ClientId, "timeout");
 			}
 			continue;

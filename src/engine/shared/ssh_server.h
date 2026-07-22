@@ -100,12 +100,18 @@ public:
 	int64_t m_FirstSeen;
 	int64_t m_LastSeen;
 	int64_t m_LastFailedPassword = 0;
+	int64_t m_LastTimeout = 0;
 
 	// amount of failed password attempts
 	int m_NumWrongPasswords = 0;
 
 	// amount of failed ssh key attempts
 	int m_NumWrongKeyAttempts = 0;
+
+	// amount of times this ip tried to connect and occupied
+	// a client id and connection slot
+	// but never sent correct credentials
+	int m_NumTimeouts = 0;
 };
 
 class CSshClient
