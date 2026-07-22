@@ -112,9 +112,9 @@ CClient::CClient() :
 {
 	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorders)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
+		DemoRecorder.Init(&m_SnapshotDelta);
 	for(auto &DemoRecorder : m_aDemoRecordersSixup)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDeltaSixup);
+		DemoRecorder.Init(&m_SnapshotDeltaSixup);
 	m_LastRenderTime = time_get();
 	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
