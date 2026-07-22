@@ -3710,6 +3710,7 @@ if(CLIENT AND DMGBUILD_FOUND)
       # tidy-alphabetical-start
       other/bundle/server/PkgInfo
       other/dmgbackground.png
+      other/icons/${SERVER_EXECUTABLE}.icns
       # tidy-alphabetical-end
     )
     set(DMGBUILD_COMMAND
