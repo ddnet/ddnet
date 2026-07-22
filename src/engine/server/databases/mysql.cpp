@@ -74,8 +74,9 @@ public:
 
 	const char *BinaryCollate() const override { return "utf8mb4_bin"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
-	const char *InsertTimestampAsUtc() const override { return "?"; }
-	const char *CollateNocase() const override { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
+	std::string Placeholder(int) const override { return "?"; }
+	std::string InsertTimestampAsUtc(int) const override { return "?"; }
+	std::string LikeNocase(int) const override { return "LIKE CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
 	const char *InsertIgnore() const override { return "INSERT IGNORE"; }
 	const char *Random() const override { return "RAND()"; }
 	const char *False() const override { return "FALSE"; }
@@ -499,6 +500,29 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 			StoreErrorStmt("execute");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
 			return false;
+		}
+		// Oracle's libmysqlclient only lets mysql_stmt_fetch_column read a column
+		// after the result columns have been bound with mysql_stmt_bind_result;
+		// without it every column is reported as NULL. We fetch columns lazily by
+		// type in the getters instead of binding real buffers up front, so bind
+		// each column to a MYSQL_TYPE_NULL placeholder purely to satisfy that
+		// requirement. libmariadb doesn't need this but accepts it.
+		// mysql_stmt_bind_result copies the array, so a local one is enough.
+		unsigned int NumResultColumns = mysql_stmt_field_count(m_pStmt.get());
+		if(NumResultColumns > 0)
+		{
+			std::vector<MYSQL_BIND> vResultBinds(NumResultColumns);
+			mem_zero(vResultBinds.data(), sizeof(vResultBinds[0]) * vResultBinds.size());
+			for(MYSQL_BIND &Bind : vResultBinds)
+			{
+				Bind.buffer_type = MYSQL_TYPE_NULL;
+			}
+			if(mysql_stmt_bind_result(m_pStmt.get(), vResultBinds.data()))
+			{
+				StoreErrorStmt("bind_result");
+				str_copy(pError, m_aErrorDetail, ErrorSize);
+				return false;
+			}
 		}
 	}
 	int Result = mysql_stmt_fetch(m_pStmt.get());
