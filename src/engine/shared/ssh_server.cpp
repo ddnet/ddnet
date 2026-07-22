@@ -1,3 +1,4 @@
+#include <cstdint>
 #if defined(CONF_SSH)
 
 #include "ssh_server.h"
@@ -1395,6 +1396,12 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					CLogScope Scope(&Logger);
 					ListConnections();
 				}
+				else if(!str_comp(pCmd, "ratelimits"))
+				{
+					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
+					CLogScope Scope(&Logger);
+					LogRatelimitStatus();
+				}
 				else if(!str_comp(pCmd, "x")) // FIXME: remove debug
 				{
 					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
@@ -1851,7 +1858,25 @@ int CSshServer::AuthPasswordCallback(ssh_session Session, const char *pUsername,
 		return SSH_AUTH_DENIED;
 
 	bool AdminUsername = str_comp(pUsername, "root") == 0 || str_comp(pUsername, "admin") == 0 || str_comp(pUsername, "default_admin") == 0;
-	if(AdminUsername && str_comp(pPassword, g_Config.m_SvRconPassword) == 0)
+	bool AuthSuccess = AdminUsername && str_comp(pPassword, g_Config.m_SvRconPassword) == 0;
+
+	CSshClient *pClient = pCtx->m_pClient;
+	auto [It, Inserted] = pCtx->m_pServer->m_Ratelimits.try_emplace(pClient->m_AddrNoPort, pClient->m_AddrNoPort);
+	CRatelimitSshCon &Entry = It->second;
+	if(AuthSuccess)
+	{
+		// the client can not avoid failed key attempts that happen in the background
+		// when doing password auth so we have to clear it on succesfull password auth
+		Entry.m_NumWrongKeyAttempts = 0;
+	}
+	else
+	{
+		Entry.m_NumWrongPasswords++;
+		Entry.m_LastFailedPassword = time_get();
+	}
+
+
+	if(AuthSuccess)
 	{
 		pCtx->m_pClient->m_Authenticated = true;
 		return SSH_AUTH_SUCCESS;
@@ -1937,6 +1962,20 @@ int CSshServer::AuthPubkeyCallback(ssh_session Session, const char *pUsername, s
 			log_error("ssh", " key_type=%d", KeyType);
 			log_error("ssh", " key='%s'", aKeyBase64);
 		}
+	}
+
+	CSshClient *pClient = pCtx->m_pClient;
+	auto [It, Inserted] = pCtx->m_pServer->m_Ratelimits.try_emplace(pClient->m_AddrNoPort, pClient->m_AddrNoPort);
+	CRatelimitSshCon &Entry = It->second;
+	Entry.m_NumWrongKeyAttempts++;
+	if(Match)
+	{
+		// failed wrong key attempts are expected
+		// a standard ssh client sends a bunch of ssh keys for every connect
+		// if the user has multiple ssh keys
+		// so we clear the tracker as soon as one of them worked
+		// but if that number keeps growing super large then something suspicious is going on
+		Entry.m_NumWrongKeyAttempts = 0;
 	}
 
 	if(Match)
@@ -2076,6 +2115,79 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 	return SSH_OK;
 }
 
+void CSshServer::LogRatelimitStatus()
+{
+	log_info("ssh", "connections dropped by ratelimit: %" PRIzu, m_NumRatelimitDrops);
+	log_info("ssh", "ips tracked %" PRIzu "/%" PRIzu, m_Ratelimits.size(), MAX_SSH_RATELIMIT_ENTRIES);
+
+	// FIXME: key limit doesnt seem to work
+	//
+	// // FIXME: once it works successful password login should also reset key fails
+
+// UDPATE: should work now ¹ ^ 
+
+	int NumPrinted = 0;
+	for(const auto &It : m_Ratelimits)
+	{
+		if(NumPrinted++ > 3)
+			break;
+
+		const CRatelimitSshCon &Entry = It.second;
+		char aAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Entry.m_Addr, aAddr, sizeof(aAddr), false);
+
+		log_info(
+			"ssh",
+			" %-16s failed_keys=%d failed_pass=%d",
+			aAddr,
+			Entry.m_NumWrongKeyAttempts,
+			Entry.m_NumWrongPasswords);
+	}
+}
+
+void CSshServer::ExpireRatelimits()
+{
+	const int64_t Now = time_get();
+	std::erase_if(m_Ratelimits, [Now](const auto &Pair) {
+		const CRatelimitSshCon &Entry = Pair.second;
+		const bool HasFails = Entry.m_NumWrongPasswords > 0 || Entry.m_NumWrongKeyAttempts > 0;
+		int64_t NotSeenSinceMinutes = ((Now - Entry.m_LastSeen) / time_freq()) / 60;
+		if(!HasFails && NotSeenSinceMinutes > 60)
+			return true;
+		if(HasFails && NotSeenSinceMinutes > 300)
+			return true;
+		return false;
+	});
+}
+
+bool CSshServer::Ratelimit(const NETADDR *pAddr)
+{
+	if(m_Ratelimits.size() > MAX_SSH_RATELIMIT_ENTRIES)
+		return true;
+
+	auto [It, Inserted] = m_Ratelimits.try_emplace(*pAddr, *pAddr);
+	if(!Inserted)
+	{
+		CRatelimitSshCon &Entry = It->second;
+		Entry.m_LastSeen = time_get();
+		if(Entry.m_LastFailedPassword)
+		{
+			int64_t SecondsSinceFail = (time_get() - Entry.m_LastFailedPassword) / time_freq();
+			if(Entry.m_NumWrongPasswords > 3)
+				return SecondsSinceFail < 20;
+			if(Entry.m_NumWrongPasswords > 6)
+				return SecondsSinceFail < 60;
+			return SecondsSinceFail < 3;
+		}
+		// TODO: probably should log an error here
+		//       because this could be triggered with legit clients
+		//       that just have a lot of ssh keys
+		if(Entry.m_NumWrongKeyAttempts > 10)
+			return true;
+	}
+	return false;
+}
+
 void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 {
 	dbg_assert(m_apClients[ClientId] == nullptr, "ssh_server connect failed ClientId %d reused", ClientId);
@@ -2095,6 +2207,20 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 	if(net_addr_comp(&pClient->m_Addr, &NETADDR_ZEROED) == 0)
 	{
 		dbg_assert_failed("failed to convert ssh client address");
+	}
+
+	pClient->m_AddrNoPort = pClient->m_Addr;
+	pClient->m_AddrNoPort.port = 0;
+
+	if(Ratelimit(&pClient->m_AddrNoPort))
+	{
+		m_NumRatelimitDrops++;
+
+		// the client just sees "Broken pipe" in that case
+		ssh_disconnect(Session);
+		ssh_free(Session);
+		delete pClient;
+		return;
 	}
 
 	char aAddr[NETADDR_MAXSTRSIZE];
@@ -2196,6 +2322,12 @@ void CSshServer::Update()
 		return;
 	if(g_Config.m_SvSsh == 0)
 		return;
+
+	if(time_get() > m_NextRatelimitCleanup)
+	{
+		m_NextRatelimitCleanup = time_get() + time_freq() * 3;
+		ExpireRatelimits();
+	}
 
 	AcceptNewConnections();
 

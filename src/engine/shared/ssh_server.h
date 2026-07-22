@@ -1,10 +1,12 @@
 #ifndef ENGINE_SHARED_SSH_SERVER_H
 #define ENGINE_SHARED_SSH_SERVER_H
 
+#include <cstdint>
 #if defined(CONF_SSH)
 
 #include <base/log.h>
 #include <base/logger.h>
+#include <base/time.h>
 #include <base/types.h>
 #include <base/vmath.h>
 
@@ -20,6 +22,7 @@
 
 #include <deque>
 #include <optional>
+#include <unordered_map>
 
 static constexpr int MAX_SSH_CLIENTS = 16;
 static constexpr int MAX_HISTORY_ENTRIES = 512;
@@ -82,6 +85,30 @@ public:
 	bool m_StatusLine = true;
 };
 
+static constexpr size_t MAX_SSH_RATELIMIT_ENTRIES = 1024;
+
+class CRatelimitSshCon
+{
+public:
+	CRatelimitSshCon(NETADDR Addr)
+	{
+		m_Addr = Addr;
+		m_FirstSeen = time_get();
+		m_LastSeen = m_FirstSeen;
+	}
+
+	NETADDR m_Addr;
+	int64_t m_FirstSeen;
+	int64_t m_LastSeen;
+	int64_t m_LastFailedPassword = 0;
+
+	// amount of failed password attempts
+	int m_NumWrongPasswords = 0;
+
+	// amount of failed ssh key attempts
+	int m_NumWrongKeyAttempts = 0;
+};
+
 class CSshClient
 {
 public:
@@ -96,6 +123,7 @@ public:
 
 	int m_ClientId;
 	NETADDR m_Addr;
+	NETADDR m_AddrNoPort;
 
 	// HOLY STATE HANDLING???
 	// refactor this?
@@ -334,6 +362,9 @@ class CSshServer
 	static int ChannelExecRequestCallback(ssh_session Session, ssh_channel Channel, const char *pCommand, void *pUserData);
 	static int ChannelShellRequestCallback(ssh_session Session, ssh_channel Channel, void *pUserData);
 
+	void LogRatelimitStatus();
+	void ExpireRatelimits();
+	bool Ratelimit(const NETADDR *pAddr);
 	void OnClientConnect(int ClientId, ssh_session Session);
 	void OnClientDisconnect(int ClientId, const char *pReason = "");
 
@@ -357,6 +388,9 @@ class CSshServer
 	void ReadNewInput(CSshClient *pClient);
 
 public:
+	std::unordered_map<NETADDR, CRatelimitSshCon> m_Ratelimits;
+	size_t m_NumRatelimitDrops = 0;
+	int64_t m_NextRatelimitCleanup = 0;
 	CSshClient *m_apClients[MAX_SSH_CLIENTS] = {};
 	unicode_width_state_t m_UnicodeWidthState;
 
