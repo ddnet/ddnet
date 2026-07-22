@@ -452,6 +452,7 @@ public:
 
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddPgsqlServer(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConReloadAnnouncement(IConsole::IResult *pResult, void *pUserData);

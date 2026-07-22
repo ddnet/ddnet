@@ -56,6 +56,17 @@ struct CMysqlConfig
 	bool m_Setup;
 };
 
+struct CPostgresqlConfig
+{
+	char m_aDatabase[64];
+	char m_aPrefix[64];
+	char m_aUser[64];
+	char m_aPass[64];
+	char m_aIp[64];
+	int m_Port;
+	bool m_Setup;
+};
+
 class CDbConnectionPool
 {
 public:
@@ -79,6 +90,7 @@ public:
 
 	void RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64]);
 	void RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig);
+	void RegisterPostgresqlDatabase(Mode DatabaseMode, const CPostgresqlConfig *pPostgresqlConfig);
 
 	void Execute(
 		FRead pFunc,
