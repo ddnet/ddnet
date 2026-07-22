@@ -36,12 +36,6 @@
 //       right now users have to manually use "help sv_name" to get that which is worse
 //       ux than the remote console in the client! Uacceptable!
 
-// TODO: add some delay in the password check to combat bruteforcing
-//       if there are too many requests from different ips slow down every check
-//       after every failed attempt slow down that ip
-//       --
-//       or does libssh does this a bit already? or offer something?
-
 // TODO: experiment with some fancy features
 //       in theory this thing could be a full TUI
 //       for example typing in the "kick" command could
@@ -2240,10 +2234,6 @@ void CSshServer::OnClientConnect(int ClientId, ssh_session Session)
 
 	char aAddr[NETADDR_MAXSTRSIZE];
 	net_addr_str(&pClient->m_Addr, aAddr, sizeof(aAddr), true);
-
-	// TODO: this prints for every connection attempt so attackers without the password can spam the log
-	//       and occupy client ids
-	//       so ideally there would be a different connection pool just for the before auth state
 	log_info("ssh", "new connection cid=%d addr=<{%s}>", ClientId, aAddr);
 
 	pClient->m_InputHistory = m_InputHistory;
