@@ -2145,7 +2145,7 @@ void CSshServer::ExpireRatelimits()
 	const int64_t Now = time_get();
 	std::erase_if(m_Ratelimits, [Now](const auto &Pair) {
 		const CRatelimitSshCon &Entry = Pair.second;
-		const bool HasFails = Entry.m_NumWrongPasswords > 0 || Entry.m_NumWrongKeyAttempts > 0;
+		const bool HasFails = Entry.m_NumWrongPasswords > 0 || Entry.m_NumWrongKeyAttempts > 0 || Entry.m_NumTimeouts > 0;
 		int64_t NotSeenSinceMinutes = ((Now - Entry.m_LastSeen) / time_freq()) / 60;
 		if(!HasFails && NotSeenSinceMinutes > 60)
 			return true;
@@ -2181,6 +2181,10 @@ bool CSshServer::Ratelimit(const NETADDR *pAddr)
 				return SecondsSinceTimeout < 60;
 			if(Entry.m_NumTimeouts > 6)
 				return SecondsSinceTimeout < 400;
+			// 10+ timeouts is considered a serious attack
+			// and will cause a one hour ratelimit
+			if(Entry.m_NumTimeouts > 10)
+				return SecondsSinceTimeout < 60 * 60 * 60;
 			return SecondsSinceTimeout < 3;
 		}
 		if(Entry.m_NumWrongKeyAttempts > 100)
