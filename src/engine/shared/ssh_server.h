@@ -1,7 +1,6 @@
 #ifndef ENGINE_SHARED_SSH_SERVER_H
 #define ENGINE_SHARED_SSH_SERVER_H
 
-#include <cstdint>
 #if defined(CONF_SSH)
 
 #include <base/log.h>

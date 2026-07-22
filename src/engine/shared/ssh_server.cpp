@@ -1,4 +1,3 @@
-#include <cstdint>
 #if defined(CONF_SSH)
 
 #include "ssh_server.h"
@@ -2120,12 +2119,6 @@ void CSshServer::LogRatelimitStatus()
 	log_info("ssh", "connections dropped by ratelimit: %" PRIzu, m_NumRatelimitDrops);
 	log_info("ssh", "ips tracked %" PRIzu "/%" PRIzu, m_Ratelimits.size(), MAX_SSH_RATELIMIT_ENTRIES);
 
-	// FIXME: key limit doesnt seem to work
-	//
-	// // FIXME: once it works successful password login should also reset key fails
-
-// UDPATE: should work now ¹ ^ 
-
 	int NumPrinted = 0;
 	for(const auto &It : m_Ratelimits)
 	{
@@ -2179,11 +2172,18 @@ bool CSshServer::Ratelimit(const NETADDR *pAddr)
 				return SecondsSinceFail < 60;
 			return SecondsSinceFail < 3;
 		}
-		// TODO: probably should log an error here
-		//       because this could be triggered with legit clients
-		//       that just have a lot of ssh keys
-		if(Entry.m_NumWrongKeyAttempts > 10)
+		if(Entry.m_NumWrongKeyAttempts > 100)
+		{
+			// this branch can be hit if someone has 10 different keys
+			// in his ~/.ssh directory and then failed to enter the correct
+			// password 10 times in a row
+			// then the ban will stay until the ratelimit entry expires
+			// which is over an hour
+			char aAddr[NETADDR_MAXSTRSIZE];
+			net_addr_str(pAddr, aAddr, sizeof(aAddr), false);
+			log_warn("ssh", "dropped ssh connection because %s already tried %d different ssh keys", aAddr, Entry.m_NumWrongKeyAttempts);
 			return true;
+		}
 	}
 	return false;
 }
