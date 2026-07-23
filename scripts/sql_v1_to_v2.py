@@ -118,6 +118,11 @@ def log(msg):
 	print(msg, file=sys.stderr, flush=True)
 
 
+def pg_connect(conninfo):
+	# batch job: don't let the game role's statement_timeout kill long statements
+	return psycopg2.connect(conninfo, options="-c statement_timeout=0")
+
+
 def connect_source(url):
 	"""Opens mysql://user:pass@host:port/db or sqlite:///path as a v1 source.
 
@@ -144,7 +149,7 @@ def connect_source(url):
 		cur.execute("SET SESSION time_zone = '+00:00'")
 		try:
 			cur.execute("SET SESSION max_statement_time = 0")
-		except Exception:
+		except mysql_driver.Error:
 			pass  # MySQL spells it max_execution_time and it only limits SELECTs
 		cur.close()
 		return "mysql", conn
@@ -158,15 +163,15 @@ def iter_rows(src, query, args=()):
 		cur = conn.cursor()
 		cur.execute(query.replace("%s", "?"), args)
 	else:
-		# unbuffered cursor, the tables don't fit in memory
-		cur = conn.cursor(conn.__class__.cursorclass.__mro__[0]) if False else conn.cursor()
+		# server-side cursor, the tables don't fit in memory
 		try:
 			import pymysql.cursors
 
-			cur.close()
 			cur = conn.cursor(pymysql.cursors.SSCursor)
 		except ImportError:
-			pass
+			import MySQLdb.cursors
+
+			cur = conn.cursor(MySQLdb.cursors.SSCursor)
 		cur.execute(query, args)
 	while True:
 		rows = cur.fetchmany(BATCH)
@@ -439,7 +444,7 @@ def migrate_points(src, pg, prefix):
 
 
 def cmd_create_schema(args):
-	pg = psycopg2.connect(args.to)
+	pg = pg_connect(args.to)
 	cur = pg.cursor()
 	cur.execute(V2_SCHEMA.format(p=args.prefix))
 	pg.commit()
@@ -448,7 +453,7 @@ def cmd_create_schema(args):
 
 def cmd_migrate(args):
 	src = connect_source(args.source)
-	pg = psycopg2.connect(args.to)
+	pg = pg_connect(args.to)
 	migrate_maps(src, pg, args.prefix)
 	migrate_players(src, pg, args.prefix)
 	migrate_finishes(src, pg, args.prefix, args.since)
@@ -461,7 +466,7 @@ def cmd_migrate(args):
 
 def cmd_finalize(args):
 	p = args.prefix
-	pg = psycopg2.connect(args.to)
+	pg = pg_connect(args.to)
 	cur = pg.cursor()
 
 	log("adding finish primary key (skipped if it exists)...")
@@ -545,7 +550,7 @@ def cmd_replay(args):
 	if parsed.scheme != "sqlite":
 		raise SystemExit("replay expects a sqlite:///... source (v2 backup file)")
 	lite = sqlite3.connect(f"file:{parsed.path}?mode=ro", uri=True)
-	pg = psycopg2.connect(args.to)
+	pg = pg_connect(args.to)
 	cur = pg.cursor()
 	maps = IdCache(pg, f"{p}_map", "map_id")
 	players = IdCache(pg, f"{p}_player", "player_id")
@@ -658,7 +663,7 @@ def one(src_or_pg, query, args=()):
 def cmd_verify(args):
 	p = args.prefix
 	src = connect_source(args.source)
-	pg = psycopg2.connect(args.to)
+	pg = pg_connect(args.to)
 	failed = False
 
 	def check(name, v1, v2):
@@ -682,7 +687,11 @@ def cmd_verify(args):
 		rosters.setdefault(bytes(team_id), (map_name, []))[1].append(name)
 	distinct_rosters = len({(map_name, tuple(sorted(names))) for (map_name, names) in rosters.values()})
 	check("team count", distinct_rosters, one(pg, f"SELECT COUNT(*) FROM {p}_team")[0])
-	check("map count", one(src, f"SELECT COUNT(*) FROM {p}_maps")[0], one(pg, f"SELECT COUNT(*) FROM {p}_map")[0])
+	# maps referenced by finishes/teams/saves but missing from v1's maps
+	# table get placeholder rows (all-default fields) during migration
+	placeholders = one(pg, f"SELECT COUNT(*) FROM {p}_map WHERE category = '' AND mapper = '' AND points = 0 AND stars = 0 AND released IS NULL")[0]
+	log(f"[INFO] {placeholders} placeholder maps for finishes on unregistered maps")
+	check("map count", one(src, f"SELECT COUNT(*) FROM {p}_maps")[0], one(pg, f"SELECT COUNT(*) FROM {p}_map")[0] - placeholders)
 	check("points sum", one(src, f"SELECT COALESCE(SUM(Points), 0) FROM {p}_points")[0], one(pg, f"SELECT COALESCE(SUM(points), 0) FROM {p}_player_points")[0])
 	check("save count", one(src, f"SELECT COUNT(*) FROM {p}_saves")[0], one(pg, f"SELECT COUNT(*) FROM {p}_save")[0])
 
