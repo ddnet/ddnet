@@ -39,6 +39,7 @@ public:
 	const char *InsertIgnoreEnd() const override { return " ON CONFLICT DO NOTHING"; }
 	const char *Random() const override { return "RANDOM()"; }
 	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
+	const char *MedianMapTimeV2(char *pBuffer, int BufferSize) const override;
 	const char *False() const override { return "FALSE"; }
 	const char *True() const override { return "TRUE"; }
 
@@ -68,7 +69,7 @@ public:
 	void GetString(int Col, char *pBuffer, int BufferSize) override;
 	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
+	bool AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 private:
 	// copy of config vars
@@ -523,7 +524,17 @@ const char *CPostgresqlConnection::MedianMapTime(char *pBuffer, int BufferSize) 
 	return pBuffer;
 }
 
-bool CPostgresqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
+const char *CPostgresqlConnection::MedianMapTimeV2(char *pBuffer, int BufferSize) const
+{
+	str_format(pBuffer, BufferSize,
+		"SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY time_cs) / 100.0 "
+		"FROM %s_finish "
+		"WHERE map_id = l.map_id",
+		GetPrefix());
+	return pBuffer;
+}
+
+bool CPostgresqlConnection::AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),

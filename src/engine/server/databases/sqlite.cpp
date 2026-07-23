@@ -25,6 +25,7 @@ public:
 	const char *InsertIgnore() const override { return "INSERT OR IGNORE"; }
 	const char *Random() const override { return "RANDOM()"; }
 	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
+	const char *MedianMapTimeV2(char *pBuffer, int BufferSize) const override;
 	// Since SQLite 3.23.0 true/false literals are recognized, but still cleaner to use 1/0, because:
 	// > For compatibility, if there exist columns named "true" or "false", then
 	// > the identifiers refer to the columns rather than Boolean constants.
@@ -58,7 +59,7 @@ public:
 	// passing a negative buffer size is undefined behavior
 	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
+	bool AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 	// fail safe
 	bool CreateFailsafeTables();
@@ -426,6 +427,23 @@ const char *CSqliteConnection::MedianMapTime(char *pBuffer, int BufferSize) cons
 	return pBuffer;
 }
 
+const char *CSqliteConnection::MedianMapTimeV2(char *pBuffer, int BufferSize) const
+{
+	str_format(pBuffer, BufferSize,
+		"SELECT AVG("
+		"  CASE counter %% 2 "
+		"    WHEN 0 THEN CASE WHEN rn IN (counter / 2, counter / 2 + 1) THEN time_cs END "
+		"    WHEN 1 THEN CASE WHEN rn = counter / 2 + 1 THEN time_cs END END) "
+		"  OVER (PARTITION BY map_id) / 100.0 AS median "
+		"FROM ("
+		"  SELECT *, ROW_NUMBER() "
+		"  OVER (PARTITION BY map_id ORDER BY time_cs) rn, COUNT(*) "
+		"  OVER (PARTITION BY map_id) counter "
+		"  FROM %s_finish WHERE map_id = l.map_id) as r",
+		GetPrefix());
+	return pBuffer;
+}
+
 bool CSqliteConnection::Execute(const char *pQuery, char *pError, int ErrorSize)
 {
 	char *pErrorMsg;
@@ -459,7 +477,7 @@ void CSqliteConnection::AssertNoError(int Result)
 	}
 }
 
-bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
+bool CSqliteConnection::AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
