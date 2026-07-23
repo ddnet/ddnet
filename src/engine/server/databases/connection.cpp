@@ -8,6 +8,52 @@ IDbConnection::IDbConnection(const char *pPrefix, int SchemaVersion) :
 	str_copy(m_aPrefix, pPrefix);
 }
 
+bool IDbConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
+{
+	if(SchemaVersion() < 2)
+	{
+		return AddPointsV1(pPlayer, Points, pError, ErrorSize);
+	}
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+		"%s INTO %s_player(name) VALUES (%s)%s",
+		InsertIgnore(), GetPrefix(), Placeholder(1).c_str(), InsertIgnoreEnd());
+	if(!PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return false;
+	}
+	BindString(1, pPlayer);
+	int NumUpdated;
+	if(!ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+	{
+		return false;
+	}
+	str_format(aBuf, sizeof(aBuf),
+		"%s INTO %s_player_points(player_id, points) "
+		"SELECT player_id, 0 FROM %s_player WHERE name = %s%s",
+		InsertIgnore(), GetPrefix(), GetPrefix(), Placeholder(1).c_str(), InsertIgnoreEnd());
+	if(!PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return false;
+	}
+	BindString(1, pPlayer);
+	if(!ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+	{
+		return false;
+	}
+	str_format(aBuf, sizeof(aBuf),
+		"UPDATE %s_player_points SET points = points + %s "
+		"WHERE player_id = (SELECT player_id FROM %s_player WHERE name = %s)",
+		GetPrefix(), Placeholder(1).c_str(), GetPrefix(), Placeholder(2).c_str());
+	if(!PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return false;
+	}
+	BindInt(1, Points);
+	BindString(2, pPlayer);
+	return ExecuteUpdate(&NumUpdated, pError, ErrorSize);
+}
+
 std::optional<float> IDbConnection::GetOptionalFloat(int Col)
 {
 	if(IsNull(Col))

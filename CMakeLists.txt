@@ -3027,6 +3027,7 @@ if(SERVER)
     score.h
     scoreworker.cpp
     scoreworker.h
+    scoreworker_v2.cpp
     teams.cpp
     teams.h
     teehistorian.cpp

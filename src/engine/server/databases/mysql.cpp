@@ -108,7 +108,7 @@ public:
 	void GetString(int Col, char *pBuffer, int BufferSize) override;
 	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
+	bool AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 private:
 	class CStmtDeleter
@@ -778,7 +778,7 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	return Length;
 }
 
-bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
+bool CMysqlConnection::AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
