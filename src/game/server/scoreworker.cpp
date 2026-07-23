@@ -407,13 +407,11 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	char aTimestamp[512];
 	pSqlServer->ToUnixTimestamp("l.Timestamp", aTimestamp, sizeof(aTimestamp));
 
-	char aMedianMapTime[2048];
 	char aBuf[4096];
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT l.Map, l.Server, Mapper, Points, Stars, "
 		"  (SELECT COUNT(Name) FROM %s_race WHERE Map = l.Map) AS Finishes, "
 		"  (SELECT COUNT(DISTINCT Name) FROM %s_race WHERE Map = l.Map) AS Finishers, "
-		"  (%s) AS Median, "
 		"  %s AS Stamp, "
 		"  %s-%s AS Ago, "
 		"  (SELECT MIN(Time) FROM %s_race WHERE Map = l.Map AND Name = %s) AS OwnTime "
@@ -428,7 +426,6 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"  LIMIT 1"
 		") as l",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
-		pSqlServer->MedianMapTime(aMedianMapTime, sizeof(aMedianMapTime)),
 		aTimestamp, aCurrentTimestamp, aTimestamp,
 		pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(),
 		pSqlServer->GetPrefix(), pSqlServer->LikeNocase(2).c_str(),
@@ -459,10 +456,39 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		int Stars = pSqlServer->GetInt(5);
 		int Finishes = pSqlServer->GetInt(6);
 		int Finishers = pSqlServer->GetInt(7);
-		float Median = pSqlServer->GetOptionalFloat(8).value_or(-1.0f);
-		int Stamp = pSqlServer->GetInt(9);
-		int Ago = pSqlServer->GetInt(10);
-		float OwnTime = pSqlServer->GetOptionalFloat(11).value_or(-1.0f);
+		int Stamp = pSqlServer->GetInt(8);
+		int Ago = pSqlServer->GetInt(9);
+		float OwnTime = pSqlServer->GetOptionalFloat(10).value_or(-1.0f);
+
+		// The median is a separate query: computing it from the sorted times
+		// with LIMIT/OFFSET is far cheaper than the per-dialect window
+		// function tricks (MariaDB's MEDIAN() OVER blows past the statement
+		// time limit on huge maps) and works the same on every backend.
+		float Median = -1.0f;
+		if(Finishes > 0)
+		{
+			char aMedianBuf[512];
+			str_format(aMedianBuf, sizeof(aMedianBuf),
+				"SELECT AVG(Time) FROM ("
+				"  SELECT Time FROM %s_race WHERE Map = %s ORDER BY Time LIMIT %d OFFSET %d"
+				") AS m",
+				pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(),
+				2 - (Finishes % 2), (Finishes - 1) / 2);
+			if(!pSqlServer->PrepareStatement(aMedianBuf, pError, ErrorSize))
+			{
+				return false;
+			}
+			pSqlServer->BindString(1, aMap);
+			bool MedianEnd;
+			if(!pSqlServer->Step(&MedianEnd, pError, ErrorSize))
+			{
+				return false;
+			}
+			if(!MedianEnd)
+			{
+				Median = pSqlServer->GetOptionalFloat(1).value_or(-1.0f);
+			}
+		}
 
 		char aAgoString[40] = "\0";
 		char aReleasedString[60] = "\0";
@@ -874,20 +900,23 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
 
 	// check sort method
-	char aBuf[600];
+	// Counting the players with a better time is much cheaper than ranking
+	// the whole map with a window function, no sort is needed.
+	char aBuf[1024];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Ranking, Time, PercentRank "
+		"SELECT SUM(CASE WHEN g.mt < p.pt THEN 1 ELSE 0 END) + 1 AS Ranking, p.pt AS Time, "
+		"  CASE WHEN COUNT(*) > 1 THEN SUM(CASE WHEN g.mt < p.pt THEN 1 ELSE 0 END) * 1.0 / (COUNT(*) - 1) ELSE 0 END AS PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w as PercentRank, MIN(Time) AS Time, Name "
-		"  FROM %s_race "
-		"  WHERE Map = %s "
-		"  AND Server LIKE %s "
-		"  GROUP BY Name "
-		"  WINDOW w AS (ORDER BY MIN(Time))"
-		") as a "
-		"WHERE Name = %s",
-		pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(),
-		pSqlServer->Placeholder(2).c_str(), pSqlServer->Placeholder(3).c_str());
+		"  SELECT MIN(Time) AS mt FROM %s_race WHERE Map = %s AND Server LIKE %s GROUP BY Name"
+		") AS g "
+		"CROSS JOIN ("
+		"  SELECT MIN(Time) AS pt FROM %s_race WHERE Map = %s AND Server LIKE %s AND Name = %s"
+		") AS p "
+		"WHERE p.pt IS NOT NULL "
+		"GROUP BY p.pt",
+		pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(), pSqlServer->Placeholder(2).c_str(),
+		pSqlServer->GetPrefix(), pSqlServer->Placeholder(3).c_str(), pSqlServer->Placeholder(4).c_str(),
+		pSqlServer->Placeholder(5).c_str());
 
 	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -895,7 +924,9 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, aServerLike);
-	pSqlServer->BindString(3, pData->m_aName);
+	pSqlServer->BindString(3, pData->m_aMap);
+	pSqlServer->BindString(4, aServerLike);
+	pSqlServer->BindString(5, pData->m_aName);
 
 	bool End;
 	if(!pSqlServer->Step(&End, pError, ErrorSize))
@@ -921,7 +952,9 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, pAny);
-	pSqlServer->BindString(3, pData->m_aName);
+	pSqlServer->BindString(3, pData->m_aMap);
+	pSqlServer->BindString(4, pAny);
+	pSqlServer->BindString(5, pData->m_aName);
 
 	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
@@ -1078,26 +1111,49 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
 	int LimitStart = std::max(absolute(pData->m_Offset) - 1, 0);
-	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
 	const char *pAny = "%";
 
-	// check sort method
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf),
-		"SELECT Name, Time, Ranking "
-		"FROM ("
-		"  SELECT RANK() OVER w AS Ranking, MIN(Time) AS Time, Name "
-		"  FROM %s_race "
-		"  WHERE Map = %s "
-		"  AND Server LIKE %s "
-		"  GROUP BY Name "
-		"  WINDOW w AS (ORDER BY MIN(Time))"
-		") as a "
-		"ORDER BY Ranking %s "
-		"LIMIT %s OFFSET %d",
-		pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(), pSqlServer->Placeholder(2).c_str(),
-		pOrder,
-		pSqlServer->Placeholder(3).c_str(), LimitStart);
+	const bool Ascending = pData->m_Offset >= 0;
+	char aBuf[1024];
+	if(Ascending)
+	{
+		// Each player's best run is the row with no better run of the same
+		// player, so the top times are found by walking the time-ordered
+		// index instead of grouping the whole map.
+		str_format(aBuf, sizeof(aBuf),
+			"SELECT Name, Time, RANK() OVER (ORDER BY Time) AS Ranking "
+			"FROM ("
+			"  SELECT r1.Name AS Name, r1.Time AS Time "
+			"  FROM %s_race r1 "
+			"  WHERE r1.Map = %s AND r1.Server LIKE %s AND NOT EXISTS ("
+			"    SELECT 1 FROM %s_race r2 "
+			"    WHERE r2.Map = r1.Map AND r2.Name = r1.Name AND r2.Server LIKE %s "
+			"      AND (r2.Time, r2.Timestamp, r2.Server) < (r1.Time, r1.Timestamp, r1.Server)) "
+			"  ORDER BY r1.Time LIMIT %d"
+			") AS a "
+			"ORDER BY Ranking ASC LIMIT %s OFFSET %d",
+			pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(), pSqlServer->Placeholder(2).c_str(),
+			pSqlServer->GetPrefix(), pSqlServer->Placeholder(3).c_str(),
+			LimitStart + 5,
+			pSqlServer->Placeholder(4).c_str(), LimitStart);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf),
+			"SELECT Name, Time, Ranking "
+			"FROM ("
+			"  SELECT RANK() OVER w AS Ranking, MIN(Time) AS Time, Name "
+			"  FROM %s_race "
+			"  WHERE Map = %s "
+			"  AND Server LIKE %s "
+			"  GROUP BY Name "
+			"  WINDOW w AS (ORDER BY MIN(Time))"
+			") as a "
+			"ORDER BY Ranking DESC "
+			"LIMIT %s OFFSET %d",
+			pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(), pSqlServer->Placeholder(2).c_str(),
+			pSqlServer->Placeholder(3).c_str(), LimitStart);
+	}
 
 	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -1105,7 +1161,15 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, pAny);
-	pSqlServer->BindInt(3, 5);
+	if(Ascending)
+	{
+		pSqlServer->BindString(3, pAny);
+		pSqlServer->BindInt(4, 5);
+	}
+	else
+	{
+		pSqlServer->BindInt(3, 5);
+	}
 
 	// show top
 	int Line = 0;
@@ -1143,7 +1207,15 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, aServerLike);
-	pSqlServer->BindInt(3, 3);
+	if(Ascending)
+	{
+		pSqlServer->BindString(3, aServerLike);
+		pSqlServer->BindInt(4, 3);
+	}
+	else
+	{
+		pSqlServer->BindInt(3, 3);
+	}
 
 	str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
 		"------------ %s Top ------------", pData->m_aServer);

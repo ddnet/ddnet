@@ -79,8 +79,6 @@ public:
 	std::string LikeNocase(int) const override { return "LIKE CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
 	const char *InsertIgnore() const override { return "INSERT IGNORE"; }
 	const char *Random() const override { return "RAND()"; }
-	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
-	const char *MedianMapTimeV2(char *pBuffer, int BufferSize) const override;
 	const char *False() const override { return "FALSE"; }
 	const char *True() const override { return "TRUE"; }
 
@@ -136,9 +134,6 @@ private:
 	bool m_NewQuery = false;
 	bool m_HaveConnection = false;
 	bool m_InTransaction = false;
-	// MariaDB and Oracle MySQL differ in a few places (e.g. MEDIAN(), correlated
-	// derived tables), so remember which server we're talking to.
-	bool m_IsMariaDb = false;
 	MYSQL m_Mysql;
 	std::unique_ptr<MYSQL_STMT, CStmtDeleter> m_pStmt = nullptr;
 	std::vector<MYSQL_BIND> m_vStmtParameters;
@@ -267,7 +262,6 @@ bool CMysqlConnection::ConnectImpl()
 		return false;
 	}
 	m_HaveConnection = true;
-	m_IsMariaDb = str_find_nocase(mysql_get_server_info(&m_Mysql), "MariaDB") != nullptr;
 
 	m_pStmt = std::unique_ptr<MYSQL_STMT, CStmtDeleter>(mysql_stmt_init(&m_Mysql));
 
@@ -737,71 +731,6 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	dbg_assert(!IsNull, "Error in GetBlob(%d): NULL", Col + 1);
 	dbg_assert(!Error, "Error in GetBlob(%d): truncation occurred", Col + 1);
 	return Length;
-}
-
-const char *CMysqlConnection::MedianMapTime(char *pBuffer, int BufferSize) const
-{
-	if(m_IsMariaDb)
-	{
-		// MariaDB has the MEDIAN() window function. It also doesn't support the
-		// correlated derived table (WHERE Map = l.Map) that the MySQL variant
-		// below relies on, so the two paths can't be merged.
-		str_format(pBuffer, BufferSize,
-			"SELECT MEDIAN(Time) "
-			"OVER (PARTITION BY Map) "
-			"FROM %s_race "
-			"WHERE Map = l.Map "
-			"LIMIT 1",
-			GetPrefix());
-		return pBuffer;
-	}
-	// Oracle MySQL has no MEDIAN(), so compute the median with standard window
-	// functions instead. DIV is used for integer division, as MySQL's `/` is
-	// floating point.
-	str_format(pBuffer, BufferSize,
-		"SELECT AVG("
-		"  CASE counter %% 2 "
-		"    WHEN 0 THEN CASE WHEN rn IN (counter DIV 2, counter DIV 2 + 1) THEN Time END "
-		"    WHEN 1 THEN CASE WHEN rn = counter DIV 2 + 1 THEN Time END END) "
-		"  OVER (PARTITION BY Map) AS Median "
-		"FROM ("
-		"  SELECT Map, Time, ROW_NUMBER() "
-		"  OVER (PARTITION BY Map ORDER BY Time) rn, COUNT(*) "
-		"  OVER (PARTITION BY Map) counter "
-		"  FROM %s_race where Map = l.Map) as r "
-		"LIMIT 1",
-		GetPrefix());
-	return pBuffer;
-}
-
-const char *CMysqlConnection::MedianMapTimeV2(char *pBuffer, int BufferSize) const
-{
-	if(m_IsMariaDb)
-	{
-		// See MedianMapTime for why the MariaDB and MySQL paths differ.
-		str_format(pBuffer, BufferSize,
-			"SELECT MEDIAN(time_cs) "
-			"OVER (PARTITION BY map_id) / 100.0 "
-			"FROM %s_finish "
-			"WHERE map_id = l.map_id "
-			"LIMIT 1",
-			GetPrefix());
-		return pBuffer;
-	}
-	str_format(pBuffer, BufferSize,
-		"SELECT AVG("
-		"  CASE counter %% 2 "
-		"    WHEN 0 THEN CASE WHEN rn IN (counter DIV 2, counter DIV 2 + 1) THEN time_cs END "
-		"    WHEN 1 THEN CASE WHEN rn = counter DIV 2 + 1 THEN time_cs END END) "
-		"  OVER (PARTITION BY map_id) / 100.0 AS median "
-		"FROM ("
-		"  SELECT map_id, time_cs, ROW_NUMBER() "
-		"  OVER (PARTITION BY map_id ORDER BY time_cs) rn, COUNT(*) "
-		"  OVER (PARTITION BY map_id) counter "
-		"  FROM %s_finish WHERE map_id = l.map_id) as r "
-		"LIMIT 1",
-		GetPrefix(), GetPrefix());
-	return pBuffer;
 }
 
 bool CMysqlConnection::AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize)
