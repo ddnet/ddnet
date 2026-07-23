@@ -35,7 +35,6 @@
 using namespace std::chrono_literals;
 
 // TODO: Add combined weapon picker button that shows all currently available weapons
-// TODO: Add "joystick-aim-relative", a virtual joystick that moves the mouse pointer relatively. And add "aim-relative" ingame direct touch input.
 // TODO: Add "choice" predefined behavior which shows a selection popup for 2 or more other behaviors?
 // TODO: Support changing labels of menu buttons (or support overriding label for all predefined button behaviors)?
 
@@ -615,14 +614,24 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnDeactivate(bool ByFinger)
 void CTouchControls::CJoystickTouchButtonBehavior::OnUpdate()
 {
 	CControls &Controls = m_pTouchControls->GameClient()->m_Controls;
+	const float Zoom = m_pTouchControls->GameClient()->m_Snap.m_SpecInfo.m_Active ? m_pTouchControls->GameClient()->m_Camera.m_Zoom : 1.0f;
 	if(m_pTouchControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 	{
 		vec2 WorldScreenSize;
-		m_pTouchControls->Graphics()->CalcScreenParams(m_pTouchControls->Graphics()->ScreenAspect(), m_pTouchControls->GameClient()->m_Camera.m_Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
+		m_pTouchControls->Graphics()->CalcScreenParams(m_pTouchControls->Graphics()->ScreenAspect(), Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
 		Controls.m_aMousePos[g_Config.m_ClDummy] += -m_AccumulatedDelta * WorldScreenSize;
 		Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::RELATIVE;
 		Controls.m_aMousePos[g_Config.m_ClDummy].x = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (m_pTouchControls->Collision()->GetWidth() + 201.0f) * 32.0f);
 		Controls.m_aMousePos[g_Config.m_ClDummy].y = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].y, -201.0f * 32, (m_pTouchControls->Collision()->GetHeight() + 201.0f) * 32.0f);
+		m_AccumulatedDelta = vec2(0.0f, 0.0f);
+	}
+	else if(IsRelative())
+	{
+		vec2 WorldScreenSize;
+		m_pTouchControls->Graphics()->CalcScreenParams(m_pTouchControls->Graphics()->ScreenAspect(), Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
+		Controls.m_aMousePos[g_Config.m_ClDummy] += m_AccumulatedDelta * WorldScreenSize;
+		Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::RELATIVE;
+		Controls.ClampMousePos();
 		m_AccumulatedDelta = vec2(0.0f, 0.0f);
 	}
 	else
@@ -646,6 +655,12 @@ int CTouchControls::CJoystickActionTouchButtonBehavior::SelectedAction() const
 
 // Joystick that only aims.
 int CTouchControls::CJoystickAimTouchButtonBehavior::SelectedAction() const
+{
+	return ACTION_AIM;
+}
+
+// Joystick that only aims and moves the mouse pointer relatively.
+int CTouchControls::CJoystickAimRelativeTouchButtonBehavior::SelectedAction() const
 {
 	return ACTION_AIM;
 }
@@ -962,6 +977,7 @@ int CTouchControls::NextDirectTouchAction() const
 		case EDirectTouchIngameMode::ACTION:
 			return m_ActionSelected;
 		case EDirectTouchIngameMode::AIM:
+		case EDirectTouchIngameMode::AIM_RELATIVE:
 			return ACTION_AIM;
 		case EDirectTouchIngameMode::FIRE:
 			return ACTION_FIRE;
@@ -1158,6 +1174,12 @@ void CTouchControls::UpdateButtonsGame(const std::vector<IInput::CTouchFingerSta
 			Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::RELATIVE;
 			Controls.m_aMousePos[g_Config.m_ClDummy].x = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (Collision()->GetWidth() + 201.0f) * 32.0f);
 			Controls.m_aMousePos[g_Config.m_ClDummy].y = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].y, -201.0f * 32, (Collision()->GetHeight() + 201.0f) * 32.0f);
+		}
+		else if(m_DirectTouchIngame == EDirectTouchIngameMode::AIM_RELATIVE)
+		{
+			Controls.m_aMousePos[g_Config.m_ClDummy] += DirectFingerState.m_Delta * WorldScreenSize;
+			Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::RELATIVE;
+			Controls.ClampMousePos();
 		}
 		else
 		{
@@ -1555,6 +1577,7 @@ std::unique_ptr<CTouchControls::CPredefinedTouchButtonBehavior> CTouchControls::
 		{CUseActionTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CUseActionTouchButtonBehavior>(); }},
 		{CJoystickActionTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickActionTouchButtonBehavior>(); }},
 		{CJoystickAimTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickAimTouchButtonBehavior>(); }},
+		{CJoystickAimRelativeTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickAimRelativeTouchButtonBehavior>(); }},
 		{CJoystickFireTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickFireTouchButtonBehavior>(); }},
 		{CJoystickHookTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickHookTouchButtonBehavior>(); }}};
 	for(const CBehaviorFactory &BehaviorFactory : BEHAVIOR_FACTORIES)
