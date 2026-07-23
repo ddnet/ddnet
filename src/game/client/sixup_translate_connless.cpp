@@ -31,17 +31,18 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 		Info.m_NumClients = Up.GetInt();
 		Info.m_MaxClients = Up.GetInt();
 
-		for(int i = 0; i < Info.m_NumClients; i++)
+		Info.m_vClients.resize(std::clamp(Info.m_NumClients, 0, (int)SERVERINFO_MAX_CLIENTS));
+		for(auto &Client : Info.m_vClients)
 		{
-			GetString(Info.m_aClients[i].m_aName);
-			GetString(Info.m_aClients[i].m_aClan);
-			Info.m_aClients[i].m_Country = Up.GetInt();
-			if(!in_range(Info.m_aClients[i].m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+			GetString(Client.m_aName);
+			GetString(Client.m_aClan);
+			Client.m_Country = Up.GetInt();
+			if(!in_range(Client.m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
 			{
-				Info.m_aClients[i].m_Country = CountryCode::DEFAULT;
+				Client.m_Country = CountryCode::DEFAULT;
 			}
-			Info.m_aClients[i].m_Score = Up.GetInt();
-			Info.m_aClients[i].m_Player = !(Up.GetInt() & 1);
+			Client.m_Score = Up.GetInt();
+			Client.m_Player = !(Up.GetInt() & 1);
 		}
 
 		const bool IsNotVanilla = Info.m_MaxPlayers > VANILLA_MAX_CLIENTS || Info.m_MaxClients > VANILLA_MAX_CLIENTS;
@@ -82,14 +83,14 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 			Packer.AddString(""); // extra info, reserved
 		}
 
-		for(int i = 0; i < Info.m_NumClients; i++)
+		for(const auto &Client : Info.m_vClients)
 		{
-			Packer.AddString(Info.m_aClients[i].m_aName);
-			Packer.AddString(Info.m_aClients[i].m_aClan);
+			Packer.AddString(Client.m_aName);
+			Packer.AddString(Client.m_aClan);
 
-			PutInt(Info.m_aClients[i].m_Country);
-			PutInt(Info.m_aClients[i].m_Score);
-			PutInt(Info.m_aClients[i].m_Player);
+			PutInt(Client.m_Country);
+			PutInt(Client.m_Score);
+			PutInt(Client.m_Player);
 
 			if(IsNotVanilla)
 			{
