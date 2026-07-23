@@ -729,6 +729,12 @@ void CDemoPlayer::DoTick()
 
 		if(ChunkType == CHUNKTYPE_DELTA)
 		{
+			if(m_LastSnapshotDataSize == -1)
+			{
+				Stop("Delta snapshot before any full snapshot");
+				break;
+			}
+
 			// process delta snapshot
 			DataSize = SnapshotDelta()->UnpackDelta(m_LastSnapshotData.AsSnapshot(), &m_Snapshot, m_aChunkData, DataSize);
 
@@ -850,6 +856,7 @@ int CDemoPlayer::Load(IStorage *pStorage, IConsole *pConsole, const char *pFilen
 	m_Info.m_Info.m_Speed = 1;
 	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
 	m_LastSnapshotDataSize = -1;
+	mem_zero(&m_LastSnapshotData, sizeof(m_LastSnapshotData));
 
 	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
 	{
