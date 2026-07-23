@@ -115,6 +115,23 @@ protected:
 	void FormatCreateMaps(char *aBuf, unsigned int BufferSize) const;
 	void FormatCreateSaves(char *aBuf, unsigned int BufferSize, bool Backup) const;
 	void FormatCreatePoints(char *aBuf, unsigned int BufferSize) const;
+
+	// Schema version 2: map/player names are normalized into integer-keyed
+	// dimension tables, times are exact integer centiseconds, the append-only
+	// `finish` log is the source of truth and the denormalized `best` table
+	// (one row per map/player/server) serves rank and top queries.
+	// pIdAutoIncrement is the dialect's auto-incrementing integer primary key
+	// column definition, pBlobType/pUuidType the dialect's blob column types
+	// (checkpoint times as 25 little-endian int32 centiseconds; team ids and
+	// roster hashes as 16 raw bytes).
+	void FormatCreateV2Map(char *aBuf, unsigned int BufferSize, const char *pIdAutoIncrement) const;
+	void FormatCreateV2Player(char *aBuf, unsigned int BufferSize, const char *pIdAutoIncrement) const;
+	void FormatCreateV2PlayerPoints(char *aBuf, unsigned int BufferSize) const;
+	void FormatCreateV2Finish(char *aBuf, unsigned int BufferSize, const char *pBlobType, bool Backup) const;
+	void FormatCreateV2Best(char *aBuf, unsigned int BufferSize, const char *pBlobType) const;
+	void FormatCreateV2Team(char *aBuf, unsigned int BufferSize, const char *pUuidType, bool Backup) const;
+	void FormatCreateV2TeamPlayer(char *aBuf, unsigned int BufferSize, const char *pUuidType) const;
+	void FormatCreateV2Save(char *aBuf, unsigned int BufferSize, bool Backup) const;
 };
 
 bool MysqlAvailable();

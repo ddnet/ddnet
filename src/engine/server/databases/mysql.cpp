@@ -296,24 +296,51 @@ bool CMysqlConnection::ConnectImpl()
 
 	if(m_Config.m_Setup)
 	{
-		char aCreateRace[1024];
-		char aCreateTeamrace[1024];
-		char aCreateMaps[1024];
-		char aCreateSaves[1024];
-		char aCreatePoints[1024];
-		FormatCreateRace(aCreateRace, sizeof(aCreateRace), /* Backup */ false);
-		FormatCreateTeamrace(aCreateTeamrace, sizeof(aCreateTeamrace), "VARBINARY(16)", /* Backup */ false);
-		FormatCreateMaps(aCreateMaps, sizeof(aCreateMaps));
-		FormatCreateSaves(aCreateSaves, sizeof(aCreateSaves), /* Backup */ false);
-		FormatCreatePoints(aCreatePoints, sizeof(aCreatePoints));
-
-		if(!PrepareAndExecuteStatement(aCreateRace) ||
-			!PrepareAndExecuteStatement(aCreateTeamrace) ||
-			!PrepareAndExecuteStatement(aCreateMaps) ||
-			!PrepareAndExecuteStatement(aCreateSaves) ||
-			!PrepareAndExecuteStatement(aCreatePoints))
+		char aBuf[2048];
+		if(SchemaVersion() >= 2)
 		{
-			return false;
+			FormatCreateV2Map(aBuf, sizeof(aBuf), "INT AUTO_INCREMENT PRIMARY KEY");
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Player(aBuf, sizeof(aBuf), "INT AUTO_INCREMENT PRIMARY KEY");
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2PlayerPoints(aBuf, sizeof(aBuf));
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Finish(aBuf, sizeof(aBuf), "VARBINARY(100)", /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Best(aBuf, sizeof(aBuf), "VARBINARY(100)");
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Team(aBuf, sizeof(aBuf), "VARBINARY(16)", /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2TeamPlayer(aBuf, sizeof(aBuf), "VARBINARY(16)");
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Save(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+		}
+		else
+		{
+			FormatCreateRace(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateTeamrace(aBuf, sizeof(aBuf), "VARBINARY(16)", /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateMaps(aBuf, sizeof(aBuf));
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateSaves(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreatePoints(aBuf, sizeof(aBuf));
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
 		}
 		m_Config.m_Setup = false;
 	}

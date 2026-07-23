@@ -242,22 +242,52 @@ bool CPostgresqlConnection::ConnectImpl(char *pError, int ErrorSize)
 
 	if(m_Config.m_Setup)
 	{
-		char aBuf[1024];
-		FormatCreateRace(aBuf, sizeof(aBuf), /* Backup */ false);
-		if(!ExecSimple(aBuf, pError, ErrorSize))
-			return false;
-		FormatCreateTeamrace(aBuf, sizeof(aBuf), "BYTEA", /* Backup */ false);
-		if(!ExecSimple(aBuf, pError, ErrorSize))
-			return false;
-		FormatCreateMaps(aBuf, sizeof(aBuf));
-		if(!ExecSimple(aBuf, pError, ErrorSize))
-			return false;
-		FormatCreateSaves(aBuf, sizeof(aBuf), /* Backup */ false);
-		if(!ExecSimple(aBuf, pError, ErrorSize))
-			return false;
-		FormatCreatePoints(aBuf, sizeof(aBuf));
-		if(!ExecSimple(aBuf, pError, ErrorSize))
-			return false;
+		char aBuf[2048];
+		if(SchemaVersion() >= 2)
+		{
+			FormatCreateV2Map(aBuf, sizeof(aBuf), "SERIAL PRIMARY KEY");
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Player(aBuf, sizeof(aBuf), "SERIAL PRIMARY KEY");
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2PlayerPoints(aBuf, sizeof(aBuf));
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Finish(aBuf, sizeof(aBuf), "BYTEA", /* Backup */ false);
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Best(aBuf, sizeof(aBuf), "BYTEA");
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Team(aBuf, sizeof(aBuf), "BYTEA", /* Backup */ false);
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2TeamPlayer(aBuf, sizeof(aBuf), "BYTEA");
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Save(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+		}
+		else
+		{
+			FormatCreateRace(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateTeamrace(aBuf, sizeof(aBuf), "BYTEA", /* Backup */ false);
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateMaps(aBuf, sizeof(aBuf));
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateSaves(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreatePoints(aBuf, sizeof(aBuf));
+			if(!ExecSimple(aBuf, pError, ErrorSize))
+				return false;
+		}
 		m_Config.m_Setup = false;
 	}
 	log_info("postgresql", "connection established");

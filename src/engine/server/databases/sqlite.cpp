@@ -155,7 +155,46 @@ bool CSqliteConnection::ConnectImpl(char *pError, int ErrorSize)
 	{
 		if(!Execute("PRAGMA journal_mode=WAL", pError, ErrorSize))
 			return false;
-		char aBuf[1024];
+		char aBuf[2048];
+		if(SchemaVersion() >= 2)
+		{
+			FormatCreateV2Map(aBuf, sizeof(aBuf), "INTEGER PRIMARY KEY");
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Player(aBuf, sizeof(aBuf), "INTEGER PRIMARY KEY");
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2PlayerPoints(aBuf, sizeof(aBuf));
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Finish(aBuf, sizeof(aBuf), "BLOB", /* Backup */ false);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Best(aBuf, sizeof(aBuf), "BLOB");
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Team(aBuf, sizeof(aBuf), "BLOB", /* Backup */ false);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2TeamPlayer(aBuf, sizeof(aBuf), "BLOB");
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Save(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+
+			FormatCreateV2Finish(aBuf, sizeof(aBuf), "BLOB", /* Backup */ true);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Team(aBuf, sizeof(aBuf), "BLOB", /* Backup */ true);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Save(aBuf, sizeof(aBuf), /* Backup */ true);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			m_Setup = false;
+			return true;
+		}
 		FormatCreateRace(aBuf, sizeof(aBuf), /* Backup */ false);
 		if(!Execute(aBuf, pError, ErrorSize))
 			return false;
