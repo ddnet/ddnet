@@ -1062,20 +1062,22 @@ bool CScoreWorkerV2::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	char aServerLike[16];
 	str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
 
-	char aBuf[600];
+	// count players with a better time instead of ranking the whole map
+	char aBuf[1024];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT ranking, time, percentrank "
+		"SELECT SUM(CASE WHEN g.mt < p.pt THEN 1 ELSE 0 END) + 1 AS ranking, p.pt / 100.0 AS time, "
+		"  CASE WHEN COUNT(*) > 1 THEN SUM(CASE WHEN g.mt < p.pt THEN 1 ELSE 0 END) * 1.0 / (COUNT(*) - 1) ELSE 0 END AS percentrank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS ranking, PERCENT_RANK() OVER w AS percentrank, MIN(time_cs) / 100.0 AS time, player_id "
-		"  FROM %s_best "
-		"  WHERE map_id = %s "
-		"  AND server LIKE %s "
-		"  GROUP BY player_id "
-		"  WINDOW w AS (ORDER BY MIN(time_cs))"
-		") as a "
-		"WHERE player_id = %s",
-		pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(),
-		pSqlServer->Placeholder(2).c_str(), pSqlServer->Placeholder(3).c_str());
+		"  SELECT MIN(time_cs) AS mt FROM %s_best WHERE map_id = %s AND server LIKE %s GROUP BY player_id"
+		") AS g "
+		"CROSS JOIN ("
+		"  SELECT MIN(time_cs) AS pt FROM %s_best WHERE map_id = %s AND server LIKE %s AND player_id = %s"
+		") AS p "
+		"WHERE p.pt IS NOT NULL "
+		"GROUP BY p.pt",
+		pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(), pSqlServer->Placeholder(2).c_str(),
+		pSqlServer->GetPrefix(), pSqlServer->Placeholder(3).c_str(), pSqlServer->Placeholder(4).c_str(),
+		pSqlServer->Placeholder(5).c_str());
 
 	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -1083,7 +1085,9 @@ bool CScoreWorkerV2::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	}
 	pSqlServer->BindInt(1, MapId);
 	pSqlServer->BindString(2, aServerLike);
-	pSqlServer->BindInt(3, PlayerId);
+	pSqlServer->BindInt(3, MapId);
+	pSqlServer->BindString(4, aServerLike);
+	pSqlServer->BindInt(5, PlayerId);
 
 	bool End;
 	if(!pSqlServer->Step(&End, pError, ErrorSize))
@@ -1109,7 +1113,9 @@ bool CScoreWorkerV2::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	}
 	pSqlServer->BindInt(1, MapId);
 	pSqlServer->BindString(2, pAny);
-	pSqlServer->BindInt(3, PlayerId);
+	pSqlServer->BindInt(3, MapId);
+	pSqlServer->BindString(4, pAny);
+	pSqlServer->BindInt(5, PlayerId);
 
 	if(!pSqlServer->Step(&End, pError, ErrorSize))
 	{
@@ -1273,29 +1279,53 @@ bool CScoreWorkerV2::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	}
 
 	int LimitStart = std::max(absolute(pData->m_Offset) - 1, 0);
-	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
 	const char *pAny = "%";
 
-	char aBuf[512];
-	// limit inside the derived table so that only the displayed rows are
-	// joined against the player names, the window still ranks the whole map
-	str_format(aBuf, sizeof(aBuf),
-		"SELECT p.name, a.time, a.ranking "
-		"FROM ("
-		"  SELECT RANK() OVER w AS ranking, MIN(time_cs) / 100.0 AS time, player_id "
-		"  FROM %s_best "
-		"  WHERE map_id = %s "
-		"  AND server LIKE %s "
-		"  GROUP BY player_id "
-		"  WINDOW w AS (ORDER BY MIN(time_cs)) "
-		"  ORDER BY ranking %s "
-		"  LIMIT %s OFFSET %d"
-		") as a "
-		"JOIN %s_player p ON p.player_id = a.player_id "
-		"ORDER BY a.ranking %s",
-		pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(), pSqlServer->Placeholder(2).c_str(),
-		pOrder, pSqlServer->Placeholder(3).c_str(), LimitStart,
-		pSqlServer->GetPrefix(), pOrder);
+	const bool Ascending = pData->m_Offset >= 0;
+	char aBuf[1024];
+	if(Ascending)
+	{
+		// A player's best row has no better row of the same player, so the
+		// top times are found by walking the time-ordered index and only the
+		// displayed rows are joined against the player names.
+		str_format(aBuf, sizeof(aBuf),
+			"SELECT p.name, a.time, a.ranking "
+			"FROM ("
+			"  SELECT b1.player_id, b1.time_cs / 100.0 AS time, RANK() OVER (ORDER BY b1.time_cs) AS ranking "
+			"  FROM %s_best b1 "
+			"  WHERE b1.map_id = %s AND b1.server LIKE %s AND NOT EXISTS ("
+			"    SELECT 1 FROM %s_best b2 "
+			"    WHERE b2.map_id = b1.map_id AND b2.player_id = b1.player_id AND b2.server LIKE %s "
+			"      AND (b2.time_cs, b2.server) < (b1.time_cs, b1.server)) "
+			"  ORDER BY b1.time_cs LIMIT %d"
+			") AS a "
+			"JOIN %s_player p ON p.player_id = a.player_id "
+			"ORDER BY a.ranking ASC LIMIT %s OFFSET %d",
+			pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(), pSqlServer->Placeholder(2).c_str(),
+			pSqlServer->GetPrefix(), pSqlServer->Placeholder(3).c_str(),
+			LimitStart + 5, pSqlServer->GetPrefix(),
+			pSqlServer->Placeholder(4).c_str(), LimitStart);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf),
+			"SELECT p.name, a.time, a.ranking "
+			"FROM ("
+			"  SELECT RANK() OVER w AS ranking, MIN(time_cs) / 100.0 AS time, player_id "
+			"  FROM %s_best "
+			"  WHERE map_id = %s "
+			"  AND server LIKE %s "
+			"  GROUP BY player_id "
+			"  WINDOW w AS (ORDER BY MIN(time_cs)) "
+			"  ORDER BY ranking DESC "
+			"  LIMIT %s OFFSET %d"
+			") as a "
+			"JOIN %s_player p ON p.player_id = a.player_id "
+			"ORDER BY a.ranking DESC",
+			pSqlServer->GetPrefix(), pSqlServer->Placeholder(1).c_str(), pSqlServer->Placeholder(2).c_str(),
+			pSqlServer->Placeholder(3).c_str(), LimitStart,
+			pSqlServer->GetPrefix());
+	}
 
 	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -1303,7 +1333,15 @@ bool CScoreWorkerV2::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	}
 	pSqlServer->BindInt(1, MapId);
 	pSqlServer->BindString(2, pAny);
-	pSqlServer->BindInt(3, 5);
+	if(Ascending)
+	{
+		pSqlServer->BindString(3, pAny);
+		pSqlServer->BindInt(4, 5);
+	}
+	else
+	{
+		pSqlServer->BindInt(3, 5);
+	}
 
 	// show top
 	int Line = 0;
@@ -1341,7 +1379,15 @@ bool CScoreWorkerV2::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	}
 	pSqlServer->BindInt(1, MapId);
 	pSqlServer->BindString(2, aServerLike);
-	pSqlServer->BindInt(3, 3);
+	if(Ascending)
+	{
+		pSqlServer->BindString(3, aServerLike);
+		pSqlServer->BindInt(4, 3);
+	}
+	else
+	{
+		pSqlServer->BindInt(3, 3);
+	}
 
 	str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
 		"------------ %s Top ------------", pData->m_aServer);
