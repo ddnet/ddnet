@@ -32,7 +32,8 @@ struct CSqlExecData
 		const char *pName);
 	CSqlExecData(
 		CDbConnectionPool::Mode m,
-		const char aFilename[64]);
+		const char aFilename[64],
+		int SchemaVersion);
 	CSqlExecData(
 		CDbConnectionPool::Mode m,
 		const CMysqlConfig *pMysqlConfig);
@@ -69,6 +70,7 @@ struct CSqlExecData
 		{
 			CDbConnectionPool::Mode m_Mode;
 			char m_Filename[64];
+			int m_SchemaVersion;
 		} m_Sqlite;
 		struct
 		{
@@ -104,13 +106,15 @@ CSqlExecData::CSqlExecData(
 
 CSqlExecData::CSqlExecData(
 	CDbConnectionPool::Mode m,
-	const char aFilename[64]) :
+	const char aFilename[64],
+	int SchemaVersion) :
 	m_Mode(ADD_SQLITE),
 	m_pThreadData(nullptr),
 	m_pName("add sqlite server")
 {
 	m_Ptr.m_Sqlite.m_Mode = m;
 	str_copy(m_Ptr.m_Sqlite.m_Filename, aFilename);
+	m_Ptr.m_Sqlite.m_SchemaVersion = SchemaVersion;
 }
 CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m,
 	const CMysqlConfig *pMysqlConfig) :
@@ -146,9 +150,9 @@ void CDbConnectionPool::Print(Mode DatabaseMode)
 	m_pShared->m_NumBackup.Signal();
 }
 
-void CDbConnectionPool::RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64])
+void CDbConnectionPool::RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64], int SchemaVersion)
 {
-	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode, aFilename);
+	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode, aFilename, SchemaVersion);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
 	m_pShared->m_NumBackup.Signal();
 }
@@ -254,7 +258,7 @@ void CBackup::ProcessQueries()
 		if(pThreadData->m_Mode == CSqlExecData::ADD_SQLITE &&
 			pThreadData->m_Ptr.m_Sqlite.m_Mode == CDbConnectionPool::Mode::WRITE_BACKUP)
 		{
-			m_pWriteBackup = CreateSqliteConnection(pThreadData->m_Ptr.m_Sqlite.m_Filename, true);
+			m_pWriteBackup = CreateSqliteConnection(pThreadData->m_Ptr.m_Sqlite.m_Filename, true, pThreadData->m_Ptr.m_Sqlite.m_SchemaVersion);
 		}
 		else if(pThreadData->m_Mode == CSqlExecData::WRITE_ACCESS && m_pWriteBackup.get())
 		{
@@ -429,7 +433,7 @@ void CWorker::ProcessQueries()
 		}
 		case CSqlExecData::ADD_SQLITE:
 		{
-			auto pSqlite = CreateSqliteConnection(pThreadData->m_Ptr.m_Sqlite.m_Filename, true);
+			auto pSqlite = CreateSqliteConnection(pThreadData->m_Ptr.m_Sqlite.m_Filename, true, pThreadData->m_Ptr.m_Sqlite.m_SchemaVersion);
 			switch(pThreadData->m_Ptr.m_Sqlite.m_Mode)
 			{
 			case CDbConnectionPool::Mode::READ:
