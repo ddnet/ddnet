@@ -100,8 +100,12 @@ public:
 	std::optional<int> GetOptionalInt(int Col);
 	std::optional<int64_t> GetOptionalInt64(int Col);
 
-	// SQL statements, that can't be abstracted, has side effects to the result
-	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) = 0;
+	// award points to a player, creating the player if necessary
+	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize);
+
+protected:
+	// schema v1 upsert into the points table, can't be abstracted across dialects
+	virtual bool AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize) = 0;
 
 private:
 	char m_aPrefix[64];

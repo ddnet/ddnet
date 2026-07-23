@@ -57,7 +57,7 @@ public:
 	// passing a negative buffer size is undefined behavior
 	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
+	bool AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 	// fail safe
 	bool CreateFailsafeTables();
@@ -441,7 +441,7 @@ void CSqliteConnection::AssertNoError(int Result)
 	}
 }
 
-bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
+bool CSqliteConnection::AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
