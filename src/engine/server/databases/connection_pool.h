@@ -93,6 +93,10 @@ public:
 	void RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64], int SchemaVersion);
 	void RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig);
 	void RegisterPostgresqlDatabase(Mode DatabaseMode, const CPostgresqlConfig *pPostgresqlConfig);
+	// Removes all registered databases of the given mode. Processed in queue
+	// order like queries and registrations, so it's safe to use at runtime
+	// to switch databases without restarting the server.
+	void Reset(Mode DatabaseMode);
 
 	void Execute(
 		FRead pFunc,

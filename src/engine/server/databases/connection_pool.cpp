@@ -7,6 +7,7 @@
 #include <base/mem.h>
 #include <base/str.h>
 #include <base/thread.h>
+#include <base/types.h>
 
 #include <engine/shared/config.h>
 
@@ -40,18 +41,20 @@ struct CSqlExecData
 	CSqlExecData(
 		CDbConnectionPool::Mode m,
 		const CPostgresqlConfig *pPostgresqlConfig);
-	CSqlExecData(CDbConnectionPool::Mode m);
-	~CSqlExecData() = default;
-
-	enum
+	enum EAction
 	{
 		READ_ACCESS,
 		WRITE_ACCESS,
 		ADD_MYSQL,
 		ADD_POSTGRESQL,
 		ADD_SQLITE,
+		RESET,
 		PRINT,
-	} m_Mode;
+	};
+	CSqlExecData(EAction Action, CDbConnectionPool::Mode DatabaseMode);
+	~CSqlExecData() = default;
+
+	EAction m_Mode;
 	union
 	{
 		CDbConnectionPool::FRead m_pReadFunc;
@@ -69,13 +72,13 @@ struct CSqlExecData
 		struct
 		{
 			CDbConnectionPool::Mode m_Mode;
-			char m_Filename[64];
+			char m_Filename[IO_MAX_PATH_LENGTH];
 			int m_SchemaVersion;
 		} m_Sqlite;
 		struct
 		{
 			CDbConnectionPool::Mode m_Mode;
-		} m_Print;
+		} m_Print, m_Reset;
 	} m_Ptr;
 
 	std::unique_ptr<const ISqlData> m_pThreadData;
@@ -135,17 +138,27 @@ CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m,
 	mem_copy(&m_Ptr.m_Postgresql.m_Config, pPostgresqlConfig, sizeof(m_Ptr.m_Postgresql.m_Config));
 }
 
-CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m) :
-	m_Mode(PRINT),
+CSqlExecData::CSqlExecData(EAction Action, CDbConnectionPool::Mode DatabaseMode) :
+	m_Mode(Action),
 	m_pThreadData(nullptr),
-	m_pName("print database server")
+	m_pName(Action == PRINT ? "print database server" : "reset database server")
 {
-	m_Ptr.m_Print.m_Mode = m;
+	if(Action == PRINT)
+		m_Ptr.m_Print.m_Mode = DatabaseMode;
+	else
+		m_Ptr.m_Reset.m_Mode = DatabaseMode;
 }
 
 void CDbConnectionPool::Print(Mode DatabaseMode)
 {
-	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode);
+	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(CSqlExecData::PRINT, DatabaseMode);
+	m_InsertIdx %= std::size(m_pShared->m_aQueries);
+	m_pShared->m_NumBackup.Signal();
+}
+
+void CDbConnectionPool::Reset(Mode DatabaseMode)
+{
+	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(CSqlExecData::RESET, DatabaseMode);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
 	m_pShared->m_NumBackup.Signal();
 }
@@ -259,6 +272,11 @@ void CBackup::ProcessQueries()
 			pThreadData->m_Ptr.m_Sqlite.m_Mode == CDbConnectionPool::Mode::WRITE_BACKUP)
 		{
 			m_pWriteBackup = CreateSqliteConnection(pThreadData->m_Ptr.m_Sqlite.m_Filename, true, pThreadData->m_Ptr.m_Sqlite.m_SchemaVersion);
+		}
+		else if(pThreadData->m_Mode == CSqlExecData::RESET &&
+			pThreadData->m_Ptr.m_Reset.m_Mode == CDbConnectionPool::Mode::WRITE_BACKUP)
+		{
+			m_pWriteBackup = nullptr;
 		}
 		else if(pThreadData->m_Mode == CSqlExecData::WRITE_ACCESS && m_pWriteBackup.get())
 		{
@@ -444,6 +462,25 @@ void CWorker::ProcessQueries()
 				break;
 			case CDbConnectionPool::Mode::WRITE_BACKUP:
 				m_pWriteBackup = std::move(pSqlite);
+				break;
+			case CDbConnectionPool::Mode::NUM_MODES:
+				break;
+			}
+			Success = true;
+			break;
+		}
+		case CSqlExecData::RESET:
+		{
+			switch(pThreadData->m_Ptr.m_Reset.m_Mode)
+			{
+			case CDbConnectionPool::Mode::READ:
+				m_vpReadConnections.clear();
+				break;
+			case CDbConnectionPool::Mode::WRITE:
+				m_pWriteConnection = nullptr;
+				break;
+			case CDbConnectionPool::Mode::WRITE_BACKUP:
+				m_pWriteBackup = nullptr;
 				break;
 			case CDbConnectionPool::Mode::NUM_MODES:
 				break;
