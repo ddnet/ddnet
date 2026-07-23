@@ -107,7 +107,7 @@ private:
 };
 
 CPostgresqlConnection::CPostgresqlConnection(CPostgresqlConfig Config) :
-	IDbConnection(Config.m_aPrefix),
+	IDbConnection(Config.m_aPrefix, Config.m_SchemaVersion),
 	m_Config(Config),
 	m_InUse(false)
 {
@@ -123,8 +123,8 @@ CPostgresqlConnection::~CPostgresqlConnection()
 void CPostgresqlConnection::Print(const char *pMode)
 {
 	log_info("server",
-		"PostgreSQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
-		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port);
+		"PostgreSQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d Schema: %d",
+		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port, SchemaVersion());
 }
 
 void CPostgresqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)

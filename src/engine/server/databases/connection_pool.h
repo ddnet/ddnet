@@ -54,6 +54,7 @@ struct CMysqlConfig
 	char m_aBindaddr[128];
 	int m_Port;
 	bool m_Setup;
+	int m_SchemaVersion;
 };
 
 struct CPostgresqlConfig
@@ -65,6 +66,7 @@ struct CPostgresqlConfig
 	char m_aIp[64];
 	int m_Port;
 	bool m_Setup;
+	int m_SchemaVersion;
 };
 
 class CDbConnectionPool
@@ -88,7 +90,7 @@ public:
 
 	void Print(Mode DatabaseMode);
 
-	void RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64]);
+	void RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64], int SchemaVersion);
 	void RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig);
 	void RegisterPostgresqlDatabase(Mode DatabaseMode, const CPostgresqlConfig *pPostgresqlConfig);
 
