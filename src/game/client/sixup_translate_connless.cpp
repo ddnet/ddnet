@@ -98,6 +98,12 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 			}
 		}
 
+		if(Packer.Error() || SERVERBROWSE_SIZE + Packer.Size() > NET_MAX_PAYLOAD)
+		{
+			pPacket->m_DataSize = 0;
+			return;
+		}
+
 		if(IsNotVanilla)
 		{
 			mem_copy((unsigned char *)pPacket->m_pData, SERVERBROWSE_INFO_EXTENDED, sizeof(SERVERBROWSE_INFO_EXTENDED));
