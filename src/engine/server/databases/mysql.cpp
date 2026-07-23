@@ -80,6 +80,7 @@ public:
 	const char *InsertIgnore() const override { return "INSERT IGNORE"; }
 	const char *Random() const override { return "RAND()"; }
 	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
+	const char *MedianMapTimeV2(char *pBuffer, int BufferSize) const override;
 	const char *False() const override { return "FALSE"; }
 	const char *True() const override { return "TRUE"; }
 
@@ -109,7 +110,7 @@ public:
 	void GetString(int Col, char *pBuffer, int BufferSize) override;
 	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
+	bool AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 private:
 	class CStmtDeleter
@@ -773,7 +774,37 @@ const char *CMysqlConnection::MedianMapTime(char *pBuffer, int BufferSize) const
 	return pBuffer;
 }
 
-bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
+const char *CMysqlConnection::MedianMapTimeV2(char *pBuffer, int BufferSize) const
+{
+	if(m_IsMariaDb)
+	{
+		// See MedianMapTime for why the MariaDB and MySQL paths differ.
+		str_format(pBuffer, BufferSize,
+			"SELECT MEDIAN(time_cs) "
+			"OVER (PARTITION BY map_id) / 100.0 "
+			"FROM %s_finish "
+			"WHERE map_id = l.map_id "
+			"LIMIT 1",
+			GetPrefix());
+		return pBuffer;
+	}
+	str_format(pBuffer, BufferSize,
+		"SELECT AVG("
+		"  CASE counter %% 2 "
+		"    WHEN 0 THEN CASE WHEN rn IN (counter DIV 2, counter DIV 2 + 1) THEN time_cs END "
+		"    WHEN 1 THEN CASE WHEN rn = counter DIV 2 + 1 THEN time_cs END END) "
+		"  OVER (PARTITION BY map_id) / 100.0 AS median "
+		"FROM ("
+		"  SELECT map_id, time_cs, ROW_NUMBER() "
+		"  OVER (PARTITION BY map_id ORDER BY time_cs) rn, COUNT(*) "
+		"  OVER (PARTITION BY map_id) counter "
+		"  FROM %s_finish WHERE map_id = l.map_id) as r "
+		"LIMIT 1",
+		GetPrefix(), GetPrefix());
+	return pBuffer;
+}
+
+bool CMysqlConnection::AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
