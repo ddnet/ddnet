@@ -155,7 +155,7 @@ void CMysqlConnection::CStmtDeleter::operator()(MYSQL_STMT *pStmt) const
 }
 
 CMysqlConnection::CMysqlConnection(CMysqlConfig Config) :
-	IDbConnection(Config.m_aPrefix),
+	IDbConnection(Config.m_aPrefix, Config.m_SchemaVersion),
 	m_Config(Config),
 	m_InUse(false)
 {
@@ -201,8 +201,8 @@ bool CMysqlConnection::PrepareAndExecuteStatement(const char *pStmt)
 void CMysqlConnection::Print(const char *pMode)
 {
 	log_info("server",
-		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
-		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port);
+		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d Schema: %d",
+		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port, SchemaVersion());
 }
 
 void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)

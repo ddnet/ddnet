@@ -19,13 +19,15 @@ enum
 class IDbConnection
 {
 public:
-	IDbConnection(const char *pPrefix);
+	IDbConnection(const char *pPrefix, int SchemaVersion);
 	virtual ~IDbConnection() = default;
 	IDbConnection &operator=(const IDbConnection &) = delete;
 	virtual void Print(const char *pMode) = 0;
 
 	// returns the database prefix
 	const char *GetPrefix() const { return m_aPrefix; }
+	// version of the table layout this connection expects, see FormatCreate*
+	int SchemaVersion() const { return m_SchemaVersion; }
 	virtual const char *BinaryCollate() const = 0;
 	// can be inserted into queries to convert a timestamp variable to the unix timestamp
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) = 0;
@@ -105,6 +107,7 @@ public:
 
 private:
 	char m_aPrefix[64];
+	int m_SchemaVersion;
 
 protected:
 	void FormatCreateRace(char *aBuf, unsigned int BufferSize, bool Backup) const;
@@ -120,7 +123,7 @@ void MysqlUninit();
 
 bool PostgresqlAvailable();
 
-std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup);
+std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup, int SchemaVersion);
 // Returns nullptr if MySQL support is not compiled in.
 std::unique_ptr<IDbConnection> CreateMysqlConnection(CMysqlConfig Config);
 // Returns nullptr if PostgreSQL support is not compiled in.

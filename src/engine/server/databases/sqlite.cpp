@@ -13,7 +13,7 @@
 class CSqliteConnection : public IDbConnection
 {
 public:
-	CSqliteConnection(const char *pFilename, bool Setup);
+	CSqliteConnection(const char *pFilename, bool Setup, int SchemaVersion);
 	~CSqliteConnection() override;
 	void Print(const char *pMode) override;
 
@@ -84,8 +84,8 @@ private:
 	std::atomic_bool m_InUse;
 };
 
-CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup) :
-	IDbConnection("record"),
+CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup, int SchemaVersion) :
+	IDbConnection("record", SchemaVersion),
 	m_Setup(Setup),
 	m_pDb(nullptr),
 	m_pStmt(nullptr),
@@ -106,8 +106,8 @@ CSqliteConnection::~CSqliteConnection()
 void CSqliteConnection::Print(const char *pMode)
 {
 	log_info("server",
-		"SQLite-%s: DB: '%s'",
-		pMode, m_aFilename);
+		"SQLite-%s: DB: '%s' Schema: %d",
+		pMode, m_aFilename, SchemaVersion());
 }
 
 void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
@@ -439,7 +439,7 @@ bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError,
 	return Step(&End, pError, ErrorSize);
 }
 
-std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup)
+std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup, int SchemaVersion)
 {
-	return std::make_unique<CSqliteConnection>(pFilename, Setup);
+	return std::make_unique<CSqliteConnection>(pFilename, Setup, SchemaVersion);
 }
