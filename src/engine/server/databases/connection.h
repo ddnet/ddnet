@@ -57,6 +57,11 @@ public:
 	// has to be called to return the connection back to the pool
 	virtual void Disconnect() = 0;
 
+	// groups all statements until CommitTransaction into a transaction. A
+	// transaction that wasn't committed is rolled back on Disconnect.
+	virtual bool BeginTransaction(char *pError, int ErrorSize) = 0;
+	virtual bool CommitTransaction(char *pError, int ErrorSize) = 0;
+
 	// Placeholder(Idx) for placeholders, connection has to be established, can overwrite previous prepared statements
 	//
 	// returns true on success

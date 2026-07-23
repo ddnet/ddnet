@@ -45,6 +45,9 @@ public:
 	bool Connect(char *pError, int ErrorSize) override;
 	void Disconnect() override;
 
+	bool BeginTransaction(char *pError, int ErrorSize) override;
+	bool CommitTransaction(char *pError, int ErrorSize) override;
+
 	bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) override;
 
 	void BindString(int Idx, const char *pString) override;
@@ -264,7 +267,27 @@ bool CPostgresqlConnection::ConnectImpl(char *pError, int ErrorSize)
 void CPostgresqlConnection::Disconnect()
 {
 	ClearResult();
+	if(m_pConn != nullptr)
+	{
+		const PGTransactionStatusType Status = PQtransactionStatus(m_pConn);
+		if(Status == PQTRANS_INTRANS || Status == PQTRANS_INERROR)
+		{
+			char aError[128];
+			if(!ExecSimple("ROLLBACK", aError, sizeof(aError)))
+				log_error("postgresql", "failed to roll back transaction: %s", aError);
+		}
+	}
 	m_InUse.store(false);
+}
+
+bool CPostgresqlConnection::BeginTransaction(char *pError, int ErrorSize)
+{
+	return ExecSimple("BEGIN", pError, ErrorSize);
+}
+
+bool CPostgresqlConnection::CommitTransaction(char *pError, int ErrorSize)
+{
+	return ExecSimple("COMMIT", pError, ErrorSize);
 }
 
 bool CPostgresqlConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)

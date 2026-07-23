@@ -34,6 +34,9 @@ public:
 	bool Connect(char *pError, int ErrorSize) override;
 	void Disconnect() override;
 
+	bool BeginTransaction(char *pError, int ErrorSize) override;
+	bool CommitTransaction(char *pError, int ErrorSize) override;
+
 	bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) override;
 
 	void BindString(int Idx, const char *pString) override;
@@ -68,6 +71,7 @@ private:
 	sqlite3 *m_pDb;
 	sqlite3_stmt *m_pStmt;
 	bool m_Done; // no more rows available for Step
+	bool m_InTransaction = false;
 	// returns false, if the query succeeded
 	bool Execute(const char *pQuery, char *pError, int ErrorSize);
 	// returns true on failure
@@ -187,7 +191,28 @@ void CSqliteConnection::Disconnect()
 	if(m_pStmt != nullptr)
 		sqlite3_finalize(m_pStmt);
 	m_pStmt = nullptr;
+	if(m_InTransaction)
+	{
+		char aError[128];
+		if(!Execute("ROLLBACK", aError, sizeof(aError)))
+			dbg_msg("sqlite", "failed to roll back transaction: %s", aError);
+		m_InTransaction = false;
+	}
 	m_InUse.store(false);
+}
+
+bool CSqliteConnection::BeginTransaction(char *pError, int ErrorSize)
+{
+	if(!Execute("BEGIN", pError, ErrorSize))
+		return false;
+	m_InTransaction = true;
+	return true;
+}
+
+bool CSqliteConnection::CommitTransaction(char *pError, int ErrorSize)
+{
+	m_InTransaction = false;
+	return Execute("COMMIT", pError, ErrorSize);
 }
 
 bool CSqliteConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)
