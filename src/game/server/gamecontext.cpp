@@ -2813,7 +2813,7 @@ void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMod
 	if(m_pController->IsGamePaused())
 		return;
 
-	int SpectatorId = std::clamp(pMsg->m_SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+	int SpectatorId = std::clamp(pMsg->m_SpectatorId, (int)SPEC_FREEVIEW, MAX_CLIENTS - 1);
 	if(SpectatorId >= 0)
 		if(!Server()->ReverseTranslate(SpectatorId, ClientId))
 			return;
