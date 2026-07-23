@@ -19,13 +19,11 @@ def read_plist(path):
 #   dmgbuild -s settings.py -D app=/path/to/My.app "My Application" MyApp.dmg
 
 # .. Useful stuff ..............................................................
-ServerDisabled: bool = False
-if 'server' not in defines:
-	ServerDisabled = True
+server_enabled = 'server' in defines
 
 application_client = defines.get('client', 'DDNet.app')
 appname_client = os.path.basename(application_client)
-if not ServerDisabled:
+if server_enabled:
 	application_server = defines.get('server', 'DDNet-Server.app')
 	appname_server = os.path.basename(application_server)
 
@@ -57,10 +55,9 @@ compression_level = 9
 size = defines.get('size', None)
 
 # Files to include
-if ServerDisabled:
-	files = [ application_client ]
-else:
-	files = [ application_client, application_server ]
+files = [ application_client ]
+if server_enabled:
+	files += application_server
 
 # Symlinks to create
 symlinks = { 'Applications': '/Applications' }
@@ -69,10 +66,9 @@ symlinks = { 'Applications': '/Applications' }
 # hide = [ 'Secret.data' ]
 
 # Files to hide the extension of
-if ServerDisabled:
-	hide_extension = [ appname_client ]
-else:
-	hide_extension = [ appname_client, appname_server ]
+hide_extension = [ appname_client ]
+if server_enabled:
+	hide_extension += appname_server
 
 # Volume icon
 #
@@ -85,17 +81,17 @@ else:
 badge_icon = icon_from_app(application_client)
 
 # Where to put the icons
-if ServerDisabled:
-	icon_locations = {
-		appname_client: (200, 288),
-		'Applications': (440, 288)
-	}
-else:
+if server_enabled:
 	icon_locations = {
 		appname_client: (128, 288),
 		appname_server: (272, 288),
 		'Applications': (512, 288)
-		}
+	}
+else:
+	icon_locations = {
+		appname_client: (200, 288),
+		'Applications': (440, 288)
+	}
 
 # .. Window configuration ......................................................
 
