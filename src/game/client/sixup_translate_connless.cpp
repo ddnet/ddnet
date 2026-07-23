@@ -4,7 +4,7 @@
 
 #include <game/client/gameclient.h>
 
-void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
+bool CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 {
 	if(mem_comp(pPacket->m_pData, SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO)) == 0)
 	{
@@ -98,6 +98,11 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 			}
 		}
 
+		if(Packer.Error() || SERVERBROWSE_SIZE + Packer.Size() > NET_MAX_PAYLOAD)
+		{
+			return false;
+		}
+
 		if(IsNotVanilla)
 		{
 			mem_copy((unsigned char *)pPacket->m_pData, SERVERBROWSE_INFO_EXTENDED, sizeof(SERVERBROWSE_INFO_EXTENDED));
@@ -105,4 +110,5 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 		mem_copy((unsigned char *)pPacket->m_pData + SERVERBROWSE_SIZE, Packer.Data(), Packer.Size());
 		pPacket->m_DataSize = SERVERBROWSE_SIZE + Packer.Size();
 	}
+	return true;
 }
