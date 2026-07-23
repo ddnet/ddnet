@@ -729,6 +729,12 @@ void CDemoPlayer::DoTick()
 
 		if(ChunkType == CHUNKTYPE_DELTA)
 		{
+			if(m_LastSnapshotDataSize == -1)
+			{
+				Stop("Delta snapshot before any full snapshot");
+				break;
+			}
+
 			// process delta snapshot
 			DataSize = SnapshotDelta()->UnpackDelta(m_LastSnapshotData.AsSnapshot(), &m_Snapshot, m_aChunkData, DataSize);
 
