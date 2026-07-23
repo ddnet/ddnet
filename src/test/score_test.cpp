@@ -660,7 +660,7 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "nameless tee has no more unfinished maps on this server!");
 }
 
-static auto g_pSqliteConn = CreateSqliteConnection(":memory:", true);
+static auto g_pSqliteConn = CreateSqliteConnection(":memory:", true, 1);
 #if defined(CONF_TEST_MYSQL)
 CMysqlConfig gMysqlConfig{
 	"ddnet", // database
@@ -671,6 +671,7 @@ CMysqlConfig gMysqlConfig{
 	"", // bindaddr
 	3306, // port
 	true, // setup
+	1, // schema version
 };
 static auto g_pMysqlConn = CreateMysqlConnection(gMysqlConfig);
 #endif
@@ -683,6 +684,7 @@ CPostgresqlConfig gPostgresqlConfig{
 	"localhost", // ip
 	5432, // port
 	true, // setup
+	1, // schema version
 };
 auto g_pPostgresqlConn = CreatePostgresqlConnection(gPostgresqlConfig);
 #endif

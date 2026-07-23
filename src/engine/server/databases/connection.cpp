@@ -2,7 +2,8 @@
 
 #include <base/str.h>
 
-IDbConnection::IDbConnection(const char *pPrefix)
+IDbConnection::IDbConnection(const char *pPrefix, int SchemaVersion) :
+	m_SchemaVersion(SchemaVersion)
 {
 	str_copy(m_aPrefix, pPrefix);
 }
