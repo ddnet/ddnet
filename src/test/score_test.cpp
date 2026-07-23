@@ -554,6 +554,29 @@ TEST_P(Points, EqualPointsTop)
 			"-------------------------------"});
 }
 
+struct Transactions : public Points
+{
+};
+
+TEST_P(Transactions, Commit)
+{
+	ASSERT_TRUE(m_pConn->BeginTransaction(m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(m_pConn->CommitTransaction(m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectLines(m_pPlayerResult, {"1. nameless tee Points: 2, requested by brainless tee"}, true);
+}
+
+TEST_P(Transactions, RollbackOnDisconnect)
+{
+	ASSERT_TRUE(m_pConn->BeginTransaction(m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError))) << m_aError;
+	m_pConn->Disconnect();
+	ASSERT_TRUE(m_pConn->Connect(m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectLines(m_pPlayerResult, {"nameless tee has not collected any points so far"});
+}
+
 struct RandomMap : public Score
 {
 	std::shared_ptr<CScoreRandomMapResult> m_pRandomMapResult{std::make_shared<CScoreRandomMapResult>(0)};
@@ -688,4 +711,5 @@ INSTANTIATE(TeamScore);
 INSTANTIATE(MapInfo);
 INSTANTIATE(MapVote);
 INSTANTIATE(Points);
+INSTANTIATE(Transactions);
 INSTANTIATE(RandomMap);

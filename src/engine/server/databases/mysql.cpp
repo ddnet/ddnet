@@ -86,6 +86,9 @@ public:
 	bool Connect(char *pError, int ErrorSize) override;
 	void Disconnect() override;
 
+	bool BeginTransaction(char *pError, int ErrorSize) override;
+	bool CommitTransaction(char *pError, int ErrorSize) override;
+
 	bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) override;
 
 	void BindString(int Idx, const char *pString) override;
@@ -131,6 +134,7 @@ private:
 
 	bool m_NewQuery = false;
 	bool m_HaveConnection = false;
+	bool m_InTransaction = false;
 	// MariaDB and Oracle MySQL differ in a few places (e.g. MEDIAN(), correlated
 	// derived tables), so remember which server we're talking to.
 	bool m_IsMariaDb = false;
@@ -319,7 +323,41 @@ bool CMysqlConnection::ConnectImpl()
 
 void CMysqlConnection::Disconnect()
 {
+	if(m_InTransaction)
+	{
+		if(mysql_real_query(&m_Mysql, "ROLLBACK", 8))
+		{
+			StoreErrorMysql("rollback");
+			dbg_msg("mysql", "failed to roll back transaction %s", m_aErrorDetail);
+		}
+		m_InTransaction = false;
+	}
 	m_InUse.store(false);
+}
+
+bool CMysqlConnection::BeginTransaction(char *pError, int ErrorSize)
+{
+	// START TRANSACTION can't go through the prepared statement protocol
+	if(mysql_real_query(&m_Mysql, "START TRANSACTION", 17))
+	{
+		StoreErrorMysql("begin");
+		str_copy(pError, m_aErrorDetail, ErrorSize);
+		return false;
+	}
+	m_InTransaction = true;
+	return true;
+}
+
+bool CMysqlConnection::CommitTransaction(char *pError, int ErrorSize)
+{
+	m_InTransaction = false;
+	if(mysql_real_query(&m_Mysql, "COMMIT", 6))
+	{
+		StoreErrorMysql("commit");
+		str_copy(pError, m_aErrorDetail, ErrorSize);
+		return false;
+	}
+	return true;
 }
 
 bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)
