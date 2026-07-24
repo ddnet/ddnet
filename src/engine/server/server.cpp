@@ -1908,7 +1908,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_RCON_CMD)
 		{
-			const char *pCmd = Unpacker.GetString();
+			const char *pCmd = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			if(Unpacker.Error())
 				return;
 
