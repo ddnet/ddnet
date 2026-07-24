@@ -123,6 +123,7 @@ public:
 	bool m_DDRaceTeam;
 
 	bool m_PredictEvents;
+	bool m_SyncedReloadTimer;
 };
 
 class CSnapEntities
