@@ -264,7 +264,7 @@ Objects = [
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
-		NetIntRange("m_FinishTimeSeconds", 'FinishTime::UNSET', 'max_int', default='FinishTime::UNSET'),
+		NetIntRange("m_FinishTimeSeconds", 'FinishTime::SECRET', 'max_int', default='FinishTime::UNSET'),
 		NetIntRange("m_FinishTimeMillis", 0, 999, default=0),
 	]),
 
@@ -393,7 +393,7 @@ Objects = [
 
  	# the current best time in the server
 	NetObjectEx("MapBestTime", "map-best-time@netobj.ddnet.org", [
-			NetIntRange("m_MapBestTimeSeconds", 'FinishTime::NOT_FINISHED_MILLIS', 'max_int'),
+			NetIntRange("m_MapBestTimeSeconds", 'FinishTime::SECRET', 'max_int'),
 			NetIntRange("m_MapBestTimeMillis", 0, 999),
 	]),
 
