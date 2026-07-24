@@ -239,9 +239,9 @@ CServer::CServer()
 {
 	m_pConfig = &g_Config;
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aDemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta, true);
-	m_aDemoRecorder[RECORDER_MANUAL] = CDemoRecorder(&m_SnapshotDelta, false);
-	m_aDemoRecorder[RECORDER_AUTO] = CDemoRecorder(&m_SnapshotDelta, false);
+		m_aDemoRecorder[i].Init(&m_SnapshotDelta, true);
+	m_aDemoRecorder[RECORDER_MANUAL].Init(&m_SnapshotDelta, false);
+	m_aDemoRecorder[RECORDER_AUTO].Init(&m_SnapshotDelta, false);
 
 	m_pGameServer = nullptr;
 
