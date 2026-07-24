@@ -634,6 +634,7 @@ public:
 	int Sizeof() const override { return sizeof(*this); }
 
 	void RenderLoading(const char *pCaption, const char *pContent, int IncreaseCounter);
+	void RenderLoadingDirect(const char *pCaption, const char *pContent, bool DoProgressBar, float Progress);
 	void FinishLoading();
 
 	bool IsInit() const { return m_IsInit; }
