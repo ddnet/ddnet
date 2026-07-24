@@ -129,7 +129,7 @@ jobs:
         brew update
         brew install ffmpeg molten-vk ninja pkg-config sdl2
         brew upgrade freetype
-        pip3 install --break-system-packages dmgbuild
+        pip3 install --break-system-packages dmgbuild pyobjc-framework-Quartz
         echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
         sudo rm -rf /Library/Developer/CommandLineTools
 
