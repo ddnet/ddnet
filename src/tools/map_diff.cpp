@@ -32,6 +32,9 @@ static bool DiffTileLayer(CDataFileReader aMaps[2], const char **pMapNames, cons
 			pfnCompare(apTile[0][Pos], apTile[1][Pos], x, y);
 		}
 	}
+
+	for(int i = 0; i < 2; ++i)
+		aMaps[i].UnloadData(aData[i]);
 	return true;
 }
 
@@ -99,7 +102,10 @@ static bool Process(IStorage *pStorage, const char **pMapNames)
 		}
 
 		const int PhysicsLayerFlags = TILESLAYERFLAG_TELE | TILESLAYERFLAG_SPEEDUP | TILESLAYERFLAG_FRONT | TILESLAYERFLAG_SWITCH | TILESLAYERFLAG_TUNE;
-		if(str_comp(aaName[0], aaName[1]) != 0 || apTilemap[0]->m_Width != apTilemap[1]->m_Width || apTilemap[0]->m_Height != apTilemap[1]->m_Height || (apTilemap[0]->m_Flags & PhysicsLayerFlags) != (apTilemap[1]->m_Flags & PhysicsLayerFlags))
+		if(str_comp(aaName[0], aaName[1]) != 0 ||
+			apTilemap[0]->m_Width != apTilemap[1]->m_Width ||
+			apTilemap[0]->m_Height != apTilemap[1]->m_Height ||
+			(apTilemap[0]->m_Flags & PhysicsLayerFlags) != (apTilemap[1]->m_Flags & PhysicsLayerFlags))
 		{
 			dbg_msg("map_diff", "different tile layers:");
 			for(int i = 0; i < 2; ++i)
@@ -116,7 +122,10 @@ static bool Process(IStorage *pStorage, const char **pMapNames)
 			const int aData[2] = {apTilemap[0]->m_Tele, apTilemap[1]->m_Tele};
 			Ok = DiffTileLayer<CTeleTile>(aMaps, pMapNames, aData, Width, Height, [&](const CTeleTile &Tile0, const CTeleTile &Tile1, int x, int y) {
 				if(Tile0.m_Number != Tile1.m_Number || Tile0.m_Type != Tile1.m_Type)
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)", aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile1.m_Number, Tile1.m_Type);
+				{
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)",
+						aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile1.m_Number, Tile1.m_Type);
+				}
 			});
 		}
 		else if(Flags & TILESLAYERFLAG_SPEEDUP)
@@ -124,7 +133,10 @@ static bool Process(IStorage *pStorage, const char **pMapNames)
 			const int aData[2] = {apTilemap[0]->m_Speedup, apTilemap[1]->m_Speedup};
 			Ok = DiffTileLayer<CSpeedupTile>(aMaps, pMapNames, aData, Width, Height, [&](const CSpeedupTile &Tile0, const CSpeedupTile &Tile1, int x, int y) {
 				if(Tile0.m_Force != Tile1.m_Force || Tile0.m_MaxSpeed != Tile1.m_MaxSpeed || Tile0.m_Type != Tile1.m_Type || Tile0.m_Angle != Tile1.m_Angle)
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (force: %d, maxspeed: %d, angle: %d, type: %d) != (force: %d, maxspeed: %d, angle: %d, type: %d)", aLayersNum[0], aaName[0], x, y, Tile0.m_Force, Tile0.m_MaxSpeed, Tile0.m_Angle, Tile0.m_Type, Tile1.m_Force, Tile1.m_MaxSpeed, Tile1.m_Angle, Tile1.m_Type);
+				{
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (force: %d, maxspeed: %d, angle: %d, type: %d) != (force: %d, maxspeed: %d, angle: %d, type: %d)",
+						aLayersNum[0], aaName[0], x, y, Tile0.m_Force, Tile0.m_MaxSpeed, Tile0.m_Angle, Tile0.m_Type, Tile1.m_Force, Tile1.m_MaxSpeed, Tile1.m_Angle, Tile1.m_Type);
+				}
 			});
 		}
 		else if(Flags & TILESLAYERFLAG_SWITCH)
@@ -132,7 +144,10 @@ static bool Process(IStorage *pStorage, const char **pMapNames)
 			const int aData[2] = {apTilemap[0]->m_Switch, apTilemap[1]->m_Switch};
 			Ok = DiffTileLayer<CSwitchTile>(aMaps, pMapNames, aData, Width, Height, [&](const CSwitchTile &Tile0, const CSwitchTile &Tile1, int x, int y) {
 				if(Tile0.m_Number != Tile1.m_Number || Tile0.m_Type != Tile1.m_Type || Tile0.m_Flags != Tile1.m_Flags || Tile0.m_Delay != Tile1.m_Delay)
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d, flags: %d, delay: %d) != (number: %d, type: %d, flags: %d, delay: %d)", aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile0.m_Flags, Tile0.m_Delay, Tile1.m_Number, Tile1.m_Type, Tile1.m_Flags, Tile1.m_Delay);
+				{
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d, flags: %d, delay: %d) != (number: %d, type: %d, flags: %d, delay: %d)",
+						aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile0.m_Flags, Tile0.m_Delay, Tile1.m_Number, Tile1.m_Type, Tile1.m_Flags, Tile1.m_Delay);
+				}
 			});
 		}
 		else if(Flags & TILESLAYERFLAG_TUNE)
@@ -140,7 +155,10 @@ static bool Process(IStorage *pStorage, const char **pMapNames)
 			const int aData[2] = {apTilemap[0]->m_Tune, apTilemap[1]->m_Tune};
 			Ok = DiffTileLayer<CTuneTile>(aMaps, pMapNames, aData, Width, Height, [&](const CTuneTile &Tile0, const CTuneTile &Tile1, int x, int y) {
 				if(Tile0.m_Number != Tile1.m_Number || Tile0.m_Type != Tile1.m_Type)
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)", aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile1.m_Number, Tile1.m_Type);
+				{
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)",
+						aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile1.m_Number, Tile1.m_Type);
+				}
 			});
 		}
 		else
@@ -151,7 +169,10 @@ static bool Process(IStorage *pStorage, const char **pMapNames)
 				(Flags & TILESLAYERFLAG_FRONT) ? apTilemap[1]->m_Front : apTilemap[1]->m_Data};
 			Ok = DiffTileLayer<CTile>(aMaps, pMapNames, aData, Width, Height, [&](const CTile &Tile0, const CTile &Tile1, int x, int y) {
 				if(Tile0.m_Index != Tile1.m_Index || Tile0.m_Flags != Tile1.m_Flags)
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aLayersNum[0], aaName[0], x, y, Tile0.m_Index, Tile0.m_Flags, Tile1.m_Index, Tile1.m_Flags);
+				{
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)",
+						aLayersNum[0], aaName[0], x, y, Tile0.m_Index, Tile0.m_Flags, Tile1.m_Index, Tile1.m_Flags);
+				}
 			});
 		}
 
