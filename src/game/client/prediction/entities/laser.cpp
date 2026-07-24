@@ -227,5 +227,6 @@ CLaserData CLaser::GetData() const
 	Result.m_Subtype = -1;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_SwitchNumber = m_Number;
+	Result.m_Predict = true;
 	return Result;
 }

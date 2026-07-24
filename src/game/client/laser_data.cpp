@@ -10,9 +10,16 @@
 #include <game/client/prediction/gameworld.h>
 #include <game/collision.h>
 
+bool CLaserData::IsVisible(float ScreenX0, float ScreenY0, float ScreenX1, float ScreenY1, bool IsPredicted) const
+{
+	constexpr float ExtraSpace = 32.0f;
+	return !((m_From.x < ScreenX0 - ExtraSpace && m_To.x < ScreenX0 - ExtraSpace) || (m_From.x > ScreenX1 + ExtraSpace && m_To.x > ScreenX1 + ExtraSpace) ||
+		 (m_From.y < ScreenY0 - ExtraSpace && m_To.y < ScreenY0 - ExtraSpace) || (m_From.y > ScreenY1 + ExtraSpace && m_To.y > ScreenY1 + ExtraSpace));
+}
+
 CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx)
 {
-	CLaserData Result = {vec2(0, 0)};
+	CLaserData Result;
 
 	if(NetObjType == NETOBJTYPE_DDNETLASER)
 	{
@@ -62,7 +69,7 @@ CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGame
 
 CLaserData ExtractLaserInfoDDNet(const CNetObj_DDNetLaser *pLaser, CGameWorld *pGameWorld)
 {
-	CLaserData Result = {vec2(0, 0)};
+	CLaserData Result;
 	Result.m_From.x = pLaser->m_FromX;
 	Result.m_From.y = pLaser->m_FromY;
 	Result.m_To.x = pLaser->m_ToX;

@@ -3,12 +3,21 @@
 
 #include "projectile_data.h"
 
+#include <base/dbg.h>
+#include <base/log.h>
+
 #include <engine/shared/snapshot.h>
 
 #include <generated/protocol.h>
 
 #include <game/client/prediction/gameworld.h>
 #include <game/collision.h>
+
+bool CProjectileData::IsVisible(float ScreenX0, float ScreenY0, float ScreenX1, float ScreenY1, bool IsPredicted) const
+{
+	constexpr float ExtraSpace = 64.0f;
+	return in_range(m_StartPos.x, ScreenX0 - ExtraSpace, ScreenX1 + ExtraSpace) && in_range(m_StartPos.y, ScreenY0 - ExtraSpace, ScreenY1 + ExtraSpace);
+}
 
 static bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
 {
@@ -28,7 +37,7 @@ CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, CGameWo
 		return ExtractProjectileInfoDDRace((CNetObj_DDRaceProjectile *)pData, pGameWorld, pEntEx);
 	}
 
-	CProjectileData Result = {vec2(0, 0)};
+	CProjectileData Result;
 	Result.m_StartPos.x = pProj->m_X;
 	Result.m_StartPos.y = pProj->m_Y;
 	Result.m_StartVel.x = pProj->m_VelX / 100.0f;
@@ -44,7 +53,7 @@ CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, CGameWo
 
 CProjectileData ExtractProjectileInfoDDRace(const CNetObj_DDRaceProjectile *pProj, CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx)
 {
-	CProjectileData Result = {vec2(0, 0)};
+	CProjectileData Result;
 
 	Result.m_StartPos.x = pProj->m_X / 100.0f;
 	Result.m_StartPos.y = pProj->m_Y / 100.0f;
@@ -71,7 +80,7 @@ CProjectileData ExtractProjectileInfoDDRace(const CNetObj_DDRaceProjectile *pPro
 
 CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj)
 {
-	CProjectileData Result = {vec2(0, 0)};
+	CProjectileData Result;
 
 	Result.m_StartPos = vec2(pProj->m_X / 100.0f, pProj->m_Y / 100.0f);
 	Result.m_StartVel = pProj->m_Owner < 0 ? vec2(pProj->m_VelX, pProj->m_VelY) / 1e6f : vec2(pProj->m_VelX, pProj->m_VelY);
