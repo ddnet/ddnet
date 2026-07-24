@@ -2515,11 +2515,13 @@ void CCharacter::Rescue()
 
 		m_LastRescue = Server()->Tick();
 		int StartTime = m_StartTime;
+		ERaceState DDRaceState = m_DDRaceState;
 		m_RescueTee[GetPlayer()->m_RescueMode].Load(this);
 		// Don't load these from saved tee:
 		m_Core.m_Vel = vec2(0, 0);
 		m_Core.m_HookState = HOOK_IDLE;
 		m_StartTime = StartTime;
+		m_DDRaceState = DDRaceState;
 		m_SavedInput.m_Direction = 0;
 		m_SavedInput.m_Jump = 0;
 		// simulate releasing the fire button
