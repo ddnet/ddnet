@@ -25,11 +25,11 @@ bool IsValidGameTile(int Index)
 		(Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) ||
 		(Index >= TILE_CP && Index <= TILE_THROUGH_DIR) ||
 		(Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) ||
-		(Index >= TILE_NPC_DISABLE && Index <= TILE_NPH_DISABLE) ||
+		(Index >= TILE_NPC_DISABLE && Index <= TILE_PHP_DISABLE) ||
 		(Index >= TILE_TELE_GUN_ENABLE && Index <= TILE_TELE_GUN_DISABLE) ||
 		(Index >= TILE_TELE_GRENADE_ENABLE && Index <= TILE_TELE_GRENADE_DISABLE) ||
 		(Index >= TILE_TELE_LASER_ENABLE && Index <= TILE_TELE_LASER_DISABLE) ||
-		(Index >= TILE_NPC_ENABLE && Index <= TILE_NPH_ENABLE) ||
+		(Index >= TILE_NPC_ENABLE && Index <= TILE_PHP_ENABLE) ||
 		(Index >= TILE_ENTITIES_OFF_1 && Index <= TILE_ENTITIES_OFF_2) ||
 		IsValidEntity(Index));
 }
@@ -47,11 +47,11 @@ bool IsValidFrontTile(int Index)
 		(Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) ||
 		(Index >= TILE_CP && Index <= TILE_THROUGH_DIR) ||
 		(Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) ||
-		(Index >= TILE_NPC_DISABLE && Index <= TILE_NPH_DISABLE) ||
+		(Index >= TILE_NPC_DISABLE && Index <= TILE_PHP_DISABLE) ||
 		(Index >= TILE_TELE_GUN_ENABLE && Index <= TILE_ALLOW_BLUE_TELE_GUN) ||
 		(Index >= TILE_TELE_GRENADE_ENABLE && Index <= TILE_TELE_GRENADE_DISABLE) ||
 		(Index >= TILE_TELE_LASER_ENABLE && Index <= TILE_TELE_LASER_DISABLE) ||
-		(Index >= TILE_NPC_ENABLE && Index <= TILE_NPH_ENABLE) ||
+		(Index >= TILE_NPC_ENABLE && Index <= TILE_PHP_ENABLE) ||
 		(Index >= TILE_ENTITIES_OFF_1 && Index <= TILE_ENTITIES_OFF_2) ||
 		IsValidEntity(Index));
 }

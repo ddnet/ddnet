@@ -308,6 +308,10 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HOOK OTHERS OFF: You can't hook others.";
 		break;
+	case TILE_PHP_DISABLE:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "PLAYER HOOKPOINT OFF: Hooking other tees acts as normal.";
+		break;
 	case TILE_SUBTRACT_TIME:
 		if(Layer == LAYER_SWITCH)
 			return "BONUS: Subtracts time from your current race time. Opposite of PENALTY.";
@@ -327,6 +331,10 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 	case TILE_NPH_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HOOK OTHERS: You can hook others.";
+		break;
+	case TILE_PHP_ENABLE:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "PLAYER HOOKPOINT: Hooking other tees doesnt pull them but makes them act as a hookpoint instead.";
 		break;
 	case TILE_CREDITS_1:
 	case TILE_CREDITS_2:
