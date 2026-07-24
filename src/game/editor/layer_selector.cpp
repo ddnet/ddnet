@@ -77,13 +77,11 @@ void CLayerSelector::UpdateHoveredTiles()
 
 			std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 			pGroup->MapScreen();
-			float aPoints[4];
-			pGroup->Mapping(aPoints);
-			float WorldWidth = aPoints[2] - aPoints[0];
-			float WorldHeight = aPoints[3] - aPoints[1];
+			CScreenRect GroupRect = pGroup->Mapping();
+
 			CUIRect Rect;
-			Rect.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-			Rect.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+			Rect.x = GroupRect.m_TopLeft.x + GroupRect.Width() * (UpdatedMousePos.x / Graphics()->WindowWidth());
+			Rect.y = GroupRect.m_TopLeft.y + GroupRect.Height() * (UpdatedMousePos.y / Graphics()->WindowHeight());
 			Rect.w = 0;
 			Rect.h = 0;
 			CIntRect r;

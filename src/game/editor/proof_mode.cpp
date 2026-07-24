@@ -2,6 +2,8 @@
 
 #include "editor.h"
 
+#include <engine/graphics.h>
+
 #include <game/client/components/menu_background.h>
 
 void CProofMode::CState::Reset()
@@ -104,47 +106,46 @@ void CProofMode::RenderScreenSizes()
 		Graphics()->LinesBegin();
 
 		// possible screen sizes (white border)
-		float aLastPoints[4];
+		CScreenRect LastRect(0, 0, 0, 0);
 		float Start = 1.0f; // 9.0f/16.0f;
 		float End = 16.0f / 9.0f;
 		const int NumSteps = 20;
 		for(int i = 0; i <= NumSteps; i++)
 		{
-			float aPoints[4];
 			float Aspect = Start + (End - Start) * (i / (float)NumSteps);
 
 			float Zoom = IsModeMenu() ? 0.7f : 1.0f;
-			Graphics()->MapScreenToWorld(
+			CScreenRect ScreenRect = Graphics()->MapScreenToWorld(
 				WorldOffset.x, WorldOffset.y,
-				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
+				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom);
 
 			if(i == 0)
 			{
 				IGraphics::CLineItem aArray[] = {
-					IGraphics::CLineItem(aPoints[0], aPoints[1], aPoints[2], aPoints[1]),
-					IGraphics::CLineItem(aPoints[0], aPoints[3], aPoints[2], aPoints[3])};
+					IGraphics::CLineItem(ScreenRect.m_TopLeft.x, ScreenRect.m_TopLeft.y, ScreenRect.m_BottomRight.x, ScreenRect.m_TopLeft.y),
+					IGraphics::CLineItem(ScreenRect.m_TopLeft.x, ScreenRect.m_BottomRight.y, ScreenRect.m_BottomRight.x, ScreenRect.m_BottomRight.y)};
 				Graphics()->LinesDraw(aArray, std::size(aArray));
 			}
 
 			if(i != 0)
 			{
 				IGraphics::CLineItem aArray[] = {
-					IGraphics::CLineItem(aPoints[0], aPoints[1], aLastPoints[0], aLastPoints[1]),
-					IGraphics::CLineItem(aPoints[2], aPoints[1], aLastPoints[2], aLastPoints[1]),
-					IGraphics::CLineItem(aPoints[0], aPoints[3], aLastPoints[0], aLastPoints[3]),
-					IGraphics::CLineItem(aPoints[2], aPoints[3], aLastPoints[2], aLastPoints[3])};
+					IGraphics::CLineItem(ScreenRect.m_TopLeft.x, ScreenRect.m_TopLeft.y, LastRect.m_TopLeft.x, LastRect.m_TopLeft.y),
+					IGraphics::CLineItem(ScreenRect.m_BottomRight.x, ScreenRect.m_TopLeft.y, LastRect.m_BottomRight.x, LastRect.m_TopLeft.y),
+					IGraphics::CLineItem(ScreenRect.m_TopLeft.x, ScreenRect.m_BottomRight.y, LastRect.m_TopLeft.x, LastRect.m_BottomRight.y),
+					IGraphics::CLineItem(ScreenRect.m_BottomRight.x, ScreenRect.m_BottomRight.y, LastRect.m_BottomRight.x, LastRect.m_BottomRight.y)};
 				Graphics()->LinesDraw(aArray, std::size(aArray));
 			}
 
 			if(i == NumSteps)
 			{
 				IGraphics::CLineItem aArray[] = {
-					IGraphics::CLineItem(aPoints[0], aPoints[1], aPoints[0], aPoints[3]),
-					IGraphics::CLineItem(aPoints[2], aPoints[1], aPoints[2], aPoints[3])};
+					IGraphics::CLineItem(ScreenRect.m_TopLeft.x, ScreenRect.m_TopLeft.y, ScreenRect.m_TopLeft.x, ScreenRect.m_BottomRight.y),
+					IGraphics::CLineItem(ScreenRect.m_BottomRight.x, ScreenRect.m_TopLeft.y, ScreenRect.m_BottomRight.x, ScreenRect.m_BottomRight.y)};
 				Graphics()->LinesDraw(aArray, std::size(aArray));
 			}
 
-			mem_copy(aLastPoints, aPoints, sizeof(aPoints));
+			LastRect = ScreenRect;
 		}
 		Graphics()->LinesEnd();
 
@@ -153,19 +154,18 @@ void CProofMode::RenderScreenSizes()
 			Graphics()->SetColor(1, 0, 0, 1);
 			for(int Pass = 0; Pass < 2; Pass++)
 			{
-				float aPoints[4];
 				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
 				const ColorRGBA aColors[] = {ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f)};
 				float Zoom = IsModeMenu() ? 0.7f : 1.0f;
-				Graphics()->MapScreenToWorld(
+				CScreenRect ScreenRect = Graphics()->MapScreenToWorld(
 					WorldOffset.x, WorldOffset.y,
-					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, aAspects[Pass], Zoom, aPoints);
+					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, aAspects[Pass], Zoom);
 
 				CUIRect Rect;
-				Rect.x = aPoints[0];
-				Rect.y = aPoints[1];
-				Rect.w = aPoints[2] - aPoints[0];
-				Rect.h = aPoints[3] - aPoints[1];
+				Rect.x = ScreenRect.m_TopLeft.x;
+				Rect.y = ScreenRect.m_TopLeft.y;
+				Rect.w = ScreenRect.Width();
+				Rect.h = ScreenRect.Height();
 				Rect.DrawOutline(aColors[Pass]);
 			}
 		}

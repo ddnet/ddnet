@@ -332,7 +332,7 @@ void CSpectator::OnRender()
 		}
 	}
 
-	Graphics()->MapScreen(0, 0, Width, Height);
+	Graphics()->MapScreenToSize(Width, Height);
 
 	SpectatorRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_ALL, 20.0f);
 

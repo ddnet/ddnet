@@ -212,7 +212,7 @@ void CStatboard::RenderGlobalStats()
 	float x = StatboardWidth / 2 - StatboardContentWidth / 2;
 	float y = 200.0f;
 
-	Graphics()->MapScreen(0, 0, StatboardWidth, StatboardHeight);
+	Graphics()->MapScreenToSize(StatboardWidth, StatboardHeight);
 
 	Graphics()->DrawRect(x - 10.f, y - 10.f, StatboardContentWidth, StatboardContentHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 17.0f);
 

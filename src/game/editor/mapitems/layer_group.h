@@ -38,7 +38,7 @@ public:
 	void Convert(CUIRect *pRect) const;
 	void Render();
 	void MapScreen();
-	void Mapping(float *pPoints) const;
+	CScreenRect Mapping() const;
 
 	void GetSize(float *pWidth, float *pHeight) const;
 

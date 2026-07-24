@@ -3,6 +3,8 @@
 #include <base/dbg.h>
 #include <base/log.h>
 
+#include <engine/graphics.h>
+
 #include <game/map/envelope_manager.h>
 
 const int LAYER_DEFAULT_TILESET = -1;
@@ -142,8 +144,7 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 
 void CMapRenderer::Render(const CRenderLayerParams &Params)
 {
-	float ScreenXLeft, ScreenYTop, ScreenXRight, ScreenYBottom;
-	Graphics()->GetScreen(&ScreenXLeft, &ScreenYTop, &ScreenXRight, &ScreenYBottom);
+	CScreenRect ScreenRect = Graphics()->GetScreen();
 
 	bool DoRenderGroup = true;
 	for(auto &pRenderLayer : m_vpRenderLayers)
@@ -165,7 +166,7 @@ void CMapRenderer::Render(const CRenderLayerParams &Params)
 	if(Params.m_RenderType != ERenderType::RENDERTYPE_BACKGROUND && Params.m_RenderType != ERenderType::RENDERTYPE_BACKGROUND_FORCE)
 	{
 		// reset the screen like it was before
-		Graphics()->MapScreen(ScreenXLeft, ScreenYTop, ScreenXRight, ScreenYBottom);
+		Graphics()->MapScreen(ScreenRect);
 	}
 	else
 	{

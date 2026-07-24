@@ -1172,7 +1172,7 @@ void CChat::OnRender()
 
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+	Graphics()->MapScreenToSize(Width, Height);
 
 	float x = 5.0f;
 	float y = 300.0f - 20.0f * FontSize() / 6.0f;

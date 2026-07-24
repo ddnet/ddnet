@@ -2,6 +2,7 @@
 
 #include "editor.h"
 
+#include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
@@ -156,7 +157,8 @@ void CMapView::Render(CUIRect View)
 		std::shared_ptr<CLayerTiles> pTileLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
 		if(pTileLayer)
 		{
-			Graphics()->MapScreen(x, y, x + w, y + h);
+			CScreenRect ScreenRect(x, y, w, h);
+			Graphics()->MapScreen(ScreenRect);
 			Editor()->m_pTilesetPicker->m_Image = pTileLayer->m_Image;
 			if(Editor()->m_BrushColorEnabled)
 			{
@@ -715,16 +717,15 @@ void CMapView::UpdateMouseWorld()
 	const std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
 	if(pGroup)
 	{
-		float aPoints[4];
-		pGroup->Mapping(aPoints);
+		CScreenRect GroupRect = pGroup->Mapping();
 
-		float WorldWidth = aPoints[2] - aPoints[0];
-		float WorldHeight = aPoints[3] - aPoints[1];
+		float WorldWidth = GroupRect.Width();
+		float WorldHeight = GroupRect.Height();
 
 		Map()->m_MapViewState.m_MouseWorldScale = WorldWidth / Graphics()->WindowWidth();
 
-		Map()->m_MapViewState.m_MouseWorldPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		Map()->m_MapViewState.m_MouseWorldPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+		Map()->m_MapViewState.m_MouseWorldPos.x = GroupRect.m_TopLeft.x + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+		Map()->m_MapViewState.m_MouseWorldPos.y = GroupRect.m_TopLeft.y + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
 		Map()->m_MapViewState.m_MouseDeltaWorld.x = UpdatedMouseDelta.x * (WorldWidth / Graphics()->WindowWidth());
 		Map()->m_MapViewState.m_MouseDeltaWorld.y = UpdatedMouseDelta.y * (WorldHeight / Graphics()->WindowHeight());
 	}
@@ -740,14 +741,13 @@ void CMapView::UpdateMouseWorld()
 		if(!pGameGroup->m_GameGroup)
 			continue;
 
-		float aPoints[4];
-		pGameGroup->Mapping(aPoints);
+		CScreenRect GroupRect = pGroup->Mapping();
 
-		float WorldWidth = aPoints[2] - aPoints[0];
-		float WorldHeight = aPoints[3] - aPoints[1];
+		float WorldWidth = GroupRect.Width();
+		float WorldHeight = GroupRect.Height();
 
-		Map()->m_MapViewState.m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		Map()->m_MapViewState.m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+		Map()->m_MapViewState.m_MouseWorldNoParaPos.x = GroupRect.m_TopLeft.x + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+		Map()->m_MapViewState.m_MouseWorldNoParaPos.y = GroupRect.m_TopLeft.y + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
 	}
 }
 
@@ -791,16 +791,16 @@ void CMapView::ZoomMouseTarget(float ZoomFactor)
 {
 	// zoom to the current mouse position
 	// get absolute mouse position
-	float aPoints[4];
-	Graphics()->MapScreenToWorld(
+
+	CScreenRect ScreenRect = Graphics()->MapScreenToWorld(
 		GetWorldOffset().x, GetWorldOffset().y,
-		100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), GetWorldZoom(), aPoints);
+		100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), GetWorldZoom());
 
-	float WorldWidth = aPoints[2] - aPoints[0];
-	float WorldHeight = aPoints[3] - aPoints[1];
+	float WorldWidth = ScreenRect.Width();
+	float WorldHeight = ScreenRect.Height();
 
-	float MouseWorldX = aPoints[0] + WorldWidth * (Ui()->MouseX() / Ui()->Screen()->w);
-	float MouseWorldY = aPoints[1] + WorldHeight * (Ui()->MouseY() / Ui()->Screen()->h);
+	float MouseWorldX = ScreenRect.m_TopLeft.x + WorldWidth * (Ui()->MouseX() / Ui()->Screen()->w);
+	float MouseWorldY = ScreenRect.m_TopLeft.y + WorldHeight * (Ui()->MouseY() / Ui()->Screen()->h);
 
 	// adjust camera
 	OffsetWorld((vec2(MouseWorldX, MouseWorldY) - GetWorldOffset()) * (1.0f - ZoomFactor));

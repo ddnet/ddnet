@@ -4,6 +4,7 @@
 
 #include "image.h"
 
+#include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/shared/map.h>
@@ -716,15 +717,14 @@ void CLayerTiles::Shift(EShiftDirection Direction)
 
 void CLayerTiles::ShowInfo()
 {
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	CScreenRect ScreenRect = Graphics()->GetScreen();
 	Graphics()->TextureSet(Editor()->Client()->GetDebugFont());
 	Graphics()->QuadsBegin();
 
-	int StartY = std::max(0, (int)(ScreenY0 / 32.0f) - 1);
-	int StartX = std::max(0, (int)(ScreenX0 / 32.0f) - 1);
-	int EndY = std::min((int)(ScreenY1 / 32.0f) + 1, m_Height);
-	int EndX = std::min((int)(ScreenX1 / 32.0f) + 1, m_Width);
+	int StartY = std::max(0, (int)(ScreenRect.m_TopLeft.y / 32.0f) - 1);
+	int StartX = std::max(0, (int)(ScreenRect.m_TopLeft.x / 32.0f) - 1);
+	int EndY = std::min((int)(ScreenRect.m_BottomRight.y / 32.0f) + 1, m_Height);
+	int EndX = std::min((int)(ScreenRect.m_BottomRight.x / 32.0f) + 1, m_Width);
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -754,7 +754,7 @@ void CLayerTiles::ShowInfo()
 		}
 
 	Graphics()->QuadsEnd();
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	Graphics()->MapScreen(ScreenRect);
 }
 
 void CLayerTiles::FillGameTiles(EGameTileOp Fill)
