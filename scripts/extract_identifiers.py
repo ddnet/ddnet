@@ -4,7 +4,6 @@ import os
 import sys
 
 import clang.cindex
-
 from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind
 
 try:
@@ -64,9 +63,9 @@ def get_complex_type(typ):
 	if typ.kind == TypeKind.ELABORATED:
 		return get_complex_type(typ.get_named_type())
 	if typ.kind in (TypeKind.UNEXPOSED, TypeKind.RECORD):
-		if typ.get_declaration().spelling in "shared_ptr unique_ptr".split():
+		if typ.get_declaration().spelling in ["shared_ptr", "unique_ptr"]:
 			return "p" + get_complex_type(typ.get_template_argument_type(0))
-		if typ.get_declaration().spelling in "array sorted_array".split():
+		if typ.get_declaration().spelling in ["array", "sorted_array"]:
 			return "a" + get_complex_type(typ.get_template_argument_type(0))
 	return ""
 
@@ -149,7 +148,7 @@ def process_source_file(out, file, extra_args, break_on):
 				"name": node.spelling,
 			})
 			if node.spelling == break_on:
-				breakpoint()
+				breakpoint()  # noqa: T100 intentional, controlled by --break-on argument
 
 
 def main():
@@ -162,7 +161,7 @@ def main():
 	if "CXXFLAGS" in os.environ:
 		extra_args = os.environ["CXXFLAGS"].split()
 
-	out = csv.DictWriter(sys.stdout, "file line column kind path qualifiers type name".split())
+	out = csv.DictWriter(sys.stdout, ["file", "line", "column", "kind", "path", "qualifiers", "type", "name"])
 	out.writeheader()
 	files = args.file
 	if len(files) > 1:

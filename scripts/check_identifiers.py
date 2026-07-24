@@ -6,32 +6,19 @@ import sys
 def check_name(kind, qualifiers, typ, name):
 	if kind == "variable":
 		return check_variable_name(qualifiers, typ, name)
-	if kind in "class struct".split():
+	if kind in ["class", "struct"]:
 		if name[0] not in "CI":
 			return "should start with 'C' (or 'I' for interfaces)"
 		if len(name) < 2:
 			return "must be at least two characters long"
 		if not name[1].isupper():
 			return "must start with an uppercase letter"
-	if kind == "enum_constant":
-		if not name.isupper():
-			return "must only contain uppercase letters, digits and underscores"
+	if kind == "enum_constant" and not name.isupper():
+		return "must only contain uppercase letters, digits and underscores"
 	return None
 
 
-ALLOW = set(
-	"""
-	dx dy
-	fx fy
-	mx my
-	ix iy
-	px py
-	sx sy
-	wx wy
-	x0 x1
-	y0 y1
-""".split()
-)
+ALLOW = {"dx", "dy", "fx", "fy", "mx", "my", "ix", "iy", "px", "py", "sx", "sy", "wx", "wy", "x0", "x1", "y0", "y1"}
 
 
 def check_variable_name(qualifiers, typ, name):

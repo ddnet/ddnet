@@ -27,7 +27,7 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake graphviz ninja-build python3-clang -y
         rustup default stable
-        pip3 install ruff
+        pip3 install ruff==0.16.0
 
     - name: Cache dependencies
       id: cache-dependencies

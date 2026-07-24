@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import csv
-from glob import glob
 import html
 import io
 import re
 import sys
-
+from glob import glob
 
 SUPPORTED_COMMAND_FLAGS = [
 	"CFGFLAG_SAVE",
@@ -113,7 +112,7 @@ def parse_tunings(lines):
 		value = value.strip()
 		try:
 			if value.endswith("f / (float)SERVER_TICK_SPEED"):
-				return float(value.rstrip("f / (float)SERVER_TICK_SPEED")) / 50.0
+				return float(value.removesuffix("f / (float)SERVER_TICK_SPEED")) / 50.0
 			return float(value.strip("f"))
 		except Exception as e:
 			raise RuntimeError("Failed to parse tuning value: {value}") from e

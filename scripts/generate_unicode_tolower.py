@@ -8,6 +8,7 @@
 # python3 scripts/generate_unicode_tolower.py data > `src/base/unicode/tolower_data.cpp`.
 
 import sys
+
 import unicode
 
 

@@ -9,6 +9,7 @@
 # python3 scripts/generate_unicode_confusables_data.py data > `src/base/unicode/confusables_data.cpp`.
 
 import sys
+
 import unicode
 
 
@@ -110,8 +111,8 @@ def main():
 	decompositions = generate_decompositions()
 
 	# Deduplicate
-	decomposition_set = sorted(set(tuple(x) for x in decompositions.values()))
-	len_set = sorted(set(len(x) for x in decomposition_set))
+	decomposition_set = sorted({tuple(x) for x in decompositions.values()})
+	len_set = sorted({len(x) for x in decomposition_set})
 
 	if len(len_set) > 8:
 		raise ValueError("Can't pack offset (13 bit) together with len (>3bit)")

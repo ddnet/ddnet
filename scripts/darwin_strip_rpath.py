@@ -1,6 +1,6 @@
 import argparse
-import subprocess
 import re
+import subprocess
 
 
 def split_cmds(lines):

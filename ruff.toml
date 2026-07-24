@@ -23,5 +23,6 @@ extend-select = [
 ]
 
 ignore = [
+    "DTZ", # naive datetimes without timezone are intentional, timestamps in filenames and databases are local time
     "E741", # ambiguous-variable-name: prohibits `l` as variable name
 ]

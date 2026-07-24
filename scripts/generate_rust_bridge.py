@@ -4,6 +4,7 @@ import argparse
 import os
 import subprocess
 import sys
+
 import tomllib
 
 os.chdir(os.path.dirname(__file__) + "/..")

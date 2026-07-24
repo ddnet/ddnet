@@ -1,7 +1,7 @@
 def only(x):
 	if len(x) != 1:
 		raise ValueError
-	return list(x)[0]
+	return next(iter(x))
 
 
 GlobalIdCounter = 0
@@ -133,10 +133,8 @@ class Array(BaseType):
 		BaseType.EmitPreDefinition(self, target_name)
 
 		lines = []
-		i = 0
-		for item in self.items:
+		for i, item in enumerate(self.items):
 			lines += item.EmitPreDefinition(f"{self.Identifier()}[{int(i)}]")
-			i += 1
 
 		if self.items:
 			lines += [f"static {self.TypeName()} {self.Identifier()}[] = {{"]
@@ -585,7 +583,7 @@ class NetArray(NetVariable):
 
 	def emit_dump(self, offset):
 		result = []
-		for i in range(0, self.size):
+		for i in range(self.size):
 			result += NetVariable(self.var).emit_dump(offset + i)
 			result += [f'dbg_msg("snapshot", "%s\\t{self.base_name}[{int(i)}]=%d", aRawData, pObj->{self.base_name}[{int(i)}]);']
 		return result
@@ -599,7 +597,7 @@ class NetTwIntString(NetArray):
 
 	def emit_dump(self, offset):
 		result = []
-		for i in range(0, self.size):
+		for i in range(self.size):
 			result += [f"aInts[0] = pObj->{self.base_name}[{int(i)}];"]
 			result += ["IntsToStr(aInts, std::size(aInts), aStr, std::size(aStr));"]
 			result += NetVariable(self.var).emit_dump(offset + i)

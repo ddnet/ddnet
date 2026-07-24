@@ -5,11 +5,11 @@
 # TODO: for whatever reason, `InterpreterPoolExecutor` doesn't work:
 # Exception: concurrent.interpreters.NotShareableError: [TidyAlphabeticalError('./CMakeLists.txt', 880, '…')] does not support cross-interpreter data
 # from concurrent.futures import InterpreterPoolExecutor as Executor
-from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor as Executor
 import argparse
 import os
 import sys
+from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor as Executor
 
 os.chdir(os.path.dirname(__file__) + "/..")
 

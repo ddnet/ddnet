@@ -24,7 +24,7 @@ def sha256_file(path: Path) -> str:
 
 def generate_asset_integrity_file(base_path: Path):
 	asset_files = enumerate_data_sorted(base_path)
-	index_lines = map(lambda asset: f"{asset} {sha256_file(base_path.joinpath(asset))}", asset_files)
+	index_lines = (f"{asset} {sha256_file(base_path.joinpath(asset))}" for asset in asset_files)
 	index_string = "\n".join(index_lines) + "\n"
 	aggregated_hash = hashlib.sha256(index_string.encode("utf-8")).hexdigest()
 	with base_path.joinpath("integrity.txt").open("w", encoding="utf-8") as index_file:

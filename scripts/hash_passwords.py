@@ -1,10 +1,10 @@
 import argparse
-import tempfile
 import binascii
 import hashlib
 import os
 import re
 import sys
+import tempfile
 
 AUTH_ADD_REGEX = re.compile(r'^\s*auth_add\s+(?P<username>"[^"]*"|[^"\s]+)\s+(?P<level>"[^"]*"|[^"\s]+)\s+(?P<password>"[^"]*"|[^"\s]+)\s*$')
 AUTH_ADD_PRESENT_REGEX = re.compile(r"(^|\W)auth_add($|\W)")
@@ -62,13 +62,13 @@ def main():
 	use_stdio = args.config is None or args.config == "-"
 	if use_stdio:
 		if args.config is None:
-			input_file = open(os.devnull, encoding="utf-8")
+			input_file = open(os.devnull, encoding="utf-8")  # noqa: SIM115 kept open until the end of main
 		else:
 			input_file = sys.stdin
 		output_file = sys.stdout
 	else:
-		input_file = open(args.config, encoding="utf-8")
-		output_file = tempfile.NamedTemporaryFile("w", dir=os.getcwd(), prefix=f"{args.config}.", delete=False)
+		input_file = open(args.config, encoding="utf-8")  # noqa: SIM115 closed manually below
+		output_file = tempfile.NamedTemporaryFile("w", dir=os.getcwd(), prefix=f"{args.config}.", delete=False)  # noqa: SIM115 closed manually below
 
 	for line in input_file:
 		parsed = parse_line(line)

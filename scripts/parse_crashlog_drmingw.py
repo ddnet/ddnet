@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
 import argparse
-from datetime import datetime
 import lzma
-from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -11,6 +11,8 @@ import tarfile
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime
+from pathlib import Path
 
 # TODO: 2027 or later: remove backwards compatibility for parsing filename without version and architecture
 CRASH_FILENAME_PATTERN = re.compile(r"(DDNet|DDNet-Server)(_([0-9\.\-]+))?_((win32|win64)(-steam)?)(_([a-zA-Z0-9]+))?_crash_log_([0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})_([0-9]+)_([0-9A-Fa-f]*)")
@@ -29,8 +31,7 @@ def run_command(args: list[str]) -> str:
 			args,
 			check=True,
 			stdin=subprocess.DEVNULL,
-			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE,
+			capture_output=True,
 			text=True,
 		)
 		return result.stdout.strip()
@@ -126,16 +127,15 @@ def download_symbols_executable(parsed_filename: ParsedFilename | None) -> Path:
 		print(f"Extracting symbols to {symbols_folder_path.name}")
 		symbols_folder_path.mkdir()
 		try:
-			with lzma.open(archive_path) as file:
-				with tarfile.open(fileobj=file) as tar:
-					for executable in ["DDNet.exe", "DDNet-Server.exe"]:
-						tar.extract(executable, path=symbols_folder_path, filter="data")
+			with lzma.open(archive_path) as file, tarfile.open(fileobj=file) as tar:
+				for executable in ["DDNet.exe", "DDNet-Server.exe"]:
+					tar.extract(executable, path=symbols_folder_path, filter="data")
 		except Exception as error:
 			shutil.rmtree(symbols_folder_path, ignore_errors=True)
 			raise RuntimeError("Failed to extract debug symbols. The debug symbols archive may be corrupted.\nPlease report this error if it persists.") from error
-		except BaseException as error:
+		except BaseException:
 			shutil.rmtree(symbols_folder_path, ignore_errors=True)
-			raise error
+			raise
 		finally:
 			archive_path.unlink()
 
@@ -261,7 +261,7 @@ def main():
 		print(error.args[0])
 		if args.verbose:
 			print()
-			raise error
+			raise
 		print("Pass the `--verbose` parameter to print the full stack trace.")
 
 

@@ -12,11 +12,11 @@
 #
 # Afterwards configure a MTA (e.g. postfix) and the users email address.
 
-import sqlite3
 import argparse
-from time import strftime
 import os
+import sqlite3
 from datetime import datetime, timedelta
+from time import strftime
 
 TABLES = ["record_race", "record_teamrace", "record_saves"]
 

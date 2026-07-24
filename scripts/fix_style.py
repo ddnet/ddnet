@@ -34,7 +34,7 @@ def filter_ignored(filenames):
 
 
 def filter_cpp(filenames):
-	return [filename for filename in filenames if any(filename.endswith(ext) for ext in ".c .cpp .h".split())]
+	return [filename for filename in filenames if any(filename.endswith(ext) for ext in [".c", ".cpp", ".h"])]
 
 
 def find_clang_format(version):
@@ -79,7 +79,7 @@ def format_or_warn(filenames, dry_run):
 		args += ["-i"]
 	args += filenames
 
-	proc = subprocess.run(args, capture_output=True, text=True)
+	proc = subprocess.run(args, capture_output=True, text=True, check=False)
 
 	if proc.stdout:
 		sys.stdout.write(proc.stdout)

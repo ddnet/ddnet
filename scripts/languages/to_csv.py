@@ -2,6 +2,7 @@
 import argparse
 import csv
 import os
+
 import twlang
 
 
@@ -18,7 +19,7 @@ def main():
 		with open(f"{args.out_dir}/{rfc3066}.csv", "w", encoding="utf-8", newline="\r\n") as f:
 			# Needs to use the "unix" dialect, otherwise Weblate misdetects
 			# space as field separator in some of the translation files.
-			writer = csv.DictWriter(f, "source context target".split(), dialect="unix")
+			writer = csv.DictWriter(f, ["source", "context", "target"], dialect="unix")
 			writer.writeheader()
 			for (source, context), (_, translation, _) in twlang.translations(filename).items():
 				writer.writerow({

@@ -1,8 +1,8 @@
-from hashlib import sha256
 import argparse
 import base64
 import binascii
 import secrets
+from hashlib import sha256
 
 
 def _crc32(bytes_):

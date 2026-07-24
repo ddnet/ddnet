@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from collections import namedtuple
-from decimal import Decimal
 import argparse
 import os.path
 import re
 import sqlite3
 import sys
+from collections import namedtuple
+from decimal import Decimal
 
 
 def chunks(l, n):

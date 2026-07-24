@@ -191,7 +191,7 @@ class DataContainer(Struct):
 
 
 def FileList(fmt, num):
-	return [fmt % (x + 1) for x in range(0, num)]
+	return [fmt % (x + 1) for x in range(num)]
 
 
 container = DataContainer()

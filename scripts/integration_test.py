@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-from collections import namedtuple
-from queue import Queue
-from threading import Thread
-from time import time
-from urllib import request
-from urllib.request import Request, urlopen
-from uuid import uuid4, UUID
 import io
 import json
 import os
@@ -16,6 +9,13 @@ import subprocess
 import sys
 import tempfile
 import traceback
+from collections import namedtuple
+from queue import Queue
+from threading import Thread
+from time import time
+from urllib import request
+from urllib.request import Request, urlopen
+from uuid import UUID, uuid4
 
 
 def urlopen_anystatus(url):
@@ -98,10 +98,9 @@ def relpath(path, start=os.curdir):
 def popen(args, *, cwd, **kwargs):
 	# If cwd is set, we might need to fix up the program path: On Windows, the
 	# executed program is relative to the current process's working directory.
-	if cwd is not None and os.name == "nt":
-		# If relative and contains a path separator.
-		if not os.path.isabs(args[0]) and os.path.dirname(args[0]) != "":
-			args = [relpath(os.path.join(cwd, args[0]))] + args[1:]
+	# Only needed if the program path is relative and contains a path separator.
+	if cwd is not None and os.name == "nt" and not os.path.isabs(args[0]) and os.path.dirname(args[0]) != "":
+		args = [relpath(os.path.join(cwd, args[0]))] + args[1:]
 	return subprocess.Popen(args, cwd=cwd, **kwargs)
 
 
@@ -295,7 +294,7 @@ def run_lines_thread(name, file, output_filename, output_list, output_queue):
 		output_file = None
 		for line in file:
 			if output_file is None:
-				output_file = open(output_filename, "w", buffering=1, encoding="utf-8")  # line buffering
+				output_file = open(output_filename, "w", buffering=1, encoding="utf-8")  # noqa: SIM115 line buffering, kept open for the lifetime of the thread
 			output_file.write(line)
 			line = line.rstrip("\r\n")
 			output_list.append(line)
@@ -412,10 +411,9 @@ class Runnable:
 		while True:
 			event = self.next_event(timeout_id)
 			if isinstance(event, Exit):
-				raise EOFError(f"program exited unexpectedly waiting for {description}")
-			elif isinstance(event, Log):
-				if fn(event):
-					return event
+				raise EOFError(f"program exited unexpectedly waiting for {description}")  # noqa: TRY004 not a type check, EOFError is intended
+			elif isinstance(event, Log) and fn(event):
+				return event
 
 	def wait_for_log_prefix(self, prefix, timeout=1):
 		return self.wait_for_log(lambda l: l.line.startswith(prefix), description=f"log line with prefix `{prefix}`", timeout=timeout)
@@ -566,9 +564,8 @@ json = {communities_json_filename!r}
 
 	def next_event(self, timeout_id):
 		event = super().next_event(timeout_id)
-		if isinstance(event, Log):
-			if event.line.startswith("warp::server: listening on http://[::]:"):
-				self.port = int(event.line[len("warp::server: listening on http://[::]:") :])
+		if isinstance(event, Log) and event.line.startswith("warp::server: listening on http://[::]:"):
+			self.port = int(event.line[len("warp::server: listening on http://[::]:") :])
 		return event
 
 	def exit(self):
@@ -812,7 +809,7 @@ def smoke_test(test_env):
 	client2.wait_for_exit()
 	server.wait_for_exit()
 
-	if not all(any(word in line for line in client1.full_stdout) for word in "cmdlist pause rank points".split()):
+	if not all(any(word in line for line in client1.full_stdout) for word in ["cmdlist", "pause", "rank", "points"]):
 		raise AssertionError("did not find output of /cmdlist command")
 	if not any("hello from admin" in line for line in server.full_stdout):
 		raise AssertionError("admin message not found in server output")
