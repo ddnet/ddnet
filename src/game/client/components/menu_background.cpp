@@ -1,6 +1,7 @@
 #include "menu_background.h"
 
 #include <base/dbg.h>
+#include <base/log.h>
 #include <base/str.h>
 #include <base/time.h>
 
@@ -100,13 +101,14 @@ void CMenuBackground::LoadThemeIcon(CTheme &Theme)
 	char aIconPath[IO_MAX_PATH_LENGTH];
 	str_format(aIconPath, sizeof(aIconPath), "themes/%s.png", Theme.m_Name.empty() ? "none" : Theme.m_Name.c_str());
 	Theme.m_IconTexture = Graphics()->LoadTexture(aIconPath, IStorage::TYPE_ALL);
-
-	char aBuf[32 + IO_MAX_PATH_LENGTH];
 	if(Theme.m_IconTexture.IsNullTexture())
-		str_format(aBuf, sizeof(aBuf), "failed to load theme icon '%s'", aIconPath);
+	{
+		log_error("menuthemes", "failed to load theme icon '%s'", aIconPath);
+	}
 	else
-		str_format(aBuf, sizeof(aBuf), "loaded theme icon '%s'", aIconPath);
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menuthemes", aBuf);
+	{
+		log_trace("menuthemes", "loaded theme icon '%s'", aIconPath);
+	}
 }
 
 int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -151,9 +153,7 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	}
 
 	// make new theme
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "added theme '%s' from 'themes/%s'", aThemeName, pName);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menuthemes", aBuf);
+	log_trace("menuthemes", "added theme '%s' from 'themes/%s'", aThemeName, pName);
 	pSelf->m_vThemes.emplace_back(aThemeName, IsDay, IsNight);
 	pSelf->LoadThemeIcon(pSelf->m_vThemes.back());
 

@@ -670,7 +670,7 @@ public:
 	void SendInfo(bool Start);
 	void SendDummyInfo(bool Start) override;
 	void SendKill() const;
-	void SendReadyChange7();
+	void SendReadyChange7() const;
 
 	void ApplyPreInputs(int Tick, bool Direct, CGameWorld &GameWorld);
 
