@@ -4,6 +4,7 @@
 #ifndef BASE_STR_H
 #define BASE_STR_H
 
+#include <array>
 #include <cinttypes>
 #include <cstdarg>
 #include <cstddef>
@@ -59,6 +60,23 @@ template<int N>
 void str_copy(char (&dst)[N], const char *src)
 {
 	str_copy(dst, src, N);
+}
+
+/**
+ * Copies a string to a fixed-size std::array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to be copied.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ * @remark Guarantees that dst string will contain null-termination.
+ */
+template<size_t N>
+void str_copy(std::array<char, N> &dst, const char *src)
+{
+	str_copy(dst.data(), src, static_cast<int>(N));
 }
 
 /**
