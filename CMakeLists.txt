@@ -3609,9 +3609,11 @@ endif()
 set(PACKAGE_TARGETS)
 if(CLIENT AND DMGBUILD_FOUND)
   file(MAKE_DIRECTORY bundle/client/)
-  file(MAKE_DIRECTORY bundle/server/)
   configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
-  configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
+  if(SERVER)
+    file(MAKE_DIRECTORY bundle/server/)
+    configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
+  endif()
 
   set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
   set(DMG_MKDIRS
@@ -3621,14 +3623,20 @@ if(CLIENT AND DMGBUILD_FOUND)
     ${CLIENT_EXECUTABLE}.app/Contents/Frameworks
     ${CLIENT_EXECUTABLE}.app/Contents/MacOS
     ${CLIENT_EXECUTABLE}.app/Contents/Resources
-    ${SERVER_EXECUTABLE}.app
-    ${SERVER_EXECUTABLE}.app/Contents
-    ${SERVER_EXECUTABLE}.app/Contents/MacOS
-    ${SERVER_EXECUTABLE}.app/Contents/Resources
-    ${SERVER_EXECUTABLE}.app/Contents/Resources/data
-    ${SERVER_EXECUTABLE}.app/Contents/Resources/data/mapres
     # tidy-alphabetical-end
   )
+  if(SERVER)
+    list(APPEND DMG_MKDIRS
+      # tidy-alphabetical-start
+      ${SERVER_EXECUTABLE}.app
+      ${SERVER_EXECUTABLE}.app/Contents
+      ${SERVER_EXECUTABLE}.app/Contents/MacOS
+      ${SERVER_EXECUTABLE}.app/Contents/Resources
+      ${SERVER_EXECUTABLE}.app/Contents/Resources/data
+      ${SERVER_EXECUTABLE}.app/Contents/Resources/data/mapres
+      # tidy-alphabetical-end
+    )
+  endif()
   set(DMG_MKDIR_COMMANDS)
   foreach(dir ${DMG_MKDIRS})
     list(APPEND DMG_MKDIR_COMMANDS COMMAND ${CMAKE_COMMAND} -E make_directory ${DMG_TMPDIR}/${dir})
@@ -3666,18 +3674,54 @@ if(CLIENT AND DMGBUILD_FOUND)
       )
     endforeach()
     list(APPEND CODESIGN_COMMANDS
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
 
         COMMAND codesign --force --options runtime --timestamp --deep --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app
-        COMMAND codesign --force --options runtime --timestamp --deep --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app
-        # Verify signatures
+        # Verify signature
         COMMAND codesign --verify --deep --strict --verbose=2 "${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app"
-        COMMAND codesign --verify --deep --strict --verbose=2 "${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app"
     )
+    if(SERVER)
+      list(APPEND CODESIGN_COMMANDS
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+
+        COMMAND codesign --force --options runtime --timestamp --deep --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app
+        # Verify signature
+        COMMAND codesign --verify --deep --strict --verbose=2 "${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app"
+      )
+    endif()
   else()
     set(CODESIGN_COMMANDS)
+  endif()
+
+  if(SERVER)
+    set(DMG_SERVER_COMMANDS
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/data/maps
+      COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${SERVER_EXECUTABLE}.icns ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/
+      COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-server> $<TARGET_FILE:game-server-launcher> ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/
+      COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+      COMMAND ${CMAKE_COMMAND} -E copy ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+    )
+    set(DMG_SERVER_DEPENDS
+      game-server-launcher
+      game-server
+      ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
+      # tidy-alphabetical-start
+      other/bundle/server/PkgInfo
+      other/dmgbackground.png
+      other/icons/${SERVER_EXECUTABLE}.icns
+      # tidy-alphabetical-end
+    )
+    set(DMGBUILD_COMMAND
+      COMMAND dmgbuild -s ${PROJECT_SOURCE_DIR}/other/dmgsettings.py -D client=${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app -D server=${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app -D background=${PROJECT_SOURCE_DIR}/other/dmgbackground.png "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}" ${CPACK_PACKAGE_FILE_NAME}.dmg
+    )
+  else()
+    set(DMG_SERVER_COMMANDS)
+    set(DMG_SERVER_DEPENDS other/dmgbackground_single.png)
+    set(DMGBUILD_COMMAND
+      COMMAND dmgbuild -s ${PROJECT_SOURCE_DIR}/other/dmgsettings.py -D client=${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app -D background=${PROJECT_SOURCE_DIR}/other/dmgbackground_single.png "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}" ${CPACK_PACKAGE_FILE_NAME}.dmg
+    )
   endif()
 
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
@@ -3705,33 +3749,23 @@ if(CLIENT AND DMGBUILD_FOUND)
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
 
     # SERVER
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/data/maps
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${SERVER_EXECUTABLE}.icns ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-server> $<TARGET_FILE:game-server-launcher> ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/
-    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
-    COMMAND ${CMAKE_COMMAND} -E copy ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+    ${DMG_SERVER_COMMANDS}
 
     ${CODESIGN_COMMANDS}
 
     # DMG
-    COMMAND dmgbuild -s ${PROJECT_SOURCE_DIR}/other/dmgsettings.py -D client=${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app -D server=${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app -D background=${PROJECT_SOURCE_DIR}/other/dmgbackground.png "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}" ${CPACK_PACKAGE_FILE_NAME}.dmg
+    ${DMGBUILD_COMMAND}
 
     DEPENDS
       game-client
       ${TARGET_STEAMAPI}
-      game-server-launcher
-      game-server
       ${PROJECT_BINARY_DIR}/bundle/client/Info.plist
-      ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
+      ${DMG_SERVER_DEPENDS}
       # tidy-alphabetical-start
       data
       other/bundle/client/PkgInfo
-      other/bundle/server/PkgInfo
-      other/dmgbackground.png
       other/dmgsettings.py
       other/icons/${CLIENT_EXECUTABLE}.icns
-      other/icons/${SERVER_EXECUTABLE}.icns
       # tidy-alphabetical-end
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
