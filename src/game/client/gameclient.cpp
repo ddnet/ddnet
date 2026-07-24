@@ -735,31 +735,7 @@ void CGameClient::OnReset()
 void CGameClient::UpdatePositions()
 {
 	// local character position
-	if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-	{
-		if(!AntiPingPlayers())
-		{
-			if(!m_Snap.m_pLocalCharacter || (m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
-			{
-				// don't use predicted
-			}
-			else
-			{
-				m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-			}
-		}
-		else
-		{
-			if(!(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
-			{
-				if(m_Snap.m_pLocalCharacter)
-					m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-			}
-			//		else
-			//			m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-		}
-	}
-	else if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter)
+	if(!Predict() && m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter)
 	{
 		m_LocalCharacterPos = mix(
 			vec2(m_Snap.m_pLocalPrevCharacter->m_X, m_Snap.m_pLocalPrevCharacter->m_Y),
@@ -985,12 +961,16 @@ float CGameClient::GetAnimationPlaybackSpeed() const
 	return 1.0f;
 }
 
-bool CGameClient::AntiPingPlayers() const
+int CGameClient::AntiPingPlayers() const
 {
-	return g_Config.m_ClAntiPing &&
-	       g_Config.m_ClAntiPingPlayers &&
-	       !m_Snap.m_SpecInfo.m_Active &&
-	       Client()->State() != IClient::STATE_DEMOPLAYBACK;
+	if(g_Config.m_ClAntiPing &&
+		g_Config.m_ClAntiPingPlayers &&
+		!m_Snap.m_SpecInfo.m_Active &&
+		Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		return g_Config.m_ClAntiPingPlayers;
+	}
+	return 0;
 }
 
 bool CGameClient::AntiPingGrenade() const
@@ -3812,7 +3792,8 @@ void CGameClient::UpdateRenderedCharacters()
 		vec2 Pos = UnpredPos;
 
 		CCharacter *pChar = m_PredictedWorld.GetCharacterById(i);
-		if(Predict() && (i == m_Snap.m_LocalClientId || (AntiPingPlayers() && !IsOtherTeam(i))) && pChar)
+		bool AntiPingPlayer = AntiPingPlayers() == 1 || (AntiPingPlayers() >= 2 && pChar && pChar->IsInterfering());
+		if(Predict() && (i == m_Snap.m_LocalClientId || (AntiPingPlayer && !IsOtherTeam(i))) && pChar)
 		{
 			m_aClients[i].m_Predicted.Write(&m_aClients[i].m_RenderCur);
 			m_aClients[i].m_PrevPredicted.Write(&m_aClients[i].m_RenderPrev);
