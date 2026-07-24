@@ -24,9 +24,16 @@ public:
 	bool m_Predict;
 	// TuneZone is introduced locally
 	int m_TuneZone;
+	float m_ShotgunStrength;
+	float m_BounceNum;
+	float m_BounceCost;
+	float m_BounceDelay;
+	float m_LaserReach;
 };
 
 CLaserData ExtractLaserInfo(int NetObjType, const void *pData, class CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx);
 CLaserData ExtractLaserInfoDDNet(const CNetObj_DDNetLaser *pLaser, class CGameWorld *pGameWorld);
+
+void GetLaserTunings(CLaserData *pData, class CGameWorld *pGameWorld);
 
 #endif // GAME_CLIENT_LASER_DATA_H

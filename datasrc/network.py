@@ -32,10 +32,10 @@ LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 	"EXPLOSIVE", "FREEZE",
 ]
 ProjectileFlags = [
-	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL",
+	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL", "HAS_TUNEPARAMS"
 ]
 LaserFlags = [
-	"NO_PREDICT",
+	"NO_PREDICT", "HAS_TUNEPARAMS"
 ]
 
 PickupFlags = [
@@ -296,6 +296,10 @@ Objects = [
 		NetIntAny("m_SwitchNumber", default=-1),
 		NetIntAny("m_Subtype", default=-1),
 		NetIntAny("m_Flags", default=0),
+		NetIntAny("m_ShotgunStrength", default=0),
+		NetIntAny("m_BounceNum", default=0),
+		NetIntAny("m_BounceCost", default=0),
+		NetIntAny("m_BounceDelay", default=0),
 	]),
 
 	NetObjectEx("DDNetProjectile", "ddnet-projectile@netobj.ddnet.tw", [
@@ -309,6 +313,9 @@ Objects = [
 		NetIntAny("m_SwitchNumber"),
 		NetIntAny("m_TuneZone"),
 		NetIntAny("m_Flags"),
+		NetIntAny("m_Curvature", default=0),
+		NetIntAny("m_Speed", default=0),
+		NetIntAny("m_Lifetime", default=0),
 	]),
 
 	NetObjectEx("DDNetPickup", "pickup@netobj.ddnet.tw", [
@@ -664,4 +671,6 @@ Messages = [
 	NetMessageEx("Sv_MapInfo", "map-info@netmsg.ddnet.org", [
 		NetString("m_pDescription"),
 	]),
+
+	NetMessageEx("Sv_TuneLock", "tunelock@netmsg.ddnet.tw", []),
 ]

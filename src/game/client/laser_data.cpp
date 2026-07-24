@@ -57,6 +57,7 @@ CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGame
 		}
 	}
 
+	GetLaserTunings(&Result, pGameWorld);
 	return Result;
 }
 
@@ -75,5 +76,26 @@ CLaserData ExtractLaserInfoDDNet(const CNetObj_DDNetLaser *pLaser, CGameWorld *p
 	Result.m_Subtype = pLaser->m_Subtype;
 	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_From)) : 0;
 	Result.m_Predict = !(pLaser->m_Flags & LASERFLAG_NO_PREDICT);
+	if(pLaser->m_Flags & LASERFLAG_HAS_TUNEPARAMS)
+	{
+		Result.m_ShotgunStrength = pLaser->m_ShotgunStrength;
+		Result.m_BounceNum = pLaser->m_BounceNum;
+		Result.m_BounceCost = pLaser->m_BounceCost;
+		Result.m_BounceDelay = pLaser->m_BounceDelay;
+	}
+	else
+	{
+		GetLaserTunings(&Result, pGameWorld);
+	}
 	return Result;
+}
+
+void GetLaserTunings(CLaserData *pData, class CGameWorld *pGameWorld)
+{
+	const CTuningParams *pTuning = pGameWorld ? pGameWorld->TuningFromChrOrZone(pData->m_Owner, pData->m_TuneZone) : &CTuningParams::DEFAULT;
+	pData->m_ShotgunStrength = pTuning->m_ShotgunStrength;
+	pData->m_BounceNum = pTuning->m_LaserBounceNum;
+	pData->m_BounceCost = pTuning->m_LaserBounceCost;
+	pData->m_BounceDelay = pTuning->m_LaserBounceDelay;
+	pData->m_LaserReach = pTuning->m_LaserReach;
 }

@@ -513,6 +513,10 @@ void CPlayer::OnDisconnect()
 	KillCharacter();
 
 	m_Moderating = false;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(GameServer()->GetPlayerChar(i))
+			GameServer()->GetPlayerChar(i)->m_aSentLockedTunings[m_ClientId] = false;
 }
 
 void CPlayer::OnPredictedInput(const CNetObj_PlayerInput *pNewInput)

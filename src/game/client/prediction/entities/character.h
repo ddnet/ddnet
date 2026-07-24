@@ -128,6 +128,9 @@ public:
 	int GetOverriddenTuneZone() const;
 	int GetPureTuneZone() const;
 
+	CTuningParams *GetTuning() const;
+	LOCKED_TUNES m_LockedTunings;
+
 	bool HammerHitDisabled() const { return m_Core.m_HammerHitDisabled; }
 	bool ShotgunHitDisabled() const { return m_Core.m_ShotgunHitDisabled; }
 	bool LaserHitDisabled() const { return m_Core.m_LaserHitDisabled; }

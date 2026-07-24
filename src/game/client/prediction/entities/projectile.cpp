@@ -41,35 +41,40 @@ CProjectile::CProjectile(
 	m_Freeze = Freeze;
 
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+	DetermineTuning();
 
 	GameWorld()->InsertEntity(this);
 }
 
-vec2 CProjectile::GetPos(float Time)
+void CProjectile::DetermineTuning()
 {
-	float Curvature = 0;
-	float Speed = 0;
-	CTuningParams *pTuning = GetTuning(m_TuneZone);
+	CTuningParams *pTuning = GameWorld()->TuningFromChrOrZone(m_Owner, m_TuneZone);
 
 	switch(m_Type)
 	{
 	case WEAPON_GRENADE:
-		Curvature = pTuning->m_GrenadeCurvature;
-		Speed = pTuning->m_GrenadeSpeed;
+		m_Curvature = pTuning->m_GrenadeCurvature;
+		m_Speed = pTuning->m_GrenadeSpeed;
+		m_Lifetime = pTuning->m_GrenadeLifetime;
 		break;
 
 	case WEAPON_SHOTGUN:
-		Curvature = pTuning->m_ShotgunCurvature;
-		Speed = pTuning->m_ShotgunSpeed;
+		m_Curvature = pTuning->m_ShotgunCurvature;
+		m_Speed = pTuning->m_ShotgunSpeed;
+		m_Lifetime = pTuning->m_ShotgunLifetime;
 		break;
 
 	case WEAPON_GUN:
-		Curvature = pTuning->m_GunCurvature;
-		Speed = pTuning->m_GunSpeed;
+		m_Curvature = pTuning->m_GunCurvature;
+		m_Speed = pTuning->m_GunSpeed;
+		m_Lifetime = pTuning->m_GunLifetime;
 		break;
 	}
+}
 
-	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
+vec2 CProjectile::GetPos(float Time)
+{
+	return CalcPos(m_Pos, m_Direction, m_Curvature, m_Speed, Time);
 }
 
 void CProjectile::Tick()
@@ -191,20 +196,24 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 	m_StartTick = pProj->m_StartTick;
 	m_TuneZone = pProj->m_TuneZone;
 
+	m_Curvature = pProj->m_Curvature;
+	m_Speed = pProj->m_Speed;
+	m_Lifetime = pProj->m_Lifetime;
+
 	int Lifetime = 20 * GameWorld()->GameTickSpeed();
 	m_SoundImpact = -1;
 	if(m_Type == WEAPON_GRENADE)
 	{
-		Lifetime = GetTuning(m_TuneZone)->m_GrenadeLifetime * GameWorld()->GameTickSpeed();
+		Lifetime = m_Lifetime * GameWorld()->GameTickSpeed();
 		m_SoundImpact = SOUND_GRENADE_EXPLODE;
 	}
 	else if(m_Type == WEAPON_GUN)
 	{
-		Lifetime = GetTuning(m_TuneZone)->m_GunLifetime * GameWorld()->GameTickSpeed();
+		Lifetime = m_Lifetime * GameWorld()->GameTickSpeed();
 	}
 	else if(m_Type == WEAPON_SHOTGUN && !GameWorld()->m_WorldConfig.m_IsDDRace)
 	{
-		Lifetime = GetTuning(m_TuneZone)->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
+		Lifetime = m_Lifetime * GameWorld()->GameTickSpeed();
 	}
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
 	m_Id = Id;
@@ -226,6 +235,9 @@ CProjectileData CProjectile::GetData() const
 	Result.m_Freeze = m_Freeze;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_SwitchNumber = m_Number;
+	Result.m_Curvature = m_Curvature;
+	Result.m_Speed = m_Speed;
+	Result.m_Lifetime = m_Lifetime;
 	return Result;
 }
 

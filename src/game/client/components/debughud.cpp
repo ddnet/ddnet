@@ -92,10 +92,12 @@ void CDebugHud::RenderTuning()
 	if(g_Config.m_DbgTuning == DBG_TUNING_OFF)
 		return;
 
-	const CCharacter *pCharacter = GameClient()->m_GameWorld.GetCharacterById(GameClient()->m_Snap.m_LocalClientId);
+	const int ClientId = GameClient()->m_Snap.m_SpecInfo.m_Active && GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW ? GameClient()->m_Snap.m_SpecInfo.m_SpectatorId : GameClient()->m_Snap.m_LocalClientId;
+	const CCharacter *pCharacter = GameClient()->m_GameWorld.GetCharacterById(ClientId);
 
 	const CTuningParams *pGlobalTuning = GameClient()->GetTuning(0);
 	const CTuningParams *pZoneTuning = !GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones || pCharacter == nullptr ? nullptr : GameClient()->GetTuning(pCharacter->GetOverriddenTuneZone());
+	const CTuningParams *pCharacterTuning = pCharacter == nullptr ? nullptr : pCharacter->GetTuning();
 	const CTuningParams *pActiveTuning = pZoneTuning == nullptr ? pGlobalTuning : pZoneTuning;
 
 	const float Height = 300.0f;
@@ -128,15 +130,22 @@ void CDebugHud::RenderTuning()
 
 	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
-		float CurrentGlobal, CurrentZone, Standard;
+		float CurrentGlobal, CurrentZone, Standard, LockedTune;
 		pGlobalTuning->Get(i, &CurrentGlobal);
 		if(pZoneTuning == nullptr)
 			CurrentZone = 0.0f;
 		else
 			pZoneTuning->Get(i, &CurrentZone);
+		if(pCharacterTuning == nullptr)
+			LockedTune = 0.0f;
+		else
+			pCharacterTuning->Get(i, &LockedTune);
 		CTuningParams::DEFAULT.Get(i, &Standard);
 
-		if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_CHANGED && Standard == CurrentGlobal && (pZoneTuning == nullptr || Standard == CurrentZone))
+		const bool GlobalStandard = Standard == CurrentGlobal;
+		const bool ZoneStandard = pZoneTuning == nullptr || Standard == CurrentZone;
+		const bool LockStandard = pCharacterTuning == nullptr || !IsTuneInList(&pCharacter->m_LockedTunings, i);
+		if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_CHANGED && GlobalStandard && ZoneStandard && LockStandard)
 			continue; // skip unchanged params
 
 		if(y == StartY)
@@ -146,11 +155,13 @@ void CDebugHud::RenderTuning()
 		}
 
 		ColorRGBA TextColor;
-		if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_ALL && Standard == CurrentGlobal && (pZoneTuning == nullptr || Standard == CurrentZone))
+		if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_ALL && GlobalStandard && ZoneStandard && LockStandard)
 			TextColor = ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f); // grey: value unchanged globally and in current zone
-		else if(Standard == CurrentGlobal && pZoneTuning != nullptr && Standard != CurrentZone)
+		else if(GlobalStandard && !LockStandard)
+			TextColor = ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f); // yellow: value changed by tunelock
+		else if(GlobalStandard && !ZoneStandard)
 			TextColor = ColorRGBA(0.6f, 0.6f, 1.0f, 1.0f); // blue: value changed only in current zone
-		else if(Standard != CurrentGlobal && pZoneTuning != nullptr && Standard == CurrentZone)
+		else if(!GlobalStandard && pZoneTuning != nullptr && Standard == CurrentZone)
 			TextColor = ColorRGBA(0.4f, 1.0f, 0.4f, 1.0f); // green: value changed globally but reset to default by tune zone
 		else
 			TextColor = ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f); // red: value changed globally
@@ -158,8 +169,10 @@ void CDebugHud::RenderTuning()
 
 		char aBufStandard[32];
 		str_format(aBufStandard, sizeof(aBufStandard), "%.2f", Standard);
+
+		const float CurrentVal = !LockStandard ? LockedTune : (!ZoneStandard ? CurrentZone : CurrentGlobal);
 		char aBufCurrent[32];
-		str_format(aBufCurrent, sizeof(aBufCurrent), "%.2f", pZoneTuning == nullptr ? CurrentGlobal : CurrentZone);
+		str_format(aBufCurrent, sizeof(aBufCurrent), "%.2f", CurrentVal);
 		RenderRow(aBufStandard, aBufCurrent, CTuningParams::Name(i));
 	}
 

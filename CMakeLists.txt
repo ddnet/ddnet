@@ -2301,7 +2301,9 @@ set_src(GAME_SHARED GLOB src/game
   team_state.h
   teamscore.cpp
   teamscore.h
+  tuning.cpp
   tuning.h
+  tuning_params.h
   version.h
   voting.h
   # tidy-alphabetical-end

@@ -21,7 +21,7 @@ CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, CGameWo
 
 	if(NetObjType == NETOBJTYPE_DDNETPROJECTILE)
 	{
-		return ExtractProjectileInfoDDNet((CNetObj_DDNetProjectile *)pData);
+		return ExtractProjectileInfoDDNet((CNetObj_DDNetProjectile *)pData, pGameWorld);
 	}
 	else if(NetObjType == NETOBJTYPE_DDRACEPROJECTILE || (NetObjType == NETOBJTYPE_PROJECTILE && UseProjectileExtraInfo(pProj)))
 	{
@@ -39,6 +39,7 @@ CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, CGameWo
 	Result.m_Owner = -1;
 	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_StartPos)) : 0;
 	Result.m_SwitchNumber = pEntEx ? pEntEx->m_SwitchNumber : 0;
+	GetProjectileTunings(&Result, pGameWorld);
 	return Result;
 }
 
@@ -66,10 +67,11 @@ CProjectileData ExtractProjectileInfoDDRace(const CNetObj_DDRaceProjectile *pPro
 	Result.m_Freeze = pProj->m_Data & LEGACYPROJECTILEFLAG_FREEZE;
 	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_StartPos)) : 0;
 	Result.m_SwitchNumber = pEntEx ? pEntEx->m_SwitchNumber : 0;
+	GetProjectileTunings(&Result, pGameWorld);
 	return Result;
 }
 
-CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj)
+CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj, CGameWorld *pGameWorld)
 {
 	CProjectileData Result = {vec2(0, 0)};
 
@@ -102,6 +104,16 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj)
 	Result.m_Explosive = pProj->m_Flags & PROJECTILEFLAG_EXPLOSIVE;
 	Result.m_Freeze = pProj->m_Flags & PROJECTILEFLAG_FREEZE;
 
+	if(pProj->m_Flags & PROJECTILEFLAG_HAS_TUNEPARAMS)
+	{
+		Result.m_Curvature = pProj->m_Curvature;
+		Result.m_Speed = pProj->m_Speed;
+		Result.m_Lifetime = pProj->m_Lifetime;
+	}
+	else
+	{
+		GetProjectileTunings(&Result, pGameWorld);
+	}
 	return Result;
 }
 
@@ -114,5 +126,28 @@ void DemoObjectRemoveExtraProjectileInfo(CNetObj_Projectile *pProj)
 		pProj->m_Y = Data.m_StartPos.y;
 		pProj->m_VelX = (int)(Data.m_StartVel.x * 100.0f);
 		pProj->m_VelY = (int)(Data.m_StartVel.y * 100.0f);
+	}
+}
+
+void GetProjectileTunings(CProjectileData *pData, class CGameWorld *pGameWorld)
+{
+	const CTuningParams *pTuning = pGameWorld ? pGameWorld->TuningFromChrOrZone(pData->m_Owner, pData->m_TuneZone) : &CTuningParams::DEFAULT;
+	if(pData->m_Type == WEAPON_GRENADE)
+	{
+		pData->m_Curvature = pTuning->m_GrenadeCurvature;
+		pData->m_Speed = pTuning->m_GrenadeSpeed;
+		pData->m_Lifetime = pTuning->m_GrenadeLifetime;
+	}
+	else if(pData->m_Type == WEAPON_SHOTGUN)
+	{
+		pData->m_Curvature = pTuning->m_ShotgunCurvature;
+		pData->m_Speed = pTuning->m_ShotgunSpeed;
+		pData->m_Lifetime = pTuning->m_ShotgunLifetime;
+	}
+	else if(pData->m_Type == WEAPON_GUN)
+	{
+		pData->m_Curvature = pTuning->m_GunCurvature;
+		pData->m_Speed = pTuning->m_GunSpeed;
+		pData->m_Lifetime = pTuning->m_GunLifetime;
 	}
 }
