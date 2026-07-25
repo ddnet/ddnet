@@ -204,14 +204,22 @@ void CGameWorld::Tick()
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 	{
 		// It's important to call PreTick() and Tick() after each other.
-		// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
-		if(m_WorldConfig.m_NoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+		// If we call PreTick() before, and Tick() after other entities have been processed,
+		// it causes physics changes such as a stronger shotgun or grenade.
+		if(i == ENTTYPE_CHARACTER)
 		{
 			auto *pEnt = m_apFirstEntityTypes[i];
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-				((CCharacter *)pEnt)->PreTick();
+				// For it's current purpose SyncedPreTick() has to happen before Tick(). If in the future something in
+				// PreTick() requires a synced state, call SynedPreTick() in a separate earlier loop.
+				CCharacter *pChr = (CCharacter *)pEnt;
+				pChr->SyncedPreTick();
+				if(m_WorldConfig.m_NoWeakHookAndBounce)
+				{
+					pChr->PreTick();
+				}
 				pEnt = m_pNextTraverseEntity;
 			}
 		}

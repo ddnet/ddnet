@@ -31,6 +31,8 @@ public:
 	void Tick() override;
 	void TickDeferred() override;
 
+	void SyncedPreTick();
+
 	bool IsGrounded();
 
 	void SetWeapon(int Weapon);

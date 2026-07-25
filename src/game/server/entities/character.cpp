@@ -656,10 +656,7 @@ void CCharacter::HandleWeapons()
 
 	// check reload timer
 	if(m_ReloadTimer)
-	{
-		m_ReloadTimer--;
 		return;
-	}
 
 	// fire Weapon, if wanted
 	FireWeapon();
@@ -775,6 +772,18 @@ void CCharacter::ResetInput()
 	m_Input.m_Fire &= INPUT_STATE_MASK;
 	m_Input.m_Jump = 0;
 	m_LatestPrevInput = m_LatestInput = m_Input;
+}
+
+void CCharacter::SyncedPreTick()
+{
+	if(m_ReloadTimer)
+	{
+		// Pre-decrement all reload timers before any character ticks so that a tee unfrozen
+		// by a laser has a timer of 0 when HandleWeapons() runs, regardless of client ID order.
+		// Without this, tees with higher ID (processed later) would be unfrozen
+		// with a timer still at 1, causing laser chains to break every second shot.
+		m_ReloadTimer--;
+	}
 }
 
 void CCharacter::PreTick()
