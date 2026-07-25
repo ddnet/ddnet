@@ -1822,6 +1822,18 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage)
 	// which is super handy for local development where
 	// the server restarts all the time
 	const char *apHistory[] = {
+		"yellow",
+		"antibot dump",
+		"status",
+		"broadcast hello world from ssh",
+		"broadcast yellow world",
+		"sv_port",
+		"sv_shutdown_when_empty 1",
+		"sv_this_config_does_not_exist 2",
+		"shutdown",
+		"access_level logout moderator",
+		"add_sqlserver xx",
+		"mapbug bong",
 		"sv_shutdown_when_empty 0",
 		"say foo bar baz",
 		"echo hello world",
