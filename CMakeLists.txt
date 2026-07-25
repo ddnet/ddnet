@@ -2541,10 +2541,18 @@ if(CLIENT)
     components/menus_ingame_touch_controls.cpp
     components/menus_ingame_touch_controls.h
     components/menus_settings.cpp
-    components/menus_settings7.cpp
+    components/menus_settings_appearance.cpp
     components/menus_settings_assets.cpp
     components/menus_settings_controls.cpp
     components/menus_settings_controls.h
+    components/menus_settings_ddnet.cpp
+    components/menus_settings_general.cpp
+    components/menus_settings_graphics.cpp
+    components/menus_settings_language.cpp
+    components/menus_settings_player.cpp
+    components/menus_settings_sound.cpp
+    components/menus_settings_tee.cpp
+    components/menus_settings_tee7.cpp
     components/menus_start.cpp
     components/menus_start.h
     components/motd.cpp

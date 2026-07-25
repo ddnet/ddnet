@@ -60,11 +60,9 @@ private:
 	ColorHSLA DoLine_ColorPicker(CButtonContainer *pResetId, float LineSize, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, int *pCheckBoxValue = nullptr, bool Alpha = false);
 	ColorHSLA DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHslaColor, bool Alpha);
 
-	void DoLaserPreview(const CUIRect *pRect, ColorHSLA OutlineColor, ColorHSLA InnerColor, int LaserType);
 	int DoButton_GridHeader(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Align = TEXTALIGN_ML);
 	int DoButton_Favorite(const void *pButtonId, const void *pParentId, bool Checked, const CUIRect *pRect);
 
-	bool m_SkinListScrollToSelected = false;
 	std::optional<std::chrono::nanoseconds> m_SkinList7LastRefreshTime;
 	std::optional<std::chrono::nanoseconds> m_SkinPartsList7LastRefreshTime;
 
@@ -244,14 +242,6 @@ protected:
 	bool m_NeedRestartUpdate;
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
-
-	// 0.7 skins
-	bool m_CustomSkinMenu = false;
-	int m_TeePartSelected = protocol7::SKINPART_BODY;
-	const CSkins7::CSkin *m_pSelectedSkin = nullptr;
-	CLineInputBuffered<protocol7::MAX_SKIN_ARRAY_SIZE, protocol7::MAX_SKIN_LENGTH> m_SkinNameInput;
-	bool m_SkinPartListNeedsUpdate = false;
-	void PopupConfirmDeleteSkin7();
 
 	// for map download popup
 	int64_t m_DownloadLastCheckTime;
@@ -567,27 +557,56 @@ protected:
 	void UpdateCommunityCache(bool Force);
 
 	// found in menus_settings.cpp
-	void RenderLanguageSettings(CUIRect MainView);
-	bool RenderLanguageSelection(CUIRect MainView);
-	void RenderThemeSelection(CUIRect MainView);
-	void RenderSettingsGeneral(CUIRect MainView);
-	void RenderSettingsPlayer(CUIRect MainView);
-	void RenderSettingsTee(CUIRect MainView);
-	void RenderSettingsTee7(CUIRect MainView);
-	void RenderSettingsTeeCustom7(CUIRect MainView);
-	void RenderSkinSelection7(CUIRect MainView);
-	void RenderSkinPartSelection7(CUIRect MainView);
-	void RenderSettingsGraphics(CUIRect MainView);
-	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
+	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 
 	// found in menus_settings_assets.cpp
 	void RenderSettingsAssets(CUIRect MainView);
+
+	// found in menus_settings_appearance.cpp
+	void RenderSettingsAppearance(CUIRect MainView);
+	void DoLaserPreview(const CUIRect *pRect, ColorHSLA OutlineColor, ColorHSLA InnerColor, int LaserType);
 
 	// found in menus_settings_controls.cpp
 	// TODO: Change PopupConfirm to avoid using a function pointer to a CMenus
 	//       member function, to move this function to CMenusSettingsControls
 	void ResetSettingsControls();
+
+	// found in menus_settings_ddnet.cpp
+	void RenderSettingsDDNet(CUIRect MainView);
+
+	// found in menus_settings_general.cpp
+	void RenderSettingsGeneral(CUIRect MainView);
+	void RenderThemeSelection(CUIRect MainView);
+
+	// found in menus_settings_graphics.cpp
+	void RenderSettingsGraphics(CUIRect MainView);
+
+	// found in menus_settings_language.cpp
+	void RenderLanguageSettings(CUIRect MainView);
+	bool RenderLanguageSelection(CUIRect MainView);
+
+	// found in menus_settings_player.cpp
+	void RenderSettingsPlayer(CUIRect MainView);
+
+	// found in menus_settings_sound.cpp
+	void RenderSettingsSound(CUIRect MainView);
+
+	// found in menus_settings_tee.cpp
+	void RenderSettingsTee(CUIRect MainView);
+	bool m_SkinListScrollToSelected = false;
+
+	// found in menus_settings_tee7.cpp
+	void RenderSettingsTee7(CUIRect MainView);
+	void PopupConfirmDeleteSkin7();
+	void RenderSettingsTeeCustom7(CUIRect MainView);
+	void RenderSkinSelection7(CUIRect MainView);
+	void RenderSkinPartSelection7(CUIRect MainView);
+	bool m_CustomSkinMenu = false;
+	int m_TeePartSelected = protocol7::SKINPART_BODY;
+	const CSkins7::CSkin *m_pSelectedSkin = nullptr;
+	CLineInputBuffered<protocol7::MAX_SKIN_ARRAY_SIZE, protocol7::MAX_SKIN_LENGTH> m_SkinNameInput;
+	bool m_SkinPartListNeedsUpdate = false;
 
 	std::vector<CButtonContainer> m_vButtonContainersNamePlateShow = {{}, {}, {}, {}};
 	std::vector<CButtonContainer> m_vButtonContainersNamePlateKeyPresses = {{}, {}, {}, {}};
@@ -831,10 +850,5 @@ private:
 	// found in menus_ingame.cpp
 	void RenderInGameNetwork(CUIRect MainView);
 	void RenderGhost(CUIRect MainView);
-
-	// found in menus_settings.cpp
-	void RenderSettingsDDNet(CUIRect MainView);
-	void RenderSettingsAppearance(CUIRect MainView);
-	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 };
 #endif
