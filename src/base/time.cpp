@@ -44,12 +44,6 @@ int64_t time_get()
 	return last;
 }
 
-int64_t time_freq()
-{
-	using namespace std::chrono_literals;
-	return std::chrono::nanoseconds(1s).count();
-}
-
 int64_t time_timestamp()
 {
 	return time(nullptr);
