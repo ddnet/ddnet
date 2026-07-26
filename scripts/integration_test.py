@@ -126,7 +126,7 @@ class TestRunner:
 		self.timeout_multiplier = timeout_multiplier
 		self.valgrind_memcheck = valgrind_memcheck
 		if self.valgrind_memcheck:
-			self.timeout_multiplier *= 20
+			self.timeout_multiplier *= 25
 
 	def run_test(self, test):
 		tmp_dir = tempfile.mkdtemp(prefix=f"integration_{test.name}_", dir=self.test_dir)
