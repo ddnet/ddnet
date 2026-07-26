@@ -691,9 +691,11 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	dbg_assert(m_LoadingState.m_Current <= m_LoadingState.m_Total, "Invalid progress for RenderLoading");
 
 	// make sure that we don't render for each little thing we load
-	// because that will slow down loading if we have vsync
+	// because that will slow down loading if we have vsync. A progress screen does
+	// not benefit from a high refresh rate, and every frame drawn here is time not
+	// spent loading, so this is deliberately much lower than the ingame frame rate.
 	const std::chrono::nanoseconds Now = time_get_nanoseconds();
-	if(Now - m_LoadingState.m_LastRender < std::chrono::nanoseconds(1s) / 60l)
+	if(Now - m_LoadingState.m_LastRender < std::chrono::nanoseconds(1s) / 10l)
 		return;
 
 	// need up date this here to get correct
