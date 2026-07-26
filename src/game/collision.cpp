@@ -779,7 +779,7 @@ int CCollision::GetSwitchNumber(int Index) const
 	if(Index < 0 || !m_pSwitch)
 		return 0;
 
-	if(m_pSwitch[Index].m_Type > 0 && m_pSwitch[Index].m_Number > 0)
+	if(m_pSwitch[Index].m_Type > 0 && m_pSwitch[Index].m_Number > 0 && m_pSwitch[Index].m_Number <= m_HighestSwitchNumber)
 		return m_pSwitch[Index].m_Number;
 
 	return 0;
