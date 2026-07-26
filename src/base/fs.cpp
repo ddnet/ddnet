@@ -589,17 +589,26 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	// Target file must be deleted first, else rename fails on Windows when the target file has open handles.
-	// Ignore the result and try to perform the rename anyway.
-	(void)fs_remove(newname);
-
 	const std::wstring wide_oldname = windows_utf8_to_wide(oldname);
 	const std::wstring wide_newname = windows_utf8_to_wide(newname);
 	if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED | MOVEFILE_WRITE_THROUGH) != 0)
 	{
 		return 0;
 	}
-	const DWORD error = GetLastError();
+
+	// Can't rename on Windows when target file has open handles, delete target
+	// file and retry. We can't retry it before renaming because for a rename of
+	// foo to FOO the source file would be deleted.
+	DWORD error = GetLastError();
+	if(error == ERROR_ACCESS_DENIED)
+	{
+		(void)fs_remove(newname);
+		if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED | MOVEFILE_WRITE_THROUGH) != 0)
+		{
+			return 0;
+		}
+		error = GetLastError();
+	}
 	log_error("filesystem", "Failed to rename file '%s' to '%s' (%ld '%s')", oldname, newname, error, windows_format_system_message(error).c_str());
 	return 1;
 #else
