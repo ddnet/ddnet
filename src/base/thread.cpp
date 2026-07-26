@@ -6,6 +6,11 @@
 #include "dbg.h"
 #include "windows.h"
 
+#include <algorithm>
+#include <atomic>
+#include <thread>
+#include <vector>
+
 #if defined(CONF_FAMILY_UNIX)
 #include <pthread.h>
 #include <sched.h>
@@ -156,4 +161,57 @@ void thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *nam
 {
 	void *thread = thread_init(threadfunc, u, name);
 	thread_detach(thread);
+}
+
+namespace {
+class CParallelForState
+{
+public:
+	const std::function<void(size_t)> *m_pFunction;
+	std::atomic<size_t> m_NextIndex;
+	size_t m_Count;
+};
+
+void ParallelForWorker(void *pUser)
+{
+	CParallelForState *pState = static_cast<CParallelForState *>(pUser);
+	while(true)
+	{
+		const size_t Index = pState->m_NextIndex.fetch_add(1);
+		if(Index >= pState->m_Count)
+			break;
+		(*pState->m_pFunction)(Index);
+	}
+}
+} // namespace
+
+void thread_parallel_for(size_t Count, const std::function<void(size_t)> &Function)
+{
+	if(Count == 0)
+		return;
+
+	const unsigned HardwareConcurrency = std::thread::hardware_concurrency();
+	const size_t NumThreads = std::min<size_t>(Count, HardwareConcurrency == 0 ? 1 : HardwareConcurrency);
+	if(NumThreads <= 1)
+	{
+		for(size_t Index = 0; Index < Count; ++Index)
+			Function(Index);
+		return;
+	}
+
+	CParallelForState State;
+	State.m_pFunction = &Function;
+	State.m_NextIndex.store(0);
+	State.m_Count = Count;
+
+	std::vector<void *> vpThreads;
+	vpThreads.reserve(NumThreads - 1);
+	for(size_t i = 0; i < NumThreads - 1; ++i)
+		vpThreads.push_back(thread_init(ParallelForWorker, &State, "parallel_for"));
+
+	// the calling thread works too, so that a single item never costs an extra thread
+	ParallelForWorker(&State);
+
+	for(void *pThread : vpThreads)
+		thread_wait(pThread);
 }

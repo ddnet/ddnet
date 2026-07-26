@@ -4,6 +4,9 @@
 #ifndef BASE_THREAD_H
 #define BASE_THREAD_H
 
+#include <cstddef>
+#include <functional>
+
 /**
  * Threading related functions.
  *
@@ -63,5 +66,22 @@ void thread_detach(void *thread);
  * @param name Name describing the use of the thread.
  */
 void thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
+
+/**
+ * Calls `Function(Index)` once for every index in `[0, Count)`, distributing the
+ * indices over worker threads, and returns when all of them have completed.
+ *
+ * Indices are handed out dynamically, so this also balances work when the
+ * individual items take very different amounts of time.
+ *
+ * @ingroup Threads
+ *
+ * @param Count Number of items to process.
+ * @param Function Work to perform for one item. Must be safe to call concurrently.
+ *
+ * @remark Must be called on a thread that may block, as it waits for completion.
+ * The calling thread participates in the work.
+ */
+void thread_parallel_for(size_t Count, const std::function<void(size_t Index)> &Function);
 
 #endif
