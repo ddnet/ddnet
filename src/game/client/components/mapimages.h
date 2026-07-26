@@ -50,6 +50,7 @@ public:
 	IGraphics::CTextureHandle Get(int Index) const override { return m_aTextures[Index]; }
 	int Num() const override { return m_Count; }
 
+	void FormatExternalImagePath(const char *pName, char *pBuffer, size_t BufferSize) const;
 	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap);
 	void OnMapLoad() override;
 	void OnInit() override;

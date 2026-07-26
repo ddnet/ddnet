@@ -6,6 +6,7 @@
 #include <base/log.h>
 #include <base/math.h>
 #include <base/mem.h>
+#include <base/thread.h>
 
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
@@ -56,6 +57,22 @@ void CMapImages::Unload()
 	}
 }
 
+void CMapImages::FormatExternalImagePath(const char *pName, char *pBuffer, size_t BufferSize) const
+{
+	bool Translated = false;
+	if(Client()->IsSixup())
+	{
+		Translated =
+			!str_comp(pName, "grass_doodads") ||
+			!str_comp(pName, "grass_main") ||
+			!str_comp(pName, "winter_main") ||
+			!str_comp(pName, "generic_shadows") ||
+			!str_comp(pName, "generic_unhookable") ||
+			!str_comp(pName, "easter");
+	}
+	str_format(pBuffer, BufferSize, "mapres/%s%s.png", pName, Translated ? "_0.7" : "");
+}
+
 void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 {
 	Unload();
@@ -100,6 +117,63 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		}
 	}
 
+	// Decompressing the embedded images in parallel is a lot faster than letting each
+	// one decompress its own data when it is loaded. They are decompressed in batches
+	// of a limited total size, because an image is freed again right after it has been
+	// handed to the graphics backend and decompressing all of them at once would keep
+	// every image of the map in memory at the same time.
+	int NextPreloadImage = 0;
+	const auto PreloadImagesFrom = [&](int FirstImage) {
+		constexpr size_t MaxPendingSize = 64 * 1024 * 1024;
+		std::vector<int> vImageDataIndices;
+		size_t PendingSize = 0;
+		int i;
+		for(i = FirstImage; i < m_Count && PendingSize < MaxPendingSize; i++)
+		{
+			if(aTextureUsedByTileOrQuadLayerFlag[i] == 0)
+				continue;
+			const CMapItemImage_v2 *pImg = static_cast<const CMapItemImage_v2 *>(pMap->GetItem(Start + i));
+			if(pImg->m_External)
+				continue;
+			vImageDataIndices.push_back(pImg->m_ImageData);
+			PendingSize += pMap->GetDataSize(pImg->m_ImageData);
+		}
+		NextPreloadImage = i;
+		pMap->PreloadData(vImageDataIndices.data(), vImageDataIndices.size());
+	};
+	PreloadImagesFrom(0);
+
+	// The external images are separate files, so they can be decoded concurrently.
+	// Only handing the decoded image to the graphics backend has to happen here.
+	class CExternalImage
+	{
+	public:
+		char m_aPath[IO_MAX_PATH_LENGTH];
+		CImageInfo m_Image;
+	};
+	std::vector<CExternalImage> vExternalImages;
+	int aExternalImageIndex[MAX_MAPIMAGES];
+	std::fill(std::begin(aExternalImageIndex), std::end(aExternalImageIndex), -1);
+	vExternalImages.reserve(m_Count);
+	for(int i = 0; i < m_Count; i++)
+	{
+		if(aTextureUsedByTileOrQuadLayerFlag[i] == 0)
+			continue;
+		const CMapItemImage_v2 *pImg = static_cast<const CMapItemImage_v2 *>(pMap->GetItem(Start + i));
+		if(!pImg->m_External)
+			continue;
+		const char *pName = pMap->GetDataString(pImg->m_ImageName);
+		if(pName == nullptr || pName[0] == '\0')
+			continue;
+
+		aExternalImageIndex[i] = vExternalImages.size();
+		vExternalImages.emplace_back();
+		FormatExternalImagePath(pName, vExternalImages.back().m_aPath, sizeof(vExternalImages.back().m_aPath));
+	}
+	thread_parallel_for(vExternalImages.size(), [&](size_t Index) {
+		Graphics()->LoadPng(vExternalImages[Index].m_Image, vExternalImages[Index].m_aPath, IStorage::TYPE_ALL);
+	});
+
 	// load new textures
 	bool ShowWarning = false;
 	for(int i = 0; i < m_Count; i++)
@@ -109,6 +183,9 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			// skip loading unused images
 			continue;
 		}
+
+		if(i >= NextPreloadImage)
+			PreloadImagesFrom(i);
 
 		const int LoadFlag = (((aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? Graphics()->TextureLoadFlags() : 0) | (((aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->HasTextureArraysSupport() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
 		const CMapItemImage_v2 *pImg = static_cast<const CMapItemImage_v2 *>(pMap->GetItem(Start + i));
@@ -134,20 +211,18 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 
 		if(pImg->m_External)
 		{
-			char aPath[IO_MAX_PATH_LENGTH];
-			bool Translated = false;
-			if(Client()->IsSixup())
+			const int ExternalIndex = aExternalImageIndex[i];
+			if(ExternalIndex >= 0 && vExternalImages[ExternalIndex].m_Image.m_pData != nullptr)
 			{
-				Translated =
-					!str_comp(pName, "grass_doodads") ||
-					!str_comp(pName, "grass_main") ||
-					!str_comp(pName, "winter_main") ||
-					!str_comp(pName, "generic_shadows") ||
-					!str_comp(pName, "generic_unhookable") ||
-					!str_comp(pName, "easter");
+				m_aTextures[i] = Graphics()->LoadTextureRawMove(vExternalImages[ExternalIndex].m_Image, LoadFlag, vExternalImages[ExternalIndex].m_aPath);
 			}
-			str_format(aPath, sizeof(aPath), "mapres/%s%s.png", pName, Translated ? "_0.7" : "");
-			m_aTextures[i] = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, LoadFlag);
+			else
+			{
+				// decoding failed, load it again to report the error the same way
+				char aPath[IO_MAX_PATH_LENGTH];
+				FormatExternalImagePath(pName, aPath, sizeof(aPath));
+				m_aTextures[i] = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, LoadFlag);
+			}
 		}
 		else
 		{
