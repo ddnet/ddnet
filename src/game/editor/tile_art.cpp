@@ -115,12 +115,12 @@ static std::shared_ptr<CEditorImage> ImageInfoToEditorImage(CEditorMap *pMap, CI
 	return pEditorImage;
 }
 
-static std::shared_ptr<CLayerTiles> AddLayerWithImage(CEditorMap *pMap, const std::shared_ptr<CLayerGroup> &pGroup, CImageInfo &Image, const char *pName)
+static std::shared_ptr<CLayerTiles> AddLayerWithImage(CEditorMap *pMap, const std::shared_ptr<CLayerGroup> &pGroup, int Width, int Height, CImageInfo &Image, const char *pName)
 {
 	std::shared_ptr<CEditorImage> pEditorImage = ImageInfoToEditorImage(pMap, Image, pName);
 	pMap->m_vpImages.push_back(pEditorImage);
 
-	std::shared_ptr<CLayerTiles> pLayer = std::make_shared<CLayerTiles>(pMap, pEditorImage->m_Width, pEditorImage->m_Height);
+	std::shared_ptr<CLayerTiles> pLayer = std::make_shared<CLayerTiles>(pMap, Width, Height);
 	str_copy(pLayer->m_aName, pName);
 	pLayer->m_Image = pMap->m_vpImages.size() - 1;
 	pGroup->AddLayer(pLayer);
@@ -154,7 +154,7 @@ void CEditorMap::AddTileArt(CImageInfo &&Image, const char *pFilename, bool Igno
 	for(size_t i = 0; i < vColorImages.size(); i++)
 	{
 		str_format(aImageName, sizeof(aImageName), "%s %" PRIzu, aTileArtFilename, i + 1);
-		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(this, pGroup, vColorImages[i], aImageName);
+		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(this, pGroup, Image.m_Width, Image.m_Height, vColorImages[i], aImageName);
 		SetTilelayerIndices(pLayer, vaColorGroups[i], Image);
 	}
 	auto IndexMap = SortImages();
