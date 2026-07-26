@@ -56,6 +56,7 @@ void CCollision::Init(class CLayers *pLayers)
 	m_Width = m_pLayers->GameLayer()->m_Width;
 	m_Height = m_pLayers->GameLayer()->m_Height;
 	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
+	m_HasHookTeleIns = false;
 
 	if(m_pLayers->TeleLayer())
 	{
@@ -147,6 +148,8 @@ void CCollision::Init(class CLayers *pLayers)
 				else
 				{
 					m_TeleOthers[Number - 1].push_back(TelePos);
+					if(Type == TILE_TELEINHOOK)
+						m_HasHookTeleIns = true;
 				}
 			}
 		}
