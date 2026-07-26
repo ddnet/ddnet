@@ -2102,7 +2102,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 					{
 						int SwitchNumber = pSwitchStateData->m_aSwitchNumbers[j];
 						int EndTick = pSwitchStateData->m_aEndTicks[j];
-						if(EndTick > 0 && in_range(SwitchNumber, 0, (int)Switchers().size()))
+						if(EndTick > 0 && SwitchNumber >= 0 && SwitchNumber < (int)Switchers().size())
 						{
 							Switchers()[SwitchNumber].m_aEndTick[Team] = EndTick;
 						}
