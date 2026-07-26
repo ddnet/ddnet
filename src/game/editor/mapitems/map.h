@@ -61,26 +61,7 @@ using FErrorHandler = std::function<void(const char *pErrorMessage)>;
 class CEditorMap
 {
 public:
-	explicit CEditorMap(CEditor *pEditor) :
-		m_EditorHistory(this),
-		m_ServerSettingsHistory(this),
-		m_EnvelopeEditorHistory(this),
-		m_QuadTracker(this),
-		m_EnvOpTracker(this),
-		m_LayerGroupPropTracker(this),
-		m_LayerPropTracker(this),
-		m_LayerTilesCommonPropTracker(this),
-		m_LayerTilesPropTracker(this),
-		m_LayerQuadPropTracker(this),
-		m_LayerSoundsPropTracker(this),
-		m_SoundSourceOperationTracker(this),
-		m_SoundSourcePropTracker(this),
-		m_SoundSourceRectShapePropTracker(this),
-		m_SoundSourceCircleShapePropTracker(this),
-		m_EnvelopeEvaluator(this),
-		m_pEditor(pEditor)
-	{
-	}
+	explicit CEditorMap(CEditor *pEditor);
 
 	const CEditor *Editor() const { return m_pEditor; }
 	CEditor *Editor() { return m_pEditor; }
@@ -170,6 +151,7 @@ public:
 	CQuadKnife::CState m_QuadKnifeState;
 	CMapEnvelopeEvaluator m_EnvelopeEvaluator;
 	CEnvelopeEditor::CState m_EnvelopeEditorState;
+	CMapSettingsBackend::CContextWithInput m_MapSettingsCommandContext;
 
 	// Housekeeping
 	void Clean();

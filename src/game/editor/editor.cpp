@@ -4398,8 +4398,6 @@ void CEditor::Reset(bool CreateDefault)
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
-	m_SettingsCommandInput.Clear();
-	m_MapSettingsCommandContext.Reset();
 	m_RenderLayersState.Reset();
 }
 
