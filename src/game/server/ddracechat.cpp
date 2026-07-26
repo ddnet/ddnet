@@ -2275,6 +2275,16 @@ void CGameContext::ConPracticeToggleHookCollision(IConsole::IResult *pResult, vo
 	pChr->SetHookHitDisabled(!pChr->Core()->m_HookHitDisabled);
 }
 
+void CGameContext::ConPracticeTogglePlayerHookpoint(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetPlayerHookpoint(!pChr->Core()->m_PlayerHookpoint);
+}
+
 void CGameContext::ConPracticeToggleHitOthers(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

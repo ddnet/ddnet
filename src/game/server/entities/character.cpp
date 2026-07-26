@@ -221,6 +221,11 @@ void CCharacter::SetHookHitDisabled(bool HookHitDisabled)
 	m_Core.m_HookHitDisabled = HookHitDisabled;
 }
 
+void CCharacter::SetPlayerHookpoint(bool PlayerHookpoint)
+{
+	m_Core.m_PlayerHookpoint = PlayerHookpoint;
+}
+
 void CCharacter::SetLiveFrozen(bool Active)
 {
 	m_Core.m_LiveFrozen = Active;
@@ -1307,6 +1312,8 @@ void CCharacter::Snap(int SnappingClient)
 		DDNetCharacter.m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	if(m_Core.m_LiveFrozen)
 		DDNetCharacter.m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
+	if(m_Core.m_PlayerHookpoint || GetTuning(m_TuneZone)->m_PlayerHookpoint)
+		DDNetCharacter.m_Flags |= CHARACTERFLAG_PLAYER_HOOKPOINT;
 
 	DDNetCharacter.m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : (m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime);
 	DDNetCharacter.m_Jumps = m_Core.m_Jumps;
@@ -1695,6 +1702,18 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hook others");
 		m_Core.m_HookHitDisabled = false;
+	}
+
+	// player hookpoints
+	if(((m_TileIndex == TILE_PHP_DISABLE) || (m_TileFIndex == TILE_PHP_DISABLE)) && m_Core.m_PlayerHookpoint)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Tees dont act as hookpoints");
+		m_Core.m_PlayerHookpoint = false;
+	}
+	else if(((m_TileIndex == TILE_PHP_ENABLE) || (m_TileFIndex == TILE_PHP_ENABLE)) && !m_Core.m_PlayerHookpoint)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Tees act as hookpoints");
+		m_Core.m_PlayerHookpoint = true;
 	}
 
 	// unlimited air jumps

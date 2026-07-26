@@ -271,6 +271,7 @@ public:
 	bool m_IsInFreeze;
 	bool m_DeepFrozen;
 	bool m_LiveFrozen;
+	bool m_PlayerHookpoint;
 	CTuningParams m_Tuning;
 
 private:

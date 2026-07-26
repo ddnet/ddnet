@@ -60,6 +60,7 @@ public:
 	void SetInvincible(bool Invincible);
 	void SetCollisionDisabled(bool CollisionDisabled);
 	void SetHookHitDisabled(bool HookHitDisabled);
+	void SetPlayerHookpoint(bool PlayerHookpoint);
 	void SetLiveFrozen(bool Active);
 	void SetDeepFrozen(bool Active);
 	void HandleWeaponSwitch();
