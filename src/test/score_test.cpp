@@ -377,12 +377,13 @@ TEST_P(MapInfo, ExactNoFinish)
 
 TEST_P(MapInfo, ExactFinish)
 {
-	InsertRank();
+	InsertRank(42.87f);
+	str_copy(m_PlayerRequest.m_aRequestingPlayer, "nameless tee");
 	str_copy(m_PlayerRequest.m_aName, "Kobra 3");
 	ASSERT_TRUE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 
 	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
-	EXPECT_THAT(m_pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
+	EXPECT_THAT(m_pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 00:42 median, your time: 42\\.87"));
 	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
 	{
 		EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[i], "");
