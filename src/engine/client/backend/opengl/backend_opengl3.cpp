@@ -3,6 +3,8 @@
 #include <base/detect.h>
 #include <base/log.h>
 
+#include <limits>
+
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
 #ifndef BACKEND_AS_OPENGL_ES
@@ -87,6 +89,11 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	m_HasMipMaps = true;
 	m_HasNPOTTextures = true;
 	m_HasShaders = true;
+#ifdef BACKEND_AS_OPENGL_ES
+	m_HasTextureStorage = true; // core since OpenGL ES 3.0, which this backend requires
+#else
+	m_HasTextureStorage = GLEW_ARB_texture_storage || pCommand->m_GlewMajor > 4 || (pCommand->m_GlewMajor == 4 && pCommand->m_GlewMinor >= 2);
+#endif
 
 	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
 	m_pTextureMemoryUsage->store(0, std::memory_order_relaxed);
@@ -562,6 +569,29 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuff
 	DestroyTexture(pCommand->m_Slot);
 }
 
+// `glTexStorage*` requires a sized internal format, unlike `glTexImage*`.
+static int TextureStorageFormat(int GLStoreFormat)
+{
+	switch(GLStoreFormat)
+	{
+	case GL_RGBA:
+		return GL_RGBA8;
+	case GL_RED:
+		return GL_R8;
+	default:
+		return GLStoreFormat;
+	}
+}
+
+// Number of mipmap levels of a texture of this size, at most `MaxLevel` + 1.
+static int TextureNumLevels(int Width, int Height, int MaxLevel)
+{
+	int Levels = 1;
+	for(int Size = std::max(Width, Height); Size > 1 && Levels <= MaxLevel; Size >>= 1)
+		++Levels;
+	return Levels;
+}
+
 void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, uint8_t *pTexData)
 {
 	while(Slot >= (int)m_vTextures.size())
@@ -612,7 +642,15 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glSamplerParameteri(m_vTextures[Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glSamplerParameteri(m_vTextures[Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
+			if(m_HasTextureStorage)
+			{
+				glTexStorage2D(GL_TEXTURE_2D, 1, TextureStorageFormat(GLStoreFormat), Width, Height);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GLFormat, GL_UNSIGNED_BYTE, pTexData);
+			}
+			else
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
+			}
 		}
 	}
 	else
@@ -628,12 +666,22 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 #endif
 
 			// prevent mipmap display bugs, when zooming out far
+			int MaxLevel = std::numeric_limits<int>::max();
 			if(Width >= 1024 && Height >= 1024)
 			{
+				MaxLevel = 5;
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5.f);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 5);
 			}
-			glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
+			if(m_HasTextureStorage)
+			{
+				glTexStorage2D(GL_TEXTURE_2D, TextureNumLevels(Width, Height, MaxLevel), TextureStorageFormat(GLStoreFormat), Width, Height);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GLFormat, GL_UNSIGNED_BYTE, pTexData);
+			}
+			else
+			{
+				glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
+			}
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 
@@ -675,7 +723,15 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 			int Image3DWidth, Image3DHeight;
 			uint8_t *pImageData3D = static_cast<uint8_t *>(malloc((size_t)PixelSize * ConvertWidth * ConvertHeight));
 			Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, pImageData3D, Image3DWidth, Image3DHeight);
-			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLStoreFormat, Image3DWidth, Image3DHeight, 256, 0, GLFormat, GL_UNSIGNED_BYTE, pImageData3D);
+			if(m_HasTextureStorage)
+			{
+				glTexStorage3D(GL_TEXTURE_2D_ARRAY, TextureNumLevels(Image3DWidth, Image3DHeight, std::numeric_limits<int>::max()), TextureStorageFormat(GLStoreFormat), Image3DWidth, Image3DHeight, 256);
+				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, Image3DWidth, Image3DHeight, 256, GLFormat, GL_UNSIGNED_BYTE, pImageData3D);
+			}
+			else
+			{
+				glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLStoreFormat, Image3DWidth, Image3DHeight, 256, 0, GLFormat, GL_UNSIGNED_BYTE, pImageData3D);
+			}
 			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 			free(pImageData3D);
 		}

@@ -57,6 +57,10 @@ protected:
 	TWGLint m_MaxTexSize;
 
 	bool m_Has2DArrayTextures;
+	// Immutable texture storage. Allocating the whole mipmap chain up front is much
+	// faster than letting `glGenerateMipmap` grow a mutable texture, especially for
+	// the 256 layer arrays that tile layers use.
+	bool m_HasTextureStorage = false;
 	bool m_Has2DArrayTexturesAsExtension;
 	TWGLenum m_2DArrayTarget;
 	bool m_Has3DTextures;
