@@ -20,11 +20,15 @@
  */
 typedef void *SEMAPHORE;
 #elif defined(CONF_PLATFORM_MACOS)
-#include <semaphore.h>
+#include <dispatch/dispatch.h>
 /**
  * @ingroup Semaphore
+ *
+ * Unnamed POSIX semaphores are not implemented on macOS and named ones leak a
+ * system-wide kernel name when a process exits without destroying them, so use
+ * GCD semaphores instead.
  */
-typedef sem_t *SEMAPHORE;
+typedef dispatch_semaphore_t SEMAPHORE;
 #elif defined(CONF_FAMILY_UNIX)
 #include <semaphore.h>
 /**

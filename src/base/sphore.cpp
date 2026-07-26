@@ -9,12 +9,6 @@
 #include <windows.h>
 
 #include <limits>
-#elif defined(CONF_PLATFORM_MACOS)
-#include "process.h"
-#include "str.h"
-
-#include <fcntl.h> // O_* constants
-#include <sys/stat.h> // S_* constants
 #elif defined(CONF_FAMILY_UNIX)
 #include "str.h"
 
@@ -42,30 +36,20 @@ void sphore_destroy(SEMAPHORE *sem)
 #elif defined(CONF_PLATFORM_MACOS)
 void sphore_init(SEMAPHORE *sem)
 {
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "/%d.%p", process_id(), (void *)sem);
-	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
-	dbg_assert(*sem != SEM_FAILED, "sem_open failure, errno=%d, name='%s'", errno, aBuf);
+	*sem = dispatch_semaphore_create(0);
+	dbg_assert(*sem != nullptr, "dispatch_semaphore_create failure");
 }
 void sphore_wait(SEMAPHORE *sem)
 {
-	while(true)
-	{
-		if(sem_wait(*sem) == 0)
-			break;
-		dbg_assert(errno == EINTR, "sem_wait failure");
-	}
+	dispatch_semaphore_wait(*sem, DISPATCH_TIME_FOREVER);
 }
 void sphore_signal(SEMAPHORE *sem)
 {
-	dbg_assert(sem_post(*sem) == 0, "sem_post failure");
+	dispatch_semaphore_signal(*sem);
 }
 void sphore_destroy(SEMAPHORE *sem)
 {
-	dbg_assert(sem_close(*sem) == 0, "sem_close failure");
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "/%d.%p", process_id(), (void *)sem);
-	dbg_assert(sem_unlink(aBuf) == 0, "sem_unlink failure");
+	dispatch_release(*sem);
 }
 #elif defined(CONF_FAMILY_UNIX)
 void sphore_init(SEMAPHORE *sem)
