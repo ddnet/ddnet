@@ -67,7 +67,22 @@ public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
 	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional);
 
-	virtual void Init() = 0;
+	// Builds the layer's data on the CPU. May run on a worker thread concurrently
+	// with other layers, so it must not touch the graphics backend or any state
+	// that is shared between layers.
+	virtual void Build() = 0;
+	// Resolves whatever `Build` needs that can only be done on the main thread.
+	virtual void PrepareBuild() {}
+	// Hands the built data to the graphics backend. Always runs on the main thread.
+	virtual void Upload() {}
+	// Whether `Build` may run on a worker thread.
+	virtual bool CanBuildConcurrently() const { return false; }
+	void Init()
+	{
+		PrepareBuild();
+		Build();
+		Upload();
+	}
 	virtual void Render(const CRenderLayerParams &Params) = 0;
 	virtual bool DoRender(const CRenderLayerParams &Params) = 0;
 	virtual bool IsValid() const { return true; }
@@ -98,7 +113,7 @@ class CRenderLayerGroup : public CRenderLayer
 public:
 	CRenderLayerGroup(int GroupId, CMapItemGroup *pGroup);
 	~CRenderLayerGroup() override = default;
-	void Init() override {}
+	void Build() override {}
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
 	bool IsValid() const override { return m_pGroup != nullptr; }
@@ -118,7 +133,10 @@ public:
 	~CRenderLayerTile() override = default;
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
-	void Init() override;
+	void Build() override;
+	void PrepareBuild() override;
+	void Upload() override;
+	bool CanBuildConcurrently() const override { return true; }
 	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
 
 	virtual int GetDataIndex(unsigned int &TileSize) const;
@@ -156,6 +174,9 @@ protected:
 			m_Height = 0;
 			m_BufferContainerIndex = -1;
 			m_IsTextured = false;
+			m_pUploadData = nullptr;
+			m_UploadDataSize = 0;
+			m_NumTiles = 0;
 		}
 
 		bool Init(unsigned int Width, unsigned int Height);
@@ -222,9 +243,18 @@ protected:
 		unsigned int m_Height;
 		int m_BufferContainerIndex;
 		bool m_IsTextured;
+
+		// Vertex data produced by `BuildTileData`, owned until `Upload` hands it to
+		// the graphics backend
+		void *m_pUploadData;
+		size_t m_UploadDataSize;
+		size_t m_NumTiles;
 	};
 
-	void UploadTileData(std::optional<CTileLayerVisuals> &VisualsOptional, int CurOverlay, bool AddAsSpeedup, bool IsGameLayer = false);
+	void BuildTileData(std::optional<CTileLayerVisuals> &VisualsOptional, int CurOverlay, bool AddAsSpeedup, bool IsGameLayer = false);
+	void UploadTileVisuals(CTileLayerVisuals &Visuals);
+	// Visuals built by `BuildTileData`, waiting to be handed to the graphics backend
+	std::vector<CTileLayerVisuals *> m_vpBuiltVisuals;
 
 	virtual void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
 	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
@@ -243,7 +273,7 @@ class CRenderLayerQuads : public CRenderLayer
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
 	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
-	void Init() override;
+	void Build() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
@@ -309,7 +339,7 @@ class CRenderLayerEntityGame final : public CRenderLayerEntityBase
 {
 public:
 	CRenderLayerEntityGame(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
-	void Init() override;
+	void Build() override;
 
 protected:
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
@@ -331,7 +361,7 @@ class CRenderLayerEntityTele final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
-	void Init() override;
+	void Build() override;
 	void InitTileData() override;
 	void Unload() override;
 
@@ -351,7 +381,7 @@ class CRenderLayerEntitySpeedup final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
-	void Init() override;
+	void Build() override;
 	void InitTileData() override;
 	void Unload() override;
 
@@ -373,7 +403,7 @@ class CRenderLayerEntitySwitch final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
-	void Init() override;
+	void Build() override;
 	void InitTileData() override;
 	void Unload() override;
 
@@ -395,7 +425,7 @@ class CRenderLayerEntityTune final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
-	void Init() override;
+	void Build() override;
 	void InitTileData() override;
 
 protected:

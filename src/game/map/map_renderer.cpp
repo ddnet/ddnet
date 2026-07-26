@@ -2,6 +2,7 @@
 
 #include <base/dbg.h>
 #include <base/log.h>
+#include <base/thread.h>
 
 #include <game/map/envelope_manager.h>
 
@@ -20,8 +21,9 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 
 	std::shared_ptr<CEnvelopeManager> pEnvelopeManager = std::make_shared<CEnvelopeManager>(pEnvelopeEval, pLayers->Map());
 	bool PassedGameLayer = false;
+	bool LastLayerAdded = false;
 
-	for(int GroupId = 0; GroupId < pLayers->NumGroups(); GroupId++)
+	for(int GroupId = 0; GroupId < pLayers->NumGroups() && !LastLayerAdded; GroupId++)
 	{
 		CMapItemGroup *pGroup = pLayers->GetGroup(GroupId);
 		std::unique_ptr<CRenderLayer> pRenderLayerGroup = std::make_unique<CRenderLayerGroup>(GroupId, pGroup);
@@ -43,7 +45,11 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 			if(Type == ERenderType::RENDERTYPE_BACKGROUND_FORCE || Type == ERenderType::RENDERTYPE_BACKGROUND)
 			{
 				if(PassedGameLayer)
-					return;
+				{
+					// no more layers to add, but the ones already added still have to be built
+					LastLayerAdded = true;
+					break;
+				}
 			}
 			else if(Type == ERenderType::RENDERTYPE_FOREGROUND)
 			{
@@ -132,12 +138,34 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 				pRenderLayer->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, RenderCallbackOptional);
 				if(pRenderLayer->IsValid())
 				{
-					pRenderLayer->Init();
+					pRenderLayer->PrepareBuild();
 					m_vpRenderLayers.push_back(std::move(pRenderLayer));
 				}
 			}
 		}
 	}
+
+	// Building the layers is by far the most expensive part of loading a map and the
+	// layers are independent of each other, so the ones that allow it are built
+	// concurrently. Everything that talks to the graphics backend stays on this
+	// thread and keeps the original order of the layers.
+	std::vector<CRenderLayer *> vpConcurrentLayers;
+	for(const auto &pRenderLayer : m_vpRenderLayers)
+	{
+		if(pRenderLayer->CanBuildConcurrently())
+			vpConcurrentLayers.push_back(pRenderLayer.get());
+	}
+	thread_parallel_for(vpConcurrentLayers.size(), [&](size_t Index) {
+		vpConcurrentLayers[Index]->Build();
+	});
+
+	for(const auto &pRenderLayer : m_vpRenderLayers)
+	{
+		if(!pRenderLayer->CanBuildConcurrently())
+			pRenderLayer->Build();
+		pRenderLayer->Upload();
+	}
+
 }
 
 void CMapRenderer::Render(const CRenderLayerParams &Params)

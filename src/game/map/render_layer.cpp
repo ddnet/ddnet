@@ -596,16 +596,75 @@ void CRenderLayerTile::RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const
 	RenderMap()->RenderTilemap(m_pTiles, m_pLayerTilemap->m_Width, m_pLayerTilemap->m_Height, 32.0f, Color, (Params.m_RenderTileBorder ? TILERENDERFLAG_EXTEND : 0) | LAYERRENDERFLAG_TRANSPARENT);
 }
 
-void CRenderLayerTile::Init()
+void CRenderLayerTile::PrepareBuild()
 {
 	if(m_pLayerTilemap->m_Image >= 0 && m_pLayerTilemap->m_Image < m_pMapImages->Num())
 		m_TextureHandle = m_pMapImages->Get(m_pLayerTilemap->m_Image);
 	else
 		m_TextureHandle.Invalidate();
-	UploadTileData(m_VisualTiles, 0, false);
+
+	// Some of the entity textures are created on first use, which has to happen here
+	// instead of during the concurrent build
+	GetTexture();
 }
 
-void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsOptional, int CurOverlay, bool AddAsSpeedup, bool IsGameLayer)
+void CRenderLayerTile::Build()
+{
+	BuildTileData(m_VisualTiles, 0, false);
+}
+
+void CRenderLayerTile::Upload()
+{
+	for(CTileLayerVisuals *pVisuals : m_vpBuiltVisuals)
+	{
+		UploadTileVisuals(*pVisuals);
+	}
+	m_vpBuiltVisuals.clear();
+}
+
+void CRenderLayerTile::UploadTileVisuals(CTileLayerVisuals &Visuals)
+{
+	if(Visuals.m_UploadDataSize == 0)
+	{
+		RenderLoading();
+		return;
+	}
+
+	// first create the buffer object
+	const int BufferObjectIndex = Graphics()->CreateBufferObject(Visuals.m_UploadDataSize, Visuals.m_pUploadData, 0, true);
+	Visuals.m_pUploadData = nullptr;
+	Visuals.m_UploadDataSize = 0;
+
+	// then create the buffer container
+	SBufferContainerInfo ContainerInfo;
+	ContainerInfo.m_Stride = (Visuals.m_IsTextured ? (sizeof(float) * 2 + sizeof(ubvec4)) : 0);
+	ContainerInfo.m_VertBufferBindingIndex = BufferObjectIndex;
+	ContainerInfo.m_vAttributes.emplace_back();
+	SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_vAttributes.back();
+	pAttr->m_DataTypeCount = 2;
+	pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
+	pAttr->m_Normalized = false;
+	pAttr->m_pOffset = nullptr;
+	pAttr->m_FuncType = 0;
+	if(Visuals.m_IsTextured)
+	{
+		ContainerInfo.m_vAttributes.emplace_back();
+		pAttr = &ContainerInfo.m_vAttributes.back();
+		pAttr->m_DataTypeCount = 4;
+		pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
+		pAttr->m_Normalized = false;
+		pAttr->m_pOffset = (void *)(sizeof(vec2));
+		pAttr->m_FuncType = 1;
+	}
+
+	Visuals.m_BufferContainerIndex = Graphics()->CreateBufferContainer(&ContainerInfo);
+	// and finally inform the backend how many indices are required
+	Graphics()->IndicesNumRequiredNotify(Visuals.m_NumTiles * 6);
+
+	RenderLoading();
+}
+
+void CRenderLayerTile::BuildTileData(std::optional<CTileLayerVisuals> &VisualsOptional, int CurOverlay, bool AddAsSpeedup, bool IsGameLayer)
 {
 	if(!Graphics()->IsTileBufferingEnabled())
 		return;
@@ -812,11 +871,12 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 
 	Visuals.m_BufferContainerIndex = -1;
 
-	// upload data to gpu
-	size_t UploadDataSize = vTmpTileTexCoords.size() * sizeof(CGraphicTileTextureCoords) + vTmpTiles.size() * sizeof(CGraphicTile);
+	// build the vertex data, which `Upload` hands to the graphics backend
+	const size_t UploadDataSize = vTmpTileTexCoords.size() * sizeof(CGraphicTileTextureCoords) + vTmpTiles.size() * sizeof(CGraphicTile);
+	Visuals.m_NumTiles = vTmpTiles.size();
+	m_vpBuiltVisuals.push_back(&Visuals);
 	if(UploadDataSize == 0)
 	{
-		RenderLoading();
 		return;
 	}
 
@@ -854,36 +914,8 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 		mem_copy(pUploadData, vTmpTiles.data(), vTmpTiles.size() * sizeof(CGraphicTile));
 	}
 
-	// first create the buffer object
-	int BufferObjectIndex = Graphics()->CreateBufferObject(UploadDataSize, pUploadData, 0, true);
-
-	// then create the buffer container
-	SBufferContainerInfo ContainerInfo;
-	ContainerInfo.m_Stride = (DoTextureCoords ? (sizeof(float) * 2 + sizeof(ubvec4)) : 0);
-	ContainerInfo.m_VertBufferBindingIndex = BufferObjectIndex;
-	ContainerInfo.m_vAttributes.emplace_back();
-	SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_vAttributes.back();
-	pAttr->m_DataTypeCount = 2;
-	pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-	pAttr->m_Normalized = false;
-	pAttr->m_pOffset = nullptr;
-	pAttr->m_FuncType = 0;
-	if(DoTextureCoords)
-	{
-		ContainerInfo.m_vAttributes.emplace_back();
-		pAttr = &ContainerInfo.m_vAttributes.back();
-		pAttr->m_DataTypeCount = 4;
-		pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
-		pAttr->m_Normalized = false;
-		pAttr->m_pOffset = (void *)(sizeof(vec2));
-		pAttr->m_FuncType = 1;
-	}
-
-	Visuals.m_BufferContainerIndex = Graphics()->CreateBufferContainer(&ContainerInfo);
-	// and finally inform the backend how many indices are required
-	Graphics()->IndicesNumRequiredNotify(vTmpTiles.size() * 6);
-
-	RenderLoading();
+	Visuals.m_pUploadData = pUploadData;
+	Visuals.m_UploadDataSize = UploadDataSize;
 }
 
 void CRenderLayerTile::Unload()
@@ -927,7 +959,7 @@ void CRenderLayerTile::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CR
 	// set clip region
 	if(!Graphics()->IsTileBufferingEnabled())
 	{
-		// shrink clip region, this is done in `UploadTileData` for buffered backends
+		// shrink clip region, this is done in `BuildTileData` for buffered backends
 		int MinX = m_pLayerTilemap->m_Width;
 		int MaxX = 0;
 		int MinY = m_pLayerTilemap->m_Height;
@@ -1109,7 +1141,7 @@ void CRenderLayerQuads::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, C
 		m_pQuads = (CQuad *)m_pMap->GetDataSwapped(m_pLayerQuads->m_Data);
 }
 
-void CRenderLayerQuads::Init()
+void CRenderLayerQuads::Build()
 {
 	if(m_pLayerQuads->m_Image >= 0 && m_pLayerQuads->m_Image < m_pMapImages->Num())
 		m_TextureHandle = m_pMapImages->Get(m_pLayerQuads->m_Image);
@@ -1512,9 +1544,9 @@ IGraphics::CTextureHandle CRenderLayerEntityBase::GetTexture() const
 CRenderLayerEntityGame::CRenderLayerEntityGame(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
-void CRenderLayerEntityGame::Init()
+void CRenderLayerEntityGame::Build()
 {
-	UploadTileData(m_VisualTiles, 0, false, true);
+	BuildTileData(m_VisualTiles, 0, false, true);
 }
 
 void CRenderLayerEntityGame::RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
@@ -1569,10 +1601,10 @@ int CRenderLayerEntityTele::GetDataIndex(unsigned int &TileSize) const
 	return m_pLayerTilemap->m_Tele;
 }
 
-void CRenderLayerEntityTele::Init()
+void CRenderLayerEntityTele::Build()
 {
-	UploadTileData(m_VisualTiles, 0, false);
-	UploadTileData(m_VisualTeleNumbers, 1, false);
+	BuildTileData(m_VisualTiles, 0, false);
+	BuildTileData(m_VisualTeleNumbers, 1, false);
 }
 
 void CRenderLayerEntityTele::InitTileData()
@@ -1643,11 +1675,11 @@ int CRenderLayerEntitySpeedup::GetDataIndex(unsigned int &TileSize) const
 	return m_pLayerTilemap->m_Speedup;
 }
 
-void CRenderLayerEntitySpeedup::Init()
+void CRenderLayerEntitySpeedup::Build()
 {
-	UploadTileData(m_VisualTiles, 0, true);
-	UploadTileData(m_VisualForce, 1, false);
-	UploadTileData(m_VisualMaxSpeed, 2, false);
+	BuildTileData(m_VisualTiles, 0, true);
+	BuildTileData(m_VisualForce, 1, false);
+	BuildTileData(m_VisualMaxSpeed, 2, false);
 }
 
 void CRenderLayerEntitySpeedup::InitTileData()
@@ -1728,11 +1760,11 @@ int CRenderLayerEntitySwitch::GetDataIndex(unsigned int &TileSize) const
 	return m_pLayerTilemap->m_Switch;
 }
 
-void CRenderLayerEntitySwitch::Init()
+void CRenderLayerEntitySwitch::Build()
 {
-	UploadTileData(m_VisualTiles, 0, false);
-	UploadTileData(m_VisualSwitchNumberTop, 1, false);
-	UploadTileData(m_VisualSwitchNumberBottom, 2, false);
+	BuildTileData(m_VisualTiles, 0, false);
+	BuildTileData(m_VisualSwitchNumberTop, 1, false);
+	BuildTileData(m_VisualSwitchNumberBottom, 2, false);
 }
 
 void CRenderLayerEntitySwitch::InitTileData()
@@ -1827,10 +1859,10 @@ void CRenderLayerEntityTune::GetTileData(unsigned char *pIndex, unsigned char *p
 	*pFlags = 0;
 }
 
-void CRenderLayerEntityTune::Init()
+void CRenderLayerEntityTune::Build()
 {
 	m_TuneColorMapper.Reset();
-	CRenderLayerTile::Init();
+	CRenderLayerTile::Build();
 }
 
 int CRenderLayerEntityTune::GetDataIndex(unsigned int &TileSize) const
