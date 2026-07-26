@@ -12,8 +12,8 @@
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/http.h>
 #include <engine/serverbrowser.h>
-#include <engine/shared/http.h>
 #include <engine/shared/jobs.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/serverinfo.h>
@@ -81,8 +81,8 @@ private:
 		CChooseMaster *m_pParent;
 		CLock m_Lock;
 		std::shared_ptr<CData> m_pData;
-		std::shared_ptr<CHttpRequest> m_pHead;
-		std::shared_ptr<CHttpRequest> m_pGet;
+		std::shared_ptr<IHttpRequest> m_pHead;
+		std::shared_ptr<IHttpRequest> m_pGet;
 		void Run() override REQUIRES(!m_Lock);
 
 	public:
@@ -217,7 +217,7 @@ void CChooseMaster::CJob::Run()
 		aTimeMs[i] = -1;
 		aAgeS[i] = SanitizeAge({});
 		const char *pUrl = m_pData->m_aaUrls[aRandomized[i]];
-		std::shared_ptr<CHttpRequest> pHead = HttpHead(pUrl);
+		std::shared_ptr<IHttpRequest> pHead = HttpHead(pUrl);
 		pHead->Timeout(Timeout);
 		pHead->LogProgress(HTTPLOG::FAILURE);
 		{
@@ -238,7 +238,7 @@ void CChooseMaster::CJob::Run()
 		}
 
 		auto StartTime = time_get_nanoseconds();
-		std::shared_ptr<CHttpRequest> pGet = HttpGet(pUrl);
+		std::shared_ptr<IHttpRequest> pGet = HttpGet(pUrl);
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
 		{
@@ -340,7 +340,7 @@ private:
 	IHttp *m_pHttp;
 
 	int m_State = STATE_WANTREFRESH;
-	std::shared_ptr<CHttpRequest> m_pGetServers;
+	std::shared_ptr<IHttpRequest> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
 	std::vector<CServerInfo> m_vServers;
@@ -388,7 +388,7 @@ void CServerBrowserHttp::Update()
 			return;
 		}
 		m_State = STATE_DONE;
-		std::shared_ptr<CHttpRequest> pGetServers = nullptr;
+		std::shared_ptr<IHttpRequest> pGetServers = nullptr;
 		std::swap(m_pGetServers, pGetServers);
 
 		bool Success = true;

@@ -88,9 +88,8 @@ function make_cmake() {
 			cmake_arguments+=("-DCURL_USE_SECTRANSPORT=ON")
 			cmake_arguments+=("-DCURL_USE_OPENSSL=OFF")
 		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
-			# Compile without crypto because curl does not work with Emscripten at all,
-			# but we currently need curl to compile server and client.
-			cmake_arguments+=("-DCURL_USE_OPENSSL=OFF")
+			log_error "ERROR: Compiling ${TARGET_LIBRARY} for ${TARGET_PLATFORM} is unnecessary."
+			exit 1
 		fi
 	elif [[ "${TARGET_LIBRARY}" == "freetype" ]]; then
 		local png_path="${PWD}/../png"

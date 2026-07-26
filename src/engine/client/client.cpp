@@ -33,6 +33,7 @@
 #include <engine/external/json-parser/json.h>
 #include <engine/favorites.h>
 #include <engine/graphics.h>
+#include <engine/http.h>
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/map.h>
@@ -44,7 +45,6 @@
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
-#include <engine/shared/http.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>

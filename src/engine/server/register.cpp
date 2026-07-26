@@ -9,8 +9,8 @@
 
 #include <engine/console.h>
 #include <engine/engine.h>
+#include <engine/http.h>
 #include <engine/shared/config.h>
-#include <engine/shared/http.h>
 #include <engine/shared/jobs.h>
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
@@ -79,12 +79,12 @@ class CRegister : public IRegister
 			int m_Index;
 			int m_InfoSerial;
 			std::shared_ptr<CShared> m_pShared;
-			std::shared_ptr<CHttpRequest> m_pRegister;
+			std::shared_ptr<IHttpRequest> m_pRegister;
 			IHttp *m_pHttp;
 			void Run() override;
 
 		public:
-			CJob(int Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::shared_ptr<CHttpRequest> &&pRegister, IHttp *pHttp) :
+			CJob(int Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::shared_ptr<IHttpRequest> &&pRegister, IHttp *pHttp) :
 				m_Protocol(Protocol),
 				m_ServerPort(ServerPort),
 				m_Index(Index),
@@ -287,7 +287,7 @@ void CRegister::CProtocol::SendRegister()
 		SendInfo = InfoSerial > m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial;
 	}
 
-	std::unique_ptr<CHttpRequest> pRegister;
+	std::unique_ptr<IHttpRequest> pRegister;
 	if(SendInfo)
 	{
 		pRegister = HttpPostJson(m_pParent->m_pConfig->m_SvRegisterUrl, m_pParent->m_aServerInfo);
@@ -353,7 +353,7 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 	char aSecret[UUID_MAXSTRSIZE];
 	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
 
-	std::shared_ptr<CHttpRequest> pDelete = HttpPost(m_pParent->m_pConfig->m_SvRegisterUrl, (const unsigned char *)"", 0);
+	std::shared_ptr<IHttpRequest> pDelete = HttpPost(m_pParent->m_pConfig->m_SvRegisterUrl, (const unsigned char *)"", 0);
 	pDelete->HeaderString("Action", "delete");
 	pDelete->HeaderString("Address", aAddress);
 	pDelete->HeaderString("Secret", aSecret);
@@ -555,7 +555,7 @@ void CRegister::Update()
 		bool Ipv4 = m_aProtocolEnabled[PROTOCOL_TW6_IPV4] || m_aProtocolEnabled[PROTOCOL_TW7_IPV4];
 		if(Ipv6 && Ipv4)
 		{
-			dbg_assert(!HttpHasIpresolveBug(), "curl version < 7.77.0 does not support registering via both IPv4 and IPv6, set `sv_register ipv6` or `sv_register ipv4`");
+			dbg_assert(!m_pHttp->HasIpresolveBug(), "curl version < 7.77.0 does not support registering via both IPv4 and IPv6, set `sv_register ipv6` or `sv_register ipv4`");
 		}
 		m_GotFirstUpdateCall = true;
 	}
