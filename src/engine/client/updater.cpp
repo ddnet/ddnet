@@ -205,16 +205,16 @@ bool CUpdater::MoveFile(const char *pFile)
 	bool Success = true;
 
 #if !defined(CONF_FAMILY_WINDOWS)
-	if(!str_endswith_nocase(pFile, ".dll"))
+	if(str_endswith_nocase(pFile, ".dll"))
 		return Success;
 #endif
 
 #if !defined(CONF_PLATFORM_LINUX)
-	if(!str_endswith_nocase(pFile, ".so"))
+	if(str_endswith_nocase(pFile, ".so"))
 		return Success;
 #endif
 
-	if(!str_endswith_nocase(pFile, ".dll") || !str_endswith_nocase(pFile, ".so"))
+	if(str_endswith_nocase(pFile, ".dll") || str_endswith_nocase(pFile, ".so"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
 		m_pStorage->RenameBinaryFile(pFile, aBuf);
@@ -403,7 +403,7 @@ void CUpdater::RunningUpdate()
 		if(Job.second)
 		{
 			const char *pFile = Job.first.c_str();
-			if(!str_endswith_nocase(pFile, ".dll"))
+			if(str_endswith_nocase(pFile, ".dll"))
 			{
 #if defined(CONF_FAMILY_WINDOWS)
 				const size_t Length = str_length(pFile);
@@ -415,7 +415,7 @@ void CUpdater::RunningUpdate()
 #endif
 				// Ignore DLL downloads on other platforms
 			}
-			else if(!str_endswith_nocase(pFile, ".so"))
+			else if(str_endswith_nocase(pFile, ".so"))
 			{
 #if defined(CONF_PLATFORM_LINUX)
 				const size_t Length = str_length(pFile);
