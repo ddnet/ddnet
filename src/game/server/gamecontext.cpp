@@ -4070,6 +4070,12 @@ void CGameContext::RegisterDDRaceCommands()
 
 	Console()->Chain("sv_practice_by_default", ConchainPracticeByDefaultUpdate, this);
 
+	//yirou
+	Console()->Register("relaytimesetall", "?i", CMDFLAG_TEST | CFGFLAG_SERVER, ConSetRelayTimeAll, this, "Set relay duration in seconds");
+	Console()->Register("relaystartall_vote", "", CMDFLAG_TEST | CFGFLAG_SERVER, ConStartRelayAllVote, this, "Start relay for all teams with players (rcon only)");
+	Console()->Register("relaystartall", "", CMDFLAG_TEST | CFGFLAG_SERVER, ConStartRelayAll, this, "Start relay for all teams with players (rcon only)");
+
+
 }
 
 void CGameContext::RegisterChatCommands()
@@ -4180,18 +4186,19 @@ void CGameContext::RegisterChatCommands()
 
 	//yirou
 	Console()->Register("relaystart", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStartRelay, this, "Start relay for your own team");
-	Console()->Register("relaystartall", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStartRelayAll, this, "Start relay for all teams with players (rcon only)");
 
 	Console()->Register("relaytimeset", "?i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayTime, this, "Set relay duration in seconds");
 	Console()->Register("relayset", "i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayOrder, this, "Set your relay order");
 	Console()->Register("setrelay", "i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayOrder, this, "Alias of relayset");
-	Console()->Register("B", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBack, this, "Return to relay record point");
-	Console()->Register("bb", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBackBack, this, "Teleport runner to previous record point");
-	Console()->Register("BB", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBackBack, this, "Teleport runner to previous record point");
+	Console()->Register("B", "?r", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBack, this, "Return to relay record point");
+	Console()->Register("bb", "?r", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBackBack, this, "Teleport runner to previous record point");
+	Console()->Register("BB", "?r", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayBackBack, this, "Teleport runner to previous record point");
 	Console()->Register("relaypause", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRelayPause, this, "Pause all relays (admin only)");
 
 	Console()->Register("roll", "?i", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRoll, this, "roll unmber");
 
+	Console()->Register("setrelaymove", "?r", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetRelayMove, this, "give a up velocity when /b");
+	//Console()->Register("recordmove", "?r", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRecordMove, this, "roll unmber");
 }
 
 void CGameContext::OnInit(const void *pPersistentData)
@@ -4554,6 +4561,14 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 
 	int SettingsIndex = Reader.NumData();
 	bool FoundInfo = false;
+
+	// ===== 新增：元数据提取变量 =====
+	char aAuthor[128] = "Unknown";
+	char aMapVersion[64] = "Unknown";
+	char aCredits[256] = "";
+	char aLicense[64] = "Unknown";
+	// =================================
+
 	for(int i = 0; i < Reader.NumItems(); i++)
 	{
 		int TypeId;
@@ -4564,6 +4579,39 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		if(TypeId == MAPITEMTYPE_INFO && ItemId == 0)
 		{
 			FoundInfo = true;
+
+			// ===== 新增：从 Info 项提取元数据 =====
+			if(Size >= (int)sizeof(CMapItemInfo))
+			{
+				CMapItemInfo *pInfo = (CMapItemInfo *)pData;
+
+				if(pInfo->m_Author > -1)
+				{
+					const char *pStr = (const char *)Reader.GetData(pInfo->m_Author);
+					if(pStr)
+						str_copy(aAuthor, pStr, sizeof(aAuthor));
+				}
+				if(pInfo->m_MapVersion > -1)
+				{
+					const char *pStr = (const char *)Reader.GetData(pInfo->m_MapVersion);
+					if(pStr)
+						str_copy(aMapVersion, pStr, sizeof(aMapVersion));
+				}
+				if(pInfo->m_Credits > -1)
+				{
+					const char *pStr = (const char *)Reader.GetData(pInfo->m_Credits);
+					if(pStr)
+						str_copy(aCredits, pStr, sizeof(aCredits));
+				}
+				if(pInfo->m_License > -1)
+				{
+					const char *pStr = (const char *)Reader.GetData(pInfo->m_License);
+					if(pStr)
+						str_copy(aLicense, pStr, sizeof(aLicense));
+				}
+			}
+			// =======================================
+
 			if(Size >= (int)sizeof(CMapItemInfoSettings))
 			{
 				CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
@@ -4576,6 +4624,24 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 					{
 						// Configs coincide, no need to update map.
 						free(pSettings);
+						Reader.Close();
+
+						// ===== 新增：设置公告（配置未变化时的提前返回路径）=====
+						char aMotd[512];
+						str_format(aMotd, sizeof(aMotd),
+							"=== 地图信息 ===\n"
+							"作者: %s\n"
+							"版本: %s\n"
+							"鸣谢: %s\n"
+							"许可证: %s",
+							aAuthor,
+							aMapVersion,
+							aCredits[0] ? aCredits : "无",
+							aLicense);
+						str_copy(g_Config.m_SvMotd, aMotd, sizeof(g_Config.m_SvMotd));
+						SendChatTarget(-1, "地图已更换，按 F1 查看地图信息");
+						// =======================================================
+
 						return true;
 					}
 					Reader.UnloadData(pInfo->m_Settings);

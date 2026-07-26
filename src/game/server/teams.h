@@ -168,6 +168,12 @@ public:
 	void SetTeamRelayDuration(int Team, int Ticks); // set relay duration in ticks
 	int GetTeamRelayDuration(int Team) const; // get relay duration in ticks
 	void PauseAllRelays(); // yirou: pause all active relays
+	
+	// yirou: helper to set player state for relay (replaces ForceRelaySpec)
+	void SetRelayPlayerState(int ClientId, bool IsRunner); // IsRunner=true: solo+invincible=false, IsRunner=false: !solo+invincible=true
+	void RecordMove(vec2 move, int team);
+	int GetCurrentRunnerID(int team);
+	int m_movetime[NUM_DDRACE_TEAMS];
 };
 
 #endif

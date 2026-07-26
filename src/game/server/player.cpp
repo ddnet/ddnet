@@ -863,60 +863,13 @@ int CPlayer::ForcePause(int Time)
 }
 
 //yirou
+// yirou: DEPRECATED - This function no longer forces spec state.
+// Relay now uses SetSolo/SetInvincible instead of spec.
+// Keeping for compatibility but it only sets flags.
 void CPlayer::ForceRelaySpec(bool Enable)
 {
-	if(Enable)
-	{
-		// Set relay forced spec flag and disable self-toggle
-		m_RelayForcedSpec = true;
-		m_CanToggleSpec = false;
-		
-		// If no character, just set flags - spec will be applied when character spawns
-		if(!m_pCharacter)
-			return;
-		
-		// Force into spec immediately, bypassing ground check
-		// Unlike Pause(), we don't check if character is on ground
-		if(m_Paused != PAUSE_SPEC)
-		{
-			m_Paused = PAUSE_SPEC;
-			m_pCharacter->Pause(true);
-			m_ViewPos = m_pCharacter->m_Pos;
-			
-			// Sixup needs a teamchange
-			protocol7::CNetMsg_Sv_Team Msg;
-			Msg.m_ClientId = m_ClientId;
-			Msg.m_CooldownTick = Server()->Tick();
-			Msg.m_Silent = true;
-			Msg.m_Team = protocol7::TEAM_SPECTATORS;
-			GameServer()->Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, m_ClientId);
-		}
-	}
-	else
-	{
-		// Only exit if we were in relay forced spec
-		if(m_RelayForcedSpec && m_Paused == PAUSE_SPEC)
-		{
-			m_RelayForcedSpec = false;
-			m_CanToggleSpec = true; // restore self-toggle ability
-			m_Paused = PAUSE_NONE;
-			
-			if(m_pCharacter)
-			{
-				m_pCharacter->Pause(false);
-				m_ViewPos = m_pCharacter->m_Pos;
-				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientId));
-			}
-			
-			// Sixup needs a teamchange
-			protocol7::CNetMsg_Sv_Team Msg;
-			Msg.m_ClientId = m_ClientId;
-			Msg.m_CooldownTick = Server()->Tick();
-			Msg.m_Silent = true;
-			Msg.m_Team = m_Team;
-			GameServer()->Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, m_ClientId);
-		}
-	}
+	m_RelayForcedSpec = Enable;
+	m_CanToggleSpec = !Enable;
 }
 
 int CPlayer::IsPaused() const

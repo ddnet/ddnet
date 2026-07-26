@@ -44,6 +44,11 @@ public:
 	void Snap(int SnappingClient) override;
 	void SwapClients(int Client1, int Client2) override;
 
+	void TeleMove();
+	void SetTeleMove(vec2 move);
+	vec2 GetTeleMove(vec2 move);
+	int64_t lastbacktick;
+
 	void PostGlobalSnap();
 
 	bool CanSnapCharacter(int SnappingClient);
@@ -108,12 +113,14 @@ public:
 	void Move(vec2 RelPos);
 
 	void ResetVelocity();
+	vec2 GetVelocity();
 	void SetVelocity(vec2 NewVelocity);
 	void SetRawVelocity(vec2 NewVelocity);
 	void AddVelocity(vec2 Addition);
 	void ApplyMoveRestrictions();
 
 private:
+	vec2 m_telemove;
 	// player controlling this character
 	class CPlayer *m_pPlayer;
 

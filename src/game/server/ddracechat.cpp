@@ -2450,14 +2450,9 @@ void CGameContext::ConStartRelay(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(!Teams.IsRelayTeam(PlayerTeam))
-	{
-		pSelf->SendChatTarget(pResult->m_ClientId, "Your team is not a relay team, use /relayset first");
-		return;
-	}
-
 	Teams.StartRelay(PlayerTeam, AdminPos);
-	pSelf->SendChatTarget(pResult->m_ClientId, "Relay started for your team");
+	//pSelf->SendChatTarget(pResult->m_ClientId, "Relay started for your team");
+
 }
 
 void CGameContext::ConStartRelayAll(IConsole::IResult *pResult, void *pUserData)
@@ -2465,17 +2460,39 @@ void CGameContext::ConStartRelayAll(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	CGameTeams &Teams = pSelf->m_pController->Teams();
-	
-	// Use first player's position as admin position, or default to (0,0)
-	vec2 AdminPos(0, 0);
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetCharacter())
+		vec2 AdminPos(0, 0);
+		bool posSet = false;
+		// 第一优先级：命令执行者
+		int ExecutorId = pResult->m_ClientId;
+		if(ExecutorId >= 0 && ExecutorId < MAX_CLIENTS && pSelf->m_apPlayers[ExecutorId] && pSelf->m_apPlayers[ExecutorId]->GetCharacter())
 		{
-			AdminPos = pSelf->m_apPlayers[i]->GetCharacter()->m_Pos;
-			break;
+			AdminPos = pSelf->m_apPlayers[ExecutorId]->GetCharacter()->m_Pos;
+			posSet = true;
 		}
-	}
+		else
+		{
+			// 第二优先级：投票发起者（m_VoteCreator）
+			int VoterId = pSelf->m_VoteCreator;
+			if(VoterId >= 0 && VoterId < MAX_CLIENTS && pSelf->m_apPlayers[VoterId] && pSelf->m_apPlayers[VoterId]->GetCharacter())
+			{
+				AdminPos = pSelf->m_apPlayers[VoterId]->GetCharacter()->m_Pos;
+				posSet = true;
+			}
+		}
+
+		// 第三优先级：第一个在线玩家（兜底）
+		if(!posSet)
+		{
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetCharacter())
+				{
+					AdminPos = pSelf->m_apPlayers[i]->GetCharacter()->m_Pos;
+					posSet = true;
+					break;
+				}
+			}
+		}
 
 	int StartedCount = 0;
 	for(int Team = 1; Team < NUM_DDRACE_TEAMS; Team++)
@@ -2507,11 +2524,31 @@ void CGameContext::ConStartRelayAll(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Admin: started relay for %d team(s)", StartedCount);
 	// Send to all players
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+}
+void CGameContext::ConStartRelayAllVote(IConsole::IResult* pResult, void* pUserData) {
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientId = pResult->m_ClientId;
+
+	// 检查是否已有投票在进行
+	if(pSelf->m_VoteCloseTime)
 	{
-		if(pSelf->m_apPlayers[i])
-			pSelf->SendChatTarget(i, aBuf);
+		pSelf->SendChatTarget(ClientId, "A vote is already running");
+		return;
 	}
+	// 构造投票信息
+	char aDesc[VOTE_DESC_LENGTH];
+	char aCmd[VOTE_CMD_LENGTH];
+	char aChatmsg[512];
+
+	str_copy(aDesc, "准备好开始比赛了吗");
+	str_copy(aCmd, "relaystartall"); // 投票通过后执行这个命令
+	str_format(aChatmsg, sizeof(aChatmsg),
+		"'%s' 正在确认",
+		pSelf->Server()->ClientName(ClientId));
+
+	// 发起投票（所有玩家都会收到投票提示，按F3/F4投票）
+	pSelf->CallVote(ClientId, aDesc, aCmd, "裁判正在确认", aChatmsg);
 }
 
 void CGameContext::ConSetRelayTime(IConsole::IResult *pResult, void *pUserData)
@@ -2539,7 +2576,7 @@ void CGameContext::ConSetRelayTime(IConsole::IResult *pResult, void *pUserData)
 		int currentSec = Teams.GetTeamRelayDuration(Team) / pSelf->Server()->TickSpeed();
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf),
-			"Team %d current relay duration: %d seconds", Team, currentSec);
+			"Team %d 现在接力间隔时间为: %d seconds", Team, currentSec);
 		pSelf->SendChatTarget(ClientID, aBuf);
 		return;
 	}
@@ -2560,12 +2597,60 @@ void CGameContext::ConSetRelayTime(IConsole::IResult *pResult, void *pUserData)
 	Teams.SetTeamRelayDuration(Team, ticks);
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Team %d relay duration set to %d seconds (%d ticks)",
+	str_format(aBuf, sizeof(aBuf), "队伍 %d 接力间隔时间被设置成 %d 秒 (%d ticks)",
 		Team, sec, ticks);
-	pSelf->SendChatTarget(ClientID, aBuf);
+	pSelf->SendChatTeam(Team, aBuf);
 
 	dbg_msg("relay", "ClientID=%d set team %d relay duration to %d ticks",
 		ClientID, Team, ticks);
+}
+void CGameContext::ConSetRelayTimeAll(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientID = pResult->m_ClientId;
+
+	if(!pSelf->m_apPlayers[ClientID])
+	{
+		pSelf->SendChatTarget(ClientID, "Error: Invalid player");
+		return;
+	}
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+	for(int Team = 1; Team < NUM_DDRACE_TEAMS; Team++)
+	{
+		if(pResult->NumArguments() == 0)
+			{
+				int currentSec = Teams.GetTeamRelayDuration(Team) / pSelf->Server()->TickSpeed();
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf),
+					"Team %d 现在接力间隔时间为: %d seconds", Team, currentSec);
+				pSelf->SendChatTarget(ClientID, aBuf);
+				return;
+			}
+
+		int sec = pResult->GetInteger(0);
+		if(sec < 1)
+			{
+				pSelf->SendChatTarget(ClientID, "Error: Duration must be at least 1 second");
+				return;
+			}
+		if(sec > 3600)
+			{
+				pSelf->SendChatTarget(ClientID, "Error: Duration cannot exceed 3600 seconds");
+				return;
+			}
+
+		int ticks = sec * pSelf->Server()->TickSpeed();
+		Teams.SetTeamRelayDuration(Team, ticks);
+
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "队伍 %d 接力间隔时间被设置成 %d 秒 (%d ticks)",
+		Team, sec, ticks);
+		pSelf->SendChatTarget(ClientID, aBuf);
+
+		dbg_msg("relay", "ClientID=%d set team %d relay duration to %d ticks",
+		ClientID, Team, ticks);
+	}
 }
 
 //yirou
@@ -2613,24 +2698,13 @@ void CGameContext::ConRelayBack(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
-	if(!pPlayer)
-		return;
+
 
 	CCharacter *pChr = pPlayer->GetCharacter();
-	if(!pChr)
-	{
-		pSelf->SendChatTarget(ClientID, "You need to be alive to use this command");
-		return;
-	}
+
 
 	int Team = pSelf->GetDDRaceTeam(ClientID);
 	CGameTeams &Teams = pSelf->m_pController->Teams();
-
-	if(!Teams.IsRelayTeam(Team))
-	{
-		pSelf->SendChatTarget(ClientID, "Your team is not in a relay");
-		return;
-	}
 
 	ETeamRelayState State = Teams.m_aTeamRelayState[Team];
 	if(State != RELAY_STATE_COUNTDOWN && State != RELAY_STATE_RUNNING)
@@ -2639,15 +2713,44 @@ void CGameContext::ConRelayBack(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	// If not current runner, teleport to runner's position instead
+	if (ClientID != Teams.GetCurrentRunnerID(Team)) {
+		int RunnerId = Teams.GetCurrentRunnerID(Team);
+		if(RunnerId == -1 || !pSelf->m_apPlayers[RunnerId])
+		{
+			pSelf->SendChatTarget(ClientID, "没有找到当前跑者");
+			return;
+		}
+		
+		CCharacter *pRunnerChr = pSelf->m_apPlayers[RunnerId]->GetCharacter();
+		if(!pRunnerChr)
+		{
+			pSelf->SendChatTarget(ClientID, "当前跑者不在游戏中");
+			return;
+		}
+		
+		// Teleport to runner's position
+		pChr->SetDeepFrozen(false);
+		pChr->Unfreeze();
+		pSelf->Teleport_relay(pChr, pRunnerChr->m_Pos);
+		pSelf->SendChatTarget(ClientID, "已传送到当前跑者的位置");
+		return;
+	}
+
 	pChr->SetDeepFrozen(false);
 	pChr->Unfreeze();
 	pSelf->Teleport_relay(pChr, Teams.m_aTeamRelayRecordPos[Team]);
-	Teams.m_aTeamRelayTickStart[Team] = pSelf->Server()->Tick();
+	if(30<pSelf->Server()->Tick()-pChr->lastbacktick) 
+	{
+		pChr->TeleMove();
+	}
+	pChr->lastbacktick = pSelf->Server()->Tick();
+	//Teams.m_aTeamRelayTickStart[Team] = pSelf->Server()->Tick();
 
 	const char *pName1 = pSelf->Server()->ClientName(ClientID);
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "!!!%d队的%sB了??", Team, pName1);
-	pSelf->SendChat(-1, TEAM_ALL, aBuf);
+	pSelf->SendChatTeam(Team, aBuf);
 }
 
 //yirou - /bb and /BB: teleport current runner to previous record point
@@ -2681,8 +2784,7 @@ void CGameContext::ConRelayBackBack(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	// Find current runner
-	int CurrentRunnerIndex = Teams.m_aTeamCurrentRunnerIndex[Team];
-	int CurrentRunnerId = (CurrentRunnerIndex >= 1 && CurrentRunnerIndex < MAX_CLIENTS) ? Teams.m_aTeamRelayOrder[Team][CurrentRunnerIndex] : -1;
+	int CurrentRunnerId = Teams.GetCurrentRunnerID(Team);
 	
 	if(CurrentRunnerId == -1 || !pSelf->m_apPlayers[CurrentRunnerId])
 	{
@@ -2698,7 +2800,7 @@ void CGameContext::ConRelayBackBack(IConsole::IResult *pResult, void *pUserData)
 	pRunnerChr->Unfreeze();
 	pSelf->Teleport_relay(pRunnerChr, Teams.m_aTeamRelayPrevRecordPos[Team]);
 	Teams.m_aTeamRelayRecordPos[Team] = Teams.m_aTeamRelayPrevRecordPos[Team];
-	Teams.m_aTeamRelayTickStart[Team] = pSelf->Server()->Tick();
+	//Teams.m_aTeamRelayTickStart[Team] = pSelf->Server()->Tick();
 	
 	// Notify
 	const char *pName1 = pSelf->Server()->ClientName(ClientID);
@@ -2727,7 +2829,7 @@ void CGameContext::ConRelayPause(IConsole::IResult *pResult, void *pUserData)
 
 	CGameTeams &Teams = pSelf->m_pController->Teams();
 	Teams.PauseAllRelays();
-	pSelf->SendChatTarget(ClientID, "All relays paused and reset");
+	pSelf->SendChatTarget(ClientID, "比赛已中止");
 }
 
 void CGameContext::ConRoll(IConsole::IResult *pResult, void *pUserData)
@@ -2736,10 +2838,97 @@ void CGameContext::ConRoll(IConsole::IResult *pResult, void *pUserData)
 	int ClientID = pResult->m_ClientId;
 	if(!CheckClientId(ClientID))
 		return;
+
 	const char *pName = pSelf->Server()->ClientName(ClientID);
-	srand((unsigned int)time(NULL));
-	int num = 1 + rand() % 99;
+
+	// 使用服务器 tick 作为时间基准（每帧递增，比 time() 更精确）
+	static int s_lastTick = -1;
+	static unsigned int s_counter = 0;
+
+	int currentTick = pSelf->Server()->Tick();
+	if(currentTick != s_lastTick)
+	{
+		s_lastTick = currentTick;
+		s_counter = 0;
+	}
+	s_counter++;
+
+	// 混合熵源：tick(时间) + ClientID + 计数器 + 指针
+	unsigned int seed = (unsigned int)currentTick ^ (ClientID * 2654435761u) ^ (s_counter * 0x9e3779b9u) ^ (unsigned int)(uintptr_t)pResult;
+
+	// 独立 LCG
+	seed = seed * 1103515245 + 12345;
+	seed = seed * 1103515245 + 12345; // 多迭代几次增加随机性
+	int num = 1 + (seed % 99);
+
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%s roll点得 %d", pName, num);
 	pSelf->SendChat(-1, TEAM_ALL, aBuf);
+}
+void CGameContext::ConSetRelayMove(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientID = pResult->m_ClientId;
+	if(!CheckClientId(ClientID))
+		return;
+	const char *pName = pSelf->Server()->ClientName(ClientID);
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pCharacter = pPlayer->GetCharacter();
+	if(!pCharacter) // 玩家可能还没生成角色（如 spectator）
+		return;
+	float moveY = 0;
+	if(pResult->NumArguments() > 0)
+	{
+		// 手动从字符串转 float
+		moveY = str_tofloat(pResult->GetString(0));
+		moveY = -moveY;
+	}
+	moveY = std::clamp(moveY, -10.0f, 10.0f);
+	pCharacter->SetTeleMove(vec2{0, moveY});
+	pCharacter->TeleMove();
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "你已将传送后y轴速度设置为%.2f", moveY);
+	pSelf->SendChatTarget(ClientID, aBuf);
+}
+void CGameContext::ConRecordMove(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+	int ClientID = pResult->m_ClientId;
+	if(!CheckClientId(ClientID))
+		return;
+	const char *pName = pSelf->Server()->ClientName(ClientID);
+	int Team = pSelf->GetDDRaceTeam(ClientID);
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pCharacter = pPlayer->GetCharacter();
+	if(ClientID != Teams.GetCurrentRunnerID(Team)) // 玩家可能还没生成角色（如 spectator）
+	{
+		pSelf->SendChatTarget(ClientID, "该指令只能由当前跑者使用。");
+		return;
+	}
+	const char *dir = pResult->GetString(0);
+	if(dir == "up")
+	{
+		Teams.RecordMove(vec2{0, -1}, Team);
+	}
+	if(dir == "left")
+	{
+		Teams.RecordMove(vec2{-1, 0}, Team);
+	}
+	if(dir == "down")
+	{
+		Teams.RecordMove(vec2{0, 1}, Team);
+	}
+	if(dir == "right")
+	{
+		Teams.RecordMove(vec2{1, 0}, Team);
+	}
+	ConRelayBack(pResult, pUserData);
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "你已将记录点%s", dir);
+	pSelf->SendChatTarget(ClientID, aBuf);
 }

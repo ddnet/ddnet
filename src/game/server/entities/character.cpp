@@ -2456,6 +2456,7 @@ void CCharacter::DDRaceInit()
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCid();
 	m_TeleCheckpoint = 0;
+	m_telemove = vec2{0, -3};
 	m_Core.m_EndlessHook = g_Config.m_SvEndlessDrag;
 	if(g_Config.m_SvHit)
 	{
@@ -2548,6 +2549,9 @@ void CCharacter::ResetVelocity()
 	m_Core.m_Vel = vec2(0, 0);
 }
 
+vec2 CCharacter::GetVelocity() {
+	return m_Core.m_Vel;
+}
 void CCharacter::SetVelocity(vec2 NewVelocity)
 {
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, NewVelocity);
@@ -2574,4 +2578,16 @@ void CCharacter::SwapClients(int Client1, int Client2)
 {
 	const int HookedPlayer = m_Core.HookedPlayer();
 	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : (HookedPlayer == Client2 ? Client1 : HookedPlayer));
+}
+void CCharacter::TeleMove()
+{
+	AddVelocity(m_telemove);
+}
+vec2 CCharacter::GetTeleMove(vec2 move)
+{
+	return m_telemove;
+}
+void CCharacter::SetTeleMove(vec2 move)
+{
+	m_telemove = move;
 }
