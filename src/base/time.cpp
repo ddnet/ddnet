@@ -174,6 +174,7 @@ void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const cha
 bool timestamp_from_str(const char *string, const char *format, time_t *timestamp)
 {
 	std::tm tm{};
+	tm.tm_isdst = -1; // determine DST from parsed date
 	std::istringstream ss(string);
 	ss >> std::get_time(&tm, format);
 	if(ss.fail() || !ss.eof())
