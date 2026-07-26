@@ -661,82 +661,79 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	int DrawTop = m_pLayerTilemap->m_Height;
 	int DrawBottom = 0;
 
-	int x = 0;
-	int y = 0;
-	for(y = 0; y < m_pLayerTilemap->m_Height; ++y)
+	const int Width = m_pLayerTilemap->m_Width;
+	const int Height = m_pLayerTilemap->m_Height;
+
+	// Tile data is fetched a row at a time to keep the virtual dispatch out of the
+	// inner loop, which runs once per tile of the layer regardless of how many tiles
+	// are actually drawn.
+	std::vector<CTile> vRowBuffer(Width);
+	std::vector<int> vRowAngleRotates(Width, -1);
+
+	// the amount of tiles handled before the current tile
+	offset_ptr32 TilesHandledCount = 0;
+
+	for(int y = 0; y < Height; ++y)
 	{
-		for(x = 0; x < m_pLayerTilemap->m_Width; ++x)
+		const CTile *pRow = GetTileRow(vRowBuffer.data(), vRowAngleRotates.data(), y, CurOverlay);
+
+		CTileLayerVisuals::CTileVisual *pRowVisuals = &Visuals.m_vTilesOfLayer[(size_t)y * Width];
+		for(int x = 0; x < Width; ++x)
 		{
-			unsigned char Index = 0;
-			unsigned char Flags = 0;
-			int AngleRotate = -1;
-			GetTileData(&Index, &Flags, &AngleRotate, x, y, CurOverlay);
-
-			// the amount of tiles handled before this tile
-			int TilesHandledCount = vTmpTiles.size();
-			Visuals.m_vTilesOfLayer[y * m_pLayerTilemap->m_Width + x].SetIndexBufferByteOffset((offset_ptr32)(TilesHandledCount));
-
-			if(AddTile(vTmpTiles, vTmpTileTexCoords, Index, Flags, x, y, DoTextureCoords, AddAsSpeedup, AngleRotate))
+			// Empty tiles are by far the common case and are rejected here rather than
+			// inside `AddTile`, so that they cost nothing but this compare and the store.
+			if(pRow[x].m_Index == 0)
 			{
-				Visuals.m_vTilesOfLayer[y * m_pLayerTilemap->m_Width + x].Draw(true);
-
-				// calculate clip region boundaries based on draws
-				DrawLeft = std::min(DrawLeft, x);
-				DrawRight = std::max(DrawRight, x);
-				DrawTop = std::min(DrawTop, y);
-				DrawBottom = std::max(DrawBottom, y);
+				pRowVisuals[x].Set(TilesHandledCount, false);
+				continue;
 			}
 
-			// do the border tiles
-			if(x == 0)
-			{
-				if(y == 0)
-				{
-					Visuals.m_BorderTopLeft.SetIndexBufferByteOffset((offset_ptr32)(vTmpBorderCorners.size()));
-					if(AddTile(vTmpBorderCorners, vTmpBorderCornersTexCoords, Index, Flags, 0, 0, DoTextureCoords, AddAsSpeedup, AngleRotate, ivec2{-32, -32}))
-						Visuals.m_BorderTopLeft.Draw(true);
-				}
-				else if(y == m_pLayerTilemap->m_Height - 1)
-				{
-					Visuals.m_BorderBottomLeft.SetIndexBufferByteOffset((offset_ptr32)(vTmpBorderCorners.size()));
-					if(AddTile(vTmpBorderCorners, vTmpBorderCornersTexCoords, Index, Flags, 0, 0, DoTextureCoords, AddAsSpeedup, AngleRotate, ivec2{-32, 0}))
-						Visuals.m_BorderBottomLeft.Draw(true);
-				}
-				Visuals.m_vBorderLeft[y].SetIndexBufferByteOffset((offset_ptr32)(vTmpBorderLeftTiles.size()));
-				if(AddTile(vTmpBorderLeftTiles, vTmpBorderLeftTilesTexCoords, Index, Flags, 0, y, DoTextureCoords, AddAsSpeedup, AngleRotate, ivec2{-32, 0}))
-					Visuals.m_vBorderLeft[y].Draw(true);
-			}
-			else if(x == m_pLayerTilemap->m_Width - 1)
-			{
-				if(y == 0)
-				{
-					Visuals.m_BorderTopRight.SetIndexBufferByteOffset((offset_ptr32)(vTmpBorderCorners.size()));
-					if(AddTile(vTmpBorderCorners, vTmpBorderCornersTexCoords, Index, Flags, 0, 0, DoTextureCoords, AddAsSpeedup, AngleRotate, ivec2{0, -32}))
-						Visuals.m_BorderTopRight.Draw(true);
-				}
-				else if(y == m_pLayerTilemap->m_Height - 1)
-				{
-					Visuals.m_BorderBottomRight.SetIndexBufferByteOffset((offset_ptr32)(vTmpBorderCorners.size()));
-					if(AddTile(vTmpBorderCorners, vTmpBorderCornersTexCoords, Index, Flags, 0, 0, DoTextureCoords, AddAsSpeedup, AngleRotate, ivec2{0, 0}))
-						Visuals.m_BorderBottomRight.Draw(true);
-				}
-				Visuals.m_vBorderRight[y].SetIndexBufferByteOffset((offset_ptr32)(vTmpBorderRightTiles.size()));
-				if(AddTile(vTmpBorderRightTiles, vTmpBorderRightTilesTexCoords, Index, Flags, 0, y, DoTextureCoords, AddAsSpeedup, AngleRotate, ivec2{0, 0}))
-					Visuals.m_vBorderRight[y].Draw(true);
-			}
-			if(y == 0)
-			{
-				Visuals.m_vBorderTop[x].SetIndexBufferByteOffset((offset_ptr32)(vTmpBorderTopTiles.size()));
-				if(AddTile(vTmpBorderTopTiles, vTmpBorderTopTilesTexCoords, Index, Flags, x, 0, DoTextureCoords, AddAsSpeedup, AngleRotate, ivec2{0, -32}))
-					Visuals.m_vBorderTop[x].Draw(true);
-			}
-			else if(y == m_pLayerTilemap->m_Height - 1)
-			{
-				Visuals.m_vBorderBottom[x].SetIndexBufferByteOffset((offset_ptr32)(vTmpBorderBottomTiles.size()));
-				if(AddTile(vTmpBorderBottomTiles, vTmpBorderBottomTilesTexCoords, Index, Flags, x, 0, DoTextureCoords, AddAsSpeedup, AngleRotate, ivec2{0, 0}))
-					Visuals.m_vBorderBottom[x].Draw(true);
-			}
+			pRowVisuals[x].Set(TilesHandledCount, true);
+			AddTile(vTmpTiles, vTmpTileTexCoords, pRow[x].m_Index, pRow[x].m_Flags, x, y, DoTextureCoords, AddAsSpeedup, vRowAngleRotates[x]);
+			TilesHandledCount++;
+
+			// calculate clip region boundaries based on draws
+			DrawLeft = std::min(DrawLeft, x);
+			DrawRight = std::max(DrawRight, x);
+			DrawTop = std::min(DrawTop, y);
+			DrawBottom = std::max(DrawBottom, y);
 		}
+	}
+
+	// Do the border tiles. They are visited in the same order as when this was
+	// interleaved with the loop above, because the offsets recorded for each border
+	// tile depend on how many border tiles were added before it.
+	const auto AddBorderTile = [&](std::vector<CGraphicTile> &vTiles, std::vector<CGraphicTileTextureCoords> &vTexCoords, CTileLayerVisuals::CTileVisual &Visual, int TileX, int TileY, int PosX, int PosY, const ivec2 &Offset) {
+		unsigned char Index = 0;
+		unsigned char Flags = 0;
+		int AngleRotate = -1;
+		GetTileData(&Index, &Flags, &AngleRotate, TileX, TileY, CurOverlay);
+		Visual.SetIndexBufferByteOffset((offset_ptr32)vTiles.size());
+		if(AddTile(vTiles, vTexCoords, Index, Flags, PosX, PosY, DoTextureCoords, AddAsSpeedup, AngleRotate, Offset))
+			Visual.Draw(true);
+	};
+
+	AddBorderTile(vTmpBorderCorners, vTmpBorderCornersTexCoords, Visuals.m_BorderTopLeft, 0, 0, 0, 0, ivec2{-32, -32});
+	if(Width > 1)
+		AddBorderTile(vTmpBorderCorners, vTmpBorderCornersTexCoords, Visuals.m_BorderTopRight, Width - 1, 0, 0, 0, ivec2{0, -32});
+	if(Height > 1)
+		AddBorderTile(vTmpBorderCorners, vTmpBorderCornersTexCoords, Visuals.m_BorderBottomLeft, 0, Height - 1, 0, 0, ivec2{-32, 0});
+	if(Width > 1 && Height > 1)
+		AddBorderTile(vTmpBorderCorners, vTmpBorderCornersTexCoords, Visuals.m_BorderBottomRight, Width - 1, Height - 1, 0, 0, ivec2{0, 0});
+
+	for(int y = 0; y < Height; ++y)
+		AddBorderTile(vTmpBorderLeftTiles, vTmpBorderLeftTilesTexCoords, Visuals.m_vBorderLeft[y], 0, y, 0, y, ivec2{-32, 0});
+	if(Width > 1)
+	{
+		for(int y = 0; y < Height; ++y)
+			AddBorderTile(vTmpBorderRightTiles, vTmpBorderRightTilesTexCoords, Visuals.m_vBorderRight[y], Width - 1, y, 0, y, ivec2{0, 0});
+	}
+	for(int x = 0; x < Width; ++x)
+		AddBorderTile(vTmpBorderTopTiles, vTmpBorderTopTilesTexCoords, Visuals.m_vBorderTop[x], x, 0, x, 0, ivec2{0, -32});
+	if(Height > 1)
+	{
+		for(int x = 0; x < Width; ++x)
+			AddBorderTile(vTmpBorderBottomTiles, vTmpBorderBottomTilesTexCoords, Visuals.m_vBorderBottom[x], x, Height - 1, x, 0, ivec2{0, 0});
 	}
 
 	// shrink clip region
@@ -776,11 +773,11 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	};
 
 	// add the border corners, then the borders and fix their byte offsets
-	int TilesHandledCount = vTmpTiles.size();
-	Visuals.m_BorderTopLeft.AddIndexBufferByteOffset(TilesHandledCount);
-	Visuals.m_BorderTopRight.AddIndexBufferByteOffset(TilesHandledCount);
-	Visuals.m_BorderBottomLeft.AddIndexBufferByteOffset(TilesHandledCount);
-	Visuals.m_BorderBottomRight.AddIndexBufferByteOffset(TilesHandledCount);
+	int CornerTilesHandledCount = vTmpTiles.size();
+	Visuals.m_BorderTopLeft.AddIndexBufferByteOffset(CornerTilesHandledCount);
+	Visuals.m_BorderTopRight.AddIndexBufferByteOffset(CornerTilesHandledCount);
+	Visuals.m_BorderBottomLeft.AddIndexBufferByteOffset(CornerTilesHandledCount);
+	Visuals.m_BorderBottomRight.AddIndexBufferByteOffset(CornerTilesHandledCount);
 
 	// add the Corners to the tiles
 	InsertTiles(vTmpBorderCorners, vTmpBorderCornersTexCoords);
@@ -985,6 +982,26 @@ void CRenderLayerTile::GetTileData(unsigned char *pIndex, unsigned char *pFlags,
 {
 	*pIndex = m_pTiles[y * m_pLayerTilemap->m_Width + x].m_Index;
 	*pFlags = m_pTiles[y * m_pLayerTilemap->m_Width + x].m_Flags;
+}
+
+const CTile *CRenderLayerTile::GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const
+{
+	return &m_pTiles[(size_t)y * m_pLayerTilemap->m_Width];
+}
+
+const CTile *CRenderLayerTile::GetTileRowFallback(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const
+{
+	for(int x = 0; x < m_pLayerTilemap->m_Width; ++x)
+	{
+		unsigned char Index = 0;
+		unsigned char Flags = 0;
+		int AngleRotate = -1;
+		GetTileData(&Index, &Flags, &AngleRotate, x, y, CurOverlay);
+		pRowBuffer[x].m_Index = Index;
+		pRowBuffer[x].m_Flags = Flags;
+		pAngleRotates[x] = AngleRotate;
+	}
+	return pRowBuffer;
 }
 
 /**************
@@ -1593,6 +1610,11 @@ void CRenderLayerEntityTele::RenderTileLayerNoTileBuffer(const ColorRGBA &Color,
 	RenderMap()->RenderTeleOverlay(m_pTeleTiles, m_pLayerTilemap->m_Width, m_pLayerTilemap->m_Height, 32.0f, OverlayRenderFlags, Color.a);
 }
 
+const CTile *CRenderLayerEntityTele::GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const
+{
+	return GetTileRowFallback(pRowBuffer, pAngleRotates, y, CurOverlay);
+}
+
 void CRenderLayerEntityTele::GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const
 {
 	*pIndex = m_pTeleTiles[y * m_pLayerTilemap->m_Width + x].m_Type;
@@ -1646,6 +1668,11 @@ void CRenderLayerEntitySpeedup::Unload()
 		m_VisualMaxSpeed->Unload();
 		m_VisualMaxSpeed = std::nullopt;
 	}
+}
+
+const CTile *CRenderLayerEntitySpeedup::GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const
+{
+	return GetTileRowFallback(pRowBuffer, pAngleRotates, y, CurOverlay);
 }
 
 void CRenderLayerEntitySpeedup::GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const
@@ -1728,6 +1755,11 @@ void CRenderLayerEntitySwitch::Unload()
 	}
 }
 
+const CTile *CRenderLayerEntitySwitch::GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const
+{
+	return GetTileRowFallback(pRowBuffer, pAngleRotates, y, CurOverlay);
+}
+
 void CRenderLayerEntitySwitch::GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const
 {
 	*pFlags = 0;
@@ -1773,6 +1805,11 @@ CRenderLayerEntityTune::CRenderLayerEntityTune(int GroupId, int LayerId, int Fla
 IGraphics::CTextureHandle CRenderLayerEntityTune::GetTexture() const
 {
 	return m_pMapImages->GetTuneColors();
+}
+
+const CTile *CRenderLayerEntityTune::GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const
+{
+	return GetTileRowFallback(pRowBuffer, pAngleRotates, y, CurOverlay);
 }
 
 void CRenderLayerEntityTune::GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const

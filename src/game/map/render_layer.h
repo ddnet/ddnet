@@ -133,6 +133,13 @@ protected:
 	virtual ColorRGBA GetRenderColor(const CRenderLayerParams &Params) const;
 	virtual void InitTileData();
 	virtual void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const;
+	// Returns an entire row of tile data at once, so that building the visuals of a
+	// layer costs one virtual call per row instead of one per tile. Either points
+	// straight into the layer's own tile data or fills `pRowBuffer`, which must hold
+	// at least one row. `pAngleRotates` is only written by layers that have angles.
+	virtual const CTile *GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const;
+	// Row accessor for layer types whose tile data cannot be read straight from `m_pTiles`.
+	const CTile *GetTileRowFallback(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const;
 	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 	CTile *m_pTiles;
 
@@ -182,6 +189,13 @@ protected:
 			void SetIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
 			{
 				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x10000000);
+			}
+
+			// Sets offset and draw flag at once, so building the visuals only stores
+			// to each tile once instead of read-modify-writing it twice.
+			void Set(offset_ptr32 IndexBufferByteOff, bool SetDraw)
+			{
+				m_IndexBufferByteOffset = IndexBufferByteOff | (SetDraw ? 0x10000000 : (offset_ptr32)0);
 			}
 
 			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
@@ -325,6 +339,7 @@ protected:
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
+	const CTile *GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const override;
 
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTeleNumbers;
@@ -344,6 +359,7 @@ protected:
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
+	const CTile *GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const override;
 	IGraphics::CTextureHandle GetTexture() const override;
 
 private:
@@ -365,6 +381,7 @@ protected:
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
+	const CTile *GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const override;
 	IGraphics::CTextureHandle GetTexture() const override;
 
 private:
@@ -384,6 +401,7 @@ public:
 protected:
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
+	const CTile *GetTileRow(CTile *pRowBuffer, int *pAngleRotates, unsigned int y, int CurOverlay) const override;
 	IGraphics::CTextureHandle GetTexture() const override;
 
 private:
