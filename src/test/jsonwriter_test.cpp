@@ -12,7 +12,7 @@
 
 #include <limits>
 
-class JsonFileWriter
+class JsonFileWriter // NOLINT(readability-identifier-naming)
 {
 public:
 	CTestInfo m_Info;
@@ -59,7 +59,7 @@ public:
 	}
 };
 
-class JsonStringWriter
+class JsonStringWriter // NOLINT(readability-identifier-naming)
 {
 public:
 	CJsonStringWriter *m_pJson;
@@ -81,10 +81,10 @@ public:
 };
 
 template<typename T>
-class JsonWriters : public testing::Test
+class JsonWriters : public testing::Test // NOLINT(readability-identifier-naming)
 {
 public:
-	T Impl;
+	T m_Impl;
 };
 
 using JsonWriterTestFixures = ::testing::Types<JsonFileWriter, JsonStringWriter>;
@@ -92,32 +92,32 @@ TYPED_TEST_SUITE(JsonWriters, JsonWriterTestFixures);
 
 TYPED_TEST(JsonWriters, Empty)
 {
-	this->Impl.Expect("\n");
+	this->m_Impl.Expect("\n");
 }
 
 TYPED_TEST(JsonWriters, EmptyObject)
 {
-	this->Impl.m_pJson->BeginObject();
-	this->Impl.m_pJson->EndObject();
-	this->Impl.Expect("{\n}\n");
+	this->m_Impl.m_pJson->BeginObject();
+	this->m_Impl.m_pJson->EndObject();
+	this->m_Impl.Expect("{\n}\n");
 }
 
 TYPED_TEST(JsonWriters, EmptyArray)
 {
-	this->Impl.m_pJson->BeginArray();
-	this->Impl.m_pJson->EndArray();
-	this->Impl.Expect("[\n]\n");
+	this->m_Impl.m_pJson->BeginArray();
+	this->m_Impl.m_pJson->EndArray();
+	this->m_Impl.Expect("[\n]\n");
 }
 
 TYPED_TEST(JsonWriters, SpecialCharacters)
 {
-	this->Impl.m_pJson->BeginObject();
-	this->Impl.m_pJson->WriteAttribute("\x01\"'\r\n\t");
-	this->Impl.m_pJson->BeginArray();
-	this->Impl.m_pJson->WriteStrValue(" \"'abc\x01\n");
-	this->Impl.m_pJson->EndArray();
-	this->Impl.m_pJson->EndObject();
-	this->Impl.Expect(
+	this->m_Impl.m_pJson->BeginObject();
+	this->m_Impl.m_pJson->WriteAttribute("\x01\"'\r\n\t");
+	this->m_Impl.m_pJson->BeginArray();
+	this->m_Impl.m_pJson->WriteStrValue(" \"'abc\x01\n");
+	this->m_Impl.m_pJson->EndArray();
+	this->m_Impl.m_pJson->EndObject();
+	this->m_Impl.Expect(
 		"{\n"
 		"\t\"\\u0001\\\"'\\r\\n\\t\": [\n"
 		"\t\t\" \\\"'abc\\u0001\\n\"\n"
@@ -127,90 +127,90 @@ TYPED_TEST(JsonWriters, SpecialCharacters)
 
 TYPED_TEST(JsonWriters, HelloWorld)
 {
-	this->Impl.m_pJson->WriteStrValue("hello world");
-	this->Impl.Expect("\"hello world\"\n");
+	this->m_Impl.m_pJson->WriteStrValue("hello world");
+	this->m_Impl.Expect("\"hello world\"\n");
 }
 
 TYPED_TEST(JsonWriters, Unicode)
 {
-	this->Impl.m_pJson->WriteStrValue("Heizölrückstoßabdämpfung");
-	this->Impl.Expect("\"Heizölrückstoßabdämpfung\"\n");
+	this->m_Impl.m_pJson->WriteStrValue("Heizölrückstoßabdämpfung");
+	this->m_Impl.Expect("\"Heizölrückstoßabdämpfung\"\n");
 }
 
 TYPED_TEST(JsonWriters, True)
 {
-	this->Impl.m_pJson->WriteBoolValue(true);
-	this->Impl.Expect("true\n");
+	this->m_Impl.m_pJson->WriteBoolValue(true);
+	this->m_Impl.Expect("true\n");
 }
 
 TYPED_TEST(JsonWriters, False)
 {
-	this->Impl.m_pJson->WriteBoolValue(false);
-	this->Impl.Expect("false\n");
+	this->m_Impl.m_pJson->WriteBoolValue(false);
+	this->m_Impl.Expect("false\n");
 }
 
 TYPED_TEST(JsonWriters, Null)
 {
-	this->Impl.m_pJson->WriteNullValue();
-	this->Impl.Expect("null\n");
+	this->m_Impl.m_pJson->WriteNullValue();
+	this->m_Impl.Expect("null\n");
 }
 
 TYPED_TEST(JsonWriters, EmptyString)
 {
-	this->Impl.m_pJson->WriteStrValue("");
-	this->Impl.Expect("\"\"\n");
+	this->m_Impl.m_pJson->WriteStrValue("");
+	this->m_Impl.Expect("\"\"\n");
 }
 
 TYPED_TEST(JsonWriters, EscapeNewline)
 {
-	this->Impl.m_pJson->WriteStrValue("\n");
-	this->Impl.Expect("\"\\n\"\n");
+	this->m_Impl.m_pJson->WriteStrValue("\n");
+	this->m_Impl.Expect("\"\\n\"\n");
 }
 
 TYPED_TEST(JsonWriters, EscapeBackslash)
 {
-	this->Impl.m_pJson->WriteStrValue("\\");
-	this->Impl.Expect("\"\\\\\"\n"); // https://www.xkcd.com/1638/
+	this->m_Impl.m_pJson->WriteStrValue("\\");
+	this->m_Impl.Expect("\"\\\\\"\n"); // https://www.xkcd.com/1638/
 }
 
 TYPED_TEST(JsonWriters, EscapeControl)
 {
-	this->Impl.m_pJson->WriteStrValue("\x1b");
-	this->Impl.Expect("\"\\u001b\"\n");
+	this->m_Impl.m_pJson->WriteStrValue("\x1b");
+	this->m_Impl.Expect("\"\\u001b\"\n");
 }
 
 TYPED_TEST(JsonWriters, EscapeUnicode)
 {
-	this->Impl.m_pJson->WriteStrValue("愛😂");
-	this->Impl.Expect("\"愛😂\"\n");
+	this->m_Impl.m_pJson->WriteStrValue("愛😂");
+	this->m_Impl.Expect("\"愛😂\"\n");
 }
 
 TYPED_TEST(JsonWriters, Zero)
 {
-	this->Impl.m_pJson->WriteIntValue(0);
-	this->Impl.Expect("0\n");
+	this->m_Impl.m_pJson->WriteIntValue(0);
+	this->m_Impl.Expect("0\n");
 }
 
 TYPED_TEST(JsonWriters, One)
 {
-	this->Impl.m_pJson->WriteIntValue(1);
-	this->Impl.Expect("1\n");
+	this->m_Impl.m_pJson->WriteIntValue(1);
+	this->m_Impl.Expect("1\n");
 }
 
 TYPED_TEST(JsonWriters, MinusOne)
 {
-	this->Impl.m_pJson->WriteIntValue(-1);
-	this->Impl.Expect("-1\n");
+	this->m_Impl.m_pJson->WriteIntValue(-1);
+	this->m_Impl.Expect("-1\n");
 }
 
 TYPED_TEST(JsonWriters, Large)
 {
-	this->Impl.m_pJson->WriteIntValue(std::numeric_limits<int>::max());
-	this->Impl.Expect("2147483647\n");
+	this->m_Impl.m_pJson->WriteIntValue(std::numeric_limits<int>::max());
+	this->m_Impl.Expect("2147483647\n");
 }
 
 TYPED_TEST(JsonWriters, Small)
 {
-	this->Impl.m_pJson->WriteIntValue(std::numeric_limits<int>::min());
-	this->Impl.Expect("-2147483648\n");
+	this->m_Impl.m_pJson->WriteIntValue(std::numeric_limits<int>::min());
+	this->m_Impl.Expect("-2147483648\n");
 }

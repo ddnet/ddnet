@@ -548,7 +548,7 @@ TEST(Str, HexDecode)
 	EXPECT_STREQ(aOut, "ABCD");
 }
 
-void StrBase64Str(char *pBuffer, int BufferSize, const char *pString)
+static void StrBase64Str(char *pBuffer, int BufferSize, const char *pString)
 {
 	str_base64(pBuffer, BufferSize, pString, str_length(pString));
 }

@@ -8,14 +8,14 @@
 
 #include <gtest/gtest.h>
 
-void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pExpectedLines, bool ExpectSuccess, bool WriteBom)
+static void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pExpectedLines, bool ExpectSuccess, bool WriteBom)
 {
 	CTestInfo Info;
 	IOHANDLE File = io_open(Info.m_aFilename, IOFLAG_WRITE);
 	ASSERT_TRUE(File);
 	if(WriteBom)
 	{
-		constexpr const unsigned char UTF8_BOM[] = {0xEF, 0xBB, 0xBF};
+		constexpr static const unsigned char UTF8_BOM[] = {0xEF, 0xBB, 0xBF};
 		EXPECT_EQ(io_write(File, UTF8_BOM, sizeof(UTF8_BOM)), sizeof(UTF8_BOM));
 	}
 	EXPECT_EQ(io_write(File, pWritten, WrittenLength), WrittenLength);
@@ -39,13 +39,13 @@ void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::in
 	EXPECT_FALSE(fs_remove(Info.m_aFilename));
 }
 
-void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess)
+static void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess)
 {
 	TestFileLineReaderRaw(pWritten, WrittenLength, pReads, ExpectSuccess, false);
 	TestFileLineReaderRaw(pWritten, WrittenLength, pReads, ExpectSuccess, true);
 }
 
-void TestFileLineReader(const char *pWritten, std::initializer_list<const char *> pReads)
+static void TestFileLineReader(const char *pWritten, std::initializer_list<const char *> pReads)
 {
 	TestFileLineReaderRaw(pWritten, str_length(pWritten), pReads, true);
 }
