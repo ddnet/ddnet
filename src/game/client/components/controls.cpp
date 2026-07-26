@@ -464,6 +464,22 @@ float CControls::GetMinMouseDistance() const
 
 float CControls::GetMaxMouseDistance() const
 {
+	float Zoom = GameClient()->m_Camera.m_Zoom;
+	if(g_Config.m_ClLimitMaxDistance == 1)
+	{
+		float HookLength = 380.0f;
+		int LocalId = GameClient()->m_aLocalIds[g_Config.m_ClDummy];
+		if(LocalId >= 0 && LocalId < MAX_CLIENTS && GameClient()->m_aClients[LocalId].m_Active)
+		{
+			HookLength = GameClient()->m_aClients[LocalId].m_Predicted.m_Tuning.m_HookLength;
+		}
+		return HookLength / Zoom;
+	}
+	else if(g_Config.m_ClLimitMaxDistance == 2)
+	{
+		return g_Config.m_ClMouseMaxDistance / Zoom;
+	}
+
 	float CameraMaxDistance = 200.0f;
 	float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 	float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
