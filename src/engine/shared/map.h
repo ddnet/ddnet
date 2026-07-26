@@ -22,6 +22,7 @@ public:
 	void *GetDataSwapped(int Index) override;
 	const char *GetDataString(int Index) override;
 	void UnloadData(int Index) override;
+	void PreloadData(const int *pIndices, size_t Count) override;
 	int NumData() const override;
 
 	int GetItemSize(int Index) override;

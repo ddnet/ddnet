@@ -43,6 +43,9 @@ public:
 	const char *GetDataString(int Index);
 	void ReplaceData(int Index, char *pData, size_t Size); // memory for data must have been allocated with malloc
 	void UnloadData(int Index);
+	// Loads the given data items in parallel. Purely an optimization: the items are
+	// cached exactly as if they had been fetched individually with `GetData`.
+	void PreloadData(const int *pIndices, size_t Count);
 	int NumData() const;
 
 	int GetItemSize(int Index) const;

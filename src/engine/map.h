@@ -6,6 +6,7 @@
 #include <base/hash.h>
 #include <base/types.h>
 
+#include <cstddef>
 #include <memory>
 
 class IStorage;
@@ -26,6 +27,9 @@ public:
 	virtual void *GetDataSwapped(int Index) = 0;
 	virtual const char *GetDataString(int Index) = 0;
 	virtual void UnloadData(int Index) = 0;
+	// Loads the given data items in parallel. Purely an optimization: the items are
+	// cached exactly as if they had been fetched individually with `GetData`.
+	virtual void PreloadData(const int *pIndices, size_t Count) = 0;
 	virtual int NumData() const = 0;
 
 	virtual int GetItemSize(int Index) = 0;

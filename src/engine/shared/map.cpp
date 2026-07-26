@@ -41,6 +41,11 @@ void CMap::UnloadData(int Index)
 	m_DataFile.UnloadData(Index);
 }
 
+void CMap::PreloadData(const int *pIndices, size_t Count)
+{
+	m_DataFile.PreloadData(pIndices, Count);
+}
+
 int CMap::NumData() const
 {
 	return m_DataFile.NumData();
@@ -97,6 +102,24 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	int GroupsStart, GroupsNum, LayersStart, LayersNum;
 	NewDataFile.GetType(MAPITEMTYPE_GROUP, &GroupsStart, &GroupsNum);
 	NewDataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
+
+	// Decompressing the tile data of every layer up front is a lot faster than
+	// letting each layer decompress its own data when it is first used
+	std::vector<int> vTileDataIndices;
+	for(int g = 0; g < GroupsNum; g++)
+	{
+		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + g));
+		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		{
+			const CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(NewDataFile.GetItem(LayersStart + pGroup->m_StartLayer + l));
+			if(pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				vTileDataIndices.push_back(reinterpret_cast<const CMapItemLayerTilemap *>(pLayer)->m_Data);
+			}
+		}
+	}
+	NewDataFile.PreloadData(vTileDataIndices.data(), vTileDataIndices.size());
+
 	for(int g = 0; g < GroupsNum; g++)
 	{
 		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + g));

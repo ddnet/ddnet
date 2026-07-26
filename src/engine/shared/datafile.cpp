@@ -14,6 +14,7 @@
 #include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
+#include <base/thread.h>
 
 #include <engine/storage.h>
 
@@ -22,6 +23,7 @@
 #include <cstdlib>
 #include <limits>
 #include <unordered_set>
+#include <vector>
 
 static constexpr int MAX_ITEM_TYPE = 0xFFFF;
 static constexpr int MAX_ITEM_ID = 0xFFFF;
@@ -297,6 +299,104 @@ public:
 			SwapEndianInPlace(m_ppDataPtrs[Index], m_pDataSizes[Index]);
 		}
 		return m_ppDataPtrs[Index];
+	}
+
+	// Loads several data items at once, decompressing them on multiple threads.
+	// Decompression dominates map loading and the items are independent, but they
+	// share one file handle, so the compressed bytes are read up front.
+	void PreloadData(const int *pIndices, size_t Count)
+	{
+		if(m_Info.m_pDataSizes == nullptr)
+		{
+			// Uncompressed datafile, there is nothing to parallelize
+			return;
+		}
+
+		class CPending
+		{
+		public:
+			int m_Index;
+			void *m_pCompressedData;
+			unsigned m_CompressedSize;
+			unsigned m_UncompressedSize;
+		};
+		std::vector<CPending> vPending;
+
+		for(size_t i = 0; i < Count; i++)
+		{
+			const int Index = pIndices[i];
+			if(Index < 0 || Index >= m_Header.m_NumRawData)
+			{
+				continue;
+			}
+			// Already loaded, previously failed, or requested twice
+			if(m_ppDataPtrs[Index] != nullptr || m_pDataSizes[Index] != 0)
+			{
+				continue;
+			}
+
+			const unsigned UncompressedSize = m_Info.m_pDataSizes[Index];
+			if(UncompressedSize == 0)
+			{
+				log_error("datafile", "data size invalid. data will be ignored. index=%d uncompressed=%d", Index, UncompressedSize);
+				m_pDataSizes[Index] = -1;
+				continue;
+			}
+
+			const unsigned CompressedSize = GetFileDataSize(Index);
+			void *pCompressedData = malloc(CompressedSize);
+			if(pCompressedData == nullptr)
+			{
+				log_error("datafile", "out of memory. could not allocate memory for compressed data. index=%d size=%d", Index, CompressedSize);
+				m_pDataSizes[Index] = -1;
+				continue;
+			}
+
+			unsigned ActualDataSize = 0;
+			if(io_seek(m_File, m_DataStartOffset + m_Info.m_pDataOffsets[Index], EIoSeekOrigin::START) == 0)
+			{
+				ActualDataSize = io_read(m_File, pCompressedData, CompressedSize);
+			}
+			if(CompressedSize != ActualDataSize)
+			{
+				log_error("datafile", "truncation error. could not read all compressed data. index=%d wanted=%d got=%d", Index, CompressedSize, ActualDataSize);
+				free(pCompressedData);
+				m_pDataSizes[Index] = -1;
+				continue;
+			}
+
+			// Marks the item as pending so that a repeated index is not read twice
+			m_pDataSizes[Index] = -1;
+			vPending.push_back({Index, pCompressedData, CompressedSize, UncompressedSize});
+		}
+
+		// Every item writes only its own element of `m_ppDataPtrs` and `m_pDataSizes`
+		thread_parallel_for(vPending.size(), [&](size_t i) {
+			const CPending &Pending = vPending[i];
+			void *pUncompressedData = malloc(Pending.m_UncompressedSize);
+			if(pUncompressedData == nullptr)
+			{
+				log_error("datafile", "out of memory. could not allocate memory for uncompressed data. index=%d size=%d", Pending.m_Index, Pending.m_UncompressedSize);
+				return;
+			}
+
+			unsigned long UncompressedSize = Pending.m_UncompressedSize;
+			const int Result = uncompress(static_cast<Bytef *>(pUncompressedData), &UncompressedSize, static_cast<Bytef *>(Pending.m_pCompressedData), Pending.m_CompressedSize);
+			if(Result != Z_OK || UncompressedSize != Pending.m_UncompressedSize)
+			{
+				log_error("datafile", "failed to uncompress data. index=%d result=%d wanted=%d got=%ld", Pending.m_Index, Result, Pending.m_UncompressedSize, UncompressedSize);
+				free(pUncompressedData);
+				return;
+			}
+
+			m_ppDataPtrs[Pending.m_Index] = pUncompressedData;
+			m_pDataSizes[Pending.m_Index] = Pending.m_UncompressedSize;
+		});
+
+		for(const CPending &Pending : vPending)
+		{
+			free(Pending.m_pCompressedData);
+		}
 	}
 
 	int GetFileItemSize(int Index) const
@@ -758,6 +858,12 @@ void CDataFileReader::ReplaceData(int Index, char *pData, size_t Size)
 	free(m_pDataFile->m_ppDataPtrs[Index]);
 	m_pDataFile->m_ppDataPtrs[Index] = pData;
 	m_pDataFile->m_pDataSizes[Index] = Size;
+}
+
+void CDataFileReader::PreloadData(const int *pIndices, size_t Count)
+{
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+	m_pDataFile->PreloadData(pIndices, Count);
 }
 
 void CDataFileReader::UnloadData(int Index)
