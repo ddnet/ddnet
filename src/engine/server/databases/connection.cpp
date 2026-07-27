@@ -11,7 +11,7 @@ std::optional<float> IDbConnection::GetOptionalFloat(int Col)
 {
 	if(IsNull(Col))
 		return std::nullopt;
-	return GetInt(Col);
+	return GetFloat(Col);
 }
 
 std::optional<int> IDbConnection::GetOptionalInt(int Col)
