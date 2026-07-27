@@ -3696,6 +3696,11 @@ if(CLIENT AND DMGBUILD_FOUND)
           COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${target}
       )
     endforeach()
+    if(SERVER)
+      list(APPEND CODESIGN_COMMANDS
+          COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+      )
+    endif()
     list(APPEND CODESIGN_COMMANDS
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
 
@@ -3705,7 +3710,6 @@ if(CLIENT AND DMGBUILD_FOUND)
     )
     if(SERVER)
       list(APPEND CODESIGN_COMMANDS
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
 
         COMMAND codesign --force --options runtime --timestamp --deep --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app
