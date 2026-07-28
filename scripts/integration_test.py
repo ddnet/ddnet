@@ -225,7 +225,6 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 				"--tool=memcheck",
 				"--gen-suppressions=all",
 				"--suppressions={}".format(relpath(os.path.join(runner.repo_dir, "memcheck.supp"), self.tmp_dir)),
-				"--track-origins=yes",
 			]
 		self.name = name
 		self.num_clients = 0
@@ -1001,6 +1000,7 @@ def main():
 	import argparse
 
 	parser = argparse.ArgumentParser()
+	parser.add_argument("--exclude", help="exclude tests containing this substring")
 	parser.add_argument("--keep-tmpdirs", action="store_true", help="keep temporary directories used for the tests")
 	parser.add_argument("--show-full-output", action="store_true", help="print the full stdout and stderr on test failures")
 	parser.add_argument("--test-mastersrv", action="store_true", help="enforce testing of mastersrv")
@@ -1027,6 +1027,8 @@ def main():
 	tests = ALL_TESTS
 	if args.test is not None:
 		tests = [test for test in tests if args.test in test.name]
+	if args.exclude is not None:
+		tests = [test for test in tests if args.exclude not in test.name]
 
 	return TestRunner(
 		ddnet=ddnet,
