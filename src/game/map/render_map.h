@@ -8,7 +8,7 @@
 
 #include <array>
 #include <chrono>
-#include <memory>
+#include <functional>
 
 enum
 {
@@ -96,6 +96,13 @@ public:
 	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags, CTuneColorMapper *pTuneColorMapper);
 
 	void RenderDebugClip(float ClipX, float ClipY, float ClipW, float ClipH, ColorRGBA Color, float Zoom, const char *pLabel);
+
+private:
+	template<typename T, typename FFetchCallback>
+	void RenderTilemapImpl(T *pTiles, int w, int h, float Scale, ColorRGBA Color, FFetchCallback FetchIndexAndFlags, int RenderFlags, CTuneColorMapper *pTuneColorMapper = nullptr);
+
+	template<typename T, typename FRenderTile>
+	void RenderOverlay(T *pTiles, int w, int h, float Scale, FRenderTile RenderTile, float Alpha = 1.0f);
 };
 
 #endif
