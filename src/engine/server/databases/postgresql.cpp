@@ -17,12 +17,6 @@
 #include <string>
 #include <vector>
 
-enum
-{
-	// OID of the `bytea` type from the PostgreSQL catalog, stable across versions.
-	PG_BYTEA_OID = 17,
-};
-
 class CPostgresqlConnection : public IDbConnection
 {
 public:
@@ -75,6 +69,10 @@ private:
 
 	PGconn *m_pConn = nullptr;
 
+	// OID of the `bytea` type, queried from the server on connect. Needed to
+	// declare the type of blob parameters, which are sent in binary format.
+	Oid m_ByteaOid = 0;
+
 	// The current prepared statement and its bound parameters, sized by the
 	// largest bound index. The parameters are executed lazily with
 	// PQexecParams on the first Step()/ExecuteUpdate() call after they've
@@ -101,6 +99,7 @@ private:
 	bool ConnectImpl(char *pError, int ErrorSize);
 	PGconn *ConnectToDatabase(const char *pDatabase, char *pError, int ErrorSize);
 	bool CreateDatabase(char *pError, int ErrorSize);
+	bool QueryByteaOid(char *pError, int ErrorSize);
 	bool ExecSimple(const char *pQuery, char *pError, int ErrorSize);
 	bool Execute(char *pError, int ErrorSize);
 };
@@ -205,6 +204,22 @@ bool CPostgresqlConnection::CreateDatabase(char *pError, int ErrorSize)
 	return Success;
 }
 
+bool CPostgresqlConnection::QueryByteaOid(char *pError, int ErrorSize)
+{
+	// Ask the server for a `bytea` column and take the type OID it reports for
+	// it, rather than relying on the OIDs of built-in types being fixed. The
+	// type is schema-qualified so that `search_path` can't resolve it to a
+	// user-defined type of the same name.
+	PGresult *pResult = PQexec(m_pConn, "SELECT NULL::pg_catalog.bytea");
+	const bool Success = PQresultStatus(pResult) == PGRES_TUPLES_OK && PQnfields(pResult) == 1;
+	if(Success)
+		m_ByteaOid = PQftype(pResult, 0);
+	else
+		str_copy(pError, PQerrorMessage(m_pConn), ErrorSize);
+	PQclear(pResult);
+	return Success;
+}
+
 bool CPostgresqlConnection::ExecSimple(const char *pQuery, char *pError, int ErrorSize)
 {
 	PGresult *pResult = PQexec(m_pConn, pQuery);
@@ -237,6 +252,9 @@ bool CPostgresqlConnection::ConnectImpl(char *pError, int ErrorSize)
 
 	m_pConn = ConnectToDatabase(m_Config.m_aDatabase, pError, ErrorSize);
 	if(m_pConn == nullptr)
+		return false;
+
+	if(!QueryByteaOid(pError, ErrorSize))
 		return false;
 
 	if(m_Config.m_Setup)
@@ -375,7 +393,7 @@ void CPostgresqlConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
 	m_vParamNull[Idx] = false;
 	m_vParamLengths[Idx] = Size;
 	m_vParamFormats[Idx] = 1; // binary
-	m_vParamTypes[Idx] = PG_BYTEA_OID;
+	m_vParamTypes[Idx] = m_ByteaOid;
 	m_NewQuery = true;
 }
 
