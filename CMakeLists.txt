@@ -3913,7 +3913,7 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
     # tidy-alphabetical-end
     # Enable Edit & Continue (Hot Reload) support
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25 AND NOT DEFINED CMAKE_MSVC_DEBUG_INFORMATION_FORMAT)
       set_property(TARGET ${target} PROPERTY MSVC_DEBUG_INFORMATION_FORMAT $<IF:$<CONFIG:Debug>,EditAndContinue,Embedded>)
       target_link_options(${target} PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
     endif()
