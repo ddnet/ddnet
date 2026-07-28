@@ -16,7 +16,7 @@ class CControls : public CComponent
 {
 public:
 	float GetMinMouseDistance() const;
-	float GetMaxMouseDistance() const;
+	float GetMaxMouseDistance(float Zoom = -1.0f) const;
 
 	enum class EMouseInputType
 	{
@@ -59,5 +59,7 @@ private:
 	static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData);
 	static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData);
 	static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData);
+
+	float m_LastZoom;
 };
 #endif

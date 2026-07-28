@@ -28,6 +28,7 @@ CControls::CControls()
 	std::fill(std::begin(m_aMousePosOnAction), std::end(m_aMousePosOnAction), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aTargetPos), std::end(m_aTargetPos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aMouseInputType), std::end(m_aMouseInputType), EMouseInputType::ABSOLUTE);
+	m_LastZoom = 1.0f;
 }
 
 void CControls::OnReset()
@@ -278,7 +279,11 @@ int CControls::SnapInput(int *pData)
 				pDummyInput->m_WantedWeapon = m_aInputData[g_Config.m_ClDummy].m_WantedWeapon;
 
 				if(!g_Config.m_ClDummyControl)
+				{
 					pDummyInput->m_Fire += m_aInputData[g_Config.m_ClDummy].m_Fire - m_aLastData[g_Config.m_ClDummy].m_Fire;
+					if((pDummyInput->m_Fire & 1) != (m_aInputData[g_Config.m_ClDummy].m_Fire & 1))
+						pDummyInput->m_Fire++;
+				}
 
 				pDummyInput->m_NextWeapon += m_aInputData[g_Config.m_ClDummy].m_NextWeapon - m_aLastData[g_Config.m_ClDummy].m_NextWeapon;
 				pDummyInput->m_PrevWeapon += m_aInputData[g_Config.m_ClDummy].m_PrevWeapon - m_aLastData[g_Config.m_ClDummy].m_PrevWeapon;
@@ -343,6 +348,31 @@ void CControls::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
+
+	float CurrentZoom = GameClient()->m_Camera.m_Zoom;
+	if(g_Config.m_ClLimitMaxDistance != 0 && m_LastZoom > 0.001f && CurrentZoom > 0.001f && CurrentZoom != m_LastZoom)
+	{
+		float OldMouseMax = GetMaxMouseDistance(m_LastZoom);
+		float NewMouseMax = GetMaxMouseDistance(CurrentZoom);
+
+		for(auto &MousePos : m_aMousePos)
+		{
+			float MouseDistance = length(MousePos);
+			if(MouseDistance >= OldMouseMax - 1.5f)
+			{
+				if(MouseDistance > 0.001f)
+				{
+					MousePos = normalize_pre_length(MousePos, MouseDistance) * NewMouseMax;
+				}
+				else
+				{
+					MousePos = vec2(NewMouseMax, 0.0f);
+				}
+			}
+		}
+		ClampMousePos();
+	}
+	m_LastZoom = CurrentZoom;
 
 	if(g_Config.m_ClAutoswitchWeaponsOutOfAmmo && !GameClient()->m_GameInfo.m_UnlimitedAmmo && GameClient()->m_Snap.m_pLocalCharacter)
 	{
@@ -462,9 +492,12 @@ float CControls::GetMinMouseDistance() const
 	return g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
 }
 
-float CControls::GetMaxMouseDistance() const
+float CControls::GetMaxMouseDistance(float Zoom) const
 {
-	float Zoom = GameClient()->m_Camera.m_Zoom;
+	if(Zoom < 0.0f)
+		Zoom = GameClient()->m_Camera.m_Zoom;
+	if(Zoom < 0.001f)
+		Zoom = 0.001f;
 	if(g_Config.m_ClLimitMaxDistance == 1)
 	{
 		float HookLength = 380.0f;
