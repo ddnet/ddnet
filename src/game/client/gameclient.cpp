@@ -1093,32 +1093,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		m_aTuning[Conn] = NewTuning;
 		return;
 	}
-	else if(MsgId == NETMSGTYPE_SV_TUNELOCK)
-	{
-		int ClientId = pUnpacker->GetInt();
-		int Size = pUnpacker->GetInt();
-
-		if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-			return;
-
-		m_aClients[ClientId].m_LockedTunings.clear();
-
-		for(int i = 0; i < Size; i++)
-		{
-			int Index = pUnpacker->GetInt();
-			float Value = pUnpacker->GetInt() / 100.f;
-
-			if(pUnpacker->Error())
-				return;
-			if(Index < 0 || Index >= CTuningParams::Num())
-				continue;
-
-			CLockedTune LockedTune(Index, Value);
-			m_aClients[ClientId].m_LockedTunings.push_back(LockedTune);
-		}
-
-		return;
-	}
 
 	void *pRawMsg = TranslateGameMsg(&MsgId, pUnpacker, Conn);
 
@@ -1922,6 +1896,18 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 
 						m_aClients[Item.m_Id].m_Snapped = *((const CNetObj_Character *)Item.m_pData);
 						m_aClients[Item.m_Id].m_Evolved = m_Snap.m_aCharacters[Item.m_Id].m_Cur;
+
+						// Clear locked tunings if server doesnt send object anymore.
+						// Cleared by the modification or via rcon without the ability for the client to predict it based on tiles
+						if(!m_Snap.m_aCharacters[Item.m_Id].m_HasTuning)
+						{
+							const CNetObj_CharacterTuning *pPrevTuning = (const CNetObj_CharacterTuning *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTERTUNING, Item.m_Id);
+							CCharacter *pChr = m_GameWorld.GetCharacterById(Item.m_Id);
+							if(pPrevTuning && pChr)
+							{
+								pChr->m_LockedTunings.clear();
+							}
+						}
 					}
 					else
 					{
@@ -1973,6 +1959,19 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 					pClient->m_Predicted.ReadDDNet(pCharacterData);
 
 					m_Teams.SetSolo(Item.m_Id, pClient->m_Solo);
+				}
+			}
+			else if(Item.m_Type == NETOBJTYPE_CHARACTERTUNING)
+			{
+				const CNetObj_CharacterTuning *pTuningData = (const CNetObj_CharacterTuning *)Item.m_pData;
+
+				if(Item.m_Id < MAX_CLIENTS)
+				{
+					m_Snap.m_aCharacters[Item.m_Id].m_Tuning = *pTuningData;
+					m_Snap.m_aCharacters[Item.m_Id].m_pPrevTuning = (const CNetObj_CharacterTuning *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTERTUNING, Item.m_Id);
+					m_Snap.m_aCharacters[Item.m_Id].m_HasTuning = true;
+					CClientData *pClient = &m_aClients[Item.m_Id];
+					pClient->m_Predicted.ReadTuning(pTuningData);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECCHAR)
@@ -3109,8 +3108,6 @@ void CGameClient::CClientData::Reset()
 
 	for(auto &Info : m_aSixup)
 		Info.Reset();
-
-	m_LockedTunings.clear();
 }
 
 CSkinDescriptor CGameClient::CClientData::ToSkinDescriptor() const
@@ -3646,12 +3643,11 @@ void CGameClient::UpdatePrediction()
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
 			bool IsLocal = (i == m_Snap.m_LocalClientId || (PredictDummy() && i == m_aLocalIds[!g_Config.m_ClDummy]));
-			CGameWorld::SExtCharData ExtCharData;
-			ExtCharData.m_GameTeam = IsTeamPlay() ? m_aClients[i].m_Team : i;
-			ExtCharData.m_pLockedTunings = &m_aClients[i].m_LockedTunings; // Keep LockedTunings in tact even after resuming from '/pause'
+			int GameTeam = IsTeamPlay() ? m_aClients[i].m_Team : i;
 			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
 				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : nullptr,
-				IsLocal, &ExtCharData);
+				m_Snap.m_aCharacters[i].m_HasTuning ? &m_Snap.m_aCharacters[i].m_Tuning : nullptr,
+				GameTeam, IsLocal);
 		}
 
 	for(const CSnapEntities &EntData : SnapEntities())

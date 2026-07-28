@@ -203,6 +203,7 @@ public:
 	// DDNet Character
 	void SetTeamsCore(CTeamsCore *pTeams);
 	void ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet);
+	void ReadTuning(const CNetObj_CharacterTuning *pObjTuning);
 	bool m_Solo;
 	bool m_Jetpack;
 	bool m_CollisionDisabled;

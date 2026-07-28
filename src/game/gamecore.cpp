@@ -645,6 +645,11 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	}
 }
 
+void CCharacterCore::ReadTuning(const CNetObj_CharacterTuning *pObjTuning)
+{
+	m_Tuning = *pObjTuning->m_Values_AsTuning();
+}
+
 void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;

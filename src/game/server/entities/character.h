@@ -46,7 +46,6 @@ public:
 
 	void PostGlobalSnap();
 
-	void HandleTuneLock(int SnappingClient, int Id);
 	bool CanSnapCharacter(int SnappingClient);
 	bool IsSnappingCharacterInView(int SnappingClientId);
 
@@ -216,7 +215,6 @@ public:
 	int m_TuneZoneOld;
 	LOCKED_TUNES m_LockedTunings;
 	LOCKED_TUNES m_LastLockedTunings;
-	bool m_aSentLockedTunings[MAX_CLIENTS];
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;

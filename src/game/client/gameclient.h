@@ -402,6 +402,10 @@ public:
 			const CNetObj_DDNetCharacter *m_pPrevExtendedData;
 			bool m_HasExtendedData;
 			bool m_HasExtendedDisplayInfo;
+
+			CNetObj_CharacterTuning m_Tuning;
+			const CNetObj_CharacterTuning *m_pPrevTuning;
+			bool m_HasTuning;
 		};
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
@@ -528,7 +532,6 @@ public:
 		int m_aPredTick[200];
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
-		LOCKED_TUNES m_LockedTunings;
 
 		void UpdateSkinInfo();
 		void UpdateSkin7HatSprite(int Dummy);
