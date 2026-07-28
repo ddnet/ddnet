@@ -424,27 +424,24 @@ void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientId)
 	OnModified();
 }
 
-void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, bool IsLocal, SExtCharData *pExtCharData)
+void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, CNetObj_CharacterTuning *pTuning, int GameTeam, bool IsLocal)
 {
 	if(IsLocalTeam(ObjId))
 	{
 		CCharacter *pChar;
 		if((pChar = (CCharacter *)GetEntity(ObjId, ENTTYPE_CHARACTER)))
 		{
-			pChar->Read(pCharObj, pExtended, IsLocal);
+			pChar->Read(pCharObj, pExtended, pTuning, IsLocal);
 			pChar->Keep();
 		}
 		else
 		{
-			pChar = new CCharacter(this, ObjId, pCharObj, pExtended);
+			pChar = new CCharacter(this, ObjId, pCharObj, pExtended, pTuning);
 			InsertEntity(pChar);
 		}
 
-		if(pChar && pExtCharData)
-		{
-			pChar->m_GameTeam = pExtCharData->m_GameTeam;
-			pChar->m_LockedTunings = *pExtCharData->m_pLockedTunings;
-		}
+		if(pChar)
+			pChar->m_GameTeam = GameTeam;
 	}
 }
 

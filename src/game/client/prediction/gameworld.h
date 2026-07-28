@@ -92,16 +92,10 @@ public:
 
 	int m_LocalClientId;
 
-	struct SExtCharData
-	{
-		int m_GameTeam;
-		LOCKED_TUNES *m_pLockedTunings;
-	};
-
 	bool IsLocalTeam(int OwnerId) const;
 	void OnModified() const;
 	void NetObjBegin(CTeamsCore Teams, int LocalClientId);
-	void NetCharAdd(int ObjId, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal, SExtCharData *pExtCharData = nullptr);
+	void NetCharAdd(int ObjId, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_CharacterTuning *pTuning, int GameTeam, bool IsLocal);
 	void NetObjAdd(int ObjId, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx);
 	void NetObjEnd();
 	void CopyWorld(CGameWorld *pFrom);

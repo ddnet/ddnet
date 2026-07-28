@@ -1297,7 +1297,7 @@ CTeamsCore *CCharacter::TeamsCore()
 	return GameWorld()->Teams();
 }
 
-CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
+CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_CharacterTuning *pTuning) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), CCharacterCore::PhysicalSize())
 {
 	m_Id = Id;
@@ -1331,7 +1331,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_LatestPrevInput = m_LatestInput = m_PrevInput = m_SavedInput = m_Input;
 
 	ResetPrediction();
-	Read(pChar, pExtended, false);
+	Read(pChar, pExtended, pTuning, false);
 }
 
 void CCharacter::AntiPingInterference(int ClientId, bool DisallowReset, bool HasToBeUnfrozen)
@@ -1399,10 +1399,28 @@ void CCharacter::ResetPrediction()
 	m_LockedTunings.clear();
 }
 
-void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
+void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_CharacterTuning *pTuning, bool IsLocal)
 {
 	m_Core.Read((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
+
+	if(pTuning)
+	{
+		m_Core.ReadTuning(pTuning);
+		// Correct predicted tuning
+		// Note: If locked tune matches tunezone value, dbg_tuning will show it in blue, not yellow while in tune zone.
+		m_LockedTunings.clear();
+		CTuningParams *pTunings = GameWorld()->GetTuning(GetOverriddenTuneZone());
+		for(int i = 0; i < CTuningParams::Num(); i++)
+		{
+			if(m_Core.m_Tuning.NetworkArray()[i] != pTunings->NetworkArray()[i])
+			{
+				float Value;
+				m_Core.m_Tuning.Get(i, &Value);
+				m_LockedTunings.emplace_back(i, Value);
+			}
+		}
+	}
 
 	if(pExtended)
 	{

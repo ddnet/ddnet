@@ -1,5 +1,5 @@
 from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange
-from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick, NetTickStrict
+from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick, NetTickStrict, NetTuningParams
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM", "SPEC_CAM", "INPUT_ABSOLUTE", "INPUT_MANUAL"]
@@ -54,8 +54,14 @@ Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
 Teams = ["ALL", "SPECTATORS", "RED", "BLUE", "WHISPER_SEND", "WHISPER_RECV"]
 
+NumTunings = 47 # CTuningParams::Num(), game/tuning.h, game/tuning_params.h
+
 RawHeader = '''
+#include <base/mem.h>
+
 #include <engine/shared/teehistorian_ex.h>
+
+#include <game/tuning.h>
 
 enum
 {
@@ -337,6 +343,10 @@ Objects = [
 
 	NetObjectEx("SpectatorCount", "spectator-count@netobj.ddnet.org", [
 		NetIntRange("m_NumSpectators", 0, 'max_int'),
+	]),
+
+	NetObjectEx("CharacterTuning", "character-tuning@netobj.ddnet.tw", [
+		NetTuningParams("m_Values", NumTunings),
 	]),
 
 	## Events
@@ -671,6 +681,4 @@ Messages = [
 	NetMessageEx("Sv_MapInfo", "map-info@netmsg.ddnet.org", [
 		NetString("m_pDescription"),
 	]),
-
-	NetMessageEx("Sv_TuneLock", "tunelock@netmsg.ddnet.tw", []),
 ]

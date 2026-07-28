@@ -1285,7 +1285,6 @@ void CCharacter::Snap(int SnappingClient)
 
 	// otherwise show our normal tee and send ddnet character stuff
 	SnapCharacter(SnappingClient, TranslatedId);
-	HandleTuneLock(SnappingClient, Id);
 
 	CNetObj_DDNetCharacter DDNetCharacter = {};
 	DDNetCharacter.m_Flags = 0;
@@ -1370,6 +1369,15 @@ void CCharacter::Snap(int SnappingClient)
 	DDNetCharacter.m_TuneZoneOverride = TuneZone::OVERRIDE_NONE;
 
 	Server()->SnapNewItem(TranslatedId, DDNetCharacter);
+
+	// No need to send when no locked tunings exist
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+	if(!m_LockedTunings.empty() && SnappingClientVersion >= VERSION_DDNET_TUNELOCK)
+	{
+		CNetObj_CharacterTuning Tunings = {};
+		Tunings.Set_m_Values(m_Core.m_Tuning);
+		Server()->SnapNewItem(TranslatedId, Tunings);
+	}
 }
 
 void CCharacter::PostGlobalSnap()
@@ -2178,32 +2186,12 @@ void CCharacter::ApplyLockedTunings(bool SendTuningParams)
 			GameServer()->SendTuningParams(m_pPlayer->GetCid(), m_TuneZone);
 		}
 		m_LastLockedTunings = m_LockedTunings;
-		// update tunes for other players when we are snapped
-		std::fill(std::begin(m_aSentLockedTunings), std::end(m_aSentLockedTunings), false);
 	}
 }
 
 CTuningParams *CCharacter::GetTuning()
 {
 	return &m_Core.m_Tuning;
-}
-
-void CCharacter::HandleTuneLock(int SnappingClient, int Id)
-{
-	if(SnappingClient < 0 || m_aSentLockedTunings[SnappingClient] || Server()->GetClientVersion(SnappingClient) < VERSION_DDNET_TUNELOCK)
-		return;
-
-	CMsgPacker Msg(NETMSGTYPE_SV_TUNELOCK);
-	Msg.AddInt(Id);
-	unsigned int Size = m_LockedTunings.size();
-	Msg.AddInt(Size);
-	for(unsigned int i = 0; i < Size; i++)
-	{
-		Msg.AddInt(m_LockedTunings[i].m_ParamIndex);
-		Msg.AddInt((int)(m_LockedTunings[i].m_Value * 100.f));
-	}
-	Server()->SendMsg(&Msg, MSGFLAG_VITAL, SnappingClient);
-	m_aSentLockedTunings[SnappingClient] = true;
 }
 
 IAntibot *CCharacter::Antibot()
@@ -2572,7 +2560,6 @@ void CCharacter::DDRaceInit()
 
 	m_LockedTunings.clear();
 	m_LastLockedTunings.clear();
-	std::fill(std::begin(m_aSentLockedTunings), std::end(m_aSentLockedTunings), false);
 }
 
 bool CCharacter::Rescue()
