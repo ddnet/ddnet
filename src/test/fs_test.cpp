@@ -239,6 +239,45 @@ TEST(Filesystem, RenameFile)
 	EXPECT_FALSE(fs_remove(aNewFilename));
 }
 
+TEST(Filesystem, RenameFileCaseOnly)
+{
+	char aOldFilename[IO_MAX_PATH_LENGTH];
+	char aNewFilename[IO_MAX_PATH_LENGTH];
+	CTestInfo Info;
+	Info.Filename(aOldFilename, sizeof(aOldFilename), ".case.tmp");
+	Info.Filename(aNewFilename, sizeof(aNewFilename), ".CASE.tmp");
+
+	IOHANDLE FileWrite = io_open(aOldFilename, IOFLAG_WRITE);
+	ASSERT_TRUE(FileWrite);
+	EXPECT_FALSE(io_close(FileWrite));
+
+	EXPECT_TRUE(fs_is_file(aOldFilename));
+	EXPECT_FALSE(fs_rename(aOldFilename, aNewFilename));
+	EXPECT_TRUE(fs_is_file(aNewFilename));
+
+	EXPECT_FALSE(fs_remove(aNewFilename));
+}
+
+TEST(Filesystem, RenameOpenFileCaseOnly)
+{
+	char aOldFilename[IO_MAX_PATH_LENGTH];
+	char aNewFilename[IO_MAX_PATH_LENGTH];
+	CTestInfo Info;
+	Info.Filename(aOldFilename, sizeof(aOldFilename), ".case.tmp");
+	Info.Filename(aNewFilename, sizeof(aNewFilename), ".CASE.tmp");
+
+	IOHANDLE FileWrite = io_open(aOldFilename, IOFLAG_WRITE);
+	ASSERT_TRUE(FileWrite);
+
+	EXPECT_TRUE(fs_is_file(aOldFilename));
+	EXPECT_FALSE(fs_rename(aOldFilename, aNewFilename));
+	EXPECT_TRUE(fs_is_file(aNewFilename));
+
+	EXPECT_FALSE(io_close(FileWrite));
+
+	EXPECT_FALSE(fs_remove(aNewFilename));
+}
+
 TEST(Filesystem, RenameFolder)
 {
 	char aNewFilename[IO_MAX_PATH_LENGTH];
