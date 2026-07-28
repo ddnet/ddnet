@@ -128,6 +128,13 @@ void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 						m_pTuneTile[TgtIndex].m_Number = 0;
 						m_pTuneTile[TgtIndex].m_Type = 0;
 						m_pTiles[TgtIndex].m_Index = 0;
+
+						STuneTileStateChange::SData Current{
+							m_pTuneTile[TgtIndex].m_Number,
+							m_pTuneTile[TgtIndex].m_Type,
+							m_pTiles[TgtIndex].m_Index};
+
+						RecordStateChange(fx, fy, Previous, Current);
 						continue;
 					}
 					else

@@ -921,7 +921,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 							pTLayer->m_pTeleTile[TileIndex].m_Type,
 							pTLayer->m_pTiles[TileIndex].m_Index};
 
-						pTLayer->RecordStateChange(x, y, Previous, Current);
+						pTLayer->RecordStateChange(x + OffsetX, y + OffsetY, Previous, Current);
 					}
 				}
 			}
