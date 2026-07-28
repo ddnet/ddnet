@@ -29,7 +29,7 @@ public:
 
 	virtual bool IsEntitiesLayer() const { return false; }
 
-	virtual void Render(bool Tileset = false) {}
+	virtual void Render() {}
 	virtual CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUi::POPUP_KEEP_OPEN; }
 
 	virtual bool IsEnvelopeUsed(int EnvelopeIndex) const { return false; }

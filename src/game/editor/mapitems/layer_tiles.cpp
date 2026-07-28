@@ -159,7 +159,7 @@ void CLayerTiles::MakePalette() const
 			m_pTiles[y * m_Width + x].m_Index = y * 16 + x;
 }
 
-void CLayerTiles::Render(bool Tileset)
+void CLayerTiles::Render()
 {
 	IGraphics::CTextureHandle Texture;
 	if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size())
@@ -188,7 +188,7 @@ void CLayerTiles::Render(bool Tileset)
 	Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
 
 	// Render DDRace Layers
-	if(!Tileset)
+	if(m_RenderOverlays)
 	{
 		int OverlayRenderFlags = (g_Config.m_ClTextEntitiesEditor ? OVERLAYRENDERFLAG_TEXT : 0) | OVERLAYRENDERFLAG_EDITOR;
 		if(m_HasTele)

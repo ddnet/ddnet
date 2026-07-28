@@ -177,7 +177,7 @@ void CMapView::Render(CUIRect View)
 			Editor()->m_pTilesetPicker->m_HasSwitch = pTileLayer->m_HasSwitch;
 			Editor()->m_pTilesetPicker->m_HasTune = pTileLayer->m_HasTune;
 
-			Editor()->m_pTilesetPicker->Render(true);
+			Editor()->m_pTilesetPicker->Render();
 
 			if(Editor()->m_ShowTileInfo != CEditor::SHOW_TILE_OFF)
 				Editor()->m_pTilesetPicker->ShowInfo();

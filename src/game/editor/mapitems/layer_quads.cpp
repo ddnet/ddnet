@@ -25,7 +25,7 @@ CLayerQuads::CLayerQuads(const CLayerQuads &Other) :
 
 CLayerQuads::~CLayerQuads() = default;
 
-void CLayerQuads::Render(bool QuadPicker)
+void CLayerQuads::Render()
 {
 	Graphics()->TextureClear();
 	if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size())

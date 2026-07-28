@@ -4481,6 +4481,7 @@ void CEditor::Init()
 	m_pTilesetPicker = std::make_shared<CLayerTiles>(Map(), 16, 16);
 	m_pTilesetPicker->MakePalette();
 	m_pTilesetPicker->m_Readonly = true;
+	m_pTilesetPicker->m_RenderOverlays = false;
 
 	m_pQuadsetPicker = std::make_shared<CLayerQuads>(Map());
 	m_pQuadsetPicker->NewQuad(0, 0, 64, 64);
