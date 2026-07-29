@@ -17,11 +17,24 @@ preview = true # allow complex single line arguments to start on the same line, 
 
 [lint]
 extend-select = [
+    # tidy-alphabetical-start
     "A", # detect shadowed builtins
     "B006", # mutable default arguments
     "BLE", # disallow catch-all exceptions
+    # tidy-alphabetical-end
 ]
 
 ignore = [
+    # tidy-alphabetical-start
+    "C401", # unnecessary-generator-set: `sorted(set(…))` can be a useful idiom to deduplicate an iterator
     "E741", # ambiguous-variable-name: prohibits `l` as variable name
+    "PIE808", # unnecessary-range-start: it's fine to give the start of a range explicitly
+    "SIM102", # collapsible-if: separate if statements can be more readable
+    "SIM115", # open-file-with-context-handler: we don't care if we don't close files explicitly
+    "SIM117", # multiple-with-statements: doesn't seem more readable
+    "SIM905", # split-static-string: prohibits `"some words here".split()`
+    # tidy-alphabetical-end
 ]
+
+[lint.isort]
+from-first = true
