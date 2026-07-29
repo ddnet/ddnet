@@ -58,7 +58,7 @@ def parse_crash_filename(filename: str) -> ParsedFilename | None:
 		version=match.group(3),
 		platform=match.group(4),
 		architecture=match.group(8),
-		timestamp=datetime.strptime(match.group(9), "%Y-%m-%d_%H-%M-%S"),
+		timestamp=datetime.strptime(match.group(9), "%Y-%m-%d_%H-%M-%S"),  # noqa: DTZ007 call-datetime-strptime-without-zone (timezone information is not available in filename)
 		commit=match.group(11),
 	)
 
@@ -75,7 +75,7 @@ def determine_date_time(lines: list[str]) -> datetime:
 	for line in lines:
 		match = DATE_TIME_PATTERN.search(line)
 		if match:
-			return datetime.strptime(match.group(1), "%A, %B %d, %Y at %H:%M:%S")
+			return datetime.strptime(match.group(1), "%A, %B %d, %Y at %H:%M:%S")  # noqa: DTZ007 call-datetime-strptime-without-zone (timezone information is not available in that format)
 	raise RuntimeError("Crash log does not contain the date and time of the crash.\nIt was likely not possible to determine a more detailed stack trace due to the severity of the crash.")
 
 
