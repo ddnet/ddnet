@@ -101,6 +101,10 @@ jobs:
         ruff --version
         ruff check
 
+    - name: Check Emscripten HTML style
+      run: |
+        tidy -errors other/emscripten/index.html
+
     - name: Check header guards
       run: scripts/check_header_guards.py
 
