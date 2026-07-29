@@ -300,6 +300,38 @@ struct SPopupMenuProperties
 	ColorRGBA m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.75f);
 };
 
+/**
+ * Text that keeps its text container across frames and is only rebuilt when the text or
+ * its layout changes, for text that is rendered every frame. The color is applied when
+ * rendering, so changing it does not rebuild the container.
+ *
+ * The container must be released with @link Reset @endlink before the text render drops
+ * its containers, which happens on window resize and language change.
+ */
+class CCachedText
+{
+	STextContainerIndex m_TextContainerIndex;
+	std::string m_Text;
+	float m_FontSize = -1.0f;
+	float m_LineWidth = -1.0f;
+	int m_CursorFlags = 0;
+	STextBoundingBox m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
+	float m_MaxCharacterHeight = 0.0f;
+
+public:
+	CCachedText() = default;
+	// Copying would leave two owners for the same text container.
+	CCachedText(const CCachedText &) = delete;
+	CCachedText &operator=(const CCachedText &) = delete;
+
+	void Update(ITextRender *pTextRender, const char *pText, float FontSize, float LineWidth = -1.0f, int CursorFlags = TEXTFLAG_RENDER);
+	void Render(ITextRender *pTextRender, vec2 Pos, ColorRGBA Color) const;
+	void Reset(ITextRender *pTextRender);
+
+	float Width() const { return m_BoundingBox.m_W; }
+	float MaxCharacterHeight() const { return m_MaxCharacterHeight; }
+};
+
 class CUi
 {
 public:
@@ -683,7 +715,7 @@ public:
 	void RenderProgressBar(CUIRect ProgressBar, float Progress);
 
 	// render time with hundredths or thousands aligned to the right of the UIRect
-	void RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFinished, int Millis, bool TrueMilliseconds) const;
+	void RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFinished, int Millis, bool TrueMilliseconds, CCachedText &SecondsText, CCachedText &MillisText, ColorRGBA Color) const;
 
 	// progress spinner
 	void RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props = {}) const;
