@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations  # FIXME(PY3.9)
+
 import argparse
 from datetime import datetime
 import lzma
