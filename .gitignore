@@ -74,6 +74,7 @@ map_diff
 map_extract
 map_find_env
 map_optimize
+map_render
 map_replace_area
 map_replace_image
 map_resave

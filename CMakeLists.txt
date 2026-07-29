@@ -596,6 +596,7 @@ endif()
 if(NOT(TARGET_OS STREQUAL "android" OR TARGET_OS STREQUAL "ios"))
   find_package(GLEW)
 endif()
+find_package(EGL QUIET)
 find_package(GTest)
 if(UPNP)
   find_package(Miniupnpc)
@@ -890,6 +891,9 @@ else()
   else()
     set(PLATFORM_LIBS)
   endif()
+endif()
+if(TOOLS)
+  show_dependency_status("EGL" EGL) # egl also checks for OpenGL::EGL
 endif()
 
 ########################################################################
@@ -2559,8 +2563,11 @@ if(CLIENT)
     backend/opengles/opengles_sl_program.cpp
     backend/vulkan/backend_vulkan.cpp
     backend/vulkan/backend_vulkan.h
+    backend_egl.cpp
+    backend_egl.h
     backend_sdl.cpp
     backend_sdl.h
+    backend_threaded.cpp
     blocklist_driver.cpp
     blocklist_driver.h
     checksum.h
@@ -3311,6 +3318,7 @@ if(TOOLS)
     map_extract.cpp
     map_find_env.cpp
     map_optimize.cpp
+    map_render.cpp
     map_replace_area.cpp
     map_replace_image.cpp
     map_resave.cpp
@@ -3326,6 +3334,9 @@ if(TOOLS)
     file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
     if(T MATCHES "\\.cpp$")
       string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
+      if(TOOL MATCHES "^map_render$" AND NOT EGL_FOUND)
+        continue()
+      endif()
       set(TOOL_DEPS ${DEPS})
       set(TOOL_LIBS ${LIBS})
       unset(EXTRA_TOOL_SRC)
@@ -3336,6 +3347,11 @@ if(TOOLS)
       endif()
       if(TOOL MATCHES "^config_")
         list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
+      endif()
+      if(TOOL MATCHES "^map_render$")
+        list(APPEND TOOL_INCLUDE_DIRS ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
+        list(APPEND TOOL_DEPS $<TARGET_OBJECTS:engine-gfx> ${GLEW_DEP})
+        list(APPEND TOOL_LIBS ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES} ${GLEW_LIBRARIES} ${CMAKE_DL_LIBS} ${EGL_LIBRARY} ${OPENGL_gl_LIBRARY})
       endif()
       set(EXCLUDE_FROM_ALL)
       if(DEV)
@@ -3352,6 +3368,32 @@ if(TOOLS)
       )
       target_include_directories(${TOOL} SYSTEM PRIVATE ${TOOL_INCLUDE_DIRS})
       target_link_libraries(${TOOL} ${TOOL_LIBS})
+      if(TOOL MATCHES "^map_render$")
+        target_sources(map_render PRIVATE
+          src/engine/client/graphics_threaded.cpp
+          src/engine/client/backend_egl.cpp
+          src/engine/client/backend/opengl/backend_opengl.cpp
+          src/engine/client/backend/opengl/backend_opengl3.cpp
+          src/engine/client/backend/opengl/opengl_sl.cpp
+          src/engine/client/backend/opengl/opengl_sl_program.cpp
+          src/engine/client/backend/glsl_shader_compiler.cpp
+          src/engine/client/backend/backend_base.cpp
+          src/engine/client/backend_threaded.cpp
+          src/engine/client/blocklist_driver.cpp
+          src/engine/client/warning.cpp
+          src/game/map/map_renderer.cpp
+          src/game/map/render_layer.cpp
+          src/game/map/render_map.cpp
+          src/game/map/render_component.cpp
+          src/game/map/envelope_extrema.cpp
+          ${PROJECT_BINARY_DIR}/src/generated/client_data.h
+        )
+        target_include_directories(map_render PRIVATE ${PROJECT_BINARY_DIR})
+        target_compile_definitions(map_render PRIVATE BACKEND_NO_SDL)
+        if(GLEW_BUNDLED)
+          target_compile_definitions(map_render PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
+        endif()
+      endif()
       list(APPEND TARGETS_TOOLS ${TOOL})
     endif()
   endforeach()
@@ -3714,6 +3756,9 @@ if(TOOLS)
     map_extract
     # tidy-alphabetical-end
   )
+  if(EGL_FOUND)
+    list(APPEND TARGET_TOOLS map_render)
+  endif()
 else()
   set(TARGET_TOOLS)
 endif()
