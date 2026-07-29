@@ -2600,6 +2600,13 @@ void CGraphics_Threaded::Move(int x, int y)
 		PropChangedListener();
 }
 
+void CGraphics_Threaded::SetScreenSize(int Width, int Height)
+{
+	m_ScreenWidth = Width;
+	m_ScreenHeight = Height;
+	UpdateViewport(0, 0, m_ScreenWidth, m_ScreenHeight, true);
+}
+
 bool CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
 {
 #if defined(CONF_VIDEORECORDER)
@@ -2785,6 +2792,17 @@ void CGraphics_Threaded::TakeCustomScreenshot(const char *pFilename)
 {
 	str_copy(m_aScreenshotName, pFilename);
 	m_DoScreenshot = true;
+}
+
+void CGraphics_Threaded::ReadFramebuffer(CImageInfo &Image)
+{
+	CCommandBuffer::SCommand_TrySwapAndScreenshot Cmd;
+	Cmd.m_pImage = &Image;
+	bool Swapped = false;
+	Cmd.m_pSwapped = &Swapped;
+	AddCmd(Cmd);
+	KickCommandBuffer();
+	WaitForIdle();
 }
 
 void CGraphics_Threaded::Swap()
