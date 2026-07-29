@@ -412,7 +412,7 @@ class Runnable:
 		while True:
 			event = self.next_event(timeout_id)
 			if isinstance(event, Exit):
-				raise EOFError(f"program exited unexpectedly waiting for {description}")
+				raise EOFError(f"program exited unexpectedly waiting for {description}")  # noqa: TRY004 type-check-without-type-error
 			elif isinstance(event, Log):
 				if fn(event):
 					return event

@@ -151,7 +151,7 @@ def process_source_file(out, file, extra_args, break_on):
 				"name": node.spelling,
 			})
 			if node.spelling == break_on:
-				breakpoint()
+				breakpoint()  # noqa: T100 debugger
 
 
 def main():
