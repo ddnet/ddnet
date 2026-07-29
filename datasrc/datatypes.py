@@ -133,10 +133,8 @@ class Array(BaseType):
 		BaseType.EmitPreDefinition(self, target_name)
 
 		lines = []
-		i = 0
-		for item in self.items:
-			lines += item.EmitPreDefinition(f"{self.Identifier()}[{int(i)}]")
-			i += 1
+		for i, item in enumerate(self.items):
+			lines += item.EmitPreDefinition(f"{self.Identifier()}[{i}]")
 
 		if self.items:
 			lines += [f"static {self.TypeName()} {self.Identifier()}[] = {{"]
