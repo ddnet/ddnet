@@ -5,9 +5,8 @@ import csv
 import os
 import sys
 
-import clang.cindex
-
 from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind
+import clang.cindex
 
 try:
 	from tqdm import tqdm

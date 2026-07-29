@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+
 import twlang
 
 os.chdir(os.path.dirname(__file__) + "/../..")

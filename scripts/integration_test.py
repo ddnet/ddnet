@@ -5,7 +5,7 @@ from threading import Thread
 from time import time
 from urllib import request
 from urllib.request import Request, urlopen
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 import io
 import json
 import os

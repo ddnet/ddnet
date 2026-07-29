@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-import csv
 from glob import glob
+import csv
 import html
 import io
 import re
 import sys
-
 
 SUPPORTED_COMMAND_FLAGS = [
 	"CFGFLAG_SAVE",

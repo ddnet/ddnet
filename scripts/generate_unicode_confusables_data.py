@@ -11,6 +11,7 @@
 # python3 scripts/generate_unicode_confusables_data.py data > `src/base/unicode/confusables_data.cpp`.
 
 import sys
+
 import unicode
 
 

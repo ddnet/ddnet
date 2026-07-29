@@ -1,7 +1,7 @@
 def only(x):
 	if len(x) != 1:
 		raise ValueError
-	return list(x)[0]
+	return next(iter(x))
 
 
 GlobalIdCounter = 0

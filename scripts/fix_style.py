@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
+from concurrent.futures import ThreadPoolExecutor
 import argparse
 import os
 import subprocess
 import sys
-from concurrent.futures import ThreadPoolExecutor
 
 os.chdir(os.path.dirname(__file__) + "/..")
 

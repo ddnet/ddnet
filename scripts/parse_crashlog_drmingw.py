@@ -2,10 +2,10 @@
 
 from __future__ import annotations  # FIXME(PY3.9)
 
-import argparse
 from datetime import datetime
-import lzma
 from pathlib import Path
+import argparse
+import lzma
 import re
 import shutil
 import subprocess
@@ -31,8 +31,7 @@ def run_command(args: list[str]) -> str:
 			args,
 			check=True,
 			stdin=subprocess.DEVNULL,
-			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE,
+			capture_output=True,
 			text=True,
 		)
 		return result.stdout.strip()
@@ -135,9 +134,9 @@ def download_symbols_executable(parsed_filename: ParsedFilename | None) -> Path:
 		except Exception as error:
 			shutil.rmtree(symbols_folder_path, ignore_errors=True)
 			raise RuntimeError("Failed to extract debug symbols. The debug symbols archive may be corrupted.\nPlease report this error if it persists.") from error
-		except BaseException as error:
+		except BaseException:
 			shutil.rmtree(symbols_folder_path, ignore_errors=True)
-			raise error
+			raise
 		finally:
 			archive_path.unlink()
 
@@ -263,7 +262,7 @@ def main():
 		print(error.args[0])
 		if args.verbose:
 			print()
-			raise error
+			raise
 		print("Pass the `--verbose` parameter to print the full stack trace.")
 
 
