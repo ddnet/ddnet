@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Needs UnicodeData.txt and confusables.txt in the current directory.
 #
 # Those can be obtained from unicode.org:

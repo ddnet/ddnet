@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Needs UnicodeData.txt in the current directory.
 #
 # It can be obtained from unicode.org:
