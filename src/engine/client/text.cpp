@@ -1538,19 +1538,11 @@ public:
 		const char *pPrevBatchEnd = nullptr;
 		const char *pEllipsis = "…";
 		const SGlyph *pEllipsisGlyph = nullptr;
-		if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END)
-		{
-			if(pCursor->m_LineWidth > 0.0f && pCursor->m_LineWidth < TextWidth(pCursor->m_FontSize, pText))
-			{
-				pEllipsisGlyph = m_pGlyphMap->GetGlyph(0x2026, ActualSize); // …
-				if(pEllipsisGlyph == nullptr)
-				{
-					// no ellipsis char in font, just stop at end instead
-					pCursor->m_Flags &= ~TEXTFLAG_ELLIPSIS_AT_END;
-					pCursor->m_Flags |= TEXTFLAG_STOP_AT_END;
-				}
-			}
-		}
+		// Only text that does not fit as a whole is ellipsized. Both the ellipsis glyph and
+		// the width of the whole text are only determined once the line width is nearly
+		// exhausted, so text that stays well within it is never measured a second time.
+		bool EllipsisGlyphResolved = false;
+		bool EllipsisFitResolved = false;
 
 		const unsigned RenderFlags = TextContainer.m_RenderFlags;
 
@@ -1753,22 +1745,44 @@ public:
 						CharKerning = m_pGlyphMap->Kerning(pLastGlyph, pGlyph).x * Scale * pCursor->m_AlignedFontSize;
 					pLastGlyph = pGlyph;
 
-					if(pEllipsisGlyph != nullptr && pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END && pCurrent < pBatchEnd && pCurrent != pEllipsis)
+					if((pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END) != 0 && pCursor->m_LineWidth > 0.0f && pCurrent < pBatchEnd && pCurrent != pEllipsis)
 					{
-						float AdvanceEllipsis = (((RenderFlags & TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pEllipsisGlyph->m_Width) : (pEllipsisGlyph->m_AdvanceX + ((!ApplyBearingX) ? (-pEllipsisGlyph->m_OffsetX) : 0.f))) * Scale * pCursor->m_AlignedFontSize;
-						float CharKerningEllipsis = 0.0f;
-						if((RenderFlags & TEXT_RENDER_FLAG_KERNING) != 0)
+						if(!EllipsisGlyphResolved)
 						{
-							CharKerningEllipsis = m_pGlyphMap->Kerning(pGlyph, pEllipsisGlyph).x * Scale * pCursor->m_AlignedFontSize;
+							EllipsisGlyphResolved = true;
+							pEllipsisGlyph = m_pGlyphMap->GetGlyph(0x2026, ActualSize); // …
+							if(pEllipsisGlyph == nullptr)
+							{
+								// no ellipsis char in font, just stop at end instead
+								pCursor->m_Flags &= ~TEXTFLAG_ELLIPSIS_AT_END;
+								pCursor->m_Flags |= TEXTFLAG_STOP_AT_END;
+							}
 						}
-						if(pCursor->m_LineWidth > 0.0f &&
-							DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
+						if(pEllipsisGlyph != nullptr)
 						{
-							// we hit the end, only render ellipsis and finish
-							pTmp = pEllipsis;
-							NextCharacter = 0x2026;
-							pCursor->m_Truncated = true;
-							continue;
+							float AdvanceEllipsis = (((RenderFlags & TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pEllipsisGlyph->m_Width) : (pEllipsisGlyph->m_AdvanceX + ((!ApplyBearingX) ? (-pEllipsisGlyph->m_OffsetX) : 0.f))) * Scale * pCursor->m_AlignedFontSize;
+							float CharKerningEllipsis = 0.0f;
+							if((RenderFlags & TEXT_RENDER_FLAG_KERNING) != 0)
+							{
+								CharKerningEllipsis = m_pGlyphMap->Kerning(pGlyph, pEllipsisGlyph).x * Scale * pCursor->m_AlignedFontSize;
+							}
+							if(DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
+							{
+								if(!EllipsisFitResolved)
+								{
+									EllipsisFitResolved = true;
+									if(pCursor->m_LineWidth >= TextWidth(pCursor->m_FontSize, pText))
+										pEllipsisGlyph = nullptr;
+								}
+								if(pEllipsisGlyph != nullptr)
+								{
+									// we hit the end, only render ellipsis and finish
+									pTmp = pEllipsis;
+									NextCharacter = 0x2026;
+									pCursor->m_Truncated = true;
+									continue;
+								}
+							}
 						}
 					}
 
