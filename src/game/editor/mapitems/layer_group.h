@@ -11,8 +11,6 @@
 class CLayerGroup : public CMapObject
 {
 public:
-	class CEditorMap *m_pMap;
-
 	std::vector<std::shared_ptr<CLayer>> m_vpLayers;
 
 	int m_OffsetX;
