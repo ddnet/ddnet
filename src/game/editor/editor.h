@@ -448,6 +448,7 @@ public:
 
 	IGraphics::CTextureHandle GetEntitiesTexture();
 
+	std::unique_ptr<CEditorMap> m_pToolsMap;
 	std::shared_ptr<CLayerGroup> m_pBrush;
 	std::shared_ptr<CLayerTiles> m_pTilesetPicker;
 	std::shared_ptr<CLayerQuads> m_pQuadsetPicker;

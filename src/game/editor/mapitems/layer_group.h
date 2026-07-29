@@ -34,7 +34,7 @@ public:
 	void OnAttach(CEditorMap *pMap) override;
 
 	void Convert(CUIRect *pRect) const;
-	void Render();
+	void Render(const CEditorMap *pRenderMap);
 	void MapScreen();
 	CScreenRect Mapping() const;
 

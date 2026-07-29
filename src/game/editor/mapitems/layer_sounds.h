@@ -10,7 +10,7 @@ public:
 	CLayerSounds(const CLayerSounds &Other);
 	~CLayerSounds() override;
 
-	void Render() override;
+	void Render(const CEditorMap *pRenderMap) override;
 	CSoundSource *NewSource(int x, int y);
 
 	void BrushSelecting(CUIRect Rect) override;

@@ -10,7 +10,7 @@ public:
 	CLayerQuads(const CLayerQuads &Other);
 	~CLayerQuads() override;
 
-	void Render() override;
+	void Render(const CEditorMap *pRenderMap) override;
 	CQuad *NewQuad(int x, int y, int Width, int Height);
 	int SwapQuads(int Index0, int Index1);
 

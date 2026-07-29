@@ -120,7 +120,7 @@ public:
 	virtual void Shift(EShiftDirection Direction);
 
 	void MakePalette() const;
-	void Render() override;
+	void Render(const CEditorMap *pRenderMap) override;
 
 	int ConvertX(float x) const;
 	int ConvertY(float y) const;
