@@ -11,7 +11,7 @@ class CMapEnvelopeEvaluator : public CMapObject, public IEnvelopeEval
 public:
 	explicit CMapEnvelopeEvaluator(CEditorMap *pMap);
 
-	void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) override;
+	void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) const override;
 
 	bool m_Animate = false;
 	float m_AnimateStart = 0.0f;

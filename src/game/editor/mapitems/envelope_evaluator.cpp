@@ -8,7 +8,7 @@ CMapEnvelopeEvaluator::CMapEnvelopeEvaluator(CEditorMap *pMap) :
 {
 }
 
-void CMapEnvelopeEvaluator::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels)
+void CMapEnvelopeEvaluator::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) const
 {
 	if(EnvelopeIndex < 0 || EnvelopeIndex >= (int)Map()->m_vpEnvelopes.size())
 		return;

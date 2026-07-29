@@ -98,7 +98,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 	return {Bottom, Top};
 }
 
-void CEnvelope::Eval(float Time, ColorRGBA &Result, size_t Channels)
+void CEnvelope::Eval(float Time, ColorRGBA &Result, size_t Channels) const
 {
 	Channels = std::min({Channels, (size_t)GetChannels(), (size_t)CEnvPoint::MAX_CHANNELS});
 	CRenderMap::RenderEvalEnvelope(&m_PointsAccess, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Result, Channels);
