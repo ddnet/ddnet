@@ -767,7 +767,7 @@ def client_can_connect_websockets(test_env):
 	client = test_env.client(["dbg_websockets 1", "stdout_output_level 1"])
 	server = test_env.server(["dbg_websockets 1", "stdout_output_level 1"])
 	wait_for_startup([client, server])
-	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
+	client.command(f"connect ddnet-20+ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
 	server.wait_for_log_prefix("websockets: I: lws_handshake_server", timeout=15)  # Connection established
 	client.wait_for_log_prefix("websockets: I: lws_http_client_socket_service", timeout=15)  # Connection established
 	join = server.wait_for_log_prefix("server: player has entered the game", timeout=5).line

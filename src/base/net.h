@@ -91,7 +91,8 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 
 /**
  * Turns url string into a network address struct.
- * The url format is tw-0.6+udp://{ipaddr}[:{port}]
+ * The url format is {scheme}://{ipaddr}[:{port}]
+ * scheme: one of tw-0.6+udp, tw-0.7+udp, ddnet-20+ws and ddnet-20+wss
  * ipaddr: can be ipv4 or ipv6
  * port: is a optional internet protocol port
  *
@@ -100,6 +101,8 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
  * Examples:
  *   tw-0.6+udp://127.0.0.1
  *   tw-0.6+udp://127.0.0.1:8303
+ *   ddnet-20+ws://127.0.0.1:8303
+ *   ddnet-20+wss://127.0.0.1:8303
  *
  * @ingroup Network-Address
  *
@@ -113,8 +116,48 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
  * @return `0` on success.
  * @return `> 0` if the input wasn't a valid DDNet URL,
  * @return `< 0` if the input is a valid DDNet URL but the host part was not a valid IPv4/IPv6 address
+ *
+ * @remark The network types of the scheme are set in `addr->type`, e.g. `NETTYPE_WEBSOCKET_IPV4`
+ * for `ddnet-20+ws://` with an IPv4 address. They are also set when the host part is not an IPv4/IPv6
+ * address, in which case both `NETTYPE_WEBSOCKET_IPV4` and `NETTYPE_WEBSOCKET_IPV6` are set for
+ * websocket schemes, as the address family is only known after resolving the hostname.
+ * Use `net_addr_from_url_lookup` to resolve hostnames.
  */
 int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size);
+
+/**
+ * Turns a URL or a plain address string into a network address struct, resolving hostnames.
+ *
+ * @ingroup Network-Address
+ *
+ * @param addr Address to fill in.
+ * @param string URL (see `net_addr_from_url`) or plain address to parse, either of which may
+ *               contain a hostname instead of an IP address.
+ * @param types The types of IP that should be returned, see `net_host_lookup`.
+ *
+ * @return `0` on success.
+ *
+ * @remark The network types of the URL scheme are applied to the resolved address, so the
+ * result can be used with `net_udp_send` etc. without further conversion.
+ */
+int net_addr_from_url_lookup(NETADDR *addr, const char *string, int types);
+
+/**
+ * Turns a network address into a representative string with the URL scheme of its type.
+ *
+ * Addresses without a specific scheme, i.e. 0.6 addresses using UDP, are formatted like
+ * `net_addr_str` does, for backward compatibility.
+ *
+ * @ingroup Network-Address
+ *
+ * @param addr Address to turn into a string.
+ * @param string Buffer to fill with the string, should be at least `NETADDR_URL_MAXSTRSIZE` bytes.
+ * @param max_length Maximum size of the string.
+ * @param add_port Whether to add the port to the string.
+ *
+ * @remark The string will always be null-terminated.
+ */
+void net_addr_url_str(const NETADDR *addr, char *string, int max_length, bool add_port);
 
 /**
  * Checks if an address is local.
@@ -149,8 +192,34 @@ int net_addr_from_str(NETADDR *addr, const char *string);
  * @param types The type of IP that should be returned.
  *
  * @return `0` on success.
+ *
+ * @remark The websocket types are ignored, as websockets are determined by the URL scheme
+ * and not by the hostname. Use `net_addr_from_url_lookup` to resolve websocket URLs.
  */
 int net_host_lookup(const char *hostname, NETADDR *addr, int types);
+
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+/**
+ * Selects whether websockets are opened as `wss` or `ws`.
+ *
+ * @ingroup Network-General
+ *
+ * @param secure Whether to use `wss`.
+ *
+ * @remark Emscripten tunnels all traffic through websockets, whose scheme is a
+ * single global setting instead of a per-socket one, so this affects all
+ * connections that are established afterwards.
+ */
+void net_websocket_set_secure(bool secure);
+
+/**
+ * Resets the websocket scheme to the default, which is determined by the protocol
+ * of the page, see `other/emscripten/index.html`.
+ *
+ * @ingroup Network-General
+ */
+void net_websocket_reset_secure();
+#endif
 
 /**
  * Initializes network functionality.
