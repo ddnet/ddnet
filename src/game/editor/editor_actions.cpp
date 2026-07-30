@@ -1216,19 +1216,19 @@ void CEditorActionAppendMap::Undo()
 	// - delete added sounds
 
 	// Delete added groups
-	while((int)Map()->m_vpGroups.size() != m_PrevInfo.m_Groups)
+	while((int)Map()->m_vpGroups.size() > m_PrevInfo.m_Groups)
 	{
 		Map()->m_vpGroups.pop_back();
 	}
 
 	// Delete added envelopes
-	while((int)Map()->m_vpEnvelopes.size() != m_PrevInfo.m_Envelopes)
+	while((int)Map()->m_vpEnvelopes.size() > m_PrevInfo.m_Envelopes)
 	{
 		Map()->m_vpEnvelopes.pop_back();
 	}
 
 	// Delete added sounds
-	while((int)Map()->m_vpSounds.size() != m_PrevInfo.m_Sounds)
+	while((int)Map()->m_vpSounds.size() > m_PrevInfo.m_Sounds)
 	{
 		Map()->m_vpSounds.pop_back();
 	}
@@ -1260,7 +1260,7 @@ void CEditorActionAppendMap::Undo()
 		});
 	}
 
-	while((int)Map()->m_vpImages.size() != m_PrevInfo.m_Images)
+	while((int)Map()->m_vpImages.size() > m_PrevInfo.m_Images)
 	{
 		Map()->m_vpImages.pop_back();
 	}
@@ -1319,7 +1319,7 @@ void CEditorActionTileArt::Undo()
 		});
 	}
 
-	while((int)Map()->m_vpImages.size() != m_PreviousImageCount)
+	while((int)Map()->m_vpImages.size() > m_PreviousImageCount)
 	{
 		Map()->m_vpImages.pop_back();
 	}
