@@ -18,4 +18,4 @@ jobs:
     continue-on-error: true
     steps:
     - uses: actions/checkout@v4
-    - uses: crate-ci/typos@v1.39.0
+    - uses: crate-ci/typos@v1.48.0
