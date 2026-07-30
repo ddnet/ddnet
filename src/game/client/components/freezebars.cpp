@@ -16,8 +16,8 @@ void CFreezeBars::RenderFreezeBar(const int ClientId)
 		return;
 	}
 
-	const int Max = pCharacter->m_FreezeEnd - pCharacter->m_FreezeStart;
-	float FreezeProgress = std::clamp(Max - (Client()->GameTick(g_Config.m_ClDummy) - pCharacter->m_FreezeStart), 0, Max) / (float)Max;
+	const int64_t Max = (int64_t)pCharacter->m_FreezeEnd - pCharacter->m_FreezeStart;
+	float FreezeProgress = std::clamp<int64_t>(Max - ((int64_t)Client()->GameTick(g_Config.m_ClDummy) - pCharacter->m_FreezeStart), 0, Max) / (float)Max;
 	if(FreezeProgress <= 0.0f)
 	{
 		return;
