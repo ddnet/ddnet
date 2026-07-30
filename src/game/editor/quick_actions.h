@@ -182,6 +182,14 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"[Home] Restore map focus.")
 REGISTER_QUICK_ACTION(
+	GotoPosition,
+	"Goto position",
+	[&]() { GotoPosition(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Go to a specified coordinate point on the map.")
+REGISTER_QUICK_ACTION(
 	Proof,
 	"Proof",
 	[&]() { MapView()->ProofMode()->Toggle(); },
