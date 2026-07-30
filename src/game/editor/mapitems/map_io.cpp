@@ -581,15 +581,27 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				pImg->m_Width = pItem->m_Width;
 				pImg->m_Height = pItem->m_Height;
 				pImg->m_Format = CImageInfo::FORMAT_RGBA;
-				pImg->Allocate();
 
-				// copy image data
-				void *pData = pMap->GetData(pItem->m_ImageData);
-				mem_copy(pImg->m_pData, pData, pImg->DataSize());
-				int TextureLoadFlag = m_pEditor->Graphics()->TextureLoadFlags();
-				if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
-					TextureLoadFlag = 0;
-				pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pImg->m_aName);
+				const void *pData = pMap->GetData(pItem->m_ImageData);
+				if(pItem->m_Width <= 0 || pItem->m_Height <= 0 || pData == nullptr || (size_t)pMap->GetDataSize(pItem->m_ImageData) < pImg->DataSize())
+				{
+					pImg->m_Width = 0;
+					pImg->m_Height = 0;
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "Error: Failed to load data of image %d '%s'.", i, pImg->m_aName);
+					ErrorHandler(aBuf);
+				}
+				else
+				{
+					pImg->Allocate();
+
+					// copy image data
+					mem_copy(pImg->m_pData, pData, pImg->DataSize());
+					int TextureLoadFlag = m_pEditor->Graphics()->TextureLoadFlags();
+					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
+						TextureLoadFlag = 0;
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pImg->m_aName);
+				}
 			}
 
 			// load auto mapper file
