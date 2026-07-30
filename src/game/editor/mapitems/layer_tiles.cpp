@@ -137,10 +137,10 @@ void CLayerTiles::PrepareForSave()
 	}
 }
 
-void CLayerTiles::ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesSize) const
+void CLayerTiles::ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesByteSize) const
 {
 	const size_t DestSize = (size_t)m_Width * m_Height;
-	if(SavedTilesSize >= DestSize)
+	if(SavedTilesByteSize >= DestSize * sizeof(CTile))
 	{
 		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
 		for(size_t TileIndex = 0; TileIndex < DestSize; ++TileIndex)
