@@ -190,6 +190,13 @@ void CEditor::MapDetails()
 	Ui()->SetActiveItem(nullptr);
 }
 
+void CEditor::GotoPosition()
+{
+	static SPopupMenuId s_PopupGotoId;
+	Ui()->DoPopupMenu(&s_PopupGotoId, Ui()->MouseX(), Ui()->MouseY(), 120.0f, 52.0f, this, PopupGoto);
+	Ui()->SetActiveItem(nullptr);
+}
+
 void CEditor::DeleteSelectedLayer()
 {
 	std::shared_ptr<CLayer> pCurrentLayer = Map()->SelectedLayer(0);

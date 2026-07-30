@@ -189,13 +189,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 		}
 	}
 
-	static int s_GotoButton = 0;
 	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_GotoButton, "Goto position", 0, &Slot, BUTTONFLAG_LEFT, "Go to a specified coordinate point on the map."))
+	if(pEditor->DoButton_MenuItem(&pEditor->m_QuickActionGotoPosition, pEditor->m_QuickActionGotoPosition.Label(), 0, &Slot, BUTTONFLAG_LEFT, pEditor->m_QuickActionGotoPosition.Description()))
 	{
-		static SPopupMenuId s_PopupGotoId;
-		pEditor->Ui()->DoPopupMenu(&s_PopupGotoId, Slot.x, Slot.y + Slot.h, 120, 52, pEditor, PopupGoto);
+		pEditor->m_QuickActionGotoPosition.Call();
 	}
 
 	static int s_TileArtButton = 0;
