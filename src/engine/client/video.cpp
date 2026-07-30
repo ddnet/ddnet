@@ -549,12 +549,12 @@ void CVideo::FillAudioFrame(size_t ThreadIndex)
 		return;
 	}
 
-	const int MakeWriteableResult = av_frame_make_writable(m_AudioStream.m_vpFrames[ThreadIndex]);
-	if(MakeWriteableResult < 0)
+	const int MakeWritableResult = av_frame_make_writable(m_AudioStream.m_vpFrames[ThreadIndex]);
+	if(MakeWritableResult < 0)
 	{
 		char aError[AV_ERROR_MAX_STRING_SIZE];
-		av_strerror(MakeWriteableResult, aError, sizeof(aError));
-		log_error("videorecorder", "Could not make audio frame writeable: %s", aError);
+		av_strerror(MakeWritableResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not make audio frame writable: %s", aError);
 		return;
 	}
 

@@ -29,6 +29,7 @@ extend-ignore-re = [
 	'datas',
 	'iy',
 	'cl_nameplates_ids_seperate_line',
+	'LWS_.*_WRITEABLE',
 	'0x510E527FUL',
 	'I\*\*nteger',
 	's\*\*tring',
