@@ -307,7 +307,7 @@ Objects = [
 		NetTick("m_StartTick"),
 		NetIntRange("m_Owner", -1, 'MAX_CLIENTS-1'),
 		NetIntAny("m_SwitchNumber"),
-		NetIntAny("m_TuneZone"),
+		NetIntRange("m_TuneZone", 0, 'TuneZone::NUM-1'),
 		NetIntAny("m_Flags"),
 	]),
 
