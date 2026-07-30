@@ -6,6 +6,8 @@
 
 #include <engine/map.h>
 
+#include <cstddef>
+
 CLayers::CLayers()
 {
 	Unload();
@@ -26,6 +28,10 @@ void CLayers::Init(IMap *pMap, bool GameOnly, bool InitializeTilemapSkip)
 		{
 			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
 			if(pLayer->m_Type != LAYERTYPE_TILES)
+				continue;
+
+			const int TilemapSize = m_pMap->GetItemSize(m_LayersStart + pGroup->m_StartLayer + LayerIndex);
+			if(TilemapSize < static_cast<int>(offsetof(CMapItemLayerTilemap, m_aName)))
 				continue;
 
 			CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
@@ -56,6 +62,9 @@ void CLayers::Init(IMap *pMap, bool GameOnly, bool InitializeTilemapSkip)
 
 			if(!GameOnly)
 			{
+				if(pTilemap->m_Version <= 2 && TilemapSize < static_cast<int>(sizeof(CMapItemLayerTilemap)))
+					continue;
+
 				if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
 				{
 					if(pTilemap->m_Version <= 2)
@@ -148,6 +157,9 @@ void CLayers::InitTilemapSkip(bool GameOnly)
 		{
 			const CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
 			if(pLayer->m_Type != LAYERTYPE_TILES)
+				continue;
+
+			if(m_pMap->GetItemSize(m_LayersStart + pGroup->m_StartLayer + LayerIndex) < static_cast<int>(offsetof(CMapItemLayerTilemap, m_aName)))
 				continue;
 
 			const CMapItemLayerTilemap *pTilemap = reinterpret_cast<const CMapItemLayerTilemap *>(pLayer);

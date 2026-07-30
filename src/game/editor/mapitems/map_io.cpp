@@ -24,6 +24,8 @@
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
 
+#include <cstddef>
+
 // compatibility with old sound layers
 class CSoundSourceDeprecated
 {
@@ -693,13 +695,20 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 
 			for(int l = 0; l < pGItem->m_NumLayers; l++)
 			{
-				CMapItemLayer *pLayerItem = (CMapItemLayer *)pMap->GetItem(LayersStart + pGItem->m_StartLayer + l);
+				const int LayerItemIndex = LayersStart + pGItem->m_StartLayer + l;
+				CMapItemLayer *pLayerItem = (CMapItemLayer *)pMap->GetItem(LayerItemIndex);
 				if(!pLayerItem)
 					continue;
 
 				if(pLayerItem->m_Type == LAYERTYPE_TILES)
 				{
 					CMapItemLayerTilemap *pTilemapItem = (CMapItemLayerTilemap *)pLayerItem;
+
+					const int TilemapSize = pMap->GetItemSize(LayerItemIndex);
+					if(TilemapSize < (int)offsetof(CMapItemLayerTilemap, m_aName))
+						continue;
+					if(pTilemapItem->m_Version <= 2 && TilemapSize < (int)sizeof(CMapItemLayerTilemap))
+						continue;
 
 					std::shared_ptr<CLayerTiles> pTiles;
 					if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
