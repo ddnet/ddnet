@@ -1139,42 +1139,52 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 		}
 	}
 
-	if(sock->buffer.pos < sock->buffer.size)
+	while(sock->buffer.pos < sock->buffer.size)
 	{
 		sockaddr_to_netaddr((sockaddr *)&(sock->buffer.sockaddrs[sock->buffer.pos]), sizeof(sock->buffer.sockaddrs[sock->buffer.pos]), addr);
 		bytes = sock->buffer.msgs[sock->buffer.pos].msg_len;
 		*data = (unsigned char *)sock->buffer.bufs[sock->buffer.pos];
 		sock->buffer.pos++;
+		if(bytes == 0)
+		{
+			continue;
+		}
 		update_stats(bytes);
 		return bytes;
 	}
 #else
 	if(sock->ipv4sock >= 0)
 	{
-		sockaddr_storage recv_addr;
-		socklen_t fromlen = sizeof(recv_addr);
-		bytes = recvfrom(sock->ipv4sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (sockaddr *)&recv_addr, &fromlen);
-		*data = (unsigned char *)sock->buffer.buf;
-		if(bytes > 0)
+		do
 		{
-			sockaddr_to_netaddr((sockaddr *)&recv_addr, fromlen, addr);
-			update_stats(bytes);
-			return bytes;
-		}
+			sockaddr_storage recv_addr;
+			socklen_t fromlen = sizeof(recv_addr);
+			bytes = recvfrom(sock->ipv4sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (sockaddr *)&recv_addr, &fromlen);
+			*data = (unsigned char *)sock->buffer.buf;
+			if(bytes > 0)
+			{
+				sockaddr_to_netaddr((sockaddr *)&recv_addr, fromlen, addr);
+				update_stats(bytes);
+				return bytes;
+			}
+		} while(bytes == 0);
 	}
 
 	if(sock->ipv6sock >= 0)
 	{
-		sockaddr_storage recv_addr;
-		socklen_t fromlen = sizeof(recv_addr);
-		bytes = recvfrom(sock->ipv6sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (sockaddr *)&recv_addr, &fromlen);
-		*data = (unsigned char *)sock->buffer.buf;
-		if(bytes > 0)
+		do
 		{
-			sockaddr_to_netaddr((sockaddr *)&recv_addr, fromlen, addr);
-			update_stats(bytes);
-			return bytes;
-		}
+			sockaddr_storage recv_addr;
+			socklen_t fromlen = sizeof(recv_addr);
+			bytes = recvfrom(sock->ipv6sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (sockaddr *)&recv_addr, &fromlen);
+			*data = (unsigned char *)sock->buffer.buf;
+			if(bytes > 0)
+			{
+				sockaddr_to_netaddr((sockaddr *)&recv_addr, fromlen, addr);
+				update_stats(bytes);
+				return bytes;
+			}
+		} while(bytes == 0);
 	}
 #endif
 
