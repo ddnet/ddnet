@@ -1180,12 +1180,12 @@ void CRenderLayerQuads::Init()
 	};
 
 	m_vQuadClusters.clear();
-	CQuadCluster QuadCluster;
 
 	// create quad clusters
 	int QuadStart = 0;
 	while(QuadStart < m_pLayerQuads->m_NumQuads)
 	{
+		CQuadCluster QuadCluster;
 		QuadCluster.m_StartIndex = QuadStart;
 		QuadCluster.m_Grouped = true;
 		QuadCluster.m_ColorEnv = m_pQuads[QuadStart].m_ColorEnv;
