@@ -101,7 +101,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	}
 
 	// deletion
-	if(Event.m_Key == KEY_BACKSPACE)
+	if(Event.m_Key == KEY_BACKSPACE && State.m_TextIndex.x > 0)
 	{
 		State.m_TextIndex.x--;
 		State.m_TextLineLen--;
@@ -128,10 +128,8 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		State.m_TextLineLen--;
 		if(Input()->KeyIsPressed(KEY_LCTRL))
 		{
-			while(pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index)
+			while(State.m_TextIndex.x >= 1 && State.m_TextIndex.x <= pLayer->m_Width - 2 && pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index)
 			{
-				if(State.m_TextIndex.x < 1 || State.m_TextIndex.x > pLayer->m_Width - 2)
-					break;
 				State.m_TextIndex.x--;
 				State.m_TextLineLen--;
 			}
@@ -143,10 +141,8 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		State.m_TextLineLen++;
 		if(Input()->KeyIsPressed(KEY_LCTRL))
 		{
-			while(pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index)
+			while(State.m_TextIndex.x >= 1 && State.m_TextIndex.x <= pLayer->m_Width - 2 && pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index)
 			{
-				if(State.m_TextIndex.x < 1 || State.m_TextIndex.x > pLayer->m_Width - 2)
-					break;
 				State.m_TextIndex.x++;
 				State.m_TextLineLen++;
 			}
