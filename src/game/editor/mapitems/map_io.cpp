@@ -25,6 +25,7 @@
 #include <game/mapitems_ex.h>
 
 #include <cstddef>
+#include <limits>
 
 // compatibility with old sound layers
 class CSoundSourceDeprecated
@@ -709,6 +710,15 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 						continue;
 					if(pTilemapItem->m_Version <= 2 && TilemapSize < (int)sizeof(CMapItemLayerTilemap))
 						continue;
+
+					if(pTilemapItem->m_Width <= 0 || pTilemapItem->m_Height <= 0 ||
+						(int64_t)pTilemapItem->m_Width * pTilemapItem->m_Height * (int64_t)sizeof(CTile) > (int64_t)std::numeric_limits<int>::max())
+					{
+						char aBuf[128];
+						str_format(aBuf, sizeof(aBuf), "Error: Invalid dimensions of tile layer %d.", l);
+						ErrorHandler(aBuf);
+						continue;
+					}
 
 					std::shared_ptr<CLayerTiles> pTiles;
 					if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
