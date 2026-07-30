@@ -426,7 +426,11 @@ CBindSlot CBinds::GetBindSlot(const char *pBindString) const
 			return EMPTY_BIND_SLOT;
 
 		if(str_find(pKey + 1, "+"))
+		{
 			pKey = str_next_token(pKey + 1, "+", aMod, sizeof(aMod));
+			if(pKey == nullptr)
+				return EMPTY_BIND_SLOT;
+		}
 		else
 			break;
 	}
