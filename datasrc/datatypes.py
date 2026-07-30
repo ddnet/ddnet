@@ -1,7 +1,7 @@
 def only(x):
 	if len(x) != 1:
 		raise ValueError
-	return list(x)[0]
+	return next(iter(x))
 
 
 GlobalIdCounter = 0
@@ -133,10 +133,8 @@ class Array(BaseType):
 		BaseType.EmitPreDefinition(self, target_name)
 
 		lines = []
-		i = 0
-		for item in self.items:
-			lines += item.EmitPreDefinition(f"{self.Identifier()}[{int(i)}]")
-			i += 1
+		for i, item in enumerate(self.items):
+			lines += item.EmitPreDefinition(f"{self.Identifier()}[{i}]")
 
 		if self.items:
 			lines += [f"static {self.TypeName()} {self.Identifier()}[] = {{"]

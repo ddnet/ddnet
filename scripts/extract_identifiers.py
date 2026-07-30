@@ -1,11 +1,12 @@
+#!/usr/bin/env python3
+
 import argparse
 import csv
 import os
 import sys
 
-import clang.cindex
-
 from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind
+import clang.cindex
 
 try:
 	from tqdm import tqdm
@@ -149,7 +150,7 @@ def process_source_file(out, file, extra_args, break_on):
 				"name": node.spelling,
 			})
 			if node.spelling == break_on:
-				breakpoint()
+				breakpoint()  # noqa: T100 debugger
 
 
 def main():

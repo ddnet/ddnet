@@ -35,7 +35,7 @@ def check_file(filename):
 		if line == "// This file can be included several times.":
 			# file does not need header/footer
 			return False
-		if line.startswith("//") or line.startswith("/*") or line.startswith("*/") or line.startswith("\t") or line == "":
+		if line.startswith(("//", "/*", "*/", "\t")) or line == "":
 			continue
 		if line.startswith("#ifndef"):
 			if line != header_guard_line1:

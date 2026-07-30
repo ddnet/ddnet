@@ -16,7 +16,7 @@ def get_curl_calls(path):
 	names = set()
 	for directory, _, files in os.walk(path):
 		for filename in files:
-			if filename.endswith(".cpp") or filename.endswith(".c") or filename.endswith(".h"):
+			if filename.endswith((".cpp", ".c", ".h")):
 				with open(os.path.join(directory, filename), encoding="utf-8") as f:
 					contents = f.read()
 				names = names.union(CURL_RE.findall(contents))

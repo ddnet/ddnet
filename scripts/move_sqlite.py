@@ -12,11 +12,11 @@
 #
 # Afterwards configure a MTA (e.g. postfix) and the users email address.
 
-import sqlite3
-import argparse
-from time import strftime
-import os
 from datetime import datetime, timedelta
+from time import strftime
+import argparse
+import os
+import sqlite3
 
 TABLES = ["record_race", "record_teamrace", "record_saves"]
 
@@ -101,7 +101,7 @@ def main():
 		print(f"Warning: '{args.f}' does not exist (yet). Is the path specified correctly?")
 		return
 
-	date = (datetime.now() - timedelta(minutes=args.backup_timeout)).strftime("%Y-%m-%d %H:%M:%S")
+	date = (datetime.now() - timedelta(minutes=args.backup_timeout)).strftime("%Y-%m-%d %H:%M:%S")  # noqa: DTZ005 call-datetime-now-without-tzinfo (naive datetime is okay here)
 
 	conn = sqlite3.connect(args.f)
 	num = {}

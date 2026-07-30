@@ -3,7 +3,6 @@ from pathlib import Path
 import re
 import sys
 
-
 # Set of C headers (without .h suffix)
 C_HEADER_SET = {
 	"assert",

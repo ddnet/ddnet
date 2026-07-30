@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-import argparse
+from __future__ import annotations  # FIXME(PY3.9)
+
 from datetime import datetime
-import lzma
 from pathlib import Path
+import argparse
+import lzma
 import re
 import shutil
 import subprocess
@@ -29,8 +31,7 @@ def run_command(args: list[str]) -> str:
 			args,
 			check=True,
 			stdin=subprocess.DEVNULL,
-			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE,
+			capture_output=True,
 			text=True,
 		)
 		return result.stdout.strip()
@@ -58,7 +59,7 @@ def parse_crash_filename(filename: str) -> ParsedFilename | None:
 		version=match.group(3),
 		platform=match.group(4),
 		architecture=match.group(8),
-		timestamp=datetime.strptime(match.group(9), "%Y-%m-%d_%H-%M-%S"),
+		timestamp=datetime.strptime(match.group(9), "%Y-%m-%d_%H-%M-%S"),  # noqa: DTZ007 call-datetime-strptime-without-zone (timezone information is not available in filename)
 		commit=match.group(11),
 	)
 
@@ -75,7 +76,7 @@ def determine_date_time(lines: list[str]) -> datetime:
 	for line in lines:
 		match = DATE_TIME_PATTERN.search(line)
 		if match:
-			return datetime.strptime(match.group(1), "%A, %B %d, %Y at %H:%M:%S")
+			return datetime.strptime(match.group(1), "%A, %B %d, %Y at %H:%M:%S")  # noqa: DTZ007 call-datetime-strptime-without-zone (timezone information is not available in that format)
 	raise RuntimeError("Crash log does not contain the date and time of the crash.\nIt was likely not possible to determine a more detailed stack trace due to the severity of the crash.")
 
 
@@ -133,9 +134,9 @@ def download_symbols_executable(parsed_filename: ParsedFilename | None) -> Path:
 		except Exception as error:
 			shutil.rmtree(symbols_folder_path, ignore_errors=True)
 			raise RuntimeError("Failed to extract debug symbols. The debug symbols archive may be corrupted.\nPlease report this error if it persists.") from error
-		except BaseException as error:
+		except BaseException:
 			shutil.rmtree(symbols_folder_path, ignore_errors=True)
-			raise error
+			raise
 		finally:
 			archive_path.unlink()
 
@@ -261,7 +262,7 @@ def main():
 		print(error.args[0])
 		if args.verbose:
 			print()
-			raise error
+			raise
 		print("Pass the `--verbose` parameter to print the full stack trace.")
 
 

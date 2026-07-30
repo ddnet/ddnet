@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from hashlib import sha256
 import argparse
 import base64

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Needs UnicodeData.txt and confusables.txt in the current directory.
 #
 # Those can be obtained from unicode.org:
@@ -9,6 +11,7 @@
 # python3 scripts/generate_unicode_confusables_data.py data > `src/base/unicode/confusables_data.cpp`.
 
 import sys
+
 import unicode
 
 

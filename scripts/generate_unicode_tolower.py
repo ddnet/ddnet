@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Needs UnicodeData.txt in the current directory.
 #
 # It can be obtained from unicode.org:
@@ -8,6 +10,7 @@
 # python3 scripts/generate_unicode_tolower.py data > `src/base/unicode/tolower_data.cpp`.
 
 import sys
+
 import unicode
 
 

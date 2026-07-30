@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import os
-import sys
 import re
+import sys
+
 import twlang
 
 os.chdir(os.path.dirname(__file__) + "/../..")
@@ -44,7 +45,7 @@ for language in languages:
 			continue
 
 		# Validate c format strings. Strings that move the formatters are not validated.
-		if re.findall(cfmt, english, flags=re.X) != re.findall(cfmt, translated, flags=re.X) and "1$" not in translated:
+		if re.findall(cfmt, english, flags=re.VERBOSE) != re.findall(cfmt, translated, flags=re.VERBOSE) and "1$" not in translated:
 			print_validation_error("Non-matching formatting", language, line)
 
 		# Check for elipisis

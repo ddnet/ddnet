@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
+from concurrent.futures import ThreadPoolExecutor
 import argparse
 import os
 import subprocess
 import sys
-from concurrent.futures import ThreadPoolExecutor
 
 os.chdir(os.path.dirname(__file__) + "/..")
 
@@ -79,7 +79,7 @@ def format_or_warn(filenames, dry_run):
 		args += ["-i"]
 	args += filenames
 
-	proc = subprocess.run(args, capture_output=True, text=True)
+	proc = subprocess.run(args, capture_output=True, text=True, check=False)
 
 	if proc.stdout:
 		sys.stdout.write(proc.stdout)
