@@ -276,8 +276,10 @@ int str_comp_filenames(const char *a, const char *b)
 				return 1;
 			else if(str_isnum(*b))
 				return -1;
-			else if(result || *a == '\0' || *b == '\0')
+			else if(result)
 				return result;
+			else if(*a == '\0' || *b == '\0')
+				return *a - *b;
 		}
 
 		result = tolower(*a) - tolower(*b);
