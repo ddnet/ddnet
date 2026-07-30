@@ -10,6 +10,24 @@
 #include <base/str.h>
 #include <base/time.h>
 
+bool CNetConnection::IsPeerAddress(const NETADDR &Addr) const
+{
+	// While connecting, the peer address is not determined yet, so any of the
+	// addresses that the connection was initiated to is accepted.
+	if(m_State != EState::CONNECT)
+	{
+		return m_PeerAddr == Addr;
+	}
+	for(int i = 0; i < m_NumConnectAddrs; i++)
+	{
+		if(m_aConnectAddrs[i] == Addr)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void CNetConnection::SetPeerAddr(const NETADDR *pAddr)
 {
 	m_PeerAddr = *pAddr;
@@ -373,24 +391,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 
 		if(CtrlMsg == NET_CTRLMSG_CLOSE)
 		{
-			bool IsPeer;
-			if(m_State != EState::CONNECT)
-			{
-				IsPeer = m_PeerAddr == *pAddr;
-			}
-			else
-			{
-				IsPeer = false;
-				for(int i = 0; i < m_NumConnectAddrs; i++)
-				{
-					if(m_aConnectAddrs[i] == *pAddr)
-					{
-						IsPeer = true;
-						break;
-					}
-				}
-			}
-			if(IsPeer)
+			if(IsPeerAddress(*pAddr))
 			{
 				m_State = EState::ERROR;
 				m_RemoteClosed = 1;
@@ -477,6 +478,10 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 					// connection made
 					if(CtrlMsg == NET_CTRLMSG_CONNECTACCEPT)
 					{
+						if(!IsPeerAddress(*pAddr))
+						{
+							return 0;
+						}
 						SetPeerAddr(pAddr);
 						if(m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)) && !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
 						{

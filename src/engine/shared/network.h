@@ -278,6 +278,7 @@ private:
 	bool IsSixup() const { return m_Sixup; }
 
 	//
+	bool IsPeerAddress(const NETADDR &Addr) const;
 	void SetPeerAddr(const NETADDR *pAddr);
 	void ClearPeerAddr();
 	void ResetStats();
