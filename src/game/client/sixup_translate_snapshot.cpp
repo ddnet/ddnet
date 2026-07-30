@@ -68,6 +68,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 				Size,
 				pItem7->Id());
 			pSnapSrcSeven->InvalidateItem(i);
+			continue;
 		}
 
 		if(ItemType == protocol7::NETOBJTYPE_PLAYERINFORACE)
