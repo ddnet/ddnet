@@ -1,0 +1,22 @@
+{
+	"name": "gameplay-local-server",
+	"args": "cl_show_welcome 0; player_name CI-Test; cl_menu_map \"\"",
+	"steps": [
+		{ "action": "connect", "address": "127.0.0.1:8303" },
+		{ "action": "waitlog", "pattern": "entered and joined the game", "timeout": 5000 },
+		{ "action": "shot", "name": "ingame", "compare": false },
+		{ "action": "keydown", "key": "d" },
+		{ "action": "wait", "ms": 600 },
+		{ "action": "key", "key": "Space" },
+		{ "action": "keyup", "key": "d" },
+		{ "action": "shot", "name": "after-move", "compare": false },
+		{ "action": "key", "key": "t" },
+		{ "action": "wait", "ms": 500 },
+		{ "action": "type", "text": "scenario chat test" },
+		{ "action": "key", "key": "Enter" },
+		{ "action": "waitlog", "pattern": "scenario chat test", "timeout": 10000 },
+		{ "action": "shot", "name": "chat", "compare": false },
+		{ "action": "console", "cmd": "disconnect" },
+		{ "action": "waitlog", "pattern": "disconnecting", "timeout": 10000 }
+	]
+}
