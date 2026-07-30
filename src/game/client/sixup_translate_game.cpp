@@ -225,6 +225,12 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 	{
 		protocol7::CNetMsg_Sv_Team *pMsg7 = (protocol7::CNetMsg_Sv_Team *)pRawMsg;
 
+		if(pMsg7->m_ClientId < 0 || pMsg7->m_ClientId >= MAX_CLIENTS)
+		{
+			dbg_msg("sixup", "Sv_Team got invalid ClientId: %d", pMsg7->m_ClientId);
+			return nullptr;
+		}
+
 		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
 			m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
@@ -591,7 +597,8 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		protocol7::CNetMsg_Sv_KillMsg *pMsg7 = (protocol7::CNetMsg_Sv_KillMsg *)pRawMsg;
 		::CNetMsg_Sv_KillMsg *pMsg = (::CNetMsg_Sv_KillMsg *)s_aRawMsg;
 
-		pMsg->m_Killer = pMsg7->m_Killer;
+		// 0.7 uses -1 and -2 for deaths without a killer, 0.6 uses the victim itself
+		pMsg->m_Killer = pMsg7->m_Killer < 0 ? pMsg7->m_Victim : pMsg7->m_Killer;
 		pMsg->m_Victim = pMsg7->m_Victim;
 		pMsg->m_Weapon = pMsg7->m_Weapon;
 		pMsg->m_ModeSpecial = pMsg7->m_ModeSpecial;
