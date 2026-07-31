@@ -27,7 +27,7 @@ void CDebugHud::RenderNetCorrections()
 
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+	Graphics()->MapScreenToSize(Width, Height);
 
 	const float Velspeed = length(vec2(GameClient()->m_Snap.m_pLocalCharacter->m_VelX / 256.0f, GameClient()->m_Snap.m_pLocalCharacter->m_VelY / 256.0f)) * Client()->GameTickSpeed();
 	const float VelspeedX = GameClient()->m_Snap.m_pLocalCharacter->m_VelX / 256.0f * Client()->GameTickSpeed();
@@ -100,7 +100,7 @@ void CDebugHud::RenderTuning()
 
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+	Graphics()->MapScreenToSize(Width, Height);
 
 	const float FontSize = 5.0f;
 
@@ -168,7 +168,7 @@ void CDebugHud::RenderTuning()
 		return;
 
 	// Render Velspeed.X * Ramp Graphs
-	Graphics()->MapScreen(0.0f, 0.0f, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
+	Graphics()->MapScreenToSize(Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	// Make sure graph positions and sizes are aligned with pixels to avoid lines overlapping graph edges
 	const float GraphSpacing = std::round(Graphics()->ScreenWidth() / 100.0f);
 	const float GraphW = std::round(Graphics()->ScreenWidth() / 4.0f);
@@ -250,7 +250,7 @@ void CDebugHud::RenderHint()
 
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+	Graphics()->MapScreenToSize(Width, Height);
 
 	const float FontSize = 5.0f;
 	const float Spacing = 5.0f;

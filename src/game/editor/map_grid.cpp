@@ -2,6 +2,7 @@
 
 #include "editor.h"
 
+#include <engine/graphics.h>
 #include <engine/keys.h>
 
 static constexpr int MIN_GRID_FACTOR = 1;
@@ -28,21 +29,19 @@ void CMapGrid::Render()
 
 	pGroup->MapScreen();
 
-	float aGroupPoints[4];
-	pGroup->Mapping(aGroupPoints);
+	CScreenRect GroupRect = pGroup->Mapping();
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	CScreenRect ScreenRect = Graphics()->GetScreen();
 
 	const int LineDistance = GridLineDistance();
 
-	const int XOffset = aGroupPoints[0] / LineDistance;
-	const int YOffset = aGroupPoints[1] / LineDistance;
+	const int XOffset = GroupRect.m_TopLeft.x / LineDistance;
+	const int YOffset = GroupRect.m_TopLeft.y / LineDistance;
 	const int XGridOffset = XOffset % Factor();
 	const int YGridOffset = YOffset % Factor();
 
-	const int NumColumns = (int)std::ceil((ScreenX1 - ScreenX0) / LineDistance) + 1;
-	const int NumRows = (int)std::ceil((ScreenY1 - ScreenY0) / LineDistance) + 1;
+	const int NumColumns = (int)std::ceil(ScreenRect.Width() / LineDistance) + 1;
+	const int NumRows = (int)std::ceil(ScreenRect.Height() / LineDistance) + 1;
 
 	Graphics()->TextureClear();
 
@@ -58,7 +57,7 @@ void CMapGrid::Render()
 				continue;
 			}
 			const float PosY = LineDistance * (y + YOffset);
-			const IGraphics::CLineItem Line = IGraphics::CLineItem(ScreenX0, PosY, ScreenX1, PosY);
+			const IGraphics::CLineItem Line = IGraphics::CLineItem(ScreenRect.m_TopLeft.x, PosY, ScreenRect.m_BottomRight.x, PosY);
 			Graphics()->LinesBatchDraw(&LineItemBatch, &Line, 1);
 		}
 		for(int x = 0; x < NumColumns; x++)
@@ -68,7 +67,7 @@ void CMapGrid::Render()
 				continue;
 			}
 			const float PosX = LineDistance * (x + XOffset);
-			const IGraphics::CLineItem Line = IGraphics::CLineItem(PosX, ScreenY0, PosX, ScreenY1);
+			const IGraphics::CLineItem Line = IGraphics::CLineItem(PosX, ScreenRect.m_TopLeft.y, PosX, ScreenRect.m_BottomRight.y);
 			Graphics()->LinesBatchDraw(&LineItemBatch, &Line, 1);
 		}
 		Graphics()->LinesBatchEnd(&LineItemBatch);
@@ -83,7 +82,7 @@ void CMapGrid::Render()
 			continue;
 		}
 		const float PosY = LineDistance * (y + YOffset);
-		const IGraphics::CLineItem Line = IGraphics::CLineItem(ScreenX0, PosY, ScreenX1, PosY);
+		const IGraphics::CLineItem Line = IGraphics::CLineItem(ScreenRect.m_TopLeft.x, PosY, ScreenRect.m_BottomRight.x, PosY);
 		Graphics()->LinesBatchDraw(&LineItemBatch, &Line, 1);
 	}
 	for(int x = 0; x < NumColumns; x++)
@@ -93,7 +92,7 @@ void CMapGrid::Render()
 			continue;
 		}
 		const float PosX = LineDistance * (x + XOffset);
-		const IGraphics::CLineItem Line = IGraphics::CLineItem(PosX, ScreenY0, PosX, ScreenY1);
+		const IGraphics::CLineItem Line = IGraphics::CLineItem(PosX, ScreenRect.m_TopLeft.y, PosX, ScreenRect.m_BottomRight.y);
 		Graphics()->LinesBatchDraw(&LineItemBatch, &Line, 1);
 	}
 	Graphics()->LinesBatchEnd(&LineItemBatch);

@@ -67,7 +67,7 @@ void CImportantAlert::RenderImportantAlert()
 
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+	Graphics()->MapScreenToSize(Width, Height);
 
 	const float TitleFontSize = 20.0f;
 	const float MessageFontSize = 16.0f;

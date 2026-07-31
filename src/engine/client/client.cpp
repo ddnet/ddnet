@@ -963,7 +963,7 @@ void CClient::RenderDebug()
 	const float FontSize = 16.0f;
 
 	Graphics()->TextureSet(m_DebugFont);
-	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
+	Graphics()->MapScreenToSize(Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	Graphics()->QuadsBegin();
 
 	str_format(aBuffer, sizeof(aBuffer), "Game/predicted tick: %d/%d", m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy]);
@@ -1077,7 +1077,7 @@ void CClient::RenderGraphs()
 		return;
 
 	// Make sure graph positions and sizes are aligned with pixels to avoid lines overlapping graph edges
-	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
+	Graphics()->MapScreenToSize(Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	const float GraphW = std::round(Graphics()->ScreenWidth() / 4.0f);
 	const float GraphH = std::round(Graphics()->ScreenHeight() / 6.0f);
 	const float GraphSpacing = std::round(Graphics()->ScreenWidth() / 100.0f);

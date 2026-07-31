@@ -460,7 +460,9 @@ const CUIRect *CUi::Screen()
 void CUi::MapScreen()
 {
 	const CUIRect *pScreen = Screen();
-	Graphics()->MapScreen(pScreen->x, pScreen->y, pScreen->w, pScreen->h);
+
+	// x and y are supposed to be 0
+	Graphics()->MapScreenToSize(pScreen->w, pScreen->h);
 }
 
 float CUi::PixelSize()
