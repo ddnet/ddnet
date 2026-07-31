@@ -75,22 +75,30 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap)
 		int EnvPointStart, FakeEnvPointNum;
 		pMap->GetType(MAPITEMTYPE_ENVPOINTS, &EnvPointStart, &FakeEnvPointNum);
 		if(FakeEnvPointNum > 0)
+		{
 			m_pPointsBezierUpstream = static_cast<CEnvPointBezier_upstream *>(pMap->GetItem(EnvPointStart));
+			m_NumPointsMax = pMap->GetItemSize(EnvPointStart) / sizeof(CEnvPointBezier_upstream);
+		}
 		else
+		{
 			m_pPointsBezierUpstream = nullptr;
-
-		m_NumPointsMax = pMap->GetItemSize(EnvPointStart) / sizeof(CEnvPointBezier_upstream);
+			m_NumPointsMax = 0;
+		}
 	}
 	else
 	{
 		int EnvPointStart, FakeEnvPointNum;
 		pMap->GetType(MAPITEMTYPE_ENVPOINTS, &EnvPointStart, &FakeEnvPointNum);
 		if(FakeEnvPointNum > 0)
+		{
 			m_pPoints = static_cast<CEnvPoint *>(pMap->GetItem(EnvPointStart));
+			m_NumPointsMax = pMap->GetItemSize(EnvPointStart) / sizeof(CEnvPoint);
+		}
 		else
+		{
 			m_pPoints = nullptr;
-
-		m_NumPointsMax = pMap->GetItemSize(EnvPointStart) / sizeof(CEnvPoint);
+			m_NumPointsMax = 0;
+		}
 
 		int EnvPointBezierStart, FakeEnvPointBezierNum;
 		pMap->GetType(MAPITEMTYPE_ENVPOINTS_BEZIER, &EnvPointBezierStart, &FakeEnvPointBezierNum);
