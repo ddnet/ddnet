@@ -4674,7 +4674,6 @@ void CGameContext::LoadMapSettings()
 			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
 			pNext += StrSize;
 		}
-		pMap->UnloadData(pItem->m_Settings);
 		break;
 	}
 

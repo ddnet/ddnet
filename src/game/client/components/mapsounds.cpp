@@ -70,7 +70,6 @@ void CMapSounds::OnMapLoad()
 			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 			m_aSounds[i] = Sound()->LoadOpus(aBuf);
-			pMap->UnloadData(pSound->m_SoundName);
 		}
 		else
 		{
@@ -83,7 +82,6 @@ void CMapSounds::OnMapLoad()
 			}
 			const int SoundDataSize = pMap->GetDataSize(pSound->m_SoundData);
 			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, SoundDataSize, false, pName);
-			pMap->UnloadData(pSound->m_SoundData);
 		}
 		ShowWarning = ShowWarning || m_aSounds[i] == -1;
 	}
