@@ -240,7 +240,18 @@ int main(int argc, const char **argv)
 			int Height = MapDataItemIterator->m_pImage->m_Height;
 
 			int ImageIndex = MapDataItemIterator->m_Index;
-			if(MapDataItemIterator->m_Data == Index)
+			// Neither the dimensions of an image are checked against the size of its
+			// data, nor the image index against the number of images we tracked, and
+			// the data of a block that failed to load is null while its size stays.
+			// Load the image data here, so that the size is the one of the buffer.
+			if(pPtr == nullptr || ImageIndex < 0 || ImageIndex >= (int)MAX_MAPIMAGES ||
+				Width <= 0 || Height <= 0 ||
+				Reader.GetData(MapDataItemIterator->m_Data) == nullptr ||
+				(int64_t)Width * Height * 4 > (int64_t)Reader.GetDataSize(MapDataItemIterator->m_Data))
+			{
+				dbg_msg("map_optimize", "Not optimizing image %d, its dimensions do not match its data", ImageIndex);
+			}
+			else if(MapDataItemIterator->m_Data == Index)
 			{
 				DeletePtr = true;
 				// optimize embedded images
