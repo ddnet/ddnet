@@ -319,6 +319,18 @@ public:
 	void SendServerAlert(const char *pMessage);
 	void SendModeratorAlert(int ToClientId, const char *pMessage);
 	void SendBroadcast(const char *pText, int ClientId, bool IsImportant = true);
+
+	/**
+	 * The 0.7 protocol does not support renaming connected clients (or changing clan/country).
+	 * But the 0.6 protocol does allow that. And the server supports both.
+	 * So when a 0.6 client renames we update the state for 0.7 clients
+	 * by reconnecting the renamed client. This is abstracted away by this method.
+	 * During the reconnect also other properties than name are being resent and potentially
+	 * updated. Those are: name, country, clan, team and skin
+	 *
+	 * @param ClientId This is the id of the client that will be updated. Not the id that will receive the message. The message gets broadcasted to all 0.7 clients.
+	 */
+	void SendRename7(int ClientId);
 	void SendSkinChange7(int ClientId);
 
 	void List(int ClientId, const char *pFilter);

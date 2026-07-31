@@ -909,6 +909,44 @@ void CGameContext::SendBroadcast(const char *pText, int ClientId, bool IsImporta
 	m_apPlayers[ClientId]->m_LastBroadcastImportance = IsImportant;
 }
 
+void CGameContext::SendRename7(int ClientId)
+{
+	dbg_assert(in_range(ClientId, 0, MAX_CLIENTS - 1), "Invalid ClientId: %d", ClientId);
+	dbg_assert(m_apPlayers[ClientId] != nullptr, "Client not online: %d", ClientId);
+
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+
+	protocol7::CNetMsg_Sv_ClientDrop Drop;
+	Drop.m_ClientId = ClientId;
+	Drop.m_pReason = "";
+	Drop.m_Silent = true;
+
+	protocol7::CNetMsg_Sv_ClientInfo Info;
+	Info.m_ClientId = ClientId;
+	Info.m_pName = Server()->ClientName(ClientId);
+	Info.m_Country = Server()->ClientCountry(ClientId);
+	Info.m_pClan = Server()->ClientClan(ClientId);
+	Info.m_Local = 0;
+	Info.m_Silent = true;
+	Info.m_Team = pPlayer->GetTeam();
+
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
+		Info.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+		Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+	}
+
+	for(int i = 0; i < Server()->MaxClients(); i++)
+	{
+		if(i != ClientId)
+		{
+			Server()->SendPackMsg(&Drop, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+			Server()->SendPackMsg(&Info, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+		}
+	}
+}
+
 void CGameContext::SendSkinChange7(int ClientId)
 {
 	dbg_assert(in_range(ClientId, 0, MAX_CLIENTS - 1), "Invalid ClientId: %d", ClientId);
@@ -2896,35 +2934,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 	if(SixupNeedsUpdate)
 	{
-		protocol7::CNetMsg_Sv_ClientDrop Drop;
-		Drop.m_ClientId = ClientId;
-		Drop.m_pReason = "";
-		Drop.m_Silent = true;
-
-		protocol7::CNetMsg_Sv_ClientInfo Info;
-		Info.m_ClientId = ClientId;
-		Info.m_pName = Server()->ClientName(ClientId);
-		Info.m_Country = pMsg->m_Country;
-		Info.m_pClan = pMsg->m_pClan;
-		Info.m_Local = 0;
-		Info.m_Silent = true;
-		Info.m_Team = pPlayer->GetTeam();
-
-		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-		{
-			Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
-			Info.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
-			Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
-		}
-
-		for(int i = 0; i < Server()->MaxClients(); i++)
-		{
-			if(i != ClientId)
-			{
-				Server()->SendPackMsg(&Drop, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
-				Server()->SendPackMsg(&Info, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
-			}
-		}
+		SendRename7(ClientId);
 	}
 	else
 	{
