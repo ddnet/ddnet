@@ -201,3 +201,8 @@ CMapItemLayer *CLayers::GetLayer(int Index) const
 {
 	return static_cast<CMapItemLayer *>(m_pMap->GetItem(m_LayersStart + Index));
 }
+
+int CLayers::GetLayerSize(int Index) const
+{
+	return m_pMap->GetItemSize(m_LayersStart + Index);
+}
