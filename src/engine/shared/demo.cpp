@@ -278,13 +278,16 @@ void CDemoRecorder::WriteTickMarker(int Tick, bool Keyframe)
 		m_FirstTick = Tick;
 }
 
-void CDemoRecorder::Write(int Type, const void *pData, int Size)
+bool CDemoRecorder::Write(int Type, const void *pData, int Size)
 {
 	if(!m_File)
-		return;
+		return false;
 
 	if(Size > 64 * 1024)
-		return;
+	{
+		log_error("demo_recorder", "Dropped chunk of type %d, size %d is too large", Type, Size);
+		return false;
+	}
 
 	/* pad the data with 0 so we get an alignment of 4,
 	else the compression won't work and miss some bytes */
@@ -295,11 +298,11 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 		aBuffer2[Size++] = 0;
 	Size = CVariableInt::Compress(aBuffer2, Size, aBuffer, sizeof(aBuffer)); // buffer2 -> buffer
 	if(Size < 0)
-		return;
+		return false;
 
 	Size = CNetBase::Compress(aBuffer, Size, aBuffer2, sizeof(aBuffer2)); // buffer -> buffer2
 	if(Size < 0)
-		return;
+		return false;
 
 	unsigned char aChunk[3];
 	aChunk[0] = ((Type & 0x3) << 5);
@@ -326,17 +329,21 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	}
 
 	io_write(m_File, aBuffer2, Size);
+	return true;
 }
 
 void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 {
+	// only advance the delta base when the chunk ended up in the file,
+	// else playback decodes all following deltas against a snapshot it never saw
 	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > SERVER_TICK_SPEED * 5)
 	{
 		// write full tickmarker
 		WriteTickMarker(Tick, true);
 
 		// write snapshot
-		Write(CHUNKTYPE_SNAPSHOT, pData, Size);
+		if(!Write(CHUNKTYPE_SNAPSHOT, pData, Size))
+			return;
 
 		m_LastKeyFrame = Tick;
 		mem_copy(&m_LastSnapshotData, pData, Size);
@@ -347,13 +354,13 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 		WriteTickMarker(Tick, false);
 
 		// create delta
-		char aDeltaData[CSnapshot::MAX_SIZE];
-		const int DeltaSize = m_pSnapshotDelta->CreateDelta(m_LastSnapshotData.AsSnapshot(), (CSnapshot *)pData, &aDeltaData);
+		CSnapshotDeltaBuffer DeltaData;
+		const int DeltaSize = m_pSnapshotDelta->CreateDelta(m_LastSnapshotData.AsSnapshot(), (CSnapshot *)pData, &DeltaData);
 		if(DeltaSize)
 		{
 			// record delta
-			Write(CHUNKTYPE_DELTA, aDeltaData, DeltaSize);
-			mem_copy(&m_LastSnapshotData, pData, Size);
+			if(Write(CHUNKTYPE_DELTA, DeltaData.m_aData, DeltaSize))
+				mem_copy(&m_LastSnapshotData, pData, Size);
 		}
 	}
 }

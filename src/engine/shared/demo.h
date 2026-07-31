@@ -42,7 +42,7 @@ class CDemoRecorder : public IDemoRecorder
 	void *m_pUser;
 
 	void WriteTickMarker(int Tick, bool Keyframe);
-	void Write(int Type, const void *pData, int Size);
+	bool Write(int Type, const void *pData, int Size);
 
 public:
 	CDemoRecorder(CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
