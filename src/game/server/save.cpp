@@ -169,8 +169,8 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_Ninja.m_CurrentMoveTime = m_Ninja.m_CurrentMoveTime;
 	pChr->m_Core.m_Ninja.m_OldVelAmount = m_Ninja.m_OldVelAmount;
 
-	pChr->m_LastWeapon = m_LastWeapon;
-	pChr->m_QueuedWeapon = m_QueuedWeapon;
+	pChr->m_LastWeapon = m_LastWeapon >= 0 && m_LastWeapon < NUM_WEAPONS ? m_LastWeapon : WEAPON_HAMMER;
+	pChr->m_QueuedWeapon = m_QueuedWeapon >= 0 && m_QueuedWeapon < NUM_WEAPONS ? m_QueuedWeapon : -1;
 
 	pChr->m_Core.m_EndlessJump = m_EndlessJump;
 	pChr->m_Core.m_Jetpack = m_Jetpack;
@@ -188,8 +188,9 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_GrenadeHitDisabled = m_HitDisabledFlags & CSaveTee::GRENADE_HIT_DISABLED;
 	pChr->m_Core.m_LaserHitDisabled = m_HitDisabledFlags & CSaveTee::LASER_HIT_DISABLED;
 
-	pChr->m_TuneZone = m_TuneZone;
-	pChr->m_TuneZoneOld = m_TuneZoneOld;
+	pChr->m_TuneZone = m_TuneZone >= 0 && m_TuneZone < TuneZone::NUM ? m_TuneZone : 0;
+	// -1 is valid, it means that no zone leave message is shown
+	pChr->m_TuneZoneOld = m_TuneZoneOld >= -1 && m_TuneZoneOld < TuneZone::NUM ? m_TuneZoneOld : 0;
 
 	if(m_Time)
 		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
@@ -219,7 +220,7 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_Vel = m_Vel;
 	pChr->m_Core.m_HookHitDisabled = !m_HookHitEnabled;
 	pChr->m_Core.m_CollisionDisabled = !m_CollisionEnabled;
-	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
+	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon >= 0 && m_ActiveWeapon < NUM_WEAPONS ? m_ActiveWeapon : WEAPON_HAMMER;
 	pChr->m_Core.m_Jumped = m_Jumped;
 	pChr->m_Core.m_JumpedTotal = m_JumpedTotal;
 	pChr->m_Core.m_Jumps = m_Jumps;
@@ -356,7 +357,7 @@ int CSaveTee::FromString(const char *pString)
 {
 	int Num;
 	Num = sscanf(pString,
-		"%[^\t]\t%d\t%d\t%d\t%d\t%d\t"
+		"%15[^\t]\t%d\t%d\t%d\t%d\t%d\t"
 		// weapons
 		"%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t"
@@ -477,8 +478,11 @@ int CSaveTee::FromString(const char *pString)
 
 void CSaveTee::LoadHookedPlayer(const CSaveTeam *pTeam)
 {
-	if(m_HookedPlayer == -1)
+	if(m_HookedPlayer < 0 || m_HookedPlayer >= pTeam->GetMembersCount())
+	{
+		m_HookedPlayer = -1;
 		return;
+	}
 	m_HookedPlayer = pTeam->m_pSavedTees[m_HookedPlayer].GetClientId();
 }
 
@@ -756,9 +760,9 @@ int CSaveTeam::FromString(const char *pString)
 		m_pSavedTees = nullptr;
 	}
 
-	if(m_MembersCount > 64)
+	if(m_MembersCount < 0 || m_MembersCount > SERVER_MAX_CLIENTS)
 	{
-		dbg_msg("load", "savegame: team has too many players");
+		dbg_msg("load", "savegame: team has an invalid number of players: %d", m_MembersCount);
 		return 1;
 	}
 	else if(m_MembersCount)
@@ -807,6 +811,12 @@ int CSaveTeam::FromString(const char *pString)
 	{
 		delete[] m_pSwitchers;
 		m_pSwitchers = nullptr;
+	}
+
+	if(m_HighestSwitchNumber < 0 || m_HighestSwitchNumber > 255)
+	{
+		dbg_msg("load", "savegame: team has an invalid highest switch number: %d", m_HighestSwitchNumber);
+		return 1;
 	}
 
 	if(m_HighestSwitchNumber)
