@@ -1,5 +1,5 @@
 from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange
-from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick, NetTickStrict
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM", "SPEC_CAM", "INPUT_ABSOLUTE", "INPUT_MANUAL"]
@@ -615,7 +615,7 @@ Messages = [
 	NetMessageEx("Sv_CommandInfoGroupEnd", "sv-commandinfo-group-end@netmsg.ddnet.org", []),
 
 	NetMessageEx("Sv_ChangeInfoCooldown", "change-info-cooldown@netmsg.ddnet.org", [
-		NetTick("m_WaitUntil")
+		NetTickStrict("m_WaitUntil")
 	]),
 
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
@@ -636,7 +636,7 @@ Messages = [
 		NetIntAny("m_PrevWeapon"),
 
 		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
-		NetTick("m_IntendedTick"),
+		NetTickStrict("m_IntendedTick"),
 	]),
 
 	NetMessageEx("Sv_SaveCode", "save-code@netmsg.ddnet.org", [

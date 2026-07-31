@@ -531,6 +531,11 @@ class NetTick(NetIntAny):
 		return NetVariable(self.name).emit_dump(offset) + [f'dbg_msg("snapshot", "%s\\t{self.name}=%d (NetTick)", aRawData, pObj->{self.name});']
 
 
+class NetTickStrict(NetIntRange):
+	def __init__(self, name, *, default=None):
+		NetIntRange.__init__(self, name, "MIN_TICK", "MAX_TICK", default=default)
+
+
 class NetArray(NetVariable):
 	def __init__(self, var, size):
 		NetVariable.__init__(self, var.name, default=var.default)
