@@ -95,7 +95,7 @@ public:
 	void SetEmote(int Emote, int Tick);
 	int DetermineEyeEmote();
 
-	void Rescue();
+	bool Rescue();
 
 	int NeededFaketuning() const { return m_NeededFaketuning; }
 	bool IsAlive() const { return m_Alive; }
