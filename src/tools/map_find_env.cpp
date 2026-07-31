@@ -116,6 +116,14 @@ static bool FindEnv(const char aFilename[64], const int EnvId)
 		CMapItemLayerQuads *pQuadLayer = (CMapItemLayerQuads *)pItem;
 		CQuad *pQuads = (CQuad *)InputMap.GetDataSwapped(pQuadLayer->m_Data);
 
+		// The number of quads of a layer is not checked against its data anywhere
+		if(pQuads == nullptr || pQuadLayer->m_NumQuads < 0 ||
+			(size_t)InputMap.GetDataSize(pQuadLayer->m_Data) < sizeof(CQuad) * (size_t)pQuadLayer->m_NumQuads)
+		{
+			dbg_msg("map_find_env", "Skipping layer %d: quads are missing or truncated", i + 1);
+			continue;
+		}
+
 		int GroupId = 0, LayerRelativeId = 0;
 		if(!GetLayerGroupIds(InputMap, i + 1, GroupId, LayerRelativeId))
 			return false;
