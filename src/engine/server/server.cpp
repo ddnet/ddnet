@@ -1100,8 +1100,8 @@ void CServer::DoSnapshot()
 
 			// create delta
 			CSnapshotDelta *const pSnapshotDelta = IsSixup(i) ? &m_SnapshotDeltaSixup : &m_SnapshotDelta;
-			char aDeltaData[CSnapshot::MAX_SIZE];
-			int DeltaSize = pSnapshotDelta->CreateDelta(pDeltashot, Data.AsSnapshot(), aDeltaData);
+			CSnapshotDeltaBuffer DeltaData;
+			int DeltaSize = pSnapshotDelta->CreateDelta(pDeltashot, Data.AsSnapshot(), &DeltaData);
 
 			if(DeltaSize)
 			{
@@ -1109,7 +1109,16 @@ void CServer::DoSnapshot()
 				const int MaxSize = MAX_SNAPSHOT_PACKSIZE;
 
 				char aCompData[CSnapshot::MAX_SIZE];
-				SnapshotSize = CVariableInt::Compress(aDeltaData, DeltaSize, aCompData, sizeof(aCompData));
+				SnapshotSize = CVariableInt::Compress(DeltaData.m_aData, DeltaSize, aCompData, sizeof(aCompData));
+				if(SnapshotSize < 0)
+				{
+					// A delta can be larger than the snapshot it was created
+					// from and then not fit into the compression buffer. Such a
+					// snapshot cannot be sent at all, it would also not fit into
+					// CSnapshot::MAX_PARTS packets.
+					log_error("server", "snapshot delta too large to send. tick=%d cid=%d delta_size=%d", m_CurrentGameTick, i, DeltaSize);
+					continue;
+				}
 				int NumPackets = (SnapshotSize + MaxSize - 1) / MaxSize;
 
 				for(int n = 0, Left = SnapshotSize; Left > 0; n++)

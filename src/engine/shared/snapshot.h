@@ -81,6 +81,8 @@ public:
 
 // CSnapshotDelta
 
+class CSnapshotDeltaBuffer;
+
 class CSnapshotDelta
 {
 public:
@@ -113,9 +115,17 @@ public:
 	uint64_t GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, size_t Size);
 	const CData *EmptyDelta() const;
-	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData);
+	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, CSnapshotDeltaBuffer *pDstData);
 	int UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, const void *pSrcData, int DataSize);
 	int DebugDumpDelta(const void *pSrcData, int DataSize);
+};
+
+class alignas(int32_t) CSnapshotDeltaBuffer
+{
+	static constexpr int MAX_SIZE = sizeof(CSnapshotDelta::CData) + CSnapshot::MAX_SIZE + CSnapshot::MAX_ITEMS * 8;
+
+public:
+	unsigned char m_aData[MAX_SIZE];
 };
 
 // CSnapshotStorage

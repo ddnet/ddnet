@@ -251,6 +251,8 @@ enum
 	CHUNKTYPE_SNAPSHOT = 1,
 	CHUNKTYPE_MESSAGE = 2,
 	CHUNKTYPE_DELTA = 3,
+
+	MAX_CHUNK_SIZE = 64 * 1024,
 };
 
 void CDemoRecorder::WriteTickMarker(int Tick, bool Keyframe)
@@ -283,7 +285,7 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	if(!m_File)
 		return;
 
-	if(Size > 64 * 1024)
+	if(Size > MAX_CHUNK_SIZE)
 		return;
 
 	/* pad the data with 0 so we get an alignment of 4,
@@ -330,31 +332,36 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 
 void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 {
-	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > SERVER_TICK_SPEED * 5)
+	CSnapshotDeltaBuffer DeltaData;
+	int DeltaSize = 0;
+	bool Keyframe = m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > SERVER_TICK_SPEED * 5;
+	if(!Keyframe)
 	{
-		// write full tickmarker
-		WriteTickMarker(Tick, true);
+		// create delta
+		DeltaSize = m_pSnapshotDelta->CreateDelta(m_LastSnapshotData.AsSnapshot(), (CSnapshot *)pData, &DeltaData);
 
+		// A delta can be larger than the snapshot it was created from, so it
+		// does not necessarily fit into a chunk. Record a keyframe instead,
+		// else the demo would continue with deltas against a snapshot that was
+		// never written.
+		Keyframe = DeltaSize > MAX_CHUNK_SIZE;
+	}
+
+	WriteTickMarker(Tick, Keyframe);
+
+	if(Keyframe)
+	{
 		// write snapshot
 		Write(CHUNKTYPE_SNAPSHOT, pData, Size);
 
 		m_LastKeyFrame = Tick;
 		mem_copy(&m_LastSnapshotData, pData, Size);
 	}
-	else
+	else if(DeltaSize)
 	{
-		// write tickmarker
-		WriteTickMarker(Tick, false);
-
-		// create delta
-		char aDeltaData[CSnapshot::MAX_SIZE];
-		const int DeltaSize = m_pSnapshotDelta->CreateDelta(m_LastSnapshotData.AsSnapshot(), (CSnapshot *)pData, &aDeltaData);
-		if(DeltaSize)
-		{
-			// record delta
-			Write(CHUNKTYPE_DELTA, aDeltaData, DeltaSize);
-			mem_copy(&m_LastSnapshotData, pData, Size);
-		}
+		// record delta
+		Write(CHUNKTYPE_DELTA, DeltaData.m_aData, DeltaSize);
+		mem_copy(&m_LastSnapshotData, pData, Size);
 	}
 }
 
