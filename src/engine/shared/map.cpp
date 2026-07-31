@@ -108,6 +108,11 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 				if(pTilemap->m_Version >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
 				{
+					if(pTilemap->m_Width <= 0 || pTilemap->m_Height <= 0)
+					{
+						log_error("map/load", "map layer has invalid dimensions (%d * %d)", pTilemap->m_Width, pTilemap->m_Height);
+						return false;
+					}
 					const size_t TilemapCount = (size_t)pTilemap->m_Width * pTilemap->m_Height;
 					const size_t TilemapSize = TilemapCount * sizeof(CTile);
 
