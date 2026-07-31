@@ -5512,6 +5512,10 @@ void CGameContext::ReadCensorList()
 	{
 		while(const char *pLine = LineReader.Get())
 		{
+			if(pLine[0] == '\0')
+			{
+				continue;
+			}
 			m_vCensorlist.emplace_back(pLine);
 		}
 	}
