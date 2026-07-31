@@ -518,6 +518,10 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 
 			const unsigned Size = pMap->GetDataSize(pItem->m_Settings);
 			char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
+			// The settings are read as a sequence of null terminated strings, and
+			// the data can also fail to decompress while its claimed size stays
+			if(pSettings == nullptr || Size == 0 || pSettings[Size - 1] != '\0')
+				break;
 			char *pNext = pSettings;
 			while(pNext < pSettings + Size)
 			{
