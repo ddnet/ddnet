@@ -396,7 +396,16 @@ void ReplaceAreaQuads(CDataFileReader aInputMaps[2], const float aaaGameAreas[][
 
 	CQuad *apQuads[3];
 	for(int i = 0; i < 2; i++)
+	{
 		apQuads[i] = (CQuad *)aInputMaps[i].GetDataSwapped(apQuadLayer[i]->m_Data);
+		// The number of quads of a layer is not checked against its data anywhere
+		if(apQuads[i] == nullptr || apQuadLayer[i]->m_NumQuads < 0 ||
+			(size_t)aInputMaps[i].GetDataSize(apQuadLayer[i]->m_Data) < sizeof(CQuad) * (size_t)apQuadLayer[i]->m_NumQuads)
+		{
+			dbg_msg("map_replace_area", "Skipping quad layer: quads are missing or truncated");
+			return;
+		}
+	}
 
 	apQuads[2] = new CQuad[apQuadLayer[0]->m_NumQuads + apQuadLayer[1]->m_NumQuads];
 	int QuadsCounter = 0;
