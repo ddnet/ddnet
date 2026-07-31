@@ -9,6 +9,8 @@
 
 #include <game/mapitems.h>
 
+#include <cstdint>
+#include <limits>
 #include <vector>
 
 // global new layers data (set by ReplaceAreaTiles and ReplaceAreaQuads),
@@ -279,6 +281,14 @@ void ReplaceAreaTiles(CDataFileReader aInputMaps[2], const float aaaGameAreas[][
 	{
 		apTilemap[i] = (CMapItemLayerTilemap *)apItem[i];
 		apTile[i] = (CTile *)aInputMaps[i].GetData(apTilemap[i]->m_Data);
+		// The dimensions of a layer are not checked against its tile data anywhere
+		if(apTile[i] == nullptr || apTilemap[i]->m_Width <= 0 || apTilemap[i]->m_Height <= 0 ||
+			(int64_t)apTilemap[i]->m_Width * apTilemap[i]->m_Height * 32 > (int64_t)std::numeric_limits<int>::max() ||
+			(size_t)aInputMaps[i].GetDataSize(apTilemap[i]->m_Data) < sizeof(CTile) * (size_t)apTilemap[i]->m_Width * apTilemap[i]->m_Height)
+		{
+			dbg_msg("map_replace_area", "Skipping tile layer: tiles are missing or truncated");
+			return;
+		}
 		aObs[i] = CreateMapObject(apLayerGroups[i], 0, 0, apTilemap[i]->m_Width * 32, apTilemap[i]->m_Height * 32);
 	}
 
