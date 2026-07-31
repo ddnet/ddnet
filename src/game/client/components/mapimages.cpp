@@ -151,6 +151,13 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		}
 		else
 		{
+			if(pImg->m_Width <= 0 || pImg->m_Height <= 0)
+			{
+				log_error("mapimages", "Failed to load map image %d '%s': invalid image dimensions.", i, pName);
+				ShowWarning = true;
+				continue;
+			}
+
 			CImageInfo ImageInfo;
 			ImageInfo.m_Width = pImg->m_Width;
 			ImageInfo.m_Height = pImg->m_Height;
