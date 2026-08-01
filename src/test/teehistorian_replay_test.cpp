@@ -5,6 +5,7 @@
 #include <base/math.h>
 #include <base/str.h>
 
+#include <game/prng.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
@@ -43,6 +44,10 @@ namespace
 		// this report is meaningful in that case.
 		std::string m_MapMismatchReason;
 
+		// False when the recording had no usable prng_description, so random draws (teleport
+		// destinations) cannot be reproduced.
+		bool m_PrngSeeded = false;
+
 		bool m_ReaderError = false;
 		std::string m_ReaderErrorMessage;
 
@@ -57,6 +62,8 @@ namespace
 		// recording started mid-session (persistent state across a map reload); the replay force-spawns
 		// such a client at the diff's position instead of the actual (unrecorded) spawn point.
 		int m_ImplicitSpawns = 0;
+		int m_aDivergentPerClient[MAX_CLIENTS] = {0};
+		int m_aFirstDivergentTick[MAX_CLIENTS] = {0};
 	};
 
 	// Per-client bookkeeping the replay needs to mirror what the recording implies about a player,
@@ -84,6 +91,30 @@ public:
 
 	CReplayClient m_aClients[MAX_CLIENTS];
 	int m_SimTick = -1;
+	CPrng m_ReplayPrng;
+
+	/**
+	 * Seeds the world's random number generator from the recording's `prng_description`, which
+	 * `CPrng::Seed` writes as `pcg-xsh-rr:<seed0>:<seed1>` with both halves in full hex. Teleport
+	 * destinations are chosen with `CWorldCore::RandomOr0`, so without the recorded seed a tee
+	 * that hits a teleporter with several exits takes a different one than it did originally and
+	 * every later position diverges. Returns false if the description is absent or unparsable,
+	 * which older recordings may be.
+	 */
+	bool SeedPrngFrom(const std::string &Description)
+	{
+		unsigned Seed0Hi, Seed0Lo, Seed1Hi, Seed1Lo;
+		if(sscanf(Description.c_str(), "pcg-xsh-rr:%08x%08x:%08x%08x", &Seed0Hi, &Seed0Lo, &Seed1Hi, &Seed1Lo) != 4)
+		{
+			return false;
+		}
+		uint64_t aSeed[2];
+		aSeed[0] = ((uint64_t)Seed0Hi << 32) | Seed0Lo;
+		aSeed[1] = ((uint64_t)Seed1Hi << 32) | Seed1Lo;
+		m_ReplayPrng.Seed(aSeed);
+		GameServer()->m_World.m_Core.m_pPrng = &m_ReplayPrng;
+		return true;
+	}
 
 	void EnsurePlayer(int ClientId)
 	{
@@ -140,6 +171,9 @@ public:
 			if(!pChr || RecordedX != ReplayedX || RecordedY != ReplayedY)
 			{
 				pReport->m_DivergentComparisons++;
+				if(pReport->m_aDivergentPerClient[ClientId] == 0)
+					pReport->m_aFirstDivergentTick[ClientId] = Tick;
+				pReport->m_aDivergentPerClient[ClientId]++;
 				AnyDivergenceThisTick = true;
 				if(pReport->m_vFirstDivergences.size() < 10)
 				{
@@ -251,6 +285,8 @@ public:
 			return Report;
 		}
 
+		Report.m_PrngSeeded = SeedPrngFrom(Reader.Header().m_aPrngDescription);
+
 		CTeeHistorianEvent Event;
 		bool HaveEvent = Reader.NextEvent(&Event);
 		while(HaveEvent)
@@ -361,6 +397,9 @@ TEST(TeeHistorianReplay, RealRecordings)
 		printf("%s: %d ticks replayed, %d positions compared, %d divergent comparison(s) across %d tick(s)%s\n",
 			aPath, Report.m_TicksReplayed, Report.m_PositionsCompared, Report.m_DivergentComparisons,
 			Report.m_DivergentTicks, Report.m_ImplicitSpawns ? " (implicit spawn(s) seen)" : "");
+		for(int c = 0; c < MAX_CLIENTS; c++)
+			if(Report.m_aDivergentPerClient[c])
+				printf("%s:   client %d: %d divergent comparison(s), first at tick %d\n", aPath, c, Report.m_aDivergentPerClient[c], Report.m_aFirstDivergentTick[c]);
 
 		if(Report.m_PositionsCompared == 0)
 		{
