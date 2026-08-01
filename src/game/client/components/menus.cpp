@@ -1717,6 +1717,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		if(DoButton_Menu(&s_SkipTutorialButton, Localize("Skip Tutorial"), 0, &Skip) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 		{
 			Client()->RequestDDNetInfo();
+			m_JoinTutorial.m_Queued = false;
 			m_Popup = g_Config.m_BrIndicateFinished ? POPUP_POINTS : POPUP_NONE;
 		}
 
