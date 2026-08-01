@@ -3260,6 +3260,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     editor_test.cpp
     fs_test.cpp
     gameworld_test.cpp
+    gameworld_test.h
     git_revision_test.cpp
     hash_test.cpp
     huffman_test.cpp
@@ -3288,6 +3289,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     str_test.cpp
     swap_endian_test.cpp
     teehistorian_reader_test.cpp
+    teehistorian_replay_test.cpp
     teehistorian_test.cpp
     test.cpp
     test.h

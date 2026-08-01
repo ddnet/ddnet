@@ -1,3 +1,5 @@
+#include "gameworld_test.h"
+
 #include "test.h"
 
 #include <base/logger.h>
@@ -39,102 +41,6 @@ std::vector<std::string> FetchAndroidServerCommandQueue()
 	return {};
 }
 #endif
-
-class GameWorld : public ::testing::Test // NOLINT(readability-identifier-naming)
-{
-public:
-	IGameServer *m_pGameServer = nullptr;
-	CServer *m_pServer = nullptr;
-	std::unique_ptr<IKernel> m_pKernel;
-	CTestInfo m_TestInfo;
-	std::unique_ptr<IStorage> m_pStorage;
-
-	CGameContext *GameServer() // NOLINT(readability-make-member-function-const)
-	{
-		return (CGameContext *)m_pGameServer;
-	}
-
-	GameWorld()
-	{
-		CServer *pServer = CreateServer();
-		m_pServer = pServer;
-
-		m_pKernel = std::unique_ptr<IKernel>(IKernel::Create());
-		m_pKernel->RegisterInterface(m_pServer);
-
-		IEngine *pEngine = CreateTestEngine(GAME_NAME);
-		m_pKernel->RegisterInterface(pEngine);
-
-		m_TestInfo.m_DeleteTestStorageFilesOnSuccess = true;
-		m_pStorage = m_TestInfo.CreateTestStorage();
-		EXPECT_NE(m_pStorage, nullptr);
-		m_pKernel->RegisterInterface(m_pStorage.get(), false);
-
-		IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON).release();
-		m_pKernel->RegisterInterface(pConsole);
-
-		IConfigManager *pConfigManager = CreateConfigManager();
-		m_pKernel->RegisterInterface(pConfigManager);
-
-		IEngineHttp *pEngineHttp = CreateEngineHttp();
-		m_pKernel->RegisterInterface(pEngineHttp); // IEngineHttp
-		m_pKernel->RegisterInterface(static_cast<IHttp *>(pEngineHttp), false);
-
-		IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
-		m_pKernel->RegisterInterface(pEngineAntibot);
-		m_pKernel->RegisterInterface(static_cast<IAntibot *>(pEngineAntibot), false);
-
-		m_pGameServer = CreateGameServer();
-		m_pKernel->RegisterInterface(m_pGameServer);
-
-		pEngine->Init();
-		pConsole->Init();
-		pConfigManager->Init();
-
-		m_pServer->RegisterCommands();
-
-		EXPECT_NE(m_pServer->LoadMap("coverage"), 0);
-
-		m_pServer->m_RunServer = CServer::RUNNING;
-
-		m_pServer->m_AuthManager.Init();
-
-		{
-			int Size = GameServer()->PersistentClientDataSize();
-			for(auto &Client : m_pServer->m_aClients)
-			{
-				Client.m_HasPersistentData = false;
-				Client.m_pPersistentData = malloc(Size);
-			}
-		}
-		m_pServer->m_pPersistentData = malloc(GameServer()->PersistentDataSize());
-		EXPECT_NE(m_pServer->LoadMap("coverage"), 0);
-
-		EXPECT_TRUE(pEngineHttp->Init(std::chrono::seconds{2})) << "Failed to initialize the HTTP client";
-
-		pServer->m_NetServer.SetCallbacks(
-			CServer::NewClientCallback,
-			CServer::NewClientNoAuthCallback,
-			CServer::ClientRejoinCallback,
-			CServer::DelClientCallback, pServer);
-
-		pServer->m_Econ.Init(pServer->Config(), pServer->Console(), &pServer->m_ServerBan);
-
-		pServer->m_Fifo.Init(pServer->Console(), pServer->Config()->m_SvInputFifo, CFGFLAG_SERVER);
-		m_pServer->Antibot()->Init();
-		GameServer()->OnInit(nullptr);
-		pServer->ReadAnnouncementsFile();
-		pServer->InitMaplist();
-	}
-
-	~GameWorld() override
-	{
-		m_pServer->m_Econ.Shutdown();
-		m_pServer->m_Fifo.Shutdown();
-		m_pGameServer->OnShutdown(nullptr);
-		m_pServer->DbPool()->OnShutdown();
-	}
-};
 
 TEST_F(GameWorld, ClosestCharacter)
 {
