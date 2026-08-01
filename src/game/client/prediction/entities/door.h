@@ -13,6 +13,9 @@ class CDoor : public CEntity
 	int m_Length;
 	bool m_Active;
 
+	int MapSide() const;
+	int MapLength(int Side);
+
 public:
 	CDoor(CGameWorld *pGameWorld, int Id, const CLaserData *pData);
 	void ResetCollision();
