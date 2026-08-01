@@ -195,7 +195,7 @@ void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t
 			pDest[DestIndex].m_Index = pSrc[SrcIndex].m_Index;
 			pDest[DestIndex].m_Flags = pSrc[SrcIndex].m_Flags;
 			pDest[DestIndex].m_Skip = 0;
-			pDest[DestIndex].m_Reserved = 0;
+			pDest[DestIndex].m_MustBe0 = 0;
 			DestIndex++;
 		}
 		SrcIndex++;
