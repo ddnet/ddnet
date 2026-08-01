@@ -219,12 +219,17 @@ public:
 		return !(!in_range(Position.x, m_TopLeft.x, m_BottomRight.x) || !in_range(Position.y, m_TopLeft.y, m_BottomRight.y));
 	}
 
+	void Expand(float Width, float Height)
+	{
+		m_TopLeft.x -= Width;
+		m_BottomRight.x += Width;
+		m_TopLeft.y -= Height;
+		m_BottomRight.y += Height;
+	}
+
 	void Expand(float Size)
 	{
-		m_TopLeft.x -= Size;
-		m_BottomRight.x += Size;
-		m_TopLeft.y -= Size;
-		m_BottomRight.y += Size;
+		Expand(Size, Size);
 	}
 
 	vec2 m_TopLeft;

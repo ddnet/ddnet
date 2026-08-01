@@ -20,9 +20,9 @@ public:
 	bool m_ExtraInfo;
 	// The rest is only set if m_ExtraInfo is true.
 	int m_Owner;
-	bool m_Explosive;
-	int m_Bouncing;
-	bool m_Freeze;
+	bool m_Explosive = false;
+	int m_Bouncing = 0;
+	bool m_Freeze = false;
 	int m_SwitchNumber;
 	// TuneZone is introduced locally
 	int m_TuneZone;
