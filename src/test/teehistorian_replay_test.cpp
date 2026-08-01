@@ -5,6 +5,8 @@
 #include <base/math.h>
 #include <base/str.h>
 
+#include <engine/server.h>
+
 #include <game/prng.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
@@ -76,6 +78,17 @@ namespace
 		CNetObj_PlayerInput m_PendingInput = {};
 	};
 
+	// `IServer::m_CurrentGameTick` is protected with no setter, but entities gate their behaviour
+	// on the absolute server tick: `CDragger::Tick` only calls `LookForPlayersToDrag` when
+	// `Server()->Tick() % (TickSpeed() * 0.15f) == 0`. Leaving the tick pinned means draggers
+	// never acquire a target and every dragged tee stands still through the whole replay.
+	// Forming a pointer-to-member inside a derived class reaches it without touching engine
+	// headers; the class is never instantiated.
+	struct CServerTickAccess : IServer
+	{
+		static int IServer::*Member() { return &CServerTickAccess::m_CurrentGameTick; }
+	};
+
 } // namespace
 
 // Drives a real `CGameContext`/`CGameWorld` (via the same `GameWorld` fixture the golden physics
@@ -91,6 +104,7 @@ public:
 
 	CReplayClient m_aClients[MAX_CLIENTS];
 	int m_SimTick = -1;
+	int m_ServerTick = 0;
 	CPrng m_ReplayPrng;
 
 	/**
@@ -131,6 +145,9 @@ public:
 	// input arrived (reusing the last input otherwise), immediately before `OnTick`.
 	void SimulateOneTick(CReplayReport *pReport)
 	{
+		// Advance the real server tick in lockstep so tick-gated entities behave as they did.
+		((IServer *)m_pServer)->*CServerTickAccess::Member() = m_ServerTick;
+		m_ServerTick++;
 		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 		{
 			if(!m_aClients[ClientId].m_Alive)
@@ -153,6 +170,7 @@ public:
 	void CompareAllAlive(int Tick, CReplayReport *pReport)
 	{
 		bool AnyDivergenceThisTick = false;
+
 		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 		{
 			CReplayClient &Client = m_aClients[ClientId];
