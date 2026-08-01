@@ -307,3 +307,110 @@ TEST_F(GameWorld, CharacterEmote)
 	pChr->Freeze(10);
 	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
 }
+
+// Golden physics tests. Each drives a real character on `coverage` for a fixed number of ticks
+// from a fixed spawn and asserts the exact resulting position, so any unintended change to the
+// movement code shows up as a diff rather than as a bug report months later.
+//
+// The values are recorded from a real run, not derived analytically, and are bit-identical
+// across runs. A deliberate physics change is expected to update them; an accidental one is
+// what this is for. `coverage` is the map the fixture already loads, and it has a tuning zone
+// (gravity 2.00) plus NOHOOK floors, both of which these values bake in.
+class GoldenPhysics : public GameWorld // NOLINT(readability-identifier-naming)
+{
+public:
+	static constexpr vec2 SPAWN = vec2(1000.0f, 200.0f);
+	// Ticks of no input needed for the tee to fall from SPAWN and come to rest.
+	static constexpr int SETTLE_TICKS = 25;
+	static constexpr int RUN_TICKS = 40;
+
+	CPlayer *m_pPlayer = nullptr;
+
+	CCharacter *Character() { return m_pPlayer->GetCharacter(); }
+
+	void SpawnAndSettle()
+	{
+		GameServer()->CreatePlayer(0, TEAM_GAME, false, -1);
+		m_pPlayer = GameServer()->m_apPlayers[0];
+		m_pPlayer->ForceSpawn(SPAWN);
+		ASSERT_NE(Character(), nullptr);
+		CNetObj_PlayerInput NoInput = {};
+		Tick(NoInput, SETTLE_TICKS);
+	}
+
+	// Applies the same input for a number of ticks and returns the lowest y reached, which is the
+	// apex of any jump since y grows downward.
+	float Tick(const CNetObj_PlayerInput &Input, int Ticks)
+	{
+		float PeakY = Character()->Core()->m_Pos.y;
+		for(int i = 0; i < Ticks; i++)
+		{
+			CCharacter *pChr = Character();
+			if(pChr == nullptr)
+				break;
+			pChr->OnDirectInput(&Input);
+			pChr->OnPredictedInput(&Input);
+			GameServer()->OnTick();
+			pChr = Character();
+			if(pChr != nullptr && pChr->Core()->m_Pos.y < PeakY)
+				PeakY = pChr->Core()->m_Pos.y;
+		}
+		return PeakY;
+	}
+};
+
+TEST_F(GoldenPhysics, FallsAndLands)
+{
+	SpawnAndSettle();
+	// Fell from y=200 and came to rest on the floor.
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.x, 1000.0f);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.y, 305.0f);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Vel.x, 0.0f);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Vel.y, 0.0f);
+
+	// Resting on the ground is stable: more ticks of no input change nothing.
+	CNetObj_PlayerInput NoInput = {};
+	Tick(NoInput, RUN_TICKS);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.x, 1000.0f);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.y, 305.0f);
+}
+
+TEST_F(GoldenPhysics, WalksRight)
+{
+	SpawnAndSettle();
+	CNetObj_PlayerInput Input = {};
+	Input.m_Direction = 1;
+	Tick(Input, RUN_TICKS);
+	// Walks off the ledge to the right of the spawn and is still falling at the end.
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.x, 1169.0f);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.y, 469.0f);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Vel.y, 12.5f);
+}
+
+TEST_F(GoldenPhysics, Jumps)
+{
+	SpawnAndSettle();
+	const float GroundY = Character()->Core()->m_Pos.y;
+	CNetObj_PlayerInput Input = {};
+	Input.m_Jump = 1;
+	const float PeakY = Tick(Input, RUN_TICKS);
+	// Holding jump spends both jumps, so the apex is well above the ground it started on.
+	EXPECT_FLOAT_EQ(PeakY, 123.0f);
+	EXPECT_LT(PeakY, GroundY);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.x, 1000.0f);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.y, 165.0f);
+}
+
+TEST_F(GoldenPhysics, HookDoesNotAttachToNoHookTiles)
+{
+	SpawnAndSettle();
+	CNetObj_PlayerInput Input = {};
+	Input.m_Hook = 1;
+	Input.m_TargetY = 300;
+	Tick(Input, RUN_TICKS);
+	// coverage's floors are NOHOOK, so the hook flies out, fails to attach and stays retracted
+	// rather than pulling the tee anywhere.
+	EXPECT_EQ(Character()->Core()->m_HookState, HOOK_RETRACTED);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.x, 1000.0f);
+	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.y, 305.0f);
+}
