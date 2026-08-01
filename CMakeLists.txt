@@ -3019,6 +3019,8 @@ if(SERVER)
     teams.h
     teehistorian.cpp
     teehistorian.h
+    teehistorian_reader.cpp
+    teehistorian_reader.h
     teeinfo.cpp
     teeinfo.h
     # tidy-alphabetical-end
@@ -3285,6 +3287,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     snapshot_test.cpp
     str_test.cpp
     swap_endian_test.cpp
+    teehistorian_reader_test.cpp
     teehistorian_test.cpp
     test.cpp
     test.h
