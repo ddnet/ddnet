@@ -2274,6 +2274,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h
+  teehistorian_opcodes.h
   translation_context.cpp
   translation_context.h
   uuid_manager.cpp

@@ -39,9 +39,9 @@ enum ETeeHistorianReaderEvent
 	TEEHISTORIAN_READER_EVENT_MESSAGE,
 	// A player joined. `m_ClientId`.
 	TEEHISTORIAN_READER_EVENT_JOIN,
-	// A player left. `m_ClientId`, `m_aStr[0]` (reason).
+	// A player left. `m_ClientId`, `m_Str` (reason).
 	TEEHISTORIAN_READER_EVENT_DROP,
-	// A console command was executed. `m_ClientId`, `m_FlagMask`, `m_aStr[0]` (command), `m_vArgs`.
+	// A console command was executed. `m_ClientId`, `m_FlagMask`, `m_Str` (command), `m_vArgs`.
 	TEEHISTORIAN_READER_EVENT_CONSOLE_COMMAND,
 	// End of the recording. No further events follow.
 	TEEHISTORIAN_READER_EVENT_FINISH,
@@ -55,7 +55,7 @@ enum ETeeHistorianReaderEvent
 	TEEHISTORIAN_READER_EVENT_PLAYER_REJOIN,
 	// Opaque antibot data. `m_vRawData`.
 	TEEHISTORIAN_READER_EVENT_ANTIBOT,
-	// A player's name changed/was recorded. `m_ClientId`, `m_aStr[0]` (name).
+	// A player's name changed/was recorded. `m_ClientId`, `m_Str` (name).
 	TEEHISTORIAN_READER_EVENT_PLAYER_NAME,
 	// A player finished the map. `m_ClientId`, `m_TimeTicks`.
 	TEEHISTORIAN_READER_EVENT_PLAYER_FINISH,
@@ -63,21 +63,21 @@ enum ETeeHistorianReaderEvent
 	TEEHISTORIAN_READER_EVENT_TEAM_FINISH,
 	// Two players swapped. `m_ClientId`, `m_ClientId2`.
 	TEEHISTORIAN_READER_EVENT_PLAYER_SWITCH,
-	// A team save succeeded. `m_Team`, `m_SaveId`, `m_aStr[0]` (team save string).
+	// A team save succeeded. `m_Team`, `m_SaveId`, `m_Str` (team save string).
 	TEEHISTORIAN_READER_EVENT_SAVE_SUCCESS,
 	// A team save failed. `m_Team`.
 	TEEHISTORIAN_READER_EVENT_SAVE_FAILURE,
-	// A team load succeeded. `m_Team`, `m_SaveId`, `m_aStr[0]` (team save string).
+	// A team load succeeded. `m_Team`, `m_SaveId`, `m_Str` (team save string).
 	TEEHISTORIAN_READER_EVENT_LOAD_SUCCESS,
 	// A team load failed. `m_Team`.
 	TEEHISTORIAN_READER_EVENT_LOAD_FAILURE,
-	// A DDNet client connected. `m_ClientId`, `m_ConnectionId`, `m_DDNetVersion`, `m_aStr[0]` (version string).
+	// A DDNet client connected. `m_ClientId`, `m_ConnectionId`, `m_DDNetVersion`, `m_Str` (version string).
 	TEEHISTORIAN_READER_EVENT_DDNETVER,
 	// A DDNet client connected (legacy, no connection id/version string). `m_ClientId`, `m_DDNetVersion`.
 	TEEHISTORIAN_READER_EVENT_DDNETVER_OLD,
-	// A player's initial auth level was recorded. `m_ClientId`, `m_AuthLevel`, `m_aStr[0]` (auth name).
+	// A player's initial auth level was recorded. `m_ClientId`, `m_AuthLevel`, `m_Str` (auth name).
 	TEEHISTORIAN_READER_EVENT_AUTH_INIT,
-	// A player logged in. `m_ClientId`, `m_AuthLevel`, `m_aStr[0]` (auth name).
+	// A player logged in. `m_ClientId`, `m_AuthLevel`, `m_Str` (auth name).
 	TEEHISTORIAN_READER_EVENT_AUTH_LOGIN,
 	// A player logged out. `m_ClientId`.
 	TEEHISTORIAN_READER_EVENT_AUTH_LOGOUT,
@@ -119,7 +119,7 @@ struct CTeeHistorianEvent
 	CUuid m_SaveId = UUID_ZEROED;
 	CUuid m_UnknownUuid = UUID_ZEROED;
 	// Generic string slots, meaning depends on `m_Type` (see enum documentation).
-	std::string m_aStr[1];
+	std::string m_Str;
 	std::vector<std::string> m_vArgs;
 	std::vector<unsigned char> m_vRawData;
 };
@@ -132,16 +132,16 @@ struct CTeeHistorianHeader
 	CUuid m_GameUuid = UUID_ZEROED;
 	bool m_HavePrevGameUuid = false;
 	CUuid m_PrevGameUuid = UUID_ZEROED;
-	std::string m_aServerVersion;
-	std::string m_aStartTime;
-	std::string m_aServerName;
+	std::string m_ServerVersion;
+	std::string m_StartTime;
+	std::string m_ServerName;
 	int m_ServerPort = 0;
-	std::string m_aGameType;
-	std::string m_aMapName;
+	std::string m_GameType;
+	std::string m_MapName;
 	int m_MapSize = 0;
 	SHA256_DIGEST m_MapSha256 = {};
 	int m_MapCrc = 0;
-	std::string m_aPrngDescription;
+	std::string m_PrngDescription;
 	// Tuning as written in the "tuning" JSON object, overlaid on top of
 	// `CTuningParams::DEFAULT`. Present even when the header has no tuning
 	// overrides at all (then it just equals the defaults).
@@ -163,8 +163,12 @@ public:
 	CTeeHistorianReader();
 
 	// Parses the UUID magic and JSON header from `pData`/`Size`. Returns
-	// false and fills `paError` (must hold at least `ErrorSize` bytes) on
-	// failure. Never crashes or asserts on malformed input.
+	// false and fills `pError` (must hold at least `ErrorSize` bytes) on
+	// failure. Never crashes or asserts on malformed input. Rejects a header
+	// whose `version` isn't the one this reader understands (`TEEHISTORIAN_VERSION`
+	// in teehistorian.cpp); a higher `version_minor` than this reader knows about is
+	// accepted (new EX chunks are skippable) but left for the caller to notice via
+	// `Header().m_VersionMinor`.
 	bool Open(const void *pData, size_t Size, char *pError, size_t ErrorSize);
 
 	const CTeeHistorianHeader &Header() const { return m_Header; }
@@ -212,9 +216,27 @@ private:
 	const unsigned char *ReadRaw(size_t Size);
 	bool ReadString(std::string *pOut);
 	bool ReadUuid(CUuid *pOut);
+	// Reads an int and validates it's a client id in `[0, MAX_CLIENTS)`. Every event field
+	// that ends up indexing a per-client array downstream (in this reader or a consumer of
+	// its events) must be read through this, not through the bare `ReadInt`.
+	bool ReadClientId(int *pOut);
+	// Same as `ReadClientId`, but also accepts `IConsole::CLIENT_ID_UNSPECIFIED` (-1): the only
+	// place that sentinel can legitimately appear is a `CONSOLE_COMMAND` event's client id,
+	// meaning the command ran from the server console/config file/econ/fifo/a passed vote, not
+	// from a connected player (see `IConsole::CLIENT_ID_UNSPECIFIED`'s own doc comment).
+	bool ReadClientIdOrUnspecified(int *pOut);
+	// Same as `ReadClientId`, for DDNet team ids: legitimately `[0, MAX_CLIENTS)`, the same
+	// bound `CTeeHistorian::m_aPrevTeams` is sized to on the write side.
+	bool ReadTeamId(int *pOut);
 
 	void SetError(const char *pMsg);
 	bool AtEnd() const { return m_Pos >= m_Size; }
+
+	// Sets `m_CurrentTick`, rejecting anything outside a plausible absolute tick range so
+	// that neither this assignment nor a later small increment of it (`AdvancePlayerDataTick`,
+	// a following TICK_SKIP) can silently wrap a signed int. Takes an `int64_t` so the caller
+	// can add attacker-controlled deltas without overflowing before the check even runs.
+	bool SetCurrentTick(int64_t NewTick);
 
 	// Attaches the current tick to `pEvent` and, if a new tick starts
 	// implicitly at ClientId `ClientId`, queues a TICK_SKIP event ahead of it.

@@ -304,6 +304,12 @@ public:
 
 	int64_t TickStartTime(int Tick);
 
+	// Test-only: pins `m_CurrentGameTick` (otherwise only advanced by the real tick loop in
+	// `Run`) without going through it, so a test harness can drive tick-gated entities
+	// (e.g. `CDragger::Tick` gates on `Server()->Tick() % ...`) in lockstep with ticks it is
+	// replaying from elsewhere. Never used outside tests.
+	void SetCurrentGameTickForTesting(int Tick) { m_CurrentGameTick = Tick; }
+
 	int Init();
 
 	static bool StrHideIps(const char *pInput, char *pOutputWithIps, size_t OutputWithIpsSize, char *pOutputWithoutIps, size_t OutputWithoutIpsSize);

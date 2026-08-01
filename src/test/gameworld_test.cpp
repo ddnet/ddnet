@@ -267,7 +267,7 @@ public:
 
 TEST_F(GoldenPhysics, FallsAndLands)
 {
-	SpawnAndSettle();
+	ASSERT_NO_FATAL_FAILURE(SpawnAndSettle());
 	// Fell from y=200 and came to rest on the floor.
 	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.x, 1000.0f);
 	EXPECT_FLOAT_EQ(Character()->Core()->m_Pos.y, 305.0f);
@@ -283,7 +283,7 @@ TEST_F(GoldenPhysics, FallsAndLands)
 
 TEST_F(GoldenPhysics, WalksRight)
 {
-	SpawnAndSettle();
+	ASSERT_NO_FATAL_FAILURE(SpawnAndSettle());
 	CNetObj_PlayerInput Input = {};
 	Input.m_Direction = 1;
 	Tick(Input, RUN_TICKS);
@@ -295,7 +295,7 @@ TEST_F(GoldenPhysics, WalksRight)
 
 TEST_F(GoldenPhysics, Jumps)
 {
-	SpawnAndSettle();
+	ASSERT_NO_FATAL_FAILURE(SpawnAndSettle());
 	const float GroundY = Character()->Core()->m_Pos.y;
 	CNetObj_PlayerInput Input = {};
 	Input.m_Jump = 1;
@@ -309,7 +309,7 @@ TEST_F(GoldenPhysics, Jumps)
 
 TEST_F(GoldenPhysics, HookDoesNotAttachToNoHookTiles)
 {
-	SpawnAndSettle();
+	ASSERT_NO_FATAL_FAILURE(SpawnAndSettle());
 	CNetObj_PlayerInput Input = {};
 	Input.m_Hook = 1;
 	Input.m_TargetY = 300;

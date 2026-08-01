@@ -9,6 +9,7 @@
 #include <engine/shared/json.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/teehistorian_opcodes.h>
 
 #include <game/gamecore.h>
 
@@ -32,22 +33,6 @@ static const char TEEHISTORIAN_VERSION_MINOR[] = "22";
 #define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
 #undef UUID
-
-enum
-{
-	TEEHISTORIAN_NONE,
-	TEEHISTORIAN_FINISH,
-	TEEHISTORIAN_TICK_SKIP,
-	TEEHISTORIAN_PLAYER_NEW,
-	TEEHISTORIAN_PLAYER_OLD,
-	TEEHISTORIAN_INPUT_DIFF,
-	TEEHISTORIAN_INPUT_NEW,
-	TEEHISTORIAN_MESSAGE,
-	TEEHISTORIAN_JOIN,
-	TEEHISTORIAN_DROP,
-	TEEHISTORIAN_CONSOLE_COMMAND,
-	TEEHISTORIAN_EX,
-};
 
 CTeeHistorian::CTeeHistorian()
 {

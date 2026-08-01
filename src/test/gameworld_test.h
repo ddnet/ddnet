@@ -16,6 +16,7 @@
 #include <engine/server/server_logger.h>
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 
 #include <generated/protocol.h>
 
@@ -24,6 +25,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdlib>
 #include <memory>
 
 // Stands up a real `CServer` + `CGameContext` on the `coverage` map, the way a production
@@ -43,7 +45,27 @@ public:
 		return (CGameContext *)m_pGameServer;
 	}
 
-	GameWorld()
+	// True once `ShutdownGameServer` has run, so the destructor doesn't run it a second time.
+	bool m_GameServerShutdown = false;
+
+	// Finishes any active teehistorian recording and cleanly shuts the game server down.
+	// Idempotent (the destructor calls it too, guarded by `m_GameServerShutdown`), so a test can
+	// call it explicitly to read back a file the server just wrote (e.g. via `Storage()`) while
+	// the fixture is still alive, rather than only being able to do so after the fixture is gone.
+	void ShutdownGameServer()
+	{
+		if(m_GameServerShutdown)
+		{
+			return;
+		}
+		m_GameServerShutdown = true;
+		m_pGameServer->OnShutdown(nullptr);
+	}
+
+	// `EnableTeeHistorian` mirrors `sv_tee_historian`: the real server reads it from the global
+	// config at `OnInit` time, so it must be set between `pConfigManager->Init()` (which resets
+	// `g_Config` to defaults) and `OnInit` below, not passed to `OnInit` directly.
+	explicit GameWorld(bool EnableTeeHistorian = false)
 	{
 		CServer *pServer = CreateServer();
 		m_pServer = pServer;
@@ -79,6 +101,18 @@ public:
 		pEngine->Init();
 		pConsole->Init();
 		pConfigManager->Init();
+
+		if(EnableTeeHistorian)
+		{
+			g_Config.m_SvTeeHistorian = 1;
+			// A production `IStorage` gets its `teehistorian/` folder from `CStorage::Init`'s
+			// `COMMON_DIRS`; `CreateTempStorage` above (via `CTestInfo::CreateTestStorage`) never
+			// calls that, so `CGameContext::OnInit` below would otherwise fail to open the
+			// recording file, hit its "teehistorian open error" `SetErrorShutdown` and skip the
+			// rest of `OnInit` -- including score handling setup, so the very first
+			// `CreatePlayer` afterwards segfaults on a null `Score()`.
+			m_pStorage->CreateFolder("teehistorian", IStorage::TYPE_SAVE);
+		}
 
 		m_pServer->RegisterCommands();
 
@@ -120,7 +154,7 @@ public:
 	{
 		m_pServer->m_Econ.Shutdown();
 		m_pServer->m_Fifo.Shutdown();
-		m_pGameServer->OnShutdown(nullptr);
+		ShutdownGameServer();
 		m_pServer->DbPool()->OnShutdown();
 	}
 };

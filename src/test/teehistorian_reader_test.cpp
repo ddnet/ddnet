@@ -4,7 +4,9 @@
 #include <base/mem.h>
 #include <base/str.h>
 
+#include <engine/shared/compression.h>
 #include <engine/shared/config.h>
+#include <engine/shared/teehistorian_opcodes.h>
 #include <engine/shared/uuid_manager.h>
 
 #include <game/gamecore.h>
@@ -15,6 +17,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -23,27 +26,35 @@ namespace
 
 	// Wraps a body byte sequence (as found in `src/test/teehistorian_test.cpp`,
 	// which only ever exercises the writer) with a minimal, but complete, header
-	// so it can be fed to `CTeeHistorianReader::Open`.
-	std::vector<unsigned char> BuildFile(const std::vector<unsigned char> &vBody)
+	// so it can be fed to `CTeeHistorianReader::Open`, embedding a given `version`/
+	// `version_minor` instead of the current format's.
+	std::vector<unsigned char> BuildFileWithVersion(int Version, int VersionMinor, const std::vector<unsigned char> &vBody)
 	{
 		static const CUuid s_Uuid = CalculateUuid("teehistorian@ddnet.tw");
-		static const char s_aJson[] =
-			"{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"22\","
+		char aJson[512];
+		str_format(aJson, sizeof(aJson),
+			"{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"%d\",\"version_minor\":\"%d\","
 			"\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\","
 			"\"start_time\":\"2024-01-01T00:00:00+0000\",\"server_name\":\"server name\","
 			"\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\","
 			"\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\","
 			"\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},"
-			"\"tuning\":{\"gravity\":\"75\"},\"uuids\":[]}";
+			"\"tuning\":{\"gravity\":\"75\"},\"uuids\":[]}",
+			Version, VersionMinor);
 
 		std::vector<unsigned char> vResult;
 		vResult.resize(sizeof(s_Uuid));
 		mem_copy(vResult.data(), &s_Uuid, sizeof(s_Uuid));
-		// sizeof(s_aJson) includes the trailing NUL of the string literal, which
-		// is exactly the separator `CTeeHistorianReader::Open` expects.
-		vResult.insert(vResult.end(), s_aJson, s_aJson + sizeof(s_aJson));
+		// Includes the JSON's trailing NUL, which is exactly the separator
+		// `CTeeHistorianReader::Open` expects.
+		vResult.insert(vResult.end(), aJson, aJson + str_length(aJson) + 1);
 		vResult.insert(vResult.end(), vBody.begin(), vBody.end());
 		return vResult;
+	}
+
+	std::vector<unsigned char> BuildFile(const std::vector<unsigned char> &vBody)
+	{
+		return BuildFileWithVersion(2, 22, vBody);
 	}
 
 	// Decodes every event in `vBody` (wrapped via `BuildFile`). Fails the current
@@ -106,8 +117,8 @@ namespace
 			return ::testing::AssertionFailure() << "scalar field mismatch";
 		if(A.m_ConnectionId != B.m_ConnectionId || A.m_SaveId != B.m_SaveId || A.m_UnknownUuid != B.m_UnknownUuid)
 			return ::testing::AssertionFailure() << "uuid mismatch";
-		if(A.m_aStr[0] != B.m_aStr[0])
-			return ::testing::AssertionFailure() << "string mismatch: '" << A.m_aStr[0] << "' != '" << B.m_aStr[0] << "'";
+		if(A.m_Str != B.m_Str)
+			return ::testing::AssertionFailure() << "string mismatch: '" << A.m_Str << "' != '" << B.m_Str << "'";
 		if(A.m_vArgs != B.m_vArgs)
 			return ::testing::AssertionFailure() << "args mismatch";
 		if(A.m_vRawData != B.m_vRawData)
@@ -301,7 +312,7 @@ namespace
 				pReplay->m_TH.RecordPlayerJoin(Event.m_ClientId, pReplay->m_aPendingProtocol[Event.m_ClientId]);
 				break;
 			case TEEHISTORIAN_READER_EVENT_DROP:
-				pReplay->m_TH.RecordPlayerDrop(Event.m_ClientId, Event.m_aStr[0].c_str());
+				pReplay->m_TH.RecordPlayerDrop(Event.m_ClientId, Event.m_Str.c_str());
 				break;
 			case TEEHISTORIAN_READER_EVENT_CONSOLE_COMMAND:
 				break;
@@ -324,7 +335,7 @@ namespace
 				pReplay->m_TH.RecordAntibot(Event.m_vRawData.data(), Event.m_vRawData.size());
 				break;
 			case TEEHISTORIAN_READER_EVENT_PLAYER_NAME:
-				pReplay->m_TH.RecordPlayerName(Event.m_ClientId, Event.m_aStr[0].c_str());
+				pReplay->m_TH.RecordPlayerName(Event.m_ClientId, Event.m_Str.c_str());
 				break;
 			case TEEHISTORIAN_READER_EVENT_PLAYER_FINISH:
 				pReplay->m_TH.RecordPlayerFinish(Event.m_ClientId, Event.m_TimeTicks);
@@ -336,28 +347,28 @@ namespace
 				pReplay->m_TH.RecordPlayerSwap(Event.m_ClientId, Event.m_ClientId2);
 				break;
 			case TEEHISTORIAN_READER_EVENT_SAVE_SUCCESS:
-				pReplay->m_TH.RecordTeamSaveSuccess(Event.m_Team, Event.m_SaveId, Event.m_aStr[0].c_str());
+				pReplay->m_TH.RecordTeamSaveSuccess(Event.m_Team, Event.m_SaveId, Event.m_Str.c_str());
 				break;
 			case TEEHISTORIAN_READER_EVENT_SAVE_FAILURE:
 				pReplay->m_TH.RecordTeamSaveFailure(Event.m_Team);
 				break;
 			case TEEHISTORIAN_READER_EVENT_LOAD_SUCCESS:
-				pReplay->m_TH.RecordTeamLoadSuccess(Event.m_Team, Event.m_SaveId, Event.m_aStr[0].c_str());
+				pReplay->m_TH.RecordTeamLoadSuccess(Event.m_Team, Event.m_SaveId, Event.m_Str.c_str());
 				break;
 			case TEEHISTORIAN_READER_EVENT_LOAD_FAILURE:
 				pReplay->m_TH.RecordTeamLoadFailure(Event.m_Team);
 				break;
 			case TEEHISTORIAN_READER_EVENT_DDNETVER:
-				pReplay->m_TH.RecordDDNetVersion(Event.m_ClientId, Event.m_ConnectionId, Event.m_DDNetVersion, Event.m_aStr[0].c_str());
+				pReplay->m_TH.RecordDDNetVersion(Event.m_ClientId, Event.m_ConnectionId, Event.m_DDNetVersion, Event.m_Str.c_str());
 				break;
 			case TEEHISTORIAN_READER_EVENT_DDNETVER_OLD:
 				pReplay->m_TH.RecordDDNetVersionOld(Event.m_ClientId, Event.m_DDNetVersion);
 				break;
 			case TEEHISTORIAN_READER_EVENT_AUTH_INIT:
-				pReplay->m_TH.RecordAuthInitial(Event.m_ClientId, Event.m_AuthLevel, Event.m_aStr[0].c_str());
+				pReplay->m_TH.RecordAuthInitial(Event.m_ClientId, Event.m_AuthLevel, Event.m_Str.c_str());
 				break;
 			case TEEHISTORIAN_READER_EVENT_AUTH_LOGIN:
-				pReplay->m_TH.RecordAuthLogin(Event.m_ClientId, Event.m_AuthLevel, Event.m_aStr[0].c_str());
+				pReplay->m_TH.RecordAuthLogin(Event.m_ClientId, Event.m_AuthLevel, Event.m_Str.c_str());
 				break;
 			case TEEHISTORIAN_READER_EVENT_AUTH_LOGOUT:
 				pReplay->m_TH.RecordAuthLogout(Event.m_ClientId);
@@ -395,6 +406,52 @@ namespace
 
 		std::vector<unsigned char> vGot = Replay.Body();
 		ASSERT_EQ(vGot, vBody);
+	}
+
+	// Appends `Value`, variable-length-int packed the way every field in the format is
+	// (`CTeehistorianPacker::AddInt` in teehistorian.cpp), letting corrupt-input tests build a
+	// chunk with an arbitrary out-of-range field instead of hand-deriving its packed bytes.
+	void AppendVarInt(std::vector<unsigned char> *pBuf, int Value)
+	{
+		unsigned char aTmp[16];
+		unsigned char *pEnd = CVariableInt::Pack(aTmp, Value, sizeof(aTmp));
+		pBuf->insert(pBuf->end(), aTmp, pEnd);
+	}
+
+	// Builds the body for a single TEEHISTORIAN_EX chunk named `pUuidName`, whose payload is
+	// `vFields` varint-packed back to back (every EX chunk's payload is a sequence of `AddInt`s).
+	std::vector<unsigned char> BuildExChunkBody(const char *pUuidName, const std::vector<int> &vFields)
+	{
+		std::vector<unsigned char> vPayload;
+		for(int Field : vFields)
+		{
+			AppendVarInt(&vPayload, Field);
+		}
+
+		std::vector<unsigned char> vBody;
+		AppendVarInt(&vBody, -TEEHISTORIAN_EX);
+		const CUuid Uuid = CalculateUuid(pUuidName);
+		const unsigned char *pUuidBytes = (const unsigned char *)&Uuid;
+		vBody.insert(vBody.end(), pUuidBytes, pUuidBytes + sizeof(Uuid));
+		AppendVarInt(&vBody, (int)vPayload.size());
+		vBody.insert(vBody.end(), vPayload.begin(), vPayload.end());
+		return vBody;
+	}
+
+	// Runs `vBody` to completion and asserts it produced a parse error rather than crashing (a
+	// crash would take the whole test process down before any assertion runs) or silently
+	// accepting the out-of-range id.
+	void ExpectCleanParseError(const std::vector<unsigned char> &vBody)
+	{
+		std::vector<unsigned char> vFile = BuildFile(vBody);
+		CTeeHistorianReader Reader;
+		char aError[256];
+		ASSERT_TRUE(Reader.Open(vFile.data(), vFile.size(), aError, sizeof(aError))) << aError;
+		CTeeHistorianEvent Event;
+		while(Reader.NextEvent(&Event))
+		{
+		}
+		EXPECT_TRUE(Reader.Error());
 	}
 
 } // anonymous namespace
@@ -576,7 +633,7 @@ TEST(TeeHistorianReader, DDNetVersion)
 	EXPECT_EQ(vEvents[0].m_Type, TEEHISTORIAN_READER_EVENT_DDNETVER);
 	EXPECT_EQ(vEvents[0].m_ClientId, 0);
 	EXPECT_EQ(vEvents[0].m_DDNetVersion, 13010);
-	EXPECT_EQ(vEvents[0].m_aStr[0], "DDNet 13.1 (3623f5e4cd184556)");
+	EXPECT_EQ(vEvents[0].m_Str, "DDNet 13.1 (3623f5e4cd184556)");
 	const CUuid ConnectionId = {
 		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
 		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b};
@@ -619,13 +676,13 @@ TEST(TeeHistorianReader, Auth)
 	EXPECT_EQ(vEvents[0].m_Type, TEEHISTORIAN_READER_EVENT_AUTH_INIT);
 	EXPECT_EQ(vEvents[0].m_ClientId, 0);
 	EXPECT_EQ(vEvents[0].m_AuthLevel, 3);
-	EXPECT_EQ(vEvents[0].m_aStr[0], "default_admin");
+	EXPECT_EQ(vEvents[0].m_Str, "default_admin");
 	EXPECT_EQ(vEvents[1].m_Type, TEEHISTORIAN_READER_EVENT_AUTH_LOGIN);
 	EXPECT_EQ(vEvents[1].m_ClientId, 1);
 	EXPECT_EQ(vEvents[1].m_AuthLevel, 2);
-	EXPECT_EQ(vEvents[1].m_aStr[0], "foobar");
+	EXPECT_EQ(vEvents[1].m_Str, "foobar");
 	EXPECT_EQ(vEvents[2].m_ClientId, 2);
-	EXPECT_EQ(vEvents[2].m_aStr[0], "help");
+	EXPECT_EQ(vEvents[2].m_Str, "help");
 	EXPECT_EQ(vEvents[3].m_Type, TEEHISTORIAN_READER_EVENT_AUTH_LOGOUT);
 	EXPECT_EQ(vEvents[3].m_ClientId, 1);
 	AssertBodyRoundTrips(vBody);
@@ -663,7 +720,7 @@ TEST(TeeHistorianReader, JoinLeave)
 	EXPECT_EQ(vEvents[3].m_ClientId, 7);
 	EXPECT_EQ(vEvents[4].m_Type, TEEHISTORIAN_READER_EVENT_DROP);
 	EXPECT_EQ(vEvents[4].m_ClientId, 6);
-	EXPECT_EQ(vEvents[4].m_aStr[0], "too many pancakes");
+	EXPECT_EQ(vEvents[4].m_Str, "too many pancakes");
 	AssertBodyRoundTrips(vBody);
 }
 
@@ -706,7 +763,7 @@ TEST(TeeHistorianReader, SaveSuccess)
 	ASSERT_EQ(vEvents.size(), 2u);
 	EXPECT_EQ(vEvents[0].m_Type, TEEHISTORIAN_READER_EVENT_SAVE_SUCCESS);
 	EXPECT_EQ(vEvents[0].m_Team, 21);
-	EXPECT_EQ(vEvents[0].m_aStr[0], "2\tH.\nll0");
+	EXPECT_EQ(vEvents[0].m_Str, "2\tH.\nll0");
 	AssertBodyRoundTrips(vBody);
 }
 
@@ -940,7 +997,7 @@ TEST(TeeHistorianReader, PlayerName)
 	ASSERT_EQ(vEvents.size(), 1u);
 	EXPECT_EQ(vEvents[0].m_Type, TEEHISTORIAN_READER_EVENT_PLAYER_NAME);
 	EXPECT_EQ(vEvents[0].m_ClientId, 21);
-	EXPECT_EQ(vEvents[0].m_aStr[0], "nameless tee");
+	EXPECT_EQ(vEvents[0].m_Str, "nameless tee");
 	AssertBodyRoundTrips(vBody);
 }
 
@@ -998,7 +1055,7 @@ TEST(TeeHistorianReader, DecodeConsoleCommand)
 	EXPECT_EQ(vEvents[0].m_Type, TEEHISTORIAN_READER_EVENT_CONSOLE_COMMAND);
 	EXPECT_EQ(vEvents[0].m_ClientId, 5);
 	EXPECT_EQ(vEvents[0].m_FlagMask, 3);
-	EXPECT_EQ(vEvents[0].m_aStr[0], "echo");
+	EXPECT_EQ(vEvents[0].m_Str, "echo");
 	ASSERT_EQ(vEvents[0].m_vArgs.size(), 2u);
 	EXPECT_EQ(vEvents[0].m_vArgs[0], "hi");
 	EXPECT_EQ(vEvents[0].m_vArgs[1], "there");
@@ -1017,11 +1074,11 @@ TEST(TeeHistorianReader, Header)
 	const CTeeHistorianHeader &Header = Reader.Header();
 	EXPECT_EQ(Header.m_Version, 2);
 	EXPECT_EQ(Header.m_VersionMinor, 22);
-	EXPECT_EQ(Header.m_aServerVersion, "DDNet test");
-	EXPECT_EQ(Header.m_aServerName, "server name");
+	EXPECT_EQ(Header.m_ServerVersion, "DDNet test");
+	EXPECT_EQ(Header.m_ServerName, "server name");
 	EXPECT_EQ(Header.m_ServerPort, 8303);
-	EXPECT_EQ(Header.m_aGameType, "game type");
-	EXPECT_EQ(Header.m_aMapName, "Kobra 3 Solo");
+	EXPECT_EQ(Header.m_GameType, "game type");
+	EXPECT_EQ(Header.m_MapName, "Kobra 3 Solo");
 	EXPECT_EQ(Header.m_MapSize, 903514);
 	EXPECT_EQ(Header.m_MapCrc, 0xeceaf25c);
 	EXPECT_FALSE(Header.m_HavePrevGameUuid);
@@ -1030,6 +1087,27 @@ TEST(TeeHistorianReader, Header)
 	EXPECT_EQ(Header.m_Tuning.m_Gravity.Get(), 75);
 	EXPECT_NE(Header.m_Tuning.m_Gravity.Get(), CTuningParams::DEFAULT.m_Gravity.Get());
 	EXPECT_EQ(Header.m_Tuning.m_HookLength.Get(), CTuningParams::DEFAULT.m_HookLength.Get());
+}
+
+TEST(TeeHistorianReader, RejectsUnsupportedVersion)
+{
+	std::vector<unsigned char> vFile = BuildFileWithVersion(3, 22, {0x40});
+	CTeeHistorianReader Reader;
+	char aError[256];
+	EXPECT_FALSE(Reader.Open(vFile.data(), vFile.size(), aError, sizeof(aError)));
+}
+
+TEST(TeeHistorianReader, AcceptsHigherVersionMinor)
+{
+	// `version_minor` only ever adds new, skippable TEEHISTORIAN_EX chunk types, so a reader
+	// older than the file it's reading still understands the whole body; it just can't name
+	// whichever new EX chunk motivated the bump. Surfaced via `Header().m_VersionMinor`
+	// rather than rejected.
+	std::vector<unsigned char> vFile = BuildFileWithVersion(2, 9999, {0x40});
+	CTeeHistorianReader Reader;
+	char aError[256];
+	ASSERT_TRUE(Reader.Open(vFile.data(), vFile.size(), aError, sizeof(aError))) << aError;
+	EXPECT_EQ(Reader.Header().m_VersionMinor, 9999);
 }
 
 // ---------------------------------------------------------------------
@@ -1143,6 +1221,112 @@ TEST(TeeHistorianReader, SkipsUnknownExUuid)
 }
 
 // ---------------------------------------------------------------------
+// Section 3b: an out-of-range client/team id in an otherwise well-formed chunk must produce a
+// clean parse error, never index `m_aPlayers`/`m_aInputs` (or a consumer's own per-client/per-team
+// array) out of bounds. Runs every case to completion under a real allocator/sanitizer rather than
+// just checking `Reader.Error()`, since a crash would kill the test process, not fail an assertion.
+// ---------------------------------------------------------------------
+
+TEST(TeeHistorianReader, CorruptClientIdInPlayerTeamIsACleanError)
+{
+	// The exact shape of the crash this reproduces: `PLAYER_TEAM` with a client id far outside
+	// `[0, MAX_CLIENTS)`, which used to reach `CTeeHistorian::RecordPlayerTeam` unchecked via a
+	// harness replaying decoded events (see `ReadClientId`).
+	ExpectCleanParseError(BuildExChunkBody("teehistorian-player-team@ddnet.tw", {50000000, 5}));
+}
+
+TEST(TeeHistorianReader, CorruptTeamIdInPlayerTeamIsACleanError)
+{
+	ExpectCleanParseError(BuildExChunkBody("teehistorian-player-team@ddnet.tw", {5, 50000000}));
+}
+
+TEST(TeeHistorianReader, CorruptTeamIdInTeamPracticeIsACleanError)
+{
+	// `CTeeHistorian::RecordTeamPractice` indexes `m_aPrevTeams[MAX_CLIENTS]` (see `ReadTeamId`).
+	ExpectCleanParseError(BuildExChunkBody("teehistorian-team-practice@ddnet.tw", {50000000, 1}));
+}
+
+TEST(TeeHistorianReader, CorruptClientId2InPlayerSwitchIsACleanError)
+{
+	ExpectCleanParseError(BuildExChunkBody("teehistorian-player-swap@ddnet.tw", {5, 50000000}));
+}
+
+TEST(TeeHistorianReader, CorruptClientIdInJoinIsACleanError)
+{
+	std::vector<unsigned char> vBody;
+	AppendVarInt(&vBody, -TEEHISTORIAN_JOIN);
+	AppendVarInt(&vBody, 50000000);
+	ExpectCleanParseError(vBody);
+}
+
+TEST(TeeHistorianReader, CorruptClientIdInDropIsACleanError)
+{
+	std::vector<unsigned char> vBody;
+	AppendVarInt(&vBody, -TEEHISTORIAN_DROP);
+	AppendVarInt(&vBody, 50000000);
+	ExpectCleanParseError(vBody);
+}
+
+TEST(TeeHistorianReader, CorruptClientIdInMessageIsACleanError)
+{
+	std::vector<unsigned char> vBody;
+	AppendVarInt(&vBody, -TEEHISTORIAN_MESSAGE);
+	AppendVarInt(&vBody, 50000000);
+	ExpectCleanParseError(vBody);
+}
+
+TEST(TeeHistorianReader, CorruptClientIdInConsoleCommandIsACleanError)
+{
+	std::vector<unsigned char> vBody;
+	AppendVarInt(&vBody, -TEEHISTORIAN_CONSOLE_COMMAND);
+	AppendVarInt(&vBody, 50000000);
+	ExpectCleanParseError(vBody);
+}
+
+TEST(TeeHistorianReader, RejectsImplausibleTickSkipDelta)
+{
+	// The exact shape of the finding: a `TICK_SKIP` delta of 2,147,483,646 (`INT_MAX - 1`) used
+	// to run `~2^31` `OnTick()` calls in a consumer replaying the decoded ticks; the reader itself
+	// must reject it outright instead of handing a consumer an unusable absolute tick.
+	std::vector<unsigned char> vBody;
+	AppendVarInt(&vBody, -TEEHISTORIAN_TICK_SKIP);
+	AppendVarInt(&vBody, 2147483646);
+	ExpectCleanParseError(vBody);
+}
+
+TEST(TeeHistorianReader, RejectsTickSkipDeltaOverflow)
+{
+	// `m_LastWrittenTick + Delta + 1` must not silently wrap even when `Delta` is chosen so the
+	// sum would overflow a 32-bit int outright.
+	std::vector<unsigned char> vBody;
+	AppendVarInt(&vBody, -TEEHISTORIAN_TICK_SKIP);
+	AppendVarInt(&vBody, 2147483647);
+	ExpectCleanParseError(vBody);
+}
+
+TEST(TeeHistorianReader, PositionDeltaOverflowWrapsInsteadOfUb)
+{
+	// A position this far out is nonsense as an actual coordinate, but decoding it must still be
+	// well-defined (two's-complement wraparound, like the input-diff reconstruction already does)
+	// rather than signed-overflow undefined behavior.
+	std::vector<unsigned char> vBody;
+	AppendVarInt(&vBody, -TEEHISTORIAN_PLAYER_NEW);
+	AppendVarInt(&vBody, 0); // ClientId
+	AppendVarInt(&vBody, 2147483647); // X = INT_MAX
+	AppendVarInt(&vBody, 0); // Y
+	AppendVarInt(&vBody, 0); // ClientId (bare, non-negative: a position delta)
+	AppendVarInt(&vBody, 100); // Dx, pushes X past INT_MAX
+	AppendVarInt(&vBody, 0); // Dy
+
+	std::vector<CTeeHistorianEvent> vEvents = DecodeBody(vBody);
+	// Each player-data chunk here gets its own implicit TICK_SKIP ahead of it (client id 0 never
+	// ascends, see `AdvancePlayerDataTick`): TICK_SKIP, PLAYER_NEW, TICK_SKIP, PLAYER_DIFF.
+	ASSERT_EQ(vEvents.size(), 4u);
+	EXPECT_EQ(vEvents[3].m_Type, TEEHISTORIAN_READER_EVENT_PLAYER_DIFF);
+	EXPECT_EQ(vEvents[3].m_X, -2147483549);
+}
+
+// ---------------------------------------------------------------------
 // Section 4: parse real recordings, if any are made available via
 // DDNET_TEEHISTORIAN_TEST_DIR (a directory of *.teehistorian files). Skipped
 // by default so the suite stays hermetic/portable.
@@ -1181,6 +1365,9 @@ TEST(TeeHistorianReader, RealRecordings)
 		const bool ReadOk = io_read_all(File, &pData, &DataSize);
 		io_close(File);
 		ASSERT_TRUE(ReadOk) << aPath;
+		// Frees `pData` however this iteration ends, including an early `ASSERT_*` return
+		// (the sanitizer job runs with `detect_leaks=1`).
+		std::unique_ptr<void, decltype(&free)> pDataGuard(pData, free);
 
 		CTeeHistorianReader Reader;
 		char aError[256];
@@ -1190,7 +1377,7 @@ TEST(TeeHistorianReader, RealRecordings)
 		{
 			printf("%s: version=%d.%d map=%s map_size=%d\n", aPath,
 				Reader.Header().m_Version, Reader.Header().m_VersionMinor,
-				Reader.Header().m_aMapName.c_str(), Reader.Header().m_MapSize);
+				Reader.Header().m_MapName.c_str(), Reader.Header().m_MapSize);
 
 			std::vector<CTeeHistorianEvent> vEvents;
 			CTeeHistorianEvent Event;
@@ -1199,7 +1386,12 @@ TEST(TeeHistorianReader, RealRecordings)
 				vEvents.push_back(Event);
 			}
 			EXPECT_FALSE(Reader.Error()) << aPath << ": " << Reader.ErrorMessage();
-			EXPECT_TRUE(Reader.Finished()) << aPath << ": no FINISH chunk";
+			// Not asserted: a recording whose server crashed (or is still being written)
+			// legitimately has no FINISH chunk, same as `MissingFinishIsNotAnError` above.
+			if(!Reader.Finished())
+			{
+				printf("%s: no FINISH chunk (recording may be incomplete)\n", aPath);
+			}
 			EXPECT_EQ(Reader.UnconsumedBytesAfterFinish(), 0u) << aPath;
 			printf("%s: %zu events, %d unknown ex chunks\n", aPath, vEvents.size(), Reader.NumUnknownExChunks());
 
@@ -1280,6 +1472,5 @@ TEST(TeeHistorianReader, RealRecordings)
 					aPath, NumConsoleCommands, vGotBody.size(), vOriginalBody.size());
 			}
 		}
-		free(pData);
 	}
 }
