@@ -159,27 +159,45 @@ void CLayerTiles::MakePalette() const
 			m_pTiles[y * m_Width + x].m_Index = y * 16 + x;
 }
 
-void CLayerTiles::Render(bool Tileset)
+void CLayerTiles::Render(const CEditorMap *pRenderMap)
 {
 	IGraphics::CTextureHandle Texture;
-	if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size())
-		Texture = Map()->m_vpImages[m_Image]->m_Texture;
-	else if(m_HasGame)
+	if(m_HasGame)
+	{
 		Texture = Editor()->GetEntitiesTexture();
+	}
 	else if(m_HasFront)
+	{
 		Texture = Editor()->GetFrontTexture();
+	}
 	else if(m_HasTele)
+	{
 		Texture = Editor()->GetTeleTexture();
+	}
 	else if(m_HasSpeedup)
+	{
 		Texture = Editor()->GetSpeedupTexture();
+	}
 	else if(m_HasSwitch)
+	{
 		Texture = Editor()->GetSwitchTexture();
+	}
 	else if(m_HasTune)
+	{
 		Texture = Editor()->GetTuneTexture();
+	}
+	else if(m_Image >= 0 && (size_t)m_Image < pRenderMap->m_vpImages.size())
+	{
+		const auto &pImage = pRenderMap->m_vpImages[m_Image];
+		if(pImage->m_Width % 16 == 0 && pImage->m_Height % 16 == 0)
+		{
+			Texture = pImage->m_Texture;
+		}
+	}
 	Graphics()->TextureSet(Texture);
 
 	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	Map()->m_EnvelopeEvaluator.EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4);
+	pRenderMap->m_EnvelopeEvaluator.EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4);
 	const ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f).Multiply(ColorEnv);
 
 	Graphics()->BlendNone();
@@ -188,7 +206,7 @@ void CLayerTiles::Render(bool Tileset)
 	Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
 
 	// Render DDRace Layers
-	if(!Tileset)
+	if(m_RenderOverlays)
 	{
 		int OverlayRenderFlags = (g_Config.m_ClTextEntitiesEditor ? OVERLAYRENDERFLAG_TEXT : 0) | OVERLAYRENDERFLAG_EDITOR;
 		if(m_HasTele)

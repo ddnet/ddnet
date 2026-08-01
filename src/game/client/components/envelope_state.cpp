@@ -16,7 +16,7 @@ CEnvelopeState::CEnvelopeState(IMap *pMap, bool OnlineOnly) :
 	m_OnlineOnly = OnlineOnly;
 }
 
-void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels)
+void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) const
 {
 	using namespace std::chrono;
 

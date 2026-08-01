@@ -25,16 +25,21 @@ CLayerQuads::CLayerQuads(const CLayerQuads &Other) :
 
 CLayerQuads::~CLayerQuads() = default;
 
-void CLayerQuads::Render(bool QuadPicker)
+void CLayerQuads::Render(const CEditorMap *pRenderMap)
 {
-	Graphics()->TextureClear();
-	if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size())
-		Graphics()->TextureSet(Map()->m_vpImages[m_Image]->m_Texture);
+	if(m_Image >= 0 && (size_t)m_Image < pRenderMap->m_vpImages.size())
+	{
+		Graphics()->TextureSet(pRenderMap->m_vpImages[m_Image]->m_Texture);
+	}
+	else
+	{
+		Graphics()->TextureClear();
+	}
 
 	Graphics()->BlendNone();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, &Map()->m_EnvelopeEvaluator);
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, &pRenderMap->m_EnvelopeEvaluator);
 	Graphics()->BlendNormal();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, &Map()->m_EnvelopeEvaluator);
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, &pRenderMap->m_EnvelopeEvaluator);
 }
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)

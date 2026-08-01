@@ -24,7 +24,7 @@ public:
 	explicit CEnvelope(int NumChannels);
 
 	std::pair<float, float> GetValueRange(int ChannelMask);
-	void Eval(float Time, ColorRGBA &Result, size_t Channels);
+	void Eval(float Time, ColorRGBA &Result, size_t Channels) const;
 	void AddPoint(CFixedTime Time, std::array<int, CEnvPoint::MAX_CHANNELS> aValues);
 	float EndTime() const;
 	int FindPointIndex(CFixedTime Time) const;
