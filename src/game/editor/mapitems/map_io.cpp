@@ -760,7 +760,6 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 
 					pGroup->AddLayer(pTiles);
 					pTiles->m_Image = pTilemapItem->m_Image;
-					pTiles->m_HasGame = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
 
 					// validate image index
 					if(pTiles->m_Image < -1 || pTiles->m_Image >= (int)m_vpImages.size())
