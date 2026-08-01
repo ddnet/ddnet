@@ -23,7 +23,6 @@ public:
 	const char *CollateNocase() const override { return "? COLLATE NOCASE"; }
 	const char *InsertIgnore() const override { return "INSERT OR IGNORE"; }
 	const char *Random() const override { return "RANDOM()"; }
-	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
 	// Since SQLite 3.23.0 true/false literals are recognized, but still cleaner to use 1/0, because:
 	// > For compatibility, if there exist columns named "true" or "false", then
 	// > the identifiers refer to the columns rather than Boolean constants.
@@ -342,23 +341,6 @@ int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	Size = std::min(Size, BufferSize);
 	mem_copy(pBuffer, sqlite3_column_blob(m_pStmt, Col - 1), Size);
 	return Size;
-}
-
-const char *CSqliteConnection::MedianMapTime(char *pBuffer, int BufferSize) const
-{
-	str_format(pBuffer, BufferSize,
-		"SELECT AVG("
-		"  CASE counter %% 2 "
-		"    WHEN 0 THEN CASE WHEN rn IN (counter / 2, counter / 2 + 1) THEN Time END "
-		"    WHEN 1 THEN CASE WHEN rn = counter / 2 + 1 THEN Time END END) "
-		"  OVER (PARTITION BY Map) AS Median "
-		"FROM ("
-		"  SELECT *, ROW_NUMBER() "
-		"  OVER (PARTITION BY Map ORDER BY Time) rn, COUNT(*) "
-		"  OVER (PARTITION BY Map) counter "
-		"  FROM %s_race where Map = l.Map) as r",
-		GetPrefix());
-	return pBuffer;
 }
 
 bool CSqliteConnection::Execute(const char *pQuery, char *pError, int ErrorSize)
