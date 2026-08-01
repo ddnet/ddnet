@@ -74,16 +74,19 @@ public:
 
 	const char *BinaryCollate() const override { return "utf8mb4_bin"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
-	const char *InsertTimestampAsUtc() const override { return "?"; }
-	const char *CollateNocase() const override { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
+	std::string Placeholder(int) const override { return "?"; }
+	std::string InsertTimestampAsUtc(int) const override { return "?"; }
+	std::string LikeNocase(int) const override { return "LIKE CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
 	const char *InsertIgnore() const override { return "INSERT IGNORE"; }
 	const char *Random() const override { return "RAND()"; }
-	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
 	const char *False() const override { return "FALSE"; }
 	const char *True() const override { return "TRUE"; }
 
 	bool Connect(char *pError, int ErrorSize) override;
 	void Disconnect() override;
+
+	bool BeginTransaction(char *pError, int ErrorSize) override;
+	bool CommitTransaction(char *pError, int ErrorSize) override;
 
 	bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) override;
 
@@ -105,7 +108,7 @@ public:
 	void GetString(int Col, char *pBuffer, int BufferSize) override;
 	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
+	bool AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 private:
 	class CStmtDeleter
@@ -130,6 +133,7 @@ private:
 
 	bool m_NewQuery = false;
 	bool m_HaveConnection = false;
+	bool m_InTransaction = false;
 	MYSQL m_Mysql;
 	std::unique_ptr<MYSQL_STMT, CStmtDeleter> m_pStmt = nullptr;
 	std::vector<MYSQL_BIND> m_vStmtParameters;
@@ -147,7 +151,7 @@ void CMysqlConnection::CStmtDeleter::operator()(MYSQL_STMT *pStmt) const
 }
 
 CMysqlConnection::CMysqlConnection(CMysqlConfig Config) :
-	IDbConnection(Config.m_aPrefix),
+	IDbConnection(Config.m_aPrefix, Config.m_SchemaVersion),
 	m_Config(Config),
 	m_InUse(false)
 {
@@ -193,8 +197,8 @@ bool CMysqlConnection::PrepareAndExecuteStatement(const char *pStmt)
 void CMysqlConnection::Print(const char *pMode)
 {
 	log_info("server",
-		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
-		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port);
+		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d Schema: %d",
+		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port, SchemaVersion());
 }
 
 void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
@@ -287,24 +291,51 @@ bool CMysqlConnection::ConnectImpl()
 
 	if(m_Config.m_Setup)
 	{
-		char aCreateRace[1024];
-		char aCreateTeamrace[1024];
-		char aCreateMaps[1024];
-		char aCreateSaves[1024];
-		char aCreatePoints[1024];
-		FormatCreateRace(aCreateRace, sizeof(aCreateRace), /* Backup */ false);
-		FormatCreateTeamrace(aCreateTeamrace, sizeof(aCreateTeamrace), "VARBINARY(16)", /* Backup */ false);
-		FormatCreateMaps(aCreateMaps, sizeof(aCreateMaps));
-		FormatCreateSaves(aCreateSaves, sizeof(aCreateSaves), /* Backup */ false);
-		FormatCreatePoints(aCreatePoints, sizeof(aCreatePoints));
-
-		if(!PrepareAndExecuteStatement(aCreateRace) ||
-			!PrepareAndExecuteStatement(aCreateTeamrace) ||
-			!PrepareAndExecuteStatement(aCreateMaps) ||
-			!PrepareAndExecuteStatement(aCreateSaves) ||
-			!PrepareAndExecuteStatement(aCreatePoints))
+		char aBuf[2048];
+		if(SchemaVersion() >= 2)
 		{
-			return false;
+			FormatCreateV2Map(aBuf, sizeof(aBuf), "INT AUTO_INCREMENT PRIMARY KEY");
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Player(aBuf, sizeof(aBuf), "INT AUTO_INCREMENT PRIMARY KEY");
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2PlayerPoints(aBuf, sizeof(aBuf));
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Finish(aBuf, sizeof(aBuf), "VARBINARY(100)", /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Best(aBuf, sizeof(aBuf), "VARBINARY(100)");
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Team(aBuf, sizeof(aBuf), "VARBINARY(16)", /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2TeamPlayer(aBuf, sizeof(aBuf), "VARBINARY(16)");
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateV2Save(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+		}
+		else
+		{
+			FormatCreateRace(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateTeamrace(aBuf, sizeof(aBuf), "VARBINARY(16)", /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateMaps(aBuf, sizeof(aBuf));
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreateSaves(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
+			FormatCreatePoints(aBuf, sizeof(aBuf));
+			if(!PrepareAndExecuteStatement(aBuf))
+				return false;
 		}
 		m_Config.m_Setup = false;
 	}
@@ -314,7 +345,41 @@ bool CMysqlConnection::ConnectImpl()
 
 void CMysqlConnection::Disconnect()
 {
+	if(m_InTransaction)
+	{
+		if(mysql_real_query(&m_Mysql, "ROLLBACK", 8))
+		{
+			StoreErrorMysql("rollback");
+			dbg_msg("mysql", "failed to roll back transaction %s", m_aErrorDetail);
+		}
+		m_InTransaction = false;
+	}
 	m_InUse.store(false);
+}
+
+bool CMysqlConnection::BeginTransaction(char *pError, int ErrorSize)
+{
+	// START TRANSACTION can't go through the prepared statement protocol
+	if(mysql_real_query(&m_Mysql, "START TRANSACTION", 17))
+	{
+		StoreErrorMysql("begin");
+		str_copy(pError, m_aErrorDetail, ErrorSize);
+		return false;
+	}
+	m_InTransaction = true;
+	return true;
+}
+
+bool CMysqlConnection::CommitTransaction(char *pError, int ErrorSize)
+{
+	m_InTransaction = false;
+	if(mysql_real_query(&m_Mysql, "COMMIT", 6))
+	{
+		StoreErrorMysql("commit");
+		str_copy(pError, m_aErrorDetail, ErrorSize);
+		return false;
+	}
+	return true;
 }
 
 bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)
@@ -455,6 +520,29 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 			StoreErrorStmt("execute");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
 			return false;
+		}
+		// Oracle's libmysqlclient only lets mysql_stmt_fetch_column read a column
+		// after the result columns have been bound with mysql_stmt_bind_result;
+		// without it every column is reported as NULL. We fetch columns lazily by
+		// type in the getters instead of binding real buffers up front, so bind
+		// each column to a MYSQL_TYPE_NULL placeholder purely to satisfy that
+		// requirement. libmariadb doesn't need this but accepts it.
+		// mysql_stmt_bind_result copies the array, so a local one is enough.
+		unsigned int NumResultColumns = mysql_stmt_field_count(m_pStmt.get());
+		if(NumResultColumns > 0)
+		{
+			std::vector<MYSQL_BIND> vResultBinds(NumResultColumns);
+			mem_zero(vResultBinds.data(), sizeof(vResultBinds[0]) * vResultBinds.size());
+			for(MYSQL_BIND &Bind : vResultBinds)
+			{
+				Bind.buffer_type = MYSQL_TYPE_NULL;
+			}
+			if(mysql_stmt_bind_result(m_pStmt.get(), vResultBinds.data()))
+			{
+				StoreErrorStmt("bind_result");
+				str_copy(pError, m_aErrorDetail, ErrorSize);
+				return false;
+			}
 		}
 	}
 	int Result = mysql_stmt_fetch(m_pStmt.get());
@@ -645,19 +733,7 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	return Length;
 }
 
-const char *CMysqlConnection::MedianMapTime(char *pBuffer, int BufferSize) const
-{
-	str_format(pBuffer, BufferSize,
-		"SELECT MEDIAN(Time) "
-		"OVER (PARTITION BY Map) "
-		"FROM %s_race "
-		"WHERE Map = l.Map "
-		"LIMIT 1",
-		GetPrefix());
-	return pBuffer;
-}
-
-bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
+bool CMysqlConnection::AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),

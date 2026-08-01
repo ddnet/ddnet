@@ -54,6 +54,19 @@ struct CMysqlConfig
 	char m_aBindaddr[128];
 	int m_Port;
 	bool m_Setup;
+	int m_SchemaVersion;
+};
+
+struct CPostgresqlConfig
+{
+	char m_aDatabase[64];
+	char m_aPrefix[64];
+	char m_aUser[64];
+	char m_aPass[64];
+	char m_aIp[64];
+	int m_Port;
+	bool m_Setup;
+	int m_SchemaVersion;
 };
 
 class CDbConnectionPool
@@ -77,8 +90,13 @@ public:
 
 	void Print(Mode DatabaseMode);
 
-	void RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64]);
+	void RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64], int SchemaVersion);
 	void RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig);
+	void RegisterPostgresqlDatabase(Mode DatabaseMode, const CPostgresqlConfig *pPostgresqlConfig);
+	// Removes all registered databases of the given mode. Processed in queue
+	// order like queries and registrations, so it's safe to use at runtime
+	// to switch databases without restarting the server.
+	void Reset(Mode DatabaseMode);
 
 	void Execute(
 		FRead pFunc,

@@ -13,17 +13,17 @@
 class CSqliteConnection : public IDbConnection
 {
 public:
-	CSqliteConnection(const char *pFilename, bool Setup);
+	CSqliteConnection(const char *pFilename, bool Setup, int SchemaVersion);
 	~CSqliteConnection() override;
 	void Print(const char *pMode) override;
 
 	const char *BinaryCollate() const override { return "BINARY"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
-	const char *InsertTimestampAsUtc() const override { return "DATETIME(?, 'utc')"; }
-	const char *CollateNocase() const override { return "? COLLATE NOCASE"; }
+	std::string Placeholder(int) const override { return "?"; }
+	std::string InsertTimestampAsUtc(int) const override { return "DATETIME(?, 'utc')"; }
+	std::string LikeNocase(int) const override { return "LIKE ? COLLATE NOCASE"; }
 	const char *InsertIgnore() const override { return "INSERT OR IGNORE"; }
 	const char *Random() const override { return "RANDOM()"; }
-	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
 	// Since SQLite 3.23.0 true/false literals are recognized, but still cleaner to use 1/0, because:
 	// > For compatibility, if there exist columns named "true" or "false", then
 	// > the identifiers refer to the columns rather than Boolean constants.
@@ -32,6 +32,9 @@ public:
 
 	bool Connect(char *pError, int ErrorSize) override;
 	void Disconnect() override;
+
+	bool BeginTransaction(char *pError, int ErrorSize) override;
+	bool CommitTransaction(char *pError, int ErrorSize) override;
 
 	bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) override;
 
@@ -54,7 +57,7 @@ public:
 	// passing a negative buffer size is undefined behavior
 	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
+	bool AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 	// fail safe
 	bool CreateFailsafeTables();
@@ -67,6 +70,7 @@ private:
 	sqlite3 *m_pDb;
 	sqlite3_stmt *m_pStmt;
 	bool m_Done; // no more rows available for Step
+	bool m_InTransaction = false;
 	// returns false, if the query succeeded
 	bool Execute(const char *pQuery, char *pError, int ErrorSize);
 	// returns true on failure
@@ -79,8 +83,8 @@ private:
 	std::atomic_bool m_InUse;
 };
 
-CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup) :
-	IDbConnection("record"),
+CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup, int SchemaVersion) :
+	IDbConnection("record", SchemaVersion),
 	m_Setup(Setup),
 	m_pDb(nullptr),
 	m_pStmt(nullptr),
@@ -101,8 +105,8 @@ CSqliteConnection::~CSqliteConnection()
 void CSqliteConnection::Print(const char *pMode)
 {
 	log_info("server",
-		"SQLite-%s: DB: '%s'",
-		pMode, m_aFilename);
+		"SQLite-%s: DB: '%s' Schema: %d",
+		pMode, m_aFilename, SchemaVersion());
 }
 
 void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
@@ -150,7 +154,46 @@ bool CSqliteConnection::ConnectImpl(char *pError, int ErrorSize)
 	{
 		if(!Execute("PRAGMA journal_mode=WAL", pError, ErrorSize))
 			return false;
-		char aBuf[1024];
+		char aBuf[2048];
+		if(SchemaVersion() >= 2)
+		{
+			FormatCreateV2Map(aBuf, sizeof(aBuf), "INTEGER PRIMARY KEY");
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Player(aBuf, sizeof(aBuf), "INTEGER PRIMARY KEY");
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2PlayerPoints(aBuf, sizeof(aBuf));
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Finish(aBuf, sizeof(aBuf), "BLOB", /* Backup */ false);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Best(aBuf, sizeof(aBuf), "BLOB");
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Team(aBuf, sizeof(aBuf), "BLOB", /* Backup */ false);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2TeamPlayer(aBuf, sizeof(aBuf), "BLOB");
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Save(aBuf, sizeof(aBuf), /* Backup */ false);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+
+			FormatCreateV2Finish(aBuf, sizeof(aBuf), "BLOB", /* Backup */ true);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Team(aBuf, sizeof(aBuf), "BLOB", /* Backup */ true);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			FormatCreateV2Save(aBuf, sizeof(aBuf), /* Backup */ true);
+			if(!Execute(aBuf, pError, ErrorSize))
+				return false;
+			m_Setup = false;
+			return true;
+		}
 		FormatCreateRace(aBuf, sizeof(aBuf), /* Backup */ false);
 		if(!Execute(aBuf, pError, ErrorSize))
 			return false;
@@ -186,7 +229,28 @@ void CSqliteConnection::Disconnect()
 	if(m_pStmt != nullptr)
 		sqlite3_finalize(m_pStmt);
 	m_pStmt = nullptr;
+	if(m_InTransaction)
+	{
+		char aError[128];
+		if(!Execute("ROLLBACK", aError, sizeof(aError)))
+			dbg_msg("sqlite", "failed to roll back transaction: %s", aError);
+		m_InTransaction = false;
+	}
 	m_InUse.store(false);
+}
+
+bool CSqliteConnection::BeginTransaction(char *pError, int ErrorSize)
+{
+	if(!Execute("BEGIN", pError, ErrorSize))
+		return false;
+	m_InTransaction = true;
+	return true;
+}
+
+bool CSqliteConnection::CommitTransaction(char *pError, int ErrorSize)
+{
+	m_InTransaction = false;
+	return Execute("COMMIT", pError, ErrorSize);
 }
 
 bool CSqliteConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)
@@ -344,23 +408,6 @@ int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	return Size;
 }
 
-const char *CSqliteConnection::MedianMapTime(char *pBuffer, int BufferSize) const
-{
-	str_format(pBuffer, BufferSize,
-		"SELECT AVG("
-		"  CASE counter %% 2 "
-		"    WHEN 0 THEN CASE WHEN rn IN (counter / 2, counter / 2 + 1) THEN Time END "
-		"    WHEN 1 THEN CASE WHEN rn = counter / 2 + 1 THEN Time END END) "
-		"  OVER (PARTITION BY Map) AS Median "
-		"FROM ("
-		"  SELECT *, ROW_NUMBER() "
-		"  OVER (PARTITION BY Map ORDER BY Time) rn, COUNT(*) "
-		"  OVER (PARTITION BY Map) counter "
-		"  FROM %s_race where Map = l.Map) as r",
-		GetPrefix());
-	return pBuffer;
-}
-
 bool CSqliteConnection::Execute(const char *pQuery, char *pError, int ErrorSize)
 {
 	char *pErrorMsg;
@@ -394,7 +441,7 @@ void CSqliteConnection::AssertNoError(int Result)
 	}
 }
 
-bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize)
+bool CSqliteConnection::AddPointsV1(const char *pPlayer, int Points, char *pError, int ErrorSize)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
@@ -413,7 +460,7 @@ bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError,
 	return Step(&End, pError, ErrorSize);
 }
 
-std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup)
+std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup, int SchemaVersion)
 {
-	return std::make_unique<CSqliteConnection>(pFilename, Setup);
+	return std::make_unique<CSqliteConnection>(pFilename, Setup, SchemaVersion);
 }
