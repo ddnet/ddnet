@@ -45,6 +45,9 @@ public:
 	int Size() const override;
 
 	static void ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
+
+private:
+	static bool ValidateMapVersion(CDataFileReader &NewDataFile);
 };
 
 #endif
