@@ -1296,9 +1296,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = Id;
-	m_Core.SetAntiPingInterfereCallback([this](int ClientId, bool DisallowReset) {
-		AntiPingInterference(ClientId, DisallowReset, true);
-	});
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
@@ -1327,18 +1324,22 @@ void CCharacter::AntiPingInterference(int ClientId, bool DisallowReset, bool Has
 	if(HasToBeUnfrozen && m_FreezeTime)
 		return;
 
+	CCharacter *pChar = GameWorld()->GetCharacterById(ClientId);
+	if(!pChar)
+		return;
+
 	bool AllowEnablePrediction = m_IsLocal || m_Interfering;
 	if(!AllowEnablePrediction && !DisallowReset)
 	{
 		// disable antiping on players if a non-predicted player interacts with them, but not player bounces here
-		if(!GameWorld()->GetCharacterById(ClientId)->m_FreezeTime || g_Config.m_ClAntiPingPlayers != 3)
+		if(!pChar->m_FreezeTime || g_Config.m_ClAntiPingPlayers != 3)
 		{
-			GameWorld()->GetCharacterById(ClientId)->m_Interfering = false;
+			pChar->m_Interfering = false;
 		}
 	}
 	else if(AllowEnablePrediction)
 	{
-		GameWorld()->GetCharacterById(ClientId)->m_Interfering = true;
+		pChar->m_Interfering = true;
 	}
 }
 
@@ -1575,6 +1576,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 void CCharacter::SetCoreWorld(CGameWorld *pGameWorld)
 {
 	m_Core.SetCoreWorld(&pGameWorld->m_Core, pGameWorld->Collision(), pGameWorld->Teams());
+	m_Core.SetAntiPingInterfereCallback([this](int ClientId, bool DisallowReset) {
+		AntiPingInterference(ClientId, DisallowReset, true);
+	});
 }
 
 bool CCharacter::Match(CCharacter *pChar) const
