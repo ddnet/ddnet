@@ -147,7 +147,7 @@ void CLayerTiles::ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesSize) 
 		for(size_t TileIndex = 0; TileIndex < DestSize; ++TileIndex)
 		{
 			m_pTiles[TileIndex].m_Skip = 0;
-			m_pTiles[TileIndex].m_Reserved = 0;
+			m_pTiles[TileIndex].m_MustBe0 = 0;
 		}
 	}
 }

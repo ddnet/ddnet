@@ -353,7 +353,7 @@ public:
 	unsigned char m_Index;
 	unsigned char m_Flags;
 	unsigned char m_Skip;
-	unsigned char m_Reserved;
+	unsigned char m_MustBe0;
 };
 
 class CMapItemInfo

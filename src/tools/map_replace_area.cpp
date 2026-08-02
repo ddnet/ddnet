@@ -304,8 +304,7 @@ void RemoveDestinationTiles(CMapItemLayerTilemap *pTilemap, CTile *pTile, float 
 	int aaRange[2][2];
 	ConvertToTiles(aaReplaceableArea, aaRange);
 
-	CTile EmptyTile;
-	EmptyTile.m_Index = EmptyTile.m_Flags = EmptyTile.m_Skip = EmptyTile.m_Reserved = 0;
+	const CTile EmptyTile = {.m_Index = TILE_AIR, .m_Flags = 0, .m_Skip = 0, .m_MustBe0 = 0};
 
 	for(int y = aaRange[1][0]; y < aaRange[1][1]; y++)
 		for(int x = aaRange[0][0]; x < aaRange[0][1]; x++)
