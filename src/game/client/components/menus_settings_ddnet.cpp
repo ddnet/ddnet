@@ -99,7 +99,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	// gameplay
 	CUIRect Gameplay;
-	MainView.HSplitTop(170.0f, &Gameplay, &MainView);
+	MainView.HSplitTop(190.0f, &Gameplay, &MainView);
 	Gameplay.HSplitTop(30.0f, &Label, &Gameplay);
 	Ui()->DoLabel(&Label, Localize("Gameplay"), 20.0f, TEXTALIGN_ML);
 	Gameplay.HSplitTop(5.0f, nullptr, &Gameplay);
@@ -166,10 +166,31 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	if(g_Config.m_ClAntiPing)
 	{
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClAntiPingPlayers, Localize("AntiPing: predict other players"), g_Config.m_ClAntiPingPlayers, &Button))
+		// AntiPing: players
 		{
-			g_Config.m_ClAntiPingPlayers ^= 1;
+			// Base state
+			{
+				int Pressed = std::min(g_Config.m_ClAntiPingPlayers, 2);
+				const int Prev = Pressed;
+				DoLine_RadioMenu(Right, Localize("AntiPing: predict other players"),
+					m_vButtonContainersAntiPingPlayers,
+					{Localize("Off", "AntiPing: predict other players"), Localize("All", "AntiPing: predict other players"), Localize("Interact", "AntiPing: predict other players")},
+					{0, 1, 2},
+					Pressed);
+				if(Pressed != Prev)
+					g_Config.m_ClAntiPingPlayers = Pressed;
+			}
+
+			// Interaction state
+			if(g_Config.m_ClAntiPingPlayers >= 2)
+			{
+				bool PrevChecked = g_Config.m_ClAntiPingPlayers == 3;
+				Right.HSplitTop(20.0f, &Button, &Right);
+				if(DoButton_CheckBox(&g_Config.m_ClAntiPingPlayers, Localize("Always predict frozen players"), PrevChecked, &Button))
+				{
+					g_Config.m_ClAntiPingPlayers = PrevChecked ? 2 : 3;
+				}
+			}
 		}
 
 		Right.HSplitTop(20.0f, &Button, &Right);

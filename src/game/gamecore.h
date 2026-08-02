@@ -177,6 +177,8 @@ public:
 	std::vector<SSwitchers> m_vSwitchers;
 };
 
+typedef std::function<void(int ClientId, bool DisallowReset)> FAntiPingInterfereCallback;
+
 class CCharacterCore
 {
 	CWorldCore *m_pWorld = nullptr;
@@ -273,11 +275,16 @@ public:
 	bool m_LiveFrozen;
 	CTuningParams m_Tuning;
 
+	// clientside only: antiping
+	void SetAntiPingInterfereCallback(FAntiPingInterfereCallback Callback);
+
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
 	int m_HookedPlayer;
 	static bool IsSwitchActiveCb(unsigned char Number, void *pUser);
+
+	FAntiPingInterfereCallback m_AntiPingInterfereCallback = [](int ClientId, bool DisallowReset) {};
 };
 
 // input count
