@@ -4,6 +4,7 @@
 
 #include <base/fs.h>
 #include <base/log.h>
+#include <base/str.h>
 
 #include <engine/storage.h>
 
@@ -84,11 +85,8 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	if(!NewDataFile.Open(pFullName, pStorage, pPath, StorageType))
 		return false;
 
-	// Check version
-	const CMapItemVersion *pItem = (CMapItemVersion *)NewDataFile.FindItem(MAPITEMTYPE_VERSION, 0);
-	if(pItem == nullptr || pItem->m_Version != 1)
+	if(!ValidateMapVersion(NewDataFile))
 	{
-		log_error("map/load", "Error: map version not supported.");
 		NewDataFile.Close();
 		return false;
 	}
@@ -200,6 +198,29 @@ void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t
 		}
 		SrcIndex++;
 	}
+}
+
+bool CMap::ValidateMapVersion(CDataFileReader &NewDataFile)
+{
+	const int VersionItemIndex = NewDataFile.FindItemIndex(MAPITEMTYPE_VERSION, 0);
+	if(VersionItemIndex < 0)
+	{
+		log_error("map/load", "Map version item is missing.");
+		return false;
+	}
+	const size_t VersionItemSize = NewDataFile.GetItemSize(VersionItemIndex);
+	if(VersionItemSize < sizeof(CMapItemVersion))
+	{
+		log_error("map/load", "Map version item is truncated (size %" PRIzu ").", VersionItemSize);
+		return false;
+	}
+	const CMapItemVersion *pVersionItem = static_cast<CMapItemVersion *>(NewDataFile.GetItem(VersionItemIndex));
+	if(pVersionItem->m_Version != 1)
+	{
+		log_error("map/load", "Map version %d is not supported.", pVersionItem->m_Version);
+		return false;
+	}
+	return true;
 }
 
 extern std::unique_ptr<IMap> CreateMap()
