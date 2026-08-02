@@ -581,15 +581,27 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				pImg->m_Width = pItem->m_Width;
 				pImg->m_Height = pItem->m_Height;
 				pImg->m_Format = CImageInfo::FORMAT_RGBA;
-				pImg->Allocate();
 
-				// copy image data
-				void *pData = pMap->GetData(pItem->m_ImageData);
-				mem_copy(pImg->m_pData, pData, pImg->DataSize());
-				int TextureLoadFlag = m_pEditor->Graphics()->TextureLoadFlags();
-				if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
-					TextureLoadFlag = 0;
-				pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pImg->m_aName);
+				const void *pData = pMap->GetData(pItem->m_ImageData);
+				if(pItem->m_Width <= 0 || pItem->m_Height <= 0 || pData == nullptr || (size_t)pMap->GetDataSize(pItem->m_ImageData) < pImg->DataSize())
+				{
+					pImg->m_Width = 0;
+					pImg->m_Height = 0;
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "Error: Failed to load data of image %d '%s'.", i, pImg->m_aName);
+					ErrorHandler(aBuf);
+				}
+				else
+				{
+					pImg->Allocate();
+
+					// copy image data
+					mem_copy(pImg->m_pData, pData, pImg->DataSize());
+					int TextureLoadFlag = m_pEditor->Graphics()->TextureLoadFlags();
+					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
+						TextureLoadFlag = 0;
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pImg->m_aName);
+				}
 			}
 
 			// load auto mapper file
@@ -894,9 +906,18 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 
 					if(pQuadsItem->m_NumQuads > 0)
 					{
-						void *pData = pMap->GetDataSwapped(pQuadsItem->m_Data);
-						pQuads->m_vQuads.resize(pQuadsItem->m_NumQuads);
-						mem_copy(pQuads->m_vQuads.data(), pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
+						const void *pData = pMap->GetDataSwapped(pQuadsItem->m_Data);
+						if(pData != nullptr && (size_t)pMap->GetDataSize(pQuadsItem->m_Data) >= sizeof(CQuad) * (size_t)pQuadsItem->m_NumQuads)
+						{
+							pQuads->m_vQuads.resize(pQuadsItem->m_NumQuads);
+							mem_copy(pQuads->m_vQuads.data(), pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
+						}
+						else
+						{
+							char aBuf[128];
+							str_format(aBuf, sizeof(aBuf), "Error: Failed to read quads of layer %d.", l);
+							ErrorHandler(aBuf);
+						}
 						pMap->UnloadData(pQuadsItem->m_Data);
 					}
 
@@ -924,9 +945,18 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 					// load data
 					if(pSoundsItem->m_NumSources > 0)
 					{
-						void *pData = pMap->GetDataSwapped(pSoundsItem->m_Data);
-						pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
-						mem_copy(pSounds->m_vSources.data(), pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
+						const void *pData = pMap->GetDataSwapped(pSoundsItem->m_Data);
+						if(pData != nullptr && (size_t)pMap->GetDataSize(pSoundsItem->m_Data) >= sizeof(CSoundSource) * (size_t)pSoundsItem->m_NumSources)
+						{
+							pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
+							mem_copy(pSounds->m_vSources.data(), pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
+						}
+						else
+						{
+							char aBuf[128];
+							str_format(aBuf, sizeof(aBuf), "Error: Failed to read sound sources of layer %d.", l);
+							ErrorHandler(aBuf);
+						}
 						pMap->UnloadData(pSoundsItem->m_Data);
 					}
 
@@ -952,32 +982,45 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 					// load layer name
 					IntsToStr(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aName, std::size(pSounds->m_aName));
 
-					// load data
-					CSoundSourceDeprecated *pData = (CSoundSourceDeprecated *)pMap->GetDataSwapped(pSoundsItem->m_Data);
 					pGroup->AddLayer(pSounds);
-					pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
 
-					for(int i = 0; i < pSoundsItem->m_NumSources; i++)
+					// load data
+					if(pSoundsItem->m_NumSources > 0)
 					{
-						CSoundSourceDeprecated *pOldSource = &pData[i];
+						const CSoundSourceDeprecated *pData = (const CSoundSourceDeprecated *)pMap->GetDataSwapped(pSoundsItem->m_Data);
+						if(pData == nullptr || (size_t)pMap->GetDataSize(pSoundsItem->m_Data) < sizeof(CSoundSourceDeprecated) * (size_t)pSoundsItem->m_NumSources)
+						{
+							char aBuf[128];
+							str_format(aBuf, sizeof(aBuf), "Error: Failed to read sound sources of layer %d.", l);
+							ErrorHandler(aBuf);
+						}
+						else
+						{
+							pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
 
-						CSoundSource &Source = pSounds->m_vSources[i];
-						Source.m_Position = pOldSource->m_Position;
-						Source.m_Loop = pOldSource->m_Loop;
-						Source.m_Pan = true;
-						Source.m_TimeDelay = pOldSource->m_TimeDelay;
-						Source.m_Falloff = 0;
+							for(int i = 0; i < pSoundsItem->m_NumSources; i++)
+							{
+								const CSoundSourceDeprecated *pOldSource = &pData[i];
 
-						Source.m_PosEnv = pOldSource->m_PosEnv;
-						Source.m_PosEnvOffset = pOldSource->m_PosEnvOffset;
-						Source.m_SoundEnv = pOldSource->m_SoundEnv;
-						Source.m_SoundEnvOffset = pOldSource->m_SoundEnvOffset;
+								CSoundSource &Source = pSounds->m_vSources[i];
+								Source.m_Position = pOldSource->m_Position;
+								Source.m_Loop = pOldSource->m_Loop;
+								Source.m_Pan = true;
+								Source.m_TimeDelay = pOldSource->m_TimeDelay;
+								Source.m_Falloff = 0;
 
-						Source.m_Shape.m_Type = CSoundShape::SHAPE_CIRCLE;
-						Source.m_Shape.m_Circle.m_Radius = pOldSource->m_FalloffDistance;
+								Source.m_PosEnv = pOldSource->m_PosEnv;
+								Source.m_PosEnvOffset = pOldSource->m_PosEnvOffset;
+								Source.m_SoundEnv = pOldSource->m_SoundEnv;
+								Source.m_SoundEnvOffset = pOldSource->m_SoundEnvOffset;
+
+								Source.m_Shape.m_Type = CSoundShape::SHAPE_CIRCLE;
+								Source.m_Shape.m_Circle.m_Radius = pOldSource->m_FalloffDistance;
+							}
+						}
+
+						pMap->UnloadData(pSoundsItem->m_Data);
 					}
-
-					pMap->UnloadData(pSoundsItem->m_Data);
 				}
 			}
 		}
