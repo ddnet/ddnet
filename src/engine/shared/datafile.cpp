@@ -767,6 +767,10 @@ void CDataFileReader::UnloadData(int Index)
 	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
 		return;
 
+	// Don't try to load the data again if it previously failed
+	if(m_pDataFile->m_pDataSizes[Index] < 0)
+		return;
+
 	free(m_pDataFile->m_ppDataPtrs[Index]);
 	m_pDataFile->m_ppDataPtrs[Index] = nullptr;
 	m_pDataFile->m_pDataSizes[Index] = 0;
