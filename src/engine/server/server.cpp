@@ -3154,8 +3154,13 @@ int CServer::Run()
 
 	if(Config()->m_SvSqliteFile[0] != '\0')
 	{
+		if(!fs_is_relative_path(Config()->m_SvSqliteFile))
+		{
+			log_error("server", "sv_sqlite_file must be a relative path. path='%s'", Config()->m_SvSqliteFile);
+			return -1;
+		}
 		char aFullPath[IO_MAX_PATH_LENGTH];
-		Storage()->GetCompletePath(IStorage::TYPE_SAVE_OR_ABSOLUTE, Config()->m_SvSqliteFile, aFullPath, sizeof(aFullPath));
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE, Config()->m_SvSqliteFile, aFullPath, sizeof(aFullPath));
 
 		if(Config()->m_SvUseSql)
 		{
