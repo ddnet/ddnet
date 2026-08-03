@@ -3270,6 +3270,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     mapitems_test.cpp
     math_test.cpp
     mem_test.cpp
+    mutes_test.cpp
     name_ban_test.cpp
     net_test.cpp
     netaddr_test.cpp
