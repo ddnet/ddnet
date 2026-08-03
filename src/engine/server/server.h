@@ -407,7 +407,7 @@ public:
 	bool m_ServerInfoNeedsUpdate = false;
 	bool m_ServerInfoNeedsResend = false;
 
-	void FillAntibot(CAntibotRoundData *pData) override;
+	void FillAntibot(CAntibotRoundData *pData, int ClientId) override;
 
 	void ExpireServerInfo() override;
 	void ExpireServerInfoAndQueueResend();
