@@ -6,6 +6,7 @@
 #include <base/mem.h>
 
 #include <algorithm>
+#include <cstdint>
 
 const unsigned CHuffman::ms_aFreqTable[HUFFMAN_MAX_SYMBOLS] = {
 	1 << 30, 4545, 2657, 431, 1950, 919, 444, 482, 2244, 617, 838, 542, 715, 1814, 304, 240, 754, 212, 647, 186,
@@ -135,21 +136,35 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 #define HUFFMAN_MACRO_LOADSYMBOL(Sym) \
 	do \
 	{ \
-		Bits |= m_aNodes[Sym].m_Bits << Bitcount; \
+		Bits |= (uint64_t)m_aNodes[Sym].m_Bits << Bitcount; \
 		Bitcount += m_aNodes[Sym].m_NumBits; \
 	} while(0)
 
-	// this macro writes the symbol stored in bits and bitcount to the dst pointer
+	// this macro writes the symbol stored in bits and bitcount to the dst pointer;
+	// with 8 bytes of output headroom the whole bit buffer is stored little-endian
+	// unconditionally and only the full bytes are consumed, which avoids the
+	// bounds-checked loop per output byte
 #define HUFFMAN_MACRO_WRITE() \
 	do \
 	{ \
-		while(Bitcount >= 8) \
+		if(pDstEnd - pDst >= 8) \
 		{ \
-			if(pDst == pDstEnd) \
-				return -1; \
-			*pDst++ = (unsigned char)(Bits & 0xff); \
-			Bits >>= 8; \
-			Bitcount -= 8; \
+			for(unsigned i = 0; i < 8; i++) \
+				pDst[i] = (unsigned char)(Bits >> (i * 8)); \
+			pDst += Bitcount >> 3; \
+			Bits >>= (Bitcount >> 3) * 8; \
+			Bitcount &= 7; \
+		} \
+		else \
+		{ \
+			while(Bitcount >= 8) \
+			{ \
+				if(pDst == pDstEnd) \
+					return -1; \
+				*pDst++ = (unsigned char)(Bits & 0xff); \
+				Bits >>= 8; \
+				Bitcount -= 8; \
+			} \
 		} \
 	} while(0)
 
@@ -160,7 +175,7 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 	unsigned char *pDstEnd = pDst + OutputSize;
 
 	// symbol variables
-	unsigned Bits = 0;
+	uint64_t Bits = 0;
 	unsigned Bitcount = 0;
 
 	// make sure that we have data that we want to compress
