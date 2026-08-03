@@ -62,7 +62,6 @@ export PATH_WRAPPER
 
 # $ANDROID_HOME can be user-defined, else the default location is used. Important notes:
 # - The path must not contain spaces on Windows.
-# - $HOME must be used instead of ~ else cargo-ndk cannot find the folder.
 ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
 export ANDROID_HOME
 
@@ -71,7 +70,6 @@ if [ -d "$ANDROID_HOME/ndk" ]; then
 	ANDROID_NDK_ROOT="$(find "${ANDROID_HOME}/ndk" -mindepth 1 -maxdepth 1 | sort -n | tail -1)"
 	if [ -n "$ANDROID_NDK_ROOT" ]; then
 		export ANDROID_NDK_ROOT
-		# ANDROID_NDK_HOME must be exported for cargo-ndk
 		export ANDROID_NDK_HOME="$ANDROID_NDK_ROOT"
 		export ANDROID_TOOLCHAIN_ROOT="${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/${HOST_OS}-x86_64"
 		ANDROID_NDK_FOUND=1

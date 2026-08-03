@@ -49,9 +49,6 @@
 /**
  * Use the @link dbg_assert @endlink function instead!
  *
- * This is also used from Rust, if you modify the signature, also look into
- * src/base/dbg.rs.
- *
  * @ingroup Debug
  *
  * @see dbg_assert

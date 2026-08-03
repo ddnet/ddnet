@@ -11,19 +11,6 @@ Requirements for building for Android on Linux
 	This will download the relevant components of the Android SDK to `~/Android/Sdk`.
 	This will also accept the Android SDK licenses using the SDK manager, otherwise the Gradle build will fail.
 	Note: If you have previously downloaded different versions of the Android SDK components, delete them before downloading the new versions to ensure that the correct versions are used.
--	Use a stable version of Rust. Using the nightly version results in linking errors.
-	For reproducible builds, use exactly the same version of Rust that is used in the CI:
-	```shell
-	rustup default 1.92.0
-	```
--	Install cargo-ndk and add the Android targets to rustup to build Rust with the Android NDK *after* setting the Rust version:
-	```shell
-	cargo install cargo-ndk
-	rustup target add armv7-linux-androideabi
-	rustup target add i686-linux-android
-	rustup target add aarch64-linux-android
-	rustup target add x86_64-linux-android
-	```
 -	Install OpenJDK 21:
 	```shell
 	sudo apt install openjdk-21-jdk
@@ -40,7 +27,7 @@ Requirements for building for Android on Linux
 	The easiest way is to use the precompiled libraries from https://github.com/ddnet/ddnet-libs/ by cloning the `ddnet-libs` submodule.
 	Alternatively, you can build the `ddnet-libs` for Android yourself. See below for instructions on how to compile them locally.
 	The libraries can also be built by manually running the GitHub workflow [`build-libraries-android`](https://github.com/ddnet/ddnet/blob/master/.github/workflows/build-libraries-android.yml).
--	Important note for reproducible builds: To make the build reproducible, you must use exactly the same versions of the Android SDK components and Rust.
+-	Important note for reproducible builds: To make the build reproducible, you must use exactly the same versions of the Android SDK components.
 	Furthermore, exactly CMake version 3.22.1 must be used for configuring.
 
 Requirements for building for Android on Windows using MSYS2
@@ -50,14 +37,6 @@ Requirements for building for Android on Windows using MSYS2
 -	First install MSYS2 (https://www.msys2.org/wiki/MSYS2-installation/) as well as all required packages for building DDNet using MSYS2 on Windows.
 	(There is currently no more detailed guide for this.)
 -	Note: All commands in this README must be executed in a `bash` terminal (e.g., from MSYS2) and not in `cmd.exe` or PowerShell.
--	Install cargo-ndk and add Android targets to rustup to build Rust with the Android NDK:
-	```shell
-	cargo install cargo-ndk
-	rustup target add armv7-linux-androideabi
-	rustup target add i686-linux-android
-	rustup target add aarch64-linux-android
-	rustup target add x86_64-linux-android
-	```
 -	Install JDK 21, e.g. from https://adoptium.net/temurin/releases/?package=jdk&os=windows&version=21
 -	Install ninja:
 	```shell

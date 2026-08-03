@@ -13,21 +13,11 @@
 	```
 	Refer to the [Emscripten documentation](https://emscripten.org/docs/getting_started/downloads.html) for details about using and updating the Emscripten SDK.
 	Note: Installing Emscripten from the package manager (e.g. with `sudo apt install emscripten`) may not work, as building some libraries requires a different version of Emscripten than is available via package manager.
--	Use a stable version of Rust. Using the nightly version results in linking errors.
-	Note that using Rust versions 1.90.0 - 1.93.0 specifically does not work.
-	For reproducible builds, use exactly the same version of Rust that is used in the CI:
-	```sh
-	rustup default 1.89.0
-	```
--	Add the WASM targets to rustup to build Rust with Emscripten *after* setting the Rust version:
-	```sh
-	rustup target add wasm32-unknown-emscripten
-	```
 -	You need the `ddnet-libs` for Emscripten.
 	The easiest way is to use the precompiled libraries from https://github.com/ddnet/ddnet-libs/ by cloning the `ddnet-libs` submodule.
 	Alternatively, you can build the `ddnet-libs` for Emscripten yourself. See below for instructions on how to compile them locally.
 	The libraries can also be built by manually running the GitHub workflow [`build-libraries-emscripten`](https://github.com/ddnet/ddnet/blob/master/.github/workflows/build-libraries-emscripten.yml).
--	Important note for reproducible builds: To make the build reproducible, you must use exactly the same versions of the emsdk and Rust.
+-	Important note for reproducible builds: To make the build reproducible, you must use exactly the same version of the emsdk.
 	Furthermore, exactly CMake version 3.22.1 must be used for configuring.
 -	To use the emsdk within a terminal in the later steps, run `source .../emsdk/emsdk_env.sh` once in the terminal (with the correct path to the emsdk) to setup the environment variables.
 

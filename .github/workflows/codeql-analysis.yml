@@ -26,8 +26,6 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-    env:
-      CARGO_HTTP_MULTIPLEXING: false
 
     strategy:
       fail-fast: false
@@ -63,15 +61,6 @@ jobs:
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
-
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
-      with:
-          cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
-          workspaces: |
-              src/mastersrv
-              src/masterping
-              ./
 
     - name: Build in release mode
       if: matrix.language == 'cpp'

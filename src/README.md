@@ -14,7 +14,6 @@ The `src` folder is structured into several folders as follows:
 - macos: Platform-specific code for macOS systems.
 - masterping: Tool that collects game server info via an HTTP endpoint and aggregates them.
 - @ref mastersrv "mastersrv": The mastersrv maintains a list of all registered DDNet (and Teeworlds) servers.
-- rust-bridge: Glue to bridge Rust and C++ code.
 - steam: Steam API integration.
 - test: Unit tests.
 - tools: Additional tools for utility and testing.

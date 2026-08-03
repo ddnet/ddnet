@@ -60,7 +60,6 @@ jobs:
           workspaces: |
               src/mastersrv
               src/masterping
-              ./
 
     - name: Check code style (ClangFormat)
       run: |
@@ -118,7 +117,7 @@ jobs:
       run: scripts/tidy_alphabetical.py --dry-run
 
     - name: Check absolute includes
-      run: "! grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
+      run: "! grep -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
 
     - name: Check config variables
       run: scripts/check_config_variables.py

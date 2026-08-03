@@ -92,8 +92,6 @@ jobs:
       run: |
         curl -LO https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4-Linux-x86_64.tar.gz
         sudo tar --strip-components 1 -C /usr -xf cmake-3.13.4-Linux-x86_64.tar.gz
-        # Our minimum supported Rust version (MSRV)
-        rustup default 1.85.0
         sudo rm -rf /var/lib/mysql/ /var/run/mysqld
         sudo mkdir /var/lib/mysql/ /var/run/mysqld/
         sudo chown mysql:mysql /var/lib/mysql/ /var/run/mysqld/
@@ -133,14 +131,6 @@ jobs:
         echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
         sudo rm -rf /Library/Developer/CommandLineTools
 
-    - name: Prepare Windows MinGW
-      if: contains(matrix.os, 'windows') && contains(matrix.name, 'mingw')
-      run: |
-        rustup toolchain install stable-x86_64-pc-windows-gnu
-        rustup target add x86_64-pc-windows-gnu
-        rustup default stable-x86_64-pc-windows-gnu
-        rustup set default-host x86_64-pc-windows-gnu
-
     - name: Install Vulkan SDK
       uses: humbletim/install-vulkan-sdk@v1.2
       with:
@@ -154,7 +144,6 @@ jobs:
           workspaces: |
               src/mastersrv
               src/masterping
-              ./
 
     - name: Build mastersrv
       if: ${{ !contains(matrix.os, 'ubuntu-22.04') }}
@@ -221,7 +210,7 @@ jobs:
         cd headless
         ${{ matrix.cmake-path }}cmake -E env CXXFLAGS="--coverage -Werror" ${{ matrix.cmake-path }}cmake -E env LDFLAGS="--coverage -Werror" ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DWEBSOCKETS=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.workaround-issue10203-run-after-configure }}
-        ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug
+        ${{ matrix.cmake-path }}cmake --build . --config Debug
 
     - name: Test headless client (unit tests)
       if: ${{ !contains(matrix.os, 'ubuntu') }}
@@ -233,7 +222,7 @@ jobs:
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
         cd headless
-        ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" RUSTDOCFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests
 
     - name: Upload Codecov report (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
@@ -332,8 +321,6 @@ jobs:
 
   build-android:
     runs-on: ubuntu-24.04
-    env:
-      CARGO_HTTP_MULTIPLEXING: false
     steps:
     - uses: actions/checkout@v4
       with:
@@ -349,12 +336,6 @@ jobs:
         curl -LO https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1-Linux-x86_64.tar.gz
         mkdir -p /home/runner/cmake
         tar --strip-components 1 -C /home/runner/cmake -xf cmake-3.22.1-Linux-x86_64.tar.gz
-        rustup default 1.92.0
-        cargo install cargo-ndk
-        rustup target add armv7-linux-androideabi
-        rustup target add i686-linux-android
-        rustup target add aarch64-linux-android
-        rustup target add x86_64-linux-android
         scripts/android/download_android_sdk.sh /home/runner
 
     - name: Install Vulkan SDK
@@ -362,15 +343,6 @@ jobs:
       with:
         version: 1.3.296.0
         cache: true
-
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
-      with:
-          cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
-          workspaces: |
-              src/mastersrv
-              src/masterping
-              ./
 
     - name: Build Android app
       env:
@@ -394,8 +366,6 @@ jobs:
 
   build-emscripten:
     runs-on: ubuntu-24.04
-    env:
-      CARGO_HTTP_MULTIPLEXING: false
     steps:
     - uses: actions/checkout@v4
       with:
@@ -406,21 +376,10 @@ jobs:
         curl -LO https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1-Linux-x86_64.tar.gz
         mkdir -p /home/runner/cmake
         tar --strip-components 1 -C /home/runner/cmake -xf cmake-3.22.1-Linux-x86_64.tar.gz
-        rustup default 1.89.0
-        rustup target add wasm32-unknown-emscripten
         git clone https://github.com/emscripten-core/emsdk emsdk
         cd emsdk
         ./emsdk install 4.0.22
         ./emsdk activate 4.0.22
-
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
-      with:
-          cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
-          workspaces: |
-              src/mastersrv
-              src/masterping
-              ./
 
     - name: Build headless Emscripten client in debug mode
       run: |

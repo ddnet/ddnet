@@ -155,8 +155,6 @@ function build_for_type() {
 		-DCMAKE_SYSTEM_NAME=Android \
 		-DCMAKE_SYSTEM_VERSION="$ANDROID_API" \
 		-DCMAKE_ANDROID_ARCH_ABI="${2}" \
-		-DCARGO_NDK_TARGET="${3}" \
-		-DCARGO_NDK_API="$ANDROID_API" \
 		-DANDROID_PACKAGE_NAME="${PACKAGE_NAME}" \
 		-DANDROID_PACKAGE_NAME_JNI="${PACKAGE_NAME//./_}" \
 		-DPREFER_BUNDLED_LIBS=ON \
@@ -176,22 +174,22 @@ mkdir -p "${BUILD_FOLDER}"
 
 if [[ "${ANDROID_BUILD}" == "arm" || "${ANDROID_BUILD}" == "all" ]]; then
 	log_info "Building cmake (arm)..."
-	build_for_type arm armeabi-v7a armv7-linux-androideabi
+	build_for_type arm armeabi-v7a
 fi
 
 if [[ "${ANDROID_BUILD}" == "arm64" || "${ANDROID_BUILD}" == "all" ]]; then
 	log_info "Building cmake (arm64)..."
-	build_for_type arm64 arm64-v8a aarch64-linux-android
+	build_for_type arm64 arm64-v8a
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86" || "${ANDROID_BUILD}" == "all" ]]; then
 	log_info "Building cmake (x86)..."
-	build_for_type x86 x86 i686-linux-android
+	build_for_type x86 x86
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "all" ]]; then
 	log_info "Building cmake (x86_64)..."
-	build_for_type x86_64 x86_64 x86_64-linux-android
+	build_for_type x86_64 x86_64
 fi
 
 log_info "Copying project files..."

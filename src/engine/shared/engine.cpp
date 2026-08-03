@@ -5,7 +5,6 @@
 #include <base/logger.h>
 #include <base/net.h>
 #include <base/os.h>
-#include <base/rust.h>
 #include <base/str.h>
 #include <base/time.h>
 
@@ -67,8 +66,6 @@ public:
 			{
 				log_info("engine", "operating system version: %s", aVersionStr);
 			}
-
-			rust_panic_use_dbg_assert();
 
 			// init the network
 			net_init();

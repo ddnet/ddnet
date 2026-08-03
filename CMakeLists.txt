@@ -550,7 +550,6 @@ find_package(Opus)
 find_package(Opusfile)
 find_package(PNG)
 find_package(Python3)
-find_package(Rust)
 find_package(SDL2)
 find_package(SQLite3)
 if(DISCORD)
@@ -599,7 +598,6 @@ if(TARGET_OS STREQUAL "mac")
 endif()
 message(STATUS ${TARGET})
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
-message(STATUS "Rust version: ${RUST_VERSION_STRING}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 message(STATUS "Dependencies:")
@@ -661,9 +659,6 @@ if(NOT(CURL_FOUND) AND NOT TARGET_OS STREQUAL "emscripten")
 endif()
 if(NOT(Python3_FOUND))
   message(SEND_ERROR "You must install Python to compile ${CMAKE_PROJECT_NAME}")
-endif()
-if(NOT(RUST_FOUND))
-  message(SEND_ERROR "You must install Rust and Cargo to compile ${CMAKE_PROJECT_NAME}")
 endif()
 if(NOT(SQLite3_FOUND))
   message(SEND_ERROR "You must install SQLite3 to compile ${CMAKE_PROJECT_NAME}")
@@ -737,7 +732,6 @@ if(TARGET_OS STREQUAL "windows")
   list(APPEND PLATFORM_LIBS version.lib) # GetFileVersionInfoSizeW
   list(APPEND PLATFORM_LIBS ws2_32.lib) # Windows sockets
   list(APPEND PLATFORM_LIBS advapi32.lib) # Reg* and Crypt* functions
-  list(APPEND PLATFORM_LIBS bcrypt.lib userenv.lib) # for Rust (https://github.com/rust-lang/rust/issues/91974)
   list(APPEND PLATFORM_LIBS ole32.lib) # CoInitialize(Ex)
   list(APPEND PLATFORM_LIBS shell32.lib)
   list(APPEND PLATFORM_LIBS ntdll.lib) # https://github.com/ddnet/ddnet/issues/6725
@@ -774,7 +768,6 @@ elseif(TARGET_OS STREQUAL "emscripten")
   set(PLATFORM_CLIENT)
   set(PLATFORM_LIBS)
   list(APPEND PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
-  list(APPEND PLATFORM_LIBS dl) # for Rust
 else()
   find_package(Notify)
   find_package(OpenGL)
@@ -784,7 +777,6 @@ else()
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS)
     list(APPEND PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
-    list(APPEND PLATFORM_LIBS dl) # for Rust
   else()
     set(PLATFORM_LIBS)
   endif()
@@ -869,199 +861,6 @@ set(DEP_JSON $<TARGET_OBJECTS:json>)
 set(DEP_MD5)
 if(NOT CRYPTO_FOUND)
   set(DEP_MD5 $<TARGET_OBJECTS:md5>)
-endif()
-
-########################################################################
-# RUST
-########################################################################
-
-set_glob(RUST_BASE GLOB_RECURSE "rs;toml" src/base
-  # tidy-alphabetical-start
-  Cargo.toml
-  color.rs
-  dbg.rs
-  lib.rs
-  rust.rs
-  # tidy-alphabetical-end
-)
-
-set_glob(RUST_ENGINE_INTERFACE GLOB "rs;toml" src/engine
-  # tidy-alphabetical-start
-  Cargo.toml
-  console.rs
-  lib.rs
-  # tidy-alphabetical-end
-)
-
-set_glob(RUST_ENGINE_SHARED GLOB_RECURSE "rs;toml" src/engine/shared
-  # tidy-alphabetical-start
-  Cargo.toml
-  build.rs
-  config.rs
-  lib.rs
-  rust_version.rs
-  # tidy-alphabetical-end
-)
-
-set_src(RUST_BRIDGE_SHARED GLOB_RECURSE src/rust-bridge
-  # tidy-alphabetical-start
-  cpp/console.cpp
-  cpp/console.h
-  engine/shared/rust_version.cpp
-  engine/shared/rust_version.h
-  # tidy-alphabetical-end
-)
-
-set_glob(RUST_MASTERSRV GLOB "rs;toml" src/mastersrv/src
-  # tidy-alphabetical-start
-  addr.rs
-  community_token.rs
-  config.rs
-  locations.rs
-  main.rs
-  # tidy-alphabetical-end
-)
-
-add_library(rust-bridge-shared EXCLUDE_FROM_ALL OBJECT ${RUST_BRIDGE_SHARED})
-list(APPEND TARGETS_OWN rust-bridge-shared)
-
-if(TARGET_OS STREQUAL "android")
-  set(CARGO_BUILD_DIR "${CARGO_NDK_TARGET}/")
-  set(CARGO_BUILD ${CMAKE_COMMAND} -E env CARGO_TARGET_DIR=${PROJECT_BINARY_DIR} DDNET_TEST_NO_LINK=1 ${RUST_CARGO} ndk --manifest-path "${PROJECT_SOURCE_DIR}/Cargo.toml" --target ${CARGO_NDK_TARGET} --platform ${CARGO_NDK_API} build --locked)
-  set(CARGO_TEST ${CMAKE_COMMAND} -E env CARGO_TARGET_DIR=${PROJECT_BINARY_DIR} ${RUST_CARGO} ndk --target ${CARGO_NDK_TARGET} --platform ${CARGO_NDK_API} test --locked)
-else()
-  set(CARGO_BUILD_DIR "")
-  set(CARGO_BUILD ${CMAKE_COMMAND} -E env CARGO_TARGET_DIR=${PROJECT_BINARY_DIR} DDNET_TEST_NO_LINK=1 ${RUST_CARGO} build --locked --manifest-path "${PROJECT_SOURCE_DIR}/Cargo.toml")
-  set(CARGO_TEST ${CMAKE_COMMAND} -E env CARGO_TARGET_DIR=${PROJECT_BINARY_DIR} ${RUST_CARGO} test --locked)
-endif()
-if(MSVC)
-  list(INSERT CARGO_BUILD 0 ${CMAKE_COMMAND} -E env $<$<CONFIG:Debug>:CFLAGS=/MTd> $<$<CONFIG:Debug>:CXXFLAGS=/MTd>)
-  list(INSERT CARGO_TEST 0 ${CMAKE_COMMAND} -E env RUSTFLAGS=-Ctarget-feature=+crt-static)
-endif()
-if(RUST_NIGHTLY)
-  list(APPEND CARGO_BUILD -Z build-std=std,panic_abort)
-endif()
-if(NOT CMAKE_OSX_ARCHITECTURES AND (DEFINED CMAKE_RUST_COMPILER_TARGET OR RUST_NIGHTLY))
-  if(DEFINED CMAKE_RUST_COMPILER_TARGET)
-    list(APPEND CARGO_TEST --target ${CMAKE_RUST_COMPILER_TARGET})
-    set(RUST_TARGET ${CMAKE_RUST_COMPILER_TARGET})
-  else()
-    set(RUST_TARGET ${RUST_TARGET_HOST})
-  endif()
-  list(APPEND CARGO_BUILD --target ${RUST_TARGET})
-  set(CARGO_BUILD_DIR "${RUST_TARGET}/")
-endif()
-set(CARGO_BUILD_DIR_DEBUG "${CARGO_BUILD_DIR}debug")
-set(CARGO_BUILD_DIR_RELEASE "${CARGO_BUILD_DIR}release")
-set(CARGO_BUILD_DIR_RELWITHDEBINFO "${CARGO_BUILD_DIR}relwithdebinfo")
-
-# We can't check this directly; it is a cmake property, not a variable
-get_cmake_property(MULTI_CONFIG_BUILD GENERATOR_IS_MULTI_CONFIG)
-if(MULTI_CONFIG_BUILD)
-  if(CMAKE_VERSION VERSION_LESS 3.20)
-    message(SEND_ERROR "Multi-config generators only supported from CMake 3.20 and up")
-  else()
-    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR}$<IF:$<CONFIG:Debug>,debug,$<IF:$<CONFIG:RelWithDebInfo>,relwithdebinfo,release>>")
-    list(APPEND CARGO_BUILD
-      $<$<CONFIG:RelWithDebInfo>:--profile>
-      $<$<CONFIG:RelWithDebInfo>:relwithdebinfo>
-      $<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>>:--release>)
-  endif()
-else()
-  if(CMAKE_BUILD_TYPE STREQUAL Debug)
-    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR_DEBUG}")
-  elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
-    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR_RELWITHDEBINFO}")
-    list(APPEND CARGO_BUILD --profile relwithdebinfo)
-  else()
-    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR_RELEASE}")
-    list(APPEND CARGO_BUILD --release)
-  endif()
-endif()
-
-# The cxx bindings generated by the cxx version we use isn't able to detect that we build with -fno-exceptions in emscripten
-# Automatic detection requires https://github.com/dtolnay/cxx/releases/tag/1.0.165
-if(TARGET_OS STREQUAL "emscripten")
-  list(INSERT CARGO_BUILD 0 ${CMAKE_COMMAND} -E env CXXFLAGS="-DRUST_CXX_NO_EXCEPTIONS")
-endif()
-
-if(CMAKE_OSX_ARCHITECTURES)
-  set(RUST_OSX_ARCHITECTURES)
-  foreach(arch ${CMAKE_OSX_ARCHITECTURES})
-    if(${arch} STREQUAL arm64)
-      list(APPEND RUST_OSX_ARCHITECTURES aarch64-apple-darwin)
-    elseif(${arch} STREQUAL x86_64)
-      list(APPEND RUST_OSX_ARCHITECTURES x86_64-apple-darwin)
-    else()
-      message(SEND_ERROR "CMAKE_OSX_ARCHITECTURES' architecture ${arch} unknown, can't build Rust code (known: arm64, x86_64)")
-    endif()
-  endforeach()
-endif()
-
-set(RUST_SRC
-      ${RUST_BASE}
-      ${RUST_ENGINE_INTERFACE}
-      ${RUST_ENGINE_SHARED}
-      Cargo.toml
-      Cargo.lock
-)
-set(RUST_TARGETS engine_shared)
-if(NOT CMAKE_OSX_ARCHITECTURES)
-  set(RUST_OUTPUTS)
-  foreach(rust_target ${RUST_TARGETS})
-    set(LIBRARY_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}ddnet_${rust_target}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-    add_library(rust_${rust_target} STATIC IMPORTED GLOBAL)
-    add_custom_target(rust_${rust_target}_target DEPENDS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-    add_dependencies(rust_${rust_target} rust_${rust_target}_target)
-    set_target_properties(rust_${rust_target} PROPERTIES
-      IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELEASE}/${LIBRARY_NAME}"
-      IMPORTED_LOCATION_DEBUG "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_DEBUG}/${LIBRARY_NAME}"
-      IMPORTED_LOCATION_RELWITHDEBINFO "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELWITHDEBINFO}/${LIBRARY_NAME}"
-    )
-    list(APPEND RUST_OUTPUTS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-  endforeach()
-  add_custom_command(
-    OUTPUT ${RUST_OUTPUTS}
-    COMMAND ${CARGO_BUILD}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-    USES_TERMINAL
-    DEPENDS ${RUST_SRC}
-  )
-else()
-  foreach(rust_target ${RUST_TARGETS})
-    set(LIBRARY_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}ddnet_${rust_target}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-    add_library(rust_${rust_target} STATIC IMPORTED GLOBAL)
-    set_target_properties(rust_${rust_target} PROPERTIES
-      IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELEASE}/${LIBRARY_NAME}"
-      IMPORTED_LOCATION_DEBUG "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_DEBUG}/${LIBRARY_NAME}"
-      IMPORTED_LOCATION_RELWITHDEBINFO "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELWITHDEBINFO}/${LIBRARY_NAME}"
-    )
-    add_custom_target(rust_${rust_target}_target DEPENDS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-    add_dependencies(rust_${rust_target} rust_${rust_target}_target)
-    set(ARCH_LIBRARIES)
-    foreach(arch ${RUST_OSX_ARCHITECTURES})
-      list(APPEND ARCH_LIBRARIES "${PROJECT_BINARY_DIR}/${arch}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-    endforeach()
-    add_custom_command(
-      OUTPUT "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}"
-      COMMAND lipo ${ARCH_LIBRARIES} -create -output "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}"
-      DEPENDS ${ARCH_LIBRARIES}
-    )
-  endforeach()
-  foreach(arch ${RUST_OSX_ARCHITECTURES})
-    set(RUST_OUTPUTS)
-    foreach(rust_target ${RUST_TARGETS})
-      set(LIBRARY_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}ddnet_${rust_target}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-      list(APPEND RUST_OUTPUTS "${PROJECT_BINARY_DIR}/${arch}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-    endforeach()
-    add_custom_command(
-      OUTPUT ${RUST_OUTPUTS}
-      COMMAND ${CARGO_BUILD} --target=${arch}
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      USES_TERMINAL
-      DEPENDS ${RUST_SRC}
-    )
-  endforeach()
 endif()
 
 ########################################################################
@@ -2132,7 +1931,6 @@ set_src(BASE GLOB_RECURSE src/base
   os.h
   process.cpp
   process.h
-  rust.h
   secure.cpp
   secure.h
   sphore.cpp
@@ -2180,7 +1978,6 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   map.h
   message.h
   notifications.h
-  rust.h
   server.h
   serverbrowser.h
   sound.h
@@ -2366,8 +2163,6 @@ set(LIBS
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
   # tidy-alphabetical-end
-  # Add Rust part of our code.
-  rust_engine_shared
   ${PLATFORM_LIBS}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
@@ -2787,7 +2582,6 @@ if(CLIENT)
     ${OGG_LIBRARIES}
 
     ${TARGET_STEAMAPI}
-    rust_engine_shared
 
     ${PLATFORM_CLIENT_LIBS}
     ${LIBS}
@@ -2832,7 +2626,6 @@ if(CLIENT)
       $<TARGET_OBJECTS:engine-gfx>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
       # tidy-alphabetical-end
     )
   else()
@@ -2846,7 +2639,6 @@ if(CLIENT)
       $<TARGET_OBJECTS:engine-gfx>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
       # tidy-alphabetical-end
     )
   endif()
@@ -3054,7 +2846,6 @@ if(SERVER)
     ${MINIUPNPC_LIBRARIES}
     ${MYSQL_LIBRARIES}
     ${TARGET_ANTIBOT}
-    rust_engine_shared
 
     ${LIBS}
   )
@@ -3085,7 +2876,6 @@ if(SERVER)
       # tidy-alphabetical-sort
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
       # tidy-alphabetical-sort
     )
   else()
@@ -3098,7 +2888,6 @@ if(SERVER)
       # tidy-alphabetical-sort
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
       # tidy-alphabetical-sort
     )
   endif()
@@ -3322,7 +3111,6 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-server-without-main>
     $<TARGET_OBJECTS:game-shared>
-    $<TARGET_OBJECTS:rust-bridge-shared>
     # tidy-alphabetical-end
     ${DEPS}
   )
@@ -3341,39 +3129,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   add_custom_target(run_tests
     DEPENDS run_cxx_tests
   )
-  if(NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release)
-    # On MSVC, Rust tests only work in the release mode because we link our C++
-    # code with the debug C standard library (/MTd) but Rust only supports
-    # linking to the release C standard library (/MT).
-    #
-    # See also https://github.com/rust-lang/rust/issues/39016.
-    add_dependencies(run_tests run_rust_tests)
-  endif()
 endif()
-
-add_library(rust_test STATIC EXCLUDE_FROM_ALL
-  # tidy-alphabetical-start
-  $<TARGET_OBJECTS:engine-gfx>
-  $<TARGET_OBJECTS:engine-shared>
-  $<TARGET_OBJECTS:game-shared>
-  $<TARGET_OBJECTS:rust-bridge-shared>
-  # tidy-alphabetical-end
-  ${DEPS}
-)
-
-list(APPEND TARGETS_OWN rust_test)
-list(APPEND TARGETS_LINK rust_test)
-
-set(RUST_TEST_LIBS ${LIBS} $<TARGET_FILE:rust_test>)
-list(REMOVE_ITEM RUST_TEST_LIBS "rust_engine_shared")
-list(REMOVE_ITEM RUST_TEST_LIBS "-pthread")
-add_custom_target(run_rust_tests
-  COMMAND ${CMAKE_COMMAND} -E env "DDNET_TEST_LIBRARIES=${RUST_TEST_LIBS}" ${CARGO_TEST}
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  USES_TERMINAL
-  DEPENDS rust_test
-  VERBATIM
-)
 
 ########################################################################
 # INSTALLATION
@@ -3988,7 +3744,6 @@ foreach(target ${TARGETS_OWN})
   endif()
   target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
-  target_include_directories(${target} PRIVATE src/rust-bridge)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)

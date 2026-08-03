@@ -666,7 +666,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 bool CConsole::CanUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
 {
-	// the fallback is needed for the client and rust tests
+	// the fallback is needed for the client and tests
 	if(!m_pfnCanUseCommandCallback)
 		return true;
 	return m_pfnCanUseCommandCallback(ClientId, pCommand, m_pCanUseCommandUserData);

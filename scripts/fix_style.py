@@ -19,7 +19,6 @@ def recursive_file_list(path):
 IGNORE_FILES = []
 IGNORE_DIRS = [
 	"src/game/generated",
-	"src/rust-bridge",
 ]
 
 
