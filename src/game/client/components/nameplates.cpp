@@ -881,7 +881,15 @@ void CNamePlates::OnRender()
 		// Only render name plates for active characters
 		if(GameClient()->m_Snap.m_aCharacters[i].m_Active)
 		{
-			const vec2 RenderPos = GameClient()->m_aClients[i].m_RenderPos;
+			vec2 RenderPos = GameClient()->m_aClients[i].m_RenderPos;
+
+			bool Local = GameClient()->m_Snap.m_LocalClientId == i;
+
+			if(!Local && g_Config.m_ClAntipingShadow)
+				RenderPos = mix(
+					vec2(GameClient()->m_Snap.m_aCharacters[i].m_Prev.m_X, GameClient()->m_Snap.m_aCharacters[i].m_Prev.m_Y),
+					vec2(GameClient()->m_Snap.m_aCharacters[i].m_Cur.m_X, GameClient()->m_Snap.m_aCharacters[i].m_Cur.m_Y),
+					Client()->IntraGameTick(g_Config.m_ClDummy));
 			RenderNamePlateGame(RenderPos, pInfo, 1.0f);
 		}
 	}
