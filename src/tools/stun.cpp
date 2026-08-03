@@ -46,6 +46,7 @@ int main(int argc, const char **argv)
 		log_error("stun", "failed sending stun request");
 		return 2;
 	}
+	net_udp_flush(Socket);
 
 	NETADDR ResponseAddr;
 	unsigned char *pResponse;

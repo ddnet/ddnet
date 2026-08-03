@@ -54,6 +54,7 @@ int main(int argc, const char **argv)
 	Packet.m_pData = aBuffer;
 
 	NetClient.Send(&Packet);
+	net_udp_flush(NetClient.m_Socket);
 
 	const int64_t StartTime = time_get();
 

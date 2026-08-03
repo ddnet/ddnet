@@ -3362,6 +3362,10 @@ void CClient::Run()
 			}
 
 			Update();
+			// flush before rendering so input packets are not delayed by a
+			// blocking buffer swap
+			for(auto &NetClient : m_aNetClient)
+				net_udp_flush(NetClient.m_Socket);
 			int64_t Now = time_get();
 
 			bool IsRenderActive = (g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen());
@@ -3428,6 +3432,9 @@ void CClient::Run()
 
 		if(State() == IClient::STATE_QUITTING || State() == IClient::STATE_RESTARTING)
 			break;
+
+		for(auto &NetClient : m_aNetClient)
+			net_udp_flush(NetClient.m_Socket);
 
 		// beNice
 		auto Now = time_get_nanoseconds();

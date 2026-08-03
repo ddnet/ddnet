@@ -36,6 +36,7 @@ TEST(Net, Ipv4AndIpv6Work)
 	unsigned char *pData;
 
 	EXPECT_EQ(net_udp_send(Socket2, &TargetV4, "abc", 3), 3);
+	net_udp_flush(Socket2);
 
 	EXPECT_EQ(net_socket_read_wait(Socket1, 10s), 1);
 	ASSERT_EQ(net_udp_recv(Socket1, &Addr, &pData), 3);
@@ -44,6 +45,7 @@ TEST(Net, Ipv4AndIpv6Work)
 	EXPECT_EQ(mem_comp(pData, "abc", 3), 0);
 
 	EXPECT_EQ(net_udp_send(Socket2, &TargetV6, "def", 3), 3);
+	net_udp_flush(Socket2);
 
 	EXPECT_EQ(net_socket_read_wait(Socket1, 10s), 1);
 	ASSERT_EQ(net_udp_recv(Socket1, &Addr, &pData), 3);

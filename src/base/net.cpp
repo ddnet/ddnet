@@ -57,6 +57,13 @@ typedef struct
 	struct iovec iovecs[VLEN];
 	char bufs[VLEN][PACKETSIZE];
 	char sockaddrs[VLEN][128];
+
+	int send_size;
+	int send_fds[VLEN];
+	struct mmsghdr send_msgs[VLEN];
+	struct iovec send_iovecs[VLEN];
+	char send_bufs[VLEN][PACKETSIZE];
+	char send_sockaddrs[VLEN][128];
 #else
 	char buf[PACKETSIZE];
 #endif
@@ -78,6 +85,18 @@ static void net_buffer_init(NETSOCKET_BUFFER *buffer)
 		buffer->msgs[i].msg_hdr.msg_iovlen = 1;
 		buffer->msgs[i].msg_hdr.msg_name = &(buffer->sockaddrs[i]);
 		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
+	}
+
+	buffer->send_size = 0;
+	mem_zero(buffer->send_msgs, sizeof(buffer->send_msgs));
+	mem_zero(buffer->send_iovecs, sizeof(buffer->send_iovecs));
+	mem_zero(buffer->send_sockaddrs, sizeof(buffer->send_sockaddrs));
+	for(size_t i = 0; i < VLEN; ++i)
+	{
+		buffer->send_iovecs[i].iov_base = buffer->send_bufs[i];
+		buffer->send_msgs[i].msg_hdr.msg_iov = &(buffer->send_iovecs[i]);
+		buffer->send_msgs[i].msg_hdr.msg_iovlen = 1;
+		buffer->send_msgs[i].msg_hdr.msg_name = &(buffer->send_sockaddrs[i]);
 	}
 #endif
 }
@@ -1007,6 +1026,63 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	return sock;
 }
 
+void net_udp_flush(NETSOCKET sock)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	if(sock == nullptr)
+		return;
+	NETSOCKET_BUFFER *buffer = &sock->buffer;
+	int start = 0;
+	while(start < buffer->send_size)
+	{
+		// sendmmsg operates on a single socket, so send consecutive runs of
+		// messages with the same target socket together
+		const int fd = buffer->send_fds[start];
+		int end = start + 1;
+		while(end < buffer->send_size && buffer->send_fds[end] == fd)
+			end++;
+		int sent = 0;
+		while(sent < end - start)
+		{
+			const int n = sendmmsg(fd, &buffer->send_msgs[start + sent], end - start - sent, 0);
+			if(n <= 0)
+			{
+				sent++;
+				continue;
+			}
+			sent += n;
+		}
+		start = end;
+	}
+	buffer->send_size = 0;
+#else
+	(void)sock;
+#endif
+}
+
+#if defined(CONF_PLATFORM_LINUX)
+static void net_send_enqueue(NETSOCKET sock, int fd, const sockaddr *sa, socklen_t salen, const void *data, int size)
+{
+	NETSOCKET_BUFFER *buffer = &sock->buffer;
+	if(size > (int)sizeof(buffer->send_bufs[0]))
+	{
+		sendto(fd, data, size, 0, sa, salen);
+		return;
+	}
+	if(buffer->send_size == (int)VLEN)
+	{
+		net_udp_flush(sock);
+	}
+	const int i = buffer->send_size;
+	buffer->send_fds[i] = fd;
+	mem_copy(buffer->send_bufs[i], data, size);
+	buffer->send_iovecs[i].iov_len = size;
+	mem_copy(buffer->send_sockaddrs[i], sa, salen);
+	buffer->send_msgs[i].msg_hdr.msg_namelen = salen;
+	buffer->send_size = i + 1;
+}
+#endif
+
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
 {
 	int d = -1;
@@ -1028,7 +1104,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 				netaddr_to_sockaddr_in(addr, &sa);
 			}
 
+#if defined(CONF_PLATFORM_LINUX)
+			net_send_enqueue(sock, sock->ipv4sock, (sockaddr *)&sa, sizeof(sa), data, size);
+			d = size;
+#else
 			d = sendto(sock->ipv4sock, (const char *)data, size, 0, (sockaddr *)&sa, sizeof(sa));
+#endif
 		}
 		else
 		{
@@ -1076,7 +1157,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 				netaddr_to_sockaddr_in6(addr, &sa);
 			}
 
+#if defined(CONF_PLATFORM_LINUX)
+			net_send_enqueue(sock, sock->ipv6sock, (sockaddr *)&sa, sizeof(sa), data, size);
+			d = size;
+#else
 			d = sendto(sock->ipv6sock, (const char *)data, size, 0, (sockaddr *)&sa, sizeof(sa));
+#endif
 		}
 		else
 		{
@@ -1223,6 +1309,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 
 void net_udp_close(NETSOCKET sock)
 {
+	net_udp_flush(sock);
 	priv_net_close_all_sockets(sock);
 }
 

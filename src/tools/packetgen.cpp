@@ -30,6 +30,7 @@ static void Run(NETADDR Dest)
 		SocketToUse %= NUM_SOCKETS;
 		io_read(io_stdin(), aData, Size);
 		net_udp_send(aSockets[SocketToUse], &Dest, aData, Size);
+		net_udp_flush(aSockets[SocketToUse]);
 	}
 }
 

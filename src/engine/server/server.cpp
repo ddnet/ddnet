@@ -3400,6 +3400,9 @@ int CServer::Run()
 			if(NewTicks)
 			{
 				DoSnapshot();
+				// flush immediately so snapshots are not delayed by the rest
+				// of the tick work
+				net_udp_flush(m_NetServer.Socket());
 
 				const int CommandSendingClientId = Tick() % MAX_CLIENTS;
 				UpdateClientRconCommands(CommandSendingClientId);
@@ -3507,6 +3510,8 @@ int CServer::Run()
 			{
 				m_ReloadedWhenEmpty = false;
 			}
+
+			net_udp_flush(m_NetServer.Socket());
 
 			// wait for incoming data
 			if(NonActive && Config()->m_SvShutdownWhenEmpty)

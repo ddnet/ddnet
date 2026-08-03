@@ -196,6 +196,8 @@ static void Run(unsigned short Port, NETADDR Dest)
 			}
 		}
 
+		net_udp_flush(Socket);
+
 		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 	}
 }

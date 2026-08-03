@@ -263,6 +263,9 @@ NETSOCKET net_udp_create(NETADDR bindaddr);
 /**
  * Sends a packet over an UDP socket.
  *
+ * On Linux, the packet may be buffered instead of being sent immediately,
+ * call `net_udp_flush` to ensure that all buffered packets are sent.
+ *
  * @ingroup Network-UDP
  *
  * @param sock Socket to use.
@@ -270,9 +273,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr);
  * @param data Pointer to the packet data to send.
  * @param size Size of the packet.
  *
- * @return On success it returns the number of bytes sent. Returns `-1` on error.
+ * @return On success it returns the number of bytes sent or buffered. Returns `-1` on error.
  */
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size);
+
+/**
+ * Sends all buffered packets of an UDP socket.
+ *
+ * @ingroup Network-UDP
+ *
+ * @param sock Socket to flush.
+ */
+void net_udp_flush(NETSOCKET sock);
 
 /**
  * Receives a packet over an UDP socket.
