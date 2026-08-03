@@ -69,21 +69,37 @@ void CDoor::ResetCollision()
 
 	m_Active = true;
 
-	vec2 Dir = m_To - m_Pos;
-	m_Length = length(Dir);
-	m_Direction = m_Length > 0 ? normalize_pre_length(Dir, static_cast<float>(m_Length)) : vec2(0.0f, 0.0f);
+	const vec2 Dir = m_To - m_Pos;
+	const float DirLength = length(Dir);
+	m_Direction = DirLength > 0.0f ? normalize_pre_length(Dir, DirLength) : vec2(0.0f, 0.0f);
 
 	// The snapshot only carries the endpoint CCollision::IntersectNoLaser produced, which
 	// also stops at TILE_NOLASER, while the server lays down door collision along the full
 	// length configured in the map and stops only at solid tiles. Recover that length the
 	// way IGameController::OnEntity derives it, from the ENTITY_LASER_* tile next to the
 	// door's tile on the side the door points at.
-	const int Side = m_Length > 0 ? MapSide() : -1;
+	const int Side = DirLength > 0.0f ? MapSide() : -1;
 	const int ConfiguredLength = Side == -1 ? -1 : MapLength(Side);
 	if(ConfiguredLength != -1)
 	{
 		m_Length = ConfiguredLength;
 		m_Direction = vec2(std::sin(pi / 4 * Side), std::cos(pi / 4 * Side));
+	}
+	else
+	{
+		// No configured length: the length comes straight off the wire, so a server can
+		// snap a door whose endpoints are billions of units apart and spin the walk below
+		// (which never breaks while it clamps to an off-map air tile) at 100% CPU on every
+		// snapshot. A door's collision can only ever matter inside the map, since both
+		// CheckPoint and SetDoorCollisionAt clamp to it, so refuse to walk anything longer
+		// than the map itself. This also keeps the float length in int range.
+		const float MaxLength = (Collision()->GetWidth() + Collision()->GetHeight()) * 32.0f;
+		if(DirLength <= 0.0f || DirLength > MaxLength)
+		{
+			m_Active = false;
+			return;
+		}
+		m_Length = round_to_int(DirLength);
 	}
 
 	for(int i = 0; i < m_Length - 1; i++)

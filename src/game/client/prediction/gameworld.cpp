@@ -608,12 +608,18 @@ void CGameWorld::ResetDoorCollision()
 	// rather than keeping them on the entity, so the grid is rebuilt after every snapshot:
 	// a destroyed door clears its entire span, including tiles another door still occupies.
 	// Doors are applied in map order, the order the server creates them in, so intersecting
-	// doors resolve to the same tile on both sides.
+	// doors resolve to the same tile on both sides. Two doors originating on the same tile
+	// share a map index; the server creates the game/front-layer door before the switch-layer
+	// one, so the switch door (m_Number > 0) stamps the shared origin tile last and wins.
 	std::vector<CDoor *> vpDoors;
 	for(CEntity *pEnt = FindFirst(ENTTYPE_DOOR); pEnt; pEnt = pEnt->TypeNext())
 		vpDoors.push_back(static_cast<CDoor *>(pEnt));
 	std::stable_sort(vpDoors.begin(), vpDoors.end(), [this](const CDoor *pLeft, const CDoor *pRight) {
-		return Collision()->GetPureMapIndex(pLeft->m_Pos) < Collision()->GetPureMapIndex(pRight->m_Pos);
+		const int LeftIndex = Collision()->GetPureMapIndex(pLeft->m_Pos);
+		const int RightIndex = Collision()->GetPureMapIndex(pRight->m_Pos);
+		if(LeftIndex != RightIndex)
+			return LeftIndex < RightIndex;
+		return (pLeft->m_Number > 0) < (pRight->m_Number > 0);
 	});
 	for(CDoor *pDoor : vpDoors)
 		pDoor->ResetCollision();
