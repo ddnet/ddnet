@@ -2640,28 +2640,25 @@ void CServer::GetServerInfoSixup(CPacker *pPacker, bool SendClients)
 	pPacker->AddRaw(FirstChunk.m_vData.data(), FirstChunk.m_vData.size());
 }
 
-void CServer::FillAntibot(CAntibotRoundData *pData)
+void CServer::FillAntibot(CAntibotRoundData *pData, int ClientId)
 {
-	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	CAntibotPlayerData *pPlayer = &pData->m_aPlayers[ClientId];
+	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 	{
-		CAntibotPlayerData *pPlayer = &pData->m_aPlayers[ClientId];
-		if(m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
-		{
-			pPlayer->m_aAddress[0] = '\0';
-		}
-		else
-		{
-			// No need for expensive str_copy since we don't truncate and the string is
-			// ASCII anyway
-			static_assert(std::size((CAntibotPlayerData{}).m_aAddress) >= NETADDR_MAXSTRSIZE);
-			static_assert(std::is_same_v<decltype(CServer{}.ClientAddrStringImpl(ClientId, true)), const std::array<char, NETADDR_MAXSTRSIZE> &>);
-			mem_copy(pPlayer->m_aAddress, ClientAddrStringImpl(ClientId, true).data(), NETADDR_MAXSTRSIZE);
-			pPlayer->m_Sixup = m_aClients[ClientId].m_Sixup;
-			pPlayer->m_DnsblNone = m_aClients[ClientId].m_DnsblState == EDnsblState::NONE;
-			pPlayer->m_DnsblPending = m_aClients[ClientId].m_DnsblState == EDnsblState::PENDING;
-			pPlayer->m_DnsblBlacklisted = m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
-			pPlayer->m_Authed = IsRconAuthed(ClientId);
-		}
+		pPlayer->m_aAddress[0] = '\0';
+	}
+	else
+	{
+		// No need for expensive str_copy since we don't truncate and the string is
+		// ASCII anyway
+		static_assert(std::size((CAntibotPlayerData{}).m_aAddress) >= NETADDR_MAXSTRSIZE);
+		static_assert(std::is_same_v<decltype(CServer{}.ClientAddrStringImpl(ClientId, true)), const std::array<char, NETADDR_MAXSTRSIZE> &>);
+		mem_copy(pPlayer->m_aAddress, ClientAddrStringImpl(ClientId, true).data(), NETADDR_MAXSTRSIZE);
+		pPlayer->m_Sixup = m_aClients[ClientId].m_Sixup;
+		pPlayer->m_DnsblNone = m_aClients[ClientId].m_DnsblState == EDnsblState::NONE;
+		pPlayer->m_DnsblPending = m_aClients[ClientId].m_DnsblState == EDnsblState::PENDING;
+		pPlayer->m_DnsblBlacklisted = m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
+		pPlayer->m_Authed = IsRconAuthed(ClientId);
 	}
 }
 

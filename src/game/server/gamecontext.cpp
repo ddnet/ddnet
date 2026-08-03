@@ -297,52 +297,49 @@ bool CGameContext::EmulateBug(int Bug) const
 	return m_MapBugs.Contains(Bug);
 }
 
-void CGameContext::FillAntibot(CAntibotRoundData *pData)
+void CGameContext::FillAntibot(CAntibotRoundData *pData, int ClientId)
 {
 	if(!pData->m_Map.m_pTiles)
 	{
 		Collision()->FillAntibot(&pData->m_Map);
 	}
 	pData->m_Tick = Server()->Tick();
-	mem_zero(pData->m_aCharacters, sizeof(pData->m_aCharacters));
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	CAntibotCharacterData *pChar = &pData->m_aCharacters[ClientId];
+	mem_zero(pChar, sizeof(*pChar));
+	for(auto &LatestInput : pChar->m_aLatestInputs)
 	{
-		CAntibotCharacterData *pChar = &pData->m_aCharacters[i];
-		for(auto &LatestInput : pChar->m_aLatestInputs)
-		{
-			LatestInput.m_Direction = 0;
-			LatestInput.m_TargetX = -1;
-			LatestInput.m_TargetY = -1;
-			LatestInput.m_Jump = -1;
-			LatestInput.m_Fire = -1;
-			LatestInput.m_Hook = -1;
-			LatestInput.m_PlayerFlags = -1;
-			LatestInput.m_WantedWeapon = -1;
-			LatestInput.m_NextWeapon = -1;
-			LatestInput.m_PrevWeapon = -1;
-		}
-		pChar->m_Alive = false;
-		pChar->m_Pause = false;
-		pChar->m_Team = -1;
+		LatestInput.m_Direction = 0;
+		LatestInput.m_TargetX = -1;
+		LatestInput.m_TargetY = -1;
+		LatestInput.m_Jump = -1;
+		LatestInput.m_Fire = -1;
+		LatestInput.m_Hook = -1;
+		LatestInput.m_PlayerFlags = -1;
+		LatestInput.m_WantedWeapon = -1;
+		LatestInput.m_NextWeapon = -1;
+		LatestInput.m_PrevWeapon = -1;
+	}
+	pChar->m_Alive = false;
+	pChar->m_Pause = false;
+	pChar->m_Team = -1;
 
-		pChar->m_Pos = vec2(-1, -1);
-		pChar->m_Vel = vec2(0, 0);
-		pChar->m_Angle = -1;
-		pChar->m_HookedPlayer = -1;
-		pChar->m_SpawnTick = -1;
-		pChar->m_WeaponChangeTick = -1;
+	pChar->m_Pos = vec2(-1, -1);
+	pChar->m_Vel = vec2(0, 0);
+	pChar->m_Angle = -1;
+	pChar->m_HookedPlayer = -1;
+	pChar->m_SpawnTick = -1;
+	pChar->m_WeaponChangeTick = -1;
 
-		if(m_apPlayers[i])
+	if(m_apPlayers[ClientId])
+	{
+		str_copy(pChar->m_aName, Server()->ClientName(ClientId));
+		CCharacter *pGameChar = m_apPlayers[ClientId]->GetCharacter();
+		pChar->m_Alive = (bool)pGameChar;
+		pChar->m_Pause = m_apPlayers[ClientId]->IsPaused();
+		pChar->m_Team = m_apPlayers[ClientId]->GetTeam();
+		if(pGameChar)
 		{
-			str_copy(pChar->m_aName, Server()->ClientName(i));
-			CCharacter *pGameChar = m_apPlayers[i]->GetCharacter();
-			pChar->m_Alive = (bool)pGameChar;
-			pChar->m_Pause = m_apPlayers[i]->IsPaused();
-			pChar->m_Team = m_apPlayers[i]->GetTeam();
-			if(pGameChar)
-			{
-				pGameChar->FillAntibot(pChar);
-			}
+			pGameChar->FillAntibot(pChar);
 		}
 	}
 }
