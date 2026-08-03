@@ -2922,8 +2922,10 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	}
 
 	if(Server()->ClientCountry(ClientId) != pMsg->m_Country)
+	{
 		SixupNeedsUpdate = true;
-	Server()->SetClientCountry(ClientId, pMsg->m_Country);
+		Server()->SetClientCountry(ClientId, pMsg->m_Country);
+	}
 
 	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin);
 	pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
