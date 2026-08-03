@@ -111,6 +111,8 @@ void CEditorMap::Clean()
 	m_SelectedSoundSource = -1;
 
 	m_ShiftBy = 1;
+	m_ShowDetail = true;
+	m_PreviewZoom = false;
 
 	m_MapViewState.Reset(Editor());
 	m_MapGridState.Reset();
