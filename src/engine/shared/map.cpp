@@ -95,6 +95,7 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	int GroupsStart, GroupsNum, LayersStart, LayersNum;
 	NewDataFile.GetType(MAPITEMTYPE_GROUP, &GroupsStart, &GroupsNum);
 	NewDataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
+	const CMapItemLayerTilemap *pGameLayer = nullptr;
 	for(int g = 0; g < GroupsNum; g++)
 	{
 		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + g));
@@ -104,6 +105,11 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
+				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
+				{
+					// CLayers uses the last game layer, so this must match
+					pGameLayer = pTilemap;
+				}
 				if(pTilemap->m_Version >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
 				{
 					const size_t TilemapCount = (size_t)pTilemap->m_Width * pTilemap->m_Height;
@@ -122,6 +128,24 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 				}
 			}
 		}
+	}
+
+	// The game layer determines the map size that the collision and all entity
+	// lookups are based on, which assume that its tile data is complete.
+	if(pGameLayer == nullptr)
+	{
+		log_error("map/load", "Map does not contain a game layer.");
+		NewDataFile.Close();
+		return false;
+	}
+	const int GameTileDataSize = NewDataFile.GetDataSize(pGameLayer->m_Data);
+	if(pGameLayer->m_Width <= 0 || pGameLayer->m_Height <= 0 ||
+		(int64_t)pGameLayer->m_Width * pGameLayer->m_Height > GameTileDataSize / (int)sizeof(CTile) ||
+		NewDataFile.GetData(pGameLayer->m_Data) == nullptr)
+	{
+		log_error("map/load", "Game layer size (%d * %d) does not match its tile data (%d bytes).", pGameLayer->m_Width, pGameLayer->m_Height, GameTileDataSize);
+		NewDataFile.Close();
+		return false;
 	}
 
 	// Replace existing datafile with new datafile

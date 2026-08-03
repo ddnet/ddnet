@@ -3,6 +3,7 @@
 #include <antibot/antibot_data.h>
 
 #include <base/dbg.h>
+#include <base/log.h>
 #include <base/math.h>
 #include <base/mem.h>
 #include <base/vmath.h>
@@ -53,9 +54,18 @@ void CCollision::Init(class CLayers *pLayers)
 	Unload();
 
 	m_pLayers = pLayers;
-	m_Width = m_pLayers->GameLayer()->m_Width;
-	m_Height = m_pLayers->GameLayer()->m_Height;
-	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
+
+	const CMapItemLayerTilemap *pGameLayer = m_pLayers->GameLayer();
+	CTile *pTiles = pGameLayer == nullptr ? nullptr : static_cast<CTile *>(m_pLayers->Map()->GetData(pGameLayer->m_Data));
+	if(pTiles == nullptr || pGameLayer->m_Width <= 0 || pGameLayer->m_Height <= 0 ||
+		(int64_t)pGameLayer->m_Width * pGameLayer->m_Height > m_pLayers->Map()->GetDataSize(pGameLayer->m_Data) / (int)sizeof(CTile))
+	{
+		log_error("collision", "Map is missing a valid game layer");
+		return;
+	}
+	m_Width = pGameLayer->m_Width;
+	m_Height = pGameLayer->m_Height;
+	m_pTiles = pTiles;
 
 	if(m_pLayers->TeleLayer())
 	{
