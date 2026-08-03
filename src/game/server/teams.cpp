@@ -594,6 +594,24 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 	return Mask;
 }
 
+bool CGameTeams::CanSee(int Team, int Asker, int ClientId)
+{
+	if(Team == TEAM_SUPER)
+		return true;
+
+	CPlayer *pAsker = GetPlayer(Asker);
+	CInteractions Interact;
+	Interact.Init(Asker, pAsker ? pAsker->GetUniqueCid() : 0);
+	Interact.FillOwnerConnected(
+		pAsker && pAsker->GetCharacter() && pAsker->GetCharacter()->IsAlive(),
+		m_Core.Team(Asker),
+		m_Core.GetSolo(Asker),
+		false,
+		false); // TODO: these false values make little sense
+
+	return GetPlayer(ClientId) && Interact.CanSee(GameServer(), ClientId);
+}
+
 void CGameTeams::SendTeamsState(int ClientId)
 {
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)

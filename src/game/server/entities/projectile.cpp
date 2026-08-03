@@ -11,6 +11,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/ddnet.h>
+#include <game/server/teams.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -384,15 +385,12 @@ void CProjectile::Snap(int SnappingClient)
 	}
 
 	CCharacter *pOwnerChar = nullptr;
-	CClientMask TeamMask = CClientMask().set();
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	if(pOwnerChar && pOwnerChar->IsAlive())
-		TeamMask = pOwnerChar->TeamMask();
-
-	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !TeamMask.test(SnappingClient))
+	if(SnappingClient != SERVER_DEMO_CLIENT && pOwnerChar && pOwnerChar->IsAlive() &&
+		!pOwnerChar->Teams()->CanSee(pOwnerChar->Team(), m_Owner, SnappingClient))
 		return;
 
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
