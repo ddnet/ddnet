@@ -47,10 +47,10 @@ static void CreateEmptyMap(IStorage *pStorage)
 	GameLayer.m_Width = LayerWidth;
 	GameLayer.m_Height = LayerHeight;
 	GameLayer.m_Flags = TILESLAYERFLAG_GAME;
-	GameLayer.m_Color.r = 0;
-	GameLayer.m_Color.g = 0;
-	GameLayer.m_Color.b = 0;
-	GameLayer.m_Color.a = 0;
+	GameLayer.m_Color.r = 255;
+	GameLayer.m_Color.g = 255;
+	GameLayer.m_Color.b = 255;
+	GameLayer.m_Color.a = 255;
 	GameLayer.m_ColorEnv = -1;
 	GameLayer.m_ColorEnvOffset = 0;
 	GameLayer.m_Image = -1;
@@ -65,9 +65,9 @@ static void CreateEmptyMap(IStorage *pStorage)
 	Layer.m_Width = LayerWidth;
 	Layer.m_Height = LayerHeight;
 	Layer.m_Flags = 0;
-	Layer.m_Color.r = 0;
-	Layer.m_Color.g = 0;
-	Layer.m_Color.b = 0;
+	Layer.m_Color.r = 255;
+	Layer.m_Color.g = 255;
+	Layer.m_Color.b = 255;
 	Layer.m_Color.a = 255;
 	Layer.m_ColorEnv = -1;
 	Layer.m_ColorEnvOffset = 0;
