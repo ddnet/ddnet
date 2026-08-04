@@ -3,6 +3,8 @@
 #include "player.h"
 #include "teams.h"
 
+#include <base/log.h>
+
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -169,8 +171,8 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_Ninja.m_CurrentMoveTime = m_Ninja.m_CurrentMoveTime;
 	pChr->m_Core.m_Ninja.m_OldVelAmount = m_Ninja.m_OldVelAmount;
 
-	pChr->m_LastWeapon = m_LastWeapon >= 0 && m_LastWeapon < NUM_WEAPONS ? m_LastWeapon : WEAPON_HAMMER;
-	pChr->m_QueuedWeapon = m_QueuedWeapon >= 0 && m_QueuedWeapon < NUM_WEAPONS ? m_QueuedWeapon : -1;
+	pChr->m_LastWeapon = m_LastWeapon;
+	pChr->m_QueuedWeapon = m_QueuedWeapon;
 
 	pChr->m_Core.m_EndlessJump = m_EndlessJump;
 	pChr->m_Core.m_Jetpack = m_Jetpack;
@@ -188,9 +190,8 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_GrenadeHitDisabled = m_HitDisabledFlags & CSaveTee::GRENADE_HIT_DISABLED;
 	pChr->m_Core.m_LaserHitDisabled = m_HitDisabledFlags & CSaveTee::LASER_HIT_DISABLED;
 
-	pChr->m_TuneZone = m_TuneZone >= 0 && m_TuneZone < TuneZone::NUM ? m_TuneZone : 0;
-	// -1 is valid, it means that no zone leave message is shown
-	pChr->m_TuneZoneOld = m_TuneZoneOld >= -1 && m_TuneZoneOld < TuneZone::NUM ? m_TuneZoneOld : 0;
+	pChr->m_TuneZone = m_TuneZone;
+	pChr->m_TuneZoneOld = m_TuneZoneOld;
 
 	if(m_Time)
 		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
@@ -220,7 +221,7 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_Vel = m_Vel;
 	pChr->m_Core.m_HookHitDisabled = !m_HookHitEnabled;
 	pChr->m_Core.m_CollisionDisabled = !m_CollisionEnabled;
-	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon >= 0 && m_ActiveWeapon < NUM_WEAPONS ? m_ActiveWeapon : WEAPON_HAMMER;
+	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
 	pChr->m_Core.m_Jumped = m_Jumped;
 	pChr->m_Core.m_JumpedTotal = m_JumpedTotal;
 	pChr->m_Core.m_Jumps = m_Jumps;
@@ -353,7 +354,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 	return m_aString;
 }
 
-int CSaveTee::FromString(const char *pString)
+bool CSaveTee::FromString(const char *pString, int MembersCount)
 {
 	int Num;
 	Num = sscanf(pString,
@@ -468,21 +469,54 @@ int CSaveTee::FromString(const char *pString)
 		m_Ninja.m_OldVelAmount = 0;
 		[[fallthrough]];
 	case 115:
-		return 0;
+		break;
 	default:
 		dbg_msg("load", "failed to load tee-string");
 		dbg_msg("load", "loaded %d vars", Num);
-		return Num + 1; // never 0 here
+		return false;
 	}
+
+	if(m_LastWeapon < 0 || m_LastWeapon >= NUM_WEAPONS)
+	{
+		log_error("load", "savegame: tee has an invalid last weapon: %d", m_LastWeapon);
+		return false;
+	}
+	// -1 is valid, it means that no weapon is queued
+	if(m_QueuedWeapon < -1 || m_QueuedWeapon >= NUM_WEAPONS)
+	{
+		log_error("load", "savegame: tee has an invalid queued weapon: %d", m_QueuedWeapon);
+		return false;
+	}
+	if(m_ActiveWeapon < 0 || m_ActiveWeapon >= NUM_WEAPONS)
+	{
+		log_error("load", "savegame: tee has an invalid active weapon: %d", m_ActiveWeapon);
+		return false;
+	}
+	if(m_TuneZone < 0 || m_TuneZone >= TuneZone::NUM)
+	{
+		log_error("load", "savegame: tee has an invalid tune zone: %d", m_TuneZone);
+		return false;
+	}
+	// TuneZone::OVERRIDE_NONE is valid, it means that no zone leave message is shown
+	if(m_TuneZoneOld < TuneZone::OVERRIDE_NONE || m_TuneZoneOld >= TuneZone::NUM)
+	{
+		log_error("load", "savegame: tee has an invalid old tune zone: %d", m_TuneZoneOld);
+		return false;
+	}
+	// -1 is valid, it means that no player is hooked
+	if(m_HookedPlayer < -1 || m_HookedPlayer >= MembersCount)
+	{
+		log_error("load", "savegame: tee has an invalid hooked player: %d", m_HookedPlayer);
+		return false;
+	}
+
+	return true;
 }
 
 void CSaveTee::LoadHookedPlayer(const CSaveTeam *pTeam)
 {
-	if(m_HookedPlayer < 0 || m_HookedPlayer >= pTeam->GetMembersCount())
-	{
-		m_HookedPlayer = -1;
+	if(m_HookedPlayer == -1)
 		return;
-	}
 	m_HookedPlayer = pTeam->m_pSavedTees[m_HookedPlayer].GetClientId();
 }
 
@@ -792,11 +826,9 @@ int CSaveTeam::FromString(const char *pString)
 		if(StrSize < sizeof(aSaveTee))
 		{
 			str_copy(aSaveTee, pCopyPos, StrSize);
-			int Num = m_pSavedTees[n].FromString(aSaveTee);
-			if(Num)
+			if(!m_pSavedTees[n].FromString(aSaveTee, m_MembersCount))
 			{
 				dbg_msg("load", "failed to load tee");
-				dbg_msg("load", "loaded %d vars", Num - 1);
 				return 1;
 			}
 		}
