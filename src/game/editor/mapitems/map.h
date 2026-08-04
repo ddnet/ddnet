@@ -145,6 +145,8 @@ public:
 	int m_SelectedSoundSource;
 
 	int m_ShiftBy;
+	bool m_ShowDetail;
+	bool m_PreviewZoom;
 
 	// Component states
 	CMapView::CState m_MapViewState;

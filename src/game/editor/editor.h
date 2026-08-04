@@ -220,10 +220,8 @@ public:
 		m_ShowMousePointer = true;
 
 		m_GuiActive = true;
-		m_PreviewZoom = false;
 
 		m_ShowTileInfo = SHOW_TILE_OFF;
-		m_ShowDetail = true;
 
 		for(size_t i = 0; i < std::size(m_aSavedColors); ++i)
 		{
@@ -385,7 +383,6 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 
-	bool m_PreviewZoom;
 	const void *m_pContainerPanned;
 	const void *m_pContainerPannedLast;
 
@@ -396,7 +393,6 @@ public:
 		SHOW_TILE_HEXADECIMAL
 	};
 	EShowTile m_ShowTileInfo;
-	bool m_ShowDetail;
 
 	enum EExtraEditor
 	{
