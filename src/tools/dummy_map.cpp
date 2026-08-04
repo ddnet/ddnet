@@ -37,7 +37,6 @@ static void CreateEmptyMap(IStorage *pStorage)
 	constexpr int LayerHeight = 2;
 	CTile aTiles[LayerWidth * LayerHeight];
 	std::fill(std::begin(aTiles), std::end(aTiles), CTile{.m_Index = TILE_SOLID, .m_Flags = 0, .m_Skip = 0, .m_MustBe0 = 0});
-	const int TilesData = Writer.AddData(sizeof(aTiles), &aTiles);
 
 	CMapItemLayerTilemap GameLayer;
 	GameLayer.m_Layer.m_Version = 0; // Not set by the official client.
@@ -54,7 +53,7 @@ static void CreateEmptyMap(IStorage *pStorage)
 	GameLayer.m_ColorEnv = -1;
 	GameLayer.m_ColorEnvOffset = 0;
 	GameLayer.m_Image = -1;
-	GameLayer.m_Data = TilesData;
+	GameLayer.m_Data = Writer.AddData(sizeof(aTiles), &aTiles);
 	Writer.AddItem(MAPITEMTYPE_LAYER, 0, sizeof(GameLayer) - sizeof(GameLayer.m_aName) - sizeof(GameLayer.m_Tele) - sizeof(GameLayer.m_Speedup) - sizeof(GameLayer.m_Front) - sizeof(GameLayer.m_Switch) - sizeof(GameLayer.m_Tune), &GameLayer);
 
 	CMapItemLayerTilemap Layer;
@@ -72,7 +71,7 @@ static void CreateEmptyMap(IStorage *pStorage)
 	Layer.m_ColorEnv = -1;
 	Layer.m_ColorEnvOffset = 0;
 	Layer.m_Image = -1;
-	Layer.m_Data = TilesData;
+	Layer.m_Data = Writer.AddData(sizeof(aTiles), &aTiles);
 	Writer.AddItem(MAPITEMTYPE_LAYER, 1, sizeof(Layer) - sizeof(Layer.m_aName) - sizeof(Layer.m_Tele) - sizeof(Layer.m_Speedup) - sizeof(Layer.m_Front) - sizeof(Layer.m_Switch) - sizeof(Layer.m_Tune), &Layer);
 
 	Writer.Finish();
