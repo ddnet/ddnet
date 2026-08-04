@@ -11,6 +11,8 @@
 
 #include <zlib.h>
 
+static const char *TOOL_NAME = "dummy_map";
+
 static void CreateEmptyMap(IStorage *pStorage)
 {
 	const char *pMapName = "maps/dummy3.map";
@@ -18,7 +20,7 @@ static void CreateEmptyMap(IStorage *pStorage)
 	CDataFileWriter Writer;
 	if(!Writer.Open(pStorage, pMapName))
 	{
-		dbg_msg("dummy_map", "couldn't open map file '%s' for writing", pMapName);
+		log_error(TOOL_NAME, "Failed to open map '%s' for writing", pMapName);
 		return;
 	}
 	CMapItemGroup_v1 Group;
@@ -75,13 +77,13 @@ static void CreateEmptyMap(IStorage *pStorage)
 
 	Writer.Finish();
 
-	dbg_msg("dummy_map", "dummy map written to '%s'", pMapName);
+	log_info(TOOL_NAME, "Dummy map written to '%s'", pMapName);
 
 	void *pData;
 	unsigned DataSize;
 	if(!pStorage->ReadFile(pMapName, IStorage::TYPE_ALL, &pData, &DataSize))
 	{
-		dbg_msg("dummy_map", "couldn't open map file '%s' for reading", pMapName);
+		log_error(TOOL_NAME, "Failed to open map file '%s' for reading", pMapName);
 		return;
 	}
 	unsigned char *pDataChar = static_cast<unsigned char *>(pData);
@@ -91,12 +93,12 @@ static void CreateEmptyMap(IStorage *pStorage)
 
 	char aMapSha[SHA256_MAXSTRSIZE];
 	sha256_str(Sha256, aMapSha, sizeof(aMapSha));
-	dbg_msg("dummy_map", "crc32 %08X, sha256 %s", Crc, aMapSha);
+	log_info(TOOL_NAME, "CRC32 %08X, SHA256 %s", Crc, aMapSha);
 
 	const unsigned HexSize = 6 * DataSize + 1;
 	char *pHex = static_cast<char *>(malloc(HexSize));
 	str_hex_cstyle(pHex, HexSize, pDataChar, DataSize);
-	dbg_msg("dummy_map", "data %s", pHex);
+	log_info(TOOL_NAME, "Data %s", pHex);
 	free(pHex);
 
 	free(pDataChar);
@@ -110,7 +112,7 @@ int main(int argc, const char **argv)
 	std::unique_ptr<IStorage> pStorage = std::unique_ptr<IStorage>(CreateStorage(IStorage::EInitializationType::SERVER, argc, argv));
 	if(!pStorage)
 	{
-		log_error("dummy_map", "Error creating server storage");
+		log_error(TOOL_NAME, "Error creating server storage");
 		return -1;
 	}
 
