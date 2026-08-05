@@ -2054,7 +2054,7 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 					return nullptr;
 
 				if(!Server()->ReverseTranslate(pMsg7->m_Target, ClientId))
-					return 0;
+					return nullptr;
 
 				WhisperId(ClientId, pMsg7->m_Target, pMsg7->m_pMessage);
 				return nullptr;

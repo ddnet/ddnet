@@ -45,7 +45,7 @@ void CDragger::LookForPlayersToDrag()
 		const int &TargetTeam = pTarget->Team();
 
 		// Do not create a dragger beam for super player
-		if(TargetTeam == TEAM_SUPER)
+		if(TargetTeam == pTarget->TeamsCore()->TeamSuper())
 		{
 			continue;
 		}

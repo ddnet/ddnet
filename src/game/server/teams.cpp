@@ -648,8 +648,8 @@ void CGameTeams::SendTeamsState(int ClientId)
 				if(DontHighlightTeam)
 					Team = 0;
 				else if(Team == TEAM_SUPER)
-					Team = LEGACY_MAX_CLIENTS; // legacy team super
-				else if(Team >= LEGACY_MAX_CLIENTS)
+					Team = LEGACY_TEAM_SUPER; // legacy team super
+				else if(Team >= LEGACY_TEAM_SUPER)
 					Team = 0;
 			}
 		}
