@@ -10,6 +10,7 @@
 #include <base/dbg.h>
 #include <base/io.h>
 #include <base/log.h>
+#include <base/log_color.h>
 #include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
@@ -354,21 +355,13 @@ int IConsole::ToLogLevelFilter(int Level)
 	return Level + 2;
 }
 
-static LOG_COLOR ColorToLogColor(ColorRGBA Color)
-{
-	return LOG_COLOR{
-		(uint8_t)(Color.r * 255.0),
-		(uint8_t)(Color.g * 255.0),
-		(uint8_t)(Color.b * 255.0)};
-}
-
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor) const
 {
 	LEVEL LogLevel = IConsole::ToLogLevel(Level);
 	// if console colors are not enabled or if the color is pure white, use default terminal color
 	if(g_Config.m_ConsoleEnableColors && PrintColor != CONSOLE_DEFAULT_COLOR)
 	{
-		log_log_color(LogLevel, ColorToLogColor(PrintColor), pFrom, "%s", pStr);
+		log_log_color(LogLevel, color_cast<LOG_COLOR>(PrintColor), pFrom, "%s", pStr);
 	}
 	else
 	{
