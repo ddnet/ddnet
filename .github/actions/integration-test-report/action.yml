@@ -1,0 +1,40 @@
+name: Report integration test failure
+description: Upload integration test results as artifact and summarize the failures
+inputs:
+  name:
+    description: Name of the artifact to upload
+    required: true
+  dir:
+    description: Build directory containing the integration_* result directories
+    required: true
+runs:
+  using: composite
+  steps:
+  - name: Upload integration test results
+    id: artifact-upload
+    uses: actions/upload-artifact@v4
+    with:
+      name: ${{ inputs.name }}
+      path: ${{ inputs.dir }}/integration_*
+      if-no-files-found: error
+
+  - name: Summarize integration test results
+    shell: bash
+    run: |
+      echo -e "\033[31mFAILED: Integration test failed. Refer to the workflow logs and uploaded artifacts in the steps above for details.\033[m"
+      echo "### Integration test failed" >> $GITHUB_STEP_SUMMARY
+      echo >> $GITHUB_STEP_SUMMARY
+      echo "See summary below. Refer to the workflow logs and uploaded artifacts for details." >> $GITHUB_STEP_SUMMARY
+      echo >> $GITHUB_STEP_SUMMARY
+      echo "Artifact URL: ${{ steps.artifact-upload.outputs.artifact-url }}" >> $GITHUB_STEP_SUMMARY
+      for integration_dir in ${{ inputs.dir }}/integration_*; do
+        echo >> $GITHUB_STEP_SUMMARY
+        echo "<details><summary>Test $(basename "$integration_dir")</summary>" >> $GITHUB_STEP_SUMMARY
+        echo >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        cat "$integration_dir/test_failure.log" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        echo >> $GITHUB_STEP_SUMMARY
+        echo "</details>" >> $GITHUB_STEP_SUMMARY
+      done
+      exit 1

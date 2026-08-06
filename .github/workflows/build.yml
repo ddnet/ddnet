@@ -23,30 +23,30 @@ jobs:
         include:
         - name: ubuntu-latest-fancy
           os: ubuntu-latest
-          cmake-args: -G Ninja
+          cmake-args: -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
         - name: ubuntu-22.04
           os: ubuntu-22.04
           cmake-path: /usr/bin/
-          cmake-args: -G "Unix Makefiles" -DTEST_MYSQL=ON
+          cmake-args: -G "Unix Makefiles" -DTEST_MYSQL=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake-init-env: CXXFLAGS=-Werror
           gtest-env: GTEST_FILTER=-*SQLite*
           package-file: "*-linux_x86_64.tar.xz"
         - name: macOS-latest
           os: macOS-latest
-          cmake-args: -G Ninja
+          cmake-args: -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-macos.dmg"
         - name: windows-latest
           os: windows-latest
-          cmake-args: -A x64 -DEXCEPTION_HANDLING=ON -DVULKAN=ON
+          cmake-args: -G Ninja -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DEXCEPTION_HANDLING=ON -DVULKAN=ON -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
           executable-suffix: .exe
         - name: windows-latest-mingw
           os: windows-latest
-          cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar -DVULKAN=ON
+          cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar -DVULKAN=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake-init-env: CXXFLAGS=-Werror LDFLAGS=-Werror
           package-file: "*-win64.zip"
           executable-suffix: .exe
@@ -155,6 +155,27 @@ jobs:
               src/mastersrv
               src/masterping
               ./
+
+    - name: Cache compiler output (ccache)
+      if: matrix.name != 'windows-latest'
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.name }}
+        save: ${{ github.event_name == 'push' }}
+        max-size: 1G
+
+    - name: Cache compiler output (sccache)
+      if: matrix.name == 'windows-latest'
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        variant: sccache
+        key: ${{ matrix.name }}
+        save: ${{ github.event_name == 'push' }}
+        max-size: 1G
+
+    - name: Set up MSVC environment
+      if: matrix.name == 'windows-latest'
+      uses: ilammy/msvc-dev-cmd@v1
 
     - name: Build mastersrv
       if: ${{ !contains(matrix.os, 'ubuntu-22.04') }}
@@ -270,46 +291,22 @@ jobs:
         cp src/mastersrv/target/debug/mastersrv${{ matrix.executable-suffix }} headless
         python scripts/integration_test.py --show-full-output --test-mastersrv headless
 
-    - name: Run integration tests with Valgrind's Memcheck and code coverage
-      id: integration_test_valgrind
+    - name: Run integration tests with code coverage
+      id: integration_test_coverage
       if: contains(matrix.os, 'ubuntu-latest')
       continue-on-error: true
       run: |
         # Remove old coverage data:
         find headless -name '*.gcno' -o -name '*.gcda' -delete
         cp src/mastersrv/target/debug/mastersrv${{ matrix.executable-suffix }} headless
-        python scripts/integration_test.py --show-full-output --test-mastersrv --test-websockets --valgrind-memcheck headless
+        python scripts/integration_test.py --show-full-output --test-mastersrv --test-websockets headless
 
-    - name: Upload integration test results
-      id: integration_test_artifact_upload
-      if: steps.integration_test.outcome == 'failure' || steps.integration_test_valgrind.outcome == 'failure'
-      uses: actions/upload-artifact@v4
+    - name: Report integration test results
+      if: steps.integration_test.outcome == 'failure' || steps.integration_test_coverage.outcome == 'failure'
+      uses: ./.github/actions/integration-test-report
       with:
         name: ddnet-${{ matrix.name }}-integration-test-results
-        path: headless/integration_*
-        if-no-files-found: error
-
-    - name: Summarize integration test results
-      if: steps.integration_test.outcome == 'failure' || steps.integration_test_valgrind.outcome == 'failure'
-      shell: bash
-      run: |
-        echo -e "\033[31mFAILED: Integration test failed. Refer to the workflow logs and uploaded artifacts in the steps above for details.\033[m"
-        echo "### Integration test failed" >> $GITHUB_STEP_SUMMARY
-        echo >> $GITHUB_STEP_SUMMARY
-        echo "See summary below. Refer to the workflow logs and uploaded artifacts for details." >> $GITHUB_STEP_SUMMARY
-        echo >> $GITHUB_STEP_SUMMARY
-        echo "Artifact URL: ${{ steps.integration_test_artifact_upload.outputs.artifact-url }}" >> $GITHUB_STEP_SUMMARY
-        for integration_dir in headless/integration_*; do
-          echo >> $GITHUB_STEP_SUMMARY
-          echo "<details><summary>Test $(basename "$integration_dir")</summary>" >> $GITHUB_STEP_SUMMARY
-          echo >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat "$integration_dir/test_failure.log" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo >> $GITHUB_STEP_SUMMARY
-          echo "</details>" >> $GITHUB_STEP_SUMMARY
-        done
-        exit 1
+        dir: headless
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')
@@ -329,6 +326,87 @@ jobs:
       with:
         name: ddnet-${{ matrix.name }}
         path: release/artifacts
+
+  valgrind:
+    name: valgrind (${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
+    strategy:
+      fail-fast: false
+      matrix:
+        # Sharded so that the slow smoke_test runs in parallel with the other tests.
+        include:
+        - shard: smoke-test
+          test-args: smoke_test
+        - shard: other
+          test-args: --exclude smoke_test
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Prepare Linux
+      run: |
+        sudo apt-get update -y
+        packages=(
+          # tidy-alphabetical-start
+          cmake
+          libfreetype6-dev
+          libglew-dev
+          libnotify-dev
+          libpng-dev
+          libsdl2-dev
+          libsqlite3-dev
+          libwebsockets-dev
+          ninja-build
+          pkg-config
+          valgrind
+          # tidy-alphabetical-end
+        )
+        sudo apt-get install -y "${packages[@]}"
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+          cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
+          workspaces: |
+              src/mastersrv
+              ./
+
+    - name: Cache compiler output (ccache)
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: valgrind
+        # Both shards build the same configuration, so only save the cache from one of them.
+        save: ${{ github.event_name == 'push' && matrix.shard == 'smoke-test' }}
+        max-size: 500M
+
+    - name: Build mastersrv
+      run: |
+        cd src/mastersrv
+        cargo build
+
+    - name: Build headless client and server
+      run: |
+        mkdir headless
+        cd headless
+        cmake -E env CXXFLAGS=-Werror cmake -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DHEADLESS_CLIENT=ON -DWEBSOCKETS=ON -DVIDEORECORDER=OFF -DVULKAN=OFF -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        cmake --build . --config Debug --target game-client game-server
+
+    - name: Run integration tests with Valgrind's Memcheck
+      id: integration_test
+      continue-on-error: true
+      run: |
+        cp src/mastersrv/target/debug/mastersrv headless
+        python scripts/integration_test.py --show-full-output --test-mastersrv --test-websockets --valgrind-memcheck headless ${{ matrix.test-args }}
+
+    - name: Report integration test results
+      if: steps.integration_test.outcome == 'failure'
+      uses: ./.github/actions/integration-test-report
+      with:
+        name: ddnet-valgrind-${{ matrix.shard }}-integration-test-results
+        dir: headless
 
   build-android:
     runs-on: ubuntu-24.04
@@ -372,10 +450,19 @@ jobs:
               src/masterping
               ./
 
+    - name: Cache compiler output (ccache)
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: android
+        save: ${{ github.event_name == 'push' }}
+        max-size: 1G
+
     - name: Build Android app
       env:
         TW_KEY_NAME: /home/runner/DDNet.jks
         TW_KEY_ALIAS: DDNet-Key
+        CMAKE_C_COMPILER_LAUNCHER: ccache
+        CMAKE_CXX_COMPILER_LAUNCHER: ccache
       run: |
         export TW_KEY_PW="$(openssl rand -base64 32)"
         keytool -genkey -v -keystore "$TW_KEY_NAME" -keyalg RSA -keysize 2048 -validity 10000 -alias "$TW_KEY_ALIAS" -storepass "$TW_KEY_PW" -dname "CN=DDNet CI, OU=DDNet, O=DDNet"
@@ -422,11 +509,18 @@ jobs:
               src/masterping
               ./
 
+    - name: Cache compiler output (ccache)
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: emscripten
+        save: ${{ github.event_name == 'push' }}
+        max-size: 500M
+
     - name: Build headless Emscripten client in debug mode
       run: |
         export PATH=/home/runner/cmake/bin:$PATH
         source emsdk/emsdk_env.sh
-        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-headless -DCMAKE_BUILD_TYPE=Debug -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DHEADLESS_CLIENT=ON -DPREFER_BUNDLED_LIBS=ON
+        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-headless -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DHEADLESS_CLIENT=ON -DPREFER_BUNDLED_LIBS=ON
         cmake --build build-emscripten-headless --target game-client -j$(nproc)
 
     - name: Test headless Emscripten client
@@ -447,7 +541,7 @@ jobs:
         export PATH=/home/runner/cmake/bin:$PATH
         source emsdk/emsdk_env.sh
         # -G "Unix Makefiles" required due to https://gitlab.kitware.com/cmake/cmake/-/issues/16395
-        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-release -DCMAKE_BUILD_TYPE=Release -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON
+        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-release -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON
         cmake --build build-emscripten-release --target game-client -j$(nproc)
         cmake --build build-emscripten-release --target package_default
         mkdir artifacts
