@@ -32,6 +32,17 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		if(!(pItem->m_Settings > -1))
 			break;
 
+		int Size = Reader.GetDataSize(pItem->m_Settings);
+		char *pSettings = (char *)Reader.GetData(pItem->m_Settings);
+		// The settings are read as a sequence of null terminated strings, and the
+		// data can also fail to decompress while its claimed size stays. Check them
+		// before the config is created, so that none is left behind on an error.
+		if(pSettings == nullptr || Size <= 0 || pSettings[Size - 1] != '\0')
+		{
+			dbg_msg("config_retrieve", "error loading the settings of the map");
+			break;
+		}
+
 		ConfigFound = true;
 		IOHANDLE Config = pStorage->OpenFile(pConfigName, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE);
 		if(!Config)
@@ -41,8 +52,6 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 			return;
 		}
 
-		int Size = Reader.GetDataSize(pItem->m_Settings);
-		char *pSettings = (char *)Reader.GetData(pItem->m_Settings);
 		char *pNext = pSettings;
 		while(pNext < pSettings + Size)
 		{

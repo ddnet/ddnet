@@ -403,15 +403,20 @@ void CAutomapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
 
-	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
-	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
-	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
-	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
+	// Both layers are indexed with the same coordinates below, while nothing ties
+	// the size of a tile layer to the size of the game layer
+	const int MaxX = std::min(pLayer->m_Width, pGameLayer->m_Width);
+	const int MaxY = std::min(pLayer->m_Height, pGameLayer->m_Height);
 
-	int UpdateFromX = std::clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_Width);
-	int UpdateFromY = std::clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_Height);
-	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
-	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
+	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, MaxX);
+	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, MaxY);
+	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, MaxX);
+	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, MaxY);
+
+	int UpdateFromX = std::clamp(X + 3 * pConf->m_StartX, 0, MaxX);
+	int UpdateFromY = std::clamp(Y + 3 * pConf->m_StartY, 0, MaxY);
+	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, MaxX);
+	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, MaxY);
 
 	CLayerTiles *pUpdateLayer = new CLayerTiles(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 	CLayerTiles *pUpdateGame = new CLayerTiles(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);

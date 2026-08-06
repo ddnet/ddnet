@@ -20,6 +20,8 @@
 #include <game/localization.h>
 #include <game/mapitems.h>
 
+#include <cstddef>
+
 CMapImages::CMapImages()
 {
 	m_Count = 0;
@@ -81,10 +83,14 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 				continue;
 			}
 
+			// The size of a layer item is not checked against its type anywhere,
+			// so a map can make it end before the image index
+			const int LayerSize = pLayers->GetLayerSize(pGroup->m_StartLayer + LayerIndex);
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				const CMapItemLayerTilemap *pLayerTilemap = reinterpret_cast<const CMapItemLayerTilemap *>(pLayer);
-				if(pLayerTilemap->m_Image >= 0 && pLayerTilemap->m_Image < m_Count)
+				if(LayerSize >= (int)(offsetof(CMapItemLayerTilemap, m_Image) + sizeof(pLayerTilemap->m_Image)) &&
+					pLayerTilemap->m_Image >= 0 && pLayerTilemap->m_Image < m_Count)
 				{
 					aTextureUsedByTileOrQuadLayerFlag[pLayerTilemap->m_Image] |= 1;
 				}
@@ -92,7 +98,8 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				const CMapItemLayerQuads *pLayerQuads = reinterpret_cast<const CMapItemLayerQuads *>(pLayer);
-				if(pLayerQuads->m_Image >= 0 && pLayerQuads->m_Image < m_Count)
+				if(LayerSize >= (int)(offsetof(CMapItemLayerQuads, m_Image) + sizeof(pLayerQuads->m_Image)) &&
+					pLayerQuads->m_Image >= 0 && pLayerQuads->m_Image < m_Count)
 				{
 					aTextureUsedByTileOrQuadLayerFlag[pLayerQuads->m_Image] |= 2;
 				}
@@ -112,6 +119,15 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 
 		const int LoadFlag = (((aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? Graphics()->TextureLoadFlags() : 0) | (((aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->HasTextureArraysSupport() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
 		const CMapItemImage_v2 *pImg = static_cast<const CMapItemImage_v2 *>(pMap->GetItem(Start + i));
+		// The size of an image item is not checked against its version anywhere
+		const int ImageSize = pMap->GetItemSize(Start + i);
+		if(ImageSize < (int)sizeof(CMapItemImage_v1) ||
+			(pImg->m_Version > 1 && ImageSize < (int)sizeof(CMapItemImage_v2)))
+		{
+			log_error("mapimages", "Failed to load map image %d: image item is too small.", i);
+			ShowWarning = true;
+			continue;
+		}
 
 		const char *pName = pMap->GetDataString(pImg->m_ImageName);
 		if(pName == nullptr || pName[0] == '\0')
@@ -168,17 +184,14 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 				char aTexName[IO_MAX_PATH_LENGTH];
 				str_format(aTexName, sizeof(aTexName), "embedded: %s", pName);
 				m_aTextures[i] = Graphics()->LoadTextureRaw(ImageInfo, LoadFlag, aTexName);
-				pMap->UnloadData(pImg->m_ImageData);
 			}
 			else
 			{
-				pMap->UnloadData(pImg->m_ImageData);
 				log_error("mapimages", "Failed to load map image %d: failed to load data.", i);
 				ShowWarning = true;
 				continue;
 			}
 		}
-		pMap->UnloadData(pImg->m_ImageName);
 		ShowWarning = ShowWarning || m_aTextures[i].IsNullTexture();
 	}
 	if(ShowWarning)

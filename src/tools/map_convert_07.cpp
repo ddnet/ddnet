@@ -27,6 +27,7 @@ static int g_aNewDataSize[MAX_MAPIMAGES];
 static void *g_apNewData[MAX_MAPIMAGES];
 
 static int g_Index = 0;
+static size_t g_NumImageIds = 0;
 static int g_NextDataItemId = -1;
 
 static int g_aImageIds[MAX_MAPIMAGES];
@@ -41,7 +42,9 @@ static bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pF
 		return true;
 
 	CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pImgLayer;
-	if(pTMap->m_Image == -1)
+	// The image index of a layer comes from the map and is only checked against
+	// the images we collected below, of which there are at most MAX_MAPIMAGES
+	if(pTMap->m_Image < 0 || pTMap->m_Image >= (int)g_NumImageIds)
 		return true;
 
 	int Type;
@@ -88,6 +91,13 @@ static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage 
 	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA || ImgInfo.m_Width > MaxImageDimension || ImgInfo.m_Height > MaxImageDimension)
 	{
 		dbg_msg("map_convert_07", "ERROR: only RGBA PNG images with maximum width/height %" PRIzu " are supported", MaxImageDimension);
+		ImgInfo.Free();
+		return pImgItem;
+	}
+
+	if(g_Index >= (int)MAX_MAPIMAGES)
+	{
+		dbg_msg("map_convert_07", "ERROR: cannot embed more than %" PRIzu " images", MAX_MAPIMAGES);
 		ImgInfo.Free();
 		return pImgItem;
 	}
@@ -178,6 +188,7 @@ int main(int argc, const char **argv)
 			}
 			g_aImageIds[i] = Index;
 			i++;
+			g_NumImageIds = i;
 		}
 	}
 

@@ -4521,7 +4521,13 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		TotalLength += str_length(pLine) + 1;
 	}
 
-	char *pSettings = (char *)malloc(std::max(1, TotalLength));
+	if(TotalLength == 0)
+	{
+		// Nothing to import, and the map cannot store an empty settings block.
+		return true;
+	}
+
+	char *pSettings = (char *)malloc(TotalLength);
 	int Offset = 0;
 	for(const char *pLine : vpLines)
 	{
@@ -4552,7 +4558,7 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 					SettingsIndex = pInfo->m_Settings;
 					char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
 					int DataSize = Reader.GetDataSize(SettingsIndex);
-					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
+					if(pMapSettings != nullptr && DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
 						// Configs coincide, no need to update map.
 						free(pSettings);
@@ -4600,6 +4606,13 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		}
 		const void *pData = Reader.GetData(i);
 		int Size = Reader.GetDataSize(i);
+		if(pData == nullptr || Size <= 0)
+		{
+			log_error("mapchange", "Failed to import settings from '%s': failed to read data %d of map '%s'", aConfig, i, pNewMapName);
+			free(pSettings);
+			Reader.Close();
+			return false;
+		}
 		Writer.AddData(Size, pData);
 		Reader.UnloadData(i);
 	}
@@ -4679,6 +4692,10 @@ void CGameContext::LoadMapSettings()
 
 		int Size = pMap->GetDataSize(pItem->m_Settings);
 		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
+		// The settings are read as a sequence of null terminated strings, and
+		// the data can also fail to decompress while its claimed size stays
+		if(pSettings == nullptr || Size <= 0 || pSettings[Size - 1] != '\0')
+			break;
 		char *pNext = pSettings;
 		while(pNext < pSettings + Size)
 		{
@@ -4686,7 +4703,6 @@ void CGameContext::LoadMapSettings()
 			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
 			pNext += StrSize;
 		}
-		pMap->UnloadData(pItem->m_Settings);
 		break;
 	}
 

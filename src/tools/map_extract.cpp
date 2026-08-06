@@ -61,6 +61,16 @@ static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
 		Image.m_Format = CImageInfo::FORMAT_RGBA;
 		Image.m_pData = static_cast<uint8_t *>(Reader.GetData(pItem->m_ImageData));
 
+		// The dimensions of an image are not checked against its data anywhere, and
+		// the data of a block that failed to load is null while its size stays
+		if(Image.m_pData == nullptr || Image.m_Width <= 0 || Image.m_Height <= 0 ||
+			(size_t)Reader.GetDataSize(pItem->m_ImageData) < Image.DataSize())
+		{
+			log_error("map_extract", "failed to load data of image '%s'", aBuf);
+			Reader.UnloadData(pItem->m_ImageData);
+			continue;
+		}
+
 		log_info("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
 		if(!CImageLoader::SavePng(io_open(aBuf, IOFLAG_WRITE), aBuf, Image))
 		{
@@ -92,11 +102,19 @@ static void ExtractMapSounds(CDataFileReader &Reader, const char *pPathSave)
 		str_format(aBuf, sizeof(aBuf), "%s/%s.opus", pPathSave, pName);
 		Reader.UnloadData(pItem->m_SoundName);
 
+		const void *pSoundData = Reader.GetData(pItem->m_SoundData);
+		if(pSoundData == nullptr || SoundDataSize <= 0)
+		{
+			log_error("map_extract", "failed to load data of sound '%s'", aBuf);
+			Reader.UnloadData(pItem->m_SoundData);
+			continue;
+		}
+
 		IOHANDLE Opus = io_open(aBuf, IOFLAG_WRITE);
 		if(Opus)
 		{
 			log_info("map_extract", "writing sound: %s (%d B)", aBuf, SoundDataSize);
-			io_write(Opus, Reader.GetData(pItem->m_SoundData), SoundDataSize);
+			io_write(Opus, pSoundData, SoundDataSize);
 			io_close(Opus);
 			Reader.UnloadData(pItem->m_SoundData);
 		}

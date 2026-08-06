@@ -9,13 +9,17 @@ CLayerFront::CLayerFront(CEditorMap *pMap, int w, int h) :
 
 void CLayerFront::SetTile(int x, int y, CTile Tile)
 {
-	if(Tile.m_Index == TILE_THROUGH_CUT)
+	// The game layer does not necessarily have the same dimensions as this layer
+	if(Map()->m_pGameLayer->IsInside(x, y))
 	{
-		Map()->m_pGameLayer->CLayerTiles::SetTile(x, y, CTile{TILE_NOHOOK}); // NOLINT(bugprone-parent-virtual-call)
-	}
-	else if(Tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
-	{
-		Map()->m_pGameLayer->CLayerTiles::SetTile(x, y, CTile{TILE_AIR}); // NOLINT(bugprone-parent-virtual-call)
+		if(Tile.m_Index == TILE_THROUGH_CUT)
+		{
+			Map()->m_pGameLayer->CLayerTiles::SetTile(x, y, CTile{TILE_NOHOOK}); // NOLINT(bugprone-parent-virtual-call)
+		}
+		else if(Tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+		{
+			Map()->m_pGameLayer->CLayerTiles::SetTile(x, y, CTile{TILE_AIR}); // NOLINT(bugprone-parent-virtual-call)
+		}
 	}
 	if(Editor()->IsAllowPlaceUnusedTiles() || IsValidFrontTile(Tile.m_Index))
 	{

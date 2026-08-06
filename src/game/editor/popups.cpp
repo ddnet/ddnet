@@ -1196,7 +1196,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		"Rectangle",
 		"Circle"};
 
-	pSource->m_Shape.m_Type = pSource->m_Shape.m_Type % CSoundShape::NUM_SHAPES; // prevent out of array errors
+	// The shape type comes from the map file, and the remainder of a negative
+	// value is negative again, so clamp instead
+	pSource->m_Shape.m_Type = std::clamp(pSource->m_Shape.m_Type, 0, (int)CSoundShape::NUM_SHAPES - 1);
 
 	static int s_ShapeTypeButton = 0;
 	if(pEditor->DoButton_Editor(&s_ShapeTypeButton, s_apShapeNames[pSource->m_Shape.m_Type], 0, &ShapeButton, BUTTONFLAG_LEFT, "Change sound source shape."))

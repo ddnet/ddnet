@@ -53,6 +53,13 @@ void CMapSounds::OnMapLoad()
 	for(int i = 0; i < m_Count; i++)
 	{
 		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i);
+		// The size of a sound item is not checked against its type anywhere
+		if(pMap->GetItemSize(Start + i) < (int)sizeof(CMapItemSound))
+		{
+			log_error("mapsounds", "Failed to load map sound %d: sound item is too small.", i);
+			ShowWarning = true;
+			continue;
+		}
 		const char *pName = pMap->GetDataString(pSound->m_SoundName);
 		if(pName == nullptr || pName[0] == '\0')
 		{
@@ -70,7 +77,6 @@ void CMapSounds::OnMapLoad()
 			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 			m_aSounds[i] = Sound()->LoadOpus(aBuf);
-			pMap->UnloadData(pSound->m_SoundName);
 		}
 		else
 		{
@@ -83,7 +89,6 @@ void CMapSounds::OnMapLoad()
 			}
 			const int SoundDataSize = pMap->GetDataSize(pSound->m_SoundData);
 			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, SoundDataSize, false, pName);
-			pMap->UnloadData(pSound->m_SoundData);
 		}
 		ShowWarning = ShowWarning || m_aSounds[i] == -1;
 	}
@@ -105,6 +110,10 @@ void CMapSounds::OnMapLoad()
 			if(!pLayer)
 				continue;
 			if(pLayer->m_Type != LAYERTYPE_SOUNDS)
+				continue;
+
+			// The size of a layer item is not checked against its type anywhere
+			if(Layers()->GetLayerSize(pGroup->m_StartLayer + LayerIndex) < (int)sizeof(CMapItemLayerSounds))
 				continue;
 
 			const CMapItemLayerSounds *pSoundLayer = reinterpret_cast<const CMapItemLayerSounds *>(pLayer);

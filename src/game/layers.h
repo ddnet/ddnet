@@ -23,6 +23,7 @@ public:
 	CMapItemLayerTilemap *GameLayer() const { return m_pGameLayer; }
 	CMapItemGroup *GetGroup(int Index) const;
 	CMapItemLayer *GetLayer(int Index) const;
+	int GetLayerSize(int Index) const;
 
 	// DDRace
 

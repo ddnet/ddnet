@@ -8,6 +8,8 @@
 
 #include <game/mapitems.h>
 
+#include <vector>
+
 class CEnvelopedQuad
 {
 public:
@@ -58,7 +60,7 @@ static int FxToTilePos(const int FxPos)
 	return std::floor(fx2f(FxPos) / 32);
 }
 
-static bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId, const int GroupId, const int LayerId, int &QuadsCounter, CEnvelopedQuad pEnvQuads[1024])
+static bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId, const int GroupId, const int LayerId, std::vector<CEnvelopedQuad> &vEnvQuads)
 {
 	bool Found = false;
 	for(int i = 0; i < NumQuads; i++)
@@ -66,20 +68,22 @@ static bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int
 		if(pQuads[i].m_PosEnv != EnvId && pQuads[i].m_ColorEnv != EnvId)
 			continue;
 
-		pEnvQuads[QuadsCounter].m_GroupId = GroupId;
-		pEnvQuads[QuadsCounter].m_LayerId = LayerId;
-		pEnvQuads[QuadsCounter].m_TilePosX = FxToTilePos(pQuads[i].m_aPoints[4].x);
-		pEnvQuads[QuadsCounter].m_TilePosY = FxToTilePos(pQuads[i].m_aPoints[4].y);
+		CEnvelopedQuad EnvQuad;
+		EnvQuad.m_GroupId = GroupId;
+		EnvQuad.m_LayerId = LayerId;
+		EnvQuad.m_TilePosX = FxToTilePos(pQuads[i].m_aPoints[4].x);
+		EnvQuad.m_TilePosY = FxToTilePos(pQuads[i].m_aPoints[4].y);
+		vEnvQuads.push_back(EnvQuad);
 
-		QuadsCounter++;
 		Found = true;
 	}
 
 	return Found;
 }
 
-static void PrintEnvelopedQuads(const CEnvelopedQuad pEnvQuads[1024], const int EnvId, const int QuadsCounter)
+static void PrintEnvelopedQuads(const std::vector<CEnvelopedQuad> &vEnvQuads, const int EnvId)
 {
+	const int QuadsCounter = vEnvQuads.size();
 	if(!QuadsCounter)
 	{
 		dbg_msg("map_find_env", "No quads found with env number #%d", EnvId + 1);
@@ -88,7 +92,7 @@ static void PrintEnvelopedQuads(const CEnvelopedQuad pEnvQuads[1024], const int 
 
 	dbg_msg("map_find_env", "Found %d quads with env number #%d:", QuadsCounter, EnvId + 1);
 	for(int i = 0; i < QuadsCounter; i++)
-		dbg_msg("map_find_env", "%*d. Group: #%d - Layer: #%d - Pos: %d,%d", (int)(std::log10(absolute(QuadsCounter))) + 1, i + 1, pEnvQuads[i].m_GroupId, pEnvQuads[i].m_LayerId, pEnvQuads[i].m_TilePosX, pEnvQuads[i].m_TilePosY);
+		dbg_msg("map_find_env", "%*d. Group: #%d - Layer: #%d - Pos: %d,%d", (int)(std::log10(absolute(QuadsCounter))) + 1, i + 1, vEnvQuads[i].m_GroupId, vEnvQuads[i].m_LayerId, vEnvQuads[i].m_TilePosX, vEnvQuads[i].m_TilePosY);
 }
 
 static bool FindEnv(const char aFilename[64], const int EnvId)
@@ -97,9 +101,9 @@ static bool FindEnv(const char aFilename[64], const int EnvId)
 	if(!OpenMap(aFilename, InputMap))
 		return false;
 
-	int LayersStart, LayersCount, QuadsCounter = 0;
+	int LayersStart, LayersCount;
 	InputMap.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersCount);
-	CEnvelopedQuad pEnvQuads[1024];
+	std::vector<CEnvelopedQuad> vEnvQuads;
 
 	for(int i = 0; i < LayersCount; i++)
 	{
@@ -112,14 +116,22 @@ static bool FindEnv(const char aFilename[64], const int EnvId)
 		CMapItemLayerQuads *pQuadLayer = (CMapItemLayerQuads *)pItem;
 		CQuad *pQuads = (CQuad *)InputMap.GetDataSwapped(pQuadLayer->m_Data);
 
+		// The number of quads of a layer is not checked against its data anywhere
+		if(pQuads == nullptr || pQuadLayer->m_NumQuads < 0 ||
+			(size_t)InputMap.GetDataSize(pQuadLayer->m_Data) < sizeof(CQuad) * (size_t)pQuadLayer->m_NumQuads)
+		{
+			dbg_msg("map_find_env", "Skipping layer %d: quads are missing or truncated", i + 1);
+			continue;
+		}
+
 		int GroupId = 0, LayerRelativeId = 0;
 		if(!GetLayerGroupIds(InputMap, i + 1, GroupId, LayerRelativeId))
 			return false;
 
-		GetEnvelopedQuads(pQuads, pQuadLayer->m_NumQuads, EnvId, GroupId, LayerRelativeId, QuadsCounter, pEnvQuads);
+		GetEnvelopedQuads(pQuads, pQuadLayer->m_NumQuads, EnvId, GroupId, LayerRelativeId, vEnvQuads);
 	}
 
-	PrintEnvelopedQuads(pEnvQuads, EnvId, QuadsCounter);
+	PrintEnvelopedQuads(vEnvQuads, EnvId);
 
 	return true;
 }
