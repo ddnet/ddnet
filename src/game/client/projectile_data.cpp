@@ -109,9 +109,9 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj,
 
 	if(pProj->m_Flags & PROJECTILEFLAG_HAS_TUNEPARAMS)
 	{
-		Result.m_Curvature = pProj->m_Curvature;
-		Result.m_Speed = pProj->m_Speed;
-		Result.m_Lifetime = pProj->m_Lifetime;
+		Result.m_Curvature = pProj->m_Curvature / 100.f;
+		Result.m_Speed = pProj->m_Speed / 100.f;
+		Result.m_Lifetime = pProj->m_Lifetime / 100.f;
 	}
 	else
 	{
@@ -135,6 +135,9 @@ void DemoObjectRemoveExtraProjectileInfo(CNetObj_Projectile *pProj)
 void GetProjectileTunings(CProjectileData *pData, class CGameWorld *pGameWorld)
 {
 	const CTuningParams *pTuning = pGameWorld ? pGameWorld->TuningFromChrOrZone(pData->m_Owner, pData->m_TuneZone) : &CTuningParams::DEFAULT;
+	pData->m_Curvature = 0.0f;
+	pData->m_Speed = 0.0f;
+	pData->m_Lifetime = 0.0f;
 	if(pData->m_Type == WEAPON_GRENADE)
 	{
 		pData->m_Curvature = pTuning->m_GrenadeCurvature;

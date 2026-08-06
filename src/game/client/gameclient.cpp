@@ -1899,14 +1899,12 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 
 						// Clear locked tunings if server doesnt send object anymore.
 						// Cleared by the modification or via rcon without the ability for the client to predict it based on tiles
-						if(!m_Snap.m_aCharacters[Item.m_Id].m_HasTuning)
+						if(!Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_CHARACTERTUNING, Item.m_Id))
 						{
-							const CNetObj_CharacterTuning *pPrevTuning = (const CNetObj_CharacterTuning *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTERTUNING, Item.m_Id);
+							const void *pPrevTuning = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTERTUNING, Item.m_Id);
 							CCharacter *pChr = m_GameWorld.GetCharacterById(Item.m_Id);
 							if(pPrevTuning && pChr)
-							{
 								pChr->m_LockedTunings.clear();
-							}
 						}
 					}
 					else
@@ -4748,14 +4746,15 @@ void CGameClient::LoadMapSettings()
 	m_MapBugs = CMapBugs::Create(Map()->BaseName(), Map()->Size(), Map()->Sha256());
 
 	// Reset Tunezones
-	for(int TuneZone = 0; TuneZone < TuneZone::NUM; TuneZone++)
+	for(int List = 0; List < TuneZone::NUM; List++)
 	{
-		TuningList()[TuneZone] = CTuningParams::DEFAULT;
-		TuningList()[TuneZone].Set("gun_curvature", 0);
-		TuningList()[TuneZone].Set("gun_speed", 1400);
-		TuningList()[TuneZone].Set("shotgun_curvature", 0);
-		TuningList()[TuneZone].Set("shotgun_speed", 500);
-		TuningList()[TuneZone].Set("shotgun_speeddiff", 0);
+		TuningList()[List] = CTuningParams::DEFAULT;
+		TuningList()[List].Set("gun_curvature", 0);
+		TuningList()[List].Set("gun_speed", 1400);
+		TuningList()[List].Set("shotgun_curvature", 0);
+		TuningList()[List].Set("shotgun_speed", 500);
+		TuningList()[List].Set("shotgun_speeddiff", 0);
+		LockedTuning()[List].clear();
 	}
 
 	// Load map tunings

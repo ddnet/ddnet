@@ -575,10 +575,10 @@ void CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, cons
 		Laser.m_Subtype = Subtype;
 		Laser.m_SwitchNumber = SwitchNumber;
 		Laser.m_Flags = LASERFLAG_HAS_TUNEPARAMS;
-		Laser.m_ShotgunStrength = ShotgunStrength;
-		Laser.m_BounceNum = BounceNum;
-		Laser.m_BounceCost = BounceCost;
-		Laser.m_BounceDelay = BounceDelay;
+		Laser.m_ShotgunStrength = round_to_int(ShotgunStrength * 100.f);
+		Laser.m_BounceNum = round_to_int(BounceNum * 100.f);
+		Laser.m_BounceCost = round_to_int(BounceCost * 100.f);
+		Laser.m_BounceDelay = round_to_int(BounceDelay * 100.f);
 		Server()->SnapNewItem(SnapId, Laser);
 	}
 	else
@@ -3355,6 +3355,8 @@ void CGameContext::ConTuneLockReset(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int List = pResult->GetInteger(0);
+	if(List < 0 || List >= TuneZone::NUM)
+		return;
 
 	LOCKED_TUNES *pLockedTunings = &pSelf->LockedTuning()[List];
 
