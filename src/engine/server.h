@@ -153,6 +153,7 @@ public:
 		char aBuf[512];
 		if(GetClientVersion(ClientId) < VERSION_DDNET_128_PLAYERS)
 		{
+			// force "Name: message" for team messages from other players to not show duplicate messages when dummy is connected
 			if(*pId >= 0 && ((MsgCopy.m_Mode == protocol7::CHAT_TEAM && *pId != ClientId) || MsgCopy.m_Mode == WhisperRecv || !Translate(*pId, ClientId)))
 			{
 				str_format(aBuf, sizeof(aBuf), "%s: %s", ClientName(*pId), MsgCopy.m_pMessage);
@@ -204,7 +205,9 @@ public:
 	int SendPackMsgTranslate(const CNetMsg_Sv_KillMsgTeam *pMsg, int Flags, int ClientId)
 	{
 		CNetMsg_Sv_KillMsgTeam MsgCopy = *pMsg;
-		return Translate(MsgCopy.m_First, ClientId) && SendPackMsgOne(&MsgCopy, Flags, ClientId);
+		if(!Translate(MsgCopy.m_First, ClientId))
+			MsgCopy.m_First = -1;
+		return SendPackMsgOne(&MsgCopy, Flags, ClientId);
 	}
 
 	int SendPackMsgTranslate(const CNetMsg_Sv_Emoticon *pMsg, int Flags, int ClientId)

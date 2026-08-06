@@ -1013,13 +1013,7 @@ void CGameContext::SendVoteSet(int ClientId)
 			{
 				// 0.7 clients need the client id in order to show the vote and the name of the caller, so its important that we get him in
 				m_PlayerMapping.ForceInsertPlayer(m_VoteCreator, i);
-				int TranslatedId = m_VoteCreator;
-				if(Server()->Translate(TranslatedId, i))
-				{
-					Msg7.m_ClientId = TranslatedId;
-					Server()->SendPackMsg(&Msg7, MSGFLAG_VITAL, i);
-					Msg7.m_ClientId = m_VoteCreator;
-				}
+				Server()->SendPackMsg(&Msg7, MSGFLAG_VITAL, i);
 			}
 		}
 	}
@@ -1033,13 +1027,7 @@ void CGameContext::SendVoteSet(int ClientId)
 		{
 			// 0.7 clients need the client id in order to show the vote and the name of the caller, so its important that we get him in
 			m_PlayerMapping.ForceInsertPlayer(m_VoteCreator, ClientId);
-			int TranslatedId = m_VoteCreator;
-			if(Server()->Translate(TranslatedId, ClientId))
-			{
-				Msg7.m_ClientId = TranslatedId;
-				Server()->SendPackMsg(&Msg7, MSGFLAG_VITAL, ClientId);
-				Msg7.m_ClientId = m_VoteCreator;
-			}
+			Server()->SendPackMsg(&Msg7, MSGFLAG_VITAL, ClientId);
 		}
 	}
 }
@@ -1742,6 +1730,7 @@ void CGameContext::OnClientEnter(int ClientId)
 	IServer::CClientInfo Info;
 	if(Server()->GetClientInfo(ClientId, &Info))
 	{
+		// 0.7 clients can send ddnet message, F-Client does that for example
 		if(!Info.m_GotDDNetVersion && !Server()->IsSixup(ClientId))
 		{
 			// By supporting 128 players with full backwards compatibility (in +spectate menu too), it's basically impossible and
@@ -2048,12 +2037,11 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 
 			if(pMsg7->m_Mode == protocol7::CHAT_WHISPER)
 			{
+				if(!Server()->ReverseTranslate(pMsg7->m_Target, ClientId))
+					return nullptr;
 				if(!CheckClientId(pMsg7->m_Target) || !Server()->ClientIngame(pMsg7->m_Target))
 					return nullptr;
 				if(ProcessSpamProtection(ClientId))
-					return nullptr;
-
-				if(!Server()->ReverseTranslate(pMsg7->m_Target, ClientId))
 					return nullptr;
 
 				WhisperId(ClientId, pMsg7->m_Target, pMsg7->m_pMessage);
@@ -2792,6 +2780,7 @@ void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMod
 	if((g_Config.m_SvSpamprotection && pPlayer->m_LastSetSpectatorMode && pPlayer->m_LastSetSpectatorMode + Server()->TickSpeed() / 4 > Server()->Tick()))
 		return;
 
+	pPlayer->m_LastSetSpectatorMode = Server()->Tick();
 	int SpectatorId = std::clamp(pMsg->m_SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
 
 	if(m_PlayerMapping.DoSeeOthers(ClientId, SpectatorId))
@@ -2801,7 +2790,6 @@ void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMod
 		if(!Server()->ReverseTranslate(SpectatorId, ClientId))
 			return;
 
-	pPlayer->m_LastSetSpectatorMode = Server()->Tick();
 	pPlayer->UpdatePlaytime();
 	if(SpectatorId >= 0 && (!m_apPlayers[SpectatorId] || m_apPlayers[SpectatorId]->GetTeam() == TEAM_SPECTATORS))
 		SendChatTarget(ClientId, "Invalid spectator id used");

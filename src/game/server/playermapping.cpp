@@ -25,20 +25,38 @@ void CPlayerMapping::Tick()
 	UpdatePlayerMap(-1);
 
 	// Translate StrongWeakId to clamp it to 64 players
+	bool NeedsLegacyMapping = false;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(!GameServer()->m_apPlayers[i] || GameServer()->GetClientVersion(i) >= VERSION_DDNET_128_PLAYERS)
+		if(GameServer()->m_apPlayers[i] && GameServer()->GetClientVersion(i) < VERSION_DDNET_128_PLAYERS)
+		{
+			NeedsLegacyMapping = true;
+			break;
+		}
+	}
+	if(!NeedsLegacyMapping)
+		return; // or continue past this block — nothing to do on modern-only servers
+
+	// Walk the character list ONCE per tick, not once per legacy client
+	int aCharacterIds[MAX_CLIENTS];
+	int NumCharacters = 0;
+	for(CCharacter *pChar = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
+	{
+		aCharacterIds[NumCharacters++] = pChar->GetPlayer()->GetCid();
+	}
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+		if(!pPlayer || GameServer()->GetClientVersion(i) >= VERSION_DDNET_128_PLAYERS)
 			continue;
 
 		int StrongWeakId = 0;
-		for(CCharacter *pChar = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
+		for(int c = 0; c < NumCharacters; c++)
 		{
-			int Id = pChar->GetPlayer()->GetCid();
+			int Id = aCharacterIds[c];
 			if(Server()->Translate(Id, i))
-			{
-				GameServer()->m_apPlayers[i]->m_aStrongWeakId[Id] = StrongWeakId;
-				StrongWeakId++;
-			}
+				pPlayer->m_aStrongWeakId[Id] = StrongWeakId++;
 		}
 	}
 }
@@ -50,6 +68,7 @@ void CPlayerMapping::CPlayerMap::Init(int ClientId, CPlayerMapping *pPlayerMappi
 	m_pMap = m_pPlayerMapping->Server()->GetIdMap(m_ClientId);
 	m_pReverseMap = m_pPlayerMapping->Server()->GetReverseIdMap(m_ClientId);
 	m_ResortReserved = false;
+	std::fill(std::begin(m_aReserved), std::end(m_aReserved), false);
 	m_NumPages = 0;
 	m_TotalOverhang = 0;
 	m_NumReserved = 0;
