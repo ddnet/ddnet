@@ -12,6 +12,9 @@
 #include <game/client/lineinput.h>
 #include <game/client/ui.h>
 
+#include <cstdint>
+#include <string>
+
 enum
 {
 	CONSOLE_CLOSED,
@@ -22,6 +25,14 @@ enum
 
 class CConsoleLogger;
 
+struct CConsoleSelectionAnchor
+{
+	uint64_t m_BacklogId = 0;
+	int m_GlyphOffset = 0;
+
+	bool IsValid() const { return m_BacklogId != 0; }
+};
+
 class CGameConsole : public CComponent
 {
 	friend class CConsoleLogger;
@@ -30,6 +41,7 @@ class CGameConsole : public CComponent
 	public:
 		struct CBacklogEntry
 		{
+			uint64_t m_BacklogId;
 			float m_YOffset;
 			int m_LineCount;
 			ColorRGBA m_PrintColor;
@@ -55,9 +67,13 @@ class CGameConsole : public CComponent
 		bool m_MouseIsPress = false;
 		vec2 m_MousePress = vec2(0.0f, 0.0f);
 		vec2 m_MouseRelease = vec2(0.0f, 0.0f);
-		int m_CurSelStart = 0;
-		int m_CurSelEnd = 0;
+		bool m_BacklogSelectionActive = false;
+		bool m_SelectionStartPending = false;
+		bool m_SelectionEndPending = false;
+		CConsoleSelectionAnchor m_SelectionStart;
+		CConsoleSelectionAnchor m_SelectionEnd;
 		bool m_HasSelection = false;
+		uint64_t m_NextBacklogId = 1;
 		int m_NewLineCounter = 0;
 
 		CGameConsole *m_pGameConsole;
@@ -110,6 +126,7 @@ class CGameConsole : public CComponent
 		void PumpBacklogPending() REQUIRES(!m_BacklogPendingLock);
 		void ClearHistory();
 		void Reset();
+		void ClearSelection();
 
 		void ExecuteLine(const char *pLine);
 
@@ -135,6 +152,12 @@ class CGameConsole : public CComponent
 		void GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH]);
 
 		void UpdateEntryTextAttributes(CBacklogEntry *pEntry) const;
+		void OnBacklogEntryEvicted(const CBacklogEntry *pEntry);
+		bool SelectionRangeForEntry(const CBacklogEntry *pEntry, int *pSelectionStart, int *pSelectionEnd) const;
+		bool SelectionToString(std::string *pSelectionString);
+		void UpdateSelectionAnchor(CConsoleSelectionAnchor *pAnchor, const CBacklogEntry *pEntry, int GlyphOffset);
+		bool UpdateSelectionAnchorFromPosition(CConsoleSelectionAnchor *pAnchor, const CBacklogEntry *pEntry, vec2 Position, float EntryY, float LineWidth);
+		void UpdateSelectionState();
 
 		bool IsInputHidden() const;
 		void UpdateCompletionSuggestions();
