@@ -40,7 +40,6 @@ CProjectile::CProjectile(
 	m_Bouncing = 0;
 	m_Freeze = Freeze;
 
-	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	DetermineTuning();
 
 	GameWorld()->InsertEntity(this);
@@ -48,8 +47,16 @@ CProjectile::CProjectile(
 
 void CProjectile::DetermineTuning()
 {
-	CTuningParams *pTuning = GameWorld()->TuningFromChrOrZone(m_Owner, m_TuneZone);
+	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
+	// Fetch current tunings
+	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+	CTuningParams *pZone = GameWorld()->GetTuning(m_TuneZone);
+	CTuningParams *pTuning = pOwnerChar ? CTuningParams::ApplyLockedTunings(pZone, pOwnerChar->m_LockedTunings) : pZone;
+
+	m_Curvature = 0.0f;
+	m_Speed = 0.0f;
+	m_Lifetime = 0.0f;
 	switch(m_Type)
 	{
 	case WEAPON_GRENADE:
@@ -195,27 +202,12 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 	m_Type = pProj->m_Type;
 	m_StartTick = pProj->m_StartTick;
 	m_TuneZone = pProj->m_TuneZone;
-
 	m_Curvature = pProj->m_Curvature;
 	m_Speed = pProj->m_Speed;
 	m_Lifetime = pProj->m_Lifetime;
-
-	int Lifetime = 20 * GameWorld()->GameTickSpeed();
-	m_SoundImpact = -1;
-	if(m_Type == WEAPON_GRENADE)
-	{
-		Lifetime = m_Lifetime * GameWorld()->GameTickSpeed();
-		m_SoundImpact = SOUND_GRENADE_EXPLODE;
-	}
-	else if(m_Type == WEAPON_GUN)
-	{
-		Lifetime = m_Lifetime * GameWorld()->GameTickSpeed();
-	}
-	else if(m_Type == WEAPON_SHOTGUN && !GameWorld()->m_WorldConfig.m_IsDDRace)
-	{
-		Lifetime = m_Lifetime * GameWorld()->GameTickSpeed();
-	}
-	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
+	float Lifetime = m_Lifetime > 0 ? m_Lifetime : 20.0f;
+	m_LifeSpan = (Lifetime * GameWorld()->GameTickSpeed()) - (pGameWorld->GameTick() - m_StartTick);
+	m_SoundImpact = m_Type == WEAPON_GRENADE ? SOUND_GRENADE_EXPLODE : -1;
 	m_Id = Id;
 	m_Number = pProj->m_SwitchNumber;
 	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;

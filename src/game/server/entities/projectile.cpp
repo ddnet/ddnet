@@ -43,14 +43,13 @@ CProjectile::CProjectile(
 
 	m_InitDir = InitDir;
 
-	m_Lifetime = m_LifeSpan;
-	m_CurPos = GetPos((Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed());
+	m_Lifetime = m_LifeSpan > 0 ? m_LifeSpan / Server()->TickSpeed() : m_LifeSpan;
+	m_CurPos = m_Pos;
 
 	m_Snap.m_CalculatedVel = false;
 	m_Snap.m_LastResetTick = Server()->Tick();
 	m_Snap.m_LastResetPos = Pos;
 
-	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	DetermineTuning();
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
@@ -68,8 +67,13 @@ void CProjectile::Reset()
 
 void CProjectile::DetermineTuning()
 {
+	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
+
 	// Fetch current tunings
-	GetTunings(GameWorld()->TuningFromChrOrZone(m_Owner, m_TuneZone), &m_Curvature, &m_Speed);
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	CTuningParams *pZone = GameWorld()->GetTuning(m_TuneZone);
+	CTuningParams *pTunings = pOwnerChar ? CTuningParams::ApplyLockedTunings(pZone, pOwnerChar->m_LockedTunings) : pZone;
+	GetTunings(pTunings, &m_Curvature, &m_Speed);
 
 	// Backwards compatible
 	float Curvature, Speed;
@@ -385,9 +389,9 @@ CNetObj_DDNetProjectile CProjectile::NetInfo(int SnappingClient)
 	Result.m_SwitchNumber = m_Number;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_Flags = Flags;
-	Result.m_Curvature = m_Curvature;
-	Result.m_Speed = m_Speed;
-	Result.m_Lifetime = m_Lifetime;
+	Result.m_Curvature = round_to_int(m_Curvature * 100.f);
+	Result.m_Speed = round_to_int(m_Speed * 100.f);
+	Result.m_Lifetime = round_to_int(m_Lifetime * 100.f);
 	return Result;
 }
 
@@ -486,9 +490,17 @@ void CProjectile::CalculateVel()
 	float Curvature, Speed;
 	GetTunings(GameWorld()->GlobalTuning(), &Curvature, &Speed);
 
-	float Time = (Server()->Tick() - m_Snap.m_LastResetTick) / (float)Server()->TickSpeed();
-	m_Snap.m_Vel.x = ((m_CurPos.x - m_Snap.m_LastResetPos.x) / Time / Speed) * 100;
-	m_Snap.m_Vel.y = ((m_CurPos.y - m_Snap.m_LastResetPos.y) / Time / Speed - Time * Speed * Curvature / 10000) * 100;
+	const int TickDiff = Server()->Tick() - m_Snap.m_LastResetTick;
+	float Time = TickDiff / (float)Server()->TickSpeed();
+	if(TickDiff > 0)
+	{
+		m_Snap.m_Vel.x = ((m_CurPos.x - m_Snap.m_LastResetPos.x) / Time / Speed) * 100;
+		m_Snap.m_Vel.y = ((m_CurPos.y - m_Snap.m_LastResetPos.y) / Time / Speed - Time * Speed * Curvature / 10000) * 100;
+	}
+	else
+	{
+		m_Snap.m_Vel = ivec2(round_to_int(m_Direction.x * 100), round_to_int(m_Direction.y * 100));
+	}
 
 	m_Snap.m_CalculatedVel = true;
 }
