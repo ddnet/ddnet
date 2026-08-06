@@ -330,6 +330,7 @@ public:
 
 	int GetClientVersion(int ClientId) const override;
 	int SendMsg(CMsgPacker *pMsg, int Flags, int ClientId) override;
+	int RecordServerDemo(CMsgPacker *pMsg) override;
 
 	void DoSnapshot();
 
