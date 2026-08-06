@@ -579,6 +579,25 @@ int CNetServer::GetClientSlot(const NETADDR &Addr)
 	return -1;
 }
 
+std::tuple<int, bool> CNetServer::DetermineConnState(const NETADDR &Addr, std::optional<int> Flags, unsigned char *pBuffer)
+{
+	int Slot = -1;
+	bool Sixup = false;
+	if((*Flags & NET_PACKETFLAG_CONNLESS) == 0)
+	{
+		Slot = GetClientSlot(Addr);
+		if(Slot != -1)
+			Sixup = m_aSlots[Slot].m_Connection.m_Sixup;
+		else if((*Flags & NET_PACKETFLAG_UNUSED) != 0)
+			Sixup = true;
+	}
+	else
+	{
+		Sixup = (pBuffer[0] & 0x3) == 1;
+	}
+	return {Slot, Sixup};
+}
+
 static bool IsDDNetControlMsg(const CNetPacketConstruct *pPacket)
 {
 	if(!(pPacket->m_Flags & NET_PACKETFLAG_CONTROL) || pPacket->m_DataSize < 1)
@@ -636,8 +655,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		}
 
 		SECURITY_TOKEN Token;
-		int Slot = (*Flags & NET_PACKETFLAG_CONNLESS) == 0 ? GetClientSlot(Addr) : -1;
-		bool Sixup = Slot != -1 && m_aSlots[Slot].m_Connection.m_Sixup;
+		auto [Slot, Sixup] = DetermineConnState(Addr, Flags, pData);
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Sixup, &Token, pResponseToken) == 0)
 		{
 			if(m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONNLESS)
