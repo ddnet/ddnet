@@ -49,6 +49,8 @@ public:
 	CDemoRecorder() = default;
 	~CDemoRecorder() override;
 
+	void Init(CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
+
 	int Start(IStorage *pStorage, IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
 	int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") override;
 

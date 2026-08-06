@@ -2183,6 +2183,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   notifications.h
   rust.h
   server.h
+  serverbrowser.cpp
   serverbrowser.h
   sound.h
   sqlite.h
