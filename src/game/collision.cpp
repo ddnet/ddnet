@@ -57,6 +57,18 @@ void CCollision::Init(class CLayers *pLayers)
 	m_Height = m_pLayers->GameLayer()->m_Height;
 	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
 
+	// The width and height are used to index m_pTiles and to size allocations
+	// derived from them. Reject dimensions that the game layer's tile data cannot
+	// back, so a malformed map cannot cause out-of-bounds access or overflow.
+	const unsigned int GameLayerSize = m_pLayers->Map()->GetDataSize(m_pLayers->GameLayer()->m_Data);
+	if(m_pTiles == nullptr || m_Width < 0 || m_Height < 0 ||
+		(size_t)m_Width * m_Height * sizeof(CTile) > GameLayerSize)
+	{
+		m_Width = 0;
+		m_Height = 0;
+		m_pTiles = nullptr;
+	}
+
 	if(m_pLayers->TeleLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->TeleLayer()->m_Tele);
