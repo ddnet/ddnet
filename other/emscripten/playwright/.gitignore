@@ -1,0 +1,7 @@
+node_modules/
+package-lock.json
+out/
+shots/
+cmds.jsonl
+record.jsonl
+driver-console.log
