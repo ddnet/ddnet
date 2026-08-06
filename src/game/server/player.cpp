@@ -14,7 +14,10 @@
 
 #include <engine/antibot.h>
 #include <engine/server.h>
+#include <engine/server/authmanager.h>
 #include <engine/shared/config.h>
+
+#include <generated/protocol.h>
 
 #include <game/gamecore.h>
 #include <game/teamscore.h>
@@ -431,7 +434,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	CNetObj_DDNetPlayer DDNetPlayer = {};
 	if((SnappingClient >= 0 && Server()->IsRconAuthed(SnappingClient)) || !Server()->HasAuthHidden(m_ClientId))
-		DDNetPlayer.m_AuthLevel = Server()->GetAuthedState(m_ClientId);
+		DDNetPlayer.m_AuthLevel = Server()->IsRconAuthedAdmin(m_ClientId) ? AUTHED_ADMIN : AUTHED_MOD;
 	else
 		DDNetPlayer.m_AuthLevel = AUTHED_NO;
 
