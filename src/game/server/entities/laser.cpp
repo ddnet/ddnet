@@ -45,14 +45,14 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
 	SyncInteractState();
 	vec2 At;
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	const CCharacter *pOwnerChar = m_InteractState.OwnerCharacter(GameServer());
 	CCharacter *pHit;
-	bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
+	bool DontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
-	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : nullptr, m_Owner);
+	if(m_InteractState.NoHitOthers())
+		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : nullptr, m_Owner, pOwnerChar);
 	else
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : nullptr, m_Owner, pOwnerChar);
+		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : nullptr, m_Owner);
 
 	if(!pHit || !m_InteractState.CanHit(GameServer(), pHit->GetPlayer()->GetCid()))
 		return false;
@@ -307,8 +307,11 @@ void CLaser::SyncInteractState()
 	// as long as the owner is connected
 	// refill the state on tick
 	// as soon as the owner disconnects keep that state
-	if(pOwnerPlayer)
+	if(pOwnerPlayer && pOwnerPlayer->GetUniqueCid() == m_InteractState.UniqueOwnerId())
 	{
+		// sv_hit stops syncing as soon as the owner disconnects
+		// which is fine because it is a readonly config
+		// so it will not change during the lifetime of a laser projectile
 		bool NoHitOthers = g_Config.m_SvHit;
 		if(pOwnerChar)
 			NoHitOthers = (m_Type == WEAPON_LASER && pOwnerChar->LaserHitDisabled()) || (m_Type == WEAPON_SHOTGUN && pOwnerChar->ShotgunHitDisabled());
