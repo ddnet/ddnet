@@ -26,9 +26,9 @@ public:
 	int m_SwitchNumber;
 	// TuneZone is introduced locally
 	int m_TuneZone;
-	float m_Curvature;
-	float m_Speed;
-	float m_Lifetime;
+	float m_Curvature = 0.0f;
+	float m_Speed = 0.0f;
+	float m_Lifetime = 0.0f;
 };
 
 CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, class CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx);

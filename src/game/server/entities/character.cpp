@@ -1371,7 +1371,6 @@ void CCharacter::Snap(int SnappingClient)
 	Server()->SnapNewItem(TranslatedId, DDNetCharacter);
 
 	// No need to send when no locked tunings exist
-	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	if(!m_LockedTunings.empty() && SnappingClientVersion >= VERSION_DDNET_TUNELOCK)
 	{
 		CNetObj_CharacterTuning Tunings = {};

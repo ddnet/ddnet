@@ -34,6 +34,7 @@ CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGame
 		Result.m_Subtype = -1;
 		Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_From)) : 0;
 		Result.m_Predict = true;
+		GetLaserTunings(&Result, pGameWorld);
 	}
 
 	if(pEntEx && !(NetObjType == NETOBJTYPE_DDNETLASER && Result.m_SwitchNumber >= 0))
@@ -57,7 +58,6 @@ CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGame
 		}
 	}
 
-	GetLaserTunings(&Result, pGameWorld);
 	return Result;
 }
 
@@ -78,10 +78,12 @@ CLaserData ExtractLaserInfoDDNet(const CNetObj_DDNetLaser *pLaser, CGameWorld *p
 	Result.m_Predict = !(pLaser->m_Flags & LASERFLAG_NO_PREDICT);
 	if(pLaser->m_Flags & LASERFLAG_HAS_TUNEPARAMS)
 	{
-		Result.m_ShotgunStrength = pLaser->m_ShotgunStrength;
-		Result.m_BounceNum = pLaser->m_BounceNum;
-		Result.m_BounceCost = pLaser->m_BounceCost;
-		Result.m_BounceDelay = pLaser->m_BounceDelay;
+		Result.m_ShotgunStrength = pLaser->m_ShotgunStrength / 100.f;
+		Result.m_BounceNum = pLaser->m_BounceNum / 100.f;
+		Result.m_BounceCost = pLaser->m_BounceCost / 100.f;
+		Result.m_BounceDelay = pLaser->m_BounceDelay / 100.f;
+		// LaserReach is derived from character tuning in prediction. It only determines the StartEnergy,
+		// it makes no sense to send it over the network, because a laser is variable in length anyway already.
 	}
 	else
 	{
