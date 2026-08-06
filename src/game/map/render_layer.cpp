@@ -179,12 +179,12 @@ bool CRenderLayerTile::CTileLayerVisuals::Init(unsigned int Width, unsigned int 
 CRenderLayer::CRenderLayer(int GroupId, int LayerId, int Flags) :
 	m_GroupId(GroupId), m_LayerId(LayerId), m_Flags(Flags) {}
 
-void CRenderLayer::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
+void CRenderLayer::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional)
 {
 	CRenderComponent::OnInit(pGraphics, pTextRender, pRenderMap);
 	m_pMap = pMap;
 	m_pMapImages = pMapImages;
-	m_RenderUploadCallback = FRenderUploadCallbackOptional;
+	m_InitCallback = CallbackLayerInitOptional;
 	m_pEnvelopeManager = pEnvelopeManager;
 }
 
@@ -194,14 +194,6 @@ void CRenderLayer::UseTexture(IGraphics::CTextureHandle TextureHandle)
 		Graphics()->TextureSet(TextureHandle);
 	else
 		Graphics()->TextureClear();
-}
-
-void CRenderLayer::RenderLoading() const
-{
-	const char *pLoadingTitle = Localize("Loading map");
-	const char *pLoadingMessage = Localize("Uploading map data to GPU");
-	if(m_RenderUploadCallback.has_value())
-		(*m_RenderUploadCallback)(pLoadingTitle, pLoadingMessage, 0);
 }
 
 bool CRenderLayer::IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const
@@ -266,6 +258,20 @@ bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params)
 		}
 	}
 	return true;
+}
+
+void CRenderLayerGroup::InitCallback() const
+{
+	if(m_InitCallback.has_value())
+	{
+		// Report layer 0, even if this is not a layer so the loading bar is monotone
+		(*m_InitCallback)(-1, 0, m_GroupId, 0);
+	}
+}
+
+void CRenderLayerGroup::Init()
+{
+	InitCallback();
 }
 
 void CRenderLayerGroup::Render(const CRenderLayerParams &Params)
@@ -593,6 +599,7 @@ void CRenderLayerTile::RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const
 
 void CRenderLayerTile::Init()
 {
+	InitCallback();
 	if(m_pLayerTilemap->m_Image >= 0 && m_pLayerTilemap->m_Image < m_pMapImages->Num())
 		m_TextureHandle = m_pMapImages->Get(m_pLayerTilemap->m_Image);
 	else
@@ -814,7 +821,6 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	size_t UploadDataSize = vTmpTileTexCoords.size() * sizeof(CGraphicTileTextureCoords) + vTmpTiles.size() * sizeof(CGraphicTile);
 	if(UploadDataSize == 0)
 	{
-		RenderLoading();
 		return;
 	}
 
@@ -880,8 +886,6 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	Visuals.m_BufferContainerIndex = Graphics()->CreateBufferContainer(&ContainerInfo);
 	// and finally inform the backend how many indices are required
 	Graphics()->IndicesNumRequiredNotify(vTmpTiles.size() * 6);
-
-	RenderLoading();
 }
 
 void CRenderLayerTile::Unload()
@@ -917,9 +921,9 @@ void *CRenderLayerTile::GetRawData() const
 	return pTiles;
 }
 
-void CRenderLayerTile::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
+void CRenderLayerTile::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional)
 {
-	CRenderLayer::OnInit(pGraphics, pTextRender, pRenderMap, pEnvelopeManager, pMap, pMapImages, FRenderUploadCallbackOptional);
+	CRenderLayer::OnInit(pGraphics, pTextRender, pRenderMap, pEnvelopeManager, pMap, pMapImages, CallbackLayerInitOptional);
 	InitTileData();
 
 	// set clip region
@@ -980,6 +984,14 @@ void CRenderLayerTile::GetTileData(unsigned char *pIndex, unsigned char *pFlags,
 {
 	*pIndex = m_pTiles[y * m_pLayerTilemap->m_Width + x].m_Index;
 	*pFlags = m_pTiles[y * m_pLayerTilemap->m_Width + x].m_Flags;
+}
+
+void CRenderLayerTile::InitCallback() const
+{
+	if(m_InitCallback.has_value())
+	{
+		(*m_InitCallback)(LAYERTYPE_TILES, static_cast<long>(m_pLayerTilemap->m_Width) * m_pLayerTilemap->m_Height, m_GroupId, m_LayerId);
+	}
 }
 
 /**************
@@ -1079,9 +1091,9 @@ void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &P
 	}
 }
 
-void CRenderLayerQuads::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
+void CRenderLayerQuads::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional)
 {
-	CRenderLayer::OnInit(pGraphics, pTextRender, pRenderMap, pEnvelopeManager, pMap, pMapImages, FRenderUploadCallbackOptional);
+	CRenderLayer::OnInit(pGraphics, pTextRender, pRenderMap, pEnvelopeManager, pMap, pMapImages, CallbackLayerInitOptional);
 	int DataSize = m_pMap->GetDataSize(m_pLayerQuads->m_Data);
 	if(m_pLayerQuads->m_NumQuads > 0 && DataSize / (int)sizeof(CQuad) >= m_pLayerQuads->m_NumQuads)
 		m_pQuads = (CQuad *)m_pMap->GetDataSwapped(m_pLayerQuads->m_Data);
@@ -1089,6 +1101,7 @@ void CRenderLayerQuads::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, C
 
 void CRenderLayerQuads::Init()
 {
+	InitCallback();
 	if(m_pLayerQuads->m_Image >= 0 && m_pLayerQuads->m_Image < m_pMapImages->Num())
 		m_TextureHandle = m_pMapImages->Get(m_pLayerQuads->m_Image);
 	else
@@ -1276,7 +1289,6 @@ void CRenderLayerQuads::Init()
 		// and finally inform the backend how many indices are required
 		Graphics()->IndicesNumRequiredNotify(m_pLayerQuads->m_NumQuads * 6);
 	}
-	RenderLoading();
 }
 
 void CRenderLayerQuads::Unload()
@@ -1461,6 +1473,14 @@ bool CRenderLayerQuads::DoRender(const CRenderLayerParams &Params)
 	return IsVisibleInClipRegion(m_LayerClip);
 }
 
+void CRenderLayerQuads::InitCallback() const
+{
+	if(m_InitCallback.has_value())
+	{
+		(*m_InitCallback)(LAYERTYPE_QUADS, m_pLayerQuads->m_NumQuads, m_GroupId, m_LayerId);
+	}
+}
+
 /****************
  * Entity Layer *
  ****************/
@@ -1492,6 +1512,7 @@ CRenderLayerEntityGame::CRenderLayerEntityGame(int GroupId, int LayerId, int Fla
 
 void CRenderLayerEntityGame::Init()
 {
+	InitCallback();
 	UploadTileData(m_VisualTiles, 0, false, true);
 }
 
@@ -1549,6 +1570,7 @@ int CRenderLayerEntityTele::GetDataIndex(unsigned int &TileSize) const
 
 void CRenderLayerEntityTele::Init()
 {
+	InitCallback();
 	UploadTileData(m_VisualTiles, 0, false);
 	UploadTileData(m_VisualTeleNumbers, 1, false);
 }
@@ -1618,6 +1640,7 @@ int CRenderLayerEntitySpeedup::GetDataIndex(unsigned int &TileSize) const
 
 void CRenderLayerEntitySpeedup::Init()
 {
+	InitCallback();
 	UploadTileData(m_VisualTiles, 0, true);
 	UploadTileData(m_VisualForce, 1, false);
 	UploadTileData(m_VisualMaxSpeed, 2, false);
@@ -1698,6 +1721,7 @@ int CRenderLayerEntitySwitch::GetDataIndex(unsigned int &TileSize) const
 
 void CRenderLayerEntitySwitch::Init()
 {
+	InitCallback();
 	UploadTileData(m_VisualTiles, 0, false);
 	UploadTileData(m_VisualSwitchNumberTop, 1, false);
 	UploadTileData(m_VisualSwitchNumberBottom, 2, false);
