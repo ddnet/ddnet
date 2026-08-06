@@ -22,7 +22,7 @@ public:
 	virtual void OnHookAttach(int ClientId, bool Player) = 0;
 
 	// Commands
-	virtual void ConsoleCommand(const char *pCommand) = 0;
+	virtual void ConsoleCommand(int ClientId, const char *pCommand) = 0;
 };
 
 class IEngineAntibot : public IAntibot
