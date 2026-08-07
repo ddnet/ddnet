@@ -2071,17 +2071,6 @@ void CGraphics_Threaded::UpdateBufferObjectInternal(int BufferIndex, size_t Uplo
 	}
 }
 
-void CGraphics_Threaded::CopyBufferObjectInternal(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize)
-{
-	CCommandBuffer::SCommand_CopyBufferObject Cmd;
-	Cmd.m_WriteBufferIndex = WriteBufferIndex;
-	Cmd.m_ReadBufferIndex = ReadBufferIndex;
-	Cmd.m_WriteOffset = WriteOffset;
-	Cmd.m_ReadOffset = ReadOffset;
-	Cmd.m_CopySize = CopyDataSize;
-	AddCmd(Cmd);
-}
-
 void CGraphics_Threaded::DeleteBufferObject(int BufferIndex)
 {
 	if(BufferIndex == -1)

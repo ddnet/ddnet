@@ -1242,7 +1242,6 @@ protected:
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_CREATE_BUFFER_OBJECT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_CreateBufferObject(static_cast<const CCommandBuffer::SCommand_CreateBufferObject *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RECREATE_BUFFER_OBJECT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RecreateBufferObject(static_cast<const CCommandBuffer::SCommand_RecreateBufferObject *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_UPDATE_BUFFER_OBJECT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_UpdateBufferObject(static_cast<const CCommandBuffer::SCommand_UpdateBufferObject *>(pBaseCommand)); }};
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_COPY_BUFFER_OBJECT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_CopyBufferObject(static_cast<const CCommandBuffer::SCommand_CopyBufferObject *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_DELETE_BUFFER_OBJECT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_DeleteBufferObject(static_cast<const CCommandBuffer::SCommand_DeleteBufferObject *>(pBaseCommand)); }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_CREATE_BUFFER_CONTAINER)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_CreateBufferContainer(static_cast<const CCommandBuffer::SCommand_CreateBufferContainer *>(pBaseCommand)); }};
@@ -6957,33 +6956,6 @@ public:
 		DeleteBufferObject((size_t)pCommand->m_BufferIndex);
 		bool IsOneFrameBuffer = (pCommand->m_Flags & IGraphics::EBufferObjectCreateFlags::BUFFER_OBJECT_CREATE_FLAGS_ONE_TIME_USE_BIT) != 0;
 		return CreateBufferObject((size_t)pCommand->m_BufferIndex, pCommand->m_pUploadData, (VkDeviceSize)pCommand->m_DataSize, IsOneFrameBuffer);
-	}
-
-	[[nodiscard]] bool Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand)
-	{
-		size_t ReadBufferIndex = (size_t)pCommand->m_ReadBufferIndex;
-		size_t WriteBufferIndex = (size_t)pCommand->m_WriteBufferIndex;
-		auto &ReadMemBlock = m_vBufferObjects[ReadBufferIndex].m_BufferObject.m_Mem;
-		auto &WriteMemBlock = m_vBufferObjects[WriteBufferIndex].m_BufferObject.m_Mem;
-		VkBuffer ReadBuffer = ReadMemBlock.m_Buffer;
-		VkBuffer WriteBuffer = WriteMemBlock.m_Buffer;
-
-		VkDeviceSize DataSize = (VkDeviceSize)pCommand->m_CopySize;
-		VkDeviceSize ReadOffset = (VkDeviceSize)pCommand->m_ReadOffset + ReadMemBlock.m_HeapData.m_OffsetToAlign;
-		VkDeviceSize WriteOffset = (VkDeviceSize)pCommand->m_WriteOffset + WriteMemBlock.m_HeapData.m_OffsetToAlign;
-
-		if(!MemoryBarrier(ReadBuffer, ReadOffset, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, true))
-			return false;
-		if(!MemoryBarrier(WriteBuffer, WriteOffset, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, true))
-			return false;
-		if(!CopyBuffer(ReadBuffer, WriteBuffer, ReadOffset, WriteOffset, DataSize))
-			return false;
-		if(!MemoryBarrier(WriteBuffer, WriteOffset, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, false))
-			return false;
-		if(!MemoryBarrier(ReadBuffer, ReadOffset, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, false))
-			return false;
-
-		return true;
 	}
 
 	[[nodiscard]] bool Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand)

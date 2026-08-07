@@ -104,7 +104,6 @@ protected:
 	virtual void Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand) { dbg_assert_failed("Call of unsupported Cmd_CreateBufferObject"); }
 	virtual void Cmd_RecreateBufferObject(const CCommandBuffer::SCommand_RecreateBufferObject *pCommand) { dbg_assert_failed("Call of unsupported Cmd_RecreateBufferObject"); }
 	virtual void Cmd_UpdateBufferObject(const CCommandBuffer::SCommand_UpdateBufferObject *pCommand) { dbg_assert_failed("Call of unsupported Cmd_UpdateBufferObject"); }
-	virtual void Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand) { dbg_assert_failed("Call of unsupported Cmd_CopyBufferObject"); }
 	virtual void Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand) { dbg_assert_failed("Call of unsupported Cmd_DeleteBufferObject"); }
 
 	virtual void Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand) { dbg_assert_failed("Call of unsupported Cmd_CreateBufferContainer"); }
@@ -171,7 +170,6 @@ protected:
 	void Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand) override;
 	void Cmd_RecreateBufferObject(const CCommandBuffer::SCommand_RecreateBufferObject *pCommand) override;
 	void Cmd_UpdateBufferObject(const CCommandBuffer::SCommand_UpdateBufferObject *pCommand) override;
-	void Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand) override;
 	void Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand) override;
 
 	void Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand) override;

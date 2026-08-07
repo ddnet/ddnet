@@ -1106,7 +1106,6 @@ ERunCommandReturnTypes CCommandProcessorFragment_OpenGL::RunCommand(const CComma
 	case CCommandBuffer::CMD_CREATE_BUFFER_OBJECT: Cmd_CreateBufferObject(static_cast<const CCommandBuffer::SCommand_CreateBufferObject *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_UPDATE_BUFFER_OBJECT: Cmd_UpdateBufferObject(static_cast<const CCommandBuffer::SCommand_UpdateBufferObject *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RECREATE_BUFFER_OBJECT: Cmd_RecreateBufferObject(static_cast<const CCommandBuffer::SCommand_RecreateBufferObject *>(pBaseCommand)); break;
-	case CCommandBuffer::CMD_COPY_BUFFER_OBJECT: Cmd_CopyBufferObject(static_cast<const CCommandBuffer::SCommand_CopyBufferObject *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_DELETE_BUFFER_OBJECT: Cmd_DeleteBufferObject(static_cast<const CCommandBuffer::SCommand_DeleteBufferObject *>(pBaseCommand)); break;
 
 	case CCommandBuffer::CMD_CREATE_BUFFER_CONTAINER: Cmd_CreateBufferContainer(static_cast<const CCommandBuffer::SCommand_CreateBufferContainer *>(pBaseCommand)); break;
@@ -1923,21 +1922,6 @@ void CCommandProcessorFragment_OpenGL2::Cmd_UpdateBufferObject(const CCommandBuf
 
 	if(pCommand->m_DeletePointer)
 		free(pUploadData);
-}
-
-void CCommandProcessorFragment_OpenGL2::Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand)
-{
-	int WriteIndex = pCommand->m_WriteBufferIndex;
-	int ReadIndex = pCommand->m_ReadBufferIndex;
-
-	SBufferObject &ReadBufferObject = m_vBufferObjectIndices[ReadIndex];
-	SBufferObject &WriteBufferObject = m_vBufferObjectIndices[WriteIndex];
-
-	mem_copy(WriteBufferObject.m_pData + (ptrdiff_t)pCommand->m_WriteOffset, ReadBufferObject.m_pData + (ptrdiff_t)pCommand->m_ReadOffset, pCommand->m_CopySize);
-
-	glBindBuffer(GL_ARRAY_BUFFER, WriteBufferObject.m_BufferObjectId);
-	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_WriteOffset), (GLsizeiptr)(pCommand->m_CopySize), WriteBufferObject.m_pData + (ptrdiff_t)pCommand->m_WriteOffset);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand)

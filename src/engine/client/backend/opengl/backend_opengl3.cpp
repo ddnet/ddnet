@@ -936,16 +936,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferObject(const CCommandB
 		free(pUploadData);
 }
 
-void CCommandProcessorFragment_OpenGL3_3::Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand)
-{
-	int WriteIndex = pCommand->m_WriteBufferIndex;
-	int ReadIndex = pCommand->m_ReadBufferIndex;
-
-	glBindBuffer(GL_COPY_WRITE_BUFFER, m_vBufferObjectIndices[WriteIndex]);
-	glBindBuffer(GL_COPY_READ_BUFFER, m_vBufferObjectIndices[ReadIndex]);
-	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_ReadOffset), (GLsizeiptr)(pCommand->m_WriteOffset), (GLsizeiptr)pCommand->m_CopySize);
-}
-
 void CCommandProcessorFragment_OpenGL3_3::Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand)
 {
 	int Index = pCommand->m_BufferIndex;

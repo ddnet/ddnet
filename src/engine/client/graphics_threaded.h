@@ -136,7 +136,6 @@ public:
 		CMD_CREATE_BUFFER_OBJECT, // create vbo
 		CMD_RECREATE_BUFFER_OBJECT, // recreate vbo
 		CMD_UPDATE_BUFFER_OBJECT, // update vbo
-		CMD_COPY_BUFFER_OBJECT, // copy vbo to another
 		CMD_DELETE_BUFFER_OBJECT, // delete vbo
 
 		CMD_CREATE_BUFFER_CONTAINER, // create vao
@@ -277,19 +276,6 @@ public:
 		void *m_pOffset;
 		void *m_pUploadData;
 		size_t m_DataSize;
-	};
-
-	struct SCommand_CopyBufferObject : public SCommand
-	{
-		SCommand_CopyBufferObject() :
-			SCommand(CMD_COPY_BUFFER_OBJECT) {}
-
-		int m_WriteBufferIndex;
-		int m_ReadBufferIndex;
-
-		size_t m_ReadOffset;
-		size_t m_WriteOffset;
-		size_t m_CopySize;
 	};
 
 	struct SCommand_DeleteBufferObject : public SCommand
@@ -1180,7 +1166,6 @@ public:
 	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) override;
 	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) override;
 	void UpdateBufferObjectInternal(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false);
-	void CopyBufferObjectInternal(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize);
 	void DeleteBufferObject(int BufferIndex) override;
 
 	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override;
