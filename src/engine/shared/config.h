@@ -153,7 +153,7 @@ struct SIntConfigVariable : public SConfigVariable
 	int m_Max;
 	int m_OldValue;
 
-	SIntConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, int *pVariable, int Default, int Min, int Max) :
+	SIntConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, int *pVariable, int Default, int Min, int Max, bool SetDefault) :
 		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
 		m_pVariable(pVariable),
 		m_Default(Default),
@@ -161,7 +161,10 @@ struct SIntConfigVariable : public SConfigVariable
 		m_Max(Max),
 		m_OldValue(Default)
 	{
-		*m_pVariable = m_Default;
+		if(SetDefault)
+		{
+			*m_pVariable = m_Default;
+		}
 	}
 
 	~SIntConfigVariable() override = default;
@@ -184,14 +187,17 @@ struct SColorConfigVariable : public SConfigVariable
 	bool m_Alpha;
 	unsigned m_OldValue;
 
-	SColorConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, unsigned *pVariable, unsigned Default) :
+	SColorConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, unsigned *pVariable, unsigned Default, bool SetDefault) :
 		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
 		m_pVariable(pVariable),
 		m_Default(Default),
 		m_Alpha(Flags & CFGFLAG_COLALPHA),
 		m_OldValue(Default)
 	{
-		*m_pVariable = m_Default;
+		if(SetDefault)
+		{
+			*m_pVariable = m_Default;
+		}
 		if(Flags & CFGFLAG_COLLIGHT)
 		{
 			m_DarkestLighting = ColorHSLA::DARKEST_LGT;
@@ -225,7 +231,7 @@ struct SStringConfigVariable : public SConfigVariable
 	size_t m_MaxSize;
 	char *m_pOldValue;
 
-	SStringConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue);
+	SStringConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue, bool SetDefault);
 	~SStringConfigVariable() override = default;
 
 	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
@@ -271,7 +277,7 @@ class CConfigManager : public IConfigManager
 public:
 	CConfigManager();
 
-	void Init() override;
+	void Init(EInitializationType InitializationType) override;
 	void Reset(const char *pScriptName) override;
 	void ResetGameSettings() override;
 	void SetReadOnly(const char *pScriptName, bool ReadOnly) override;
