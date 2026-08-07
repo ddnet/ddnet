@@ -228,19 +228,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64_t m_CurrentServerCurrentPingTime = -1; // >= 0 request running
 	int64_t m_CurrentServerNextPingTime = -1; // >= 0 should request
 
-	// version info
-	struct CVersionInfo
-	{
-		enum
-		{
-			STATE_INIT = 0,
-			STATE_START,
-			STATE_READY,
-		};
-
-		int m_State = STATE_INIT;
-	} m_VersionInfo;
-
 	std::mutex m_WarningsMutex;
 	std::vector<SWarning> m_vWarnings;
 	std::vector<SWarning> m_vQuittingWarnings;
