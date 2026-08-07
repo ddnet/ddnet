@@ -235,7 +235,6 @@ public:
 
 	virtual ColorRGBA GetTextColor() const = 0;
 	virtual ColorRGBA GetTextOutlineColor() const = 0;
-	virtual ColorRGBA GetTextSelectionColor() const = 0;
 
 	virtual void OnPreWindowResize() = 0;
 	virtual void OnWindowResize() = 0;

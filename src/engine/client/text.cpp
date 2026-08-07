@@ -1436,11 +1436,6 @@ public:
 		return m_OutlineColor;
 	}
 
-	ColorRGBA GetTextSelectionColor() const override
-	{
-		return m_SelectionColor;
-	}
-
 	void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		const unsigned OldRenderFlags = m_RenderFlags;
