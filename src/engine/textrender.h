@@ -93,11 +93,6 @@ struct STextBoundingBox
 	float Right() const { return m_X + m_W; }
 	float Bottom() const { return m_Y + m_H; }
 	vec2 Size() const { return vec2(m_W, m_H); }
-	void MoveBy(vec2 Offset)
-	{
-		m_X += Offset.x;
-		m_Y += Offset.y;
-	}
 };
 
 // Allow to render multi colored text in one go without having to call TextEx() multiple times.
