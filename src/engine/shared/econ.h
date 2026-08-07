@@ -36,7 +36,6 @@ class CEcon
 	CNetConsole m_NetConsole;
 
 	bool m_Ready;
-	int m_PrintCBIndex;
 	int m_UserClientId;
 
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);
