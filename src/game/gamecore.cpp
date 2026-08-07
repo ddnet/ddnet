@@ -160,6 +160,7 @@ void CCharacterCore::Reset()
 	m_HookState = HOOK_IDLE;
 	SetHookedPlayer(-1);
 	m_AttachedPlayers.clear();
+	m_ActiveWeapon = -1;
 	m_Jumped = 0;
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
