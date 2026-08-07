@@ -220,12 +220,6 @@ public:
 		return m_ArgConstraintsPerCommand.at(pSettingName).at(Arg);
 	}
 
-	// Backend methods
-	const std::vector<SParsedMapSettingArg> &ParsedArgs(const std::shared_ptr<IMapSetting> &pSetting) const
-	{
-		return m_ParsedCommandArgs.at(pSetting);
-	}
-
 	// CContext
 	class CContext
 	{
