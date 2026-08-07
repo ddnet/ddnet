@@ -727,16 +727,6 @@ void CHud::PrepareAmmoHealthAndArmorQuads()
 	for(int i = 0; i < 10; ++i)
 		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 12, 12);
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
-
-	// empty armor meter
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 10, 10);
-	m_EmptyArmorOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
-
-	// 0.7
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 12, 12);
-	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 }
 
 void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
