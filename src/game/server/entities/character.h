@@ -212,7 +212,6 @@ public:
 	int m_TuneZone;
 	int m_TuneZoneOld;
 	int m_PainSoundTimer;
-	int m_LastMove;
 	int m_StartTime;
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;

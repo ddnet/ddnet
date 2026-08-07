@@ -2192,8 +2192,6 @@ void CCharacter::DDRaceTick()
 {
 	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
 	GameServer()->m_pController->SetArmorProgress(this, m_FreezeTime);
-	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
-		m_LastMove = Server()->Tick();
 
 	if(m_Core.m_LiveFrozen && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
