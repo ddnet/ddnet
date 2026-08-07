@@ -87,7 +87,6 @@ void CPlayer::Reset()
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
-	m_FirstPacket = true;
 
 	m_SendVoteIndex = -1;
 
