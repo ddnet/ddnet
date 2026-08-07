@@ -190,14 +190,17 @@ void SColorConfigVariable::ResetToOld()
 
 // -----
 
-SStringConfigVariable::SStringConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue) :
+SStringConfigVariable::SStringConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue, bool SetDefault) :
 	SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
 	m_pStr(pStr),
 	m_pDefault(pDefault),
 	m_MaxSize(MaxSize),
 	m_pOldValue(pOldValue)
 {
-	str_copy(m_pStr, m_pDefault, m_MaxSize);
+	if(SetDefault)
+	{
+		str_copy(m_pStr, m_pDefault, m_MaxSize);
+	}
 	str_copy(m_pOldValue, m_pDefault, m_MaxSize);
 }
 
@@ -276,10 +279,19 @@ CConfigManager::CConfigManager()
 	m_Failed = false;
 }
 
-void CConfigManager::Init()
+void CConfigManager::Init(EInitializationType InitializationType)
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
+
+	const auto &&SetDefault = [InitializationType](int Flags) {
+		// The integrated server shares the process-global config with the
+		// running client, so it only sets the defaults of the variables it
+		// exclusively owns and leaves the client's configuration untouched.
+		if(InitializationType == EInitializationType::INTEGRATED_SERVER)
+			return (Flags & (CFGFLAG_SERVER | CFGFLAG_ECON)) != 0 && (Flags & CFGFLAG_CLIENT) == 0;
+		return true;
+	};
 
 	const auto &&AddVariable = [this](SConfigVariable *pVariable) {
 		m_vpAllVariables.push_back(pVariable);
@@ -288,7 +300,7 @@ void CConfigManager::Init()
 		pVariable->Register();
 	};
 
-	const auto &&AddIntVariable = [this, AddVariable](const char *pScriptName, int Flags, const char *pDesc, int *pVariable, int Default, int Min, int Max) {
+	const auto &&AddIntVariable = [this, AddVariable, SetDefault](const char *pScriptName, int Flags, const char *pDesc, int *pVariable, int Default, int Min, int Max) {
 		dbg_assert(Min == 0 || Max == 0 || Min < Max, "MACRO_CONFIG_INT(%s): minimum (%d) must be less than maximum (%d)", pScriptName, Min, Max);
 		dbg_assert((Min == 0 || Default >= Min) && (Max == 0 || Default <= Max), "MACRO_CONFIG_INT(%s): default (%d) must be in range of minimum (%d) and maximum (%d)", pScriptName, Default, Min, Max);
 		char aHelp[512];
@@ -302,7 +314,7 @@ void CConfigManager::Init()
 		dbg_assert(HelpSize < sizeof(aHelp) - UTF8_BYTE_LENGTH - 1, "MACRO_CONFIG_INT(%s): help text possibly truncated. Increase size of aHelp.", pScriptName);
 
 		AddVariable(m_ConfigHeap.Allocate<SIntConfigVariable>(
-			m_pConsole, pScriptName, SConfigVariable::VAR_INT, Flags, m_ConfigHeap.StoreString(aHelp), pVariable, Default, Min, Max));
+			m_pConsole, pScriptName, SConfigVariable::VAR_INT, Flags, m_ConfigHeap.StoreString(aHelp), pVariable, Default, Min, Max, SetDefault(Flags)));
 	};
 
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
@@ -318,7 +330,7 @@ void CConfigManager::Init()
 		const size_t HelpSize = str_format(aHelp, sizeof(aHelp), "%s (default: $%0*X)", Desc, Alpha ? 8 : 6, color_cast<ColorRGBA>(ColorHSLA(Def, Alpha)).Pack(Alpha)); \
 		dbg_assert(HelpSize < sizeof(aHelp) - UTF8_BYTE_LENGTH - 1, "MACRO_CONFIG_COL(%s): help text possibly truncated. Increase size of aHelp.", pScriptName); \
 		AddVariable(m_ConfigHeap.Allocate<SColorConfigVariable>( \
-			m_pConsole, pScriptName, SConfigVariable::VAR_COLOR, Flags, m_ConfigHeap.StoreString(aHelp), &g_Config.m_##Name, Def)); \
+			m_pConsole, pScriptName, SConfigVariable::VAR_COLOR, Flags, m_ConfigHeap.StoreString(aHelp), &g_Config.m_##Name, Def, SetDefault(Flags))); \
 	}
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
@@ -329,7 +341,7 @@ void CConfigManager::Init()
 		dbg_assert(HelpSize < sizeof(aHelp) - UTF8_BYTE_LENGTH - 1, "MACRO_CONFIG_STR(%s): help text possibly truncated. Increase size of aHelp.", pScriptName); \
 		char *pOldValue = static_cast<char *>(m_ConfigHeap.Allocate(Len)); \
 		AddVariable(m_ConfigHeap.Allocate<SStringConfigVariable>( \
-			m_pConsole, pScriptName, SConfigVariable::VAR_STRING, Flags, m_ConfigHeap.StoreString(aHelp), g_Config.m_##Name, Def, Len, pOldValue)); \
+			m_pConsole, pScriptName, SConfigVariable::VAR_STRING, Flags, m_ConfigHeap.StoreString(aHelp), g_Config.m_##Name, Def, Len, pOldValue, SetDefault(Flags))); \
 	}
 
 #include "config_variables.h"

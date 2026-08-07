@@ -2821,6 +2821,17 @@ if(CLIENT)
     set(CLIENT_MANIFEST)
   endif()
 
+  # On Emscripten the server is linked into the client, because the browser
+  # cannot run the server as a separate process. The client starts the server
+  # on a thread instead, reachable via the in-memory loopback transport.
+  set(CLIENT_SERVER_SRC)
+  if(TARGET_OS STREQUAL "emscripten" AND SERVER)
+    set(CLIENT_SERVER_SRC
+      "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
+      $<TARGET_OBJECTS:game-server-without-main>
+    )
+  endif()
+
   # Target
   if(TARGET_OS STREQUAL "android")
     add_library(game-client SHARED
@@ -2842,6 +2853,7 @@ if(CLIENT)
       ${CLIENT_ICON}
       ${CLIENT_VERSIONINFO}
       ${CLIENT_MANIFEST}
+      ${CLIENT_SERVER_SRC}
       ${DEPS_CLIENT}
       # tidy-alphabetical-start
       $<TARGET_OBJECTS:engine-gfx>
@@ -2852,6 +2864,9 @@ if(CLIENT)
     )
   endif()
   add_dependencies(game-client generate_content_types)
+  if(CLIENT_SERVER_SRC)
+    add_dependencies(game-client generate_protocol)
+  endif()
   if(VULKAN)
     add_dependencies(game-client build_vulkan_shaders)
   endif()
@@ -2947,6 +2962,7 @@ if(SERVER)
     databases/connection_pool.h
     databases/mysql.cpp
     databases/sqlite.cpp
+    emscripten_server.h
     main.cpp
     name_ban.cpp
     name_ban.h
@@ -3068,6 +3084,25 @@ if(SERVER)
   add_dependencies(game-server-without-main generate_content_types)
   add_dependencies(game-server-without-main generate_protocol)
   # tidy-alphabetical-end
+  if(TARGET_OS STREQUAL "emscripten")
+    # The server is linked into the client on Emscripten. These class names
+    # exist both in the server and in the client prediction code, so rename
+    # the server's classes to avoid duplicate symbols.
+    target_compile_definitions(game-server-without-main PRIVATE
+      # tidy-alphabetical-start
+      CCharacter=CServerCharacter
+      CDoor=CServerDoor
+      CDragger=CServerDragger
+      CEntity=CServerEntity
+      CGameWorld=CServerGameWorld
+      CLaser=CServerLaser
+      CPickup=CServerPickup
+      CPlasma=CServerPlasma
+      CProjectile=CServerProjectile
+      g_pData=g_pServerData
+      # tidy-alphabetical-end
+    )
+  endif()
   set_property(TARGET game-server-without-main
       PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
@@ -3076,6 +3111,8 @@ if(SERVER)
   list(APPEND TARGETS_LINK game-server-without-main)
 
   # Target
+  # On Emscripten no standalone server is built, the server is linked into the
+  # client instead.
   if(TARGET_OS STREQUAL "android")
     add_library(game-server SHARED
       ${DEPS}
@@ -3089,7 +3126,7 @@ if(SERVER)
       $<TARGET_OBJECTS:rust-bridge-shared>
       # tidy-alphabetical-sort
     )
-  else()
+  elseif(NOT TARGET_OS STREQUAL "emscripten")
     add_executable(game-server
       ${DEPS}
       "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
@@ -3103,12 +3140,14 @@ if(SERVER)
       # tidy-alphabetical-sort
     )
   endif()
-  set_property(TARGET game-server
-      PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
-  )
-  target_link_libraries(game-server ${LIBS_SERVER})
-  list(APPEND TARGETS_OWN game-server)
-  list(APPEND TARGETS_LINK game-server)
+  if(TARGET game-server)
+    set_property(TARGET game-server
+        PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
+    )
+    target_link_libraries(game-server ${LIBS_SERVER})
+    list(APPEND TARGETS_OWN game-server)
+    list(APPEND TARGETS_LINK game-server)
+  endif()
 
   if(TARGET_OS AND TARGET_OS STREQUAL "mac")
     set(SERVER_LAUNCHER_SRC src/macos/server.mm)
@@ -3253,6 +3292,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     chunk_header_test.cpp
     color_test.cpp
     compression_test.cpp
+    config_test.cpp
     csv_test.cpp
     datafile_test.cpp
     dbg_test.cpp
