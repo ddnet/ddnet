@@ -594,7 +594,6 @@ private:
 	int m_SourceIndex;
 	int m_CurrentValue;
 
-	std::vector<int> m_vOriginalValues;
 	CSoundShape m_SavedShape;
 
 	void Save();
