@@ -153,8 +153,6 @@ private:
 	CNetObj_PlayerInput m_SavedInput;
 	int m_NumInputs;
 
-	int m_DamageTakenTick;
-
 	int m_Health;
 	int m_Armor;
 	int m_TriggeredEvents7;
