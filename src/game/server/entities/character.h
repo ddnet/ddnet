@@ -134,8 +134,6 @@ private:
 
 	int m_MoveRestrictions;
 
-	int m_DamageTaken;
-
 	int m_EmoteType;
 	int m_EmoteStop;
 
