@@ -37,13 +37,11 @@ struct SEditResult
 struct SUIAnimator
 {
 	bool m_Active;
-	bool m_ScaleLabel;
 	bool m_RepositionLabel;
 
 	std::chrono::nanoseconds m_Time;
 	float m_Value;
 
-	float m_XOffset;
 	float m_YOffset;
 	float m_WOffset;
 	float m_HOffset;

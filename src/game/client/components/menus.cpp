@@ -183,7 +183,6 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 
 		Rect.w += pAnimator->m_Value * pAnimator->m_WOffset;
 		Rect.h += pAnimator->m_Value * pAnimator->m_HOffset;
-		Rect.x += pAnimator->m_Value * pAnimator->m_XOffset;
 		Rect.y += pAnimator->m_Value * pAnimator->m_YOffset;
 
 		pAnimator->m_Time = Time;
@@ -225,11 +224,8 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 			Rect.y += Rect.h - pRect->h + Rect.y - pRect->y;
 		}
 
-		if(!pAnimator->m_ScaleLabel)
-		{
-			Rect.w = pRect->w;
-			Rect.h = pRect->h;
-		}
+		Rect.w = pRect->w;
+		Rect.h = pRect->h;
 	}
 
 	if(pCommunityIcon)
