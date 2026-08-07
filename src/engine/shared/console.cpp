@@ -141,22 +141,6 @@ std::optional<CConsole::EAccessLevel> CConsole::AccessLevelToEnum(const char *pA
 	return std::nullopt;
 }
 
-const char *CConsole::AccessLevelToString(EAccessLevel AccessLevel)
-{
-	switch(AccessLevel)
-	{
-	case EAccessLevel::ADMIN:
-		return "admin";
-	case EAccessLevel::MODERATOR:
-		return "moderator";
-	case EAccessLevel::HELPER:
-		return "helper";
-	case EAccessLevel::USER:
-		return "all";
-	}
-	dbg_assert_failed("invalid access level: %d", (int)AccessLevel);
-}
-
 // the maximum number of tokens occurs in a string of length CONSOLE_MAX_STR_LENGTH with tokens size 1 separated by single spaces
 
 int CConsole::ParseStart(CResult *pResult, const char *pString, int Length)

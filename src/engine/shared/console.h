@@ -202,14 +202,6 @@ public:
 	 */
 	static std::optional<EAccessLevel> AccessLevelToEnum(const char *pAccessLevel);
 
-	/**
-	 * Converts access level enum to access level string.
-	 *
-	 * @param AccessLevel should be one of these: `EAccessLevel::ADMIN`, `EAccessLevel::MODERATOR`, `EAccessLevel::HELPER` or `EAccessLevel::USER`.
-	 * @return `nullptr` on error or access level string like "admin".
-	 */
-	static const char *AccessLevelToString(EAccessLevel AccessLevel);
-
 	static std::optional<ColorHSLA> ColorParse(const char *pStr, float DarkestLighting);
 
 	// DDRace
