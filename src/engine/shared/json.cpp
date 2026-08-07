@@ -167,15 +167,3 @@ char *EscapeJson(char *pBuffer, int BufferSize, const char *pString)
 	*pBuffer = 0;
 	return pResult;
 }
-
-const char *JsonBool(bool Bool)
-{
-	if(Bool)
-	{
-		return "true";
-	}
-	else
-	{
-		return "false";
-	}
-}

@@ -14,6 +14,5 @@ int json_int_get(const json_value *pInteger);
 int json_boolean_get(const json_value *pBoolean);
 
 char *EscapeJson(char *pBuffer, int BufferSize, const char *pString);
-const char *JsonBool(bool Bool);
 
 #endif // ENGINE_SHARED_JSON_H
