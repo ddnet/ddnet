@@ -38,14 +38,6 @@ bool CGLSLProgram::AddShader(CGLSL *pShader) const
 	return false;
 }
 
-void CGLSLProgram::DetachShader(CGLSL *pShader) const
-{
-	if(pShader->IsLoaded())
-	{
-		DetachShaderById(pShader->GetShaderId());
-	}
-}
-
 void CGLSLProgram::DetachShaderById(TWGLuint ShaderId) const
 {
 	glDetachShader(m_ProgramId, ShaderId);

@@ -29,7 +29,6 @@ public:
 	void UseProgram() const;
 	TWGLuint GetProgramId() const;
 
-	void DetachShader(CGLSL *pShader) const;
 	void DetachShaderById(TWGLuint ShaderId) const;
 	void DetachAllShaders() const;
 
