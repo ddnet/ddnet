@@ -180,7 +180,6 @@ public:
 
 private:
 	std::vector<std::shared_ptr<IEditorAction>> m_vpActions;
-	std::string m_Display;
 	bool m_Reverse;
 };
 
