@@ -206,6 +206,10 @@ public:
 		void Reset();
 	} m_CameraInfo;
 
+	// effective radius for network clipping, updated every tick since it depends on the dynamic camera offset
+	vec2 m_NetworkClipRadius;
+	void UpdateNetworkClipRadius();
+
 	int m_ChatScore;
 
 	bool m_Moderating;

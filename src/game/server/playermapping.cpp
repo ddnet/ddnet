@@ -347,7 +347,7 @@ void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
 	}
 }
 
-bool CPlayerMapping::ReserveTeamSlots(int DDTeam)
+bool CPlayerMapping::ReserveTeamSlots(int DDTeam) const
 {
 	return !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap;
 }

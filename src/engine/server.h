@@ -3,6 +3,7 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 
+#include "console.h"
 #include "kernel.h"
 #include "message.h"
 
@@ -278,6 +279,9 @@ public:
 
 	bool Translate(int &Target, int ClientId)
 	{
+		// console and server demo pseudo clients operate on untranslated ids (SERVER_DEMO_CLIENT == IConsole::CLIENT_ID_UNSPECIFIED)
+		if(ClientId == SERVER_DEMO_CLIENT || ClientId == IConsole::CLIENT_ID_GAME || ClientId == IConsole::CLIENT_ID_NO_GAME)
+			return true;
 		if(GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS)
 			return true;
 		if(Target < 0 || Target >= MAX_CLIENTS)
@@ -291,6 +295,9 @@ public:
 
 	bool ReverseTranslate(int &Target, int ClientId)
 	{
+		// console and server demo pseudo clients operate on untranslated ids (SERVER_DEMO_CLIENT == IConsole::CLIENT_ID_UNSPECIFIED)
+		if(ClientId == SERVER_DEMO_CLIENT || ClientId == IConsole::CLIENT_ID_GAME || ClientId == IConsole::CLIENT_ID_NO_GAME)
+			return true;
 		if(GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS)
 			return true;
 		if(Target < 0 || Target >= LEGACY_MAX_CLIENTS)

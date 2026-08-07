@@ -96,7 +96,7 @@ public:
 	int TotalOverhang(int ClientId) const;
 	ESeeOthersInd SeeOthersInd(int ClientId, int MapId) const;
 	const char *SeeOthersName(int ClientId);
-	bool ReserveTeamSlots(int DDTeam);
+	bool ReserveTeamSlots(int DDTeam) const;
 };
 
 #endif

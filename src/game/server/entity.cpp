@@ -97,18 +97,9 @@ bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 Ch
 	if(SnappingClient == SERVER_DEMO_CLIENT || pGameServer->m_apPlayers[SnappingClient]->m_ShowAll)
 		return false;
 
-	// Border of 10 blocks outside of view range so that no entities randomly appear even with high latency
-	// ShowDistance / 2 because it's the radius. This heavily decreases bandwidth on some maps and was likely a bug
-	// or misunderstanding introduced by whoever added showdistance. Now it's like this since forever and was noticed because
-	// the playermapping algorithm depends on NetworkClipped function to determine when to add a new tee.
-	float Border = 32.f * 10.f;
-
-	float dx = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos.x - CheckPos.x;
-	if(absolute(dx) > pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance.x / 2.f + Border)
-		return true;
-
-	float dy = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos.y - CheckPos.y;
-	return absolute(dy) > pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance.y / 2.f + Border;
+	const CPlayer *pPlayer = pGameServer->m_apPlayers[SnappingClient];
+	vec2 Delta = pPlayer->m_ViewPos - CheckPos;
+	return absolute(Delta.x) > pPlayer->m_NetworkClipRadius.x || absolute(Delta.y) > pPlayer->m_NetworkClipRadius.y;
 }
 
 bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec2 StartPos, vec2 EndPos)
@@ -116,8 +107,8 @@ bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec
 	if(SnappingClient == SERVER_DEMO_CLIENT || pGameServer->m_apPlayers[SnappingClient]->m_ShowAll)
 		return false;
 
-	vec2 &ViewPos = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos;
-	vec2 &ShowDistance = pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance;
+	const CPlayer *pPlayer = pGameServer->m_apPlayers[SnappingClient];
+	const vec2 &ViewPos = pPlayer->m_ViewPos;
 
 	vec2 DistanceToLine, ClosestPoint;
 	if(closest_point_on_line(StartPos, EndPos, ViewPos, ClosestPoint))
@@ -130,8 +121,6 @@ bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec
 		DistanceToLine = ViewPos - StartPos;
 	}
 
-	// Border of 10 blocks outside of view range
-	float Border = 32.f * 10.f;
-	float ClippDistance = std::max(ShowDistance.x, ShowDistance.y) / 2.f + Border;
+	float ClippDistance = std::max(pPlayer->m_NetworkClipRadius.x, pPlayer->m_NetworkClipRadius.y);
 	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
 }

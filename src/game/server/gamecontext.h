@@ -609,6 +609,7 @@ private:
 	static void ConVoteMutes(IConsole::IResult *pResult, void *pUserData);
 
 	void Whisper(int ClientId, char *pStr);
+	int WhisperRecordFlag(int ClientId) const;
 	void WhisperId(int ClientId, int VictimId, const char *pMessage);
 	void Converse(int ClientId, char *pStr);
 	bool IsVersionBanned(int Version);

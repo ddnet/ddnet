@@ -28,6 +28,7 @@ CGameTeams::CGameTeams(CGameContext *pGameContext) :
 void CGameTeams::Reset()
 {
 	m_Core.Reset();
+	UpdateLegacyTeamMap();
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		m_aTeeStarted[i] = false;
@@ -478,6 +479,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 	}
 
 	m_Core.Team(ClientId, Team);
+	UpdateLegacyTeamMap();
 
 	if(OldTeam != Team)
 	{
@@ -539,11 +541,23 @@ void CGameTeams::KillTeam(int Team, int NewStrongId, int ExceptId)
 		}
 	}
 
-	// send the team kill message
+	// send the team kill message, the team number can differ per client
 	CNetMsg_Sv_KillMsgTeam Msg;
 	Msg.m_Team = Team;
 	Msg.m_First = NewStrongId;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+
+	// pack one with the real team and id for the recording only, the per client messages are not recorded
+	CMsgPacker Packer(&Msg);
+	Msg.Pack(&Packer);
+	Server()->SendMsg(&Packer, MSGFLAG_NOSEND, SERVER_DEMO_CLIENT);
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!Server()->ClientIngame(i))
+			continue;
+		Msg.m_Team = TeamForClient(Team, i);
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+	}
 }
 
 bool CGameTeams::TeamFinished(int Team)
@@ -640,18 +654,8 @@ void CGameTeams::SendTeamsState(int ClientId)
 		int TranslatedId = i;
 		if(Server()->ReverseTranslate(TranslatedId, ClientId))
 		{
-			Team = m_Core.Team(TranslatedId);
-			if(ClientVersion < VERSION_DDNET_128_TEAMS)
-			{
-				// If player is not reserved, dont highlight his team. Causes mismatch between dummy and main when playermapping is active.
-				bool DontHighlightTeam = PlayerMappingRequired && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team);
-				if(DontHighlightTeam)
-					Team = 0;
-				else if(Team == TEAM_SUPER)
-					Team = LEGACY_TEAM_SUPER; // legacy team super
-				else if(Team >= LEGACY_TEAM_SUPER)
-					Team = 0;
-			}
+			// TeamForClient is also used for the switch state snap and Sv_KillMsgTeam, which have to agree with the teams state
+			Team = TeamForClient(m_Core.Team(TranslatedId), ClientId);
 		}
 		Msg.AddInt(Team);
 		MsgLegacy.AddInt(Team);
@@ -662,6 +666,51 @@ void CGameTeams::SendTeamsState(int ClientId)
 	{
 		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);
 	}
+}
+
+void CGameTeams::UpdateLegacyTeamMap()
+{
+	// Clients before VERSION_DDNET_128_TEAMS only know team numbers up to LEGACY_TEAM_SUPER. Only whether
+	// two team numbers are equal matters to a client, so the teams that such a client cannot represent are
+	// renumbered into the team numbers that are currently unused. This keeps collision and hook prediction
+	// correct, at the cost of showing a different team number than the one the player joined.
+	bool aTeamOccupied[NUM_DDRACE_TEAMS] = {};
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		aTeamOccupied[m_Core.Team(i)] = true;
+
+	// teams that the client can represent keep their own number
+	for(int Team = TEAM_FLOCK; Team < LEGACY_TEAM_SUPER; Team++)
+		m_aLegacyTeamMap[Team] = Team;
+	for(int Team = LEGACY_TEAM_SUPER; Team < TEAM_SUPER; Team++)
+		m_aLegacyTeamMap[Team] = TEAM_FLOCK;
+	m_aLegacyTeamMap[TEAM_SUPER] = LEGACY_TEAM_SUPER;
+
+	// the teams that are left get the numbers that no team is currently using
+	int NextNumber = TEAM_FLOCK + 1;
+	for(int Team = LEGACY_TEAM_SUPER; Team < TEAM_SUPER; Team++)
+	{
+		if(!aTeamOccupied[Team])
+			continue;
+
+		while(NextNumber < LEGACY_TEAM_SUPER && aTeamOccupied[NextNumber])
+			NextNumber++;
+		if(NextNumber == LEGACY_TEAM_SUPER)
+			break; // more teams than the client can represent, the rest stays TEAM_FLOCK
+
+		m_aLegacyTeamMap[Team] = NextNumber;
+		NextNumber++;
+	}
+}
+
+int CGameTeams::TeamForClient(int Team, int ClientId) const
+{
+	int ClientVersion = GameServer()->GetClientVersion(ClientId);
+	if(ClientVersion >= VERSION_DDNET_128_TEAMS)
+		return Team;
+	// If the team's slots are not reserved, dont highlight it. Causes mismatch between dummy and main when playermapping is active.
+	if(ClientVersion < VERSION_DDNET_128_PLAYERS && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team))
+		return TEAM_FLOCK;
+	return m_aLegacyTeamMap[Team];
 }
 
 ERaceState CGameTeams::GetDDRaceState(const CPlayer *Player) const
