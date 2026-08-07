@@ -219,7 +219,9 @@ public:
 	int SendPackMsgTranslate(const protocol7::CNetMsg_Sv_VoteSet *pMsg, int Flags, int ClientId)
 	{
 		protocol7::CNetMsg_Sv_VoteSet MsgCopy = *pMsg;
-		return Translate(MsgCopy.m_ClientId, ClientId) && SendPackMsgOne(&MsgCopy, Flags, ClientId);
+		if(!Translate(MsgCopy.m_ClientId, ClientId))
+			MsgCopy.m_ClientId = -1;
+		return SendPackMsgOne(&MsgCopy, Flags, ClientId);
 	}
 
 	int SendPackMsgTranslate(const protocol7::CNetMsg_Sv_Team *pMsg, int Flags, int ClientId)

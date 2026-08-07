@@ -1207,7 +1207,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		if(i <= 16)
 			m_Teams.m_IsDDRace16 = true;
-		else if(i <= 64)
+		else if(!m_GameInfo.m_Supports128Teams)
 			m_Teams.m_IsDDRace64 = true;
 
 		m_Ghost.m_AllowRestart = true;
@@ -1652,6 +1652,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_NoSkinChangeForFrozen = false;
 	Info.m_DDRaceTeam = false;
 	Info.m_PredictEvents = Vanilla;
+	Info.m_Supports128Teams = false;
 
 	if(Version >= 0)
 	{
@@ -1718,6 +1719,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 11)
 	{
 		Info.m_PredictEvents = Flags2 & GAMEINFOFLAG2_PREDICT_EVENTS;
+	}
+	if(Version >= 12)
+	{
+		Info.m_Supports128Teams = Flags2 & GAMEINFOFLAG2_SUPPORTS_128_TEAMS;
 	}
 
 	return Info;
