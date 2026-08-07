@@ -236,14 +236,12 @@ enum EButtonFlags : unsigned
 
 struct SMenuButtonProperties
 {
-	int m_Checked = 0;
 	bool m_HintRequiresStringCheck = false;
 	bool m_HintCanChangePositionOrSize = false;
 	bool m_UseIconFont = false;
 	bool m_ShowDropDownIcon = false;
 	int m_Corners = IGraphics::CORNER_ALL;
 	float m_Rounding = 5.0f;
-	float m_FontFactor = 0.0f;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
 	unsigned m_Flags = BUTTONFLAG_LEFT;
 };
