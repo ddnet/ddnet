@@ -157,7 +157,6 @@ private:
 	int m_CollisionDisabledOffset;
 	int m_HookHitDisabledOffset;
 	int m_HammerHitDisabledOffset;
-	int m_GunHitDisabledOffset;
 	int m_ShotgunHitDisabledOffset;
 	int m_GrenadeHitDisabledOffset;
 	int m_LaserHitDisabledOffset;
