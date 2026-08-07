@@ -277,12 +277,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		else if(m_pClient->m_TranslationContext.m_ServerSettings.m_TeamLock && !pMsg->m_TeamLock)
 			m_Chat.AddLine(-1, 0, "Teams were unlocked");
 
-		m_pClient->m_TranslationContext.m_ServerSettings.m_KickVote = pMsg->m_KickVote;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_KickMin = pMsg->m_KickMin;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_SpecVote = pMsg->m_SpecVote;
 		m_pClient->m_TranslationContext.m_ServerSettings.m_TeamLock = pMsg->m_TeamLock;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_TeamBalance = pMsg->m_TeamBalance;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_PlayerSlots = pMsg->m_PlayerSlots;
 		return nullptr; // There is no 0.6 equivalent
 	}
 	else if(*pMsgId == protocol7::NETMSGTYPE_SV_RACEFINISH)
