@@ -28,7 +28,7 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libglew-dev -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libglew-dev libwebsockets-dev -y
 
     - name: Install Vulkan SDK
       uses: humbletim/install-vulkan-sdk@v1.2
@@ -54,7 +54,7 @@ jobs:
         SAN_FLAGS="-fsanitize=address,undefined,leak -fsanitize-recover=all -fno-omit-frame-pointer -fno-common"
         export CXXFLAGS="$SAN_FLAGS"
         export CFLAGS="$SAN_FLAGS"
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -DWEBSOCKETS=ON -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON ..
         cmake --build . --config Debug --target everything
 
     - name: Run server and headless client with ASan and UBSan
@@ -119,7 +119,7 @@ jobs:
       run: |
         cd clang-sanitizer
         set +e
-        python ../scripts/integration_test.py --show-full-output --test-mastersrv .
+        python ../scripts/integration_test.py --show-full-output --test-mastersrv --test-websockets .
         integration_test_result=$?
         set -e
         if [ $integration_test_result -ne 0 ]; then

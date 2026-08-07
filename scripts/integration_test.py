@@ -690,16 +690,49 @@ def client_can_connect_websockets(test_env):
 	server = test_env.server(["dbg_websockets 1", "stdout_output_level 1"])
 	wait_for_startup([client, server])
 	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
-	server.wait_for_log_prefix("websockets: I: lws_handshake_server", timeout=15)  # Connection established
-	client.wait_for_log_prefix("websockets: I: lws_http_client_socket_service", timeout=15)  # Connection established
-	join = server.wait_for_log_prefix("server: player has entered the game", timeout=5).line
+	join = server.wait_for_log_prefix("server: player has entered the game", timeout=15).line
 	if "sixup=0" not in join:
 		raise AssertionError(f"sixup=0 not found in {join!r}")
 	server.exit()
+	# The disconnect reason is carried by the websocket close frame.
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
 	server.wait_for_exit()
 	client.wait_for_exit()
+
+
+@test(requires_websockets=True)
+def server_notices_websocket_disconnect(test_env):
+	client = test_env.client(["dbg_websockets 1", "stdout_output_level 1"])
+	server = test_env.server(["dbg_websockets 1", "stdout_output_level 1"])
+	wait_for_startup([client, server])
+	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
+	server.wait_for_log_prefix("server: player has entered the game", timeout=15)
+	client.command("disconnect")
+	# The server must notice the close immediately, without unrelated traffic
+	# waking it up.
+	server.wait_for_log_prefix("server: client dropped", timeout=5)
+	client.exit()
+	server.exit()
+	client.wait_for_exit()
+	server.wait_for_exit()
+
+
+@test(requires_websockets=True)
+def client_can_reconnect_websockets(test_env):
+	client = test_env.client(["dbg_websockets 1", "stdout_output_level 1"])
+	server = test_env.server(["dbg_websockets 1", "stdout_output_level 1"])
+	wait_for_startup([client, server])
+	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
+	server.wait_for_log_prefix("server: player has entered the game", timeout=15)
+	# Reconnecting to the same address must not be killed by a stale close
+	# event of the connection that is being left.
+	client.command(f"connect ws://127.0.0.1:{server.port}")
+	server.wait_for_log_prefix("server: player has entered the game", timeout=15)
+	client.exit()
+	server.exit()
+	client.wait_for_exit()
+	server.wait_for_exit()
 
 
 @test

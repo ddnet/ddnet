@@ -92,19 +92,6 @@ static void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
 }
 #endif
 
-#if defined(CONF_WEBSOCKETS)
-static void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
-{
-#if defined(CONF_PLATFORM_LINUX)
-	*buf = buffer->bufs[0];
-	*size = sizeof(buffer->bufs[0]);
-#else
-	*buf = buffer->buf;
-	*size = sizeof(buffer->buf);
-#endif
-}
-#endif
-
 struct NETSOCKET_INTERNAL
 {
 	int type;
@@ -1036,27 +1023,6 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		}
 	}
 
-#if defined(CONF_WEBSOCKETS)
-	if(addr->type & NETTYPE_WEBSOCKET_IPV4)
-	{
-		if(sock->web_ipv4sock >= 0)
-		{
-			if(addr->type & NETTYPE_LINK_BROADCAST)
-			{
-				log_error("net", "Cannot send broadcasts to Websocket IPv4");
-			}
-			else
-			{
-				d = websocket_send(sock->web_ipv4sock, (const unsigned char *)data, size, addr);
-			}
-		}
-		else
-		{
-			log_error("net", "Cannot send Websocket IPv4 traffic to this socket");
-		}
-	}
-#endif
-
 	if(addr->type & NETTYPE_IPV6)
 	{
 		if(sock->ipv6sock >= 0)
@@ -1084,26 +1050,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		}
 	}
 
-#if defined(CONF_WEBSOCKETS)
-	if(addr->type & NETTYPE_WEBSOCKET_IPV6)
+	if(addr->type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6))
 	{
-		if(sock->web_ipv6sock >= 0)
-		{
-			if(addr->type & NETTYPE_LINK_BROADCAST)
-			{
-				log_error("net", "Cannot send broadcasts to Websocket IPv6");
-			}
-			else
-			{
-				d = websocket_send(sock->web_ipv6sock, (const unsigned char *)data, size, addr);
-			}
-		}
-		else
-		{
-			log_error("net", "Cannot send Websocket IPv6 traffic to this socket");
-		}
+		// Websocket connections carry network chunks instead of whole packets,
+		// so packets cannot be sent to them; see engine/shared/websockets.h.
+		log_error("net", "Cannot send packets to websocket addresses");
 	}
-#endif
 
 	network_stats.sent_bytes += size;
 	network_stats.sent_packets++;
@@ -1188,37 +1140,22 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	}
 #endif
 
-#if defined(CONF_WEBSOCKETS)
-	if(sock->web_ipv4sock >= 0)
-	{
-		char *buf;
-		int size;
-		net_buffer_simple(&sock->buffer, &buf, &size);
-		bytes = websocket_recv(sock->web_ipv4sock, (unsigned char *)buf, size, addr);
-		*data = (unsigned char *)buf;
-		if(bytes > 0)
-		{
-			update_stats(bytes);
-			return bytes;
-		}
-	}
+	return bytes < 0 ? -1 : 0;
+}
 
-	if(sock->web_ipv6sock >= 0)
+int net_socket_websocket(NETSOCKET sock, int nettype)
+{
+#if defined(CONF_WEBSOCKETS)
+	if(nettype & NETTYPE_WEBSOCKET_IPV4)
 	{
-		char *buf;
-		int size;
-		net_buffer_simple(&sock->buffer, &buf, &size);
-		bytes = websocket_recv(sock->web_ipv6sock, (unsigned char *)buf, size, addr);
-		*data = (unsigned char *)buf;
-		if(bytes > 0)
-		{
-			update_stats(bytes);
-			return bytes;
-		}
+		return sock->web_ipv4sock;
+	}
+	if(nettype & NETTYPE_WEBSOCKET_IPV6)
+	{
+		return sock->web_ipv6sock;
 	}
 #endif
-
-	return bytes < 0 ? -1 : 0;
+	return -1;
 }
 
 void net_udp_close(NETSOCKET sock)
