@@ -64,8 +64,6 @@ public:
 	void SkipByFileTime(bool SkipByFileTime) { m_SkipByFileTime = SkipByFileTime; }
 	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
 	void FailOnErrorStatus(bool FailOnErrorStatus) { m_FailOnErrorStatus = FailOnErrorStatus; }
-	// Download to memory only. Get the result via `Result*`.
-	void WriteToMemory();
 	// Download to filesystem and memory.
 	void WriteToFileAndMemory(IStorage *pStorage, const char *pDest, int StorageType);
 	// Download to the filesystem only.

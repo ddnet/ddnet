@@ -33,12 +33,6 @@ IHttpRequest::~IHttpRequest()
 	}
 }
 
-void IHttpRequest::WriteToMemory()
-{
-	m_WriteToMemory = true;
-	m_WriteToFile = false;
-}
-
 void IHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int StorageType)
 {
 	m_WriteToMemory = false;
