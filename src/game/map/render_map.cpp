@@ -122,11 +122,6 @@ int CMapBasedEnvelopePointAccess::NumPoints() const
 	return m_NumPoints;
 }
 
-int CMapBasedEnvelopePointAccess::NumPointsMax() const
-{
-	return m_NumPointsMax;
-}
-
 const CEnvPoint *CMapBasedEnvelopePointAccess::GetPoint(int Index) const
 {
 	if(Index < 0 || Index >= m_NumPoints)

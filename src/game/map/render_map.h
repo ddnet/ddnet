@@ -45,7 +45,6 @@ public:
 	void SetPointsRange(int StartPoint, int NumPoints);
 	int StartPoint() const;
 	int NumPoints() const override;
-	int NumPointsMax() const;
 	const CEnvPoint *GetPoint(int Index) const override;
 	const CEnvPointBezier *GetBezier(int Index) const override;
 };
