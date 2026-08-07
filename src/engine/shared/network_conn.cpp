@@ -10,6 +10,78 @@
 #include <base/str.h>
 #include <base/time.h>
 
+#include <engine/shared/websockets.h>
+
+bool CNetConnection::IsWebsocket() const
+{
+	// While connecting, the peer address is not determined yet
+	const NETADDR *pAddr = m_State == EState::CONNECT ? &m_aConnectAddrs[0] : &m_PeerAddr;
+	return (pAddr->type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) != 0;
+}
+
+bool CNetConnection::WebsocketOnOpen(const NETADDR *pAddr)
+{
+	if(m_State != EState::CONNECT || !IsPeerAddress(*pAddr))
+		return false;
+
+	// The established websocket connection is the completed connect handshake
+	SetPeerAddr(pAddr);
+	const int64_t Now = time_get();
+	m_LastSendTime = Now;
+	m_LastRecvTime = Now;
+	m_LastUpdateTime = Now;
+	m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+	m_State = EState::ONLINE;
+	if(g_Config.m_Debug)
+		dbg_msg("connection", "websocket connected, connection online");
+	return true;
+}
+
+void CNetConnection::WebsocketOnClose(const NETADDR *pAddr, const char *pReason, bool Abrupt)
+{
+	if(m_State == EState::OFFLINE || m_State == EState::ERROR || !IsPeerAddress(*pAddr))
+		return;
+
+	m_State = EState::ERROR;
+	m_RemoteClosed = 1;
+
+	char aStr[256] = {0};
+	if(pReason != nullptr && pReason[0] != '\0')
+	{
+		// make sure to sanitize the error string from the other party
+		str_copy(aStr, pReason);
+		str_sanitize_cc(aStr);
+		if(!str_utf8_check(aStr))
+		{
+			str_copy(aStr, "(Invalid error message)");
+		}
+	}
+
+	if(!m_BlockCloseMsg)
+	{
+		SetError(aStr);
+	}
+
+	if(Abrupt)
+	{
+		// The connection was lost without the peer announcing the close, which
+		// is what timeout protection exists for, so treat it like a timeout
+		// instead of ending the connection right away. The reason of an abrupt
+		// close is generated locally, so it is safe to report regardless of
+		// m_BlockCloseMsg.
+		m_TimeoutSituation = true;
+		SetError(aStr[0] == '\0' ? "Timeout" : aStr);
+	}
+
+	if(g_Config.m_Debug)
+		dbg_msg("conn", "websocket closed reason='%s' abrupt=%d", aStr, Abrupt ? 1 : 0);
+}
+
+void CNetConnection::WebsocketOnRecv()
+{
+	m_LastRecvTime = time_get();
+}
+
 bool CNetConnection::IsPeerAddress(const NETADDR &Addr) const
 {
 	// While connecting, the peer address is not determined yet, so any of the
@@ -121,6 +193,10 @@ void CNetConnection::SignalResend()
 
 int CNetConnection::Flush()
 {
+	// Websocket chunks are sent immediately, there is nothing to flush
+	if(IsWebsocket())
+		return 0;
+
 	// Only flush the connection if there is at least one chunk to flush,
 	// or if a resend should be signaled.
 	const int NumChunks = m_Construct.m_NumChunks;
@@ -145,6 +221,22 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 {
 	if(m_State == EState::OFFLINE || m_State == EState::ERROR)
 		return -1;
+
+	if(IsWebsocket())
+	{
+		// The chunk is sent as one websocket message immediately, a flags
+		// byte followed by the payload; the transport provides reliability
+		// and ordering
+		if(m_State != EState::ONLINE || DataSize < 0 || DataSize > NET_MAX_PAYLOAD)
+			return -1;
+		unsigned char aMessage[1 + NET_MAX_PAYLOAD];
+		aMessage[0] = Flags & NET_CHUNKFLAG_VITAL;
+		mem_copy(&aMessage[1], pData, DataSize);
+		if(websocket_send(net_socket_websocket(m_Socket, m_PeerAddr.type), aMessage, 1 + DataSize, &m_PeerAddr, (Flags & NET_CHUNKFLAG_VITAL) != 0) < 0)
+			return -1;
+		m_LastSendTime = time_get();
+		return 0;
+	}
 
 	unsigned char *pChunkData;
 
@@ -247,6 +339,16 @@ int CNetConnection::Connect(const NETADDR *pAddr, int NumAddrs)
 	m_NumConnectAddrs = NumAddrs;
 	m_aErrorString[0] = '\0';
 	m_State = EState::CONNECT;
+	if(IsWebsocket())
+	{
+		// Establishing the websocket connection is the connect handshake
+		const int Handle = net_socket_websocket(m_Socket, m_aConnectAddrs[0].type);
+		if(Handle >= 0 && websocket_connect(Handle, &m_aConnectAddrs[0]) == 0)
+			return 0;
+		m_State = EState::ERROR;
+		SetError("Websockets are not supported");
+		return -1;
+	}
 	SendConnect();
 	return 0;
 }
@@ -302,7 +404,22 @@ void CNetConnection::Disconnect(const char *pReason)
 
 	if(m_RemoteClosed == 0)
 	{
-		if(!m_TimeoutSituation)
+		if(IsWebsocket())
+		{
+			if(m_State == EState::CONNECT)
+			{
+				// The connect handshake has not completed, so there is no peer
+				// address yet and no close frame to send; cancel the pending
+				// attempt so it cannot complete or error out later
+				websocket_connect_abort(net_socket_websocket(m_Socket, m_aConnectAddrs[0].type));
+			}
+			else
+			{
+				// The websocket close frame carries the disconnect reason
+				websocket_close(net_socket_websocket(m_Socket, m_PeerAddr.type), &m_PeerAddr, pReason);
+			}
+		}
+		else if(!m_TimeoutSituation)
 		{
 			if(pReason)
 				SendControl(NET_CTRLMSG_CLOSE, pReason, str_length(pReason) + 1);
@@ -584,11 +701,23 @@ int CNetConnection::Update()
 		}
 
 		if(time_get() - m_LastSendTime > time_freq())
-			SendControl(NET_CTRLMSG_KEEPALIVE, nullptr, 0);
+		{
+			if(IsWebsocket())
+			{
+				// An empty websocket message is the keepalive
+				websocket_send(net_socket_websocket(m_Socket, m_PeerAddr.type), nullptr, 0, &m_PeerAddr, false);
+				m_LastSendTime = time_get();
+			}
+			else
+			{
+				SendControl(NET_CTRLMSG_KEEPALIVE, nullptr, 0);
+			}
+		}
 	}
 	else if(State() == EState::CONNECT)
 	{
-		if(time_get() - m_LastSendTime > time_freq() / 2) // send a new connect every 500ms
+		// Websocket connects are retried by the transport
+		if(!IsWebsocket() && time_get() - m_LastSendTime > time_freq() / 2) // send a new connect every 500ms
 			SendConnect();
 	}
 	else if(State() == EState::PENDING)

@@ -690,16 +690,79 @@ def client_can_connect_websockets(test_env):
 	server = test_env.server(["dbg_websockets 1", "stdout_output_level 1"])
 	wait_for_startup([client, server])
 	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
-	server.wait_for_log_prefix("websockets: I: lws_handshake_server", timeout=15)  # Connection established
-	client.wait_for_log_prefix("websockets: I: lws_http_client_socket_service", timeout=15)  # Connection established
-	join = server.wait_for_log_prefix("server: player has entered the game", timeout=5).line
+	join = server.wait_for_log_prefix("server: player has entered the game", timeout=15).line
 	if "sixup=0" not in join:
 		raise AssertionError(f"sixup=0 not found in {join!r}")
 	server.exit()
+	# The disconnect reason is carried by the websocket close frame.
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
 	server.wait_for_exit()
 	client.wait_for_exit()
+
+
+@test(requires_websockets=True)
+def server_notices_websocket_disconnect(test_env):
+	client = test_env.client(["dbg_websockets 1", "stdout_output_level 1"])
+	server = test_env.server(["dbg_websockets 1", "stdout_output_level 1"])
+	wait_for_startup([client, server])
+	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
+	server.wait_for_log_prefix("server: player has entered the game", timeout=15)
+	client.command("disconnect")
+	# The server must notice the close immediately, without unrelated traffic
+	# waking it up.
+	server.wait_for_log_prefix("server: client dropped", timeout=5)
+	client.exit()
+	server.exit()
+	client.wait_for_exit()
+	server.wait_for_exit()
+
+
+@test(requires_websockets=True)
+def client_can_reconnect_websockets(test_env):
+	client = test_env.client(["dbg_websockets 1", "stdout_output_level 1"])
+	server = test_env.server(["dbg_websockets 1", "stdout_output_level 1"])
+	wait_for_startup([client, server])
+	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
+	server.wait_for_log_prefix("server: player has entered the game", timeout=15)
+	# Reconnecting to the same address must not be killed by a stale close
+	# event of the connection that is being left.
+	client.command(f"connect ws://127.0.0.1:{server.port}")
+	server.wait_for_log_prefix("server: player has entered the game", timeout=15)
+	client.exit()
+	server.exit()
+	client.wait_for_exit()
+	server.wait_for_exit()
+
+
+@test(requires_websockets=True)
+def websocket_client_can_use_timeout_protection(test_env):
+	# The same seed makes both clients generate the same timeout code.
+	timeout_seed = "cl_timeout_seed integrationtest"
+	client = test_env.client(["dbg_websockets 1", "stdout_output_level 1", "player_name wsprot", timeout_seed])
+	server = test_env.server(["dbg_websockets 1", "stdout_output_level 2"])
+	wait_for_startup([client, server])
+	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
+	server.wait_for_log_prefix("server: player has entered the game", timeout=15)
+	# The timeout code that the client sends on join enables the protection.
+	server.wait_for_log_prefix("chat-command: 0 used /timeout ", timeout=15)
+	# Killing the client ends the connection without a websocket close frame,
+	# just like a crashing or killed client does. The connection must then be
+	# treated as a timeout instead of being dropped right away.
+	client.process.kill()
+	server.wait_for_log_exact("chat: *** 'wsprot' would have timed out, but can use timeout protection now", timeout=10)
+	# The kept connection can be reclaimed by reconnecting with the same code.
+	client2 = test_env.client(["dbg_websockets 1", "stdout_output_level 1", "player_name wsprot", timeout_seed])
+	wait_for_startup([client2])
+	client2.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
+	server.wait_for_log_suffix("reason='Timeout Protection used'", timeout=15)
+	# The reclaimed connection is the one that keeps being used.
+	client2.command("say reclaimed")
+	server.wait_for_log_suffix(":wsprot: reclaimed", timeout=10)
+	client2.exit()
+	server.exit()
+	client2.wait_for_exit()
+	server.wait_for_exit()
 
 
 @test
