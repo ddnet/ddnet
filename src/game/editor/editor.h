@@ -135,13 +135,6 @@ class CEditor : public IEditor
 	IGraphics::CTextureHandle m_SwitchTexture;
 	IGraphics::CTextureHandle m_TuneTexture;
 
-	enum EPreviewState
-	{
-		PREVIEW_UNLOADED,
-		PREVIEW_LOADED,
-		PREVIEW_ERROR,
-	};
-
 	std::shared_ptr<CLayerGroup> m_apSavedBrushes[10];
 	static constexpr ColorRGBA ms_DefaultPropColor = ColorRGBA(1, 1, 1, 0.5f);
 
