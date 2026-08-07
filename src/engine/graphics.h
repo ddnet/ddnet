@@ -323,7 +323,6 @@ public:
 	// TODO: These should perhaps not be virtuals
 	virtual void BlendNone() = 0;
 	virtual void BlendNormal() = 0;
-	virtual void BlendAdditive() = 0;
 	virtual void WrapNormal() = 0;
 	virtual void WrapClamp() = 0;
 

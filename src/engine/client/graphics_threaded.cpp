@@ -159,11 +159,6 @@ void CGraphics_Threaded::BlendNormal()
 	m_State.m_BlendMode = EBlendMode::ALPHA;
 }
 
-void CGraphics_Threaded::BlendAdditive()
-{
-	m_State.m_BlendMode = EBlendMode::ADDITIVE;
-}
-
 void CGraphics_Threaded::WrapNormal()
 {
 	m_State.m_WrapMode = EWrapMode::REPEAT;

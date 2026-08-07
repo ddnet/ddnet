@@ -875,7 +875,6 @@ public:
 
 	void BlendNone() override;
 	void BlendNormal() override;
-	void BlendAdditive() override;
 
 	void WrapNormal() override;
 	void WrapClamp() override;
