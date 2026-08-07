@@ -111,7 +111,7 @@ public:
 	int IsFrontTimeCheckpoint(int Index) const;
 
 	int MoverSpeed(int x, int y, vec2 *pSpeed) const;
-	bool HasHookTeleIns() const { return m_HasHookTeleIns; }
+	bool HasHookTeleIns() const;
 
 	const CLayers *Layers() const { return m_pLayers; }
 	const CTile *GameLayer() const { return m_pTiles; }

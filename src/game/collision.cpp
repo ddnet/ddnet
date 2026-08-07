@@ -841,6 +841,11 @@ int CCollision::MoverSpeed(int x, int y, vec2 *pSpeed) const
 	return Index;
 }
 
+bool CCollision::HasHookTeleIns() const
+{
+	return m_HasHookTeleIns || (g_Config.m_SvOldTeleportHook && !m_TeleIns.empty());
+}
+
 int CCollision::GetPureMapIndex(float x, float y) const
 {
 	int Nx = std::clamp(round_to_int(x) / 32, 0, m_Width - 1);
