@@ -176,13 +176,6 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, float CornerRa
 	return Item;
 }
 
-CListboxItem CListBox::DoSubheader()
-{
-	CListboxItem Item = DoNextRow();
-	Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.2f), IGraphics::CORNER_NONE, 0.0f);
-	return Item;
-}
-
 int CListBox::DoEnd()
 {
 	m_ScrollRegion.End();
