@@ -99,6 +99,7 @@ public:
 	enum
 	{
 		MAX_RCONCMD_SEND = 16,
+		MAX_RCONCMD_RATIO = 12,
 	};
 
 	enum class EDnsblState
