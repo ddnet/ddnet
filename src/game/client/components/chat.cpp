@@ -85,14 +85,14 @@ CChat::CChat()
 	});
 }
 
-void CChat::RegisterCommand(const char *pName, const char *pParams, const char *pHelpText)
+void CChat::RegisterCommand(const char *pName, const char *pParams)
 {
 	// Don't allow duplicate commands.
 	for(const auto &Command : m_vServerCommands)
 		if(str_comp(Command.m_aName, pName) == 0)
 			return;
 
-	m_vServerCommands.emplace_back(pName, pParams, pHelpText);
+	m_vServerCommands.emplace_back(pName, pParams);
 	m_ServerCommandsNeedSorting = true;
 }
 
@@ -581,7 +581,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 			m_vServerCommands.clear();
 			m_ServerSupportsCommandInfo = true;
 		}
-		RegisterCommand(pMsg->m_pName, pMsg->m_pArgsFormat, pMsg->m_pHelpText);
+		RegisterCommand(pMsg->m_pName, pMsg->m_pArgsFormat);
 	}
 	else if(MsgType == NETMSGTYPE_SV_COMMANDINFOREMOVE)
 	{
