@@ -219,25 +219,28 @@ void CPlayers::RenderHookCollLine(
 	vec2 Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	vec2 Direction = direction(Angle);
 
-	// Check, if the player is outside the screen-rect and is aiming away from us.
-	// We don't know how long the hook collision line will be.
-	// If the map contains hook teleports, we are out of luck since we don't know if it will enter the screen at any point.
-	if(!Collision()->HasHookTeleIns() &&
-		((Position.x < ScreenRect.m_TopLeft.x && Direction.x <= 0) ||
-			(Position.x > ScreenRect.m_BottomRight.x && Direction.x >= 0) ||
-			(Position.y < ScreenRect.m_TopLeft.y && Direction.y <= 0) ||
-			(Position.y > ScreenRect.m_BottomRight.y && Direction.y >= 0)))
-	{
-		return;
-	}
-
-	static constexpr float HOOK_START_DISTANCE = CCharacterCore::PhysicalSize() * 1.5f;
-
 	// When the other player isn't predicted, we don't know their tunes.
 	// Use our own tunes instead. This is wrong, but a good heuristic.
 	const CCharacterCore &PlayerCore = GameClient()->m_aClients[ClientId].m_IsPredicted ? GameClient()->m_aClients[ClientId].m_Predicted : GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_Predicted;
 	float HookLength = PlayerCore.m_Tuning.m_HookLength;
 	float HookFireSpeed = PlayerCore.m_Tuning.m_HookFireSpeed;
+
+	// Check, if the player is outside the screen-rect
+	// If the map contains hook teleports, we are out of luck since we don't know if it will enter the screen at any point.
+	if(!Collision()->HasHookTeleIns())
+	{
+		const float MaxHookReach = HookLength + HookFireSpeed;
+
+		if(Position.x < ScreenRect.m_TopLeft.x - (Direction.x >= 0 ? MaxHookReach : 0) ||
+			Position.x > ScreenRect.m_BottomRight.x + (Direction.x <= 0 ? MaxHookReach : 0) ||
+			Position.y < ScreenRect.m_TopLeft.y - (Direction.y >= 0 ? MaxHookReach : 0) ||
+			Position.y > ScreenRect.m_BottomRight.y + (Direction.y <= 0 ? MaxHookReach : 0))
+		{
+			return;
+		}
+	}
+
+	static constexpr float HOOK_START_DISTANCE = CCharacterCore::PhysicalSize() * 1.5f;
 
 	// janky physics
 	if(HookLength < HOOK_START_DISTANCE || HookFireSpeed <= 0.0f)
