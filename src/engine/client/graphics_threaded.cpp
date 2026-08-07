@@ -2159,25 +2159,6 @@ void CGraphics_Threaded::DeleteBufferContainer(int &ContainerIndex, bool Destroy
 	ContainerIndex = -1;
 }
 
-void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBufferContainerInfo *pContainerInfo)
-{
-	CCommandBuffer::SCommand_UpdateBufferContainer Cmd;
-	Cmd.m_BufferContainerIndex = ContainerIndex;
-	Cmd.m_AttrCount = pContainerInfo->m_vAttributes.size();
-	Cmd.m_Stride = pContainerInfo->m_Stride;
-	Cmd.m_VertBufferBindingIndex = pContainerInfo->m_VertBufferBindingIndex;
-	Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-
-	AddCmd(Cmd, [&] {
-		Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-		return Cmd.m_pAttributes != nullptr;
-	});
-
-	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_vAttributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-
-	m_vVertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
-}
-
 void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCount)
 {
 	CCommandBuffer::SCommand_IndicesRequiredNumNotify Cmd;

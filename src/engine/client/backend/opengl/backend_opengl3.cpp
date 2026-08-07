@@ -991,37 +991,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferContainer(const CComma
 	BufferContainer.m_ContainerInfo.m_Stride = pCommand->m_Stride;
 }
 
-void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferContainer(const CCommandBuffer::SCommand_UpdateBufferContainer *pCommand)
-{
-	SBufferContainer &BufferContainer = m_vBufferContainers[pCommand->m_BufferContainerIndex];
-
-	glBindVertexArray(BufferContainer.m_VertArrayId);
-
-	// disable all old attributes
-	for(size_t i = 0; i < BufferContainer.m_ContainerInfo.m_vAttributes.size(); ++i)
-	{
-		glDisableVertexAttribArray((GLuint)i);
-	}
-	BufferContainer.m_ContainerInfo.m_vAttributes.clear();
-
-	for(size_t i = 0; i < pCommand->m_AttrCount; ++i)
-	{
-		glEnableVertexAttribArray((GLuint)i);
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_vBufferObjectIndices[pCommand->m_VertBufferBindingIndex]);
-		SBufferContainerInfo::SAttribute &Attr = pCommand->m_pAttributes[i];
-		if(Attr.m_FuncType == 0)
-			glVertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, Attr.m_Normalized, pCommand->m_Stride, Attr.m_pOffset);
-		else if(Attr.m_FuncType == 1)
-			glVertexAttribIPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, pCommand->m_Stride, Attr.m_pOffset);
-
-		BufferContainer.m_ContainerInfo.m_vAttributes.push_back(Attr);
-	}
-
-	BufferContainer.m_ContainerInfo.m_VertBufferBindingIndex = pCommand->m_VertBufferBindingIndex;
-	BufferContainer.m_ContainerInfo.m_Stride = pCommand->m_Stride;
-}
-
 void CCommandProcessorFragment_OpenGL3_3::Cmd_DeleteBufferContainer(const CCommandBuffer::SCommand_DeleteBufferContainer *pCommand)
 {
 	DestroyBufferContainer(pCommand->m_BufferContainerIndex, pCommand->m_DestroyAllBO);

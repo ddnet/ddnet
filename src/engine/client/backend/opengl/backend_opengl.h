@@ -108,7 +108,6 @@ protected:
 	virtual void Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand) { dbg_assert_failed("Call of unsupported Cmd_DeleteBufferObject"); }
 
 	virtual void Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand) { dbg_assert_failed("Call of unsupported Cmd_CreateBufferContainer"); }
-	virtual void Cmd_UpdateBufferContainer(const CCommandBuffer::SCommand_UpdateBufferContainer *pCommand) { dbg_assert_failed("Call of unsupported Cmd_UpdateBufferContainer"); }
 	virtual void Cmd_DeleteBufferContainer(const CCommandBuffer::SCommand_DeleteBufferContainer *pCommand) { dbg_assert_failed("Call of unsupported Cmd_DeleteBufferContainer"); }
 	virtual void Cmd_IndicesRequiredNumNotify(const CCommandBuffer::SCommand_IndicesRequiredNumNotify *pCommand) { dbg_assert_failed("Call of unsupported Cmd_IndicesRequiredNumNotify"); }
 
@@ -176,7 +175,6 @@ protected:
 	void Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand) override;
 
 	void Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand) override;
-	void Cmd_UpdateBufferContainer(const CCommandBuffer::SCommand_UpdateBufferContainer *pCommand) override;
 	void Cmd_DeleteBufferContainer(const CCommandBuffer::SCommand_DeleteBufferContainer *pCommand) override;
 	void Cmd_IndicesRequiredNumNotify(const CCommandBuffer::SCommand_IndicesRequiredNumNotify *pCommand) override;
 

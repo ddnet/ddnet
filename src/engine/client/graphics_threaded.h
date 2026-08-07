@@ -141,7 +141,6 @@ public:
 
 		CMD_CREATE_BUFFER_CONTAINER, // create vao
 		CMD_DELETE_BUFFER_CONTAINER, // delete vao
-		CMD_UPDATE_BUFFER_CONTAINER, // update vao
 
 		CMD_INDICES_REQUIRED_NUM_NOTIFY, // create indices that are required
 
@@ -305,20 +304,6 @@ public:
 	{
 		SCommand_CreateBufferContainer() :
 			SCommand(CMD_CREATE_BUFFER_CONTAINER) {}
-
-		int m_BufferContainerIndex;
-
-		int m_Stride;
-		int m_VertBufferBindingIndex;
-
-		size_t m_AttrCount;
-		SBufferContainerInfo::SAttribute *m_pAttributes;
-	};
-
-	struct SCommand_UpdateBufferContainer : public SCommand
-	{
-		SCommand_UpdateBufferContainer() :
-			SCommand(CMD_UPDATE_BUFFER_CONTAINER) {}
 
 		int m_BufferContainerIndex;
 
@@ -1201,7 +1186,6 @@ public:
 	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
 	void DeleteBufferContainer(int &ContainerIndex, bool DestroyAllBO = true) override;
-	void UpdateBufferContainerInternal(int ContainerIndex, SBufferContainerInfo *pContainerInfo);
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
 	int GetNumScreens() const override;
