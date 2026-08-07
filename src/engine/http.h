@@ -124,7 +124,6 @@ public:
 
 	int StatusCode() const;
 	std::optional<int64_t> ResultAgeSeconds() const;
-	std::optional<int64_t> ResultLastModified() const;
 
 protected:
 	static const char *const USER_AGENT_STRING;

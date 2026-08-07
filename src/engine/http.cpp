@@ -175,12 +175,6 @@ std::optional<int64_t> IHttpRequest::ResultAgeSeconds() const
 	return *m_ResultDate - *m_ResultLastModified;
 }
 
-std::optional<int64_t> IHttpRequest::ResultLastModified() const
-{
-	dbg_assert(State() == EHttpState::DONE, "Request not done");
-	return m_ResultLastModified;
-}
-
 static bool CalculateSha256(const char *pAbsoluteFilename, SHA256_DIGEST *pSha256)
 {
 	IOHANDLE File = io_open(pAbsoluteFilename, IOFLAG_READ);
