@@ -76,11 +76,6 @@ protected:
 	void StartProcessor(ICommandProcessor *pProcessor);
 	void StopProcessor();
 
-	bool HasWarning() const
-	{
-		return m_Warning.m_WarningType != GFX_WARNING_TYPE_NONE;
-	}
-
 private:
 	ICommandProcessor *m_pProcessor;
 	std::atomic_bool m_Shutdown;
