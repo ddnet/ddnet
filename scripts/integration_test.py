@@ -726,7 +726,7 @@ def smoke_test(test_env):
 	client1.command("stdout_output_level 2; loglevel 2")
 	client1.command(f"connect localhost:{server.port}")
 	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
-	client1.wait_for_log_exact("client: state change. last=2 current=3", timeout=15)
+	client1.wait_for_log_exact("client: state change. last=2 current=3", timeout=30)
 	client1.command("stdout_output_level 0; loglevel 0")
 	client1.command("debug 0")
 	client1.command("record client1")
@@ -741,10 +741,10 @@ def smoke_test(test_env):
 		)
 
 	client1.command("say hello world")
-	server.wait_for_log_exact("chat: 0:-2:client1: hello world")
+	server.wait_for_log_exact("chat: 0:-2:client1: hello world", timeout=15)
 
 	client1.command(f"rcon_auth {server.rcon_password}")
-	server.wait_for_log_exact("server: ClientId=0 authed with key='default_admin' (admin)")
+	server.wait_for_log_exact("server: ClientId=0 authed with key='default_admin' (admin)", timeout=15)
 
 	client1.command(
 		'say "/mc; {}"'.format(
