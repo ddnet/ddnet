@@ -458,11 +458,6 @@ void CMapImages::SetTextureScale(int Scale)
 	}
 }
 
-int CMapImages::GetTextureScale() const
-{
-	return m_TextureScale;
-}
-
 IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset)
 {
 	CImageInfo TextImage;

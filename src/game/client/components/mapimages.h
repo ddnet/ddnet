@@ -66,7 +66,6 @@ public:
 	IGraphics::CTextureHandle GetOverlayCenter() override;
 
 	void SetTextureScale(int Scale);
-	int GetTextureScale() const;
 
 	void ChangeEntitiesPath(const char *pPath);
 
