@@ -70,8 +70,6 @@ protected:
 
 	void ResetGame();
 
-	char m_aMapWish[MAX_MAP_LENGTH];
-
 	int m_RoundStartTick;
 	int m_GameOverTick;
 	int m_SuddenDeath;
