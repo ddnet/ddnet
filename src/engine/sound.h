@@ -27,12 +27,6 @@ public:
 		SHAPE_RECTANGLE,
 	};
 
-	// unused
-	struct CSampleHandle
-	{
-		int m_SampleId;
-	};
-
 	struct CVoiceShapeCircle
 	{
 		float m_Radius;

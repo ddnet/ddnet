@@ -176,12 +176,6 @@ class TextureHandle(BaseType):
 	def EmitDefinition(self, _name):
 		return ["IGraphics::CTextureHandle()"]
 
-class SampleHandle(BaseType):
-	def __init__(self):
-		BaseType.__init__(self, "ISound::CSampleHandle")
-	def EmitDefinition(self, _name):
-		return ["ISound::CSampleHandle()"]
-
 # helper functions
 
 def EmitTypeDeclaration(root):
