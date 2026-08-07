@@ -113,12 +113,8 @@ public:
 	// network latency calculations
 	struct
 	{
-		int m_Accum;
 		int m_AccumMin;
-		int m_AccumMax;
-		int m_Avg;
 		int m_Min;
-		int m_Max;
 	} m_Latency;
 
 private:
