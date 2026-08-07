@@ -785,12 +785,6 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	typedef ColorRGBA SUniformSpriteMultiPushGVertColor;
 
-	struct SUniformQuadGPosBase
-	{
-		float m_aPos[4 * 2];
-		int32_t m_QuadOffset;
-	};
-
 	struct SUniformQuadPushGBufferObject
 	{
 		ColorRGBA m_VertColor;
