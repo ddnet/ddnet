@@ -20,6 +20,8 @@
 #include <game/gamecore.h>
 #include <game/teamscore.h>
 
+#include <algorithm>
+
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -146,6 +148,7 @@ void CPlayer::Reset()
 	m_RescueMode = RESCUEMODE_AUTO;
 
 	m_CameraInfo.Reset();
+	UpdateNetworkClipRadius();
 	std::fill(std::begin(m_aStrongWeakId), std::end(m_aStrongWeakId), 0);
 }
 
@@ -293,6 +296,8 @@ void CPlayer::PostTick()
 	// update view pos for spectators
 	if((m_Team == TEAM_SPECTATORS || m_Paused) && m_SpectatorId != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorId] && GameServer()->m_apPlayers[m_SpectatorId]->GetCharacter())
 		m_ViewPos = GameServer()->m_apPlayers[m_SpectatorId]->GetCharacter()->m_Pos;
+
+	UpdateNetworkClipRadius();
 }
 
 void CPlayer::PostPostTick()
@@ -1056,12 +1061,38 @@ vec2 CPlayer::CCameraInfo::ConvertTargetToWorld(vec2 Position, vec2 Target) cons
 	return Position + (Target - TargetCameraOffset) * m_Zoom + TargetCameraOffset;
 }
 
+void CPlayer::UpdateNetworkClipRadius()
+{
+	// Keep the full show distance as radius while not viewing the own character, it covers the camera
+	// offset the client applies when spectating and must not depend on the spectated client's values
+	const CCharacter *pChr = GetCharacter();
+	if(!m_CameraInfo.m_HasCameraInfo || !pChr || m_Paused)
+	{
+		m_NetworkClipRadius = m_ShowDistance;
+		return;
+	}
+
+	// With the dynamic camera the client camera is offset from the view position towards the cursor,
+	// this mirrors the offset computation of the client, see CCamera::UpdateCamera.
+	// The aim target is not validated, so it's limited to the maximum distance a client can aim at.
+	const float TargetDistance = std::min(length(vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY)), 2000.0f); // cl_dyncam_max_distance
+	const float DyncamOffset = std::max(TargetDistance - m_CameraInfo.m_Deadzone, 0.0f) * (m_CameraInfo.m_FollowFactor / 100.0f);
+
+	// Border of 10 blocks outside of view range so that no entities randomly appear even with high latency.
+	// ShowDistance / 2 because it's the radius. This heavily decreases bandwidth on some maps and was likely a bug
+	// or misunderstanding introduced by whoever added showdistance. Now it's like this since forever and was noticed because
+	// the playermapping algorithm depends on the NetworkClipped function to determine when to add a new tee.
+	const float Border = 32.f * 10.f;
+	m_NetworkClipRadius = m_ShowDistance / 2.f + vec2(Border + DyncamOffset, Border + DyncamOffset);
+}
+
 void CPlayer::CCameraInfo::Write(const CNetMsg_Cl_CameraInfo *Msg)
 {
+	// Clamp to the ranges a client can configure, these values also affect other clients spectating this player
 	m_HasCameraInfo = true;
 	m_Zoom = Msg->m_Zoom / 1000.0f;
-	m_Deadzone = Msg->m_Deadzone;
-	m_FollowFactor = Msg->m_FollowFactor;
+	m_Deadzone = std::clamp(Msg->m_Deadzone, 0, 3000); // cl_mouse_deadzone, cl_dyncam_deadzone
+	m_FollowFactor = std::clamp(Msg->m_FollowFactor, 0, 200); // cl_mouse_followfactor, cl_dyncam_follow_factor
 }
 
 void CPlayer::CCameraInfo::Reset()

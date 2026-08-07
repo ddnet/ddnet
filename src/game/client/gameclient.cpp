@@ -1207,8 +1207,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		if(i <= 16)
 			m_Teams.m_IsDDRace16 = true;
-		else if(!m_GameInfo.m_Supports128Teams)
-			m_Teams.m_IsDDRace64 = true;
 
 		m_Ghost.m_AllowRestart = true;
 		m_RaceDemo.m_AllowRestart = true;
@@ -2086,9 +2084,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 					continue;
 				}
 				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)Item.m_pData;
-				// TODO: use NUM_DDRACE_TEAMS-1 instead of hardcoding 63
-				//       once https://github.com/ddnet/ddnet/pull/11232 is resolved
-				int Team = std::clamp(Item.m_Id, (int)TEAM_FLOCK, 63);
+				int Team = std::clamp(Item.m_Id, (int)TEAM_FLOCK, NUM_DDRACE_TEAMS - 1);
 
 				int HighestSwitchNumber = std::clamp(std::max(pSwitchStateData->m_HighestSwitchNumber, Collision()->m_HighestSwitchNumber), 0, 255);
 				if(HighestSwitchNumber != std::max(0, (int)Switchers().size() - 1))
@@ -2144,6 +2140,9 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	{
 		m_GameInfo = GetGameInfo(nullptr, 0, &ServerInfo);
 	}
+
+	// Sv_TeamsState can arrive before the first snapshot, so derive this here instead of in the message handler
+	m_Teams.m_IsDDRace64 = !m_GameInfo.m_Supports128Teams;
 
 	for(CClientData &Client : m_aClients)
 	{

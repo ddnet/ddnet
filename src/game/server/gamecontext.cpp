@@ -524,6 +524,8 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 	int SentTeam = Team;
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 		SentTeam = 0;
+	else if(SnappingClient != SERVER_DEMO_CLIENT)
+		SentTeam = m_pController->Teams().TeamForClient(SentTeam, SnappingClient);
 
 	CNetObj_SwitchState SwitchState = {};
 
@@ -1759,6 +1761,9 @@ void CGameContext::OnClientEnter(int ClientId)
 	}
 	m_VoteUpdate = true;
 
+	// the player map has to be initialized before anything can be mapped into it
+	m_PlayerMapping.InitPlayerMap(ClientId);
+
 	// send active vote
 	if(m_VoteCloseTime)
 		SendVoteSet(ClientId);
@@ -1786,8 +1791,6 @@ void CGameContext::OnClientEnter(int ClientId)
 	}
 
 	LogEvent("Connect", ClientId);
-
-	m_PlayerMapping.InitPlayerMap(ClientId);
 }
 
 bool CGameContext::OnClientDataPersist(int ClientId, void *pData)
@@ -5079,6 +5082,13 @@ void CGameContext::Whisper(int ClientId, char *pStr)
 	WhisperId(ClientId, Victim, pStr);
 }
 
+// Whispers are only recorded into the server demo when sv_demo_chat is set. Messages to 0.7 clients are
+// packed in the 0.7 format and can never be recorded into the 0.6 demo.
+int CGameContext::WhisperRecordFlag(int ClientId) const
+{
+	return g_Config.m_SvDemoChat && !Server()->IsSixup(ClientId) ? 0 : MSGFLAG_NORECORD;
+}
+
 void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 {
 	dbg_assert(CheckClientId(ClientId) && m_apPlayers[ClientId] != nullptr, "ClientId invalid");
@@ -5100,7 +5110,7 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 	{
 		// The translation layer will send the correct 0.6 packet after translating
 		Msg.m_Mode = (int)protocol7::NUM_CHATS + TEAM_WHISPER_SEND;
-		Server()->SendPackMsgTranslateChat(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+		Server()->SendPackMsgTranslateChat(&Msg, MSGFLAG_VITAL | WhisperRecordFlag(ClientId), ClientId);
 	}
 	else
 	{
@@ -5118,7 +5128,7 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 	{
 		// The translation layer will send the correct 0.6 packet after translating
 		Msg.m_Mode = (int)protocol7::NUM_CHATS + TEAM_WHISPER_RECV;
-		Server()->SendPackMsgTranslateChat(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, VictimId);
+		Server()->SendPackMsgTranslateChat(&Msg, MSGFLAG_VITAL | WhisperRecordFlag(VictimId), VictimId);
 	}
 	else
 	{
