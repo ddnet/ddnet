@@ -2266,33 +2266,6 @@ public:
 		return FontSize;
 	}
 
-	float GetGlyphOffsetX(int FontSize, char TextCharacter) const override
-	{
-		if(m_pGlyphMap->DefaultFace() == nullptr)
-			return -1.0f;
-
-		FT_Set_Pixel_Sizes(m_pGlyphMap->DefaultFace(), 0, FontSize);
-		const char *pTmp = &TextCharacter;
-		const int NextCharacter = str_utf8_decode(&pTmp);
-
-		if(NextCharacter)
-		{
-#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
-			const FT_Int32 FTFlags = FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP;
-#else
-			const FT_Int32 FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
-#endif
-			if(FT_Load_Char(m_pGlyphMap->DefaultFace(), NextCharacter, FTFlags))
-			{
-				log_debug("textrender", "Error loading glyph. Chr=%d", NextCharacter);
-				return -1.0f;
-			}
-
-			return (float)(m_pGlyphMap->DefaultFace()->glyph->metrics.horiBearingX >> 6);
-		}
-		return 0.0f;
-	}
-
 	int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) const override
 	{
 		if(m_pGlyphMap->DefaultFace() == nullptr)
