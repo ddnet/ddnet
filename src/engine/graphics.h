@@ -546,7 +546,6 @@ public:
 	virtual void SetColor(float r, float g, float b, float a) = 0;
 	virtual void SetColor(ColorRGBA Color) = 0;
 	virtual void SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight) = 0;
-	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) = 0;
 	virtual void ChangeColorOfQuadVertices(size_t QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
 
 	/**

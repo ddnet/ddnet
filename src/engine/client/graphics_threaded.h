@@ -948,8 +948,6 @@ public:
 	void SetColor(ColorRGBA Color) override;
 	void SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight) override;
 
-	// go through all vertices and change their color (only works for quads)
-	void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) override;
 	void ChangeColorOfQuadVertices(size_t QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) override;
 
 	void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV) override;

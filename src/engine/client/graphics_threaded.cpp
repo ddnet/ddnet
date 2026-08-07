@@ -852,19 +852,6 @@ void CGraphics_Threaded::SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorR
 	SetColorVertex(aArray, std::size(aArray));
 }
 
-void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a)
-{
-	m_aColor[0].r = NormalizeColorComponent(r);
-	m_aColor[0].g = NormalizeColorComponent(g);
-	m_aColor[0].b = NormalizeColorComponent(b);
-	m_aColor[0].a = NormalizeColorComponent(a);
-
-	for(int i = 0; i < m_NumVertices; ++i)
-	{
-		SetColor(&m_aVertices[i], 0);
-	}
-}
-
 void CGraphics_Threaded::ChangeColorOfQuadVertices(size_t QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
 	const CCommandBuffer::SColor Color(r, g, b, a);
