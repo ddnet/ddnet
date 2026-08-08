@@ -9,6 +9,7 @@
 #include <generated/protocol.h>
 
 #include <ctime>
+#include <vector>
 
 class CConfig;
 class CTuningParams;
@@ -138,6 +139,10 @@ private:
 
 	WRITE_CALLBACK m_pfnWriteCallback;
 	void *m_pWriteCallbackUserdata;
+
+	// Batches all writes between `BeginTick` and `EndTick` into a single
+	// write callback invocation.
+	std::vector<unsigned char> m_vTickBuffer;
 
 	int m_State;
 
