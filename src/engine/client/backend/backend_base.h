@@ -4,7 +4,11 @@
 #include <engine/client/graphics_threaded.h>
 #include <engine/graphics.h>
 
+#ifndef BACKEND_NO_SDL
 #include <SDL_video.h>
+#else
+struct SDL_Window;
+#endif
 
 #include <atomic>
 #include <cstddef>
