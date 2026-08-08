@@ -523,9 +523,36 @@ void CGameClient::OnDummySwap()
 		m_Controls.ResetInput(PlayerOrDummy);
 		m_Controls.m_aInputData[PlayerOrDummy].m_Hook = 0;
 	}
-	const int PrevDummyFire = m_DummyInput.m_Fire;
+	CNetObj_PlayerInput OldDummyInput = g_Config.m_ClDummyHammer ? m_HammerInput : m_DummyInput;
+
 	m_DummyInput = m_Controls.m_aInputData[!g_Config.m_ClDummy];
-	m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = PrevDummyFire;
+
+	m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = OldDummyInput.m_Fire;
+
+	if((m_DummyInput.m_Fire & 1) == 0 && (OldDummyInput.m_Fire & 1) != 0)
+	{
+		m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = OldDummyInput.m_Fire + 1;
+		OldDummyInput.m_Fire += 1;
+		if(g_Config.m_ClDummyHammer)
+		{
+			m_HammerInput.m_Fire = OldDummyInput.m_Fire;
+		}
+	}
+
+	if(g_Config.m_ClDummyCopyMoves && !g_Config.m_ClDummyHammer)
+	{
+		if((m_DummyInput.m_Fire & 1) != (m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire & 1))
+		{
+			m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire++;
+			OldDummyInput.m_Fire++;
+		}
+	}
+
+	m_Controls.m_aInputData[g_Config.m_ClDummy].m_NextWeapon = OldDummyInput.m_NextWeapon;
+	m_Controls.m_aInputData[g_Config.m_ClDummy].m_PrevWeapon = OldDummyInput.m_PrevWeapon;
+
+	m_Controls.m_aLastData[g_Config.m_ClDummy] = m_Controls.m_aInputData[g_Config.m_ClDummy];
+
 	m_IsDummySwapping = 1;
 }
 
@@ -544,7 +571,8 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	{
 		if(m_DummyFire != 0)
 		{
-			m_DummyInput.m_Fire = (m_HammerInput.m_Fire + 1) & ~1;
+			int Parity = m_DummyInput.m_Fire & 1;
+			m_DummyInput.m_Fire = ((m_HammerInput.m_Fire + 1) & ~1) | Parity;
 			m_DummyFire = 0;
 		}
 
