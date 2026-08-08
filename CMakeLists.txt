@@ -3369,6 +3369,11 @@ list(APPEND TARGETS_LINK rust_test)
 set(RUST_TEST_LIBS ${LIBS} $<TARGET_FILE:rust_test>)
 list(REMOVE_ITEM RUST_TEST_LIBS "rust_engine_shared")
 list(REMOVE_ITEM RUST_TEST_LIBS "-pthread")
+if(ZLIB_BUNDLED)
+  # Cargo needs the library file path, not the CMake target name.
+  list(REMOVE_ITEM RUST_TEST_LIBS "zlib-ng")
+  list(APPEND RUST_TEST_LIBS $<TARGET_FILE:zlib-ng>)
+endif()
 add_custom_target(run_rust_tests
   COMMAND ${CMAKE_COMMAND} -E env "DDNET_TEST_LIBRARIES=${RUST_TEST_LIBS}" ${CARGO_TEST}
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}

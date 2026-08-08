@@ -89,7 +89,7 @@ jobs:
       run: |
         export PATH=/home/runner/style-tools:$PATH
         shfmt --version
-        find . -type f -name '*.sh' -print0 | xargs -0 shfmt -d
+        find . -type f -name '*.sh' -not -path './src/engine/external/zlib-ng/*' -print0 | xargs -0 shfmt -d
 
     - name: Check Python code style (ruff format)
       run: |

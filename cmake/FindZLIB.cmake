@@ -39,45 +39,33 @@ endif()
 
 if(NOT ZLIB_FOUND)
   set(ZLIB_BUNDLED ON)
-  set(ZLIB_SRC_DIR src/engine/external/zlib)
-  set_src(ZLIB_SRC GLOB ${ZLIB_SRC_DIR}
-    adler32.c
-    compress.c
-    crc32.c
-    crc32.h
-    deflate.c
-    deflate.h
-    gzclose.c
-    gzguts.h
-    gzlib.c
-    gzread.c
-    gzwrite.c
-    infback.c
-    inffast.c
-    inffast.h
-    inffixed.h
-    inflate.c
-    inflate.h
-    inftrees.c
-    inftrees.h
-    trees.c
-    trees.h
-    uncompr.c
-    zconf.h
-    zlib.h
-    zutil.c
-    zutil.h
-  )
-  add_library(zlib EXCLUDE_FROM_ALL OBJECT ${ZLIB_SRC})
-  set(ZLIB_INCLUDEDIR ${ZLIB_SRC_DIR})
-  target_include_directories(zlib PRIVATE ${ZLIB_INCLUDEDIR})
 
-  set(ZLIB_DEP $<TARGET_OBJECTS:zlib>)
-  set(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDEDIR})
-  set(ZLIB_LIBRARIES)
+  set(BUILD_SHARED_LIBS OFF)
+  set(ZLIB_COMPAT ON)
+  set(ZLIB_ALIASES OFF)
+  set(BUILD_TESTING OFF)
+  set(WITH_GTEST OFF)
+  set(WITH_FUZZERS OFF)
+  set(WITH_BENCHMARKS OFF)
+  set(WITH_BENCHMARK_APPS OFF)
+  set(WITH_NATIVE_INSTRUCTIONS OFF)
+  set(SKIP_INSTALL_ALL ON)
+  add_subdirectory(src/engine/external/zlib-ng EXCLUDE_FROM_ALL)
 
-  list(APPEND TARGETS_DEP zlib)
+  if(NOT MSVC)
+    # GCC emits aligned AVX2 stack accesses without realigning the stack in
+    # unoptimized builds, crashing on Windows, so always build the bundled
+    # zlib-ng with optimizations.
+    # See https://github.com/zlib-ng/zlib-ng/issues/1874
+    target_compile_options(zlib-ng PRIVATE $<$<CONFIG:Debug>:-O2>)
+  endif()
+
+  set(ZLIB_DEP)
+  set(ZLIB_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/src/engine/external/zlib-ng")
+  set(ZLIB_LIBRARIES zlib-ng)
+
+  list(APPEND TARGETS_DEP zlib-ng)
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(ZLIB DEFAULT_MSG ZLIB_INCLUDEDIR)
+  find_package_handle_standard_args(ZLIB DEFAULT_MSG ZLIB_INCLUDE_DIRS)
 endif()
