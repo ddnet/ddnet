@@ -35,8 +35,6 @@ class CSnapIdPool
 	int m_FirstFree;
 	int m_FirstTimed;
 	int m_LastTimed;
-	int m_Usage;
-	int m_InUsage;
 
 public:
 	CSnapIdPool();

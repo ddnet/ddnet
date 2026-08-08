@@ -225,11 +225,8 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 			Rect.y += Rect.h - pRect->h + Rect.y - pRect->y;
 		}
 
-		if(!pAnimator->m_ScaleLabel)
-		{
-			Rect.w = pRect->w;
-			Rect.h = pRect->h;
-		}
+		Rect.w = pRect->w;
+		Rect.h = pRect->h;
 	}
 
 	if(pCommunityIcon)

@@ -23,8 +23,6 @@ void CSnapIdPool::Reset()
 	m_FirstFree = 0;
 	m_FirstTimed = -1;
 	m_LastTimed = -1;
-	m_Usage = 0;
-	m_InUsage = 0;
 }
 
 void CSnapIdPool::RemoveFirstTimeout()
@@ -40,8 +38,6 @@ void CSnapIdPool::RemoveFirstTimeout()
 	m_FirstTimed = NextTimed;
 	if(m_FirstTimed == -1)
 		m_LastTimed = -1;
-
-	m_Usage--;
 }
 
 std::optional<int> CSnapIdPool::NewId()
@@ -60,8 +56,6 @@ std::optional<int> CSnapIdPool::NewId()
 	}
 	m_FirstFree = m_aIds[m_FirstFree].m_Next;
 	m_aIds[Id].m_State = ID_ALLOCATED;
-	m_Usage++;
-	m_InUsage++;
 	return Id;
 }
 
@@ -79,7 +73,6 @@ void CSnapIdPool::FreeId(int Id)
 	dbg_assert((size_t)Id < std::size(m_aIds), "id is out of range");
 	dbg_assert(m_aIds[Id].m_State == ID_ALLOCATED, "id is not allocated");
 
-	m_InUsage--;
 	m_aIds[Id].m_State = ID_TIMED;
 	m_aIds[Id].m_Timeout = time_get() + time_freq() * 5;
 	m_aIds[Id].m_Next = -1;

@@ -87,7 +87,6 @@ void CPlayer::Reset()
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
-	m_FirstPacket = true;
 
 	m_SendVoteIndex = -1;
 
@@ -198,19 +197,13 @@ void CPlayer::Tick()
 		IServer::CClientInfo Info;
 		if(Server()->GetClientInfo(m_ClientId, &Info))
 		{
-			m_Latency.m_Accum += Info.m_Latency;
-			m_Latency.m_AccumMax = std::max(m_Latency.m_AccumMax, Info.m_Latency);
 			m_Latency.m_AccumMin = std::min(m_Latency.m_AccumMin, Info.m_Latency);
 		}
 		// each second
 		if(Server()->Tick() % Server()->TickSpeed() == 0)
 		{
-			m_Latency.m_Avg = m_Latency.m_Accum / Server()->TickSpeed();
-			m_Latency.m_Max = m_Latency.m_AccumMax;
 			m_Latency.m_Min = m_Latency.m_AccumMin;
-			m_Latency.m_Accum = 0;
 			m_Latency.m_AccumMin = 1000;
-			m_Latency.m_AccumMax = 0;
 		}
 	}
 

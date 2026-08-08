@@ -1067,7 +1067,6 @@ int CUi::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pId, const
 {
 	CUIRect Text = *pRect, DropDownIcon;
 	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
-	Text.HMargin((Text.h * Props.m_FontFactor) / 2.0f, &Text);
 	if(Props.m_ShowDropDownIcon)
 	{
 		Text.VSplitRight(pRect->h * 0.25f, &Text, nullptr);
@@ -1162,7 +1161,7 @@ int CUi::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pId, const
 	ColorRGBA ColorTextOutline(TextRender()->DefaultTextOutlineColor());
 	if(UIElement.Rect(0)->m_UITextContainer.Valid())
 		TextRender()->RenderTextContainer(UIElement.Rect(0)->m_UITextContainer, ColorText, ColorTextOutline);
-	return DoButtonLogic(pId, Props.m_Checked, pRect, Props.m_Flags);
+	return DoButtonLogic(pId, 0, pRect, Props.m_Flags);
 }
 
 int CUi::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, int Corners, bool Enabled, const std::optional<ColorRGBA> ButtonColor)

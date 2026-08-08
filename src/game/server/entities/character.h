@@ -134,8 +134,6 @@ private:
 
 	int m_MoveRestrictions;
 
-	int m_DamageTaken;
-
 	int m_EmoteType;
 	int m_EmoteStop;
 
@@ -152,8 +150,6 @@ private:
 	CNetObj_PlayerInput m_Input;
 	CNetObj_PlayerInput m_SavedInput;
 	int m_NumInputs;
-
-	int m_DamageTakenTick;
 
 	int m_Health;
 	int m_Armor;
@@ -214,7 +210,6 @@ public:
 	int m_TuneZone;
 	int m_TuneZoneOld;
 	int m_PainSoundTimer;
-	int m_LastMove;
 	int m_StartTime;
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;

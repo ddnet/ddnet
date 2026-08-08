@@ -180,7 +180,6 @@ public:
 
 private:
 	std::vector<std::shared_ptr<IEditorAction>> m_vpActions;
-	std::string m_Display;
 	bool m_Reverse;
 };
 
@@ -595,7 +594,6 @@ private:
 	int m_SourceIndex;
 	int m_CurrentValue;
 
-	std::vector<int> m_vOriginalValues;
 	CSoundShape m_SavedShape;
 
 	void Save();

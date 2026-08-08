@@ -25,12 +25,7 @@ public:
 	class CServerSettings
 	{
 	public:
-		bool m_KickVote;
-		int m_KickMin;
-		bool m_SpecVote;
 		bool m_TeamLock;
-		bool m_TeamBalance;
-		int m_PlayerSlots;
 
 		CServerSettings()
 		{
@@ -39,12 +34,7 @@ public:
 
 		void Reset()
 		{
-			m_KickVote = false;
-			m_KickMin = 0;
-			m_SpecVote = false;
 			m_TeamLock = false;
-			m_TeamBalance = false;
-			m_PlayerSlots = 0;
 		}
 
 	} m_ServerSettings;

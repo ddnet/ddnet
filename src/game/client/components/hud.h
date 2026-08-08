@@ -142,7 +142,6 @@ private:
 	int m_HealthOffset;
 	int m_EmptyHealthOffset;
 	int m_ArmorOffset;
-	int m_EmptyArmorOffset;
 	int m_aCursorOffset[NUM_WEAPONS];
 	int m_FlagOffset;
 	int m_AirjumpOffset;

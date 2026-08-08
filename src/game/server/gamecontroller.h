@@ -55,13 +55,11 @@ protected:
 		CSpawnEval()
 		{
 			m_Got = false;
-			m_FriendlyTeam = -1;
 			m_Pos = vec2(100, 100);
 		}
 
 		vec2 m_Pos;
 		bool m_Got;
-		int m_FriendlyTeam;
 		float m_Score;
 	};
 
@@ -69,8 +67,6 @@ protected:
 	void EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int ClientId);
 
 	void ResetGame();
-
-	char m_aMapWish[MAX_MAP_LENGTH];
 
 	int m_RoundStartTick;
 	int m_GameOverTick;
