@@ -741,7 +741,7 @@ bool CCharacterCore::IsSwitchActiveCb(unsigned char Number, void *pUser)
 {
 	CCharacterCore *pThis = (CCharacterCore *)pUser;
 	if(pThis->m_pWorld && !pThis->m_pWorld->m_vSwitchers.empty())
-		if(pThis->m_Id != -1 && pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
+		if(pThis->m_Id != -1 && pThis->m_pTeams->Team(pThis->m_Id) != pThis->m_pTeams->TeamSuper())
 			return pThis->m_pWorld->m_vSwitchers[Number].m_aStatus[pThis->m_pTeams->Team(pThis->m_Id)];
 	return false;
 }

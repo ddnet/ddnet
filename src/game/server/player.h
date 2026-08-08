@@ -51,6 +51,9 @@ public:
 	void PostPostTick();
 	void Snap(int SnappingClient);
 	void FakeSnap();
+	void SendConnect(int FakeId, int ClientId);
+	void SendDisconnect(int FakeId);
+	int m_aStrongWeakId[LEGACY_MAX_CLIENTS];
 
 	void OnDirectInput(const CNetObj_PlayerInput *pNewInput);
 	void OnPredictedInput(const CNetObj_PlayerInput *pNewInput);
@@ -202,6 +205,10 @@ public:
 		void Write(const CNetMsg_Cl_CameraInfo *pMsg);
 		void Reset();
 	} m_CameraInfo;
+
+	// effective radius for network clipping, updated every tick since it depends on the dynamic camera offset
+	vec2 m_NetworkClipRadius;
+	void UpdateNetworkClipRadius();
 
 	int m_ChatScore;
 

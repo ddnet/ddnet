@@ -43,6 +43,10 @@ class CGameTeams
 	// the message from playing for a long time in an unfinishable team.
 	int m_aTeamUnfinishableKillTick[NUM_DDRACE_TEAMS];
 
+	// Team numbers as they are sent to clients before VERSION_DDNET_128_TEAMS, see UpdateLegacyTeamMap
+	int m_aLegacyTeamMap[NUM_DDRACE_TEAMS];
+	void UpdateLegacyTeamMap();
+
 	CGameContext *m_pGameContext;
 
 	/**
@@ -68,6 +72,13 @@ public:
 	CGameContext *GameServer();
 	const CGameContext *GameServer() const;
 	class IServer *Server();
+
+	/**
+	 * Translate a team number for a client that does not support all team numbers yet.
+	 * @param Team The team id to translate
+	 * @param ClientId The client the team number is sent to
+	 */
+	int TeamForClient(int Team, int ClientId) const;
 
 	void OnCharacterStart(int ClientId);
 	void OnCharacterFinish(int ClientId);
