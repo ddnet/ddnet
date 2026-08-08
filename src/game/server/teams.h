@@ -87,6 +87,9 @@ public:
 
 	CClientMask TeamMask(int Team, int ExceptId = -1, int Asker = -1, int VersionFlags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP);
 
+	// whether ClientId can see actions of Asker.
+	bool CanSee(int Team, int Asker, int ClientId);
+
 	int TeamSize(int Team) const;
 
 	// need to be very careful using this method. SERIOUSLY...
