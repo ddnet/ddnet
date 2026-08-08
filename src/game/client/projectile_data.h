@@ -5,6 +5,8 @@
 
 #include <base/vmath.h>
 
+#include <engine/shared/protocol.h>
+
 struct CNetObj_Projectile;
 struct CNetObj_DDRaceProjectile;
 struct CNetObj_DDNetProjectile;
@@ -24,6 +26,8 @@ public:
 	int m_Bouncing = 0;
 	bool m_Freeze = false;
 	int m_SwitchNumber;
+	// Derived from flags
+	int m_TeleType = ProjTele::NONE;
 	// TuneZone is introduced locally
 	int m_TuneZone;
 };

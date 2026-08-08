@@ -39,6 +39,7 @@ CProjectile::CProjectile(
 	m_Number = Number;
 	m_Bouncing = 0;
 	m_Freeze = Freeze;
+	m_TeleType = ProjTele::NONE;
 
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
@@ -83,7 +84,7 @@ void CProjectile::Tick()
 	int Collide = Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
 	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
 
-	CCharacter *pTargetChr = GameWorld()->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
+	CCharacter *pTargetChr = GameWorld()->IntersectCharacter(PrevPos, ColPos, (m_Freeze || m_TeleType != ProjTele::NONE) ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
 	if(GameWorld()->m_WorldConfig.m_IsSolo && !(m_Type == WEAPON_SHOTGUN && GameWorld()->m_WorldConfig.m_IsDDRace))
 		pTargetChr = nullptr;
@@ -142,7 +143,7 @@ void CProjectile::Tick()
 				GameWorld()->CreatePredictedDamageIndEvent(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_StartTick);
 			m_MarkedForDestroy = true;
 		}
-		else if(!m_Freeze)
+		else if(!m_Freeze && m_TeleType == ProjTele::NONE)
 		{
 			m_MarkedForDestroy = true;
 		}
@@ -210,6 +211,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 	m_Id = Id;
 	m_Number = pProj->m_SwitchNumber;
 	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
+	m_TeleType = pProj->m_TeleType;
 }
 
 CProjectileData CProjectile::GetData() const
@@ -226,6 +228,7 @@ CProjectileData CProjectile::GetData() const
 	Result.m_Freeze = m_Freeze;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_SwitchNumber = m_Number;
+	Result.m_TeleType = m_TeleType;
 	return Result;
 }
 
