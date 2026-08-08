@@ -16,6 +16,8 @@
 
 #include <engine/shared/protocolglue.h>
 
+#include <mutex>
+
 const unsigned char SECURITY_TOKEN_MAGIC[4] = {'T', 'K', 'E', 'N'};
 
 SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
@@ -512,7 +514,10 @@ int CNetBase::Decompress(const void *pData, int DataSize, void *pOutput, int Out
 
 void CNetBase::Init()
 {
-	ms_Huffman.Init();
+	// May be called concurrently when client and server run in the same
+	// process, so make sure the huffman table is only initialized once.
+	static std::once_flag OnceFlag;
+	std::call_once(OnceFlag, []() { ms_Huffman.Init(); });
 }
 
 void CNetTokenCache::Init(NETSOCKET Socket)

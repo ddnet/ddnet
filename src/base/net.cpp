@@ -10,11 +10,19 @@
 #include "windows.h"
 
 #include <chrono>
+#include <condition_variable>
+#include <deque>
 #include <iterator> // std::size
+#include <map>
+#include <mutex>
 #include <string_view>
 
 #if defined(CONF_WEBSOCKETS)
 #include <engine/shared/websockets.h>
+#endif
+
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+#include <emscripten/threading.h>
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
@@ -105,6 +113,8 @@ static void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
 }
 #endif
 
+struct NETLOOPBACK;
+
 struct NETSOCKET_INTERNAL
 {
 	int type;
@@ -112,10 +122,150 @@ struct NETSOCKET_INTERNAL
 	int ipv6sock;
 	int web_ipv4sock;
 	int web_ipv6sock;
+	NETLOOPBACK *loopback;
 
 	NETSOCKET_BUFFER buffer;
 };
-static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1, -1};
+static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1, -1, nullptr};
+
+// In-memory loopback transport. Browsers offer no real loopback sockets, so on
+// Emscripten packets to localhost are exchanged through in-process queues instead,
+// which allows the client to talk to a server running on a thread in the same
+// process. Disabled on other platforms except for tests.
+struct NETLOOPBACK_PACKET
+{
+	NETADDR from;
+	int size;
+	unsigned char data[PACKETSIZE];
+};
+
+struct NETLOOPBACK
+{
+	int port;
+	std::deque<NETLOOPBACK_PACKET> queue;
+	NETLOOPBACK_PACKET current;
+	std::condition_variable cond;
+};
+
+static std::mutex loopback_lock;
+static std::map<int, NETLOOPBACK *> loopback_sockets;
+static int loopback_next_ephemeral_port = 61000;
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+static bool loopback_enabled = true;
+#else
+static bool loopback_enabled = false;
+#endif
+static constexpr size_t LOOPBACK_MAX_QUEUE = 1024;
+
+void net_loopback_set_enabled(bool enabled)
+{
+	loopback_enabled = enabled;
+}
+
+static bool loopback_addr_match(const NETADDR *addr)
+{
+	if(addr->type & NETTYPE_LINK_BROADCAST)
+		return true;
+	if(addr->type & (NETTYPE_IPV4 | NETTYPE_WEBSOCKET_IPV4))
+		return addr->ip[0] == 127;
+	if(addr->type & (NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV6))
+	{
+		for(int i = 0; i < 15; i++)
+		{
+			if(addr->ip[i] != 0)
+				return false;
+		}
+		return addr->ip[15] == 1;
+	}
+	return false;
+}
+
+static bool loopback_registered(int port)
+{
+	const std::unique_lock lock(loopback_lock);
+	return loopback_sockets.count(port) != 0;
+}
+
+static void loopback_register(NETSOCKET sock, int port)
+{
+	const std::unique_lock lock(loopback_lock);
+	if(port == 0)
+	{
+		while(loopback_sockets.count(loopback_next_ephemeral_port) != 0)
+		{
+			loopback_next_ephemeral_port = loopback_next_ephemeral_port >= 65535 ? 61000 : loopback_next_ephemeral_port + 1;
+		}
+		port = loopback_next_ephemeral_port;
+		loopback_next_ephemeral_port = port >= 65535 ? 61000 : port + 1;
+	}
+	else if(loopback_sockets.count(port) != 0)
+	{
+		log_error("net", "loopback port %d already in use", port);
+		return;
+	}
+	sock->loopback = new NETLOOPBACK();
+	sock->loopback->port = port;
+	loopback_sockets[port] = sock->loopback;
+}
+
+static void loopback_unregister(NETSOCKET sock)
+{
+	if(sock->loopback == nullptr)
+		return;
+	{
+		const std::unique_lock lock(loopback_lock);
+		loopback_sockets.erase(sock->loopback->port);
+	}
+	delete sock->loopback;
+	sock->loopback = nullptr;
+}
+
+static int loopback_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
+{
+	if(size <= 0 || (size_t)size > PACKETSIZE)
+		return -1;
+	// Fabricate the sender address in the family the destination address uses,
+	// so that connection peer address checks on both sides are consistent.
+	NETADDR from;
+	mem_zero(&from, sizeof(from));
+	if(addr->type & (NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV6))
+	{
+		from.type = NETTYPE_IPV6;
+		from.ip[15] = 1;
+	}
+	else
+	{
+		from.type = NETTYPE_IPV4;
+		from.ip[0] = 127;
+		from.ip[3] = 1;
+	}
+	from.port = sock->loopback->port;
+
+	const std::unique_lock lock(loopback_lock);
+	auto it = loopback_sockets.find(addr->port);
+	if(it != loopback_sockets.end() && it->second != sock->loopback && it->second->queue.size() < LOOPBACK_MAX_QUEUE)
+	{
+		NETLOOPBACK_PACKET &packet = it->second->queue.emplace_back();
+		packet.from = from;
+		packet.size = size;
+		mem_copy(packet.data, data, size);
+		it->second->cond.notify_one();
+	}
+	// Destination not registered or queue full: silently dropped, like UDP.
+	return size;
+}
+
+static int loopback_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
+{
+	const std::unique_lock lock(loopback_lock);
+	if(sock->loopback->queue.empty())
+		return 0;
+	sock->loopback->current = sock->loopback->queue.front();
+	sock->loopback->queue.pop_front();
+	*addr = sock->loopback->current.from;
+	*data = sock->loopback->current.data;
+	return sock->loopback->current.size;
+}
 
 const NETADDR NETADDR_ZEROED = {NETTYPE_INVALID, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0};
 
@@ -577,6 +727,18 @@ static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 
 	log_trace("host_lookup", "host='%s' port='%d' types='%d'", host, port, types);
 
+	// When the loopback transport is active (Emscripten), "localhost" must map
+	// to 127.0.0.1, as the resolver may return a synthetic address instead.
+	if(loopback_enabled && str_comp(host, "localhost") == 0 && (types & NETTYPE_IPV4) != 0)
+	{
+		mem_zero(addr, sizeof(*addr));
+		addr->type = NETTYPE_IPV4;
+		addr->ip[0] = 127;
+		addr->ip[3] = 1;
+		addr->port = port;
+		return 0;
+	}
+
 	struct addrinfo hints;
 	mem_zero(&hints, sizeof(hints));
 
@@ -720,11 +882,8 @@ int net_would_block()
 #endif
 }
 
-int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
+static int net_socket_read_wait_select(NETSOCKET sock, int64_t microseconds)
 {
-	const int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(nanoseconds).count();
-	dbg_assert(microseconds >= 0, "Negative wait duration %" PRId64 " not allowed", microseconds);
-
 	fd_set readfds;
 	FD_ZERO(&readfds);
 
@@ -779,6 +938,39 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 	}
 #endif
 	return 0;
+}
+
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
+{
+	const int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(nanoseconds).count();
+	dbg_assert(microseconds >= 0, "Negative wait duration %" PRId64 " not allowed", microseconds);
+
+	if(sock->loopback != nullptr)
+	{
+		// Wait on the loopback queue, but poll the real sockets in short slices
+		// so their traffic is not delayed for the entire wait duration.
+		const bool has_real_sockets = sock->ipv4sock >= 0 || sock->ipv6sock >= 0 || sock->web_ipv4sock >= 0 || sock->web_ipv6sock >= 0;
+		const auto deadline = std::chrono::steady_clock::now() + nanoseconds;
+		while(true)
+		{
+			{
+				std::unique_lock lock(loopback_lock);
+				if(!sock->loopback->queue.empty())
+					return 1;
+				const auto now = std::chrono::steady_clock::now();
+				if(now >= deadline)
+					return 0;
+				const std::chrono::nanoseconds remaining = deadline - now;
+				sock->loopback->cond.wait_for(lock, has_real_sockets ? std::min<std::chrono::nanoseconds>(remaining, std::chrono::milliseconds(1)) : remaining);
+				if(!sock->loopback->queue.empty())
+					return 1;
+			}
+			if(has_real_sockets && net_socket_read_wait_select(sock, 0))
+				return 1;
+		}
+	}
+
+	return net_socket_read_wait_select(sock, microseconds);
 }
 
 static void priv_net_close_socket(int sock)
@@ -902,6 +1094,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
 
+	const int loopback_types = bindaddr.type & (NETTYPE_IPV4 | NETTYPE_IPV6);
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	// Emscripten proxies socket syscalls to the browser main thread, which can
+	// abort when the main thread is suspended by Asyncify. Only the main thread
+	// may therefore use real sockets. Other threads (the integrated server)
+	// only get the in-memory loopback transport.
+	if(!emscripten_is_main_runtime_thread())
+	{
+		bindaddr.type = 0;
+	}
+#endif
+
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		NETADDR bindaddr_ipv4 = bindaddr;
@@ -993,6 +1197,16 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	}
 #endif
 
+	if(loopback_enabled && loopback_types != 0)
+	{
+		loopback_register(sock, bindaddr.port);
+		if(sock->loopback != nullptr)
+		{
+			// The socket is usable even if no real socket could be created.
+			sock->type |= loopback_types;
+		}
+	}
+
 	if(sock->type == NETTYPE_INVALID)
 	{
 		free(sock);
@@ -1010,6 +1224,21 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
 {
 	int d = -1;
+
+	// Only divert the packet to the loopback transport if an in-process socket
+	// is actually bound on the destination port, so localhost traffic can still
+	// reach servers outside this process through the real sockets. Broadcasts
+	// are delivered to the in-process socket in addition to the real send.
+	if(sock->loopback != nullptr && loopback_addr_match(addr) && loopback_registered(addr->port))
+	{
+		d = loopback_send(sock, addr, data, size);
+		if((addr->type & NETTYPE_LINK_BROADCAST) == 0)
+		{
+			network_stats.sent_bytes += size;
+			network_stats.sent_packets++;
+			return d;
+		}
+	}
 
 	if(addr->type & NETTYPE_IPV4)
 	{
@@ -1118,6 +1347,17 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	};
 
 	int bytes = 0;
+
+	if(sock->loopback != nullptr)
+	{
+		bytes = loopback_recv(sock, addr, data);
+		if(bytes > 0)
+		{
+			update_stats(bytes);
+			return bytes;
+		}
+	}
+
 #if defined(CONF_PLATFORM_LINUX)
 	if(sock->ipv4sock >= 0)
 	{
@@ -1223,6 +1463,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 
 void net_udp_close(NETSOCKET sock)
 {
+	loopback_unregister(sock);
 	priv_net_close_all_sockets(sock);
 }
 

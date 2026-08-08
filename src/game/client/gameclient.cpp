@@ -601,7 +601,17 @@ void CGameClient::OnConnected()
 		pComponent->OnReset();
 	}
 
-	ConfigManager()->ResetGameSettings();
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	// The integrated server shares the process-global g_Config with this
+	// client, so while it is running it owns the game config variables:
+	// resetting them here would revert settings applied to the running server
+	// via rcon. When connected to the integrated server, LoadMapSettings
+	// re-applies the same values the server already loaded from its map.
+	if(!m_LocalServer.IsServerRunning())
+#endif
+	{
+		ConfigManager()->ResetGameSettings();
+	}
 	LoadMapSettings();
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
