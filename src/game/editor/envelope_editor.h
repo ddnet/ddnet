@@ -32,6 +32,7 @@ public:
 
 	void OnReset() override;
 	void Render(CUIRect View);
+	bool IsPointOperationActive() const;
 
 private:
 	void RenderColorBar(CUIRect ColorBar, const std::shared_ptr<CEnvelope> &pEnvelope);

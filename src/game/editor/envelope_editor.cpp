@@ -862,7 +862,8 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 						const void *pId = &pEnvelope->m_vPoints[i].m_aValues[c];
 
-						if(Map()->IsEnvPointSelected(i, c))
+						if((Map()->m_SelectedQuadEnvelope == -1 && Map()->IsEnvPointSelected(i, c)) ||
+							(Map()->m_SelectedQuadEnvelope == Map()->m_SelectedEnvelope && Map()->m_SelectedQuadEnvelopePoint == i))
 						{
 							Graphics()->SetColor(1, 1, 1, 1);
 							CUIRect Background = {
@@ -1505,6 +1506,14 @@ void CEnvelopeEditor::Render(CUIRect View)
 			}
 		}
 	}
+}
+
+bool CEnvelopeEditor::IsPointOperationActive() const
+{
+	return m_Operation == EEnvelopeEditorOp::DRAG_POINT ||
+	       m_Operation == EEnvelopeEditorOp::DRAG_POINT_X ||
+	       m_Operation == EEnvelopeEditorOp::DRAG_POINT_Y ||
+	       m_Operation == EEnvelopeEditorOp::SCALE;
 }
 
 void CEnvelopeEditor::RenderColorBar(CUIRect ColorBar, const std::shared_ptr<CEnvelope> &pEnvelope)

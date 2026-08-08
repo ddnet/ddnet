@@ -2084,7 +2084,11 @@ void CEditor::DoQuadEnvelopes(const CLayerQuads *pLayerQuads)
 			const vec2 Offset = vec2(fx2f(EnvPoint.m_aValues[0]), fx2f(EnvPoint.m_aValues[1]));
 			const float Rotation = fx2f(EnvPoint.m_aValues[2]) / 180.0f * pi;
 
-			const float Alpha = (Map()->m_SelectedQuadEnvelope == pQuad->m_PosEnv && Map()->IsEnvPointSelected(PointIndex)) ? 0.65f : 0.35f;
+			const float Alpha =
+				((Map()->m_SelectedQuadEnvelope == pQuad->m_PosEnv && Map()->m_SelectedQuadEnvelopePoint == (int)PointIndex) ||
+					(m_EnvelopeEditor.IsPointOperationActive() && Map()->m_SelectedEnvelope == pQuad->m_PosEnv && Map()->IsEnvPointSelected(PointIndex))) ?
+					0.65f :
+					0.35f;
 			Graphics()->SetColor4(
 				ColorRGBA(pQuad->m_aColors[0].r, pQuad->m_aColors[0].g, pQuad->m_aColors[0].b, pQuad->m_aColors[0].a).Multiply(1.0f / 255.0f).WithMultipliedAlpha(Alpha),
 				ColorRGBA(pQuad->m_aColors[1].r, pQuad->m_aColors[1].g, pQuad->m_aColors[1].b, pQuad->m_aColors[1].a).Multiply(1.0f / 255.0f).WithMultipliedAlpha(Alpha),
@@ -2166,6 +2170,13 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 			Ui()->DisableMouseLock();
 			m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 			Ui()->SetActiveItem(nullptr);
+			Map()->m_SelectedQuadEnvelope = -1;
+			Map()->m_SelectedQuadEnvelopePoint = -1;
+		}
+		else
+		{
+			Map()->m_SelectedQuadEnvelope = pQuad->m_PosEnv;
+			Map()->m_SelectedQuadEnvelopePoint = PointIndex;
 		}
 
 		Graphics()->SetColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
@@ -2187,14 +2198,14 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 				m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::MOVE;
 			}
 			Map()->SelectQuad(QuadIndex);
-			Map()->SelectEnvPoint(PointIndex);
 			Map()->m_SelectedQuadEnvelope = pQuad->m_PosEnv;
+			Map()->m_SelectedQuadEnvelopePoint = PointIndex;
 			Ui()->SetActiveItem(pPoint);
 		}
 		else
 		{
-			Map()->DeselectEnvPoints();
 			Map()->m_SelectedQuadEnvelope = -1;
+			Map()->m_SelectedQuadEnvelopePoint = -1;
 		}
 	}
 	else
