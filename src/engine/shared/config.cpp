@@ -31,9 +31,7 @@ bool SConfigVariable::CheckReadOnly() const
 {
 	if(!m_ReadOnly)
 		return false;
-	char aBuf[IConsole::CMDLINE_LENGTH + 64];
-	str_format(aBuf, sizeof(aBuf), "The config variable '%s' cannot be changed right now.", m_pScriptName);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+	log_error("config", "The config variable '%s' cannot be changed right now.", m_pScriptName);
 	return true;
 }
 
@@ -65,9 +63,7 @@ void SIntConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUser
 	}
 	else
 	{
-		char aBuf[32];
-		str_format(aBuf, sizeof(aBuf), "Value: %d", *pData->m_pVariable);
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+		log_info("config", "Value: %d", *pData->m_pVariable);
 	}
 }
 
@@ -115,7 +111,6 @@ void SIntConfigVariable::ResetToOld()
 void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUserData)
 {
 	SColorConfigVariable *pData = static_cast<SColorConfigVariable *>(pUserData);
-	char aBuf[IConsole::CMDLINE_LENGTH + 64];
 	if(pResult->NumArguments())
 	{
 		if(pData->CheckReadOnly())
@@ -130,21 +125,17 @@ void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "Value: %u", *pData->m_pVariable);
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+		log_info("config", "Value: %u", *pData->m_pVariable);
 
 		const ColorHSLA Hsla = ColorHSLA(*pData->m_pVariable, true).UnclampLighting(pData->m_DarkestLighting);
-		str_format(aBuf, sizeof(aBuf), "H: %d°, S: %d%%, L: %d%%", round_to_int(Hsla.h * 360), round_to_int(Hsla.s * 100), round_to_int(Hsla.l * 100));
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+		log_info("config", "H: %d°, S: %d%%, L: %d%%", round_to_int(Hsla.h * 360), round_to_int(Hsla.s * 100), round_to_int(Hsla.l * 100));
 
 		const ColorRGBA Rgba = color_cast<ColorRGBA>(Hsla);
-		str_format(aBuf, sizeof(aBuf), "R: %d, G: %d, B: %d, #%06X", round_to_int(Rgba.r * 255), round_to_int(Rgba.g * 255), round_to_int(Rgba.b * 255), Rgba.Pack(false));
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+		log_info("config", "R: %d, G: %d, B: %d, #%06X", round_to_int(Rgba.r * 255), round_to_int(Rgba.g * 255), round_to_int(Rgba.b * 255), Rgba.Pack(false));
 
 		if(pData->m_Alpha)
 		{
-			str_format(aBuf, sizeof(aBuf), "A: %d%%", round_to_int(Hsla.a * 100));
-			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+			log_info("config", "A: %d%%", round_to_int(Hsla.a * 100));
 		}
 	}
 }
@@ -218,9 +209,7 @@ void SStringConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pU
 	}
 	else
 	{
-		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "Value: %s", pData->m_pStr);
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+		log_info("config", "Value: %s", pData->m_pStr);
 	}
 }
 
@@ -354,9 +343,7 @@ void CConfigManager::Reset(const char *pScriptName)
 		}
 	}
 
-	char aBuf[IConsole::CMDLINE_LENGTH + 32];
-	str_format(aBuf, sizeof(aBuf), "Invalid command: '%s'.", pScriptName);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+	log_error("config", "Invalid command: '%s'.", pScriptName);
 }
 
 void CConfigManager::ResetGameSettings()
@@ -533,9 +520,7 @@ void CConfigManager::Con_Toggle(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	char aBuf[IConsole::CMDLINE_LENGTH + 32];
-	str_format(aBuf, sizeof(aBuf), "Invalid command: '%s'.", pScriptName);
-	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+	log_error("config", "Invalid command: '%s'.", pScriptName);
 }
 
 void CConfigManager::Con_ToggleStroke(IConsole::IResult *pResult, void *pUserData)
@@ -558,9 +543,7 @@ void CConfigManager::Con_ToggleStroke(IConsole::IResult *pResult, void *pUserDat
 		return;
 	}
 
-	char aBuf[IConsole::CMDLINE_LENGTH + 32];
-	str_format(aBuf, sizeof(aBuf), "Invalid command: '%s'.", pScriptName);
-	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+	log_error("config", "Invalid command: '%s'.", pScriptName);
 }
 
 IConfigManager *CreateConfigManager() { return new CConfigManager; }
