@@ -862,7 +862,8 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 						const void *pId = &pEnvelope->m_vPoints[i].m_aValues[c];
 
-						if(Map()->IsEnvPointSelected(i, c))
+						if((Map()->m_SelectedQuadEnvelope == -1 && Map()->IsEnvPointSelected(i, c)) ||
+							(Map()->m_SelectedQuadEnvelope == Map()->m_SelectedEnvelope && Map()->m_SelectedQuadEnvelopePoint == i))
 						{
 							Graphics()->SetColor(1, 1, 1, 1);
 							CUIRect Background = {
@@ -996,7 +997,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 							else if(!Ui()->MouseButton(0))
 							{
 								Ui()->SetActiveItem(nullptr);
-								Map()->m_SelectedQuadEnvelope = -1;
 
 								if(m_Operation == EEnvelopeEditorOp::SELECT)
 								{
@@ -1018,7 +1018,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 							{
 								Ui()->SetActiveItem(pId);
 								m_Operation = EEnvelopeEditorOp::SELECT;
-								Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
 								m_MouseStart = Ui()->MousePos();
 							}
 							else if(Ui()->MouseButtonClicked(1))
@@ -1132,7 +1131,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 								else if(!Ui()->MouseButton(0))
 								{
 									Ui()->SetActiveItem(nullptr);
-									Map()->m_SelectedQuadEnvelope = -1;
 
 									if(m_Operation == EEnvelopeEditorOp::SELECT)
 										Map()->SelectTangentOutPoint(i, c);
@@ -1149,7 +1147,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 								{
 									Ui()->SetActiveItem(pId);
 									m_Operation = EEnvelopeEditorOp::SELECT;
-									Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
 									m_MouseStart = Ui()->MousePos();
 								}
 								else if(Ui()->MouseButtonClicked(1))
@@ -1263,7 +1260,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 								else if(!Ui()->MouseButton(0))
 								{
 									Ui()->SetActiveItem(nullptr);
-									Map()->m_SelectedQuadEnvelope = -1;
 
 									if(m_Operation == EEnvelopeEditorOp::SELECT)
 										Map()->SelectTangentInPoint(i, c);
@@ -1280,7 +1276,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 								{
 									Ui()->SetActiveItem(pId);
 									m_Operation = EEnvelopeEditorOp::SELECT;
-									Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
 									m_MouseStart = Ui()->MousePos();
 								}
 								else if(Ui()->MouseButtonClicked(1))
