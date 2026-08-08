@@ -262,7 +262,6 @@ public:
 	void OnIngameMoved() override { m_IngameMoved = true; }
 	void ResetIngameMoved() override { m_IngameMoved = false; }
 
-	void HandleCursorMovement();
 	void OnInput(const IInput::CEvent &Event);
 	void MouseAxisLock(vec2 &CursorRel);
 	vec2 m_MouseAxisInitialPos = vec2(0.0f, 0.0f);

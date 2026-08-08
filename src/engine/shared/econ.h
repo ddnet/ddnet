@@ -7,7 +7,6 @@
 
 class CConfig;
 class CNetBan;
-class ColorRGBA;
 
 class CEcon
 {
@@ -40,7 +39,6 @@ class CEcon
 	int m_PrintCBIndex;
 	int m_UserClientId;
 
-	static void SendLineCB(const char *pLine, void *pUserData, ColorRGBA PrintColor = {1, 1, 1, 1});
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);
 
 	static int NewClientCallback(int ClientId, void *pUser);

@@ -132,7 +132,6 @@ public:
 
 	void CreatePredictedEvent(const CPredictedEvent &NewEvent);
 	bool CheckPredictedEventHandled(const CPredictedEvent &CheckEvent);
-	void PlayPredictedEvents(int Tick);
 
 	void CreatePredictedSound(vec2 Pos, int SoundId, int Id = -1);
 	void CreatePredictedExplosionEvent(vec2 Pos, int Id = -1);
