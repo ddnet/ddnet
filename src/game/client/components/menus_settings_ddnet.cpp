@@ -289,6 +289,11 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	s_RunOnJoinInput.SetEmptyText(Localize("Chat command (e.g. showall 1)"));
 	Ui()->DoEditBox(&s_RunOnJoinInput, &Button, 14.0f);
 
+	Miscellaneous.HSplitTop(20.0f, &Button, &Miscellaneous);
+	if(DoButton_CheckBox(&g_Config.m_ClHighBandwidth, Localize("Request 50Hz snapshot updates"), g_Config.m_ClHighBandwidth, &Button))
+		g_Config.m_ClHighBandwidth ^= 1;
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClHighBandwidth, &Button, Localize("When supported by the server, doubles your snapshot rate from 25Hz to 50Hz for smoother gameplay. Uses roughly twice the bandwidth."));
+
 #if defined(CONF_FAMILY_WINDOWS)
 	static CButtonContainer s_ButtonUnregisterShell;
 	Miscellaneous.HSplitTop(10.0f, nullptr, &Miscellaneous);

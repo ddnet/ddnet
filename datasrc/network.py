@@ -664,4 +664,8 @@ Messages = [
 	NetMessageEx("Sv_MapInfo", "map-info@netmsg.ddnet.org", [
 		NetString("m_pDescription"),
 	]),
+
+	NetMessageEx("Cl_HighBandwidth", "highbandwidth@netmsg.ddnet.tw", [
+		NetBool("m_Enable"),
+	]),
 ]
