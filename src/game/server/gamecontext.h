@@ -513,8 +513,6 @@ private:
 	static void ConTopPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConHighBandwidth(IConsole::IResult *pResult, void *pUserData);
-
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhispers(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
