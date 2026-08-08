@@ -20,6 +20,15 @@
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/map.h>
 
+#include <optional>
+
+static const char *const CHANNEL_NAMES[CEnvPoint::MAX_CHANNELS][CEnvPoint::MAX_CHANNELS] = {
+	{"V", "", "", ""},
+	{"", "", "", ""},
+	{"X", "Y", "R", ""},
+	{"R", "G", "B", "A"},
+};
+
 static const char *const CURVE_TYPE_NAMES[] = {"Step", "Linear", "Slow", "Fast", "Smooth", "Bezier"};
 static const char *const CURVE_TYPE_NAMES_SHORT[] = {"N", "L", "S", "F", "M", "B"};
 static_assert(std::size(CURVE_TYPE_NAMES) == NUM_CURVETYPES);
@@ -362,13 +371,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 		CUIRect Button;
 		ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
-
-		static const char *const CHANNEL_NAMES[CEnvPoint::MAX_CHANNELS][CEnvPoint::MAX_CHANNELS] = {
-			{"V", "", "", ""},
-			{"", "", "", ""},
-			{"X", "Y", "R", ""},
-			{"R", "G", "B", "A"},
-		};
 
 		static const char *const CHANNEL_DESCRIPTIONS[CEnvPoint::MAX_CHANNELS][CEnvPoint::MAX_CHANNELS] = {
 			{"Volume of the envelope.", "", "", ""},
@@ -862,7 +864,8 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 						const void *pId = &pEnvelope->m_vPoints[i].m_aValues[c];
 
-						if(Map()->IsEnvPointSelected(i, c))
+						if((Map()->m_SelectedQuadEnvelope == -1 && Map()->IsEnvPointSelected(i, c)) ||
+							(Map()->m_SelectedQuadEnvelope == Map()->m_SelectedEnvelope && Map()->m_SelectedQuadEnvelopePoint == i))
 						{
 							Graphics()->SetColor(1, 1, 1, 1);
 							CUIRect Background = {
@@ -996,7 +999,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 							else if(!Ui()->MouseButton(0))
 							{
 								Ui()->SetActiveItem(nullptr);
-								Map()->m_SelectedQuadEnvelope = -1;
 
 								if(m_Operation == EEnvelopeEditorOp::SELECT)
 								{
@@ -1018,7 +1020,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 							{
 								Ui()->SetActiveItem(pId);
 								m_Operation = EEnvelopeEditorOp::SELECT;
-								Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
 								m_MouseStart = Ui()->MousePos();
 							}
 							else if(Ui()->MouseButtonClicked(1))
@@ -1132,7 +1133,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 								else if(!Ui()->MouseButton(0))
 								{
 									Ui()->SetActiveItem(nullptr);
-									Map()->m_SelectedQuadEnvelope = -1;
 
 									if(m_Operation == EEnvelopeEditorOp::SELECT)
 										Map()->SelectTangentOutPoint(i, c);
@@ -1149,7 +1149,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 								{
 									Ui()->SetActiveItem(pId);
 									m_Operation = EEnvelopeEditorOp::SELECT;
-									Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
 									m_MouseStart = Ui()->MousePos();
 								}
 								else if(Ui()->MouseButtonClicked(1))
@@ -1263,7 +1262,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 								else if(!Ui()->MouseButton(0))
 								{
 									Ui()->SetActiveItem(nullptr);
-									Map()->m_SelectedQuadEnvelope = -1;
 
 									if(m_Operation == EEnvelopeEditorOp::SELECT)
 										Map()->SelectTangentInPoint(i, c);
@@ -1280,7 +1278,6 @@ void CEnvelopeEditor::Render(CUIRect View)
 								{
 									Ui()->SetActiveItem(pId);
 									m_Operation = EEnvelopeEditorOp::SELECT;
-									Map()->m_SelectedQuadEnvelope = Map()->m_SelectedEnvelope;
 									m_MouseStart = Ui()->MousePos();
 								}
 								else if(Ui()->MouseButtonClicked(1))
@@ -1355,6 +1352,8 @@ void CEnvelopeEditor::Render(CUIRect View)
 		if(m_Operation == EEnvelopeEditorOp::SCALE)
 		{
 			str_copy(Editor()->m_aTooltip, "Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise.");
+			Ui()->SetHotItem(nullptr); // Prevent other UI elements from being activated during scale operation
+			Editor()->m_ActiveEnvelopePreview = CEditor::EEnvelopePreview::SELECTED;
 
 			if(Input()->ModifierIsPressed())
 			{
@@ -1498,6 +1497,59 @@ void CEnvelopeEditor::Render(CUIRect View)
 				}
 			}
 		}
+
+		// tooltips
+		if(m_Operation == EEnvelopeEditorOp::DRAG_POINT ||
+			m_Operation == EEnvelopeEditorOp::DRAG_POINT_X ||
+			m_Operation == EEnvelopeEditorOp::DRAG_POINT_Y)
+		{
+			for(int PointIndex = 0; PointIndex < (int)pEnvelope->m_vPoints.size(); PointIndex++)
+			{
+				for(int Channel = 0; Channel < pEnvelope->GetChannels(); Channel++)
+				{
+					const void *pPointId = &pEnvelope->m_vPoints[PointIndex].m_aValues[Channel];
+					const void *pTangentInId = &pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaX[Channel];
+					const void *pTangentOutId = &pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaX[Channel];
+					if((m_Operation == EEnvelopeEditorOp::DRAG_POINT_X ||
+						   m_Operation == EEnvelopeEditorOp::DRAG_POINT_Y) &&
+						Ui()->CheckActiveItem(pPointId))
+					{
+						if(m_Operation == EEnvelopeEditorOp::DRAG_POINT_X)
+						{
+							RenderPointTimeTooltip(View, PointIndex, pEnvelope);
+						}
+						else
+						{
+							RenderPointValueTooltip(View, PointIndex, pEnvelope);
+						}
+						PointIndex = pEnvelope->m_vPoints.size();
+						break;
+					}
+					else if(m_Operation == EEnvelopeEditorOp::DRAG_POINT &&
+						Ui()->CheckActiveItem(pTangentInId))
+					{
+						RenderTangentInTooltip(View, PointIndex, Channel, pEnvelope);
+						PointIndex = pEnvelope->m_vPoints.size();
+						break;
+					}
+					else if(m_Operation == EEnvelopeEditorOp::DRAG_POINT &&
+						Ui()->CheckActiveItem(pTangentOutId))
+					{
+						RenderTangentOutTooltip(View, PointIndex, Channel, pEnvelope);
+						PointIndex = pEnvelope->m_vPoints.size();
+						break;
+					}
+				}
+			}
+		}
+		else if(m_Operation == EEnvelopeEditorOp::SCALE)
+		{
+			RenderScaleTooltip(View, pEnvelope);
+		}
+		else if(Ui()->CheckActiveItem(&Map()->m_EnvelopeEvaluator.m_AnimateTime))
+		{
+			RenderTimebarTooltip(View, pEnvelope);
+		}
 	}
 }
 
@@ -1597,6 +1649,229 @@ void CEnvelopeEditor::RenderColorBar(CUIRect ColorBar, const std::shared_ptr<CEn
 	Ui()->ClipDisable();
 	ColorBarBackground.h -= Ui()->Screen()->h / Graphics()->ScreenHeight(); // hack to fix alignment of bottom border
 	ColorBarBackground.DrawOutline(ColorRGBA(0.7f, 0.7f, 0.7f, 1.0f));
+}
+
+static constexpr float TOOLTIP_MARGIN = 5.0f;
+static constexpr float TOOLTIP_FONT_SIZE = 10.0f;
+
+void CEnvelopeEditor::RenderPointTimeTooltip(CUIRect View, int PointIndex, const std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	dbg_assert(!Map()->m_vSelectedEnvelopePoints.empty(), "Envelope time tooltip without selected envelope points");
+
+	const CFixedTime Time = pEnvelope->m_vPoints[PointIndex].m_Time;
+	int SelectedChannelsCount = 0;
+	int64_t SelectedValuesSum = 0;
+	for(auto [SelectedIndex, SelectedChannel] : Map()->m_vSelectedEnvelopePoints)
+	{
+		if(PointIndex != SelectedIndex)
+		{
+			continue;
+		}
+
+		++SelectedChannelsCount;
+		SelectedValuesSum += pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
+	}
+
+	char aTimeLabel[32];
+	str_format(aTimeLabel, sizeof(aTimeLabel), "%.3fs", Time.AsSeconds());
+
+	const float TimeWidth = TextRender()->TextWidth(TOOLTIP_FONT_SIZE, aTimeLabel);
+
+	CUIRect TooltipRect = CUIRect{
+		.x = EnvelopeToScreenX(View, Time.AsSeconds()),
+		.y = EnvelopeToScreenY(View, fx2f(SelectedValuesSum / SelectedChannelsCount)),
+		.w = TimeWidth + 2.0f * TOOLTIP_MARGIN,
+		.h = TOOLTIP_FONT_SIZE + 2.0f * TOOLTIP_MARGIN,
+	};
+	RenderTooltip(&TooltipRect, View);
+
+	Ui()->DoLabel(&TooltipRect, aTimeLabel, TOOLTIP_FONT_SIZE, TEXTALIGN_ML);
+}
+
+void CEnvelopeEditor::RenderPointValueTooltip(CUIRect View, int PointIndex, const std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	dbg_assert(!Map()->m_vSelectedEnvelopePoints.empty(), "Envelope value tooltip without selected envelope points");
+
+	bool aChannelSelected[CEnvPoint::MAX_CHANNELS] = {false, false, false, false};
+	int SelectedChannelsCount = 0;
+	char aaValueLabels[CEnvPoint::MAX_CHANNELS][32];
+	float aValueWidths[CEnvPoint::MAX_CHANNELS];
+	float MaxValueWidth = -1.0f;
+	int64_t SelectedValuesSum = 0;
+	for(auto [SelectedIndex, SelectedChannel] : Map()->m_vSelectedEnvelopePoints)
+	{
+		if(PointIndex != SelectedIndex)
+		{
+			continue;
+		}
+
+		aChannelSelected[SelectedChannel] = true;
+		++SelectedChannelsCount;
+
+		str_format(aaValueLabels[SelectedChannel], sizeof(aaValueLabels[SelectedChannel]), "%.3f",
+			fx2f(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel]));
+
+		aValueWidths[SelectedChannel] = TextRender()->TextWidth(TOOLTIP_FONT_SIZE, aaValueLabels[SelectedChannel]);
+		MaxValueWidth = std::max(MaxValueWidth, aValueWidths[SelectedChannel]);
+		SelectedValuesSum += pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
+	}
+	dbg_assert(SelectedChannelsCount > 0, "Envelope value tooltip without selected channel");
+
+	const float MaxChannelWidth = 12.0f;
+	CUIRect TooltipRect = CUIRect{
+		.x = EnvelopeToScreenX(View, pEnvelope->m_vPoints[PointIndex].m_Time.AsSeconds()),
+		.y = EnvelopeToScreenY(View, fx2f(SelectedValuesSum / SelectedChannelsCount)),
+		.w = MaxChannelWidth + MaxValueWidth + 3.0f * TOOLTIP_MARGIN,
+		.h = SelectedChannelsCount * TOOLTIP_FONT_SIZE + 2.0f * TOOLTIP_MARGIN,
+	};
+	RenderTooltip(&TooltipRect, View);
+
+	for(int SelectedChannel = 0; SelectedChannel < pEnvelope->GetChannels(); ++SelectedChannel)
+	{
+		if(!aChannelSelected[SelectedChannel])
+		{
+			continue;
+		}
+		CUIRect Row, Label;
+		TooltipRect.HSplitTop(TOOLTIP_FONT_SIZE, &Row, &TooltipRect);
+		Row.VSplitLeft(MaxChannelWidth, &Label, &Row);
+		Ui()->DoLabel(&Label, CHANNEL_NAMES[pEnvelope->GetChannels() - 1][SelectedChannel], TOOLTIP_FONT_SIZE, TEXTALIGN_ML);
+		Row.VSplitLeft(TOOLTIP_MARGIN, nullptr, &Label);
+		Ui()->DoLabel(&Label, aaValueLabels[SelectedChannel], TOOLTIP_FONT_SIZE, TEXTALIGN_ML);
+	}
+}
+
+void CEnvelopeEditor::RenderTangentInTooltip(CUIRect View, int PointIndex, int Channel, const std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	const CFixedTime Time = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaX[Channel];
+	const int Value = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaY[Channel];
+	RenderTangentTooltip(View, PointIndex, Channel, Time, Value, pEnvelope);
+}
+
+void CEnvelopeEditor::RenderTangentOutTooltip(CUIRect View, int PointIndex, int Channel, const std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	const CFixedTime Time = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaX[Channel];
+	const int Value = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaY[Channel];
+	RenderTangentTooltip(View, PointIndex, Channel, Time, Value, pEnvelope);
+}
+
+void CEnvelopeEditor::RenderTangentTooltip(CUIRect View, int PointIndex, int Channel, CFixedTime Time, int Value, const std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	char aTimeLabel[32];
+	str_format(aTimeLabel, sizeof(aTimeLabel), "%.3fs", Time.AsSeconds());
+	char aValueLabel[32];
+	str_format(aValueLabel, sizeof(aValueLabel), "%.3f", fx2f(Value));
+
+	const float TimeWidth = TextRender()->TextWidth(TOOLTIP_FONT_SIZE, aTimeLabel);
+	const float ValueWidth = TextRender()->TextWidth(TOOLTIP_FONT_SIZE, aValueLabel);
+
+	CUIRect TooltipRect = CUIRect{
+		.x = EnvelopeToScreenX(View, (pEnvelope->m_vPoints[PointIndex].m_Time + Time).AsSeconds()),
+		.y = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[PointIndex].m_aValues[Channel] + Value)),
+		.w = TimeWidth + ValueWidth + 3.0f * TOOLTIP_MARGIN,
+		.h = TOOLTIP_FONT_SIZE + 2.0f * TOOLTIP_MARGIN,
+	};
+	RenderTooltip(&TooltipRect, View);
+
+	CUIRect TimeLabel, ValueLabel;
+	TooltipRect.VSplitLeft(TimeWidth, &TimeLabel, &TooltipRect);
+	TooltipRect.VSplitLeft(TOOLTIP_MARGIN, nullptr, &TooltipRect);
+	TooltipRect.VSplitLeft(ValueWidth, &ValueLabel, &TooltipRect);
+	Ui()->DoLabel(&TimeLabel, aTimeLabel, TOOLTIP_FONT_SIZE, TEXTALIGN_ML);
+	Ui()->DoLabel(&ValueLabel, aValueLabel, TOOLTIP_FONT_SIZE, TEXTALIGN_ML);
+}
+
+void CEnvelopeEditor::RenderScaleTooltip(CUIRect View, const std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	dbg_assert(!Map()->m_vSelectedEnvelopePoints.empty(), "Envelope scale tooltip without selected envelope points");
+
+	int64_t SelectedTimesSum = 0;
+	int64_t SelectedValuesSum = 0;
+	for(auto [SelectedIndex, SelectedChannel] : Map()->m_vSelectedEnvelopePoints)
+	{
+		SelectedTimesSum += pEnvelope->m_vPoints[SelectedIndex].m_Time.GetInternal();
+		SelectedValuesSum += pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
+	}
+
+	char aTimeLabel[32];
+	str_format(aTimeLabel, sizeof(aTimeLabel), "Time ×%.3f", m_ScaleFactor.x);
+	char aValueLabel[32];
+	str_format(aValueLabel, sizeof(aValueLabel), "Value ×%.3f", m_ScaleFactor.y);
+
+	const float TimeWidth = TextRender()->TextWidth(TOOLTIP_FONT_SIZE, aTimeLabel);
+	const float ValueWidth = TextRender()->TextWidth(TOOLTIP_FONT_SIZE, aValueLabel);
+
+	CUIRect TooltipRect = CUIRect{
+		.x = EnvelopeToScreenX(View, CFixedTime(SelectedTimesSum / Map()->m_vSelectedEnvelopePoints.size()).AsSeconds()),
+		.y = EnvelopeToScreenY(View, fx2f(SelectedValuesSum / Map()->m_vSelectedEnvelopePoints.size())),
+		.w = std::max(TimeWidth, ValueWidth) + 2.0f * TOOLTIP_MARGIN,
+		.h = 2.0f * TOOLTIP_FONT_SIZE + 2.0f * TOOLTIP_MARGIN,
+	};
+	RenderTooltip(&TooltipRect, View);
+
+	CUIRect TimeLabel, ValueLabel;
+	TooltipRect.HSplitTop(TOOLTIP_FONT_SIZE, &TimeLabel, &ValueLabel);
+	Ui()->DoLabel(&TimeLabel, aTimeLabel, TOOLTIP_FONT_SIZE, TEXTALIGN_ML);
+	Ui()->DoLabel(&ValueLabel, aValueLabel, TOOLTIP_FONT_SIZE, TEXTALIGN_ML);
+}
+
+void CEnvelopeEditor::RenderTimebarTooltip(CUIRect View, const std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	const float Time = Map()->m_EnvelopeEvaluator.m_AnimateTime * Map()->m_EnvelopeEvaluator.m_AnimateSpeed;
+	const float LoopedTime = std::fmod(Time, pEnvelope->EndTime());
+	const float CurrentTimebarX = EnvelopeToScreenX(View, Time);
+	const float LoopedTimebarX = EnvelopeToScreenX(View, LoopedTime);
+	const float TooltipTimebarX =
+		in_range(CurrentTimebarX, View.x + TOOLTIP_MARGIN, View.x + View.w - TOOLTIP_MARGIN) ||
+				!in_range(LoopedTimebarX, View.x + TOOLTIP_MARGIN, View.x + View.w - TOOLTIP_MARGIN) ?
+			CurrentTimebarX :
+			LoopedTimebarX;
+
+	char aTimeLabel[32];
+	str_format(aTimeLabel, sizeof(aTimeLabel), "%.3fs", Time);
+
+	const float TimeWidth = TextRender()->TextWidth(TOOLTIP_FONT_SIZE, aTimeLabel);
+
+	CUIRect TooltipRect = CUIRect{
+		.x = TooltipTimebarX,
+		.y = Ui()->MouseY(),
+		.w = TimeWidth + 2.0f * TOOLTIP_MARGIN,
+		.h = TOOLTIP_FONT_SIZE + 2.0f * TOOLTIP_MARGIN,
+	};
+	RenderTooltip(&TooltipRect, View);
+
+	Ui()->DoLabel(&TooltipRect, aTimeLabel, TOOLTIP_FONT_SIZE, TEXTALIGN_ML);
+}
+
+void CEnvelopeEditor::RenderTooltip(CUIRect *pTooltipRect, CUIRect Boundary)
+{
+	pTooltipRect->y -= pTooltipRect->h / 2.0f;
+
+	const float OffsetX = 10.0f;
+	if(pTooltipRect->x + OffsetX < Boundary.x + TOOLTIP_MARGIN)
+	{
+		pTooltipRect->x = Boundary.x + TOOLTIP_MARGIN;
+	}
+	else if(pTooltipRect->x + OffsetX + pTooltipRect->w > Boundary.x + Boundary.w - TOOLTIP_MARGIN)
+	{
+		pTooltipRect->x = std::clamp(pTooltipRect->x - OffsetX - pTooltipRect->w, Boundary.x + TOOLTIP_MARGIN, Boundary.x + Boundary.w - TOOLTIP_MARGIN - pTooltipRect->w);
+	}
+	else
+	{
+		pTooltipRect->x += OffsetX;
+	}
+
+	if(pTooltipRect->y < Boundary.y + TOOLTIP_MARGIN)
+	{
+		pTooltipRect->y = Boundary.y + TOOLTIP_MARGIN;
+	}
+	else if(pTooltipRect->y + pTooltipRect->h > Boundary.y + Boundary.h - TOOLTIP_MARGIN)
+	{
+		pTooltipRect->y = std::max(Boundary.y + Boundary.h - TOOLTIP_MARGIN - pTooltipRect->h, Boundary.y + TOOLTIP_MARGIN);
+	}
+
+	pTooltipRect->Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 3.0f);
+	pTooltipRect->Margin(TOOLTIP_MARGIN, pTooltipRect);
 }
 
 void CEnvelopeEditor::UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels)
