@@ -279,6 +279,8 @@ public:
 
 	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
 	CTuningParams *GetTuning(int Zone) { return &TuningList()[Zone]; }
+
+	vec2 GetViewPos(const class CPlayer *pPlayer = nullptr) const;
 };
 
 #endif
