@@ -112,6 +112,8 @@ enum
 
 	// Doors
 	ENTITY_DOOR = 49,
+	// Teleport shotgun bullet
+	ENTITY_BULLET_TELEPORT_CFROM = 50,
 	// End Of Lower Tiles
 
 	ENTITY_OFFSET = 255 - 16 * 4,

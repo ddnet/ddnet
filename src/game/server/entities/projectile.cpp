@@ -24,7 +24,8 @@ CProjectile::CProjectile(
 	int SoundImpact,
 	vec2 InitDir,
 	int Layer,
-	int Number) :
+	int Number,
+	int TeleType) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, true)
 {
 	m_Type = Type;
@@ -40,6 +41,7 @@ CProjectile::CProjectile(
 	m_Number = Number;
 	m_Bouncing = 0;
 	m_Freeze = Freeze;
+	m_TeleType = TeleType;
 
 	m_InitDir = InitDir;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
@@ -101,7 +103,7 @@ void CProjectile::Tick()
 	CCharacter *pTargetChr = nullptr;
 
 	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
-		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
+		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, (m_Freeze || m_TeleType != ProjTele::NONE) ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
@@ -144,7 +146,7 @@ void CProjectile::Tick()
 					(m_Owner != -1) ? TeamMask : CClientMask().set());
 			}
 		}
-		else if(m_Freeze)
+		else if(m_Freeze || m_TeleType != ProjTele::NONE)
 		{
 			CEntity *apEnts[MAX_CLIENTS];
 			int Num = GameWorld()->FindEntities(CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
@@ -152,7 +154,12 @@ void CProjectile::Tick()
 			{
 				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
 				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])))
-					pChr->Freeze();
+				{
+					if(m_Freeze)
+						pChr->Freeze();
+					if(m_TeleType != ProjTele::NONE)
+						pChr->m_TeleBulletTeleport = m_TeleType;
+				}
 			}
 		}
 		else if(pTargetChr)
@@ -221,7 +228,7 @@ void CProjectile::Tick()
 		}
 		else
 		{
-			if(!m_Freeze)
+			if(!m_Freeze && m_TeleType == ProjTele::NONE)
 			{
 				m_MarkedForDestroy = true;
 				return;
@@ -342,6 +349,14 @@ CNetObj_DDNetProjectile CProjectile::NetInfo() const
 	if(m_Freeze)
 	{
 		Flags |= PROJECTILEFLAG_FREEZE;
+	}
+	if(m_TeleType != ProjTele::NONE)
+	{
+		Flags |= PROJECTILEFLAG_TELEPORT_CFROM;
+		if(m_TeleType == ProjTele::CFROM_EVIL)
+		{
+			Flags |= PROJECTILEFLAG_TELEPORT_EVIL;
+		}
 	}
 
 	if(m_Owner < 0)

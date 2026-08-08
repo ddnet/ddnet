@@ -20,7 +20,8 @@ public:
 		int SoundImpact,
 		vec2 InitDir,
 		int Layer = 0,
-		int Number = 0);
+		int Number = 0,
+		int TeleType = ProjTele::NONE);
 
 	vec2 GetPos(float Time);
 
@@ -48,6 +49,7 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
+	int m_TeleType;
 	int m_TuneZone;
 	bool m_BelongsToPracticeTeam;
 	int m_DDRaceTeam;

@@ -517,6 +517,10 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "DOOR: Combined with LASER LENGTH creates doors. Doesn't allow to go through it (only with NINJA).";
 		break;
+	case ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
+			return "CHECKPOINT TELEPORT BULLET: Send tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are not reset if delay is 1.";
+		break;
 	case TILE_TELE_GUN_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "TELEGUN: Turn gun on as telegun weapon.";
