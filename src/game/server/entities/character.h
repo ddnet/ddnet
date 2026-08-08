@@ -219,7 +219,7 @@ public:
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;
 	bool TeleToCheckpoint(bool Evil);
-	bool m_TeleBulletTeleport;
+	int m_TeleBulletTeleport;
 
 	int m_TimeCpBroadcastEndTick;
 	int m_LastTimeCp;
@@ -237,7 +237,6 @@ public:
 	vec2 m_TeleGunPos;
 	bool m_TeleGunTeleport;
 	bool m_IsBlueTeleGunTeleport;
-
 	int m_StrongWeakId;
 
 	int m_SpawnTick;

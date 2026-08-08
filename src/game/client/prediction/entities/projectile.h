@@ -53,7 +53,7 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
-	bool m_TeleCFrom;
+	int m_TeleType;
 	int m_TuneZone;
 };
 

@@ -69,7 +69,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_TeleGunTeleport = false;
 	m_IsBlueTeleGunTeleport = false;
-	m_TeleBulletTeleport = false;
+	m_TeleBulletTeleport = ProjTele::NONE;
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -2317,11 +2317,11 @@ void CCharacter::DDRacePostCoreTick()
 		m_IsBlueTeleGunTeleport = false;
 	}
 
-	if(m_TeleBulletTeleport)
+	if(m_TeleBulletTeleport != ProjTele::NONE)
 	{
-		if(TeleToCheckpoint(true))
+		if(TeleToCheckpoint(m_TeleBulletTeleport == ProjTele::CFROM_EVIL))
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
-		m_TeleBulletTeleport = false;
+		m_TeleBulletTeleport = ProjTele::NONE;
 	}
 
 	HandleBroadcast();

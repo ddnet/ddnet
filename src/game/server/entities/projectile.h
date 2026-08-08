@@ -21,7 +21,7 @@ public:
 		vec2 InitDir,
 		int Layer = 0,
 		int Number = 0,
-		bool TeleCFrom = false);
+		int TeleType = ProjTele::NONE);
 
 	vec2 GetPos(float Time);
 
@@ -49,7 +49,7 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
-	bool m_TeleCFrom;
+	int m_TeleType;
 	int m_TuneZone;
 	bool m_BelongsToPracticeTeam;
 	int m_DDRaceTeam;
