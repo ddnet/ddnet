@@ -3206,7 +3206,9 @@ int CServer::Run()
 	}
 
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
-	m_pRegister = CreateRegister(&g_Config, m_pConsole, m_pEngine, m_pHttp, g_Config.m_SvRegisterPort > 0 ? g_Config.m_SvRegisterPort : this->Port(), m_NetServer.GetGlobalToken());
+	// The socket types include NETTYPE_WEBSOCKET_TLS if websockets are served
+	// with TLS, which determines the advertised websocket scheme (ws or wss).
+	m_pRegister = CreateRegister(&g_Config, m_pConsole, m_pEngine, m_pHttp, net_socket_type(m_NetServer.Socket()), g_Config.m_SvRegisterPort > 0 ? g_Config.m_SvRegisterPort : this->Port(), m_NetServer.GetGlobalToken());
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 

@@ -213,12 +213,13 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 void net_websocket_set_secure(bool secure);
 
 /**
- * Resets the websocket scheme to the default, which is determined by the protocol
- * of the page, see `other/emscripten/index.html`.
+ * Returns whether the default websocket scheme is `wss`, i.e. whether the page
+ * was loaded over `https`. In that case, browsers block insecure `ws`
+ * connections as mixed content.
  *
  * @ingroup Network-General
  */
-void net_websocket_reset_secure();
+bool net_websocket_secure_default();
 #endif
 
 /**
@@ -264,8 +265,9 @@ void net_stats(NETSTATS *stats);
  *
  * @param sock Socket whose type should be determined.
  *
- * @return The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6`, `NETTYPE_WEBSOCKET_IPV4`
- *         and `NETTYPE_WEBSOCKET_IPV6`, or `NETTYPE_INVALID` if the socket is invalid.
+ * @return The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6`, `NETTYPE_WEBSOCKET_IPV4`,
+ *         `NETTYPE_WEBSOCKET_IPV6` and `NETTYPE_WEBSOCKET_TLS`, or `NETTYPE_INVALID` if the
+ *         socket is invalid.
  */
 int net_socket_type(NETSOCKET sock);
 

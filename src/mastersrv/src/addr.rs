@@ -11,6 +11,8 @@ pub enum Protocol {
     V5,
     V6,
     V7,
+    Ws,
+    Wss,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -41,7 +43,8 @@ pub struct UnknownProtocol;
 
 impl fmt::Display for UnknownProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        "protocol must be one of tw-0.5+udp, tw-0.6+udp or tw-0.7+udp".fmt(f)
+        "protocol must be one of tw-0.5+udp, tw-0.6+udp, tw-0.7+udp, ddnet-20+ws or ddnet-20+wss"
+            .fmt(f)
     }
 }
 
@@ -53,6 +56,8 @@ impl FromStr for Protocol {
             "tw-0.5+udp" => V5,
             "tw-0.6+udp" => V6,
             "tw-0.7+udp" => V7,
+            "ddnet-20+ws" => Ws,
+            "ddnet-20+wss" => Wss,
             _ => return Err(UnknownProtocol),
         })
     }
@@ -73,7 +78,9 @@ impl<'de> serde::de::Visitor<'de> for ProtocolVisitor {
     type Value = Protocol;
 
     fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str("one of \"tw-0.5+udp\", \"tw-0.6+udp\" and \"tw-0.7+udp\"")
+        f.write_str(
+            "one of \"tw-0.5+udp\", \"tw-0.6+udp\", \"tw-0.7+udp\", \"ddnet-20+ws\" and \"ddnet-20+wss\"",
+        )
     }
     fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Protocol, E> {
         let invalid_value = || E::invalid_value(serde::de::Unexpected::Str(v), &self);
@@ -97,6 +104,8 @@ impl Protocol {
             V5 => "tw-0.5+udp",
             V6 => "tw-0.6+udp",
             V7 => "tw-0.7+udp",
+            Ws => "ddnet-20+ws",
+            Wss => "ddnet-20+wss",
         }
     }
 }
@@ -302,6 +311,33 @@ mod test {
                 protocol: Protocol::V6,
             }
         );
+        assert_eq!(
+            Addr::from_str("ddnet-20+ws://127.0.0.1:8303").unwrap(),
+            Addr {
+                ip: IpAddr::from_str("127.0.0.1").unwrap(),
+                port: 8303,
+                protocol: Protocol::Ws,
+            }
+        );
+        assert_eq!(
+            Addr::from_str("ddnet-20+wss://[::1]:8303").unwrap(),
+            Addr {
+                ip: IpAddr::from_str("::1").unwrap(),
+                port: 8303,
+                protocol: Protocol::Wss,
+            }
+        );
+    }
+
+    #[test]
+    fn addr_round_trip() {
+        for addr in [
+            "tw-0.6+udp://127.0.0.1:8303",
+            "ddnet-20+ws://127.0.0.1:8303",
+            "ddnet-20+wss://[::1]:8303",
+        ] {
+            assert_eq!(format!("{}", Addr::from_str(addr).unwrap()), addr);
+        }
     }
 
     #[test]
@@ -311,6 +347,20 @@ mod test {
             RegisterAddr {
                 port: 8303,
                 protocol: Protocol::V6,
+            }
+        );
+        assert_eq!(
+            RegisterAddr::from_str("ddnet-20+ws://connecting-address.invalid:8303").unwrap(),
+            RegisterAddr {
+                port: 8303,
+                protocol: Protocol::Ws,
+            }
+        );
+        assert_eq!(
+            RegisterAddr::from_str("ddnet-20+wss://connecting-address.invalid:8303").unwrap(),
+            RegisterAddr {
+                port: 8303,
+                protocol: Protocol::Wss,
             }
         );
     }

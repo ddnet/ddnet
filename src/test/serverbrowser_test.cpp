@@ -2,6 +2,7 @@
 
 #include <base/net.h>
 
+#include <engine/client/serverbrowser.h>
 #include <engine/client/serverbrowser_ping_cache.h>
 #include <engine/console.h>
 #include <engine/engine.h>
@@ -11,6 +12,45 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+
+TEST(ServerBrowser, CanConnectAddress)
+{
+	NETADDR Udp6, Udp7, Ws4, Ws6, Wss4;
+	ASSERT_FALSE(net_addr_from_url(&Udp6, "tw-0.6+udp://127.0.0.1:8303", nullptr, 0));
+	ASSERT_FALSE(net_addr_from_url(&Udp7, "tw-0.7+udp://127.0.0.1:8303", nullptr, 0));
+	ASSERT_FALSE(net_addr_from_url(&Ws4, "ddnet-20+ws://127.0.0.1:8303", nullptr, 0));
+	ASSERT_FALSE(net_addr_from_url(&Ws6, "ddnet-20+ws://[::1]:8303", nullptr, 0));
+	ASSERT_FALSE(net_addr_from_url(&Wss4, "ddnet-20+wss://127.0.0.1:8303", nullptr, 0));
+
+	static const int UDP_ONLY = NETTYPE_IPV4 | NETTYPE_IPV6;
+	static const int WITH_WEBSOCKETS = UDP_ONLY | NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6;
+
+	// Native client without websocket support.
+	EXPECT_TRUE(ServerBrowserCanConnectAddress(Udp6, UDP_ONLY, false, false));
+	EXPECT_TRUE(ServerBrowserCanConnectAddress(Udp7, UDP_ONLY, false, false));
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Ws4, UDP_ONLY, false, false));
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Wss4, UDP_ONLY, false, false));
+
+	// Native client with websocket support; the address family must match.
+	EXPECT_TRUE(ServerBrowserCanConnectAddress(Ws4, WITH_WEBSOCKETS, false, false));
+	EXPECT_TRUE(ServerBrowserCanConnectAddress(Ws6, WITH_WEBSOCKETS, false, false));
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Ws6, UDP_ONLY | NETTYPE_WEBSOCKET_IPV4, false, false));
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Ws4, UDP_ONLY | NETTYPE_WEBSOCKET_IPV6, false, false));
+	// Secure websockets are not supported by the native client.
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Wss4, WITH_WEBSOCKETS, false, false));
+
+	// Browser client on an http page.
+	EXPECT_TRUE(ServerBrowserCanConnectAddress(Ws4, 0, true, false));
+	EXPECT_TRUE(ServerBrowserCanConnectAddress(Ws6, 0, true, false));
+	EXPECT_TRUE(ServerBrowserCanConnectAddress(Wss4, 0, true, false));
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Udp6, 0, true, false));
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Udp7, 0, true, false));
+
+	// Browser client on an https page blocks insecure websockets as mixed content.
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Ws4, 0, true, true));
+	EXPECT_TRUE(ServerBrowserCanConnectAddress(Wss4, 0, true, true));
+	EXPECT_FALSE(ServerBrowserCanConnectAddress(Udp6, 0, true, true));
+}
 
 TEST(ServerBrowser, PingCache)
 {

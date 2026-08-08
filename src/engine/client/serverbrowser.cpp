@@ -9,6 +9,7 @@
 #include <base/hash_ctxt.h>
 #include <base/log.h>
 #include <base/mem.h>
+#include <base/net.h>
 #include <base/secure.h>
 #include <base/str.h>
 #include <base/time.h>
@@ -86,9 +87,10 @@ CServerBrowser::~CServerBrowser()
 	m_pPingCache = nullptr;
 }
 
-void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
+void CServerBrowser::SetBaseInfo(class CNetClient *pClient, class CNetClient *pConnectNetClient, const char *pNetVersion)
 {
 	m_pNetClient = pClient;
+	m_pConnectNetClient = pConnectNetClient;
 	str_copy(m_aNetVersion, pNetVersion);
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
@@ -432,6 +434,56 @@ bool CServerBrowser::SortCompareFavoritesNumPlayersAndPing(int Index1, int Index
 	return IsFavorite1 && !IsFavorite2;
 }
 
+bool ServerBrowserCanConnectAddress(const NETADDR &Addr, int NetTypes, bool WebsocketOnly, bool SecureWebsocketOnly)
+{
+	if((Addr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) == 0)
+	{
+		// Non-websocket transports are only usable by native clients.
+		return !WebsocketOnly;
+	}
+	if((Addr.type & NETTYPE_WEBSOCKET_TLS) != 0)
+	{
+		// Secure websockets are only supported by the browser client.
+		return WebsocketOnly;
+	}
+	if(SecureWebsocketOnly)
+	{
+		return false;
+	}
+	if(WebsocketOnly)
+	{
+		// The browser tunnels websockets of both address families.
+		return true;
+	}
+	// The native client can only use websockets of an address family whose
+	// websocket socket it actually bound.
+	return (NetTypes & Addr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) != 0;
+}
+
+bool CServerBrowser::CompatibleAddress(const NETADDR &Addr) const
+{
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	// The browser can only connect via websockets. If the client itself was
+	// loaded over https, insecure websocket connections are additionally
+	// blocked as mixed content.
+	return ServerBrowserCanConnectAddress(Addr, 0, true, net_websocket_secure_default());
+#else
+	return ServerBrowserCanConnectAddress(Addr, m_pConnectNetClient->NetType(), false, false);
+#endif
+}
+
+bool CServerBrowser::HasCompatibleAddress(const CServerInfo &Info) const
+{
+	for(int i = 0; i < Info.m_NumAddresses; i++)
+	{
+		if(CompatibleAddress(Info.m_aAddresses[i]))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void CServerBrowser::Filter()
 {
 	m_NumSortedPlayers = 0;
@@ -465,6 +517,11 @@ void CServerBrowser::Filter()
 		else if(g_Config.m_BrFilterUnfinishedMap && Info.m_HasRank == CServerInfo::RANK_RANKED)
 			Filtered = true;
 		else if(g_Config.m_BrFilterLogin && Info.m_RequiresLogin)
+			Filtered = true;
+		// LAN servers were discovered over a connection that can also join
+		// them and favorited servers are explicitly user-curated, so neither
+		// is filtered by protocol compatibility.
+		else if(g_Config.m_BrFilterCompatibleProtocols && m_ServerlistType != IServerBrowser::TYPE_LAN && Info.m_Favorite == TRISTATE::NONE && !HasCompatibleAddress(Info))
 			Filtered = true;
 		else
 		{
@@ -642,6 +699,7 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterCountry << 14;
 	i |= g_Config.m_BrFilterConnectingPlayers << 15;
 	i |= g_Config.m_BrFilterLogin << 16;
+	i |= g_Config.m_BrFilterCompatibleProtocols << 17;
 	return i;
 }
 
