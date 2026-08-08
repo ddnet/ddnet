@@ -359,7 +359,6 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 					{
 						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
 						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number = IsTeleTileCheckpoint(Tile.m_Index) ? Editor()->m_TeleCheckpointNumber : Editor()->m_TeleNumber;
-						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Flags = Tile.m_Flags;
 					}
 				}
 			}
@@ -617,10 +616,10 @@ void CLayerTiles::BrushFlipX()
 {
 	BrushFlipXImpl(m_pTiles);
 
-	if(m_HasSpeedup || m_HasTune)
+	if(m_HasTele || m_HasSpeedup || m_HasTune)
 		return;
 
-	bool Rotate = !(m_HasGame || m_HasFront || m_HasSwitch || m_HasTele) || Editor()->IsAllowPlaceUnusedTiles();
+	bool Rotate = !(m_HasGame || m_HasFront || m_HasSwitch) || Editor()->IsAllowPlaceUnusedTiles();
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
@@ -633,10 +632,10 @@ void CLayerTiles::BrushFlipY()
 {
 	BrushFlipYImpl(m_pTiles);
 
-	if(m_HasSpeedup || m_HasTune)
+	if(m_HasTele || m_HasSpeedup || m_HasTune)
 		return;
 
-	bool Rotate = !(m_HasGame || m_HasFront || m_HasSwitch || m_HasTele) || Editor()->IsAllowPlaceUnusedTiles();
+	bool Rotate = !(m_HasGame || m_HasFront || m_HasSwitch) || Editor()->IsAllowPlaceUnusedTiles();
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))

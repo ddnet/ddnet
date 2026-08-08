@@ -68,8 +68,7 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELECHECK ||
 		Index == TILE_TELECHECKOUT ||
 		Index == TILE_TELECHECKIN ||
-		Index == TILE_TELECHECKINEVIL ||
-		Index == ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM);
+		Index == TILE_TELECHECKINEVIL);
 }
 
 bool IsTeleTileCheckpoint(int Index)
@@ -82,19 +81,13 @@ bool IsTeleTileNumberUsed(int Index, bool Checkpoint)
 	if(Checkpoint)
 		return IsTeleTileCheckpoint(Index);
 	return !IsTeleTileCheckpoint(Index) && Index != TILE_TELECHECKIN &&
-	       Index != TILE_TELECHECKINEVIL && Index != ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM;
+	       Index != TILE_TELECHECKINEVIL;
 }
 
 bool IsTeleTileNumberUsedAny(int Index)
 {
 	return Index != TILE_TELECHECKIN &&
-	       Index != TILE_TELECHECKINEVIL &&
-	       Index != ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM;
-}
-
-bool IsTeleTileFlagsUsed(int Index)
-{
-	return Index == ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM;
+	       Index != TILE_TELECHECKINEVIL;
 }
 
 bool IsValidSpeedupTile(int Index)
@@ -155,7 +148,8 @@ bool IsValidEntity(int Index)
 		(Index >= ENTITY_SPAWN && Index <= ENTITY_LASER_O_FAST) ||
 		(Index >= ENTITY_PLASMAE && Index <= ENTITY_ARMOR_LASER) ||
 		(Index >= ENTITY_DRAGGER_WEAK && Index <= ENTITY_DRAGGER_STRONG_NW) ||
-		Index == ENTITY_DOOR);
+		Index == ENTITY_DOOR ||
+		Index == ENTITY_BULLET_TELEPORT_CFROM);
 }
 
 bool IsRotatableTile(int Index)

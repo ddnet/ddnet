@@ -230,9 +230,10 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			Dir = 3;
 		float Deg = Dir * (pi / 2);
 
-		bool Freeze = Index != ENTITY_BULLET_TELEPORT_CFROM;
-		bool Explosive = Index == ENTITY_CRAZY_SHOTGUN_EX;
-		int SoundImpact = (Explosive && g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1;
+		const bool Explosive = Index == ENTITY_CRAZY_SHOTGUN_EX;
+		const int SoundImpact = (Explosive && g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1;
+		const bool TeleCFrom = Index == ENTITY_BULLET_TELEPORT_CFROM;
+		const bool Freeze = !TeleCFrom;
 
 		CProjectile *pBullet = new CProjectile(
 			&GameServer()->m_World,
@@ -246,7 +247,8 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			SoundImpact, //SoundImpact
 			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
-			Number);
+			Number,
+			TeleCFrom);
 		pBullet->SetBouncing(2 - (Dir % 2));
 	}
 

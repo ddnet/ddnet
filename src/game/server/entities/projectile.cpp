@@ -24,7 +24,8 @@ CProjectile::CProjectile(
 	int SoundImpact,
 	vec2 InitDir,
 	int Layer,
-	int Number) :
+	int Number,
+	bool TeleCFrom) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, true)
 {
 	m_Type = Type;
@@ -40,7 +41,7 @@ CProjectile::CProjectile(
 	m_Number = Number;
 	m_Bouncing = 0;
 	m_Freeze = Freeze;
-	m_TeleCFrom = m_Layer == LAYER_TELE;
+	m_TeleCFrom = TeleCFrom;
 
 	m_InitDir = InitDir;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
@@ -145,7 +146,7 @@ void CProjectile::Tick()
 					(m_Owner != -1) ? TeamMask : CClientMask().set());
 			}
 		}
-		else if(m_Freeze)
+		else if(m_Freeze || m_TeleCFrom)
 		{
 			CEntity *apEnts[MAX_CLIENTS];
 			int Num = GameWorld()->FindEntities(CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
@@ -153,19 +154,11 @@ void CProjectile::Tick()
 			{
 				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
 				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])))
-					pChr->Freeze();
-			}
-		}
-		else if(m_TeleCFrom)
-		{
-			CEntity *apEnts[MAX_CLIENTS];
-			int Num = GameWorld()->FindEntities(CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-			for(int i = 0; i < Num; ++i)
-			{
-				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
-				if(pChr)
 				{
-					pChr->m_TeleBulletTeleport = true;
+					if(m_Freeze)
+						pChr->Freeze();
+					if(m_TeleCFrom)
+						pChr->m_TeleBulletTeleport = true;
 				}
 			}
 		}

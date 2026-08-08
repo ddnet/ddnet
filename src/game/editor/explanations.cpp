@@ -518,7 +518,7 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 			return "DOOR: Combined with LASER LENGTH creates doors. Doesn't allow to go through it (only with NINJA).";
 		break;
 	case ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM:
-		if(Layer == LAYER_TELE)
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "RED CHECKPOINT TELEPORT BULLET: Send tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are reset.";
 		break;
 	case TILE_TELE_GUN_ENABLE:

@@ -638,7 +638,6 @@ class CTeleTile
 public:
 	unsigned char m_Number;
 	unsigned char m_Type;
-	unsigned char m_Flags;
 };
 
 class CSpeedupTile
@@ -680,7 +679,6 @@ bool IsValidTeleTile(int Index);
 bool IsTeleTileCheckpoint(int Index); // Assumes that Index is a valid tele tile index
 bool IsTeleTileNumberUsed(int Index, bool Checkpoint); // Assumes that Index is a valid tele tile index
 bool IsTeleTileNumberUsedAny(int Index); // Does not check for checkpoint only
-bool IsTeleTileFlagsUsed(int Index); // Assumes that Index is a valid tele tile index
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
 bool IsSwitchTileFlagsUsed(int Index); // Assumes that Index is a valid switch tile index
