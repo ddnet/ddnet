@@ -42,7 +42,16 @@ CProjectile::CProjectile(
 	m_Freeze = Freeze;
 
 	m_InitDir = InitDir;
+
+	m_Lifetime = m_LifeSpan > 0 ? m_LifeSpan / Server()->TickSpeed() : m_LifeSpan;
+	m_CurPos = m_Pos;
+
+	m_Snap.m_CalculatedVel = false;
+	m_Snap.m_LastResetTick = Server()->Tick();
+	m_Snap.m_LastResetPos = Pos;
+
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
+	DetermineTuning();
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
@@ -57,31 +66,23 @@ void CProjectile::Reset()
 	m_MarkedForDestroy = true;
 }
 
+void CProjectile::DetermineTuning()
+{
+	// Fetch current tunings
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	CTuningParams *pZone = GameWorld()->GetTuning(m_TuneZone);
+	CTuningParams *pTunings = pOwnerChar ? CTuningParams::ApplyLockedTunings(pZone, pOwnerChar->m_LockedTunings) : pZone;
+	GetTunings(pTunings, &m_Curvature, &m_Speed);
+
+	// Backwards compatible
+	float Curvature, Speed;
+	GetTunings(GameWorld()->GlobalTuning(), &Curvature, &Speed);
+	m_DefaultTuning = Curvature == m_Curvature && Speed == m_Speed;
+}
+
 vec2 CProjectile::GetPos(float Time)
 {
-	float Curvature = 0;
-	float Speed = 0;
-	CTuningParams *pTuning = GetTuning(m_TuneZone);
-
-	switch(m_Type)
-	{
-	case WEAPON_GRENADE:
-		Curvature = pTuning->m_GrenadeCurvature;
-		Speed = pTuning->m_GrenadeSpeed;
-		break;
-
-	case WEAPON_SHOTGUN:
-		Curvature = pTuning->m_ShotgunCurvature;
-		Speed = pTuning->m_ShotgunSpeed;
-		break;
-
-	case WEAPON_GUN:
-		Curvature = pTuning->m_GunCurvature;
-		Speed = pTuning->m_GunSpeed;
-		break;
-	}
-
-	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
+	return CalcPos(m_Pos, m_Direction, m_Curvature, m_Speed, Time);
 }
 
 void CProjectile::Tick()
@@ -89,10 +90,10 @@ void CProjectile::Tick()
 	float Pt = (Server()->Tick() - m_StartTick - 1) / (float)Server()->TickSpeed();
 	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
 	vec2 PrevPos = GetPos(Pt);
-	vec2 CurPos = GetPos(Ct);
+	m_CurPos = GetPos(Ct);
 	vec2 ColPos;
 	vec2 NewPos;
-	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
+	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, m_CurPos, &ColPos, &NewPos);
 	CCharacter *pOwnerChar = nullptr;
 
 	if(m_Owner >= 0)
@@ -127,7 +128,7 @@ void CProjectile::Tick()
 		return;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(m_CurPos)) && !IsWeaponCollide)
 	{
 		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
@@ -147,7 +148,7 @@ void CProjectile::Tick()
 		else if(m_Freeze)
 		{
 			CEntity *apEnts[MAX_CLIENTS];
-			int Num = GameWorld()->FindEntities(CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			int Num = GameWorld()->FindEntities(m_CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; ++i)
 			{
 				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
@@ -188,7 +189,7 @@ void CProjectile::Tick()
 				if(!Collide)
 					Found = GetNearestAirPosPlayer(pTargetChr ? pTargetChr->m_Pos : ColPos, &PossiblePos);
 				else
-					Found = GetNearestAirPos(NewPos, CurPos, &PossiblePos);
+					Found = GetNearestAirPos(NewPos, m_CurPos, &PossiblePos);
 
 				if(Found)
 				{
@@ -215,7 +216,7 @@ void CProjectile::Tick()
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
+			GameServer()->CreateDamageInd(m_CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
 			m_MarkedForDestroy = true;
 			return;
 		}
@@ -250,7 +251,7 @@ void CProjectile::Tick()
 		return;
 	}
 
-	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
+	int x = GameServer()->Collision()->GetIndex(PrevPos, m_CurPos);
 	int z;
 	if(g_Config.m_SvOldTeleportWeapons)
 		z = GameServer()->Collision()->IsTeleport(x);
@@ -277,6 +278,21 @@ CNetObj_Projectile CProjectile::NetInfoVanilla() const
 	Result.m_VelX = (int)(m_Direction.x * 100.0f);
 	Result.m_VelY = (int)(m_Direction.y * 100.0f);
 	Result.m_StartTick = m_StartTick;
+	Result.m_Type = m_Type;
+	return Result;
+}
+
+CNetObj_Projectile CProjectile::NetInfoBackwardsCompatible()
+{
+	if(!m_Snap.m_CalculatedVel)
+		CalculateVel();
+
+	CNetObj_Projectile Result = {};
+	Result.m_X = (int)m_Snap.m_LastResetPos.x;
+	Result.m_Y = (int)m_Snap.m_LastResetPos.y;
+	Result.m_VelX = (int)(m_Snap.m_Vel.x);
+	Result.m_VelY = (int)(m_Snap.m_Vel.y);
+	Result.m_StartTick = m_Snap.m_LastResetTick;
 	Result.m_Type = m_Type;
 	return Result;
 }
@@ -326,7 +342,7 @@ CNetObj_DDNetProjectile CProjectile::NetInfo() const
 {
 	CNetObj_DDNetProjectile Result = {};
 
-	int Flags = 0;
+	int Flags = PROJECTILEFLAG_HAS_TUNEPARAMS;
 	if(m_Bouncing & 1)
 	{
 		Flags |= PROJECTILEFLAG_BOUNCE_HORIZONTAL;
@@ -364,6 +380,9 @@ CNetObj_DDNetProjectile CProjectile::NetInfo() const
 	Result.m_SwitchNumber = m_Number;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_Flags = Flags;
+	Result.m_Curvature = round_to_int(m_Curvature * 100.f);
+	Result.m_Speed = round_to_int(m_Speed * 100.f);
+	Result.m_Lifetime = round_to_int(m_Lifetime * 100.f);
 	return Result;
 }
 
@@ -394,6 +413,12 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !TeamMask.test(SnappingClient))
 		return;
+
+	if(SnappingClientVersion < VERSION_DDNET_TUNELOCK && !IsDefaultTuning())
+	{
+		Server()->SnapNewItem(GetId().value(), NetInfoBackwardsCompatible());
+		return;
+	}
 
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
@@ -439,4 +464,57 @@ bool CProjectile::CanCollide(int ClientId)
 void CProjectile::SetBouncing(int Value)
 {
 	m_Bouncing = Value;
+}
+
+void CProjectile::TickDeferred()
+{
+	if(Server()->Tick() % 2 == 1)
+	{
+		m_Snap.m_LastResetPos = m_CurPos;
+		m_Snap.m_LastResetTick = Server()->Tick();
+	}
+	m_Snap.m_CalculatedVel = false;
+}
+
+void CProjectile::CalculateVel()
+{
+	float Curvature, Speed;
+	GetTunings(GameWorld()->GlobalTuning(), &Curvature, &Speed);
+
+	const int TickDiff = Server()->Tick() - m_Snap.m_LastResetTick;
+	float Time = TickDiff / (float)Server()->TickSpeed();
+	if(TickDiff > 0)
+	{
+		m_Snap.m_Vel.x = ((m_CurPos.x - m_Snap.m_LastResetPos.x) / Time / Speed) * 100;
+		m_Snap.m_Vel.y = ((m_CurPos.y - m_Snap.m_LastResetPos.y) / Time / Speed - Time * Speed * Curvature / 10000) * 100;
+	}
+	else
+	{
+		m_Snap.m_Vel = ivec2(round_to_int(m_Direction.x * 100), round_to_int(m_Direction.y * 100));
+	}
+
+	m_Snap.m_CalculatedVel = true;
+}
+
+void CProjectile::GetTunings(CTuningParams *pTuning, float *pCurvature, float *pSpeed) const
+{
+	*pCurvature = 0;
+	*pSpeed = 0;
+	switch(m_Type)
+	{
+	case WEAPON_GRENADE:
+		*pCurvature = pTuning->m_GrenadeCurvature;
+		*pSpeed = pTuning->m_GrenadeSpeed;
+		break;
+
+	case WEAPON_SHOTGUN:
+		*pCurvature = pTuning->m_ShotgunCurvature;
+		*pSpeed = pTuning->m_ShotgunSpeed;
+		break;
+
+	case WEAPON_GUN:
+		*pCurvature = pTuning->m_GunCurvature;
+		*pSpeed = pTuning->m_GunSpeed;
+		break;
+	}
 }

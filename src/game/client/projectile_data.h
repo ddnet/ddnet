@@ -26,11 +26,16 @@ public:
 	int m_SwitchNumber;
 	// TuneZone is introduced locally
 	int m_TuneZone;
+	float m_Curvature = 0.0f;
+	float m_Speed = 0.0f;
+	float m_Lifetime = 0.0f;
 };
 
 CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, class CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx);
 CProjectileData ExtractProjectileInfoDDRace(const CNetObj_DDRaceProjectile *pProj, class CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx);
-CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj);
+CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj, class CGameWorld *pGameWorld);
+
+void GetProjectileTunings(CProjectileData *pData, class CGameWorld *pGameWorld);
 
 void DemoObjectRemoveExtraProjectileInfo(CNetObj_Projectile *pProj);
 

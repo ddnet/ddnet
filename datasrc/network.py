@@ -1,5 +1,5 @@
 from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange
-from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick, NetTickStrict
+from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick, NetTickStrict, NetTuningParams
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM", "SPEC_CAM", "INPUT_ABSOLUTE", "INPUT_MANUAL"]
@@ -32,10 +32,10 @@ LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 	"EXPLOSIVE", "FREEZE",
 ]
 ProjectileFlags = [
-	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL",
+	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL", "HAS_TUNEPARAMS"
 ]
 LaserFlags = [
-	"NO_PREDICT",
+	"NO_PREDICT", "HAS_TUNEPARAMS"
 ]
 
 PickupFlags = [
@@ -54,8 +54,14 @@ Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
 Teams = ["ALL", "SPECTATORS", "RED", "BLUE", "WHISPER_SEND", "WHISPER_RECV"]
 
+NumTunings = 47 # CTuningParams::Num(), game/tuning.h, game/tuning_params.h
+
 RawHeader = '''
+#include <base/mem.h>
+
 #include <engine/shared/teehistorian_ex.h>
+
+#include <game/tuning.h>
 
 enum
 {
@@ -296,6 +302,10 @@ Objects = [
 		NetIntAny("m_SwitchNumber", default=-1),
 		NetIntAny("m_Subtype", default=-1),
 		NetIntAny("m_Flags", default=0),
+		NetIntAny("m_ShotgunStrength", default=0),
+		NetIntAny("m_BounceNum", default=0),
+		NetIntAny("m_BounceCost", default=0),
+		NetIntAny("m_BounceDelay", default=0),
 	]),
 
 	NetObjectEx("DDNetProjectile", "ddnet-projectile@netobj.ddnet.tw", [
@@ -309,6 +319,9 @@ Objects = [
 		NetIntAny("m_SwitchNumber"),
 		NetIntRange("m_TuneZone", 0, 'TuneZone::NUM-1'),
 		NetIntAny("m_Flags"),
+		NetIntAny("m_Curvature", default=0),
+		NetIntAny("m_Speed", default=0),
+		NetIntAny("m_Lifetime", default=0),
 	]),
 
 	NetObjectEx("DDNetPickup", "pickup@netobj.ddnet.tw", [
@@ -330,6 +343,10 @@ Objects = [
 
 	NetObjectEx("SpectatorCount", "spectator-count@netobj.ddnet.org", [
 		NetIntRange("m_NumSpectators", 0, 'max_int'),
+	]),
+
+	NetObjectEx("CharacterTuning", "character-tuning@netobj.ddnet.tw", [
+		NetTuningParams("m_Values", NumTunings),
 	]),
 
 	## Events
