@@ -201,6 +201,19 @@ void net_stats(NETSTATS *stats);
 int net_socket_type(NETSOCKET sock);
 
 /**
+ * Retrieve the websocket transport handle of a socket, for use with the
+ * functions in `engine/shared/websockets.h`.
+ *
+ * @ingroup Network-General
+ *
+ * @param sock Socket whose websocket handle should be retrieved.
+ * @param nettype `NETTYPE_WEBSOCKET_IPV4` or `NETTYPE_WEBSOCKET_IPV6`.
+ *
+ * @return The websocket handle, or `-1` if the socket has none of the given type.
+ */
+int net_socket_websocket(NETSOCKET sock, int nettype);
+
+/**
  * Make a socket not block on operations.
  *
  * @ingroup Network-General

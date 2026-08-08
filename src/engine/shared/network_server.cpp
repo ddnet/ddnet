@@ -14,6 +14,7 @@
 #include <engine/shared/compression.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/websockets.h>
 
 const int g_DummyMapCrc = 0x6AF73DAF;
 const unsigned char g_aDummyMapData[] = {
@@ -220,17 +221,22 @@ bool CNetServer::Connlimit(NETADDR Addr)
 
 int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth, bool Sixup, SECURITY_TOKEN Token)
 {
+	const auto &&RejectClient = [&](const char *pMsg) {
+		if(Addr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6))
+			websocket_close(net_socket_websocket(m_Socket, Addr.type), &Addr, pMsg);
+		else
+			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, pMsg, str_length(pMsg) + 1, SecurityToken, Sixup);
+	};
+
 	if(Sixup && !g_Config.m_SvSixup)
 	{
-		const char aMsg[] = "0.7 connections are not accepted at this time";
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aMsg, sizeof(aMsg), SecurityToken, Sixup);
+		RejectClient("0.7 connections are not accepted at this time");
 		return -1; // failed to add client?
 	}
 
 	if(Connlimit(Addr))
 	{
-		const char aMsg[] = "Too many connections in a short time";
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aMsg, sizeof(aMsg), SecurityToken, Sixup);
+		RejectClient("Too many connections in a short time");
 		return -1; // failed to add client
 	}
 
@@ -239,7 +245,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIp);
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, SecurityToken, Sixup);
+		RejectClient(aBuf);
 		return -1; // failed to add client
 	}
 
@@ -255,9 +261,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 
 	if(Slot == -1)
 	{
-		const char aFullMsg[] = "This server is full";
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aFullMsg, sizeof(aFullMsg), SecurityToken, Sixup);
-
+		RejectClient("This server is full");
 		return -1; // failed to add client
 	}
 
@@ -599,6 +603,62 @@ static bool IsDDNetControlMsg(const CNetPacketConstruct *pPacket)
 	return false;
 }
 
+int CNetServer::RecvWebsocket(CNetChunk *pChunk)
+{
+	websocket_event Event;
+	int Handle;
+	while(websocket_recv_next(m_Socket, &Event, &Handle))
+	{
+		if(Event.type == WEBSOCKET_EVENT_OPEN)
+		{
+			char aBanMsg[128];
+			if(NetBan() && NetBan()->IsBanned(&Event.addr, aBanMsg, sizeof(aBanMsg)))
+				websocket_close(Handle, &Event.addr, aBanMsg);
+			else
+				TryAcceptClient(Event.addr, NET_SECURITY_TOKEN_UNSUPPORTED);
+		}
+		else if(Event.type == WEBSOCKET_EVENT_MESSAGE)
+		{
+			const int Slot = GetClientSlot(Event.addr);
+			if(Slot == -1)
+			{
+				// Message from a connection without client slot, e.g.
+				// arriving after the client was dropped
+				websocket_close(Handle, &Event.addr, nullptr);
+				continue;
+			}
+			m_aSlots[Slot].m_Connection.WebsocketOnRecv();
+			if(Event.size == 0) // keepalive
+				continue;
+			const int Flags = Event.data[0];
+			if((Flags & ~NET_CHUNKFLAG_VITAL) != 0 || Event.size - 1 > (size_t)NET_MAX_PAYLOAD)
+			{
+				// Drop closes the websocket, carrying the reason in the
+				// close frame; no close event comes back for it
+				Drop(Slot, "Invalid message");
+				continue;
+			}
+			mem_copy(m_RecvBuffer.m_aChunkData, &Event.data[1], Event.size - 1);
+			pChunk->m_ClientId = Slot;
+			pChunk->m_Address = Event.addr;
+			pChunk->m_Flags = Flags;
+			pChunk->m_DataSize = Event.size - 1;
+			pChunk->m_pData = m_RecvBuffer.m_aChunkData;
+			return 1;
+		}
+		else if(Event.type == WEBSOCKET_EVENT_CLOSE)
+		{
+			const int Slot = GetClientSlot(Event.addr);
+			if(Slot != -1)
+			{
+				m_aSlots[Slot].m_Connection.WebsocketOnClose(&Event.addr, Event.close_reason);
+				Drop(Slot, m_aSlots[Slot].m_Connection.ErrorString());
+			}
+		}
+	}
+	return 0;
+}
+
 /*
 	TODO: chopp up this function into smaller working parts
 */
@@ -617,7 +677,11 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 
 		// no more packets for now
 		if(Bytes <= 0)
+		{
+			if(RecvWebsocket(pChunk))
+				return 1;
 			break;
+		}
 
 		// check if we just should drop the packet
 		char aBuf[128];
@@ -715,6 +779,12 @@ int CNetServer::Send(CNetChunk *pChunk)
 
 	if(pChunk->m_Flags & NETSENDFLAG_CONNLESS)
 	{
+		if(pChunk->m_Address.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6))
+		{
+			// Websockets carry only connection-oriented chunks; server info is
+			// available to websocket clients from the HTTPS masterserver
+			return -1;
+		}
 		// send connectionless packet
 		CNetBase::SendPacketConnless(m_Socket, &pChunk->m_Address, pChunk->m_pData, pChunk->m_DataSize,
 			pChunk->m_Flags & NETSENDFLAG_EXTENDED, pChunk->m_aExtraData);
