@@ -638,7 +638,8 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	char aBuffer[128];
 	bool OnlySixup = true;
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
-	bool SecureWebsockets = false;
+	int ConnectWebsocketSecure = -1;
+	bool ConnectWebsocketSecureExplicit = false;
 #endif
 	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
@@ -649,24 +650,63 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 			continue;
 		}
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
-		// Emscripten tunnels all traffic through websockets, so websocket addresses are
-		// used like normal addresses and only their scheme is applied. The scheme is a
-		// single global setting and all addresses are connected to at once, so they must
-		// agree on it.
-		bool Secure = net_websocket_secure_default();
+		// The browser can only connect via websockets, so addresses that explicitly
+		// specify another transport are unusable. Addresses without a scheme are
+		// implicitly used via websocket.
+		if(str_find(aBuffer, "://") != nullptr && (NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) == 0)
+		{
+			log_error("client", "only websockets (ddnet-20+ws:// and ddnet-20+wss://) are supported by this client, ignoring '%s'", aBuffer);
+			continue;
+		}
+		// Emscripten tunnels all traffic through websockets, whose ws/wss scheme
+		// is a single global setting instead of a per-address one, so all connect
+		// addresses must agree on the scheme. Addresses with an explicit ws/wss
+		// scheme determine it; addresses without a scheme tunnel over either and
+		// only assume the page default as long as no explicit scheme was seen.
+		bool WebsocketSecure;
+		bool WebsocketSecureExplicit;
 		if((NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) != 0)
 		{
-			Secure = (NextAddr.type & NETTYPE_WEBSOCKET_TLS) != 0;
+			WebsocketSecure = (NextAddr.type & NETTYPE_WEBSOCKET_TLS) != 0;
+			WebsocketSecureExplicit = true;
+			if(!WebsocketSecure && net_websocket_secure_default())
+			{
+				log_warn("client", "insecure websocket address '%s' is likely blocked by the browser as mixed content on an https page", aBuffer);
+			}
 			const bool Ipv4 = (NextAddr.type & NETTYPE_WEBSOCKET_IPV4) != 0;
 			NextAddr.type &= ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6 | NETTYPE_WEBSOCKET_TLS);
 			NextAddr.type |= Ipv4 ? NETTYPE_IPV4 : NETTYPE_IPV6;
 		}
-		if(NumConnectAddrs != 0 && Secure != SecureWebsockets)
+		else
 		{
-			log_error("client", "connect addresses must all use the same websocket scheme, ignoring %s", aBuffer);
+			WebsocketSecure = net_websocket_secure_default();
+			WebsocketSecureExplicit = false;
+		}
+		if(ConnectWebsocketSecure == -1)
+		{
+			ConnectWebsocketSecure = (int)WebsocketSecure;
+			ConnectWebsocketSecureExplicit = WebsocketSecureExplicit;
+			net_websocket_set_secure(WebsocketSecure);
+		}
+		else if((bool)ConnectWebsocketSecure == WebsocketSecure)
+		{
+			ConnectWebsocketSecureExplicit = ConnectWebsocketSecureExplicit || WebsocketSecureExplicit;
+		}
+		else if(WebsocketSecureExplicit && !ConnectWebsocketSecureExplicit)
+		{
+			// The scheme so far was only assumed from the page default, so the
+			// explicit scheme takes over; already accepted schemeless addresses
+			// tunnel over the new scheme just as well.
+			ConnectWebsocketSecure = (int)WebsocketSecure;
+			ConnectWebsocketSecureExplicit = true;
+			net_websocket_set_secure(WebsocketSecure);
+		}
+		else if(WebsocketSecureExplicit)
+		{
+			log_error("client", "websocket scheme of '%s' conflicts with the previous connect addresses, ignoring it", aBuffer);
 			continue;
 		}
-		SecureWebsockets = Secure;
+		// else: schemeless address, tunnels over the already chosen scheme
 #else
 		if((NextAddr.type & NETTYPE_WEBSOCKET_TLS) != 0)
 		{
@@ -674,9 +714,9 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 			continue;
 		}
 		if((NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) != 0 &&
-			(m_aNetClient[CONN_MAIN].NetType() & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) == 0)
+			(m_aNetClient[CONN_MAIN].NetType() & NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) == 0)
 		{
-			log_error("client", "websockets (ddnet-20+ws://) are not supported by this client");
+			log_error("client", "websockets (ddnet-20+ws://) are not supported by this client for the address family of %s", aBuffer);
 			continue;
 		}
 #endif
@@ -716,10 +756,6 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		AddWarning(Warning);
 		return;
 	}
-
-#if defined(CONF_PLATFORM_EMSCRIPTEN)
-	net_websocket_set_secure(SecureWebsockets);
-#endif
 
 	m_ConnectionId = RandomUuid();
 	ServerInfoRequest();
@@ -3139,7 +3175,7 @@ void CClient::InitInterfaces()
 
 	m_DemoEditor.Init(&m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pConsole, m_pStorage);
 
-	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
+	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], &m_aNetClient[CONN_MAIN], m_pGameClient->NetVersion());
 
 #if defined(CONF_AUTOUPDATE)
 	m_Updater.Init();

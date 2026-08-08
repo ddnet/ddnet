@@ -475,6 +475,15 @@ int websocket_create(const NETADDR *bindaddr)
 	return first_free;
 }
 
+bool websocket_has_tls(int socket)
+{
+#if defined(LWS_WITH_TLS)
+	return contexts[socket].creation_info.ssl_cert_filepath != nullptr;
+#else
+	return false;
+#endif
+}
+
 void websocket_destroy(int socket)
 {
 	lws_context *context = websocket_context(socket);

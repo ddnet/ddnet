@@ -1047,6 +1047,10 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_WEBSOCKET_IPV4;
+			if(websocket_has_tls(socket))
+			{
+				sock->type |= NETTYPE_WEBSOCKET_TLS;
+			}
 			sock->web_ipv4sock = socket;
 		}
 	}
@@ -1094,6 +1098,10 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_WEBSOCKET_IPV6;
+			if(websocket_has_tls(socket))
+			{
+				sock->type |= NETTYPE_WEBSOCKET_TLS;
+			}
 			sock->web_ipv6sock = socket;
 		}
 	}

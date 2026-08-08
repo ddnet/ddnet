@@ -17,6 +17,14 @@
 
 typedef struct _json_value json_value;
 class CNetClient;
+
+// Returns whether a client can connect to `Addr`. `NetTypes` are the
+// `NETTYPE_*` flags of the client's connect socket. `WebsocketOnly` is set
+// when the client can only use websocket transports (browser client).
+// `SecureWebsocketOnly` is additionally set when insecure websockets are
+// unusable because the client was loaded over https and browsers block them
+// as mixed content.
+bool ServerBrowserCanConnectAddress(const NETADDR &Addr, int NetTypes, bool WebsocketOnly, bool SecureWebsocketOnly);
 class IConfigManager;
 class IConsole;
 class IEngine;
@@ -312,7 +320,7 @@ public:
 	void RequestCurrentServerWithRandomToken(const NETADDR &Addr, int *pBasicToken, int *pToken) const;
 	void SetCurrentServerPing(const NETADDR &Addr, int Ping);
 
-	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
+	void SetBaseInfo(class CNetClient *pClient, class CNetClient *pConnectNetClient, const char *pNetVersion);
 	void OnInit();
 
 	void QueueRequest(CServerEntry *pEntry);
@@ -322,6 +330,9 @@ public:
 
 private:
 	CNetClient *m_pNetClient = nullptr;
+	// The netclient used for joining servers, which decides protocol
+	// compatibility. `m_pNetClient` is the contact netclient for pings.
+	CNetClient *m_pConnectNetClient = nullptr;
 	IConfigManager *m_pConfigManager = nullptr;
 	IConsole *m_pConsole = nullptr;
 	IEngine *m_pEngine = nullptr;
@@ -390,6 +401,8 @@ private:
 	bool SortCompareFavoritesNumPlayersAndPing(int Index1, int Index2) const;
 
 	//
+	bool CompatibleAddress(const NETADDR &Addr) const;
+	bool HasCompatibleAddress(const CServerInfo &Info) const;
 	void Filter();
 	void Sort();
 	int SortHash() const;
