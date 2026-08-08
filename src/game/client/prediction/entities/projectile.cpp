@@ -209,7 +209,15 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
 	m_Id = Id;
 	m_Number = pProj->m_SwitchNumber;
-	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
+	m_Layer = LAYER_GAME;
+	if(pProj->m_TeleCFrom)
+	{
+		m_Layer = LAYER_TELE;
+	}
+	else if(m_Number > 0)
+	{
+		m_Layer = LAYER_SWITCH;
+	}
 }
 
 CProjectileData CProjectile::GetData() const
@@ -226,6 +234,7 @@ CProjectileData CProjectile::GetData() const
 	Result.m_Freeze = m_Freeze;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_SwitchNumber = m_Number;
+	Result.m_TeleCFrom = m_Layer == LAYER_TELE;
 	return Result;
 }
 

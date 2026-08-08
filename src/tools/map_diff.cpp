@@ -171,10 +171,10 @@ static bool Process(IStorage *pStorage, const char **pMapNames)
 		if(Flags & TILESLAYERFLAG_TELE)
 		{
 			Ok = DiffTileLayer<CTeleTile>(aMaps, pMapNames, aData, Width, Height, [&](const CTeleTile &Tile0, const CTeleTile &Tile1, int x, int y) {
-				if(Tile0.m_Number != Tile1.m_Number || Tile0.m_Type != Tile1.m_Type)
+				if(Tile0.m_Number != Tile1.m_Number || Tile0.m_Type != Tile1.m_Type || Tile0.m_Flags != Tile1.m_Flags)
 				{
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)",
-						aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile1.m_Number, Tile1.m_Type);
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d, flags: %d) != (number: %d, type: %d, flags: %d)",
+						aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile0.m_Flags, Tile1.m_Number, Tile1.m_Type, Tile1.m_Flags);
 				}
 			});
 		}

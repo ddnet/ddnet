@@ -109,6 +109,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 			STeleTileStateChange::SData Previous{
 				m_pTeleTile[TgtIndex].m_Number,
 				m_pTeleTile[TgtIndex].m_Type,
+				m_pTeleTile[TgtIndex].m_Flags,
 				m_pTiles[TgtIndex].m_Index};
 
 			if((Editor()->IsAllowPlaceUnusedTiles() || IsValidTeleTile(pTeleLayer->m_pTiles[SrcIndex].m_Index)) && pTeleLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
@@ -147,12 +148,20 @@ void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 				}
 
 				m_pTeleTile[TgtIndex].m_Type = pTeleLayer->m_pTiles[SrcIndex].m_Index;
+				m_pTeleTile[TgtIndex].m_Flags = pTeleLayer->m_pTiles[SrcIndex].m_Flags;
 				m_pTiles[TgtIndex].m_Index = pTeleLayer->m_pTiles[SrcIndex].m_Index;
+				m_pTiles[TgtIndex].m_Flags = pTeleLayer->m_pTiles[SrcIndex].m_Flags;
+
+				if(!IsTeleTileFlagsUsed(pTeleLayer->m_pTiles[SrcIndex].m_Index))
+				{
+					m_pTeleTile[TgtIndex].m_Flags = 0;
+				}
 			}
 			else
 			{
 				m_pTeleTile[TgtIndex].m_Number = 0;
 				m_pTeleTile[TgtIndex].m_Type = 0;
+				m_pTeleTile[TgtIndex].m_Flags = 0;
 				m_pTiles[TgtIndex].m_Index = 0;
 
 				if(pTeleLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
@@ -162,6 +171,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 			STeleTileStateChange::SData Current{
 				m_pTeleTile[TgtIndex].m_Number,
 				m_pTeleTile[TgtIndex].m_Type,
+				m_pTeleTile[TgtIndex].m_Flags,
 				m_pTiles[TgtIndex].m_Index};
 
 			RecordStateChange(fx, fy, Previous, Current);
@@ -211,6 +221,12 @@ void CLayerTele::BrushRotate(float Amount)
 			{
 				*pDst1 = pTempData1[y * m_Width + x];
 				*pDst2 = pTempData2[y * m_Width + x];
+				if(IsRotatableTile(pDst2->m_Index))
+				{
+					if(pDst2->m_Flags & TILEFLAG_ROTATE)
+						pDst2->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
+					pDst2->m_Flags ^= TILEFLAG_ROTATE;
+				}
 			}
 
 		std::swap(m_Width, m_Height);
@@ -260,6 +276,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			STeleTileStateChange::SData Previous{
 				m_pTeleTile[TgtIndex].m_Number,
 				m_pTeleTile[TgtIndex].m_Type,
+				m_pTeleTile[TgtIndex].m_Flags,
 				m_pTiles[TgtIndex].m_Index};
 
 			if(Empty || (!Editor()->IsAllowPlaceUnusedTiles() && !IsValidTeleTile((pLt->m_pTiles[SrcIndex]).m_Index)))
@@ -291,6 +308,11 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 						m_pTeleTile[TgtIndex].m_Number = Editor()->m_TeleCheckpointNumber;
 					else
 						m_pTeleTile[TgtIndex].m_Number = pLt->m_pTeleTile[SrcIndex].m_Number;
+
+					if(!IsTeleTileFlagsUsed(m_pTeleTile[TgtIndex].m_Type))
+						m_pTeleTile[TgtIndex].m_Flags = 0;
+					else
+						m_pTeleTile[TgtIndex].m_Flags = pLt->m_pTeleTile[SrcIndex].m_Flags;
 				}
 				else
 				{
@@ -303,6 +325,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			STeleTileStateChange::SData Current{
 				m_pTeleTile[TgtIndex].m_Number,
 				m_pTeleTile[TgtIndex].m_Type,
+				m_pTeleTile[TgtIndex].m_Flags,
 				m_pTiles[TgtIndex].m_Index};
 
 			RecordStateChange(fx, fy, Previous, Current);

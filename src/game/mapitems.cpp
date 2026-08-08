@@ -59,6 +59,7 @@ bool IsValidFrontTile(int Index)
 bool IsValidTeleTile(int Index)
 {
 	return (
+		Index == TILE_AIR ||
 		Index == TILE_TELEINEVIL ||
 		Index == TILE_TELEINWEAPON ||
 		Index == TILE_TELEINHOOK ||
@@ -67,7 +68,8 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELECHECK ||
 		Index == TILE_TELECHECKOUT ||
 		Index == TILE_TELECHECKIN ||
-		Index == TILE_TELECHECKINEVIL);
+		Index == TILE_TELECHECKINEVIL ||
+		Index == ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM);
 }
 
 bool IsTeleTileCheckpoint(int Index)
@@ -80,13 +82,19 @@ bool IsTeleTileNumberUsed(int Index, bool Checkpoint)
 	if(Checkpoint)
 		return IsTeleTileCheckpoint(Index);
 	return !IsTeleTileCheckpoint(Index) && Index != TILE_TELECHECKIN &&
-	       Index != TILE_TELECHECKINEVIL;
+	       Index != TILE_TELECHECKINEVIL && Index != ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM;
 }
 
 bool IsTeleTileNumberUsedAny(int Index)
 {
 	return Index != TILE_TELECHECKIN &&
-	       Index != TILE_TELECHECKINEVIL;
+	       Index != TILE_TELECHECKINEVIL &&
+	       Index != ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM;
+}
+
+bool IsTeleTileFlagsUsed(int Index)
+{
+	return Index == ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM;
 }
 
 bool IsValidSpeedupTile(int Index)
@@ -163,7 +171,8 @@ bool IsRotatableTile(int Index)
 		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN_EX ||
 		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN ||
 		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_1 && Index - ENTITY_OFFSET <= ENTITY_WEAPON_LASER) ||
-		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_SHOTGUN && Index - ENTITY_OFFSET <= ENTITY_ARMOR_LASER));
+		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_SHOTGUN && Index - ENTITY_OFFSET <= ENTITY_ARMOR_LASER) ||
+		Index - ENTITY_OFFSET == ENTITY_BULLET_TELEPORT_CFROM);
 }
 
 bool IsCreditsTile(int TileIndex)

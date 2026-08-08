@@ -793,7 +793,10 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 							{
 								if(IsValidTeleTile(pLayerTeleTiles[i].m_Type))
+								{
 									pTiles->m_pTiles[i].m_Index = pLayerTeleTiles[i].m_Type;
+									pTiles->m_pTiles[i].m_Flags = pLayerTeleTiles[i].m_Flags;
+								}
 								else
 									pTiles->m_pTiles[i].m_Index = 0;
 							}

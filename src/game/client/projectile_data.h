@@ -24,6 +24,7 @@ public:
 	int m_Bouncing = 0;
 	bool m_Freeze = false;
 	int m_SwitchNumber;
+	bool m_TeleCFrom = false;
 	// TuneZone is introduced locally
 	int m_TuneZone;
 };

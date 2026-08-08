@@ -1030,6 +1030,8 @@ void CRenderMap::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Colo
 				if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
 					Render = true;
 
+				unsigned char Flags = pTele[c].m_Flags;
+
 				if(Render)
 				{
 					int tx = Index % 16;
@@ -1058,6 +1060,36 @@ void CRenderMap::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Colo
 						y2 = y0 + 1;
 						x3 = x0;
 						y3 = y0 + 1;
+					}
+
+					if(Flags & TILEFLAG_XFLIP)
+					{
+						x0 = x2;
+						x1 = x3;
+						x2 = x3;
+						x3 = x0;
+					}
+
+					if(Flags & TILEFLAG_YFLIP)
+					{
+						y0 = y3;
+						y2 = y1;
+						y3 = y1;
+						y1 = y0;
+					}
+
+					if(Flags & TILEFLAG_ROTATE)
+					{
+						float Tmp = x0;
+						x0 = x3;
+						x3 = x2;
+						x2 = x1;
+						x1 = Tmp;
+						Tmp = y0;
+						y0 = y3;
+						y3 = y2;
+						y2 = y1;
+						y1 = Tmp;
 					}
 
 					if(Graphics()->HasTextureArraysSupport())

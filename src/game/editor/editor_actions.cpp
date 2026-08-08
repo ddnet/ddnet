@@ -195,6 +195,7 @@ void CEditorBrushDrawAction::Apply(bool Undo)
 
 			Map()->m_pTeleLayer->m_pTeleTile[Index].m_Number = Data.m_Number;
 			Map()->m_pTeleLayer->m_pTeleTile[Index].m_Type = Data.m_Type;
+			Map()->m_pTeleLayer->m_pTeleTile[Index].m_Flags = Data.m_Flags;
 			Map()->m_pTeleLayer->m_pTiles[Index].m_Index = Data.m_Index;
 		}
 	}

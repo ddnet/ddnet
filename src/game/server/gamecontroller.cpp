@@ -217,7 +217,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			}
 		}
 	}
-	else if(Index == ENTITY_CRAZY_SHOTGUN_EX)
+	else if(Index == ENTITY_CRAZY_SHOTGUN_EX || Index == ENTITY_CRAZY_SHOTGUN || Index == ENTITY_BULLET_TELEPORT_CFROM)
 	{
 		int Dir;
 		if(!Flags)
@@ -229,6 +229,11 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 		else
 			Dir = 3;
 		float Deg = Dir * (pi / 2);
+
+		bool Freeze = Index != ENTITY_BULLET_TELEPORT_CFROM;
+		bool Explosive = Index == ENTITY_CRAZY_SHOTGUN_EX;
+		int SoundImpact = (Explosive && g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1;
+
 		CProjectile *pBullet = new CProjectile(
 			&GameServer()->m_World,
 			WEAPON_SHOTGUN, //Type
@@ -236,36 +241,9 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			Pos, //Pos
 			vec2(std::sin(Deg), std::cos(Deg)), //Dir
 			-2, //Span
-			true, //Freeze
-			true, //Explosive
-			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
-			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
-			Layer,
-			Number);
-		pBullet->SetBouncing(2 - (Dir % 2));
-	}
-	else if(Index == ENTITY_CRAZY_SHOTGUN)
-	{
-		int Dir;
-		if(!Flags)
-			Dir = 0;
-		else if(Flags == (TILEFLAG_ROTATE))
-			Dir = 1;
-		else if(Flags == (TILEFLAG_XFLIP | TILEFLAG_YFLIP))
-			Dir = 2;
-		else
-			Dir = 3;
-		float Deg = Dir * (pi / 2);
-		CProjectile *pBullet = new CProjectile(
-			&GameServer()->m_World,
-			WEAPON_SHOTGUN, //Type
-			-1, //Owner
-			Pos, //Pos
-			vec2(std::sin(Deg), std::cos(Deg)), //Dir
-			-2, //Span
-			true, //Freeze
-			false, //Explosive
-			SOUND_GRENADE_EXPLODE,
+			Freeze, //Freeze
+			Explosive, //Explosive
+			SoundImpact, //SoundImpact
 			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
 			Number);

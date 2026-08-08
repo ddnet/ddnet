@@ -104,6 +104,7 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj)
 
 	Result.m_Explosive = pProj->m_Flags & PROJECTILEFLAG_EXPLOSIVE;
 	Result.m_Freeze = pProj->m_Flags & PROJECTILEFLAG_FREEZE;
+	Result.m_TeleCFrom = pProj->m_Flags & PROJECTILEFLAG_TELEPORT_CFROM;
 
 	return Result;
 }

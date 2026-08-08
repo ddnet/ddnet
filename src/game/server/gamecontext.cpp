@@ -4385,6 +4385,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 	const CTile *pTiles = m_Collision.GameLayer();
 	const CTile *pFront = m_Collision.FrontLayer();
 	const CSwitchTile *pSwitch = m_Collision.SwitchLayer();
+	const CTeleTile *pTele = m_Collision.TeleLayer();
 
 	for(int y = 0; y < m_Collision.GetHeight(); y++)
 	{
@@ -4468,6 +4469,15 @@ void CGameContext::CreateAllEntities(bool Initial)
 				if(SwitchType >= ENTITY_OFFSET)
 				{
 					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number);
+				}
+			}
+
+			if(pTele)
+			{
+				const int TeleType = pTele[Index].m_Type;
+				if(TeleType >= ENTITY_OFFSET)
+				{
+					m_pController->OnEntity(TeleType - ENTITY_OFFSET, x, y, LAYER_TELE, pTele[Index].m_Flags, Initial, pTele[Index].m_Number);
 				}
 			}
 		}

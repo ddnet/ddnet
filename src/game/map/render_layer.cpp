@@ -1592,6 +1592,10 @@ void CRenderLayerEntityTele::GetTileData(unsigned char *pIndex, unsigned char *p
 {
 	*pIndex = m_pTeleTiles[y * m_pLayerTilemap->m_Width + x].m_Type;
 	*pFlags = 0;
+	if(CurOverlay == 0)
+	{
+		*pFlags = m_pTeleTiles[y * m_pLayerTilemap->m_Width + x].m_Flags;
+	}
 	if(CurOverlay == 1)
 	{
 		if(IsTeleTileNumberUsedAny(*pIndex))

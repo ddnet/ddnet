@@ -48,6 +48,7 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
+	bool m_TeleCFrom;
 	int m_TuneZone;
 	bool m_BelongsToPracticeTeam;
 	int m_DDRaceTeam;

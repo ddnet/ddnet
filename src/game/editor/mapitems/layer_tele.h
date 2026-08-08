@@ -10,6 +10,7 @@ struct STeleTileStateChange
 	{
 		int m_Number;
 		int m_Type;
+		int m_Flags;
 		int m_Index;
 	} m_Previous, m_Current;
 };
