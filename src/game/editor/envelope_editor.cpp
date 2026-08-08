@@ -1350,6 +1350,8 @@ void CEnvelopeEditor::Render(CUIRect View)
 		if(m_Operation == EEnvelopeEditorOp::SCALE)
 		{
 			str_copy(Editor()->m_aTooltip, "Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise.");
+			Ui()->SetHotItem(nullptr); // Prevent other UI elements from being activated during scale operation
+			Editor()->m_ActiveEnvelopePreview = CEditor::EEnvelopePreview::SELECTED;
 
 			if(Input()->ModifierIsPressed())
 			{
