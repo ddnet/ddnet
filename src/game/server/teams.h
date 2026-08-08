@@ -27,6 +27,7 @@ class CGameTeams
 	// the team to finish instantly.
 	bool m_aTeeStarted[MAX_CLIENTS];
 	bool m_aTeeFinished[MAX_CLIENTS];
+	bool m_aTeamLeader[MAX_CLIENTS];
 	int m_aLastChat[MAX_CLIENTS];
 
 	ETeamState m_aTeamState[NUM_DDRACE_TEAMS];
@@ -128,6 +129,10 @@ public:
 	bool GetSaving(int TeamId) const;
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
+	bool HasLeader(int Team) const;
+	bool IsAllowLeaderCommands(int ClientId, int Team);
+	void SetTeamLeader(int ClientId, bool Set);
+	bool IsTeamLeader(int ClientId) const;
 	bool IsValidTeamNumber(int Team) const;
 };
 
