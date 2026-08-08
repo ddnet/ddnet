@@ -676,9 +676,7 @@ int CCollision::IsTeleport(int Index) const
 
 int CCollision::IsEvilTeleport(int Index) const
 {
-	if(Index < 0)
-		return 0;
-	if(!m_pTele)
+	if(Index < 0 || !m_pTele)
 		return 0;
 
 	if(m_pTele[Index].m_Type == TILE_TELEINEVIL)
@@ -703,10 +701,7 @@ bool CCollision::IsCheckEvilTeleport(int Index) const
 
 int CCollision::IsTeleCheckpoint(int Index) const
 {
-	if(Index < 0)
-		return 0;
-
-	if(!m_pTele)
+	if(Index < 0 || !m_pTele)
 		return 0;
 
 	if(m_pTele[Index].m_Type == TILE_TELECHECK)
