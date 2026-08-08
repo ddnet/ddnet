@@ -295,7 +295,7 @@ public:
 	virtual void SetErrorShutdown(const char *pReason) = 0;
 	virtual void ExpireServerInfo() = 0;
 
-	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+	virtual void FillAntibot(CAntibotRoundData *pData, int ClientId) = 0;
 
 	virtual void SendMsgRaw(int ClientId, const void *pData, int Size, int Flags) = 0;
 
@@ -392,7 +392,7 @@ public:
 	virtual void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) = 0;
 	virtual void TeehistorianRecordAuthLogin(int ClientId, int Level, const char *pAuthName) = 0;
 
-	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+	virtual void FillAntibot(CAntibotRoundData *pData, int ClientId) = 0;
 
 	/**
 	 * Used to report custom player info to the master server.
