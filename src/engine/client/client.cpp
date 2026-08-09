@@ -5220,7 +5220,7 @@ int main(int argc, const char **argv)
 #endif
 
 	// Set meta data
-	SDL_SetAppMetadata(GAME_NAME, GAME_RELEASE_VERSION, nullptr);
+	SDL_SetAppMetadata(GAME_NAME, GAME_RELEASE_VERSION, "org.ddnet.client");
 
 	// Do not automatically translate touch events to mouse events and vice versa.
 	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
@@ -5468,7 +5468,7 @@ int CClient::UdpConnectivity(int NetType)
 static bool ViewLinkImpl(const char *pLink)
 {
 #if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_IOS)
-	if(SDL_OpenURL(pLink) == 0)
+	if(SDL_OpenURL(pLink))
 	{
 		return true;
 	}

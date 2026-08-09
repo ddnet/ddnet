@@ -95,6 +95,8 @@ class CSound : public IEngineSound
 	IStorage *m_pStorage = nullptr;
 
 	int *m_pMixBuffer = nullptr;
+	// Preallocated so the audio callback does not put a config sized buffer on its stack
+	short *m_pCallbackBuffer = nullptr;
 	int64_t m_PlaybackTime = 0;
 
 	CSample *AllocSample() REQUIRES(!m_SoundLock);
@@ -154,6 +156,7 @@ public:
 
 	int MixingRate() const override { return m_MixingRate; }
 	void Mix(short *pFinalOut, unsigned Frames) override REQUIRES(!m_SoundLock);
+	void FillAudioStream(SDL_AudioStream *pStream, int AdditionalAmount) REQUIRES(!m_SoundLock);
 
 	void PauseAudioDevice() override;
 	void UnpauseAudioDevice() override;
