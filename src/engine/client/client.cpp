@@ -1031,7 +1031,8 @@ void CClient::RenderDebug()
 				Row++;
 			}
 		}
-		for(int i = CSnapshot::MAX_TYPE; i > (CSnapshot::MAX_TYPE - 64); i--)
+		// Extended item types count down from 0x7fff
+		for(int i = 0x7fff; i > (0x7fff - 64); i--)
 		{
 			if(SnapshotDelta()->GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
 			{
@@ -2109,7 +2110,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if((NumParts < CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == (((uint64_t)(1) << NumParts) - 1)) ||
 					(NumParts == CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == std::numeric_limits<uint64_t>::max()))
 				{
-					unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
+					alignas(int32_t) unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
 					CSnapshotBuffer TmpBuffer3;
 
 					// reset snapshotting
