@@ -4,6 +4,7 @@
 #include <base/hash.h>
 #include <base/io.h>
 #include <base/log.h>
+#include <base/sphore.h>
 #include <base/str.h>
 
 #include <engine/shared/linereader.h>
@@ -39,7 +40,7 @@ static bool UnpackAsset(const char *pFilename)
 	}
 
 	char *pData = static_cast<char *>(malloc(FileLength));
-	const size_t ReadLength = SDL_ReadIO(pAssetFile, pData, 1, FileLength);
+	const size_t ReadLength = SDL_ReadIO(pAssetFile, pData, FileLength);
 	SDL_CloseIO(pAssetFile);
 
 	if(ReadLength != (size_t)FileLength)
@@ -102,7 +103,7 @@ static bool EqualIntegrityFiles(const char *pAssetFilename, const char *pStorage
 	}
 
 	char aAssetMainSha256[SHA256_MAXSTRSIZE];
-	const size_t AssetReadLength = SDL_ReadIO(pAssetFile, aAssetMainSha256, 1, sizeof(aAssetMainSha256) - 1);
+	const size_t AssetReadLength = SDL_ReadIO(pAssetFile, aAssetMainSha256, sizeof(aAssetMainSha256) - 1);
 	SDL_CloseIO(pAssetFile);
 	if(AssetReadLength != sizeof(aAssetMainSha256) - 1)
 	{
@@ -256,15 +257,38 @@ void RestartAndroidApp()
 	SDL_SendAndroidMessage(COMMAND_RESTART_APP, 0);
 }
 
+// Result of an SDL_RequestAndroidPermission call, which is answered asynchronously.
+struct SPermissionRequest
+{
+	CSemaphore m_Semaphore;
+	bool m_Granted = false;
+};
+
+static void PermissionRequestCallback(void *pUser, const char *pPermission, bool Granted)
+{
+	SPermissionRequest *pRequest = static_cast<SPermissionRequest *>(pUser);
+	pRequest->m_Granted = Granted;
+	pRequest->m_Semaphore.Signal();
+}
+
 bool StartAndroidServer(const char **ppArguments, size_t NumArguments)
 {
 	// We need the notification-permission to show a notification for the foreground service.
-	// We use SDL for this instead of doing it on the Java side because this function blocks
+	// We use SDL for this instead of doing it on the Java side because we can simply wait
 	// until the user made a choice, which is easier to handle. Only Android 13 (API 33) and
 	// newer support requesting this permission at runtime.
-	if(SDL_GetAndroidSDKVersion() >= 33 && !SDL_RequestAndroidPermission("android.permission.POST_NOTIFICATIONS"))
+	if(SDL_GetAndroidSDKVersion() >= 33)
 	{
-		return false;
+		SPermissionRequest Request;
+		if(!SDL_RequestAndroidPermission("android.permission.POST_NOTIFICATIONS", PermissionRequestCallback, &Request))
+		{
+			return false;
+		}
+		Request.m_Semaphore.Wait();
+		if(!Request.m_Granted)
+		{
+			return false;
+		}
 	}
 
 	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_GetAndroidJNIEnv());

@@ -228,8 +228,10 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	static EBackendType DetectBackend();
 	static void ClampDriverVersion(EBackendType BackendType);
-	
-	SDL_DisplayID DisplayIdFromIndex(int &Index) const;
+
+	static SDL_DisplayID DisplayIdFromIndex(int &Index);
+	static int IndexFromDisplayId(SDL_DisplayID DisplayId);
+	bool SetExclusiveFullscreenMode(int Index, int Width, int Height, int RefreshRate);
 
 public:
 	CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc);
@@ -247,13 +249,14 @@ public:
 	const char *GetScreenName(int Index) const override;
 
 	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) override;
-	void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) override;
+	bool GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) override;
 
 	void Minimize() override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index, bool MoveToCenter, ivec2 *pDesktopSize) override;
 	bool UpdateDisplayMode(int Index, ivec2 *pDesktopSize) override;
 	int GetWindowScreen() override;
+	uint32_t GetWindowId() const override;
 	int WindowActive() override;
 	int WindowOpen() override;
 	void SetWindowGrab(bool Grab) override;

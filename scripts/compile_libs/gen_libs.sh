@@ -120,7 +120,7 @@ build_cmake_lib freetype https://gitlab.freedesktop.org/freetype/freetype "branc
 
 # SDL
 log_info_header "Building SDL..."
-build_cmake_lib sdl https://github.com/libsdl-org/SDL "branch" "release-3.2.x"
+build_cmake_lib sdl https://github.com/libsdl-org/SDL "branch" "release-3.4.14"
 
 # ogg, opus, opusfile
 log_info_header "Building ogg..."

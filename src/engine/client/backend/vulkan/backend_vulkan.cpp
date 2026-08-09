@@ -3545,12 +3545,11 @@ public:
 	 * VULKAN SETUP CODE
 	 ************************/
 
-	[[nodiscard]] bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions)
+	[[nodiscard]] bool GetVulkanExtensions(std::vector<std::string> &vVKExtensions)
 	{
-		// TODOSDL: just return ppExtentionList?
 		uint32_t ExtCount;
-		const char *const *ppExtentionList = SDL_Vulkan_GetInstanceExtensions(&ExtCount);
-		if(!ppExtentionList)
+		const char *const *ppExtensionList = SDL_Vulkan_GetInstanceExtensions(&ExtCount);
+		if(!ppExtensionList)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get instance extensions from SDL.");
 			return false;
@@ -3559,7 +3558,7 @@ public:
 		vVKExtensions.reserve(ExtCount);
 		for(uint32_t i = 0; i < ExtCount; i++)
 		{
-			vVKExtensions.emplace_back(ppExtentionList[i]);
+			vVKExtensions.emplace_back(ppExtensionList[i]);
 		}
 
 		return true;
@@ -5716,7 +5715,7 @@ public:
 		m_CanvasWidth = CanvasWidth;
 		m_CanvasHeight = CanvasHeight;
 
-		if(!GetVulkanExtensions(pWindow, vVKExtensions))
+		if(!GetVulkanExtensions(vVKExtensions))
 			return -1;
 
 		if(!GetVulkanLayers(vVKLayers))

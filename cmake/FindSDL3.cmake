@@ -16,10 +16,10 @@ else()
   set(CMAKE_FIND_FRAMEWORK LAST)
 endif()
 set_extra_dirs_include(SDL3 sdl "${SDL3_LIBRARY}")
-# Looking for 'SDL.h' directly might accidentally find a SDL instead of SDL 2
-# installation. Look for a header file only present in SDL 2 instead.
-find_path(SDL3_INCLUDEDIR SDL_assert.h
-  PATH_SUFFIXES SDL3
+# Looking for 'SDL.h' directly might accidentally find an SDL 1 or SDL 2
+# installation. Look for a header file only present in SDL 3 instead, and keep the
+# SDL3 prefix so that '#include <SDL3/SDL.h>' resolves against this directory.
+find_path(SDL3_INCLUDEDIR SDL3/SDL_assert.h
   HINTS ${HINTS_SDL3_INCLUDEDIR} ${PC_SDL3_INCLUDE_DIRS}
   PATHS ${PATHS_SDL3_INCLUDEDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}

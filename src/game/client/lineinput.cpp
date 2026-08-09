@@ -584,8 +584,7 @@ void CLineInput::RenderCandidates()
 	for(int i = 0; i < Input()->GetCandidateCount(); ++i)
 		LongestCandidateWidth = std::max(LongestCandidateWidth, TextRender()->TextWidth(FontSize, Input()->GetCandidate(i)));
 
-	const float NumOffset = 8.0f;
-	const float RectWidth = LongestCandidateWidth + Margin + NumOffset + 2.0f * Padding;
+	const float RectWidth = LongestCandidateWidth + Margin + 2.0f * Padding;
 	const float RectHeight = Input()->GetCandidateCount() * (FontSize + 2.0f * Padding) + Margin;
 
 	vec2 Position = ms_CompositionWindowPosition / ScreenSize * vec2(Width, Height);
@@ -613,23 +612,21 @@ void CLineInput::RenderCandidates()
 	Graphics()->QuadsDrawTL(&Quad, 1);
 
 	// Draw selected entry highlight
-	Graphics()->SetColor(0.1f, 0.4f, 0.8f, 1.0f);
-	Quad = IGraphics::CQuadItem(Position.x + Margin / 4.0f, Position.y + Margin / 2.0f + Input()->GetCandidateSelectedIndex() * (FontSize + 2.0f * Padding), RectWidth - Margin / 2.0f, FontSize + 2.0f * Padding);
-	Graphics()->QuadsDrawTL(&Quad, 1);
+	if(Input()->GetCandidateSelectedIndex() >= 0)
+	{
+		Graphics()->SetColor(0.1f, 0.4f, 0.8f, 1.0f);
+		Quad = IGraphics::CQuadItem(Position.x + Margin / 4.0f, Position.y + Margin / 2.0f + Input()->GetCandidateSelectedIndex() * (FontSize + 2.0f * Padding), RectWidth - Margin / 2.0f, FontSize + 2.0f * Padding);
+		Graphics()->QuadsDrawTL(&Quad, 1);
+	}
 	Graphics()->QuadsEnd();
 
-	// Draw candidates
+	// Draw candidates, SDL prefixes them with their selection digit
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	for(int i = 0; i < Input()->GetCandidateCount(); ++i)
 	{
-		char aBuf[3];
-		str_format(aBuf, sizeof(aBuf), "%d.", (i + 1) % 10);
-
 		const float PosX = Position.x + Margin / 2.0f + Padding;
 		const float PosY = Position.y + Margin / 2.0f + i * (FontSize + 2.0f * Padding) + Padding;
-		TextRender()->TextColor(0.6f, 0.6f, 0.6f, 1.0f);
-		TextRender()->Text(PosX, PosY, FontSize, aBuf);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		TextRender()->Text(PosX + NumOffset, PosY, FontSize, Input()->GetCandidate(i));
+		TextRender()->Text(PosX, PosY, FontSize, Input()->GetCandidate(i));
 	}
 }
 

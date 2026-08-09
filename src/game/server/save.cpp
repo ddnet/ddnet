@@ -572,11 +572,12 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 		return ESaveResult::TEAM_0_MODE;
 	}
 
-	m_MembersCount = pTeams->TeamSize(Team);
-	if(m_MembersCount <= 0)
+	const int MembersCount = pTeams->TeamSize(Team);
+	if(MembersCount <= 0)
 	{
 		return ESaveResult::TEAM_NOT_FOUND;
 	}
+	m_MembersCount = MembersCount;
 
 	m_TeamState = pTeams->GetTeamState(Team);
 
@@ -589,7 +590,7 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 	m_TeamLocked = pTeams->TeamLocked(Team);
 	m_Practice = pTeams->IsPractice(Team);
 
-	m_pSavedTees = new CSaveTee[m_MembersCount];
+	m_pSavedTees = new CSaveTee[MembersCount];
 	int aPlayerCids[MAX_CLIENTS];
 	int j = 0;
 	CCharacter *p = (CCharacter *)pGameServer->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
@@ -609,11 +610,12 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 	if(m_MembersCount != j && !Force)
 		return ESaveResult::CHAR_NOT_FOUND;
 
-	if(pGameServer->Collision()->m_HighestSwitchNumber)
+	const int HighestSwitchNumber = pGameServer->Collision()->m_HighestSwitchNumber;
+	if(HighestSwitchNumber > 0)
 	{
-		m_pSwitchers = new SSimpleSwitchers[pGameServer->Collision()->m_HighestSwitchNumber + 1];
+		m_pSwitchers = new SSimpleSwitchers[HighestSwitchNumber + 1];
 
-		for(int i = 1; i < pGameServer->Collision()->m_HighestSwitchNumber + 1; i++)
+		for(int i = 1; i < HighestSwitchNumber + 1; i++)
 		{
 			m_pSwitchers[i].m_Status = pGameServer->Switchers()[i].m_aStatus[Team];
 			if(pGameServer->Switchers()[i].m_aEndTick[Team])
