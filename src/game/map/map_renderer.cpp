@@ -39,7 +39,7 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 		for(int LayerId = 0; LayerId < pGroup->m_NumLayers; LayerId++)
 		{
 			CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer + LayerId);
-			int LayerType = GetLayerType(pLayer, pLayers);
+			int LayerType = GetLayerType(pLayer);
 			PassedGameLayer |= LayerType == LAYER_GAME;
 
 			if(Type == ERenderType::RENDERTYPE_BACKGROUND_FORCE || Type == ERenderType::RENDERTYPE_BACKGROUND)
@@ -175,19 +175,26 @@ void CMapRenderer::Render(const CRenderLayerParams &Params)
 	}
 }
 
-int CMapRenderer::GetLayerType(const CMapItemLayer *pLayer, const CLayers *pLayers) const
+int CMapRenderer::GetLayerType(const CMapItemLayer *pLayer) const
 {
-	if(pLayer == (CMapItemLayer *)pLayers->GameLayer())
+	if(pLayer->m_Type != LAYERTYPE_TILES)
+		return LAYER_DEFAULT_TILESET;
+
+	// Physics layers must be determined by their flags instead of by comparing them with the
+	// layers of CLayers, which only knows the last physics layer of each type, as design tiles
+	// layers use the data index which is neither used nor validated for physics layers.
+	const int Flags = reinterpret_cast<const CMapItemLayerTilemap *>(pLayer)->m_Flags;
+	if(Flags & TILESLAYERFLAG_GAME)
 		return LAYER_GAME;
-	else if(pLayer == (CMapItemLayer *)pLayers->FrontLayer())
+	else if(Flags & TILESLAYERFLAG_FRONT)
 		return LAYER_FRONT;
-	else if(pLayer == (CMapItemLayer *)pLayers->SwitchLayer())
+	else if(Flags & TILESLAYERFLAG_SWITCH)
 		return LAYER_SWITCH;
-	else if(pLayer == (CMapItemLayer *)pLayers->TeleLayer())
+	else if(Flags & TILESLAYERFLAG_TELE)
 		return LAYER_TELE;
-	else if(pLayer == (CMapItemLayer *)pLayers->SpeedupLayer())
+	else if(Flags & TILESLAYERFLAG_SPEEDUP)
 		return LAYER_SPEEDUP;
-	else if(pLayer == (CMapItemLayer *)pLayers->TuneLayer())
+	else if(Flags & TILESLAYERFLAG_TUNE)
 		return LAYER_TUNE;
 	return LAYER_DEFAULT_TILESET;
 }

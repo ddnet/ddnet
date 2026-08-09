@@ -105,12 +105,34 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	NewDataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
 
 	// Replace map items for old versions with items compatible with latest version to avoid version checks when using the map items.
+	// Ensure that we have a game layer and game group.
+	const CMapItemLayerTilemap *pGameLayer = nullptr;
+	std::set<int> UsedLayerItemIndices;
 	for(int GroupIndex = 0; GroupIndex < GroupsNum; GroupIndex++)
 	{
+		const size_t GroupItemSize = NewDataFile.GetItemSize(GroupsStart + GroupIndex);
+		if(GroupItemSize < sizeof(CMapItemGroup_v1))
+		{
+			log_error("map/load", "Group %d is truncated (size %" PRIzu ").", GroupIndex, GroupItemSize);
+			return false;
+		}
 		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + GroupIndex));
+		if(pGroup->m_StartLayer < 0 || pGroup->m_NumLayers < 0 ||
+			(int64_t)pGroup->m_StartLayer + pGroup->m_NumLayers > LayersNum)
+		{
+			log_error("map/load", "Group %d uses invalid layers %d to %d (the map contains %d layers).",
+				GroupIndex, pGroup->m_StartLayer, pGroup->m_StartLayer + pGroup->m_NumLayers - 1, LayersNum);
+			return false;
+		}
 		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
 			const int LayerItemIndex = LayersStart + pGroup->m_StartLayer + LayerIndex;
+			const auto &[_, LayerUnique] = UsedLayerItemIndices.emplace(LayerItemIndex);
+			if(!LayerUnique)
+			{
+				log_error("map/load", "Layer %d in group %d is also being used by another group.", LayerIndex, GroupIndex);
+				return false;
+			}
 			CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(NewDataFile.GetItem(LayerItemIndex));
 			const size_t LayerItemSize = NewDataFile.GetItemSize(LayerItemIndex);
 			if(LayerItemSize < sizeof(CMapItemLayer))
@@ -131,27 +153,8 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 				{
 					return false;
 				}
-			}
-		}
-	}
-
-	// Lazily validate data and replace compressed tile layers with uncompressed ones.
-	// Ensure that we have a game layer and game group.
-	const CMapItemLayerTilemap *pGameLayer = nullptr;
-	std::set<int> UsedDataIndices;
-	for(int GroupIndex = 0; GroupIndex < GroupsNum; GroupIndex++)
-	{
-		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + GroupIndex));
-		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
-		{
-			CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(NewDataFile.GetItem(LayersStart + pGroup->m_StartLayer + LayerIndex));
-			if(pLayer->m_Type == LAYERTYPE_TILES)
-			{
-				const CMapItemLayerTilemap *pLayerTilemap = reinterpret_cast<const CMapItemLayerTilemap *>(pLayer);
-				if(!ValidateAndUnpackTilesLayerData(NewDataFile, GroupIndex, LayerIndex, pLayerTilemap, UsedDataIndices))
-				{
-					return false;
-				}
+				// The item may have been replaced, so the pointer must be determined again.
+				const CMapItemLayerTilemap *pLayerTilemap = static_cast<CMapItemLayerTilemap *>(NewDataFile.GetItem(LayerItemIndex));
 				if(pLayerTilemap->m_Flags & TILESLAYERFLAG_GAME)
 				{
 					pGameLayer = pLayerTilemap;
@@ -164,6 +167,25 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 		log_error("map/load", "Game layer is missing.");
 		return false;
 	}
+
+	// Lazily validate data and replace compressed tile layers with uncompressed ones.
+	std::set<int> UsedDataIndices;
+	for(int GroupIndex = 0; GroupIndex < GroupsNum; GroupIndex++)
+	{
+		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + GroupIndex));
+		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
+		{
+			CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(NewDataFile.GetItem(LayersStart + pGroup->m_StartLayer + LayerIndex));
+			if(pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				if(!ValidateAndUnpackTilesLayerData(NewDataFile, GroupIndex, LayerIndex, reinterpret_cast<const CMapItemLayerTilemap *>(pLayer), *pGameLayer, UsedDataIndices))
+				{
+					return false;
+				}
+			}
+		}
+	}
+
 	// Load and implicitly validate game layer tile data immediately because we need it.
 	// Do not preload other data to avoid excessive memory usage.
 	if(NewDataFile.GetData(pGameLayer->m_Data) == nullptr)
@@ -502,6 +524,14 @@ bool CMap::UpgradeAndValidateTilesLayerItem(
 			return false;
 		}
 	}
+	else if(LayerItemSize < sizeof(CMapItemLayerTilemap_v3Teeworlds))
+	{
+		// Only the physics layer data indices added by DDRace may be truncated in
+		// version 3 and 4 items, the layer name must always be complete.
+		log_error("map/load", "Tile layer %d in group %d is truncated (version %d, size %" PRIzu ").",
+			LayerIndex, GroupIndex, pLayerTilemapBase->m_Version, LayerItemSize);
+		return false;
+	}
 	else if(LayerItemSize < sizeof(CMapItemLayerTilemap))
 	{
 		const CMapItemLayerTilemap *pLayerTilemapLegacy = static_cast<const CMapItemLayerTilemap *>(pLayerTilemapBase);
@@ -536,7 +566,7 @@ bool CMap::UpgradeAndValidateTilesLayerItem(
 	return true;
 }
 
-bool CMap::ValidateAndUnpackTilesLayerData(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex, const CMapItemLayerTilemap *pLayerTilemap, std::set<int> &UsedDataIndices)
+bool CMap::ValidateAndUnpackTilesLayerData(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex, const CMapItemLayerTilemap *pLayerTilemap, const CMapItemLayerTilemap &GameLayer, std::set<int> &UsedDataIndices)
 {
 	size_t TileSize;
 	int DataIndex;
@@ -604,6 +634,16 @@ bool CMap::ValidateAndUnpackTilesLayerData(CDataFileReader &NewDataFile, int Gro
 	{
 		log_error("map/load", "Tile layer %d in group %d is too big (%d * %d * %" PRIzu " causes an integer overflow).",
 			LayerIndex, GroupIndex, pLayerTilemap->m_Width, pLayerTilemap->m_Height, TileSize);
+		return false;
+	}
+
+	// The collision uses the size of the game layer for the data of all physics layers,
+	// so physics layers must contain at least as many tiles as the game layer.
+	if(LayerType != LAYERTYPE_TILES && LayerType != LAYERTYPE_GAME &&
+		TilemapCount < (size_t)GameLayer.m_Width * GameLayer.m_Height)
+	{
+		log_error("map/load", "Physics layer %d in group %d is smaller than the game layer (%d * %d < %d * %d).",
+			LayerIndex, GroupIndex, pLayerTilemap->m_Width, pLayerTilemap->m_Height, GameLayer.m_Width, GameLayer.m_Height);
 		return false;
 	}
 

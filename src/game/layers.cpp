@@ -78,7 +78,7 @@ void CLayers::Init(IMap *pMap, bool GameOnly, bool InitializeTilemapSkip)
 
 	if(InitializeTilemapSkip)
 	{
-		InitTilemapSkip(GameOnly);
+		InitTilemapSkip();
 	}
 }
 
@@ -100,7 +100,7 @@ void CLayers::Unload()
 	m_pTuneLayer = nullptr;
 }
 
-void CLayers::InitTilemapSkip(bool GameOnly)
+void CLayers::InitTilemapSkip()
 {
 	for(int GroupIndex = 0; GroupIndex < NumGroups(); GroupIndex++)
 	{
@@ -112,7 +112,9 @@ void CLayers::InitTilemapSkip(bool GameOnly)
 				continue;
 
 			const CMapItemLayerTilemap *pTilemap = reinterpret_cast<const CMapItemLayerTilemap *>(pLayer);
-			if(GameOnly && (pTilemap->m_Flags & (TILESLAYERFLAG_TELE | TILESLAYERFLAG_SPEEDUP | TILESLAYERFLAG_FRONT | TILESLAYERFLAG_SWITCH | TILESLAYERFLAG_TUNE)) != 0)
+			// Physics layers except the game layer store their tiles in their own data index,
+			// so their m_Data is neither used nor validated when the map is loaded.
+			if((pTilemap->m_Flags & (TILESLAYERFLAG_TELE | TILESLAYERFLAG_SPEEDUP | TILESLAYERFLAG_FRONT | TILESLAYERFLAG_SWITCH | TILESLAYERFLAG_TUNE)) != 0)
 				continue;
 
 			CTile *pTiles = static_cast<CTile *>(m_pMap->GetData(pTilemap->m_Data));

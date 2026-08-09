@@ -119,7 +119,7 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 		{
 			dbg_msg("map_diff", "different tile layers:");
 			for(int i = 0; i < 2; ++i)
-				dbg_msg("map_diff", " [%d:%s] (%dx%d, flags: %d)", aLayersNum[i], aaName[i], apTilemap[i]->m_Width, apTilemap[i]->m_Height, apTilemap[i]->m_Flags);
+				dbg_msg("map_diff", " [%d:%s] (%dx%d, flags: %d)", j, aaName[i], apTilemap[i]->m_Width, apTilemap[i]->m_Height, apTilemap[i]->m_Flags);
 			return false;
 		}
 

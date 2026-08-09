@@ -474,6 +474,13 @@ public:
 	int m_Tune;
 };
 
+// The tiles layer items are cast from the raw map file data, so the base classes
+// must not add any padding to the derived classes.
+static_assert(sizeof(CMapItemLayerTilemap_v2) == 60);
+static_assert(sizeof(CMapItemLayerTilemap_v2Legacy) == 80);
+static_assert(sizeof(CMapItemLayerTilemap_v3Teeworlds) == 72);
+static_assert(sizeof(CMapItemLayerTilemap) == 92);
+
 class CMapItemLayerQuads
 {
 public:
