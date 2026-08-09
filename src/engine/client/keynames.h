@@ -6,6 +6,6 @@
 /**
  * Do not use directly! Use the @link IInput::KeyName @endlink function.
  */
-extern const char g_aaKeyStrings[512][20];
+extern const char g_aaKeyStrings[512][21];
 
 #endif

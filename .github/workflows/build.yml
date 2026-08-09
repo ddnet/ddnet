@@ -78,17 +78,28 @@ jobs:
           libglew-dev
           libnotify-dev
           libpng-dev
-          libsdl3-dev
           libsqlite3-dev
           libswresample-dev
           libswscale-dev
+          libx11-dev
           libx264-dev
+          libxcursor-dev
+          libxext-dev
+          libxi-dev
+          libxrandr-dev
+          libxss-dev
+          libxtst-dev
           ninja-build
           pkg-config
           valgrind
           # tidy-alphabetical-end
         )
         sudo apt-get install -y "${packages[@]}"
+        curl -LO https://github.com/libsdl-org/SDL/releases/download/release-3.4.16/SDL3-3.4.16.tar.gz
+        tar xf SDL3-3.4.16.tar.gz
+        cmake -S SDL3-3.4.16 -B SDL3-3.4.16/build -DCMAKE_BUILD_TYPE=Release -DSDL_TESTS=OFF
+        cmake --build SDL3-3.4.16/build --parallel
+        sudo cmake --install SDL3-3.4.16/build
 
     - name: Prepare Linux (non-fancy)
       if: contains(matrix.os, 'ubuntu') && !contains(matrix.name, 'fancy')

@@ -643,13 +643,14 @@ void CGraphicsBackend_EGL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *
 	*pNumModes = 0;
 }
 
-void CGraphicsBackend_EGL::GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
+bool CGraphicsBackend_EGL::GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
 {
 	(void)HiDPIScale;
 	(void)MaxWindowWidth;
 	(void)MaxWindowHeight;
 	(void)ScreenId;
 	CurMode = CVideoMode{};
+	return false;
 }
 
 bool CGraphicsBackend_EGL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType)

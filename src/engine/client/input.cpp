@@ -18,14 +18,8 @@
 #include <SDL3/SDL.h>
 
 #include <algorithm>
-
-// support older SDL version (pre 2.0.6)
-#ifndef SDL_JOYSTICK_AXIS_MIN
-#define SDL_JOYSTICK_AXIS_MIN (-32768)
-#endif
-#ifndef SDL_JOYSTICK_AXIS_MAX
-#define SDL_JOYSTICK_AXIS_MAX 32767
-#endif
+#include <cmath>
+#include <utility>
 
 void CInput::AddKeyEvent(int Key, int Flags)
 {
@@ -87,12 +81,12 @@ void CInput::Init()
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 
-	// SDLTODO: you can do better
-	m_pWindow = SDL_GetWindows(nullptr)[0];
-	dbg_assert(m_pWindow, "SDL Window not found");
+#if !defined(CONF_HEADLESS_CLIENT)
+	dbg_assert(Window() != nullptr, "SDL Window not found");
 
 	StopTextInput();
 	MouseModeRelative();
+#endif
 	InitJoysticks();
 }
 
@@ -101,20 +95,31 @@ void CInput::Shutdown()
 	CloseJoysticks();
 }
 
+SDL_Window *CInput::Window() const
+{
+	return SDL_GetWindowFromID(Graphics()->GetWindowId());
+}
+
 void CInput::InitJoysticks()
 {
-	if(!SDL_WasInit(SDL_INIT_JOYSTICK) || !SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+	if(!SDL_WasInit(SDL_INIT_JOYSTICK) && !SDL_InitSubSystem(SDL_INIT_JOYSTICK))
 	{
 		log_error("joystick", "Unable to init SDL joystick system: %s", SDL_GetError());
 		return;
 	}
 
-	int NumJoysticks;
-	SDL_JoystickID *JoystickIds = SDL_GetJoysticks(&NumJoysticks);
+	int NumJoysticks = 0;
+	SDL_JoystickID *pJoystickIds = SDL_GetJoysticks(&NumJoysticks);
+	if(!pJoystickIds)
+	{
+		log_error("joystick", "Unable to get joysticks: %s", SDL_GetError());
+		return;
+	}
 
 	log_info("joystick", "%d joystick(s) found", NumJoysticks);
 	for(int i = 0; i < NumJoysticks; i++)
-		OpenJoystick(JoystickIds[i]);
+		OpenJoystick(pJoystickIds[i]);
+	SDL_free(pJoystickIds);
 	UpdateActiveJoystick();
 
 	Console()->Chain("inp_controller_guid", ConchainJoystickGuidChanged, this);
@@ -273,14 +278,14 @@ bool CInput::MouseRelative(float *pX, float *pY)
 void CInput::MouseModeAbsolute()
 {
 	m_InputGrabbed = false;
-	SDL_SetWindowRelativeMouseMode(m_pWindow, false);
+	SDL_SetWindowRelativeMouseMode(Window(), false);
 	Graphics()->SetWindowGrab(false);
 }
 
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = true;
-	SDL_SetWindowRelativeMouseMode(m_pWindow, true);
+	SDL_SetWindowRelativeMouseMode(Window(), true);
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(nullptr, nullptr);
@@ -327,12 +332,12 @@ void CInput::SetClipboardText(const char *pText)
 
 void CInput::StartTextInput()
 {
-	SDL_StartTextInput(m_pWindow);
+	SDL_StartTextInput(Window());
 }
 
 void CInput::StopTextInput()
 {
-	SDL_StopTextInput(m_pWindow);
+	SDL_StopTextInput(Window());
 	m_CompositionString = "";
 	m_CompositionCursor = 0;
 	m_vCandidates.clear();
@@ -345,13 +350,19 @@ void CInput::EnsureScreenKeyboardShown()
 	{
 		return;
 	}
-	SDL_StopTextInput(m_pWindow);
-	SDL_StartTextInput(m_pWindow);
+	SDL_StopTextInput(Window());
+	SDL_StartTextInput(Window());
 }
 
-void CInput::ClearComposition() const
+void CInput::ClearComposition()
 {
-	SDL_ClearComposition(m_pWindow);
+	// SDL_ClearComposition only cancels the composition of the IME on Windows, on the
+	// other platforms our own composition state has to be cleared as well.
+	SDL_ClearComposition(Window());
+	m_CompositionString = "";
+	m_CompositionCursor = 0;
+	m_vCandidates.clear();
+	m_CandidateSelectedIndex = -1;
 }
 
 void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const
@@ -410,6 +421,24 @@ int CInput::FindKeyByName(const char *pKeyName) const
 	for(int Key = KEY_FIRST; Key < KEY_LAST; Key++)
 	{
 		if(str_comp_nocase(pKeyName, KeyName(Key)) == 0)
+			return Key;
+	}
+
+	// Keys renamed in SDL3, so binds saved with the old names keep working.
+	static const std::pair<const char *, int> s_aRenamedKeys[] = {
+		{"audionext", KEY_MEDIA_NEXT_TRACK},
+		{"audioprev", KEY_MEDIA_PREVIOUS_TRACK},
+		{"audiostop", KEY_MEDIA_STOP},
+		{"audioplay", KEY_MEDIA_PLAY},
+		{"audiomute", KEY_MUTE},
+		{"audiorewind", KEY_MEDIA_REWIND},
+		{"audiofastforward", KEY_MEDIA_FAST_FORWARD},
+		{"mediaselect", KEY_MEDIA_SELECT},
+		{"eject", KEY_MEDIA_EJECT},
+	};
+	for(const auto &[pOldName, Key] : s_aRenamedKeys)
+	{
+		if(str_comp_nocase(pKeyName, pOldName) == 0)
 			return Key;
 	}
 
@@ -582,11 +611,14 @@ void CInput::HandleTextEditingEvent(const char *pText, int Start, int Length)
 	{
 		m_CompositionString = pText;
 		m_CompositionCursor = 0;
-		for(int i = 0; i < Start; i++)
+		// Start and Length mark the clause the IME is converting, and are -1 when it reports
+		// none. We render that clause like the rest of the composition instead of highlighting
+		// it, so put the cursor behind it, which is where SDL2 reported it.
+		const int CursorOffset = std::max(Start, 0) + std::max(Length, 0);
+		for(int i = 0; i < CursorOffset; i++)
 		{
 			m_CompositionCursor = str_utf8_forward(m_CompositionString.c_str(), m_CompositionCursor);
 		}
-		// Length is currently unused on Windows and will always be 0, so we don't support selecting composition text
 		AddTextEvent("");
 	}
 	else
@@ -603,8 +635,8 @@ void CInput::SetCompositionWindowPosition(float X, float Y, float H)
 	Rect.y = Y / m_pGraphics->ScreenHiDPIScale();
 	Rect.h = H / m_pGraphics->ScreenHiDPIScale();
 	Rect.w = 0;
-	// TODOSDL: we should use the cursor param, this is jank
-	SDL_SetTextInputArea(m_pWindow, &Rect, 0);
+	// Todo SDL: pass the cursor position instead of always using the start of the area
+	SDL_SetTextInputArea(Window(), &Rect, 0);
 }
 
 static int TranslateKeyEventKey(const SDL_KeyboardEvent &KeyEvent)
@@ -668,21 +700,27 @@ static int TranslateMouseButtonEventKey(const SDL_MouseButtonEvent &MouseButtonE
 	}
 }
 
-static int TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &MouseWheelEvent)
+int CInput::TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &MouseWheelEvent)
 {
-	if(MouseWheelEvent.y > 0)
+	// x and y are the precise deltas in SDL3, so accumulate them to whole notches.
+	// One notch of a high resolution wheel or a trackpad would otherwise produce a
+	// burst of events. SDL only does this itself since 3.2.12, in integer_x/integer_y.
+	vec2 Wheel;
+	m_ResidualScroll.x = std::modf(m_ResidualScroll.x + MouseWheelEvent.x, &Wheel.x);
+	m_ResidualScroll.y = std::modf(m_ResidualScroll.y + MouseWheelEvent.y, &Wheel.y);
+	if(Wheel.y > 0)
 	{
 		return KEY_MOUSE_WHEEL_UP;
 	}
-	else if(MouseWheelEvent.y < 0)
+	else if(Wheel.y < 0)
 	{
 		return KEY_MOUSE_WHEEL_DOWN;
 	}
-	else if(MouseWheelEvent.x > 0)
+	else if(Wheel.x > 0)
 	{
 		return KEY_MOUSE_WHEEL_RIGHT;
 	}
-	else if(MouseWheelEvent.x < 0)
+	else if(Wheel.x < 0)
 	{
 		return KEY_MOUSE_WHEEL_LEFT;
 	}
@@ -754,7 +792,13 @@ int CInput::Update()
 			m_vCandidates.reserve(Event.edit_candidates.num_candidates);
 			for(auto i = 0; i < Event.edit_candidates.num_candidates; ++i)
 				m_vCandidates.emplace_back(Event.edit_candidates.candidates[i]);
+			// SDL's Windows backend only sends the current page of candidates but reports
+			// the absolute selection index, so from the second page onwards it points
+			// past the page or, for the variable page size of Chinese IMEs, at the wrong
+			// row. Show no selection when it is out of range.
 			m_CandidateSelectedIndex = Event.edit_candidates.selected_candidate;
+			if(m_CandidateSelectedIndex >= (int)m_vCandidates.size())
+				m_CandidateSelectedIndex = -1;
 			break;
 
 		// handle keys
@@ -806,6 +850,7 @@ int CInput::Update()
 			break;
 
 		case SDL_EVENT_FINGER_UP:
+		case SDL_EVENT_FINGER_CANCELED:
 			HandleTouchUpEvent(Event.tfinger);
 			break;
 
@@ -814,7 +859,13 @@ int CInput::Update()
 			break;
 
 		case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
-			Graphics()->SwitchWindowScreen(Event.display.data1, false);
+			Graphics()->SwitchWindowScreen(Graphics()->GetWindowScreen(), false);
+			break;
+
+		case SDL_EVENT_DISPLAY_ADDED:
+		case SDL_EVENT_DISPLAY_REMOVED:
+			// The index of the window's display shifts when a display before it is added or removed.
+			Graphics()->Move(0, 0);
 			break;
 
 		case SDL_EVENT_WINDOW_MOVED:
@@ -822,16 +873,30 @@ int CInput::Update()
 			break;
 
 		// listen to size changes, this includes our manual changes and the ones by the window manager
-		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		case SDL_EVENT_WINDOW_RESIZED:
 			Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
 			break;
+
+		// A pure DPI change keeps the logical size but changes the pixel size, so the
+		// viewport and the HiDPI scale still have to be refreshed.
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		{
+			int Width, Height;
+			if(SDL_GetWindowSize(Window(), &Width, &Height))
+				Graphics()->GotResized(Width, Height, -1);
+			break;
+		}
 
 		// Ignore keys following a focus gain as they may be part of global
 		// shortcuts
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
 			if(m_InputGrabbed)
 			{
-#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL: https://github.com/libsdl-org/SDL/issues/13920
+#if defined(CONF_PLATFORM_MACOS)
+				// Todo: remove this when fixed in SDL: https://github.com/libsdl-org/SDL/issues/13920
+				// Relative mouse mode requested before the application was activated never
+				// reaches the system, while SDL already considers it enabled, so asking for
+				// it again does nothing. Force a real off to on transition instead.
 				MouseModeAbsolute();
 #endif
 				MouseModeRelative();
@@ -884,8 +949,8 @@ int CInput::Update()
 			return 1;
 
 		case SDL_EVENT_DROP_FILE:
-			if(Event.drop.source)
-				str_copy(m_aDropFile, Event.drop.source);
+			if(Event.drop.data)
+				str_copy(m_aDropFile, Event.drop.data);
 			break;
 		}
 	}

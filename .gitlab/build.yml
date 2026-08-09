@@ -1,4 +1,6 @@
-image: ubuntu:22.04
+# ubuntu:26.04 is pinned because libsdl3-dev is not packaged before Ubuntu 25.10.
+# Switch back to an LTS image once one ships SDL3.
+image: ubuntu:26.04
 
 stages:
   - test

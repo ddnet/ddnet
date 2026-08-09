@@ -4,7 +4,7 @@
 # docker build -t ddnet - < Dockerfile
 # 2. Run the DDNet build script
 # docker run -it -v PATH_TO_DDNET:/ddnet:ro -v PATH_TO_OUTPUT_DIRECTORY:/build ddnet ./build-all.sh
-FROM debian:12
+FROM debian:13
 
 RUN apt-get update && apt-get install -y gcc-mingw-w64-x86-64-posix \
         g++-mingw-w64-x86-64-posix \

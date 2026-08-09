@@ -13,11 +13,13 @@ concurrency:
 
 jobs:
   check-clang-san:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     env:
       CARGO_HTTP_MULTIPLEXING: false
       UBSAN_OPTIONS: log_path=SAN:print_stacktrace=1:halt_on_error=0
       ASAN_OPTIONS: log_path=SAN:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=1:halt_on_error=0
+      # Suppressed leaks must not be printed, the log file is only checked for existence.
+      LSAN_OPTIONS: suppressions=../lsan.supp:print_suppressions=0
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5

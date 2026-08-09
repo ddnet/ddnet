@@ -116,13 +116,14 @@ public:
 	const char *GetScreenName(int Screen) const override { return "EGL Offscreen"; }
 
 	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
-	void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
+	bool GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
 
 	void Minimize() override {}
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override {}
 	bool SetWindowScreen(int Index, bool MoveToCenter, ivec2 *pDesktopSize) override { return false; }
 	bool UpdateDisplayMode(int Index, ivec2 *pDesktopSize) override { return false; }
 	int GetWindowScreen() override { return 0; }
+	uint32_t GetWindowId() const override { return 0; }
 	int WindowActive() override { return 1; }
 	int WindowOpen() override { return 1; }
 	void SetWindowGrab(bool Grab) override {}

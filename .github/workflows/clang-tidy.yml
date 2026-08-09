@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   check-clang-tidy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
@@ -63,10 +63,7 @@ jobs:
     - name: Install Clang 20
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget gnupg lsb-release
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh 20 all
+        sudo apt-get install -y clang-20 clang-tidy-20
 
     - name: Build with clang-tidy
       run: |
