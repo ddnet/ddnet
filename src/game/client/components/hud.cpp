@@ -1048,7 +1048,7 @@ void CHud::RenderPlayerState(const int ClientId)
 	{
 		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(GameClient()->m_HudSkin.m_SpriteHudGunHitDisabled);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LaserHitDisabledOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_GunHitDisabledOffset, x, y);
 		x += 12;
 	}
 	if((pCharacter->m_ShotgunHitDisabled && pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got))
