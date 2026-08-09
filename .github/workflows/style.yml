@@ -19,8 +19,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        submodules: recursive
+
+    - name: Check out ddnet-libs
+      shell: bash
+      run: ./scripts/checkout_ddnet_libs.sh "${{ github.repository_owner }}" "${{ github.event.pull_request.head.repo.owner.login }}"
 
     - name: Prepare Linux
       run: |

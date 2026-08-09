@@ -17,7 +17,7 @@ UBSAN_OPTIONS=suppressions=./ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_o
 
 Check the SAN.\* files afterwards. This finds more problems than memcheck, runs faster, but requires a modern GCC/Clang compiler.
 
-On macOS with the Homebrew `sdl2-compat` package you need to set `DYLD_LIBRARY_PATH`:
+On macOS with the Homebrew `sdl3` package you need to set `DYLD_LIBRARY_PATH`:
 
 ```sh
 DYLD_LIBRARY_PATH=$(brew --prefix sdl3)/lib ./DDNet

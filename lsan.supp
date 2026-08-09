@@ -1,0 +1,4 @@
+# ALSA caches its device name hints when SDL enumerates audio devices and never
+# frees them, which surfaces as a leak inside SDL_OpenAudioDeviceStream.
+leak:libasound
+leak:snd_device_name_hint

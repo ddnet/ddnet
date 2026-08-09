@@ -14,7 +14,6 @@
 #include <engine/storage.h>
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_audio.h>
 
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>
@@ -172,27 +171,33 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 #endif
 }
 
+void CSound::FillAudioStream(SDL_AudioStream *pStream, int AdditionalAmount)
+{
+	// SDL asks for data in the app's format, which m_MaxFrames is sized for.
+	const unsigned Frames = std::min<unsigned>(AdditionalAmount / sizeof(short) / 2, m_MaxFrames);
+
+#if defined(CONF_VIDEORECORDER)
+	const bool VideoRecorderTakesSound = IVideo::Current() != nullptr && g_Config.m_ClVideoSndEnable;
+#else
+	const bool VideoRecorderTakesSound = false;
+#endif
+	if(VideoRecorderTakesSound)
+	{
+		// Mix is not called at all in this case, so play silence instead of stale samples.
+		mem_zero(m_pCallbackBuffer, Frames * 2 * sizeof(short));
+	}
+	else
+	{
+		Mix(m_pCallbackBuffer, Frames);
+	}
+	SDL_PutAudioStreamData(pStream, m_pCallbackBuffer, Frames * 2 * sizeof(short));
+}
+
 static void SdlCallback(void *pUser, SDL_AudioStream *pStream, int AdditionalAmount, int TotalAmount)
 {
-	CSound *pSound = static_cast<CSound *>(pUser);
-
-	if(AdditionalAmount > 0)
-	{
-		Uint8 *pData = SDL_stack_alloc(Uint8, AdditionalAmount);
-		if(pData)
-		{
-#if defined(CONF_VIDEORECORDER)
-			if(!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
-			{
-				pSound->Mix((short *)pData, AdditionalAmount / sizeof(short) / 2);
-			}
-#else
-			pSound->Mix((short *)pData, AdditionalAmount / sizeof(short) / 2);
-#endif
-			SDL_PutAudioStreamData(pStream, pData, AdditionalAmount);
-			SDL_stack_free(pData);
-		}
-	}
+	if(AdditionalAmount <= 0)
+		return;
+	static_cast<CSound *>(pUser)->FillAudioStream(pStream, AdditionalAmount);
 }
 
 int CSound::Init()
@@ -228,6 +233,10 @@ int CSound::Init()
 	Format.format = SDL_AUDIO_S16;
 	Format.channels = 2;
 
+	char aBufferSize[16];
+	str_format(aBufferSize, sizeof(aBufferSize), "%d", g_Config.m_SndBufferSize);
+	SDL_SetHint(SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES, aBufferSize);
+
 	// Open the audio device and start playing sound!
 	m_pDevice = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &Format, SdlCallback, this);
 	if(!m_pDevice)
@@ -240,22 +249,33 @@ int CSound::Init()
 		log_info("sound", "Sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
 	}
 
-	[[maybe_unused]] SDL_AudioSpec FormatDevice;
-	int DeviceSampleFrames;
+	SDL_AudioSpec FormatDevice;
+	int DeviceSampleFrames = 1024;
 	if(!SDL_GetAudioDeviceFormat(SDL_GetAudioStreamDevice(m_pDevice), &FormatDevice, &DeviceSampleFrames))
 	{
-		DeviceSampleFrames = 1024 * 2;
+		FormatDevice = Format;
+		DeviceSampleFrames = 1024;
 		log_error("sound", "Unable to get device format: %s", SDL_GetError());
 	}
-	m_MaxFrames = DeviceSampleFrames;
+	// The device requests whole device frames, but the callback has to answer in the
+	// app's format, so scale by the resample ratio and keep headroom for jitter.
+	const int DeviceFreq = FormatDevice.freq > 0 ? FormatDevice.freq : Format.freq;
+	m_MaxFrames = 2 * (uint32_t)(((int64_t)DeviceSampleFrames * Format.freq + DeviceFreq - 1) / DeviceFreq);
 #if defined(CONF_VIDEORECORDER)
 	m_MaxFrames = std::max(m_MaxFrames, 1024u * 2u); // make the buffer bigger just in case
 #endif
 	m_pMixBuffer = (int *)calloc(m_MaxFrames * 2, sizeof(int));
+	m_pCallbackBuffer = (short *)calloc(m_MaxFrames * 2, sizeof(short));
 
-	SDL_AudioSpec FormatOut;
-	SDL_GetAudioStreamFormat(m_pDevice, &Format, &FormatOut);
-	m_MixingRate = FormatOut.freq;
+	// The spec given to SDL_OpenAudioDeviceStream is the app's side of the stream: the
+	// callback has to produce data at this rate and SDL resamples it for the device.
+	SDL_AudioSpec FormatIn;
+	if(!SDL_GetAudioStreamFormat(m_pDevice, &FormatIn, nullptr))
+	{
+		log_error("sound", "Unable to get audio stream format: %s", SDL_GetError());
+		FormatIn = Format;
+	}
+	m_MixingRate = FormatIn.freq;
 
 	m_SoundEnabled = true;
 	Update();
@@ -286,6 +306,9 @@ void CSound::Shutdown()
 	SDL_DestroyAudioStream(m_pDevice);
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	m_pDevice = nullptr;
+
+	free(m_pCallbackBuffer);
+	m_pCallbackBuffer = nullptr;
 
 	const CLockScope LockScope(m_SoundLock);
 	for(auto &Sample : m_aSamples)

@@ -25,7 +25,9 @@ permissions:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    # Pinned to ubuntu-26.04 because libsdl3-dev is not packaged before Ubuntu 25.10.
+    # Switch back to ubuntu-latest once that is GA and ships SDL3.
+    runs-on: ubuntu-26.04
     env:
       CARGO_HTTP_MULTIPLEXING: false
 
@@ -41,8 +43,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        submodules: recursive
+
+    - name: Check out ddnet-libs
+      shell: bash
+      run: ./scripts/checkout_ddnet_libs.sh "${{ github.repository_owner }}" "${{ github.event.pull_request.head.repo.owner.login }}"
 
     - name: Prepare Linux
       if: matrix.language == 'cpp'

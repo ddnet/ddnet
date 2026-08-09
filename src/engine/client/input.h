@@ -64,7 +64,9 @@ private:
 	IEngineGraphics *Graphics() const { return m_pGraphics; }
 	IConsole *Console() const { return m_pConsole; }
 
-	SDL_Window *m_pWindow = nullptr;
+	// Resolved on demand from the graphics backend, which owns the window: it destroys
+	// and recreates it, so a cached pointer goes stale and every SDL call on it fails.
+	SDL_Window *Window() const;
 
 	// joystick
 	std::vector<CJoystick> m_vJoysticks;
@@ -108,6 +110,11 @@ private:
 	void HandleTouchUpEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTextEditingEvent(const char *pText, int Start, int Length);
+	int TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &Event);
+
+	// remainder of the scroll deltas that did not add up to a whole notch yet
+	float m_ResidualScrollX = 0.0f;
+	float m_ResidualScrollY = 0.0f;
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
 
@@ -150,7 +157,7 @@ public:
 	void StartTextInput() override;
 	void StopTextInput() override;
 	void EnsureScreenKeyboardShown() override;
-	void ClearComposition() const override;
+	void ClearComposition() override;
 	const char *GetComposition() const override { return m_CompositionString.c_str(); }
 	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }
