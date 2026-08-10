@@ -792,41 +792,67 @@ int CCollision::MoverSpeed(int x, int y, vec2 *pSpeed) const
 {
 	int Nx = std::clamp(x / 32, 0, m_Width - 1);
 	int Ny = std::clamp(y / 32, 0, m_Height - 1);
-	int Index = m_pTiles[Ny * m_Width + Nx].m_Index;
+	int MapIndex = Ny * m_Width + Nx;
 
-	if(Index != TILE_CP && Index != TILE_CP_F)
+	int Index, Flags, Speed;
+	bool NoMoverFound = true;
+	int aLayers[] = {LAYER_GAME, LAYER_FRONT, LAYER_SWITCH};
+	for(size_t i = 0; i < std::size(aLayers); i++)
 	{
-		return 0;
+		Index = 0;
+		Flags = 0;
+		Speed = 0;
+		if(aLayers[i] == LAYER_SWITCH && m_pSwitch)
+		{
+			Index = m_pSwitch[MapIndex].m_Type;
+			Flags = m_pSwitch[MapIndex].m_Flags;
+			Speed = std::min((int)m_pSwitch[MapIndex].m_Delay, 32); // Don't exceed tilesize
+		}
+		else
+		{
+			CTile *pTiles = aLayers[i] == LAYER_FRONT ? m_pFront : m_pTiles;
+			if(pTiles)
+			{
+				Index = pTiles[MapIndex].m_Index;
+				Flags = pTiles[MapIndex].m_Flags;
+				Speed = Index == TILE_CP_F ? 16 : 4;
+			}
+		}
+
+		if(Index == TILE_CP || Index == TILE_CP_F)
+		{
+			NoMoverFound = false;
+			break;
+		}
 	}
 
+	if(NoMoverFound)
+		return 0;
+
 	vec2 Target;
-	switch(m_pTiles[Ny * m_Width + Nx].m_Flags)
+	switch(Flags)
 	{
 	case ROTATION_0:
 		Target.x = 0.0f;
-		Target.y = -4.0f;
+		Target.y = -1.0f;
 		break;
 	case ROTATION_90:
-		Target.x = 4.0f;
+		Target.x = 1.0f;
 		Target.y = 0.0f;
 		break;
 	case ROTATION_180:
 		Target.x = 0.0f;
-		Target.y = 4.0f;
+		Target.y = 1.0f;
 		break;
 	case ROTATION_270:
-		Target.x = -4.0f;
+		Target.x = -1.0f;
 		Target.y = 0.0f;
 		break;
 	default:
 		Target = vec2(0.0f, 0.0f);
 		break;
 	}
-	if(Index == TILE_CP_F)
-	{
-		Target *= 4.0f;
-	}
-	*pSpeed = Target;
+	*pSpeed = Target * Speed;
 	return Index;
 }
 

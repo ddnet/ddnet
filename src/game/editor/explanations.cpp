@@ -255,6 +255,8 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 	case TILE_CP:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "SPEEDER: Causes weapons, SHIELD, HEART and SPINNING LASER to move slowly.";
+		if(Layer == LAYER_SWITCH)
+			return "SPEEDER: Causes weapons, SHIELD, HEART and SPINNING LASER to move. Adjust speed using delay (max = 32).";
 		break;
 	case TILE_CP_F:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
