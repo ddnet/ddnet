@@ -121,7 +121,7 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 			return "FREEZE: Freezes tees for defined amount of seconds.";
 		break;
 	case TILE_UNFREEZE:
-		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "UNFREEZE: Unfreezes tees immediately.";
 		break;
 	case TILE_TELEINEVIL:
