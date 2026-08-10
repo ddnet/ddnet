@@ -2555,6 +2555,7 @@ if(CLIENT)
     components/menus_settings_assets.cpp
     components/menus_settings_controls.cpp
     components/menus_settings_controls.h
+    components/menus_settings_credits.cpp
     components/menus_settings_ddnet.cpp
     components/menus_settings_general.cpp
     components/menus_settings_graphics.cpp
