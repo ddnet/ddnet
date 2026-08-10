@@ -1290,12 +1290,14 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_IsLocal = false;
 
 	m_LastWeapon = WEAPON_HAMMER;
+	m_LastSnapWeapon = -1;
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
 	m_PrevPrevPos = m_PrevPos = m_Pos = vec2(pChar->m_X, pChar->m_Y);
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = Id;
+	m_Core.m_ActiveWeapon = -1; // set by the first Read below
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
@@ -1541,6 +1543,10 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 		if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
 			SetActiveWeapon(pChar->m_Weapon);
+	}
+	else if(m_Core.m_ActiveWeapon < 0)
+	{
+		SetActiveWeapon(pChar->m_Weapon);
 	}
 
 	// reset all input except direction and hook for non-local players (as in vanilla prediction)
