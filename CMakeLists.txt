@@ -3267,6 +3267,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     name_ban_test.cpp
     net_test.cpp
     netaddr_test.cpp
+    network_test.cpp
     os_test.cpp
     packer_test.cpp
     prng_test.cpp
