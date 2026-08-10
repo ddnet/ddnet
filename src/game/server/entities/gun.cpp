@@ -37,6 +37,11 @@ void CGun::Tick()
 		m_EvalTick = Server()->Tick();
 		GameServer()->Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;
+
+		if(m_Core != vec2(0.0f, 0.0f))
+		{
+			TeleportToTile(m_Pos - m_Core, m_Pos);
+		}
 	}
 	if(g_Config.m_SvPlasmaPerSec > 0)
 	{

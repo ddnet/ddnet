@@ -726,6 +726,17 @@ int CCollision::IsTeleportHook(int Index) const
 	return 0;
 }
 
+int CCollision::IsTeleportEntity(int Index) const
+{
+	if(Index < 0 || !m_pTele)
+		return 0;
+
+	if(m_pTele[Index].m_Type == TILE_TELEINENTITY)
+		return m_pTele[Index].m_Number;
+
+	return 0;
+}
+
 bool CCollision::IsSpeedup(int Index) const
 {
 	dbg_assert(Index >= 0, "Invalid speedup index %d", Index);
@@ -797,12 +808,12 @@ int CCollision::MoverSpeed(int x, int y, vec2 *pSpeed) const
 	int Index, Flags, Speed;
 	bool NoMoverFound = true;
 	int aLayers[] = {LAYER_GAME, LAYER_FRONT, LAYER_SWITCH};
-	for(size_t i = 0; i < std::size(aLayers); i++)
+	for(auto Layer : aLayers)
 	{
 		Index = 0;
 		Flags = 0;
 		Speed = 0;
-		if(aLayers[i] == LAYER_SWITCH && m_pSwitch)
+		if(Layer == LAYER_SWITCH && m_pSwitch)
 		{
 			Index = m_pSwitch[MapIndex].m_Type;
 			Flags = m_pSwitch[MapIndex].m_Flags;
@@ -810,7 +821,7 @@ int CCollision::MoverSpeed(int x, int y, vec2 *pSpeed) const
 		}
 		else
 		{
-			CTile *pTiles = aLayers[i] == LAYER_FRONT ? m_pFront : m_pTiles;
+			CTile *pTiles = Layer == LAYER_FRONT ? m_pFront : m_pTiles;
 			if(pTiles)
 			{
 				Index = pTiles[MapIndex].m_Index;

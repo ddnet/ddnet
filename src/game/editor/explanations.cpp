@@ -152,6 +152,10 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_TELE)
 			return "HOOK TELEPORT: Teleports hooks entering into it to TELEPORT TO, where it comes out. Direction, angle and length are kept.";
 		break;
+	case TILE_TELEINENTITY:
+		if(Layer == LAYER_TELE)
+			return "ENTITY TELEPORT: Teleports entities like pickups, draggers, freeze lasers and turrets moving into it to TELEPORT TO. Direction is kept.";
+		break;
 	case TILE_WALLJUMP:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "WALLJUMP: Placed next to a wall. Enables climbing up the wall.";

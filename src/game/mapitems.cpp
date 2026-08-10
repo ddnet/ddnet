@@ -62,6 +62,7 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELEINEVIL ||
 		Index == TILE_TELEINWEAPON ||
 		Index == TILE_TELEINHOOK ||
+		Index == TILE_TELEINENTITY ||
 		Index == TILE_TELEIN ||
 		Index == TILE_TELEOUT ||
 		Index == TILE_TELECHECK ||

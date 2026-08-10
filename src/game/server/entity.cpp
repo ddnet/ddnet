@@ -6,6 +6,8 @@
 #include "gamecontext.h"
 #include "player.h"
 
+#include <engine/shared/config.h>
+
 #include <game/server/gameworld.h>
 
 //////////////////////////////////////////////////
@@ -88,6 +90,30 @@ bool CEntity::GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *pOutPos)
 		{
 			return true;
 		}
+	}
+	return false;
+}
+
+bool CEntity::TeleportToTile(vec2 PrevPos, vec2 Pos, bool Weapon)
+{
+	int x = GameServer()->Collision()->GetIndex(PrevPos, Pos);
+	int z;
+	if(Weapon)
+	{
+		if(g_Config.m_SvOldTeleportWeapons)
+			z = GameServer()->Collision()->IsTeleport(x);
+		else
+			z = GameServer()->Collision()->IsTeleportWeapon(x);
+	}
+	else
+	{
+		z = GameServer()->Collision()->IsTeleportEntity(x);
+	}
+	if(z && !GameServer()->Collision()->TeleOuts(z - 1).empty())
+	{
+		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(z - 1).size());
+		m_Pos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
+		return true;
 	}
 	return false;
 }
