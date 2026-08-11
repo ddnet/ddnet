@@ -137,7 +137,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static_assert(SKIP_DURATIONS_SECONDS[DEFAULT_SKIP_DURATION_INDEX] == 5.0f);
 	static_assert(std::size(SKIP_DURATIONS_SECONDS) == std::size(SKIP_DURATIONS_STRINGS));
 
-	const int DemoLengthSeconds = TotalTicks / Client()->GameTickSpeed();
+	const float DemoLengthSeconds = TotalTicks / static_cast<float>(Client()->GameTickSpeed());
 	int NumDurationLabels = 0;
 	for(size_t i = 0; i < std::size(SKIP_DURATIONS_SECONDS); ++i)
 	{
