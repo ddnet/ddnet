@@ -1565,7 +1565,7 @@ Add clan
 == 
 
 Add friend
-== 
+== Afegir amic
 
 Server filter
 == 

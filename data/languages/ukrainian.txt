@@ -932,10 +932,10 @@ Ingame controller mode
 == Режим контролера у грі
 
 Ingame controller sens.
-== Чутливість контролера в грі
+== Чутливість контролера в грі.
 
 Ingame mouse sens.
-== Чутливість миші в грі
+== Чутливість миші в грі.
 
 Initializing assets
 == Ініціалізація текстур

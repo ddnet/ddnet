@@ -1804,10 +1804,10 @@ Add clanmates by entering their clan below and leaving the name blank.
 == 
 
 Add clan
-== 
+== Agregar clan
 
 Add friend
-== 
+== Añadir amigo
 
 Server filter
 == 

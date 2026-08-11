@@ -1093,7 +1093,7 @@ Add clan
 == 
 
 Add friend
-== 
+== Добави Приятел
 
 Server filter
 == 

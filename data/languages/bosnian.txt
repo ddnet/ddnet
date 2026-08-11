@@ -1399,7 +1399,7 @@ Add clan
 == 
 
 Add friend
-== 
+== Dodaj prijatelja
 
 Server filter
 == 

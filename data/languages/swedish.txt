@@ -2517,10 +2517,10 @@ Click to add this community to your favorites.
 == 
 
 Add clan
-== 
+== Lägg till klan
 
 Add friend
-== 
+== Lägg till kompis
 
 Refresh the demo list
 == 
