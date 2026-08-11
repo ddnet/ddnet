@@ -1508,7 +1508,7 @@ Add clan
 == 
 
 Add friend
-== 
+== Legg til venn
 
 Server filter
 == 

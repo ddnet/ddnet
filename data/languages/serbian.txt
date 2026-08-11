@@ -1849,10 +1849,10 @@ Add clanmates by entering their clan below and leaving the name blank.
 == 
 
 Add clan
-== 
+== Додај клан
 
 Add friend
-== 
+== Dodaj prijatelja
 
 Server filter
 == 

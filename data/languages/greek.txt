@@ -1099,7 +1099,7 @@ Add clan
 == 
 
 Add friend
-== 
+== Προσθήκη Φίλου
 
 Server filter
 == 

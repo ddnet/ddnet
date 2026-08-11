@@ -1927,10 +1927,10 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Add clan
-== 
+== Aldoni klanon
 
 Add friend
-== 
+== Aldoni amikon
 
 [Demo playback]
 Live

@@ -2517,10 +2517,10 @@ Click to add this community to your favorites.
 == 
 
 Add clan
-== 
+== Pridať klan
 
 Add friend
-== 
+== Pridať priateľa
 
 Refresh the demo list
 == 
