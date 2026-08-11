@@ -4755,6 +4755,10 @@ void CGameClient::LoadMapSettings()
 
 		int Size = Map()->GetDataSize(pItem->m_Settings);
 		char *pSettings = (char *)Map()->GetData(pItem->m_Settings);
+		// The settings are read as a sequence of null terminated strings, and
+		// the data can also fail to decompress while its claimed size stays
+		if(pSettings == nullptr || Size <= 0 || pSettings[Size - 1] != '\0')
+			break;
 		char *pNext = pSettings;
 		Console()->SetUnknownCommandCallback(UnknownMapSettingCallback, nullptr);
 		while(pNext < pSettings + Size)
@@ -4764,7 +4768,6 @@ void CGameClient::LoadMapSettings()
 			pNext += StrSize;
 		}
 		Console()->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
-		Map()->UnloadData(pItem->m_Settings);
 		break;
 	}
 }

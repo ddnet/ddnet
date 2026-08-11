@@ -9,7 +9,6 @@
 
 #include <game/mapitems.h>
 
-#include <algorithm>
 #include <vector>
 
 static void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
@@ -36,7 +35,13 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		return;
 	}
 
-	char *pSettings = (char *)malloc(std::max(1, TotalLength));
+	if(TotalLength == 0)
+	{
+		log_error("config_store", "Failed to import settings from '%s': the config is empty, and the map cannot store an empty settings block", pConfigName);
+		return;
+	}
+
+	char *pSettings = (char *)malloc(TotalLength);
 	int Offset = 0;
 	for(const char *pLine : vpLines)
 	{
@@ -69,7 +74,7 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 					SettingsIndex = pInfo->m_Settings;
 					char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
 					int DataSize = Reader.GetDataSize(SettingsIndex);
-					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
+					if(pMapSettings != nullptr && DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
 						log_info("config_store", "Configs coincide, not updating map");
 						free(pSettings);
@@ -117,6 +122,13 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		}
 		unsigned char *pData = (unsigned char *)Reader.GetData(i);
 		int Size = Reader.GetDataSize(i);
+		if(pData == nullptr || Size <= 0)
+		{
+			log_error("config_store", "Failed to import settings from '%s': failed to read data %d of map '%s'", pConfigName, i, pMapName);
+			free(pSettings);
+			Reader.Close();
+			return;
+		}
 		Writer.AddData(Size, pData);
 		Reader.UnloadData(i);
 	}

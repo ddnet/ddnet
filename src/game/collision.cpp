@@ -3,6 +3,7 @@
 #include <antibot/antibot_data.h>
 
 #include <base/dbg.h>
+#include <base/log.h>
 #include <base/math.h>
 #include <base/mem.h>
 #include <base/vmath.h>
@@ -57,6 +58,20 @@ void CCollision::Init(class CLayers *pLayers)
 	m_Height = m_pLayers->GameLayer()->m_Height;
 	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
 	m_HasHookTeleIns = false;
+
+	// The dimensions and the tile data of the game layer both come from the map
+	// without being checked against each other. Everything below clamps into the
+	// dimensions and indexes the tiles, so use an empty game layer instead of
+	// reading past the tile data or clamping into an empty range.
+	static CTile s_EmptyTile;
+	if(m_Width <= 0 || m_Height <= 0 || m_pTiles == nullptr ||
+		(size_t)m_pLayers->Map()->GetDataSize(m_pLayers->GameLayer()->m_Data) < (size_t)m_Width * m_Height * sizeof(CTile))
+	{
+		log_error("collision", "Game layer of the map is invalid (%d * %d)", m_Width, m_Height);
+		m_Width = 1;
+		m_Height = 1;
+		m_pTiles = &s_EmptyTile;
+	}
 
 	if(m_pLayers->TeleLayer())
 	{

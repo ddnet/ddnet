@@ -9,10 +9,15 @@
 
 #include <game/mapitems.h>
 
-// global new layers data (set by ReplaceAreaTiles and ReplaceAreaQuads)
-static void *g_apNewData[1024];
-static void *g_apNewItem[1024];
-static int g_aNewDataSize[1024];
+#include <cstdint>
+#include <limits>
+#include <vector>
+
+// global new layers data (set by ReplaceAreaTiles and ReplaceAreaQuads),
+// indexed by the data and item indices of the destination map
+static std::vector<void *> g_vpNewData;
+static std::vector<void *> g_vpNewItem;
+static std::vector<int> g_vNewDataSize;
 
 class CMapObject // quad pivot or tile layer
 {
@@ -102,12 +107,6 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	for(int i = 0; i < 1024; i++)
-	{
-		g_apNewData[i] = g_apNewItem[i] = nullptr;
-		g_aNewDataSize[i] = 0;
-	}
-
 	return ReplaceArea(pStorage.get(), aaMapNames, aaaGameAreas) ? 0 : 1;
 }
 
@@ -121,6 +120,10 @@ bool ReplaceArea(IStorage *pStorage, const char aaMapNames[3][64], const float a
 	if(!CompareLayers(aaMapNames, aInputMaps))
 		return false;
 	CompareGroups(aaMapNames, aInputMaps);
+
+	g_vpNewData.assign(aInputMaps[1].NumData(), nullptr);
+	g_vpNewItem.assign(aInputMaps[1].NumItems(), nullptr);
+	g_vNewDataSize.assign(aInputMaps[1].NumData(), 0);
 
 	int aLayersStart[2], LayersCount;
 	for(int i = 0; i < 2; i++)
@@ -184,8 +187,8 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap)
 			continue;
 		}
 
-		if(g_apNewItem[i])
-			pItem = g_apNewItem[i];
+		if(g_vpNewItem[i])
+			pItem = g_vpNewItem[i];
 
 		int Size = InputMap.GetItemSize(i);
 		OutputMap.AddItem(Type, Id, Size, pItem, &Uuid);
@@ -193,8 +196,8 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap)
 
 	for(int i = 0; i < InputMap.NumData(); i++)
 	{
-		void *pData = g_apNewData[i] ? g_apNewData[i] : InputMap.GetData(i);
-		int Size = g_aNewDataSize[i] ? g_aNewDataSize[i] : InputMap.GetDataSize(i);
+		void *pData = g_vpNewData[i] ? g_vpNewData[i] : InputMap.GetData(i);
+		int Size = g_vNewDataSize[i] ? g_vNewDataSize[i] : InputMap.GetDataSize(i);
 		OutputMap.AddData(Size, pData);
 	}
 
@@ -278,6 +281,14 @@ void ReplaceAreaTiles(CDataFileReader aInputMaps[2], const float aaaGameAreas[][
 	{
 		apTilemap[i] = (CMapItemLayerTilemap *)apItem[i];
 		apTile[i] = (CTile *)aInputMaps[i].GetData(apTilemap[i]->m_Data);
+		// The dimensions of a layer are not checked against its tile data anywhere
+		if(apTile[i] == nullptr || apTilemap[i]->m_Width <= 0 || apTilemap[i]->m_Height <= 0 ||
+			(int64_t)apTilemap[i]->m_Width * apTilemap[i]->m_Height * 32 > (int64_t)std::numeric_limits<int>::max() ||
+			(size_t)aInputMaps[i].GetDataSize(apTilemap[i]->m_Data) < sizeof(CTile) * (size_t)apTilemap[i]->m_Width * apTilemap[i]->m_Height)
+		{
+			dbg_msg("map_replace_area", "Skipping tile layer: tiles are missing or truncated");
+			return;
+		}
 		aObs[i] = CreateMapObject(apLayerGroups[i], 0, 0, apTilemap[i]->m_Width * 32, apTilemap[i]->m_Height * 32);
 	}
 
@@ -296,7 +307,9 @@ void ReplaceAreaTiles(CDataFileReader aInputMaps[2], const float aaaGameAreas[][
 			ReplaceDestinationTiles(apTilemap, apTile, aaaReplaceableAreas);
 	}
 
-	g_apNewData[apTilemap[1]->m_Data] = apTile[1];
+	// The data index comes from the map file
+	if(apTilemap[1]->m_Data >= 0 && apTilemap[1]->m_Data < (int)g_vpNewData.size())
+		g_vpNewData[apTilemap[1]->m_Data] = apTile[1];
 }
 
 void RemoveDestinationTiles(CMapItemLayerTilemap *pTilemap, CTile *pTile, float aaReplaceableArea[2][2])
@@ -382,7 +395,16 @@ void ReplaceAreaQuads(CDataFileReader aInputMaps[2], const float aaaGameAreas[][
 
 	CQuad *apQuads[3];
 	for(int i = 0; i < 2; i++)
+	{
 		apQuads[i] = (CQuad *)aInputMaps[i].GetDataSwapped(apQuadLayer[i]->m_Data);
+		// The number of quads of a layer is not checked against its data anywhere
+		if(apQuads[i] == nullptr || apQuadLayer[i]->m_NumQuads < 0 ||
+			(size_t)aInputMaps[i].GetDataSize(apQuadLayer[i]->m_Data) < sizeof(CQuad) * (size_t)apQuadLayer[i]->m_NumQuads)
+		{
+			dbg_msg("map_replace_area", "Skipping quad layer: quads are missing or truncated");
+			return;
+		}
+	}
 
 	apQuads[2] = new CQuad[apQuadLayer[0]->m_NumQuads + apQuadLayer[1]->m_NumQuads];
 	int QuadsCounter = 0;
@@ -392,10 +414,14 @@ void ReplaceAreaQuads(CDataFileReader aInputMaps[2], const float aaaGameAreas[][
 
 	if(DataChanged)
 	{
-		g_apNewData[apQuadLayer[1]->m_Data] = apQuads[2];
-		g_aNewDataSize[apQuadLayer[1]->m_Data] = ((int)sizeof(CQuad)) * QuadsCounter;
+		// The data index comes from the map file
+		if(apQuadLayer[1]->m_Data >= 0 && apQuadLayer[1]->m_Data < (int)g_vpNewData.size())
+		{
+			g_vpNewData[apQuadLayer[1]->m_Data] = apQuads[2];
+			g_vNewDataSize[apQuadLayer[1]->m_Data] = ((int)sizeof(CQuad)) * QuadsCounter;
+		}
 		apQuadLayer[1]->m_NumQuads = QuadsCounter;
-		g_apNewItem[ItemNumber] = apItem[1];
+		g_vpNewItem[ItemNumber] = apItem[1];
 	}
 	else
 		delete[] apQuads[2];

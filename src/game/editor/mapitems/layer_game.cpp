@@ -16,7 +16,8 @@ CLayerGame::~CLayerGame() = default;
 
 CTile CLayerGame::GetTile(int x, int y) const
 {
-	if(Map()->m_pFrontLayer && Map()->m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+	// The front layer does not necessarily have the same dimensions as this layer
+	if(Map()->m_pFrontLayer && Map()->m_pFrontLayer->IsInside(x, y) && Map()->m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
 		return CTile{TILE_THROUGH_CUT};
 	}
@@ -40,11 +41,12 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), GameGroupIndex, LayerIndex));
 		}
 		CLayerTiles::SetTile(x, y, CTile{TILE_NOHOOK});
-		Map()->m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_THROUGH_CUT}); // NOLINT(bugprone-parent-virtual-call)
+		if(Map()->m_pFrontLayer->IsInside(x, y))
+			Map()->m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_THROUGH_CUT}); // NOLINT(bugprone-parent-virtual-call)
 	}
 	else
 	{
-		if(Editor()->m_SelectEntitiesImage == "DDNet" && Map()->m_pFrontLayer && Map()->m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+		if(Editor()->m_SelectEntitiesImage == "DDNet" && Map()->m_pFrontLayer && Map()->m_pFrontLayer->IsInside(x, y) && Map()->m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 		{
 			Map()->m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_AIR}); // NOLINT(bugprone-parent-virtual-call)
 		}

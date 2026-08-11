@@ -138,10 +138,10 @@ void CLayerTiles::PrepareForSave()
 	}
 }
 
-void CLayerTiles::ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesSize) const
+void CLayerTiles::ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesByteSize) const
 {
 	const size_t DestSize = (size_t)m_Width * m_Height;
-	if(SavedTilesSize >= DestSize)
+	if(SavedTilesByteSize >= DestSize * sizeof(CTile))
 	{
 		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
 		for(size_t TileIndex = 0; TileIndex < DestSize; ++TileIndex)
@@ -551,11 +551,12 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			bool HasTile = GetTile(fx, fy).m_Index;
 			if(!Empty && pLt->GetTile(x % pLt->m_Width, y % pLt->m_Height).m_Index == TILE_THROUGH_CUT)
 			{
-				if(m_HasGame && Map()->m_pFrontLayer)
+				// The other layer does not necessarily have the same dimensions as this layer
+				if(m_HasGame && Map()->m_pFrontLayer && Map()->m_pFrontLayer->IsInside(fx, fy))
 				{
 					HasTile = HasTile || Map()->m_pFrontLayer->GetTile(fx, fy).m_Index;
 				}
-				else if(m_HasFront)
+				else if(m_HasFront && Map()->m_pGameLayer->IsInside(fx, fy))
 				{
 					HasTile = HasTile || Map()->m_pGameLayer->GetTile(fx, fy).m_Index;
 				}
@@ -593,11 +594,12 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 			bool HasTile = GetTile(fx, fy).m_Index;
 			if(pTileLayer->CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 			{
-				if(m_HasGame && Map()->m_pFrontLayer)
+				// The other layer does not necessarily have the same dimensions as this layer
+				if(m_HasGame && Map()->m_pFrontLayer && Map()->m_pFrontLayer->IsInside(fx, fy))
 				{
 					HasTile = HasTile || Map()->m_pFrontLayer->GetTile(fx, fy).m_Index;
 				}
-				else if(m_HasFront)
+				else if(m_HasFront && Map()->m_pGameLayer->IsInside(fx, fy))
 				{
 					HasTile = HasTile || Map()->m_pGameLayer->GetTile(fx, fy).m_Index;
 				}

@@ -112,6 +112,10 @@ public:
 	CLayerTiles(const CLayerTiles &Other);
 	~CLayerTiles() override;
 
+	// GetTile and SetTile do not check their coordinates, which is fine as long as
+	// they are derived from the dimensions of this layer. Use this where one layer
+	// is indexed with the coordinates of another one.
+	[[nodiscard]] bool IsInside(int x, int y) const { return x >= 0 && y >= 0 && x < m_Width && y < m_Height; }
 	[[nodiscard]] virtual CTile GetTile(int x, int y) const;
 	virtual void SetTile(int x, int y, CTile Tile);
 	void SetTileIgnoreHistory(int x, int y, CTile Tile) const;
@@ -168,7 +172,7 @@ public:
 	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 
 	void PrepareForSave();
-	void ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesSize) const;
+	void ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesByteSize) const;
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{

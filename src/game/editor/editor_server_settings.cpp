@@ -18,6 +18,7 @@
 #include <game/editor/editor_history.h>
 #include <game/gamecore.h>
 
+#include <algorithm>
 #include <iterator>
 
 static const int FONT_SIZE = 12.0f;
@@ -1269,7 +1270,7 @@ void CMapSettingsBackend::CContext::UpdateFromString(const char *pStr)
 	while(*pIterator != ' ' && *pIterator != '\0')
 		pIterator++;
 
-	str_copy(m_aCommand, aInputString, (pIterator - aInputString) + 1);
+	str_copy(m_aCommand, aInputString, std::min<size_t>((pIterator - aInputString) + 1, sizeof(m_aCommand)));
 
 	// Get the command if it is a recognized one
 	for(auto &pSetting : m_pBackend->m_vpMapSettings)
