@@ -145,12 +145,8 @@ bool CTeamrank::GetSqlTop5Team(IDbConnection *pSqlServer, bool *pEnd, char *pErr
 	return true;
 }
 
-bool CScoreWorker::LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::LoadBestTime(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlLoadBestTimeRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreLoadBestTimeResult *>(pGameData->m_pResult.get());
 
@@ -179,12 +175,8 @@ bool CScoreWorker::LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGame
 }
 
 // update stuff
-bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::LoadPlayerData(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	pResult->SetVariant(CScorePlayerResult::PLAYER_INFO);
@@ -265,12 +257,8 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 	return true;
 }
 
-bool CScoreWorker::LoadPlayerTimeCp(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::LoadPlayerTimeCp(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::LoadPlayerTimeCp(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -319,12 +307,8 @@ bool CScoreWorker::LoadPlayerTimeCp(IDbConnection *pSqlServer, const ISqlData *p
 	return true;
 }
 
-bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::MapVote(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -385,12 +369,8 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	return true;
 }
 
-bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::MapInfo(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
@@ -538,12 +518,8 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	return true;
 }
 
-bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+bool CScoreWorkerV1::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::SaveScore(pSqlServer, pGameData, w, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -704,12 +680,8 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 }
 
-bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+bool CScoreWorkerV1::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::SaveTeamScore(pSqlServer, pGameData, w, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
 
 	char aBuf[512];
@@ -883,12 +855,8 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 	return true;
 }
 
-bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::ShowRank(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
@@ -1010,12 +978,8 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	return true;
 }
 
-bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::ShowTeamRank(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
@@ -1099,12 +1063,8 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 	return true;
 }
 
-bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::ShowTop(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
@@ -1232,12 +1192,8 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	return End;
 }
 
-bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::ShowTeamTop5(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -1335,12 +1291,8 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 	return true;
 }
 
-bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::ShowPlayerTeamTop5(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -1433,12 +1385,8 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 	return true;
 }
 
-bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::ShowTimes(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -1554,12 +1502,8 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	return true;
 }
 
-bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::ShowPoints(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -1604,12 +1548,8 @@ bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	return true;
 }
 
-bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::ShowTopPoints(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -1657,12 +1597,8 @@ bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGam
 	return true;
 }
 
-bool CScoreWorker::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::RandomMap(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
 
@@ -1714,12 +1650,8 @@ bool CScoreWorker::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	return true;
 }
 
-bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::RandomUnfinishedMap(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
 
@@ -1787,12 +1719,8 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 	return true;
 }
 
-bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+bool CScoreWorkerV1::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::SaveTeam(pSqlServer, pGameData, w, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlTeamSaveData *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
 
@@ -1922,12 +1850,8 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	return true;
 }
 
-bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+bool CScoreWorkerV1::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::LoadTeam(pSqlServer, pGameData, w, pError, ErrorSize);
-	}
 	if(w == Write::NORMAL_SUCCEEDED || w == Write::BACKUP_FIRST)
 		return true;
 	const auto *pData = dynamic_cast<const CSqlTeamLoadRequest *>(pGameData);
@@ -2062,12 +1986,8 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	return true;
 }
 
-bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorkerV1::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	if(pSqlServer->SchemaVersion() >= 2)
-	{
-		return CScoreWorkerV2::GetSaves(pSqlServer, pGameData, pError, ErrorSize);
-	}
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
@@ -2122,4 +2042,116 @@ bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData
 			pData->m_aMap, aLastSavedString);
 	}
 	return true;
+}
+
+// The workers are stateless, so one shared instance of each is enough.
+IScoreWorker *CScoreWorker::Worker(IDbConnection *pSqlServer)
+{
+	static CScoreWorkerV1 s_WorkerV1;
+	static CScoreWorkerV2 s_WorkerV2;
+	if(pSqlServer->SchemaVersion() >= 2)
+	{
+		return &s_WorkerV2;
+	}
+	return &s_WorkerV1;
+}
+
+bool CScoreWorker::LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->LoadBestTime(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->RandomMap(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->RandomUnfinishedMap(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->MapVote(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->LoadPlayerData(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::LoadPlayerTimeCp(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->LoadPlayerTimeCp(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->MapInfo(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->ShowRank(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->ShowTeamRank(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->ShowTop(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->ShowTeamTop5(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->ShowPlayerTeamTop5(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->ShowTimes(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->ShowPoints(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->ShowTopPoints(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->GetSaves(pSqlServer, pGameData, pError, ErrorSize);
+}
+
+bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->SaveTeam(pSqlServer, pGameData, w, pError, ErrorSize);
+}
+
+bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->LoadTeam(pSqlServer, pGameData, w, pError, ErrorSize);
+}
+
+bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->SaveScore(pSqlServer, pGameData, w, pError, ErrorSize);
+}
+
+bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	return Worker(pSqlServer)->SaveTeamScore(pSqlServer, pGameData, w, pError, ErrorSize);
 }

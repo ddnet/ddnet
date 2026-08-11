@@ -29,8 +29,8 @@ Requires psycopg2; pymysql or MySQLdb for MySQL sources.
 import argparse
 import hashlib
 import io
-import struct
 import sqlite3
+import struct
 import sys
 import urllib.parse
 
@@ -364,7 +364,7 @@ def migrate_teams(src, pg, prefix, since):
 	if since:
 		# improvements update the row's Timestamp in place, so this catches
 		# both new and improved team ranks
-		where = "WHERE Id IN (SELECT Id FROM %s_teamrace WHERE Timestamp > %%s)" % prefix
+		where = f"WHERE Id IN (SELECT Id FROM {prefix}_teamrace WHERE Timestamp > %s)"
 		args = (since,)
 	query = f"SELECT Id, Map, Name, Time, Timestamp, GameId, DDNet7 FROM {prefix}_teamrace {where} ORDER BY Id"
 
