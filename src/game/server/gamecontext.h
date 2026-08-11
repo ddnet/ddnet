@@ -125,6 +125,7 @@ class CGameContext : public IGameServer
 	protocol7::CNetObjHandler m_NetObjHandler7;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_aTuningList[TuneZone::NUM];
+	LOCKED_TUNES m_aLockedTuning[TuneZone::NUM];
 	std::vector<std::string> m_vCensorlist;
 
 	bool m_TeeHistorianActive;
@@ -149,6 +150,10 @@ class CGameContext : public IGameServer
 	static void ConTuneResetZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLock(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockDump(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockSetMsgEnter(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwitchOpen(IConsole::IResult *pResult, void *pUserData);
 	static void ConPause(IConsole::IResult *pResult, void *pUserData);
@@ -178,6 +183,9 @@ class CGameContext : public IGameServer
 	static void ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPracticeByDefaultUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConDumpLog(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockPlayerReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockPlayerDump(IConsole::IResult *pResult, void *pUserData);
 
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
@@ -213,6 +221,7 @@ public:
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
 	CNetObjHandler *GetNetObjHandler() override { return &m_NetObjHandler; }
 	protocol7::CNetObjHandler *GetNetObjHandler7() override { return &m_NetObjHandler7; }
+	LOCKED_TUNES *LockedTuning() { return m_aLockedTuning; }
 
 	CGameContext(bool Resetting = false);
 	~CGameContext() override;
@@ -266,6 +275,7 @@ public:
 	int m_VoteEnforce;
 	char m_aaZoneEnterMsg[TuneZone::NUM][256]; // 0 is used for switching from or to area without tunings
 	char m_aaZoneLeaveMsg[TuneZone::NUM][256];
+	char m_aaTuneLockMsg[TuneZone::NUM][256];
 
 	void CreateAllEntities(bool Initial);
 	CPlayer *CreatePlayer(int ClientId, int StartTeam, bool Afk, int LastWhisperTo);
@@ -299,7 +309,7 @@ public:
 	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
 	void SnapSwitchers(int SnappingClient);
-	void SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1) const;
+	void SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1, int ShotgunStrength = 0, int BounceNum = 0, int BounceCost = 0, int BounceDelay = 0) const;
 	void SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const;
 
 	enum
@@ -495,7 +505,6 @@ private:
 	void Teleport(CCharacter *pChr, vec2 Pos);
 	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConCredits(IConsole::IResult *pResult, void *pUserData);
 	static void ConInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConHelp(IConsole::IResult *pResult, void *pUserData);
 	static void ConSettings(IConsole::IResult *pResult, void *pUserData);

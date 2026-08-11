@@ -2446,6 +2446,12 @@ Dragger Inner Color
 Download
 == Ladda ner
 
+Add clan
+== Lägg till klan
+
+Add friend
+== Lägg till kompis
+
 Team save in progress. You'll be able to load with '/load %s'
 == 
 
@@ -2516,22 +2522,16 @@ Click to remove this community from your favorites.
 Click to add this community to your favorites.
 == 
 
-Add clan
-== 
-
-Add friend
-== 
-
 Refresh the demo list
-== 
-
-Are you sure that you want to disconnect and play this demo?
 == 
 
 Open the selected folder
 == 
 
 Play the selected demo
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Info
@@ -2543,6 +2543,10 @@ Button browser
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
 == 
 
+[Direct touch input]
+Relative aim
+== 
+
 Preview visibilities
 == 
 
@@ -2550,6 +2554,10 @@ You can manage your touch controls settings on this page. Only changes that are 
 == 
 
 Open DDNet Wiki
+== 
+
+[Predefined touch button behaviors]
+Joystick Relative Aim
 == 
 
 Buttons with this behavior execute console commands like regular key binds.
@@ -2585,6 +2593,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -2615,12 +2626,6 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
 Colors of the hook collision line:
 == 
 
@@ -2640,6 +2645,9 @@ When a Tee is hookable
 Hook collision line tip
 == 
 
+Scoreboard cursor
+== 
+
 Show background quads
 == 
 
@@ -2649,7 +2657,28 @@ Prediction margin
 Predict events (experimental)
 == 
 
-Scoreboard cursor
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+No country flags match your filter criteria
 == 
 
 Unmute

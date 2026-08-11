@@ -1244,7 +1244,7 @@ Show player target angle
 == 显示玩家瞄准角度
 
 Opacity of freeze bars inside freeze
-== 解冻进度条不透明度
+== 被冻结时解冻进度条不透明度
 
 Normal Color
 == 非相关信息颜色
@@ -2663,3 +2663,32 @@ Prediction margin
 
 Predict events (experimental)
 == 预测事件（实验性）
+
+[Direct touch input]
+Relative aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
+No country flags match your filter criteria
+== 

@@ -2084,6 +2084,12 @@ Moved ingame
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
+Add clan
+== Tilføj klan
+
+Add friend
+== Tilføj ven
+
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
@@ -2186,12 +2192,6 @@ Click to remove this community from your favorites.
 Click to add this community to your favorites.
 == 
 
-Add clan
-== 
-
-Add friend
-== 
-
 [Demo playback]
 Live
 == 
@@ -2206,13 +2206,13 @@ Map size
 Refresh the demo list
 == 
 
-Are you sure that you want to disconnect and play this demo?
-== 
-
 Open the selected folder
 == 
 
 Play the selected demo
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Save all changes before turning off the editor?
@@ -2346,6 +2346,10 @@ Active color
 Inactive color
 == 
 
+[Direct touch input]
+Relative aim
+== 
+
 Preview visibilities
 == 
 
@@ -2462,6 +2466,10 @@ Joystick Aim
 == 
 
 [Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+[Predefined touch button behaviors]
 Joystick Fire
 == 
 
@@ -2502,6 +2510,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -2530,24 +2541,6 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-This skin name cannot be used.
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-Skin could not be found.
-== 
-
-No skins match your filter criteria
 == 
 
 Show number of spectators
@@ -2637,6 +2630,9 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
+Scoreboard cursor
+== 
+
 Show background quads
 == 
 
@@ -2646,7 +2642,40 @@ Prediction margin
 Predict events (experimental)
 == 
 
-Scoreboard cursor
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+No country flags match your filter criteria
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
 == 
 
 Download

@@ -686,3 +686,107 @@ void CGameContext::LogEvent(const char *Description, int ClientId)
 		str_copy(pNewEntry->m_aClientName, Server()->ClientName(ClientId));
 	}
 }
+
+void CGameContext::ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
+		return;
+
+	const char *pParam = pResult->GetString(1);
+	if(pResult->NumArguments() == 2)
+	{
+		float Value;
+		if(pChr->GetTuning()->Get(pParam, &Value))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Value: %.2f", Value);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		}
+		return;
+	}
+
+	float Value = pResult->GetFloat(2);
+	CLockedTune LockedTune(CTuningParams::GetIndex(pParam), Value);
+
+	char aBuf[256];
+	// AllowGlobalValues = true via command. This is not possible by tile.
+	// Example: global tune gravity is 0.5, then using 0.5 from tile resets any other previous gravity lock and wont add it.
+	// Via command its possibly allowing to force lock default tuning overriding a zone. Should probably just be "false" tho.
+	int Result = SetLockedTune(pSelf->GlobalTuning(), &pChr->m_LockedTunings, LockedTune, true);
+	if(Result == 3)
+	{
+		str_format(aBuf, sizeof(aBuf), "Reset '%s' for '%s'", pParam, pSelf->Server()->ClientName(Victim));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+	else if(Result)
+	{
+		str_format(aBuf, sizeof(aBuf), "Set '%s' to %.2f for '%s'", pParam, Value, pSelf->Server()->ClientName(Victim));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+	else
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+
+	if(Result)
+	{
+		pChr->ApplyLockedTunings();
+	}
+}
+
+void CGameContext::ConTuneLockPlayerReset(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
+		return;
+
+	char aBuf[128];
+	if(pResult->NumArguments() > 1)
+	{
+		const char *pParam = pResult->GetString(1);
+		float Value;
+		if(pSelf->GlobalTuning()->Get(pParam, &Value))
+		{
+			CLockedTune LockedTune(CTuningParams::GetIndex(pParam), Value);
+			SetLockedTune(pSelf->GlobalTuning(), &pChr->m_LockedTunings, LockedTune);
+			pChr->ApplyLockedTunings();
+			str_format(aBuf, sizeof(aBuf), "Reset '%s' for '%s'", pParam, pSelf->Server()->ClientName(Victim));
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Invalid tuning parameter");
+		}
+	}
+	else if(!pChr->m_LockedTunings.empty())
+	{
+		pChr->m_LockedTunings.clear();
+		pChr->ApplyLockedTunings();
+		str_format(aBuf, sizeof(aBuf), "Reset all locked tunings for '%s'", pSelf->Server()->ClientName(Victim));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+}
+
+void CGameContext::ConTuneLockPlayerDump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
+		return;
+
+	char aBuf[256];
+	const char *pName = pSelf->Server()->ClientName(Victim);
+	for(auto &LockedTune : pChr->m_LockedTunings)
+	{
+		str_format(aBuf, sizeof(aBuf), "lock '%s': %s %.2f", pName, CTuningParams::Name(LockedTune.m_ParamIndex), (float)LockedTune.m_Value);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+}

@@ -1505,6 +1505,12 @@ Absolute
 English translation by the DDNet Team
 == Galician translation by TormentaDeFacha and Mercadona
 
+Add clan
+== Agregar clan
+
+Add friend
+== Añadir amigo
+
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
@@ -1803,12 +1809,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == 
 
-Add clan
-== 
-
-Add friend
-== 
-
 Server filter
 == 
 
@@ -1892,13 +1892,13 @@ map not included
 Refresh the demo list
 == 
 
-Are you sure that you want to disconnect and play this demo?
-== 
-
 Open the selected folder
 == 
 
 Play the selected demo
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -2135,6 +2135,10 @@ Aim
 == 
 
 [Direct touch input]
+Relative aim
+== 
+
+[Direct touch input]
 Fire
 == 
 
@@ -2282,6 +2286,10 @@ Joystick Aim
 == 
 
 [Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+[Predefined touch button behaviors]
 Joystick Fire
 == 
 
@@ -2322,6 +2330,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -2350,46 +2361,6 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
-== 
-
-[Hertz]
-Hz
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Saves file
-== 
-
-Open the saves file
-== 
-
-Player info change cooldown
-== 
-
-This skin name cannot be used.
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-Skin could not be found.
-== 
-
-No skins match your filter criteria
-== 
-
-Show FPS
-== 
-
-Renders your frame rate in the top right
-== 
-
-Graphics card
 == 
 
 Tee
@@ -2554,6 +2525,15 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
+Scoreboard cursor
+== 
+
+Custom
+== 
+
+Axis
+== 
+
 Default length
 == 
 
@@ -2572,16 +2552,71 @@ Prediction margin
 Predict events (experimental)
 == 
 
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
 Regular background color
 == 
 
 Entities background color
 == 
 
-Basic
+[Hertz]
+Hz
 == 
 
-Custom
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
+Graphics card
+== 
+
+Player info change cooldown
+== 
+
+No country flags match your filter criteria
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Basic
 == 
 
 Are you sure that you want to delete '%s'?
@@ -2591,12 +2626,6 @@ Delete skin
 == 
 
 Unable to delete skin
-== 
-
-Scoreboard cursor
-== 
-
-Axis
 == 
 
 Download

@@ -196,8 +196,11 @@ public:
 	*/
 	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 
+	CTuningParams *TuningFromChrOrZone(int ClientId, int Zone = -1);
 	const CTuningParams *TuningList() const { return m_pTuningList; }
 	CTuningParams *TuningList() { return m_pTuningList; }
+	const CTuningParams *GlobalTuning() const { return &TuningList()[0]; }
+	CTuningParams *GlobalTuning() { return &TuningList()[0]; }
 	const CTuningParams *GetTuning(int i) const { return &TuningList()[i]; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 };

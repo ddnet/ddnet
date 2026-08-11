@@ -932,10 +932,10 @@ Ingame controller mode
 == Режим контролера у грі
 
 Ingame controller sens.
-== Чутливість контролера в грі
+== Чутливість контролера в грі.
 
 Ingame mouse sens.
-== Чутливість миші в грі
+== Чутливість миші в грі.
 
 Initializing assets
 == Ініціалізація текстур
@@ -2663,3 +2663,32 @@ Prediction margin
 
 Predict events (experimental)
 == Передбачувати події (експериментально)
+
+[Direct touch input]
+Relative aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
+No country flags match your filter criteria
+== 

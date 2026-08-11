@@ -1751,6 +1751,12 @@ Moved ingame
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
+Add clan
+== Aldoni klanon
+
+Add friend
+== Aldoni amikon
+
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == 
@@ -1926,12 +1932,6 @@ Are you sure that you want to remove the player '%s' from your friends list?
 Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
-Add clan
-== 
-
-Add friend
-== 
-
 [Demo playback]
 Live
 == 
@@ -2031,13 +2031,13 @@ Refresh the demo list
 Fetch Info
 == 
 
-Are you sure that you want to disconnect and play this demo?
-== 
-
 Open the selected folder
 == 
 
 Play the selected demo
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Unable to delete the demo '%s'
@@ -2105,6 +2105,10 @@ No buttons match your filter criteria
 == 
 
 Direct touch input while ingame
+== 
+
+[Direct touch input]
+Relative aim
 == 
 
 Direct touch input while spectating
@@ -2184,6 +2188,10 @@ Joystick Aim
 == 
 
 [Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+[Predefined touch button behaviors]
 Joystick Fire
 == 
 
@@ -2224,6 +2232,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -2252,72 +2263,6 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
-== 
-
-Dynamic Camera
-== 
-
-Smooth Dynamic Camera
-== 
-
-Switch weapon when out of ammo
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Saves file
-== 
-
-Open the saves file
-== 
-
-Open the directory that contains the configuration and user files
-== 
-
-Automatically take statboard screenshot
-== 
-
-Automatically create statboard csv
-== 
-
-Player info change cooldown
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-No skins match your filter criteria
-== 
-
-may cause delay
-== 
-
-FSAA samples
-== 
-
-Allows maps to render with more detail
-== 
-
-Renders your frame rate in the top right
-== 
-
-Enable long pain sound (used when shooting in freeze)
-== 
-
-Enable server message sound
-== 
-
-Enable regular chat sound
-== 
-
-Enable team chat sound
-== 
-
-Enable highlighted chat sound
 == 
 
 HUD
@@ -2529,6 +2474,45 @@ Dragger Inner Color
 Set all to Rifle
 == 
 
+Extras
+== 
+
+Loading assets
+== 
+
+Assets directory
+== 
+
+Open the directory to add custom assets
+== 
+
+Toggle dyncam
+== 
+
+Hammerfly dummy
+== 
+
+Scoreboard cursor
+== 
+
+Statboard
+== 
+
+Show HUD
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
+
+Controller jitter tolerance
+== 
+
+Aim bind
+== 
+
 Save the best demo of each race
 == 
 
@@ -2583,6 +2567,21 @@ Tries to predict other entities to give a feel of low latency
 AntiPing: predict other players
 == 
 
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
 AntiPing: predict weapons
 == 
 
@@ -2595,46 +2594,76 @@ Show tiles layers from BG map
 Run on join
 == 
 
+Dynamic Camera
+== 
+
+Smooth Dynamic Camera
+== 
+
+Switch weapon when out of ammo
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Automatically take statboard screenshot
+== 
+
+Automatically create statboard csv
+== 
+
+may cause delay
+== 
+
+FSAA samples
+== 
+
+Allows maps to render with more detail
+== 
+
+Renders your frame rate in the top right
+== 
+
+Player info change cooldown
+== 
+
+No country flags match your filter criteria
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Enable server message sound
+== 
+
+Enable regular chat sound
+== 
+
+Enable team chat sound
+== 
+
+Enable highlighted chat sound
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+No skins match your filter criteria
+== 
+
 Basic
-== 
-
-Extras
-== 
-
-Loading assets
-== 
-
-Assets directory
-== 
-
-Open the directory to add custom assets
-== 
-
-Toggle dyncam
-== 
-
-Hammerfly dummy
-== 
-
-Scoreboard cursor
-== 
-
-Statboard
-== 
-
-Show HUD
-== 
-
-Reset controls
-== 
-
-Are you sure that you want to reset the controls to their defaults?
-== 
-
-Controller jitter tolerance
-== 
-
-Aim bind
 == 
 
 Loading race demo files
