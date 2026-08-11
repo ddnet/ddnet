@@ -80,6 +80,15 @@ private:
 	int m_ClientId;
 };
 
+// Tunings of a laser, only sent for lasers that can be predicted by the client
+struct CSnapLaserTuning
+{
+	float m_ShotgunStrength;
+	float m_BounceNum;
+	float m_BounceCost;
+	float m_BounceDelay;
+};
+
 class CMute
 {
 public:
@@ -309,7 +318,7 @@ public:
 	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
 	void SnapSwitchers(int SnappingClient);
-	void SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1, int ShotgunStrength = 0, int BounceNum = 0, int BounceCost = 0, int BounceDelay = 0) const;
+	void SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1, const CSnapLaserTuning *pTuning = nullptr) const;
 	void SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const;
 
 	enum

@@ -292,8 +292,9 @@ void CLaser::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	int LaserType = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : (m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1);
 
+	const CSnapLaserTuning Tuning = {m_ShotgunStrength, m_BounceNum, m_BounceCost, m_BounceDelay};
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), GetId().value(),
-		m_Pos, m_From, m_EvalTick, m_Owner, LaserType, 0, m_Number, m_ShotgunStrength, m_BounceNum, m_BounceCost, m_BounceDelay);
+		m_Pos, m_From, m_EvalTick, m_Owner, LaserType, 0, m_Number, &Tuning);
 }
 
 void CLaser::SwapClients(int Client1, int Client2)

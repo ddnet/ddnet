@@ -562,7 +562,7 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 }
 
 void CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner,
-	int LaserType, int Subtype, int SwitchNumber, int ShotgunStrength, int BounceNum, int BounceCost, int BounceDelay) const
+	int LaserType, int Subtype, int SwitchNumber, const CSnapLaserTuning *pTuning) const
 {
 	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
 	{
@@ -576,11 +576,15 @@ void CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, cons
 		Laser.m_Type = LaserType;
 		Laser.m_Subtype = Subtype;
 		Laser.m_SwitchNumber = SwitchNumber;
-		Laser.m_Flags = LASERFLAG_HAS_TUNEPARAMS;
-		Laser.m_ShotgunStrength = round_to_int(ShotgunStrength * 100.f);
-		Laser.m_BounceNum = round_to_int(BounceNum * 100.f);
-		Laser.m_BounceCost = round_to_int(BounceCost * 100.f);
-		Laser.m_BounceDelay = round_to_int(BounceDelay * 100.f);
+		Laser.m_Flags = 0;
+		if(pTuning)
+		{
+			Laser.m_Flags |= LASERFLAG_HAS_TUNEPARAMS;
+			Laser.m_ShotgunStrength = round_to_int(pTuning->m_ShotgunStrength * 100.f);
+			Laser.m_BounceNum = round_to_int(pTuning->m_BounceNum * 100.f);
+			Laser.m_BounceCost = round_to_int(pTuning->m_BounceCost * 100.f);
+			Laser.m_BounceDelay = round_to_int(pTuning->m_BounceDelay * 100.f);
+		}
 		if(!Server()->Translate(Laser.m_Owner, Context.ClientId()))
 			Laser.m_Owner = -1;
 		Server()->SnapNewItem(SnapId, Laser);
