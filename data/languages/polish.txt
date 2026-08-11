@@ -2619,10 +2619,24 @@ Open the selected folder
 Play the selected demo
 == Odtwórz wybrane demo
 
+Prediction margin
+== Zakres przewidywania
+
+Predict events (experimental)
+== Przewiduj wydarzenia (eksperymentalne)
+
+[Direct touch input]
+Relative aim
+== 
+
 Preview visibilities
 == 
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
+== 
+
+[Predefined touch button behaviors]
+Joystick Relative Aim
 == 
 
 Buttons with this behavior execute console commands like regular key binds.
@@ -2649,6 +2663,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -2658,8 +2675,20 @@ Virtual joystick which always uses hook.
 The extra menu with the given number is activated.
 == 
 
-Prediction margin
-== Zakres przewidywania
+[AntiPing: predict other players]
+Off
+== 
 
-Predict events (experimental)
-== Przewiduj wydarzenia (eksperymentalne)
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
+No country flags match your filter criteria
+== 
