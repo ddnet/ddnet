@@ -65,7 +65,7 @@ bool CGLSLProgram::LinkProgram()
 		{
 			std::string Log(LogLength, '\0');
 			glGetProgramInfoLog(m_ProgramId, Log.size(), nullptr, &Log.front());
-			if(Log[Log.size() - 2] == '\n')
+			if(Log.size() >= 2 && Log[Log.size() - 2] == '\n')
 			{
 				Log[Log.size() - 2] = '\0';
 			}
