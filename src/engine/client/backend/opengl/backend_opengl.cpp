@@ -1799,13 +1799,35 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 
 void CCommandProcessorFragment_OpenGL2::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
 {
-	// TODO: cleanup the OpenGL context too
+	if(m_HasShaders)
+	{
+		glUseProgram(0);
+	}
+
+	m_pTileProgram->DeleteProgram();
+	m_pTileProgramTextured->DeleteProgram();
+	m_pBorderTileProgram->DeleteProgram();
+	m_pBorderTileProgramTextured->DeleteProgram();
+	m_pPrimitive3DProgram->DeleteProgram();
+	m_pPrimitive3DProgramTextured->DeleteProgram();
+
 	delete m_pTileProgram;
 	delete m_pTileProgramTextured;
+	delete m_pBorderTileProgram;
+	delete m_pBorderTileProgramTextured;
 	delete m_pPrimitive3DProgram;
 	delete m_pPrimitive3DProgramTextured;
+
+	for(int i = 0; i < (int)m_vTextures.size(); ++i)
+	{
+		DestroyTexture(i);
+	}
+
 	for(auto &BufferObject : m_vBufferObjectIndices)
+	{
+		glDeleteBuffers(1, &BufferObject.m_BufferObjectId);
 		free(BufferObject.m_pData);
+	}
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand)
