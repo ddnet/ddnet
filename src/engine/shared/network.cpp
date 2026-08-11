@@ -351,6 +351,10 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		}
 		else
 		{
+			if(pPacket->m_DataSize > (int)sizeof(pPacket->m_aChunkData))
+			{
+				return -1;
+			}
 			mem_copy(pPacket->m_aChunkData, &pBuffer[DataStart], pPacket->m_DataSize);
 		}
 	}

@@ -443,7 +443,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientId), pReason);
 		else
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientId));
-		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1);
 
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientId, Server()->ClientName(ClientId));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
@@ -654,7 +654,10 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
-	GameInfoEx.m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE | GAMEINFOFLAG2_DDRACE_TEAM | GAMEINFOFLAG2_PREDICT_EVENTS;
+	GameInfoEx.m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE |
+			      GAMEINFOFLAG2_DDRACE_TEAM |
+			      GAMEINFOFLAG2_PREDICT_EVENTS |
+			      GAMEINFOFLAG2_SUPPORTS_128_TEAMS;
 	if(g_Config.m_SvNoWeakHook)
 		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	GameInfoEx.m_Version = GAMEINFO_CURVERSION;

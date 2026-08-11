@@ -26,8 +26,8 @@ public:
 
 	CNetObj_Projectile NetInfoVanilla() const;
 	bool NetIsInfoLegacyCompatible() const;
-	CNetObj_DDRaceProjectile NetInfoLegacy() const;
-	CNetObj_DDNetProjectile NetInfo() const;
+	CNetObj_DDRaceProjectile NetInfoLegacy(int SnappingClient);
+	CNetObj_DDNetProjectile NetInfo(int SnappingClient);
 	CNetObj_Projectile NetInfoBackwardsCompatible();
 
 	void Reset() override;

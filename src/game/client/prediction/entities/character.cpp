@@ -36,7 +36,7 @@ void CCharacter::SetSuper(bool Super)
 {
 	m_Core.m_Super = Super;
 	if(m_Core.m_Super)
-		TeamsCore()->Team(GetCid(), TeamsCore()->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
+		TeamsCore()->Team(GetCid(), TeamsCore()->TeamSuper());
 }
 
 bool CCharacter::IsGrounded()
@@ -773,7 +773,7 @@ bool CCharacter::IsSwitchActiveCb(unsigned char Number, void *pUser)
 {
 	CCharacter *pThis = (CCharacter *)pUser;
 	auto &aSwitchers = pThis->Switchers();
-	return !aSwitchers.empty() && pThis->Team() != TEAM_SUPER && aSwitchers[Number].m_aStatus[pThis->Team()];
+	return !aSwitchers.empty() && pThis->Team() != pThis->TeamsCore()->TeamSuper() && aSwitchers[Number].m_aStatus[pThis->Team()];
 }
 
 void CCharacter::HandleTiles(int Index)
@@ -965,59 +965,59 @@ void CCharacter::HandleTiles(int Index)
 	const int SwitchType = Collision()->GetSwitchType(MapIndex);
 	const int SwitchNumber = Collision()->GetSwitchNumber(MapIndex);
 	const int SwitchDelay = Collision()->GetSwitchDelay(MapIndex);
-	if(SwitchType == TILE_SWITCHOPEN && Team() != TEAM_SUPER && SwitchNumber > 0)
+	if(SwitchType == TILE_SWITCHOPEN && Team() != TeamsCore()->TeamSuper() && SwitchNumber > 0)
 	{
 		Switchers()[SwitchNumber].m_aStatus[Team()] = true;
 		Switchers()[SwitchNumber].m_aEndTick[Team()] = 0;
 		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHOPEN;
 		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = GameWorld()->GameTick();
 	}
-	else if(SwitchType == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && SwitchNumber > 0)
+	else if(SwitchType == TILE_SWITCHTIMEDOPEN && Team() != TeamsCore()->TeamSuper() && SwitchNumber > 0)
 	{
 		Switchers()[SwitchNumber].m_aStatus[Team()] = true;
 		Switchers()[SwitchNumber].m_aEndTick[Team()] = GameWorld()->GameTick() + 1 + SwitchDelay * GameWorld()->GameTickSpeed();
 		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHTIMEDOPEN;
 		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = GameWorld()->GameTick();
 	}
-	else if(SwitchType == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && SwitchNumber > 0)
+	else if(SwitchType == TILE_SWITCHTIMEDCLOSE && Team() != TeamsCore()->TeamSuper() && SwitchNumber > 0)
 	{
 		Switchers()[SwitchNumber].m_aStatus[Team()] = false;
 		Switchers()[SwitchNumber].m_aEndTick[Team()] = GameWorld()->GameTick() + 1 + SwitchDelay * GameWorld()->GameTickSpeed();
 		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHTIMEDCLOSE;
 		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = GameWorld()->GameTick();
 	}
-	else if(SwitchType == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && SwitchNumber > 0)
+	else if(SwitchType == TILE_SWITCHCLOSE && Team() != TeamsCore()->TeamSuper() && SwitchNumber > 0)
 	{
 		Switchers()[SwitchNumber].m_aStatus[Team()] = false;
 		Switchers()[SwitchNumber].m_aEndTick[Team()] = 0;
 		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHCLOSE;
 		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = GameWorld()->GameTick();
 	}
-	else if(SwitchType == TILE_FREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(SwitchType == TILE_FREEZE && Team() != TeamsCore()->TeamSuper() && !m_Core.m_Invincible)
 	{
 		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
 		{
 			Freeze(SwitchDelay);
 		}
 	}
-	else if(SwitchType == TILE_DFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(SwitchType == TILE_DFREEZE && Team() != TeamsCore()->TeamSuper() && !m_Core.m_Invincible)
 	{
 		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
 			m_Core.m_DeepFrozen = true;
 	}
-	else if(SwitchType == TILE_DUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(SwitchType == TILE_DUNFREEZE && Team() != TeamsCore()->TeamSuper() && !m_Core.m_Invincible)
 	{
 		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
 			m_Core.m_DeepFrozen = false;
 	}
-	else if(SwitchType == TILE_LFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(SwitchType == TILE_LFREEZE && Team() != TeamsCore()->TeamSuper() && !m_Core.m_Invincible)
 	{
 		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
 		{
 			m_Core.m_LiveFrozen = true;
 		}
 	}
-	else if(SwitchType == TILE_LUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(SwitchType == TILE_LUNFREEZE && Team() != TeamsCore()->TeamSuper() && !m_Core.m_Invincible)
 	{
 		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
 		{
@@ -1304,12 +1304,14 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_IsLocal = false;
 
 	m_LastWeapon = WEAPON_HAMMER;
+	m_LastSnapWeapon = -1;
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
 	m_PrevPrevPos = m_PrevPos = m_Pos = vec2(pChar->m_X, pChar->m_Y);
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = Id;
+	m_Core.m_ActiveWeapon = -1; // set by the first Read below
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
@@ -1574,6 +1576,10 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 		if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
 			SetActiveWeapon(pChar->m_Weapon);
+	}
+	else if(m_Core.m_ActiveWeapon < 0)
+	{
+		SetActiveWeapon(pChar->m_Weapon);
 	}
 
 	// reset all input except direction and hook for non-local players (as in vanilla prediction)

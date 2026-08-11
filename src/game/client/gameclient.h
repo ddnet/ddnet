@@ -123,6 +123,8 @@ public:
 	bool m_DDRaceTeam;
 
 	bool m_PredictEvents;
+
+	bool m_Supports128Teams;
 };
 
 class CSnapEntities

@@ -436,7 +436,7 @@ jobs:
           --browser firefox \
           --browser-args=-headless \
           --port 8000 \
-          --silence_timeout=30 \
+          --silence_timeout=120 \
           --timeout=300 \
           --kill_start \
           --kill_exit \

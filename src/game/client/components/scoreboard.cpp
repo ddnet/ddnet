@@ -23,6 +23,9 @@
 #include <game/client/ui.h>
 #include <game/localization.h>
 
+// Horizontal spacing of the scoreboard contents, both to its edges and between columns
+static constexpr float MARGIN = 10.0f;
+
 CScoreboard::CScoreboard()
 {
 	CScoreboard::OnReset();
@@ -266,7 +269,7 @@ void CScoreboard::RenderTitleBar(CUIRect TitleBar, int Team, const char *pTitle)
 	const float ScoreTextWidth = TextRender()->TextWidth(TitleFontSize, "00:00:00");
 	const float TitleTextWidth = TextRender()->TextWidth(TitleFontSize, pTitle);
 
-	TitleBar.VMargin(10.0f, &TitleBar);
+	TitleBar.VMargin(MARGIN, &TitleBar);
 	CUIRect TitleLabel, ScoreLabel;
 	if(Team == TEAM_RED)
 	{
@@ -541,15 +544,15 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		FontSize = 5.0f;
 	}
 
-	const float ScoreOffset = Scoreboard.x + 20.0f;
+	const float ScoreOffset = Scoreboard.x + MARGIN;
 	const float ScoreLength = TextRender()->TextWidth(FontSize, UseTime ? "00:00:00" : "99999");
-	const float TeeOffset = ScoreOffset + ScoreLength + 10.0f;
+	const float TeeOffset = ScoreOffset + ScoreLength + MARGIN;
 	const float TeeLength = 60.0f * TeeSizeMod;
 	const float NameOffset = TeeOffset + TeeLength;
 	const float NameLength = (LowScoreboardWidth ? 90.0f : 150.0f) - TeeLength;
 	const float CountryLength = (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f;
 	const float PingLength = 27.5f;
-	const float PingOffset = Scoreboard.x + Scoreboard.w - PingLength - 10.0f;
+	const float PingOffset = Scoreboard.x + Scoreboard.w - PingLength - MARGIN;
 	const float CountryOffset = PingOffset - CountryLength;
 	const float ClanOffset = NameOffset + NameLength + 2.5f;
 	const float ClanLength = CountryOffset - ClanOffset - 2.5f;
@@ -650,7 +653,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 					if(NumPlayers > 8)
 					{
-						if(DDTeam == TEAM_SUPER)
+						if(DDTeam == GameClient()->m_Teams.TeamSuper())
 							str_copy(aBuf, Localize("Super"));
 						else if(CurrentDDTeamSize <= 1)
 							str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
@@ -660,7 +663,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					}
 					else
 					{
-						if(DDTeam == TEAM_SUPER)
+						if(DDTeam == GameClient()->m_Teams.TeamSuper())
 							str_copy(aBuf, Localize("Super"));
 						else if(CurrentDDTeamSize > 1)
 							str_format(aBuf, sizeof(aBuf), Localize("Team %d (%d/%d)"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
