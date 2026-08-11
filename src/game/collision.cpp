@@ -15,6 +15,7 @@
 #include <game/mapitems.h>
 
 #include <cmath>
+#include <limits>
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
@@ -365,13 +366,19 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 	return 0;
 }
 
-int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const
+template<typename FIsTeleport>
+int CCollision::IntersectLineTeleHookImpl(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, FIsTeleport IsTeleportFn) const
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
 	vec2 Last = Pos0;
 	int dx = 0, dy = 0; // Offset for checking the "through" tile
 	ThroughOffset(Pos0, Pos1, &dx, &dy);
+
+	// somewhere outside the map border
+	int LastTileRow = std::numeric_limits<int>::min();
+	int LastTileColumn = std::numeric_limits<int>::min();
+
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i / (float)End;
@@ -380,13 +387,25 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 		int ix = round_to_int(Pos.x);
 		int iy = round_to_int(Pos.y);
 
+		// A physics tile has 32 x 32
+		int Column = ix / 32;
+		int Row = iy / 32;
+
+		// Skip as many iterations as we can, we can't use the Index directly due to the mapborders
+		if(Column == LastTileColumn && Row == LastTileRow)
+		{
+			// I don't need to track anything else, the offset is also constant
+			Last = Pos;
+			continue;
+		}
+		LastTileRow = Row;
+		LastTileColumn = Column;
+
 		int Index = GetPureMapIndex(Pos);
+
 		if(pTeleNr)
 		{
-			if(g_Config.m_SvOldTeleportHook)
-				*pTeleNr = IsTeleport(Index);
-			else
-				*pTeleNr = IsTeleportHook(Index);
+			*pTeleNr = IsTeleportFn(Index);
 		}
 		if(pTeleNr && *pTeleNr)
 		{
@@ -397,16 +416,8 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 			return TILE_TELEINHOOK;
 		}
 
-		int Hit = 0;
-		if(CheckPoint(ix, iy))
-		{
-			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
-				Hit = GetCollisionAt(ix, iy);
-		}
-		else if(IsHookBlocker(ix, iy, Pos0, Pos1))
-		{
-			Hit = TILE_NOHOOK;
-		}
+		int Hit = CheckPoint(ix, iy);
+		Hit = HitHookAffectingTile(Hit, Index, ix, iy, dx, dy, Pos0, Pos1);
 		if(Hit)
 		{
 			if(pOutCollision)
@@ -423,6 +434,15 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 	if(pOutBeforeCollision)
 		*pOutBeforeCollision = Pos1;
 	return 0;
+}
+
+int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const
+{
+	if(!HasHookTeleIns())
+		return IntersectLineTeleHookImpl(Pos0, Pos1, pOutCollision, pOutBeforeCollision, pTeleNr, [](int) { return 0; });
+	else if(g_Config.m_SvOldTeleportHook)
+		return IntersectLineTeleHookImpl(Pos0, Pos1, pOutCollision, pOutBeforeCollision, pTeleNr, [&](int Index) -> int { return IsTeleport(Index); });
+	return IntersectLineTeleHookImpl(Pos0, Pos1, pOutCollision, pOutBeforeCollision, pTeleNr, [&](int Index) -> int { return IsTeleportHook(Index); });
 }
 
 int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const
@@ -619,30 +639,34 @@ int CCollision::IsSolid(int x, int y) const
 	return Index == TILE_SOLID || Index == TILE_NOHOOK;
 }
 
-bool CCollision::IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const
+int CCollision::HitHookAffectingTile(int Hit, int Index, int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const
 {
-	const int Index = GetPureMapIndex(x, y);
-	if(m_pFront && (m_pFront[Index].m_Index == TILE_THROUGH_ALL || m_pFront[Index].m_Index == TILE_THROUGH_CUT))
-		return true;
-	if(m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_DIR && ((m_pFront[Index].m_Flags == ROTATION_0 && Pos0.y > Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_90 && Pos0.x < Pos1.x) || (m_pFront[Index].m_Flags == ROTATION_180 && Pos0.y < Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_270 && Pos0.x > Pos1.x)))
-		return true;
-	const int OffsetIndex = GetPureMapIndex(x + OffsetX, y + OffsetY);
-	return m_pTiles[OffsetIndex].m_Index == TILE_THROUGH || (m_pFront && m_pFront[OffsetIndex].m_Index == TILE_THROUGH);
-}
-
-bool CCollision::IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const
-{
-	const int Index = GetPureMapIndex(x, y);
-	if(m_pTiles[Index].m_Index == TILE_THROUGH_ALL || (m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_ALL))
-		return true;
-	if(m_pTiles[Index].m_Index == TILE_THROUGH_DIR && ((m_pTiles[Index].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) ||
-								  (m_pTiles[Index].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) ||
-								  (m_pTiles[Index].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) ||
-								  (m_pTiles[Index].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
-		return true;
-	if(m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_DIR && ((m_pFront[Index].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) || (m_pFront[Index].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
-		return true;
-	return false;
+	if(Hit)
+	{
+		// handle hook through first
+		if(m_pFront && (m_pFront[Index].m_Index == TILE_THROUGH_ALL || m_pFront[Index].m_Index == TILE_THROUGH_CUT))
+			return TILE_AIR;
+		if(m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_DIR && ((m_pFront[Index].m_Flags == ROTATION_0 && Pos0.y > Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_90 && Pos0.x < Pos1.x) || (m_pFront[Index].m_Flags == ROTATION_180 && Pos0.y < Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_270 && Pos0.x > Pos1.x)))
+			return TILE_AIR;
+		const int OffsetIndex = GetPureMapIndex(x + OffsetX, y + OffsetY);
+		if(m_pTiles[OffsetIndex].m_Index == TILE_THROUGH || (m_pFront && m_pFront[OffsetIndex].m_Index == TILE_THROUGH))
+			return TILE_AIR;
+		return GetCollisionAt(x, y);
+	}
+	else
+	{
+		// handle hook blocker next
+		if(m_pTiles[Index].m_Index == TILE_THROUGH_ALL || (m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_ALL))
+			return TILE_NOHOOK;
+		if(m_pTiles[Index].m_Index == TILE_THROUGH_DIR && ((m_pTiles[Index].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) ||
+									  (m_pTiles[Index].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) ||
+									  (m_pTiles[Index].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) ||
+									  (m_pTiles[Index].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
+			return TILE_NOHOOK;
+		if(m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_DIR && ((m_pFront[Index].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) || (m_pFront[Index].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
+			return TILE_NOHOOK;
+	}
+	return Hit;
 }
 
 int CCollision::IsWallJump(int Index) const
