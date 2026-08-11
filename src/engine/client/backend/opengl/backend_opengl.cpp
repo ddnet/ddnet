@@ -1699,8 +1699,8 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 				m_pTileProgramTextured->AddShader(&VertexShader);
 				m_pTileProgramTextured->AddShader(&FragmentShader);
 
-				glBindAttribLocation(m_pTileProgram->GetProgramId(), 0, "inVertex");
-				glBindAttribLocation(m_pTileProgram->GetProgramId(), 1, "inVertexTexCoord");
+				glBindAttribLocation(m_pTileProgramTextured->GetProgramId(), 0, "inVertex");
+				glBindAttribLocation(m_pTileProgramTextured->GetProgramId(), 1, "inVertexTexCoord");
 
 				m_pTileProgramTextured->LinkProgram();
 
