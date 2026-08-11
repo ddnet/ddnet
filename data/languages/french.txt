@@ -2121,10 +2121,10 @@ Click to add this community to your favorites.
 == 
 
 Add clan
-== 
+== Ajouter un clan
 
 Add friend
-== 
+== Ajouter aux amis
 
 [Demo playback]
 Live

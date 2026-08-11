@@ -1244,7 +1244,7 @@ Show player target angle
 == 显示玩家瞄准角度
 
 Opacity of freeze bars inside freeze
-== 解冻进度条不透明度
+== 被冻结时解冻进度条不透明度
 
 Normal Color
 == 非相关信息颜色

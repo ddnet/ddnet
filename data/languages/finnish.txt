@@ -1948,10 +1948,10 @@ Add clanmates by entering their clan below and leaving the name blank.
 == 
 
 Add clan
-== 
+== Lisää klaani
 
 Add friend
-== 
+== Lisää ystävä
 
 [Demo playback]
 Live

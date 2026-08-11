@@ -1559,7 +1559,7 @@ Add clan
 == 
 
 Add friend
-== 
+== 友達追加
 
 Server filter
 == 

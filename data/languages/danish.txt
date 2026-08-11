@@ -2187,10 +2187,10 @@ Click to add this community to your favorites.
 == 
 
 Add clan
-== 
+== Tilføj klan
 
 Add friend
-== 
+== Tilføj ven
 
 [Demo playback]
 Live
