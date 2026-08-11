@@ -66,7 +66,7 @@ enum
 enum
 {
 	NET_MAX_PACKETSIZE = 1400,
-	NET_MAX_PAYLOAD = NET_MAX_PACKETSIZE - 6,
+	NET_MAX_CONNLESS_PAYLOAD = NET_MAX_PACKETSIZE - 6,
 	/**
 	 * The maximum size of a chunk within a connection-oriented packet.
 	 *
@@ -146,6 +146,8 @@ struct CNetChunk
 	const void *m_pData;
 	// only used if the flags contain NETSENDFLAG_EXTENDED and NETSENDFLAG_CONNLESS
 	unsigned char m_aExtraData[NET_CONNLESS_EXTRA_SIZE];
+
+	void AssertSizeSanity() const;
 };
 
 class CNetChunkHeader
@@ -178,7 +180,7 @@ public:
 	int m_Ack;
 	int m_NumChunks;
 	int m_DataSize;
-	unsigned char m_aChunkData[NET_MAX_PAYLOAD];
+	unsigned char m_aChunkData[NET_MAX_PACKETSIZE - NET_PACKETHEADERSIZE];
 	unsigned char m_aExtraData[NET_CONNLESS_EXTRA_SIZE];
 };
 
@@ -571,7 +573,7 @@ private:
 	public:
 		NETADDR m_Addr;
 		int m_DataSize;
-		unsigned char m_aData[NET_MAX_PAYLOAD];
+		unsigned char m_aData[NET_MAX_CONNLESS_PAYLOAD];
 		int64_t m_Expiry;
 	};
 

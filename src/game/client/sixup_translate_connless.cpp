@@ -98,7 +98,7 @@ bool CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 			}
 		}
 
-		if(Packer.Error() || SERVERBROWSE_SIZE + Packer.Size() > NET_MAX_PAYLOAD)
+		if(Packer.Error() || SERVERBROWSE_SIZE + Packer.Size() > NET_MAX_CONNLESS_PAYLOAD)
 		{
 			return false;
 		}

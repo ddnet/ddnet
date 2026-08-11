@@ -146,11 +146,7 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 
 int CNetClient::Send(CNetChunk *pChunk)
 {
-	if(pChunk->m_DataSize >= NET_MAX_PAYLOAD)
-	{
-		dbg_msg("netclient", "chunk payload too big. %d. dropping chunk", pChunk->m_DataSize);
-		return -1;
-	}
+	pChunk->AssertSizeSanity();
 
 	if(pChunk->m_Flags & NETSENDFLAG_CONNLESS)
 	{

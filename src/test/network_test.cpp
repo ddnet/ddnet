@@ -17,11 +17,11 @@ TEST(Network, UnpackMaximumUncompressedPacket)
 	CNetPacketConstruct Packet;
 	EXPECT_EQ(UnpackUncompressedPacket(NET_PACKETHEADERSIZE + (int)sizeof(Packet.m_aChunkData), &Packet), 0);
 	EXPECT_EQ(Packet.m_DataSize, (int)sizeof(Packet.m_aChunkData));
+	EXPECT_EQ(UnpackUncompressedPacket(NET_MAX_PACKETSIZE, &Packet), 0);
 }
 
 TEST(Network, UnpackOversizedUncompressedPacket)
 {
 	CNetPacketConstruct Packet;
 	EXPECT_EQ(UnpackUncompressedPacket(NET_PACKETHEADERSIZE + (int)sizeof(Packet.m_aChunkData) + 1, &Packet), -1);
-	EXPECT_EQ(UnpackUncompressedPacket(NET_MAX_PACKETSIZE, &Packet), -1);
 }
