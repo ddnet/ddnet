@@ -1334,6 +1334,9 @@ Loading sound files
 English translation by the DDNet Team
 == Serbian Cyrillic translation by Veljko Radovanovic (VekiPro)
 
+Add friend
+== Додај пријатеља
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1704,9 +1707,6 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 Add clan
 == 
 
-Add friend
-== 
-
 Server filter
 == 
 
@@ -1826,13 +1826,13 @@ Refresh the demo list
 Open the directory that contains the demo files
 == 
 
-Are you sure that you want to disconnect and play this demo?
-== 
-
 Open the selected folder
 == 
 
 Play the selected demo
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -2078,6 +2078,10 @@ Aim
 == 
 
 [Direct touch input]
+Relative aim
+== 
+
+[Direct touch input]
 Fire
 == 
 
@@ -2225,6 +2229,10 @@ Joystick Aim
 == 
 
 [Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+[Predefined touch button behaviors]
 Joystick Fire
 == 
 
@@ -2265,6 +2273,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -2293,61 +2304,6 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
-== 
-
-[Hertz]
-Hz
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Open the settings file
-== 
-
-Saves file
-== 
-
-Open the saves file
-== 
-
-Open the directory that contains the configuration and user files
-== 
-
-Open the directory to add custom themes
-== 
-
-Player info change cooldown
-== 
-
-This skin name cannot be used.
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-Skin could not be found.
-== 
-
-Create a random skin
-== 
-
-No skins match your filter criteria
-== 
-
-Open the directory to add custom skins
-== 
-
-Show FPS
-== 
-
-Renders your frame rate in the top right
-== 
-
-Graphics card
 == 
 
 Tee
@@ -2542,6 +2498,27 @@ Dragger Inner Color
 Set all to Rifle
 == 
 
+Open the directory to add custom assets
+== 
+
+Scoreboard cursor
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
+
+Custom
+== 
+
+No controller found. Plug in a controller.
+== 
+
+Axis
+== 
+
 Enable ghost
 == 
 
@@ -2557,6 +2534,21 @@ Prediction margin
 Predict events (experimental)
 == 
 
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
 Regular background color
 == 
 
@@ -2566,10 +2558,65 @@ Entities background color
 Unregister protocol and file extensions
 == 
 
-Basic
+[Hertz]
+Hz
 == 
 
-Custom
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
+Graphics card
+== 
+
+Player info change cooldown
+== 
+
+No country flags match your filter criteria
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+Create a random skin
+== 
+
+No skins match your filter criteria
+== 
+
+Open the directory to add custom skins
+== 
+
+Basic
 == 
 
 Are you sure that you want to delete '%s'?
@@ -2579,24 +2626,6 @@ Delete skin
 == 
 
 Unable to delete skin
-== 
-
-Open the directory to add custom assets
-== 
-
-Scoreboard cursor
-== 
-
-Reset controls
-== 
-
-Are you sure that you want to reset the controls to their defaults?
-== 
-
-No controller found. Plug in a controller.
-== 
-
-Axis
 == 
 
 Download

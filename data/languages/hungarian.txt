@@ -905,7 +905,7 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Debug mód bekapcsolva. Nyomd meg a Ctrl+Shift+D billentyűparancsot, hogy kikapcsold.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Használd a K gombot az újraéledéshez, Q betű a megfigyeléshez. Nézd meg a beállításokat a többi bind-ért.
+== Használd a K gombot újraéledéshez, és a Q betűt játékosok megfigyeléséhez. Lásd a beállításoknál a többi bind-okat.
 
 Existing Player
 == Létező játékos
@@ -1487,65 +1487,68 @@ Open the directory to add custom assets
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Hungarian translation by Feca, Boti., Cellegen and bencie
+== Magyar fordítást produkálta Feca, Boti., Cellegen és bencie
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Nincs elég Virtuális Memória (VRAM). Próbáld meg a 'cl_skins_loaded_max' parancsot hogy lejjebb vedd az egyedi textúráknak a minőségét (szkineknek, entitásoknak, stb.), főként magas nagyságú textúráknál.
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Nem lehetett a '%s' kapcsolatot létesíteni. Nézd a konzolt további részletekért.
 
 Connect address error
-== 
+== Csatlakozási probléma
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== A debug grafikonok kikapcsolásához nyomd meg a 'Ctrl + Shift + G' gombot.
 
 Could not connect dummy
-== 
+== Másolat csatlakoztatása sikertelen
 
 Error playing demo
-== 
+== Demó lejátszása sikertelen
 
 Failed saving the replay!
-== 
+== Visszajátszás elmentése sikertelen!
 
 Saving settings to '%s' failed
-== 
+== Beállítások elmentése '%s' helyen sikertelen
 
 Error saving settings
-== 
+== Beállítások elmentése sikertelen
 
 No demo with this filename exists
-== 
+== Nem létezik demó ezzel a fájl névvel
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" nem kompatibilis pnglite-al és régi DDNet verziók nem tudják betölteni:
 
 Loading demo file from storage
-== 
+== Demó fájl betöltése tárolóból
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Pár betű fájl betöltése sikertelen volt. Nézd a konzolt további részletekért.
 
 Quitting. Please wait…
-== 
+== Kilépés. Kérlek várj…
 
 Restarting. Please wait…
-== 
+== Újraindítás. Kérlek várj…
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== Csapat mentése folyamatban. A csapat betöltéséhez '/load %s' parancsot tudsz használni
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== Csapat mentése folyamatban. Csapat betöltéséhez '/load %s' parancsot tudsz használni ha sikeres volt elmenteni, vagy pedig '/load %s' parancsal ha sikertelen volt
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== Csapat '%s' sikeresen el van mentve. Az adatbázisnak nem sikerült elmentenie, így egy mentési kód lett generálva hogy ne legyen mentési probléma. Használd a '/load %s' parancsot hogy betöltsd a csapatot
+
+Add friend
+== Barát hozzáadása
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
 == 
@@ -1809,9 +1812,6 @@ Add clanmates by entering their clan below and leaving the name blank.
 Add clan
 == 
 
-Add friend
-== 
-
 Server filter
 == 
 
@@ -1895,13 +1895,13 @@ map not included
 Refresh the demo list
 == 
 
-Are you sure that you want to disconnect and play this demo?
-== 
-
 Open the selected folder
 == 
 
 Play the selected demo
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -2138,6 +2138,10 @@ Aim
 == 
 
 [Direct touch input]
+Relative aim
+== 
+
+[Direct touch input]
 Fire
 == 
 
@@ -2285,6 +2289,10 @@ Joystick Aim
 == 
 
 [Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+[Predefined touch button behaviors]
 Joystick Fire
 == 
 
@@ -2325,6 +2333,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -2353,46 +2364,6 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
-== 
-
-[Hertz]
-Hz
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Saves file
-== 
-
-Open the saves file
-== 
-
-Player info change cooldown
-== 
-
-This skin name cannot be used.
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-Skin could not be found.
-== 
-
-No skins match your filter criteria
-== 
-
-Show FPS
-== 
-
-Renders your frame rate in the top right
-== 
-
-Graphics card
 == 
 
 Tee
@@ -2557,6 +2528,15 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
+Scoreboard cursor
+== 
+
+Custom
+== 
+
+Axis
+== 
+
 Enable ghost
 == 
 
@@ -2572,16 +2552,71 @@ Prediction margin
 Predict events (experimental)
 == 
 
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
 Regular background color
 == 
 
 Entities background color
 == 
 
-Basic
+[Hertz]
+Hz
 == 
 
-Custom
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
+Graphics card
+== 
+
+Player info change cooldown
+== 
+
+No country flags match your filter criteria
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Basic
 == 
 
 Are you sure that you want to delete '%s'?
@@ -2591,12 +2626,6 @@ Delete skin
 == 
 
 Unable to delete skin
-== 
-
-Scoreboard cursor
-== 
-
-Axis
 == 
 
 Download

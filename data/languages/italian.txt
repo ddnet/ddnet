@@ -1285,6 +1285,12 @@ Moved ingame
 English translation by the DDNet Team
 == Italian translation by Lanta, Carmine, Otacon, Apmox, NeXus and kio
 
+Add clan
+== Aggiungi clan
+
+Add friend
+== Aggiungi amico
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1637,12 +1643,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == 
 
-Add clan
-== 
-
-Add friend
-== 
-
 Server filter
 == 
 
@@ -1771,13 +1771,13 @@ Refresh the demo list
 Open the directory that contains the demo files
 == 
 
-Are you sure that you want to disconnect and play this demo?
-== 
-
 Open the selected folder
 == 
 
 Play the selected demo
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -2023,6 +2023,10 @@ Aim
 == 
 
 [Direct touch input]
+Relative aim
+== 
+
+[Direct touch input]
 Fire
 == 
 
@@ -2170,6 +2174,10 @@ Joystick Aim
 == 
 
 [Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+[Predefined touch button behaviors]
 Joystick Fire
 == 
 
@@ -2210,6 +2218,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -2238,76 +2249,6 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
-== 
-
-[Hertz]
-Hz
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Settings file
-== 
-
-Open the settings file
-== 
-
-Saves file
-== 
-
-Open the saves file
-== 
-
-Config directory
-== 
-
-Open the directory that contains the configuration and user files
-== 
-
-Open the directory to add custom themes
-== 
-
-Dummy
-== 
-
-Player info change cooldown
-== 
-
-This skin name cannot be used.
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-Skin could not be found.
-== 
-
-No skins match your filter criteria
-== 
-
-Allows maps to render with more detail
-== 
-
-Show FPS
-== 
-
-Renders your frame rate in the top right
-== 
-
-Renderer
-== 
-
-default
-== 
-
-custom
-== 
-
-auto
 == 
 
 Tee
@@ -2514,45 +2455,6 @@ Dragger Inner Color
 Set all to Rifle
 == 
 
-Enable ghost
-== 
-
-Only save improvements
-== 
-
-Overlay entities
-== 
-
-Show background quads
-== 
-
-Prediction margin
-== 
-
-Predict events (experimental)
-== 
-
-Regular background color
-== 
-
-Entities background color
-== 
-
-Basic
-== 
-
-Custom
-== 
-
-Are you sure that you want to delete '%s'?
-== 
-
-Delete skin
-== 
-
-Unable to delete skin
-== 
-
 Extras
 == 
 
@@ -2571,6 +2473,12 @@ Mouse
 Controller
 == 
 
+Dummy
+== 
+
+Custom
+== 
+
 [Ingame controller mode]
 Absolute
 == 
@@ -2585,6 +2493,127 @@ Controller jitter tolerance
 == 
 
 Aim bind
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Overlay entities
+== 
+
+Show background quads
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 
+
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
+Regular background color
+== 
+
+Entities background color
+== 
+
+[Hertz]
+Hz
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Settings file
+== 
+
+Open the settings file
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+Config directory
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Allows maps to render with more detail
+== 
+
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+auto
+== 
+
+Player info change cooldown
+== 
+
+No country flags match your filter criteria
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Basic
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Unable to delete skin
 == 
 
 Discord

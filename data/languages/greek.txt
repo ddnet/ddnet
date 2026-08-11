@@ -503,6 +503,9 @@ Name plates size
 English translation by the DDNet Team
 == Greek translation by Evropi
 
+Add friend
+== Προσθήκη Φίλου
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -971,9 +974,6 @@ Getting game info
 Requesting to join the game
 == 
 
-Theme
-== 
-
 Loading menu images
 == 
 
@@ -1096,9 +1096,6 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Add clan
-== 
-
-Add friend
 == 
 
 Server filter
@@ -1256,13 +1253,13 @@ Demos directory
 Open the directory that contains the demo files
 == 
 
-Are you sure that you want to disconnect and play this demo?
-== 
-
 Open the selected folder
 == 
 
 Play the selected demo
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -1547,6 +1544,10 @@ Aim
 == 
 
 [Direct touch input]
+Relative aim
+== 
+
+[Direct touch input]
 Fire
 == 
 
@@ -1694,6 +1695,10 @@ Joystick Aim
 == 
 
 [Predefined touch button behaviors]
+Joystick Relative Aim
+== 
+
+[Predefined touch button behaviors]
 Joystick Fire
 == 
 
@@ -1734,6 +1739,9 @@ Virtual joystick which uses the active action.
 Virtual joystick which only aims without using an action.
 == 
 
+Virtual joystick which only aims and moves the mouse pointer relatively.
+== 
+
 Virtual joystick which always uses fire.
 == 
 
@@ -1762,184 +1770,6 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
-== 
-
-Smooth Dynamic Camera
-== 
-
-Switch weapon when out of ammo
-== 
-
-Skip the main menu
-== 
-
-[Hertz]
-Hz
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Settings file
-== 
-
-Open the settings file
-== 
-
-Saves file
-== 
-
-Open the saves file
-== 
-
-Config directory
-== 
-
-Open the directory that contains the configuration and user files
-== 
-
-Themes directory
-== 
-
-Open the directory to add custom themes
-== 
-
-Automatically take statboard screenshot
-== 
-
-Automatically create statboard csv
-== 
-
-Max CSVs
-== 
-
-Dummy
-== 
-
-Player info change cooldown
-== 
-
-Download skins
-== 
-
-Download community skins
-== 
-
-Vanilla skins only
-== 
-
-Fat skins (DDFat)
-== 
-
-Skin prefix
-== 
-
-This skin name cannot be used.
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-Skin could not be found.
-== 
-
-Create a random skin
-== 
-
-Choose default eyes when joining a server
-== 
-
-No skins match your filter criteria
-== 
-
-Skin Database
-== 
-
-Skins directory
-== 
-
-Open the directory to add custom skins
-== 
-
-Windowed
-== 
-
-Windowed borderless
-== 
-
-Windowed fullscreen
-== 
-
-Desktop fullscreen
-== 
-
-Screen
-== 
-
-may cause delay
-== 
-
-Allows maps to render with more detail
-== 
-
-Show FPS
-== 
-
-Renders your frame rate in the top right
-== 
-
-Refresh Rate
-== 
-
-Renderer
-== 
-
-default
-== 
-
-custom
-== 
-
-Graphics card
-== 
-
-auto
-== 
-
-Enable game sounds
-== 
-
-Enable gun sound
-== 
-
-Enable long pain sound (used when shooting in freeze)
-== 
-
-Enable server message sound
-== 
-
-Enable regular chat sound
-== 
-
-Enable team chat sound
-== 
-
-Enable highlighted chat sound
-== 
-
-Game sound volume
-== 
-
-Chat sound volume
-== 
-
-Map sound volume
-== 
-
-Background music volume
 == 
 
 Tee
@@ -2248,141 +2078,6 @@ Dragger Inner Color
 Set all to Rifle
 == 
 
-Save the best demo of each race
-== 
-
-Enable replays
-== 
-
-Default length
-== 
-
-Enable ghost
-== 
-
-When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
-
-Show ghost
-== 
-
-Opacity
-== 
-
-Save ghost
-== 
-
-Only save improvements
-== 
-
-Gameplay
-== 
-
-Overlay entities
-== 
-
-Show text entities
-== 
-
-Show others
-== 
-
-Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== 
-
-Show others (own team only)
-== 
-
-Show background quads
-== 
-
-Quads are used for background decoration
-== 
-
-Default zoom
-== 
-
-Prediction margin
-== 
-
-Predict events (experimental)
-== 
-
-AntiPing
-== 
-
-Tries to predict other entities to give a feel of low latency
-== 
-
-AntiPing: predict other players
-== 
-
-AntiPing: predict weapons
-== 
-
-AntiPing: predict grenade paths
-== 
-
-Background
-== 
-
-Regular background color
-== 
-
-Entities background color
-== 
-
-Use current map as background
-== 
-
-Show tiles layers from BG map
-== 
-
-New random timeout code
-== 
-
-Run on join
-== 
-
-Chat command (e.g. showall 1)
-== 
-
-Unregister protocol and file extensions
-== 
-
-DDNet %s is available:
-== 
-
-Update now
-== 
-
-Updating…
-== 
-
-DDNet Client updated!
-== 
-
-No updates available
-== 
-
-Check now
-== 
-
-Basic
-== 
-
-Custom
-== 
-
-Are you sure that you want to delete '%s'?
-== 
-
-Delete skin
-== 
-
-Unable to delete skin
-== 
-
 Emoticons
 == 
 
@@ -2408,6 +2103,12 @@ Zoom in
 == 
 
 Zoom out
+== 
+
+Default zoom
+== 
+
+Show others
 == 
 
 Show all
@@ -2461,6 +2162,12 @@ Mouse
 Controller
 == 
 
+Dummy
+== 
+
+Custom
+== 
+
 Ingame mouse sens.
 == 
 
@@ -2500,6 +2207,328 @@ Status
 == 
 
 Aim bind
+== 
+
+Save the best demo of each race
+== 
+
+Enable replays
+== 
+
+Default length
+== 
+
+Enable ghost
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Show ghost
+== 
+
+Opacity
+== 
+
+Save ghost
+== 
+
+Only save improvements
+== 
+
+Gameplay
+== 
+
+Overlay entities
+== 
+
+Show text entities
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
+== 
+
+Show others (own team only)
+== 
+
+Show background quads
+== 
+
+Quads are used for background decoration
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 
+
+AntiPing
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+AntiPing: predict other players
+== 
+
+[AntiPing: predict other players]
+Off
+== 
+
+[AntiPing: predict other players]
+All
+== 
+
+[AntiPing: predict other players]
+Interact
+== 
+
+Always predict frozen players
+== 
+
+AntiPing: predict weapons
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Background
+== 
+
+Regular background color
+== 
+
+Entities background color
+== 
+
+Use current map as background
+== 
+
+Show tiles layers from BG map
+== 
+
+New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 
+
+Unregister protocol and file extensions
+== 
+
+DDNet %s is available:
+== 
+
+Update now
+== 
+
+Updating…
+== 
+
+DDNet Client updated!
+== 
+
+No updates available
+== 
+
+Check now
+== 
+
+Smooth Dynamic Camera
+== 
+
+Switch weapon when out of ammo
+== 
+
+Skip the main menu
+== 
+
+[Hertz]
+Hz
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Settings file
+== 
+
+Open the settings file
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+Config directory
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Themes directory
+== 
+
+Open the directory to add custom themes
+== 
+
+Automatically take statboard screenshot
+== 
+
+Automatically create statboard csv
+== 
+
+Max CSVs
+== 
+
+Theme
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Windowed fullscreen
+== 
+
+Desktop fullscreen
+== 
+
+Screen
+== 
+
+may cause delay
+== 
+
+Allows maps to render with more detail
+== 
+
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
+Refresh Rate
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics card
+== 
+
+auto
+== 
+
+Player info change cooldown
+== 
+
+No country flags match your filter criteria
+== 
+
+Enable game sounds
+== 
+
+Enable gun sound
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Enable server message sound
+== 
+
+Enable regular chat sound
+== 
+
+Enable team chat sound
+== 
+
+Enable highlighted chat sound
+== 
+
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
+Map sound volume
+== 
+
+Background music volume
+== 
+
+Download skins
+== 
+
+Download community skins
+== 
+
+Vanilla skins only
+== 
+
+Fat skins (DDFat)
+== 
+
+Skin prefix
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+Create a random skin
+== 
+
+Choose default eyes when joining a server
+== 
+
+No skins match your filter criteria
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Open the directory to add custom skins
+== 
+
+Basic
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Unable to delete skin
 == 
 
 Discord
