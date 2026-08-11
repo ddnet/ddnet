@@ -2474,7 +2474,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 
 			if(Type == SERVERINFO_EXTENDED)
 			{
-				if(q.Size() >= NET_MAX_PAYLOAD - 18) // 8 bytes for type, 10 bytes for the largest token
+				if(q.Size() >= NET_MAX_CONNLESS_PAYLOAD - 18) // 8 bytes for type, 10 bytes for the largest token
 				{
 					// Retry current player.
 					i--;
@@ -2565,7 +2565,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 				Packer.AddInt(m_aClients[i].m_Score.value_or(-1)); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i) ? 0 : 1); // flag spectator=1, bot=2 (player=0)
 
-				const int MaxPacketSize = NET_MAX_PAYLOAD - 128;
+				const int MaxPacketSize = NET_MAX_CONNLESS_PAYLOAD - 128;
 				if(MaxConsideredClients == MAX_CLIENTS)
 				{
 					if(Packer.Size() > MaxPacketSize - 32) // -32 because repacking will increase the length of the name
@@ -2948,7 +2948,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 		}
 	}
 	{
-		unsigned char aBuffer[NET_MAX_PAYLOAD];
+		unsigned char aBuffer[NET_MAX_CHUNK_SIZE];
 		int Flags;
 		mem_zero(&Packet, sizeof(Packet));
 		Packet.m_pData = aBuffer;
