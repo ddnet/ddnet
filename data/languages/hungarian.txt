@@ -1521,7 +1521,7 @@ No demo with this filename exists
 == Nem létezik demó ezzel a fájl névvel
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== A textúra szélessége vagy nagysága '%s' nem osztható el '%d' számmal, ami vizsuális problémákat okozhat.
+== 
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" nem kompatibilis pnglite-al és régi DDNet verziók nem tudják betölteni:
