@@ -422,6 +422,8 @@ public:
 	// DDRace
 	void OnPreTickTeehistorian() override;
 	bool OnClientDDNetVersionKnown(int ClientId);
+	// Returns whether the client was kicked for not telling us its DDNet version in time
+	bool KickClientWithoutDDNetVersion(int ClientId);
 	void FillAntibot(CAntibotRoundData *pData) override;
 	bool ProcessSpamProtection(int ClientId, bool RespectChatInitialDelay = true);
 	int GetDDRaceTeam(int ClientId) const;
