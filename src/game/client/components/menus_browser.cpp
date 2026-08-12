@@ -89,8 +89,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 
 	enum
 	{
-		COL_FLAG_LOCK = 0,
-		COL_FLAG_FAV,
+		COL_FLAG_FAV = 0,
 		COL_COMMUNITY,
 		COL_NAME,
 		COL_GAMETYPE,
@@ -113,6 +112,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		UI_ELEM_MAP_3,
 		UI_ELEM_FINISH_ICON,
 		UI_ELEM_PLAYERS,
+		UI_ELEM_PLAYERS_SLASH,
+		UI_ELEM_PLAYERS_MAX,
 		UI_ELEM_FRIEND_ICON,
 		UI_ELEM_PING,
 		UI_ELEM_KEY_ICON,
@@ -120,22 +121,33 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 	};
 
 	constexpr float ClickableIconSpace = 20.0f;
+	constexpr float MapMargin = 4.0f;
 
 	static SColumn s_aCols[] = {
 		{-1, -1, "", -1, 2.0f, {0}},
-		{COL_FLAG_LOCK, -1, "", -1, 14.0f, {0}},
-		{COL_FLAG_FAV, IServerBrowser::SORT_FAVORITES, "", -1, ClickableIconSpace, {0}},
 		{COL_COMMUNITY, -1, "", -1, 28.0f, {0}},
 		{COL_NAME, IServerBrowser::SORT_NAME, Localizable("Name"), 0, 50.0f, {0}},
+		{COL_FLAG_FAV, IServerBrowser::SORT_FAVORITES, "", 1, ClickableIconSpace, {0}},
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, Localizable("Type"), 1, 50.0f, {0}},
-		{COL_MAP, IServerBrowser::SORT_MAP, Localizable("Map"), 1, 120.0f + (Headers.w - 480) / 8, {0}},
-		{COL_FRIENDS, IServerBrowser::SORT_NUMFRIENDS, "", 1, ClickableIconSpace, {0}},
+		{COL_MAP, IServerBrowser::SORT_MAP, Localizable("Map"), 1, 120.0f, {0}},
+		// The friend icon is rendered at the end of the map name, so this column takes no space of its own
+		{COL_FRIENDS, IServerBrowser::SORT_NUMFRIENDS, "", 2, 0.0f, {0}},
 		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, Localizable("Players"), 1, 60.0f, {0}},
 		{-1, -1, "", 1, 4.0f, {0}},
 		{COL_PING, IServerBrowser::SORT_PING, Localizable("Ping"), 1, 40.0f, {0}},
 	};
 
 	const int NumCols = std::size(s_aCols);
+
+	for(auto &Col : s_aCols)
+	{
+		// Grow the map column with the available width. Since the friend icon is rendered
+		// inside the map column, also add its space back on resolutions wider than 5:4
+		// (Headers.w == 480) so the space for the map name is not reduced compared to
+		// the friend icon having its own column.
+		if(Col.m_Id == COL_MAP)
+			Col.m_Width = 120.0f + (Headers.w - 480.0f) / 8.0f + std::clamp(Headers.w - 480.0f, 0.0f, ClickableIconSpace);
+	}
 
 	// do layout
 	for(int i = 0; i < NumCols; i++)
@@ -164,6 +176,22 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 	{
 		if(Col.m_Direction == 0)
 			Col.m_Rect = Headers;
+	}
+
+	{
+		CUIRect *pMapRect = nullptr;
+		CUIRect *pFriendsRect = nullptr;
+		for(auto &Col : s_aCols)
+		{
+			if(Col.m_Id == COL_MAP)
+				pMapRect = &Col.m_Rect;
+			else if(Col.m_Id == COL_FRIENDS)
+				pFriendsRect = &Col.m_Rect;
+		}
+		CUIRect MapRect;
+		pMapRect->VMargin(MapMargin, &MapRect);
+		MapRect.VSplitRight(MapRect.h, &MapRect, nullptr);
+		MapRect.VSplitRight(ClickableIconSpace, nullptr, pFriendsRect);
 	}
 
 	const bool PlayersOrPing = (g_Config.m_BrSort == IServerBrowser::SORT_NUMPLAYERS || g_Config.m_BrSort == IServerBrowser::SORT_PING);
@@ -328,18 +356,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 			Button.w = Col.m_Rect.w;
 
 			const int Id = Col.m_Id;
-			if(Id == COL_FLAG_LOCK)
-			{
-				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
-				{
-					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_LOCK_ICON), &Button, ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f), TextRender()->DefaultTextOutlineColor(), FontIcon::LOCK, TEXTALIGN_MC);
-				}
-				else if(pItem->m_RequiresLogin)
-				{
-					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_KEY_ICON), &Button, ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f), TextRender()->DefaultTextOutlineColor(), FontIcon::KEY, TEXTALIGN_MC);
-				}
-			}
-			else if(Id == COL_FLAG_FAV)
+			if(Id == COL_FLAG_FAV)
 			{
 				if(pItem->m_Favorite != TRISTATE::NONE)
 				{
@@ -363,6 +380,18 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 			}
 			else if(Id == COL_NAME)
 			{
+				CUIRect LockIcon;
+				const bool ShowLockIcon = (pItem->m_Flags & SERVER_FLAG_PASSWORD) || pItem->m_RequiresLogin;
+				if(ShowLockIcon)
+				{
+					Button.VSplitRight(16.0f, &Button, &LockIcon);
+				}
+				else if(pItem->m_Favorite == TRISTATE::NONE)
+				{
+					// Let the name use the space of the favorite column when its icon is not shown
+					Button.w += ClickableIconSpace;
+				}
+
 				SLabelProperties Props;
 				Props.m_MaxWidth = Button.w;
 				Props.m_StopAtEnd = true;
@@ -378,6 +407,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					});
 				if(!Printed)
 					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props);
+
+				if(ShowLockIcon)
+				{
+					const char *pIcon = (pItem->m_Flags & SERVER_FLAG_PASSWORD) ? FontIcon::LOCK : FontIcon::KEY;
+					const int UiElem = (pItem->m_Flags & SERVER_FLAG_PASSWORD) ? UI_ELEM_LOCK_ICON : UI_ELEM_KEY_ICON;
+					RenderBrowserIcons(*pUiElement->Rect(UiElem), &LockIcon, ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f), TextRender()->DefaultTextOutlineColor(), pIcon, TEXTALIGN_MC);
+				}
 			}
 			else if(Id == COL_GAMETYPE)
 			{
@@ -394,15 +430,21 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 			}
 			else if(Id == COL_MAP)
 			{
+				Button.VMargin(MapMargin, &Button);
+
+				CUIRect FriendIcon, FinishIcon;
+				const bool ShowFriendIcon = pItem->m_FriendState != IFriends::FRIEND_NO;
+				const bool ShowFinishIcon = g_Config.m_BrIndicateFinished && pItem->m_HasRank == CServerInfo::RANK_RANKED;
+				const float FinishIconSpace = Button.h;
+				Button.VSplitRight(FinishIconSpace, &Button, &FinishIcon);
+				Button.VSplitRight(ClickableIconSpace, &Button, &FriendIcon);
+				FinishIcon.Margin(2.0f, &FinishIcon);
+				if(!ShowFriendIcon)
 				{
-					CUIRect Icon;
-					Button.VMargin(4.0f, &Button);
-					Button.VSplitLeft(Button.h, &Icon, &Button);
-					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == CServerInfo::RANK_RANKED)
-					{
-						Icon.Margin(2.0f, &Icon);
-						RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FINISH_ICON), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), FontIcon::FLAG_CHECKERED, TEXTALIGN_MC);
-					}
+					// Let the map use the space of the friend and finish icons when they are not shown
+					Button.w += ClickableIconSpace;
+					if(!ShowFinishIcon)
+						Button.w += FinishIconSpace;
 				}
 
 				SLabelProperties Props;
@@ -420,35 +462,49 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					});
 				if(!Printed)
 					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props);
-			}
-			else if(Id == COL_FRIENDS)
-			{
-				if(pItem->m_FriendState != IFriends::FRIEND_NO)
+
+				if(ShowFinishIcon)
 				{
-					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Button, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FontIcon::HEART, TEXTALIGN_MC);
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FINISH_ICON), &FinishIcon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), FontIcon::FLAG_CHECKERED, TEXTALIGN_MC);
+				}
+
+				if(ShowFriendIcon)
+				{
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &FriendIcon, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FontIcon::HEART, TEXTALIGN_MC);
 
 					if(pItem->m_FriendNum > 1)
 					{
 						str_format(aTemp, sizeof(aTemp), "%d", pItem->m_FriendNum);
 						TextRender()->TextColor(0.94f, 0.8f, 0.8f, 1.0f);
-						Ui()->DoLabel(&Button, aTemp, 9.0f, TEXTALIGN_MC);
+						Ui()->DoLabel(&FriendIcon, aTemp, 9.0f, TEXTALIGN_MC);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
 					}
 				}
 			}
 			else if(Id == COL_PLAYERS)
 			{
-				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 				{
 					TextRender()->TextColor(HIGHLIGHTED_TEXT_COLOR);
 				}
-				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_PLAYERS), &Button, aTemp, FontSize, TEXTALIGN_MR);
+				// Align the slash between the two numbers
+				SLabelProperties Props;
+				Props.m_EnableWidthCheck = false;
+				CUIRect NumPlayers, Slash, MaxPlayers;
+				char aMaxClients[8];
+				str_format(aMaxClients, sizeof(aMaxClients), "%d", SERVER_MAX_CLIENTS);
+				Button.VSplitRight(TextRender()->TextWidth(FontSize, aMaxClients), &Button, &MaxPlayers);
+				Button.VSplitRight(TextRender()->TextWidth(FontSize, "/"), &NumPlayers, &Slash);
+				str_format(aTemp, sizeof(aTemp), "%i", pItem->m_NumFilteredPlayers);
+				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_PLAYERS), &NumPlayers, aTemp, FontSize, TEXTALIGN_MR, Props);
+				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_PLAYERS_SLASH), &Slash, "/", FontSize, TEXTALIGN_MC, Props);
+				str_format(aTemp, sizeof(aTemp), "%i", ServerBrowser()->Max(*pItem));
+				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_PLAYERS_MAX), &MaxPlayers, aTemp, FontSize, TEXTALIGN_MR, Props);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 			else if(Id == COL_PING)
 			{
-				Button.VMargin(4.0f, &Button);
+				Button.VMargin(2.0f, &Button);
 				FormatServerbrowserPing(aTemp, pItem);
 				if(g_Config.m_UiColorizePing)
 				{
