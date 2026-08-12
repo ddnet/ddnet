@@ -11,6 +11,7 @@
 
 #include <engine/shared/config.h>
 
+#include <algorithm>
 #include <limits>
 
 const char *CTuningParams::ms_apNames[] =
@@ -351,24 +352,48 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		// Check against other players first
 		if(!m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking && (m_HookState == HOOK_FLYING || !m_NewHook))
 		{
-			float Distance = 0.0f;
-			for(int i = 0; i < MAX_CLIENTS; i++)
+			// `closest_point_on_line(m_HookPos, NewPos, ...)`, hoisted out of the
+			// loop, which the opaque calls in it keep the compiler from doing.
+			const vec2 HookSegment = NewPos - m_HookPos;
+			const float HookSegmentLengthSquared = length_squared(HookSegment);
+			if(HookSegmentLengthSquared > 0.0f)
 			{
-				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
-				if(!pCharCore || pCharCore == this || (!(m_Super || pCharCore->m_Super) && ((m_Id != -1 && !m_pTeams->CanCollide(i, m_Id)) || pCharCore->m_Solo || m_Solo)))
-					continue;
-
-				vec2 ClosestPoint;
-				if(closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
+				float Distance = 0.0f;
+				constexpr float GrabRadius = PhysicalSize() + 2.0f;
+				constexpr float GrabRadiusSquared = GrabRadius * GrabRadius;
+				// No point of the segment is further from `m_HookPos` than the
+				// segment length, so nothing beyond that plus the grab radius can
+				// be hit. The relative margin keeps that conservative under the
+				// rounding of `ClosestPoint`, which scales with the segment.
+				const float GrabRange = (length(HookSegment) + GrabRadius) * 1.0001f;
+				const float GrabRangeSquared = GrabRange * GrabRange;
+				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
-					if(distance(pCharCore->m_Pos, ClosestPoint) < PhysicalSize() + 2.0f)
+					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
+					if(!pCharCore || pCharCore == this)
+						continue;
+
+					// Reject out of range players before the cross translation unit
+					// team check.
+					if(distance_squared(m_HookPos, pCharCore->m_Pos) >= GrabRangeSquared)
+						continue;
+
+					if(!(m_Super || pCharCore->m_Super) && ((m_Id != -1 && !m_pTeams->CanCollide(i, m_Id)) || pCharCore->m_Solo || m_Solo))
+						continue;
+
+					const float SegmentFraction = dot(pCharCore->m_Pos - m_HookPos, HookSegment) / HookSegmentLengthSquared;
+					const vec2 ClosestPoint = m_HookPos + HookSegment * std::clamp(SegmentFraction, 0.0f, 1.0f);
+					if(distance_squared(pCharCore->m_Pos, ClosestPoint) < GrabRadiusSquared)
 					{
-						if(m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
+						// Not squared: two squared distances can share a square
+						// root, which would change who gets hooked.
+						const float HookDistance = distance(m_HookPos, pCharCore->m_Pos);
+						if(m_HookedPlayer == -1 || HookDistance < Distance)
 						{
 							m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_PLAYER;
 							m_HookState = HOOK_GRABBED;
 							SetHookedPlayer(i);
-							Distance = distance(m_HookPos, pCharCore->m_Pos);
+							Distance = HookDistance;
 							m_AntiPingInterfereCallback(i, false);
 						}
 					}
@@ -466,16 +491,30 @@ void CCharacterCore::TickDeferred()
 {
 	if(m_pWorld)
 	{
+		constexpr float PushRange = PhysicalSize() * 1.25f;
+		// `sqrtf` is monotone and both 35.0f and its square 1225.0f are exact in
+		// binary32, so rejecting at 1225.0f rejects nobody the `Distance` check
+		// below would keep. The margin absorbs `distance` and `distance_squared`
+		// rounding their common `dot` differently.
+		constexpr float PushRangeSquared = PushRange * PushRange * 1.0001f;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
 			if(!pCharCore)
 				continue;
 
-			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)))
+			if(pCharCore == this)
 				continue; // make sure that we don't nudge our self
 
+			// Reject players that are neither hooked by us nor close enough to be
+			// pushed, before the two square roots and the team check.
+			if(m_HookedPlayer != i && distance_squared(m_Pos, pCharCore->m_Pos) >= PushRangeSquared)
+				continue;
+
 			if(!(m_Super || pCharCore->m_Super) && (m_Solo || pCharCore->m_Solo))
+				continue;
+
+			if(m_Id != -1 && !m_pTeams->CanCollide(m_Id, i))
 				continue;
 
 			// handle player <-> player collision
@@ -486,7 +525,7 @@ void CCharacterCore::TickDeferred()
 
 				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && m_Tuning.m_PlayerCollision);
 
-				if(CanCollide && Distance < PhysicalSize() * 1.25f)
+				if(CanCollide && Distance < PushRange)
 				{
 					float a = (PhysicalSize() * 1.45f - Distance);
 					float Velocity = 0.5f;
@@ -575,19 +614,35 @@ void CCharacterCore::Move()
 		float Distance = distance(m_Pos, NewPos);
 		if(Distance > 0)
 		{
-			int End = Distance + 1;
+			// Nothing the filter looks at changes while walking the path, so
+			// determine who can be hit at all once instead of once per step. No
+			// point of the path is further from `m_Pos` than `Distance`; the
+			// relative margin keeps that conservative under the rounding of
+			// `mix`, which scales with the path.
+			const float Range = (Distance + PhysicalSize()) * 1.0001f;
+			CCharacterCore *apCandidates[MAX_CLIENTS];
+			int NumCandidates = 0;
+			for(int p = 0; p < MAX_CLIENTS; p++)
+			{
+				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
+				if(!pCharCore || pCharCore == this || distance_squared(m_Pos, pCharCore->m_Pos) >= Range * Range)
+					continue;
+				if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
+					continue;
+				apCandidates[NumCandidates] = pCharCore;
+				NumCandidates++;
+			}
+
+			// Without anyone in range there is no point in walking the path.
+			int End = NumCandidates == 0 ? 0 : static_cast<int>(Distance + 1);
 			vec2 LastPos = m_Pos;
 			for(int i = 0; i < End; i++)
 			{
 				float a = i / Distance;
 				vec2 Pos = mix(m_Pos, NewPos, a);
-				for(int p = 0; p < MAX_CLIENTS; p++)
+				for(int c = 0; c < NumCandidates; c++)
 				{
-					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
-					if(!pCharCore || pCharCore == this)
-						continue;
-					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
-						continue;
+					CCharacterCore *pCharCore = apCandidates[c];
 					float D = distance(Pos, pCharCore->m_Pos);
 					if(D < PhysicalSize())
 					{
