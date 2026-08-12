@@ -192,6 +192,7 @@ public:
 		void *m_pPersistentData;
 
 		void Reset();
+		void ResetIdMap();
 
 		// DDRace
 
