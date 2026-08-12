@@ -127,6 +127,11 @@ class TestRunner:
 		self.valgrind_memcheck = valgrind_memcheck
 		if self.valgrind_memcheck:
 			self.timeout_multiplier *= 25
+		# `conn_timeout` is wall clock inside the engine, so it has to be scaled like
+		# the test timeouts, otherwise a slowed down client or server drops its own
+		# connection while the test is still waiting. 100 is the default of the config
+		# variable, 1000 its maximum.
+		self.conn_timeout = min(1000, round(100 * self.timeout_multiplier))
 
 	def run_test(self, test):
 		tmp_dir = tempfile.mkdtemp(prefix=f"integration_{test.name}_", dir=self.test_dir)
@@ -466,6 +471,7 @@ class Client(Runnable):
 				f"cl_input_fifo {self.fifo_name}",
 				"gfx_fullscreen 0",
 				"cl_save_settings 0",
+				f"conn_timeout {test_env.runner.conn_timeout}",
 			]
 			+ extra_args,
 		)
@@ -497,6 +503,7 @@ class Server(Runnable):
 				test_env.ddnet_server,
 				f"sv_input_fifo {self.fifo_name}",
 				"sv_register 0",
+				f"conn_timeout {test_env.runner.conn_timeout}",
 			]
 			+ extra_args,
 		)
