@@ -16,6 +16,56 @@
 
 #include <cstdio> // sscanf
 
+// Locked tunings are stored as a comma separated list of tuning index and value
+// pairs, a single "-" is used when no tunings are locked.
+static void FormatLockedTunings(const LOCKED_TUNES &LockedTunings, char *pBuffer, size_t BufferSize)
+{
+	if(LockedTunings.empty())
+	{
+		str_copy(pBuffer, "-", BufferSize);
+		return;
+	}
+
+	pBuffer[0] = '\0';
+	for(const CLockedTune &LockedTune : LockedTunings)
+	{
+		char aLockedTune[32];
+		str_format(aLockedTune, sizeof(aLockedTune), "%s%d,%d", pBuffer[0] == '\0' ? "" : ",", LockedTune.m_ParamIndex, LockedTune.m_Value.Get());
+		str_append(pBuffer, aLockedTune, BufferSize);
+	}
+}
+
+static bool ParseLockedTunings(const char *pString, LOCKED_TUNES *pLockedTunings)
+{
+	pLockedTunings->clear();
+	if(str_comp(pString, "-") == 0)
+		return true;
+
+	char aParamIndex[16];
+	char aValue[16];
+	const char *pRest = pString;
+	while((pRest = str_next_token(pRest, ",", aParamIndex, sizeof(aParamIndex))) != nullptr)
+	{
+		int ParamIndex;
+		int Value;
+		pRest = str_next_token(pRest, ",", aValue, sizeof(aValue));
+		if(pRest == nullptr || !str_toint(aParamIndex, &ParamIndex) || !str_toint(aValue, &Value))
+		{
+			log_error("load", "savegame: tee has invalid locked tunings: %s", pString);
+			return false;
+		}
+		if(ParamIndex < 0 || ParamIndex >= CTuningParams::Num())
+		{
+			log_error("load", "savegame: tee has an invalid locked tuning index: %d", ParamIndex);
+			return false;
+		}
+		CLockedTune LockedTune(ParamIndex, 0.0f);
+		LockedTune.m_Value.Set(Value);
+		pLockedTunings->push_back(LockedTune);
+	}
+	return true;
+}
+
 CSaveTee::CSaveTee() = default;
 
 void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
@@ -80,6 +130,7 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 
 	m_TuneZone = pChr->m_TuneZone;
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
+	m_LockedTunings = pChr->m_LockedTunings;
 
 	if(pChr->m_StartTime)
 		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
@@ -192,6 +243,8 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 
 	pChr->m_TuneZone = m_TuneZone;
 	pChr->m_TuneZoneOld = m_TuneZoneOld;
+	pChr->m_LockedTunings = m_LockedTunings;
+	pChr->ApplyLockedTunings();
 
 	if(m_Time)
 		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
@@ -282,6 +335,9 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		}
 	}
 
+	char aLockedTunings[1024];
+	FormatLockedTunings(m_LockedTunings, aLockedTunings, sizeof(aLockedTunings));
+
 	str_format(m_aString, sizeof(m_aString),
 		"%s\t%d\t%d\t%d\t%d\t%d\t"
 		// weapons
@@ -316,7 +372,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%d\t" // m_ReloadTimer
 		"%d\t" // m_TeeStarted
 		"%d\t" //m_LiveFreeze
-		"%f\t%f\t%d\t%d\t%d", // m_Ninja
+		"%f\t%f\t%d\t%d\t%d\t" // m_Ninja
+		"%s", // m_LockedTunings
 		m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 		// weapons
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
@@ -350,12 +407,14 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_ReloadTimer,
 		m_TeeStarted,
 		m_LiveFrozen,
-		m_Ninja.m_ActivationDir.x, m_Ninja.m_ActivationDir.y, m_Ninja.m_ActivationTick, m_Ninja.m_CurrentMoveTime, m_Ninja.m_OldVelAmount);
+		m_Ninja.m_ActivationDir.x, m_Ninja.m_ActivationDir.y, m_Ninja.m_ActivationTick, m_Ninja.m_CurrentMoveTime, m_Ninja.m_OldVelAmount,
+		aLockedTunings);
 	return m_aString;
 }
 
 bool CSaveTee::FromString(const char *pString, int MembersCount)
 {
+	char aLockedTunings[1024] = "";
 	int Num;
 	Num = sscanf(pString,
 		"%15[^\t]\t%d\t%d\t%d\t%d\t%d\t"
@@ -391,7 +450,8 @@ bool CSaveTee::FromString(const char *pString, int MembersCount)
 		"%d\t" // m_ReloadTimer
 		"%d\t" // m_TeeStarted
 		"%d\t" // m_LiveFreeze
-		"%f\t%f\t%d\t%d\t%d", // m_Ninja
+		"%f\t%f\t%d\t%d\t%d\t" // m_Ninja
+		"%1023s", // m_LockedTunings
 		m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 		// weapons
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -425,7 +485,8 @@ bool CSaveTee::FromString(const char *pString, int MembersCount)
 		&m_ReloadTimer,
 		&m_TeeStarted,
 		&m_LiveFrozen,
-		&m_Ninja.m_ActivationDir.x, &m_Ninja.m_ActivationDir.y, &m_Ninja.m_ActivationTick, &m_Ninja.m_CurrentMoveTime, &m_Ninja.m_OldVelAmount);
+		&m_Ninja.m_ActivationDir.x, &m_Ninja.m_ActivationDir.y, &m_Ninja.m_ActivationTick, &m_Ninja.m_CurrentMoveTime, &m_Ninja.m_OldVelAmount,
+		aLockedTunings);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 96:
@@ -469,6 +530,13 @@ bool CSaveTee::FromString(const char *pString, int MembersCount)
 		m_Ninja.m_OldVelAmount = 0;
 		[[fallthrough]];
 	case 115:
+		m_LockedTunings.clear();
+		break;
+	case 116:
+		if(!ParseLockedTunings(aLockedTunings, &m_LockedTunings))
+		{
+			return false;
+		}
 		break;
 	default:
 		dbg_msg("load", "failed to load tee-string");
@@ -715,7 +783,7 @@ char *CSaveTeam::GetString()
 
 	for(int i = 0; i < m_MembersCount; i++)
 	{
-		char aBuf[1024];
+		char aBuf[2048];
 		str_format(aBuf, sizeof(aBuf), "\n%s", m_pSavedTees[i].GetString(this));
 		str_append(m_aString, aBuf);
 	}
@@ -737,7 +805,7 @@ int CSaveTeam::FromString(const char *pString)
 {
 	char aTeamStats[MAX_CLIENTS];
 	char aSwitcher[64];
-	char aSaveTee[1024];
+	char aSaveTee[2048];
 
 	char *pCopyPos;
 	unsigned int Pos = 0;

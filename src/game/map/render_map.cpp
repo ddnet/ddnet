@@ -953,7 +953,7 @@ void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, 
 			int c = x + y * w;
 
 			unsigned char Index = pTune[c].m_Number;
-			if(Index)
+			if(Index && IsTuneTileNumberUsed(pTune[c].m_Type))
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
