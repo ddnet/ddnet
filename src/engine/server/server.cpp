@@ -234,7 +234,10 @@ void CServer::CClient::Reset()
 	m_NextMapChunk = 0;
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
+}
 
+void CServer::CClient::ResetIdMap()
+{
 	std::fill(std::begin(m_aIdMap), std::end(m_aIdMap), -1);
 	std::fill(std::begin(m_aReverseIdMap), std::end(m_aReverseIdMap), -1);
 }
@@ -1168,10 +1171,14 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
-	pThis->m_aClients[ClientId].m_DDNetVersion = VERSION_NONE;
-	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
-	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 
+	// Do not clear the client version and the player id map here. The client keeps
+	// its session, so `OnClientEnter` will not be called again for it, and neither
+	// the resent `NETMSG_CLIENTVER` (ignored outside of `STATE_PREAUTH`) nor
+	// `CPlayerMapping::CPlayerMap::InitPlayer` would ever restore them. A client
+	// without version is treated as a 64 player client, and an empty id map makes
+	// `Translate` fail for every id including the client's own one, which hides the
+	// client from itself entirely.
 	pThis->m_aClients[ClientId].Reset();
 
 	pThis->GameServer()->TeehistorianRecordPlayerRejoin(ClientId);
@@ -1205,6 +1212,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientId].Reset();
+	pThis->m_aClients[ClientId].ResetIdMap();
 
 	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, false);
 	pThis->Antibot()->OnEngineClientJoin(ClientId);
@@ -1239,6 +1247,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientId].Reset();
+	pThis->m_aClients[ClientId].ResetIdMap();
 	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
 	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, Sixup);
@@ -3311,6 +3320,7 @@ int CServer::Run()
 						SendMap(ClientId);
 						bool HasPersistentData = m_aClients[ClientId].m_HasPersistentData;
 						m_aClients[ClientId].Reset();
+						m_aClients[ClientId].ResetIdMap();
 						m_aClients[ClientId].m_HasPersistentData = HasPersistentData;
 						m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
 					}
