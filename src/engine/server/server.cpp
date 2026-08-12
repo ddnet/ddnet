@@ -1038,6 +1038,10 @@ void CServer::DoSnapshot()
 		if(m_aClients[i].m_State != CClient::STATE_INGAME)
 			continue;
 
+		// don't send snapshots to clients that haven't identified as DDNet-based yet, can crash them.
+		if(!m_aClients[i].m_Sixup && m_aClients[i].m_DDNetVersion < VERSION_DDNET_OLD)
+			continue;
+
 		// this client is trying to recover, don't spam snapshots
 		if(m_aClients[i].m_SnapRate == CClient::SNAPRATE_RECOVER && (Tick() % TickSpeed()) != 0)
 			continue;

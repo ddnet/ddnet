@@ -231,6 +231,9 @@ public:
 	bool m_EyeEmoteEnabled;
 	int m_TimerType;
 
+	// Tick at which to kick the client if it still hasn't identified as a DDNet-based client
+	int m_DDNetVersionKickTick;
+
 	int GetDefaultEmote() const;
 	void OverrideDefaultEmote(int Emote, int Tick);
 	bool CanOverrideDefaultEmote() const;
