@@ -685,6 +685,7 @@ bool IsSwitchTileFlagsUsed(int Index); // Assumes that Index is a valid switch t
 bool IsSwitchTileNumberUsed(int Index); // Assumes that Index is a valid switch tile index
 bool IsSwitchTileDelayUsed(int Index); // Assumes that Index is a valid switch tile index
 bool IsValidTuneTile(int Index);
+bool IsTuneTileNumberUsed(int Index); // Assumes that Index is a valid tune tile index
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);
 bool IsCreditsTile(int TileIndex);

@@ -140,6 +140,11 @@ bool IsValidTuneTile(int Index)
 	return Index == TILE_TUNE || Index == TILE_TUNELOCK || Index == TILE_TUNELOCK_RESET;
 }
 
+bool IsTuneTileNumberUsed(int Index)
+{
+	return Index != TILE_TUNELOCK_RESET;
+}
+
 bool IsValidEntity(int Index)
 {
 	Index -= ENTITY_OFFSET;

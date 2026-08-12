@@ -473,7 +473,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				if(!Editor()->Input()->KeyIsPressed(KEY_SPACE))
 				{
 					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = static_cast<CLayerTune *>(this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
-					if(IsValidTuneTile(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type))
+					const unsigned char TgtIndex = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type;
+					if(IsValidTuneTile(TgtIndex) && IsTuneTileNumberUsed(TgtIndex))
 					{
 						Editor()->m_TuningNumber = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
 					}
@@ -484,7 +485,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 					if(IsValidTuneTile(Tile.m_Index))
 					{
 						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
-						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number = Editor()->m_TuningNumber;
+						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number = IsTuneTileNumberUsed(Tile.m_Index) ? Editor()->m_TuningNumber : 255;
 					}
 				}
 			}
