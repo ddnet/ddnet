@@ -4790,6 +4790,7 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	m_aClients[ClientId].m_DDNetVersion = m_aClients[OrigId].m_DDNetVersion;
 	m_aClients[ClientId].m_GotDDNetVersionPacket = m_aClients[OrigId].m_GotDDNetVersionPacket;
 	m_aClients[ClientId].m_DDNetVersionSettled = m_aClients[OrigId].m_DDNetVersionSettled;
+	m_aClients[ClientId].m_ReloadingMap = m_aClients[OrigId].m_ReloadingMap;
 
 	DelClientCallback(OrigId, "Timeout Protection used", this);
 
