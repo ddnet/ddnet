@@ -1229,6 +1229,16 @@ void CGameContext::OnTick()
 	{
 		if(m_apPlayers[i])
 		{
+			// By supporting 128 players with full backwards compatibility (in +spectate menu too), it's basically impossible and
+			// really unnecessary to have old 16 player clients supported
+			IServer::CClientInfo Info;
+			if(Server()->Tick() >= m_apPlayers[i]->m_DDNetVersionKickTick && !Server()->IsSixup(i) &&
+				Server()->GetClientInfo(i, &Info) && Info.m_DDNetVersion < VERSION_DDNET_OLD)
+			{
+				Server()->Kick(i, "Old Teeworlds 0.6 versions are unsupported. Use DDNet client or Teeworlds 0.7");
+				continue;
+			}
+
 			// send vote options
 			ProgressVoteOptions(i);
 
@@ -1771,16 +1781,12 @@ void CGameContext::OnClientEnter(int ClientId)
 	if(Server()->GetClientInfo(ClientId, &Info))
 	{
 		// 0.7 clients can send ddnet message, F-Client does that for example
-		if(!Info.m_GotDDNetVersion && !Server()->IsSixup(ClientId))
+		if(Info.m_GotDDNetVersion)
 		{
-			// By supporting 128 players with full backwards compatibility (in +spectate menu too), it's basically impossible and
-			// really unnecessary to have old 16 player clients supported
-			Server()->Kick(ClientId, "Old Teeworlds 0.6 versions are unsupported. Use DDNet client or Teeworlds 0.7");
-			return;
-		}
-		else if(OnClientDDNetVersionKnown(ClientId))
-		{
-			return; // kicked
+			if(OnClientDDNetVersionKnown(ClientId))
+			{
+				return; // kicked
+			}
 		}
 	}
 
