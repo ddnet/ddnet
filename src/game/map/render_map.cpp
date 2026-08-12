@@ -1305,8 +1305,9 @@ void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Colo
 				if(Render)
 				{
 					const unsigned char Number = pTune[c].m_Number;
+					const unsigned char Type = pTune[c].m_Number;
 
-					if(Number == 0 || pTuneColorMapper == nullptr)
+					if(Number == 0 || pTuneColorMapper == nullptr || Type < TILE_TUNE || Type > TILE_TUNELOCK)
 						Graphics()->SetColor(Color);
 					else
 					{

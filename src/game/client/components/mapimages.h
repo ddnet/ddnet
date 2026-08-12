@@ -59,7 +59,7 @@ public:
 	// DDRace
 	IGraphics::CTextureHandle GetEntities(EMapImageEntityLayerType EntityLayerType) override;
 	IGraphics::CTextureHandle GetSpeedupArrow() override;
-	IGraphics::CTextureHandle GetTuneColors() override;
+	IGraphics::CTextureHandle GetTuneColors(int TileIndex) override;
 
 	IGraphics::CTextureHandle GetOverlayBottom() override;
 	IGraphics::CTextureHandle GetOverlayTop() override;
@@ -76,7 +76,7 @@ private:
 	bool m_TuneColorsIsLoaded;
 	IGraphics::CTextureHandle m_aaEntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT * 2][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
 	IGraphics::CTextureHandle m_SpeedupArrowTexture;
-	IGraphics::CTextureHandle m_TuneColorMapTexture;
+	IGraphics::CTextureHandle m_aTuneColorMapTexture[TILE_TUNELOCK - TILE_TUNE + 1];
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
