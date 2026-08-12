@@ -72,6 +72,7 @@ void CServerBrowserPingCache::Load()
 		bool Error = false;
 		bool WarnedForBadAddress = false;
 		Error = Error || !m_pLoadStmt;
+		Error = Error || SQLITE_HANDLE_ERROR(sqlite3_reset(m_pLoadStmt.get())) != SQLITE_OK;
 		while(!Error)
 		{
 			int StepResult = SQLITE_HANDLE_ERROR(sqlite3_step(m_pLoadStmt.get()));
