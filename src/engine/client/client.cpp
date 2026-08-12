@@ -4166,6 +4166,11 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 
 void CClient::DemoRecorder_HandleAutoStart()
 {
+	if(State() != IClient::STATE_ONLINE)
+	{
+		return;
+	}
+
 	if(g_Config.m_ClAutoDemoRecord)
 	{
 		DemoRecorder(RECORDER_AUTO)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
