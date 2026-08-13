@@ -139,6 +139,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCmdPlayDemo[IO_MAX_PATH_LENGTH] = "";
 	char m_aCmdEditMap[IO_MAX_PATH_LENGTH] = "";
 
+	// Whether `CGameClient::OnConnected` has initialized the map logic, i.e. the
+	// layers and the collision, for the currently loaded map.
+	bool m_MapLogicInitialized = false;
+
 	// map download
 	char m_aMapDownloadUrl[256] = "";
 	std::shared_ptr<IHttpRequest> m_pMapdownloadTask = nullptr;

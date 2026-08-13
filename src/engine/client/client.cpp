@@ -782,6 +782,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
 	GameClient()->Map()->Unload();
+	m_MapLogicInitialized = false;
 	m_CurrentServerPingInfoType = -1;
 	m_CurrentServerPingBasicToken = -1;
 	m_CurrentServerPingToken = -1;
@@ -1218,6 +1219,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	// Unload the current map and reset all snapshots before loading a new map,
 	// because the snapshots are only valid for the old map.
 	GameClient()->Map()->Unload();
+	m_MapLogicInitialized = false;
 	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 	{
 		m_aapSnapshots[Dummy][SNAP_CURRENT] = nullptr;
@@ -1874,6 +1876,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				return;
 			}
 			GameClient()->OnConnected();
+			m_MapLogicInitialized = true;
 			if(m_DummyReconnectOnReload)
 			{
 				m_DummySendConnInfo = true;
@@ -2078,7 +2081,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		{
 			// We are not allowed to process snapshots yet.
 			if(State() < IClient::STATE_LOADING ||
-				!GameClient()->Map()->IsLoaded())
+				!m_MapLogicInitialized)
 			{
 				return;
 			}
@@ -4087,6 +4090,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	SetState(IClient::STATE_DEMOPLAYBACK);
 
 	GameClient()->OnConnected();
+	m_MapLogicInitialized = true;
 
 	// setup buffers
 	mem_zero(m_aaDemorecSnapshotData, sizeof(m_aaDemorecSnapshotData));
