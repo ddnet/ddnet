@@ -67,6 +67,7 @@ enum
 {
 	NET_MAX_PACKETSIZE = 1400,
 	NET_MAX_CONNLESS_PAYLOAD = NET_MAX_PACKETSIZE - 6,
+	NET_MAX_SEND_PAYLOAD = NET_MAX_PACKETSIZE - 6,
 	/**
 	 * The maximum size of a chunk within a connection-oriented packet.
 	 *
