@@ -115,7 +115,13 @@ void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 
 			if((Editor()->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pTuneLayer->m_pTiles[SrcIndex].m_Index)) && pTuneLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
-				if(Editor()->m_TuningNumber != pTuneLayer->m_TuningNumber)
+				if(!IsTuneTileNumberUsed(pTuneLayer->m_pTiles[SrcIndex].m_Index))
+				{
+					// Tune tile number is unused. Set a known value which is not 0,
+					// as tiles with number 0 would not be rendered ingame.
+					m_pTuneTile[TgtIndex].m_Number = 255;
+				}
+				else if(Editor()->m_TuningNumber != pTuneLayer->m_TuningNumber)
 				{
 					m_pTuneTile[TgtIndex].m_Number = Editor()->m_TuningNumber;
 				}
@@ -271,7 +277,13 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				{
 					m_pTuneTile[TgtIndex].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
 
-					if((pLt->m_pTuneTile[SrcIndex].m_Number == 0 && Editor()->m_TuningNumber) || Editor()->m_TuningNumber != pLt->m_TuningNumber)
+					if(!IsTuneTileNumberUsed(m_pTuneTile[TgtIndex].m_Type))
+					{
+						// Tune tile number is unused. Set a known value which is not 0,
+						// as tiles with number 0 would not be rendered ingame.
+						m_pTuneTile[TgtIndex].m_Number = 255;
+					}
+					else if((pLt->m_pTuneTile[SrcIndex].m_Number == 0 && Editor()->m_TuningNumber) || Editor()->m_TuningNumber != pLt->m_TuningNumber)
 						m_pTuneTile[TgtIndex].m_Number = Editor()->m_TuningNumber;
 					else
 						m_pTuneTile[TgtIndex].m_Number = pLt->m_pTuneTile[SrcIndex].m_Number;
@@ -314,7 +326,8 @@ bool CLayerTune::ContainsElementWithId(int Id) const
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
-			if(IsValidTuneTile(m_pTuneTile[y * m_Width + x].m_Type) && m_pTuneTile[y * m_Width + x].m_Number == Id)
+			const unsigned char Type = m_pTuneTile[y * m_Width + x].m_Type;
+			if(IsValidTuneTile(Type) && IsTuneTileNumberUsed(Type) && m_pTuneTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
@@ -336,6 +349,8 @@ void CLayerTune::GetPos(int Number, int Offset, ivec2 &Pos)
 			for(int y = 0; y < m_Height; y++)
 			{
 				int i = y * m_Width + x;
+				if(!IsTuneTileNumberUsed(m_pTuneTile[i].m_Type))
+					continue;
 				int Tune = m_pTuneTile[i].m_Number;
 				if(Number == Tune)
 				{

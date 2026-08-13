@@ -1765,17 +1765,17 @@ void CRenderLayerEntitySwitch::RenderTileLayerNoTileBuffer(const ColorRGBA &Colo
 CRenderLayerEntityTune::CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
-IGraphics::CTextureHandle CRenderLayerEntityTune::GetTexture() const
-{
-	return m_pMapImages->GetTuneColors();
-}
-
 void CRenderLayerEntityTune::GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const
 {
 	const unsigned char Number = m_pTuneTiles[y * m_pLayerTilemap->m_Width + x].m_Number;
+	const unsigned char Type = m_pTuneTiles[y * m_pLayerTilemap->m_Width + x].m_Type;
 	unsigned char Index = 0;
 
-	if(Number != 0)
+	if(Number == 0 || (CurOverlay == 0 && (Type < TILE_TUNE || Type > TILE_TUNELOCK)))
+	{
+		Index = Type;
+	}
+	else if((CurOverlay == 1 && Type == TILE_TUNE) || (CurOverlay == 2 && Type == TILE_TUNELOCK))
 	{
 		// assign color index instead of tune number for higher color distance
 		Index = m_TuneColorMapper.TuneNumberToColorIndex(Number);
@@ -1788,7 +1788,9 @@ void CRenderLayerEntityTune::GetTileData(unsigned char *pIndex, unsigned char *p
 void CRenderLayerEntityTune::Init()
 {
 	m_TuneColorMapper.Reset();
-	CRenderLayerTile::Init();
+	UploadTileData(m_VisualTiles, 0, false);
+	UploadTileData(m_VisualTuneColor, 1, false);
+	UploadTileData(m_VisualTuneColorLock, 2, false);
 }
 
 int CRenderLayerEntityTune::GetDataIndex(unsigned int &TileSize) const
@@ -1800,6 +1802,30 @@ int CRenderLayerEntityTune::GetDataIndex(unsigned int &TileSize) const
 void CRenderLayerEntityTune::InitTileData()
 {
 	m_pTuneTiles = GetData<CTuneTile>();
+}
+
+void CRenderLayerEntityTune::Unload()
+{
+	CRenderLayerTile::Unload();
+	if(m_VisualTuneColor.has_value())
+	{
+		m_VisualTuneColor->Unload();
+		m_VisualTuneColor = std::nullopt;
+	}
+	if(m_VisualTuneColorLock.has_value())
+	{
+		m_VisualTuneColorLock->Unload();
+		m_VisualTuneColorLock = std::nullopt;
+	}
+}
+
+void CRenderLayerEntityTune::RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
+{
+	RenderTileLayer(Color, Params);
+	Graphics()->TextureSet(m_pMapImages->GetTuneColors(TILE_TUNE));
+	RenderTileLayer(Color, Params, &m_VisualTuneColor.value());
+	Graphics()->TextureSet(m_pMapImages->GetTuneColors(TILE_TUNELOCK));
+	RenderTileLayer(Color, Params, &m_VisualTuneColorLock.value());
 }
 
 void CRenderLayerEntityTune::RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)

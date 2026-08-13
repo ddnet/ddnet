@@ -5102,7 +5102,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 				for(int x = 0; x < pTuneLayer->m_Width; x++)
 				{
 					int i = y * pTuneLayer->m_Width + x;
-					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pTuneLayer->m_pTuneTile[i].m_Number))
+					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !IsTuneTileNumberUsed(pTuneLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pTuneLayer->m_pTuneTile[i].m_Number))
 						continue;
 
 					if(UseNextFree)

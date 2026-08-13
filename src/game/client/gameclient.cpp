@@ -198,6 +198,7 @@ void CGameClient::OnConsoleInit()
 	// register game commands to allow the client prediction to load settings from the map
 	Console()->Register("tune", "s[tuning] ?f[value]", CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("tune_lock", "i[number] s[tuning] f[value]", CFGFLAG_GAME, ConTuneLock, this, "Tune for lock a variable to value");
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
 	for(auto &pComponent : m_vpAll)
@@ -425,7 +426,7 @@ void CGameClient::OnInit()
 		m_Menus.RenderLoading(pLoadingDDNetCaption, pLoadingMessageAssets, 1);
 	}
 
-	m_GameWorld.Init(Collision(), m_aTuningList, &m_MapBugs);
+	m_GameWorld.Init(Collision(), m_aTuningList, m_aLockedTuning, &m_MapBugs);
 	OnReset();
 
 	// Set free binds to DDRace binds if it's active
@@ -1900,6 +1901,16 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 
 						m_aClients[Item.m_Id].m_Snapped = *((const CNetObj_Character *)Item.m_pData);
 						m_aClients[Item.m_Id].m_Evolved = m_Snap.m_aCharacters[Item.m_Id].m_Cur;
+
+						// Clear locked tunings if server doesnt send object anymore.
+						// Cleared by the modification or via rcon without the ability for the client to predict it based on tiles
+						if(!Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_CHARACTERTUNING, Item.m_Id))
+						{
+							const void *pPrevTuning = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTERTUNING, Item.m_Id);
+							CCharacter *pChr = m_GameWorld.GetCharacterById(Item.m_Id);
+							if(pPrevTuning && pChr)
+								pChr->m_LockedTunings.clear();
+						}
 					}
 					else
 					{
@@ -1951,6 +1962,19 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 					pClient->m_Predicted.ReadDDNet(pCharacterData);
 
 					m_Teams.SetSolo(Item.m_Id, pClient->m_Solo);
+				}
+			}
+			else if(Item.m_Type == NETOBJTYPE_CHARACTERTUNING)
+			{
+				const CNetObj_CharacterTuning *pTuningData = (const CNetObj_CharacterTuning *)Item.m_pData;
+
+				if(Item.m_Id < MAX_CLIENTS)
+				{
+					m_Snap.m_aCharacters[Item.m_Id].m_Tuning = *pTuningData;
+					m_Snap.m_aCharacters[Item.m_Id].m_pPrevTuning = (const CNetObj_CharacterTuning *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTERTUNING, Item.m_Id);
+					m_Snap.m_aCharacters[Item.m_Id].m_HasTuning = true;
+					CClientData *pClient = &m_aClients[Item.m_Id];
+					pClient->m_Predicted.ReadTuning(pTuningData);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECCHAR)
@@ -3626,6 +3650,7 @@ void CGameClient::UpdatePrediction()
 			int GameTeam = IsTeamPlay() ? m_aClients[i].m_Team : i;
 			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
 				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : nullptr,
+				m_Snap.m_aCharacters[i].m_HasTuning ? &m_Snap.m_aCharacters[i].m_Tuning : nullptr,
 				GameTeam, IsLocal);
 		}
 
@@ -4727,14 +4752,15 @@ void CGameClient::LoadMapSettings()
 	m_MapBugs = CMapBugs::Create(Map()->BaseName(), Map()->Size(), Map()->Sha256());
 
 	// Reset Tunezones
-	for(int TuneZone = 0; TuneZone < TuneZone::NUM; TuneZone++)
+	for(int List = 0; List < TuneZone::NUM; List++)
 	{
-		TuningList()[TuneZone] = CTuningParams::DEFAULT;
-		TuningList()[TuneZone].Set("gun_curvature", 0);
-		TuningList()[TuneZone].Set("gun_speed", 1400);
-		TuningList()[TuneZone].Set("shotgun_curvature", 0);
-		TuningList()[TuneZone].Set("shotgun_speed", 500);
-		TuningList()[TuneZone].Set("shotgun_speeddiff", 0);
+		TuningList()[List] = CTuningParams::DEFAULT;
+		TuningList()[List].Set("gun_curvature", 0);
+		TuningList()[List].Set("gun_speed", 1400);
+		TuningList()[List].Set("shotgun_curvature", 0);
+		TuningList()[List].Set("shotgun_speed", 500);
+		TuningList()[List].Set("shotgun_speeddiff", 0);
+		LockedTuning()[List].clear();
 	}
 
 	// Load map tunings
@@ -4789,6 +4815,20 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < TuneZone::NUM)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
+}
+
+void CGameClient::ConTuneLock(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	int List = pResult->GetInteger(0);
+	const char *pParamName = pResult->GetString(1);
+	float NewValue = pResult->GetFloat(2);
+
+	if(List >= 0 && List < TuneZone::NUM)
+	{
+		CLockedTune LockedTune(CTuningParams::GetIndex(pParamName), NewValue);
+		SetLockedTune(&pSelf->TuningList()[0], &pSelf->LockedTuning()[List], LockedTune, true);
+	}
 }
 
 void CGameClient::ConMapbug(IConsole::IResult *pResult, void *pUserData)
