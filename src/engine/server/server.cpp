@@ -230,6 +230,7 @@ void CServer::CClient::Reset()
 	m_LastAckedSnapshot = -1;
 	m_LastInputTick = -1;
 	m_SnapRate = CClient::SNAPRATE_INIT;
+	m_ReloadingMap = false;
 	m_Score = -1;
 	m_NextMapChunk = 0;
 	m_Flags = 0;
@@ -1038,6 +1039,10 @@ void CServer::DoSnapshot()
 		if(m_aClients[i].m_State != CClient::STATE_INGAME)
 			continue;
 
+		// client is loading the map again after rejoining
+		if(m_aClients[i].m_ReloadingMap)
+			continue;
+
 		// don't send snapshots to clients that haven't identified as DDNet-based yet, can crash them.
 		if(!m_aClients[i].m_Sixup && m_aClients[i].m_DDNetVersion < VERSION_DDNET_OLD)
 			continue;
@@ -1189,6 +1194,9 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser)
 	pThis->Antibot()->OnEngineClientDrop(ClientId, "rejoin");
 	pThis->Antibot()->OnEngineClientJoin(ClientId);
 
+	// The client keeps its slot and therefore `STATE_INGAME`, but it has to load
+	// the map again before it can handle snapshots.
+	pThis->m_aClients[ClientId].m_ReloadingMap = true;
 	pThis->SendMap(ClientId);
 
 	return 0;
@@ -2080,6 +2088,7 @@ void CServer::OnNetMsgReady(int ClientId)
 
 	// Make rejoining session possible before timeout protection triggers
 	// https://github.com/ddnet/ddnet/pull/301
+	m_aClients[ClientId].m_ReloadingMap = false;
 	SendConnectionReady(ClientId);
 }
 

@@ -143,6 +143,11 @@ public:
 		int m_State;
 		int m_Latency;
 		int m_SnapRate;
+		/**
+		 * Whether this client is reloading the map after rejoining its slot,
+		 * i.e. it stays `STATE_INGAME` but cannot handle snapshots yet.
+		 */
+		bool m_ReloadingMap;
 
 		double m_Traffic;
 		int64_t m_TrafficSince;
