@@ -214,7 +214,15 @@ void CPlayers::RenderHookCollLine(
 		return;
 
 	float Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
-	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
+	float Angle;
+	if(Local && !GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		Angle = angle(GameClient()->m_Controls.m_aSnapAimTo45MousePos[g_Config.m_ClDummy]);
+	}
+	else
+	{
+		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
+	}
 
 	vec2 Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	vec2 Direction = direction(Angle);
@@ -620,7 +628,16 @@ void CPlayers::RenderPlayer(
 	}
 	float AttackTicksPassed = AttackTime * (float)Client()->GameTickSpeed();
 
-	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
+	float Angle;
+	if(Local && !GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		// just use the direct input if it's the local player we are rendering
+		Angle = angle(GameClient()->m_Controls.m_aSnapAimTo45MousePos[g_Config.m_ClDummy]);
+	}
+	else
+	{
+		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
+	}
 
 	vec2 Direction = direction(Angle);
 	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), Intra);
