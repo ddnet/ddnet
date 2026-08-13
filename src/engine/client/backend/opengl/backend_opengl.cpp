@@ -37,12 +37,16 @@
 // ------------ CCommandProcessorFragment_OpenGL
 void CCommandProcessorFragment_OpenGL::Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand)
 {
+	// The viewport is given relative to the top left of the drawable area, whereas
+	// OpenGL places it relative to the bottom left.
+	m_ViewportX = pCommand->m_X;
+	m_ViewportY = pCommand->m_DrawableHeight - pCommand->m_Y - pCommand->m_Height;
 	if(pCommand->m_ByResize)
 	{
 		m_CanvasWidth = (uint32_t)pCommand->m_Width;
 		m_CanvasHeight = (uint32_t)pCommand->m_Height;
 	}
-	glViewport(pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height);
+	glViewport(m_ViewportX, m_ViewportY, pCommand->m_Width, pCommand->m_Height);
 }
 
 size_t CCommandProcessorFragment_OpenGL::GLFormatToPixelSize(int GLFormat)
@@ -87,7 +91,9 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 	// clip
 	if(State.m_ClipEnable)
 	{
-		glScissor(State.m_ClipX, State.m_ClipY, State.m_ClipW, State.m_ClipH);
+		// The clip rectangle is relative to the viewport, whereas glScissor is
+		// relative to the drawable area.
+		glScissor(m_ViewportX + State.m_ClipX, m_ViewportY + State.m_ClipY, State.m_ClipW, State.m_ClipH);
 		glEnable(GL_SCISSOR_TEST);
 		m_LastClipEnable = true;
 	}
@@ -307,7 +313,7 @@ bool CCommandProcessorFragment_OpenGL::GetPresentedImageData(uint32_t &Width, ui
 		GLint Alignment;
 		glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, m_CanvasWidth, m_CanvasHeight, GL_RGBA, GL_UNSIGNED_BYTE, vDstData.data());
+		glReadPixels(m_ViewportX, m_ViewportY, m_CanvasWidth, m_CanvasHeight, GL_RGBA, GL_UNSIGNED_BYTE, vDstData.data());
 		glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 
 		uint8_t *pTempRow = vDstData.data() + Width * Height * 4;
@@ -995,17 +1001,20 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 
 void CCommandProcessorFragment_OpenGL::Cmd_ReadPixel(const CCommandBuffer::SCommand_TrySwapAndReadPixel *pCommand)
 {
-	// get size of viewport
+	// get position and size of viewport
 	GLint aViewport[4] = {0, 0, 0, 0};
 	glGetIntegerv(GL_VIEWPORT, aViewport);
-	const int h = aViewport[3];
+	const int ViewportX = aViewport[0];
+	const int ViewportY = aViewport[1];
+	const int ViewportHeight = aViewport[3];
 
-	// fetch the pixel
+	// fetch the pixel. The position is relative to the top left of the viewport,
+	// whereas glReadPixels reads relative to the bottom left of the drawable area.
 	uint8_t aPixelData[3];
 	GLint Alignment;
 	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(pCommand->m_Position.x, h - 1 - pCommand->m_Position.y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, aPixelData);
+	glReadPixels(ViewportX + pCommand->m_Position.x, ViewportY + ViewportHeight - 1 - pCommand->m_Position.y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, aPixelData);
 	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 
 	// fill in the information
@@ -1018,6 +1027,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 	GLint aViewport[4] = {0, 0, 0, 0};
 	glGetIntegerv(GL_VIEWPORT, aViewport);
 
+	const int ViewportX = aViewport[0];
+	const int ViewportY = aViewport[1];
 	int w = aViewport[2];
 	int h = aViewport[3];
 
@@ -1036,7 +1047,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 	GLint Alignment;
 	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pPixelData);
+	glReadPixels(ViewportX, ViewportY, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pPixelData);
 	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 
 	// flip the pixel because opengl works from bottom left corner
@@ -1170,7 +1181,9 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 	// clip
 	if(State.m_ClipEnable)
 	{
-		glScissor(State.m_ClipX, State.m_ClipY, State.m_ClipW, State.m_ClipH);
+		// The clip rectangle is relative to the viewport, whereas glScissor is
+		// relative to the drawable area.
+		glScissor(m_ViewportX + State.m_ClipX, m_ViewportY + State.m_ClipY, State.m_ClipW, State.m_ClipH);
 		glEnable(GL_SCISSOR_TEST);
 		m_LastClipEnable = true;
 	}
@@ -1333,6 +1346,8 @@ bool CCommandProcessorFragment_OpenGL2::DoAnalyzeStep(size_t CheckCount, size_t 
 	GLint aViewport[4] = {0, 0, 0, 0};
 	glGetIntegerv(GL_VIEWPORT, aViewport);
 
+	const int ViewportX = aViewport[0];
+	const int ViewportY = aViewport[1];
 	int w = aViewport[2];
 	int h = aViewport[3];
 
@@ -1345,7 +1360,7 @@ bool CCommandProcessorFragment_OpenGL2::DoAnalyzeStep(size_t CheckCount, size_t 
 	GLint Alignment;
 	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
+	glReadPixels(ViewportX, ViewportY, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
 	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 
 	// now analyse the image data

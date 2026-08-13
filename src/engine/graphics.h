@@ -242,6 +242,8 @@ class IGraphics : public IInterface
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
+	int m_DrawableWidth;
+	int m_DrawableHeight;
 	int m_ScreenRefreshRate;
 	float m_ScreenHiDPIScale;
 	ivec2 m_DesktopSize;
@@ -278,6 +280,12 @@ public:
 	float ScreenHiDPIScale() const { return m_ScreenHiDPIScale; }
 	int WindowWidth() const { return m_ScreenWidth / m_ScreenHiDPIScale; }
 	int WindowHeight() const { return m_ScreenHeight / m_ScreenHiDPIScale; }
+
+	// Size of the whole drawable area, in the same units as ScreenWidth()/ScreenHeight().
+	// The rendered image is clamped to an aspect ratio of at most 5:4 and aligned to the
+	// top left corner, so the area at the bottom can be larger than the image and is not
+	// rendered to.
+	vec2 DrawableSize() const { return vec2(m_DrawableWidth, m_DrawableHeight); }
 
 	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
