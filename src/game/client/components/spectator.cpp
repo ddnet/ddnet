@@ -281,13 +281,23 @@ void CSpectator::OnRender()
 		++TotalPlayers;
 	}
 
-	if(TotalPlayers > 64)
+	if(TotalPlayers > 96)
 	{
-		FontSize = 12.0f;
+		FontSize = 15.0f;
 		LineHeight = 15.0f;
 		TeeSizeMod = 0.3f;
 		PerLine = 32;
 		RoundRadius = 5.0f;
+		BoxMove = 3.0f;
+		BoxOffset = 6.0f;
+	}
+	else if(TotalPlayers > 64)
+	{
+		FontSize = 16.0f;
+		LineHeight = 19.0f;
+		TeeSizeMod = 0.45f;
+		PerLine = 24;
+		RoundRadius = 6.0f;
 		BoxMove = 3.0f;
 		BoxOffset = 6.0f;
 	}
