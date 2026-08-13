@@ -95,7 +95,7 @@ void CGraph::Scale(int64_t WantedTotalTime)
 	m_MinAxis = m_MinRange;
 	m_MaxAxis = m_MaxRange;
 	m_MinValue = std::numeric_limits<float>::max();
-	m_MaxValue = std::numeric_limits<float>::min();
+	m_MaxValue = std::numeric_limits<float>::lowest();
 	for(CEntry *pEntry = m_pFirstScaled; pEntry != nullptr; pEntry = m_Entries.Next(pEntry))
 	{
 		const float Value = pEntry->m_Value;
