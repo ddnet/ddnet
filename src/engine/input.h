@@ -146,13 +146,16 @@ public:
 		 */
 		CTouchFinger m_Finger;
 		/**
-		 * The current position of the finger. The x- and y-components of the position are normalized to the
-		 * range `0.0f`-`1.0f` representing the absolute position of the finger on the current touch device.
+		 * The current position of the finger. The x- and y-components of the position are normalized so that
+		 * `0.0f`-`1.0f` covers the rendered image.
+		 *
+		 * @remark The touch device covers the entire window, whereas the rendered image is clamped to an aspect
+		 * ratio of at most 5:4 and aligned to its top left corner, so the components exceed `1.0f` for a finger
+		 * on the area that is not rendered to.
 		 */
 		vec2 m_Position;
 		/**
-		 * The current delta of the finger. The x- and y-components of the delta are normalized to the
-		 * range `-1.0f`-`1.0f` representing the absolute delta of the finger on the current touch device.
+		 * The current delta of the finger, in the same units as @link m_Position @endlink.
 		 *
 		 * @remark This is reset to zero at the end of each frame.
 		 */

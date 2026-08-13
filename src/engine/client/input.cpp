@@ -540,13 +540,22 @@ void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 	}
 }
 
+vec2 CInput::WindowFractionToViewport(vec2 Fraction) const
+{
+	// Touch events are normalized to the drawable area, whereas the rendered image can
+	// be smaller than it and is aligned to its top left corner. This is a pure scale,
+	// so deltas can be converted with it as well.
+	dbg_assert(Graphics()->ScreenWidth() > 0 && Graphics()->ScreenHeight() > 0, "Screen size invalid");
+	return Fraction * Graphics()->DrawableSize() / Graphics()->ScreenSize();
+}
+
 void CInput::HandleTouchDownEvent(const SDL_TouchFingerEvent &Event)
 {
 	CTouchFingerState TouchFingerState;
 	TouchFingerState.m_Finger.m_DeviceId = Event.touchId;
 	TouchFingerState.m_Finger.m_FingerId = Event.fingerId;
-	TouchFingerState.m_Position = vec2(Event.x, Event.y);
-	TouchFingerState.m_Delta = vec2(Event.dx, Event.dy);
+	TouchFingerState.m_Position = WindowFractionToViewport(vec2(Event.x, Event.y));
+	TouchFingerState.m_Delta = WindowFractionToViewport(vec2(Event.dx, Event.dy));
 	TouchFingerState.m_PressTime = time_get_nanoseconds();
 	m_vTouchFingerStates.emplace_back(TouchFingerState);
 }
@@ -569,8 +578,8 @@ void CInput::HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event)
 	});
 	if(FoundState != m_vTouchFingerStates.end())
 	{
-		FoundState->m_Position = vec2(Event.x, Event.y);
-		FoundState->m_Delta += vec2(Event.dx, Event.dy);
+		FoundState->m_Position = WindowFractionToViewport(vec2(Event.x, Event.y));
+		FoundState->m_Delta += WindowFractionToViewport(vec2(Event.dx, Event.dy));
 	}
 }
 
