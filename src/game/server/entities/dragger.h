@@ -3,6 +3,9 @@
 #define GAME_SERVER_ENTITIES_DRAGGER_H
 
 #include <game/server/entity.h>
+
+#include <optional>
+
 class CDraggerBeam;
 
 /**
@@ -31,6 +34,9 @@ class CDragger : public CEntity
 	CDraggerBeam *m_apDraggerBeam[MAX_CLIENTS];
 
 	void LookForPlayersToDrag();
+	// Returns the client id of the dragger beam that is snapped with the dragger's id
+	// for the given snapping client, if there is one
+	std::optional<int> DraggerBeamUsingDraggerId(int SnappingClientId);
 
 public:
 	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool IgnoreWalls, int Layer = 0, int Number = 0);
