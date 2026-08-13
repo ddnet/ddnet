@@ -431,6 +431,8 @@ public:
 
 	virtual void OnClientEnter(int ClientId) = 0;
 	virtual void OnClientDrop(int ClientId, const char *pReason) = 0;
+	// Called when the name, clan or country the server keeps for a client changed.
+	virtual void OnClientInfoChange(int ClientId) = 0;
 	virtual void OnClientPrepareInput(int ClientId, void *pInput) = 0;
 	virtual void OnClientDirectInput(int ClientId, const void *pInput) = 0;
 	virtual void OnClientPredictedInput(int ClientId, const void *pInput) = 0;
