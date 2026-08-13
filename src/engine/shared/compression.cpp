@@ -6,37 +6,6 @@
 
 #include <iterator> // std::size
 
-// Format: ESDDDDDD EDDDDDDD EDD... Extended, Data, Sign
-unsigned char *CVariableInt::Pack(unsigned char *pDst, int i, int DstSize)
-{
-	if(DstSize <= 0)
-		return nullptr;
-
-	DstSize--;
-	*pDst = 0;
-	if(i < 0)
-	{
-		*pDst |= 0x40; // set sign bit
-		i = ~i;
-	}
-
-	*pDst |= i & 0x3F; // pack 6bit into dst
-	i >>= 6; // discard 6 bits
-	while(i)
-	{
-		if(DstSize <= 0)
-			return nullptr;
-		*pDst |= 0x80; // set extend bit
-		DstSize--;
-		pDst++;
-		*pDst = i & 0x7F; // pack 7bit
-		i >>= 7; // discard 7 bits
-	}
-
-	pDst++;
-	return pDst;
-}
-
 const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut, int SrcSize)
 {
 	if(SrcSize <= 0)
