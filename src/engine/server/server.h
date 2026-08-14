@@ -533,6 +533,7 @@ public:
 
 	bool IsSixup(int ClientId) const override { return ClientId != SERVER_DEMO_CLIENT && m_aClients[ClientId].m_Sixup; }
 	int GetMaxClients(int ClientId) const override;
+	bool ClientSupportsServerMaxClients(int ClientId) const override { return GetMaxClients(ClientId) >= m_NetServer.MaxClients(); }
 
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 

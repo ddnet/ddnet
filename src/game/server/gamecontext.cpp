@@ -1083,7 +1083,7 @@ void CGameContext::SendVoteStatus(int ClientId, int Total, int Yes, int No)
 	}
 
 	const int MaxClients = Server()->GetMaxClients(ClientId);
-	if(Total > MaxClients && m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetClientVersion() < VERSION_DDNET_128_PLAYERS)
+	if(Total > MaxClients && m_apPlayers[ClientId] && !Server()->ClientSupportsServerMaxClients(ClientId))
 	{
 		Yes = (Yes * MaxClients) / (float)Total;
 		No = (No * MaxClients) / (float)Total;

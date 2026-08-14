@@ -28,8 +28,7 @@ void CPlayerMapping::Tick()
 	bool NeedsLegacyMapping = false;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		const int ClientVersion = GameServer()->GetClientVersion(i);
-		if(GameServer()->m_apPlayers[i] && ClientVersion < VERSION_DDNET_128_PLAYERS && ClientVersion >= VERSION_DDNET_OLD)
+		if(GameServer()->m_apPlayers[i] && !Server()->ClientSupportsServerMaxClients(i) && GameServer()->GetClientVersion(i) > VERSION_VANILLA)
 		{
 			NeedsLegacyMapping = true;
 			break;
@@ -49,8 +48,7 @@ void CPlayerMapping::Tick()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-		const int ClientVersion = GameServer()->GetClientVersion(i);
-		if(!pPlayer || ClientVersion >= VERSION_DDNET_128_PLAYERS || ClientVersion < VERSION_DDNET_OLD)
+		if(!pPlayer || Server()->ClientSupportsServerMaxClients(i) || GameServer()->GetClientVersion(i) <= VERSION_VANILLA)
 			continue;
 
 		int StrongWeakId = 0;
@@ -230,7 +228,7 @@ void CPlayerMapping::CPlayerMap::Update()
 {
 	if(!m_pPlayerMapping->Server()->ClientIngame(m_ClientId) || !Player())
 		return;
-	if(m_pPlayerMapping->GameServer()->GetClientVersion(m_ClientId) >= VERSION_DDNET_128_PLAYERS)
+	if(m_pPlayerMapping->Server()->ClientSupportsServerMaxClients(m_ClientId))
 		return;
 
 	if(m_DoSeeOthersByVote)
@@ -402,7 +400,7 @@ int CPlayerMapping::SeeOthersId(int ClientId) const
 
 bool CPlayerMapping::DoSeeOthers(int ClientId, int SelectedId, bool DoByVote)
 {
-	if(GameServer()->GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS)
+	if(Server()->ClientSupportsServerMaxClients(ClientId))
 		return false;
 	if(SelectedId == SeeOthersId(ClientId))
 	{
