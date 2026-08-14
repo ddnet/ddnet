@@ -9,6 +9,7 @@
 #include <base/types.h>
 
 #include <engine/shared/protocol7.h>
+#include <engine/shared/websockets.h>
 
 bool CNetClient::Open(NETADDR BindAddr)
 {
@@ -74,6 +75,53 @@ void CNetClient::ResetErrorString()
 	m_Connection.ResetErrorString();
 }
 
+int CNetClient::RecvWebsocket(CNetChunk *pChunk)
+{
+	websocket_event Event;
+	int Handle;
+	while(websocket_recv_next(m_Socket, &Event, &Handle))
+	{
+		if(Event.type == WEBSOCKET_EVENT_OPEN)
+		{
+			if(!m_Connection.WebsocketOnOpen(&Event.addr))
+			{
+				// Not the connection we are waiting for, e.g. an aborted
+				// connect that completed late
+				websocket_close(Handle, &Event.addr, nullptr);
+			}
+		}
+		else if(Event.type == WEBSOCKET_EVENT_MESSAGE)
+		{
+			if(m_Connection.State() != CNetConnection::EState::ONLINE || Event.addr != *m_Connection.PeerAddress())
+				continue;
+			m_Connection.WebsocketOnRecv();
+			if(Event.size == 0) // keepalive
+				continue;
+			const int Flags = Event.data[0];
+			if((Flags & ~NET_CHUNKFLAG_VITAL) != 0 || Event.size - 1 > (size_t)NET_MAX_PAYLOAD)
+			{
+				// No close event comes back for websocket_close, so take
+				// the connection down directly
+				websocket_close(Handle, &Event.addr, "Invalid message");
+				m_Connection.WebsocketOnClose(&Event.addr, "Invalid message", false);
+				continue;
+			}
+			mem_copy(m_RecvBuffer.m_aChunkData, &Event.data[1], Event.size - 1);
+			pChunk->m_ClientId = 0;
+			pChunk->m_Address = Event.addr;
+			pChunk->m_Flags = Flags;
+			pChunk->m_DataSize = Event.size - 1;
+			pChunk->m_pData = m_RecvBuffer.m_aChunkData;
+			return 1;
+		}
+		else if(Event.type == WEBSOCKET_EVENT_CLOSE)
+		{
+			m_Connection.WebsocketOnClose(&Event.addr, Event.close_reason, Event.abrupt);
+		}
+	}
+	return 0;
+}
+
 int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Sixup)
 {
 	while(true)
@@ -89,7 +137,11 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 
 		// no more packets for now
 		if(Bytes <= 0)
+		{
+			if(RecvWebsocket(pChunk))
+				return 1;
 			break;
+		}
 
 		if(m_pStun->OnPacket(Addr, pData, Bytes))
 		{
@@ -150,6 +202,11 @@ int CNetClient::Send(CNetChunk *pChunk)
 
 	if(pChunk->m_Flags & NETSENDFLAG_CONNLESS)
 	{
+		if(pChunk->m_Address.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6))
+		{
+			// Websockets carry only connection-oriented chunks
+			return -1;
+		}
 		// send connectionless packet
 		if(pChunk->m_Address.type & NETTYPE_TW7)
 		{

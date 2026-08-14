@@ -314,6 +314,17 @@ public:
 
 	const char *ErrorString();
 	void SignalResend();
+
+	// Websocket connections carry network chunks directly instead of whole
+	// packets, with reliability and ordering provided by the transport; see
+	// engine/shared/websockets.h for the protocol.
+	bool IsWebsocket() const;
+	bool WebsocketOnOpen(const NETADDR *pAddr);
+	// An abrupt close, i.e. one the peer did not announce, is handled like a
+	// timeout, so timeout protection applies to it
+	void WebsocketOnClose(const NETADDR *pAddr, const char *pReason, bool Abrupt);
+	void WebsocketOnRecv();
+
 	EState State() const { return m_State; }
 	const NETADDR *PeerAddress() const { return &m_PeerAddr; }
 	const std::array<char, NETADDR_MAXSTRSIZE> &PeerAddressString(bool IncludePort) const
@@ -468,6 +479,7 @@ class CNetServer
 	int NumClientsWithAddr(NETADDR Addr);
 	bool Connlimit(NETADDR Addr);
 	void SendMsgs(NETADDR &Addr, const CPacker **ppMsgs, int Num);
+	int RecvWebsocket(CNetChunk *pChunk);
 
 public:
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
@@ -599,6 +611,8 @@ class CNetClient
 	CNetTokenCache m_TokenCache;
 
 	CStun *m_pStun = nullptr;
+
+	int RecvWebsocket(CNetChunk *pChunk);
 
 public:
 	NETSOCKET m_Socket = nullptr;
