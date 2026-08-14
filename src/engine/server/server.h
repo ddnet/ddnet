@@ -532,6 +532,7 @@ public:
 	void SetErrorShutdown(const char *pReason) override;
 
 	bool IsSixup(int ClientId) const override { return ClientId != SERVER_DEMO_CLIENT && m_aClients[ClientId].m_Sixup; }
+	int GetMaxClients(int ClientId) const override;
 
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 

@@ -28,7 +28,8 @@ void CPlayerMapping::Tick()
 	bool NeedsLegacyMapping = false;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->m_apPlayers[i] && GameServer()->GetClientVersion(i) < VERSION_DDNET_128_PLAYERS)
+		const int ClientVersion = GameServer()->GetClientVersion(i);
+		if(GameServer()->m_apPlayers[i] && ClientVersion < VERSION_DDNET_128_PLAYERS && ClientVersion >= VERSION_DDNET_OLD)
 		{
 			NeedsLegacyMapping = true;
 			break;
@@ -48,7 +49,8 @@ void CPlayerMapping::Tick()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-		if(!pPlayer || GameServer()->GetClientVersion(i) >= VERSION_DDNET_128_PLAYERS)
+		const int ClientVersion = GameServer()->GetClientVersion(i);
+		if(!pPlayer || ClientVersion >= VERSION_DDNET_128_PLAYERS || ClientVersion < VERSION_DDNET_OLD)
 			continue;
 
 		int StrongWeakId = 0;
@@ -125,8 +127,8 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 		m_pReverseMap[i] = -1;
 
 	m_NumReserved = 2;
-	m_pMap[LEGACY_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
-	m_pMap[m_pPlayerMapping->SeeOthersId()] = -1; // see others in spec menu
+	m_pMap[m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1] = -1; // player with empty name to say chat msgs
+	m_pMap[m_pPlayerMapping->SeeOthersId(m_ClientId)] = -1; // see others in spec menu
 	m_TotalOverhang = 0;
 
 	if(m_pPlayerMapping->Server()->IsSixup(m_ClientId))
@@ -333,6 +335,7 @@ void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
 	if(ClientId == -1 || m_pReverseMap[ClientId] != -1)
 		return;
 
+	// Fast path: find an empty slot or a slot occupied by a character-less player.
 	for(int i = 0; i < MapSize() - m_NumSeeOthers; i++)
 	{
 		int MappedClientId = m_pMap[i];
@@ -342,9 +345,49 @@ void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
 		if(MappedClientId == -1 || (!m_pPlayerMapping->GameServer()->GetPlayerChar(MappedClientId) || m_pPlayerMapping->GameServer()->GetPlayerChar(MappedClientId)->NetworkClipped(m_ClientId)))
 		{
 			Add(i, ClientId);
-			break;
+			return;
 		}
 	}
+
+	// Overflow fallback: all visible non-reserved slots are occupied.
+	// Replace the farthest non-reserved player if the new player is closer.
+	CCharacter *pNewChar = m_pPlayerMapping->GameServer()->GetPlayerChar(ClientId);
+	if(!pNewChar || !Player())
+		return;
+
+	vec2 ViewPos = Player()->m_ViewPos;
+	float NewDist = distance_squared(ViewPos, pNewChar->GetPos());
+
+	int ReplaceIndex = -1;
+	float MaxDist = NewDist;
+
+	for(int i = 0; i < MapSize() - m_NumSeeOthers; i++)
+	{
+		int MappedClientId = m_pMap[i];
+		if(MappedClientId == -1 || m_aReserved[MappedClientId])
+			continue;
+
+		CCharacter *pMappedChar = m_pPlayerMapping->GameServer()->GetPlayerChar(MappedClientId);
+		if(!pMappedChar)
+			continue;
+
+		float Dist = distance_squared(ViewPos, pMappedChar->GetPos());
+		if(Dist > MaxDist)
+		{
+			MaxDist = Dist;
+			ReplaceIndex = i;
+		}
+	}
+
+	if(ReplaceIndex != -1)
+	{
+		Add(ReplaceIndex, ClientId);
+	}
+}
+
+int CPlayerMapping::CPlayerMap::MapSize() const
+{
+	return m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - m_NumReserved;
 }
 
 bool CPlayerMapping::ReserveTeamSlots(int DDTeam) const
@@ -352,16 +395,16 @@ bool CPlayerMapping::ReserveTeamSlots(int DDTeam) const
 	return !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap;
 }
 
-int CPlayerMapping::SeeOthersId() const
+int CPlayerMapping::SeeOthersId(int ClientId) const
 {
-	return LEGACY_MAX_CLIENTS - 2;
+	return m_pServer->GetMaxClients(ClientId) - 2;
 }
 
 bool CPlayerMapping::DoSeeOthers(int ClientId, int SelectedId, bool DoByVote)
 {
 	if(GameServer()->GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS)
 		return false;
-	if(SelectedId == SeeOthersId())
+	if(SelectedId == SeeOthersId(ClientId))
 	{
 		if(DoByVote)
 		{
@@ -413,8 +456,9 @@ void CPlayerMapping::UpdatePlayerMap(int ClientId)
 			int Overhang = std::max(0, ClientCount - Map.MapSize());
 			if(Overhang != Map.m_TotalOverhang)
 			{
+				int MaxNumSeeOthers = Map.MaxNumSeeOthers();
 				Map.m_TotalOverhang = Overhang;
-				Map.m_NumPages = std::max(1, (Overhang + ms_MaxNumSeeOthers - 1) / ms_MaxNumSeeOthers);
+				Map.m_NumPages = std::max(1, (Overhang + MaxNumSeeOthers - 1) / MaxNumSeeOthers);
 				if(Map.m_TotalOverhang <= 0 && Map.m_SeeOthersPage != -1)
 					Map.ResetSeeOthers();
 
@@ -436,7 +480,7 @@ void CPlayerMapping::UpdatePlayerMap(int ClientId)
 
 CPlayerMapping::ESeeOthersInd CPlayerMapping::SeeOthersInd(int ClientId, int MapId) const
 {
-	if(m_aMap[ClientId].m_TotalOverhang && MapId == SeeOthersId())
+	if(m_aMap[ClientId].m_TotalOverhang && MapId == SeeOthersId(ClientId))
 		return ESeeOthersInd::BUTTON;
 	if(m_aMap[ClientId].m_NumSeeOthers && MapId >= m_aMap[ClientId].MapSize() - m_aMap[ClientId].m_NumSeeOthers && MapId < m_aMap[ClientId].MapSize())
 		return ESeeOthersInd::PLAYER;
@@ -452,7 +496,7 @@ const char *CPlayerMapping::SeeOthersName(int ClientId)
 	}
 	else if(m_aMap[ClientId].m_SeeOthersPage != -1)
 	{
-		if(m_aMap[ClientId].m_TotalOverhang > ms_MaxNumSeeOthers)
+		if(m_aMap[ClientId].m_TotalOverhang > m_aMap[ClientId].MaxNumSeeOthers())
 			str_format(m_aSeeOthersName, sizeof(m_aSeeOthersName), "⋅ %d/%d", Page, m_aMap[ClientId].m_NumPages);
 		else
 			str_copy(m_aSeeOthersName, "⋅ Close");
@@ -469,11 +513,11 @@ void CPlayerMapping::CPlayerMap::CycleSeeOthers()
 	if(m_TotalOverhang <= 0)
 		return;
 
-	for(int i = 0; i < LEGACY_MAX_CLIENTS; i++)
+	for(int i = 0; i < m_pPlayerMapping->Server()->GetMaxClients(m_ClientId); i++)
 		if(m_pMap[i] != -1)
 			m_aWasSeeOthers[m_pMap[i]] = true;
 
-	int Size = std::min(m_TotalOverhang, ms_MaxNumSeeOthers);
+	int Size = std::min(m_TotalOverhang, MaxNumSeeOthers());
 	int Added = 0;
 	int MapId = MapSize() - 1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -529,12 +573,29 @@ void CPlayerMapping::CPlayerMap::ResetSeeOthers()
 	UpdateSeeOthers();
 }
 
+int CPlayerMapping::CPlayerMap::MaxNumSeeOthers()
+{
+	const int Max = m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) == VANILLA_MAX_CLIENTS ? ms_MaxNumSeeOthersVanilla : ms_MaxNumSeeOthers;
+
+	// count non-reserved slots
+	int NumSeeOthersSlots = 0;
+	for(int i = MapSize() - 1; i >= 0; i--)
+	{
+		int MappenClientId = m_pMap[i];
+		if(MappenClientId != -1 && m_aReserved[MappenClientId])
+			break;
+		NumSeeOthersSlots++;
+	}
+
+	return std::min({Max, MapSize(), NumSeeOthersSlots});
+}
+
 void CPlayerMapping::CPlayerMap::UpdateSeeOthers() const
 {
 	if(!m_pPlayerMapping->Server()->IsSixup(m_ClientId))
 		return;
 
-	int SeeOthersId = m_pPlayerMapping->SeeOthersId();
+	int SeeOthersId = m_pPlayerMapping->SeeOthersId(m_ClientId);
 	protocol7::CNetMsg_Sv_ClientDrop ClientDropMsg;
 	ClientDropMsg.m_ClientId = SeeOthersId;
 	ClientDropMsg.m_pReason = "";

@@ -164,7 +164,7 @@ public:
 				if(MsgCopy.m_Mode == WhisperSend && *pId == ClientId)
 					Translate(*pId, ClientId);
 				else
-					*pId = LEGACY_MAX_CLIENTS - 1;
+					*pId = GetMaxClients(ClientId) - 1;
 			}
 		}
 
@@ -300,7 +300,7 @@ public:
 			return true;
 		if(GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS)
 			return true;
-		if(Target < 0 || Target >= LEGACY_MAX_CLIENTS)
+		if(Target < 0 || Target >= GetMaxClients(ClientId))
 			return false;
 		int *pMap = GetIdMap(ClientId);
 		if(pMap[Target] == -1)
@@ -379,6 +379,7 @@ public:
 	virtual void SendMsgRaw(int ClientId, const void *pData, int Size, int Flags) = 0;
 
 	virtual bool IsSixup(int ClientId) const = 0;
+	virtual int GetMaxClients(int ClientId) const = 0;
 };
 
 class IGameServer : public IInterface
