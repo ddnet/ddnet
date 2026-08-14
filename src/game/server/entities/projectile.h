@@ -46,6 +46,7 @@ private:
 
 	// DDRace
 
+	CClientMask m_TeamMask;
 	int m_Bouncing;
 	bool m_Freeze;
 	int m_TuneZone;
