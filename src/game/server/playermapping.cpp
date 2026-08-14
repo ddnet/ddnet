@@ -28,7 +28,7 @@ void CPlayerMapping::Tick()
 	bool NeedsLegacyMapping = false;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->m_apPlayers[i] && !Server()->ClientSupportsServerMaxClients(i) && GameServer()->GetClientVersion(i) > VERSION_VANILLA)
+		if(GameServer()->m_apPlayers[i] && !Server()->ClientSupportsServerMaxClients(i) && GameServer()->GetClientVersion(i) >= VERSION_DDNET_OLD)
 		{
 			NeedsLegacyMapping = true;
 			break;
@@ -48,7 +48,7 @@ void CPlayerMapping::Tick()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-		if(!pPlayer || Server()->ClientSupportsServerMaxClients(i) || GameServer()->GetClientVersion(i) <= VERSION_VANILLA)
+		if(!pPlayer || Server()->ClientSupportsServerMaxClients(i) || GameServer()->GetClientVersion(i) < VERSION_DDNET_OLD)
 			continue;
 
 		int StrongWeakId = 0;
@@ -132,7 +132,7 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 	if(m_pPlayerMapping->Server()->IsSixup(m_ClientId))
 	{
 		protocol7::CNetMsg_Sv_ClientInfo FakeInfo;
-		FakeInfo.m_ClientId = LEGACY_MAX_CLIENTS - 1;
+		FakeInfo.m_ClientId = m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1;
 		FakeInfo.m_Local = 0;
 		FakeInfo.m_Team = TEAM_BLUE;
 		FakeInfo.m_pName = " ";
@@ -150,7 +150,7 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 		UpdateSeeOthers();
 	}
 
-	// Breaks with more than 64 tees from the same ip
+	// Breaks with more than `MapSize` tees from the same ip, but not a problem on official servers.
 	if(NextFreeId < MapSize())
 	{
 		m_aReserved[m_ClientId] = true;
@@ -261,7 +261,7 @@ void CPlayerMapping::CPlayerMap::Update()
 		// If a team (not 0) has more than 10 players, do not reserve their slots because it can get messy quickly if a few huge teams form.
 		// To keep teams state the same on main and dummy big teams do not get highlighted at all.
 		int DDTeam = m_pPlayerMapping->GameServer()->GetDDRaceTeam(i);
-		bool ReserveTeamSlots = m_pPlayerMapping->ReserveTeamSlots(DDTeam);
+		bool ReserveTeamSlots = m_pPlayerMapping->ReserveTeamSlots(DDTeam, m_ClientId);
 
 		if(m_aReserved[i])
 		{
@@ -317,7 +317,7 @@ void CPlayerMapping::CPlayerMap::Update()
 		}
 		else if(pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(m_ClientId))
 		{
-			InsertNextEmpty(i);
+			InsertNextEmptyOrReplace(i);
 		}
 	}
 
@@ -328,7 +328,7 @@ void CPlayerMapping::CPlayerMap::Update()
 	}
 }
 
-void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
+void CPlayerMapping::CPlayerMap::InsertNextEmptyOrReplace(int ClientId)
 {
 	if(ClientId == -1 || m_pReverseMap[ClientId] != -1)
 		return;
@@ -388,9 +388,10 @@ int CPlayerMapping::CPlayerMap::MapSize() const
 	return m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - m_NumReserved;
 }
 
-bool CPlayerMapping::ReserveTeamSlots(int DDTeam) const
+bool CPlayerMapping::ReserveTeamSlots(int DDTeam, int ClientId) const
 {
-	return !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap;
+	const bool IsDDNet = m_pGameServer->GetClientVersion(ClientId) >= VERSION_DDNET_OLD;
+	return !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap && IsDDNet;
 }
 
 int CPlayerMapping::SeeOthersId(int ClientId) const

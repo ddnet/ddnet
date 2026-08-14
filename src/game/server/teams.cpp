@@ -628,7 +628,7 @@ void CGameTeams::SendTeamsState(int ClientId)
 	{
 		if(PlayerMappingRequired)
 		{
-			if(i >= LEGACY_MAX_CLIENTS)
+			if(i >= (unsigned)Server()->GetMaxClients(ClientId))
 				break;
 
 			// see others selector
@@ -709,7 +709,7 @@ int CGameTeams::TeamForClient(int Team, int ClientId) const
 	if(ClientSupportsServerNumTeams(ClientId))
 		return Team;
 	// If the team's slots are not reserved, dont highlight it. Causes mismatch between dummy and main when playermapping is active.
-	if(!Server()->ClientSupportsServerMaxClients(ClientId) && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team))
+	if(!Server()->ClientSupportsServerMaxClients(ClientId) && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team, ClientId))
 		return TEAM_FLOCK;
 	return m_aLegacyTeamMap[Team];
 }

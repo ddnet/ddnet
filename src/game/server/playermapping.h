@@ -14,7 +14,7 @@ class CPlayer;
 // only support up to 64 clients. And also only up to 64 client ids (0-63).
 // The CPlayerMapping class manages a mapping of real server internal
 // client ids in the range of 0-127 and the fake client ids send to clients
-// in the range of 0-63.
+// in the range of 0-63 (or vanilla 0.6: ids 0-15)
 //
 // If a client does not support 128 slots the server will only show the 63 (64-1 for empty client for chat)
 // closest players (that closest selection currently tries to minimize changes by only changing when really required)
@@ -23,7 +23,7 @@ class CPlayer;
 // fake client id list for every old client.
 //
 // Additionally there is the "See Others" feature which lets you cycle through a list of
-// all players manually in pause or spectator mode by holding right shift (+spectate).
+// all players manually in pause or spectator mode by holding right shift (+spectate) or call vote menu.
 
 class CPlayerMapping
 {
@@ -32,8 +32,10 @@ class CPlayerMapping
 	class IServer *m_pServer;
 
 	// Number of players per page for see others feature in +spectate
+	// (128 - (64 - 2)) / 2 + 1 reserved slots for max 2 pages. We want to show some players still on screen, as we have enough slots with 64 slots
 	static constexpr int ms_MaxNumSeeOthers = 34;
-	static constexpr int ms_MaxNumSeeOthersVanilla = 15;
+	// 16 - 2 - 1 is max for 16p clients, keep local char. MaxNumSeeOthers() will take care if reserved players take up more space.
+	static constexpr int ms_MaxNumSeeOthersVanilla = 13;
 	// Teams are messy. Dont highlight teams bigger than 10 tees in playermapping so that big teams wont break anything
 	static constexpr int ms_MaxTeamSizePlayerMap = 10;
 
@@ -57,7 +59,7 @@ class CPlayerMapping
 		void Update();
 		void Add(int MapId, int ClientId);
 		int Remove(int MapId);
-		void InsertNextEmpty(int ClientId);
+		void InsertNextEmptyOrReplace(int ClientId);
 		int MapSize() const;
 		// See others
 		int m_SeeOthersPage;
@@ -84,7 +86,7 @@ public:
 
 	void InitPlayerMap(int ClientId, bool Timeout = false) { m_aMap[ClientId].InitPlayer(Timeout); }
 	void UpdateTeamsState(int ClientId) { m_aMap[ClientId].m_UpdateTeamsState = true; }
-	void ForceInsertPlayer(int Insert, int ClientId) { m_aMap[ClientId].InsertNextEmpty(Insert); }
+	void ForceInsertPlayer(int Insert, int ClientId) { m_aMap[ClientId].InsertNextEmptyOrReplace(Insert); }
 
 	enum class ESeeOthersInd
 	{
@@ -98,7 +100,7 @@ public:
 	int TotalOverhang(int ClientId) const;
 	ESeeOthersInd SeeOthersInd(int ClientId, int MapId) const;
 	const char *SeeOthersName(int ClientId);
-	bool ReserveTeamSlots(int DDTeam) const;
+	bool ReserveTeamSlots(int DDTeam, int ClientId) const;
 };
 
 #endif

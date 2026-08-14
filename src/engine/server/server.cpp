@@ -1040,12 +1040,6 @@ void CServer::DoSnapshot()
 		if(m_aClients[i].m_State != CClient::STATE_INGAME)
 			continue;
 
-		// don't send snapshots to clients that haven't identified as DDNet-based yet, can crash them.
-		// vanilla 0.6 clients have to wait 3 seconds until settled
-		const bool IsSettledVanilla = m_aClients[i].m_DDNetVersion == VERSION_VANILLA && m_aClients[i].m_DDNetVersionSettled;
-		if(!m_aClients[i].m_Sixup && m_aClients[i].m_DDNetVersion < VERSION_DDNET_OLD && !IsSettledVanilla)
-			continue;
-
 		// this client is trying to recover, don't spam snapshots
 		if(m_aClients[i].m_SnapRate == CClient::SNAPRATE_RECOVER && (Tick() % TickSpeed()) != 0)
 			continue;
@@ -2880,6 +2874,13 @@ int CServer::GetMaxClients(int ClientId) const
 	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_OLD)
 		return LEGACY_MAX_CLIENTS;
 	return VANILLA_MAX_CLIENTS;
+}
+
+bool CServer::ClientSupportsServerMaxClients(int ClientId) const
+{
+	// We can use `m_NetServer.MaxClients()` instead of `MAX_CLIENTS` here because it can't be changed ingame.
+	// The playermapping code currently relies on sixup (0.7) clients taking the route through playermapping.
+	return GetMaxClients(ClientId) >= m_NetServer.MaxClients() && !m_aClients[ClientId].m_Sixup;
 }
 
 void CServer::PumpNetwork()
