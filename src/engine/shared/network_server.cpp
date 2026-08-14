@@ -565,7 +565,7 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 	return 0;
 }
 
-int CNetServer::GetClientSlot(const NETADDR &Addr)
+std::optional<int> CNetServer::GetClientSlot(const NETADDR &Addr)
 {
 	for(int i = 0; i < MaxClients(); i++)
 	{
@@ -576,26 +576,29 @@ int CNetServer::GetClientSlot(const NETADDR &Addr)
 			return i;
 		}
 	}
-	return -1;
+	return std::nullopt;
 }
 
-std::tuple<int, bool> CNetServer::DetermineConnState(const NETADDR &Addr, std::optional<int> Flags, unsigned char *pBuffer)
+std::optional<int> CNetServer::FindSlot(const NETADDR &Addr, int Flags, unsigned char *pBuffer, bool *pSixup)
 {
-	int Slot = -1;
-	bool Sixup = false;
-	if((*Flags & NET_PACKETFLAG_CONNLESS) == 0)
+	std::optional<int> Slot = std::nullopt;
+	if((Flags & NET_PACKETFLAG_CONNLESS) == 0)
 	{
 		Slot = GetClientSlot(Addr);
-		if(Slot != -1)
-			Sixup = m_aSlots[Slot].m_Connection.m_Sixup;
-		else if((*Flags & NET_PACKETFLAG_UNUSED) != 0)
-			Sixup = true;
+		if(Slot.has_value())
+		{
+			*pSixup = m_aSlots[*Slot].m_Connection.m_Sixup;
+		}
+		else
+		{
+			*pSixup = (Flags & NET_PACKETFLAG_UNUSED) != 0;
+		}
 	}
 	else
 	{
-		Sixup = (pBuffer[0] & 0x3) == 1;
+		*pSixup = (pBuffer[0] & 0x3) == 1;
 	}
-	return {Slot, Sixup};
+	return Slot;
 }
 
 static bool IsDDNetControlMsg(const CNetPacketConstruct *pPacket)
@@ -655,7 +658,8 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		}
 
 		SECURITY_TOKEN Token;
-		auto [Slot, Sixup] = DetermineConnState(Addr, Flags, pData);
+		bool Sixup;
+		std::optional<int> Slot = FindSlot(Addr, *Flags, pData, &Sixup);
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Sixup, &Token, pResponseToken) == 0)
 		{
 			if(m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONNLESS)
@@ -679,21 +683,21 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			}
 			else // connection-oriented packet
 			{
-				if(Slot != -1) // connection found
+				if(Slot.has_value()) // connection found
 				{
 					const bool Control = (m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONTROL) != 0;
 					if(Control)
 					{
-						OnConnCtrlMsg(Addr, Slot, m_RecvBuffer.m_aChunkData[0], m_RecvBuffer);
+						OnConnCtrlMsg(Addr, *Slot, m_RecvBuffer.m_aChunkData[0], m_RecvBuffer);
 					}
 
-					if(m_aSlots[Slot].m_Connection.Feed(&m_RecvBuffer, &Addr, Token, *pResponseToken))
+					if(m_aSlots[*Slot].m_Connection.Feed(&m_RecvBuffer, &Addr, Token, *pResponseToken))
 					{
 						if(!Control &&
 							m_RecvBuffer.m_DataSize > 0 &&
 							m_RecvBuffer.m_NumChunks > 0)
 						{
-							m_PacketChunkUnpacker.FeedPacket(Addr, m_RecvBuffer, &m_aSlots[Slot].m_Connection, Slot);
+							m_PacketChunkUnpacker.FeedPacket(Addr, m_RecvBuffer, &m_aSlots[*Slot].m_Connection, *Slot);
 						}
 					}
 				}

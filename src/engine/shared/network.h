@@ -11,7 +11,6 @@
 
 #include <array>
 #include <optional>
-#include <tuple>
 
 class CHuffman;
 class CNetBan;
@@ -459,9 +458,9 @@ class CNetServer
 	int OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token);
 	void OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet);
 	void OnConnCtrlMsg(NETADDR &Addr, int ClientId, int ControlMsg, const CNetPacketConstruct &Packet);
-	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr) != -1; }
-	int GetClientSlot(const NETADDR &Addr);
-	std::tuple<int, bool> DetermineConnState(const NETADDR &Addr, std::optional<int> Flags, unsigned char *pBuffer);
+	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr).has_value(); }
+	std::optional<int> GetClientSlot(const NETADDR &Addr);
+	std::optional<int> FindSlot(const NETADDR &Addr, int Flags, unsigned char *pBuffer, bool *pSixup);
 	void SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
 
 	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth = false, bool Sixup = false, SECURITY_TOKEN Token = 0);
