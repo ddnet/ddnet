@@ -1035,7 +1035,9 @@ void CServer::DoSnapshot()
 			continue;
 
 		// don't send snapshots to clients that haven't identified as DDNet-based yet, can crash them.
-		if(!m_aClients[i].m_Sixup && m_aClients[i].m_DDNetVersion < VERSION_DDNET_OLD)
+		// vanilla 0.6 clients have to wait 3 seconds until settled
+		const bool IsSettledVanilla = m_aClients[i].m_DDNetVersion == VERSION_VANILLA && m_aClients[i].m_DDNetVersionSettled;
+		if(!m_aClients[i].m_Sixup && m_aClients[i].m_DDNetVersion < VERSION_DDNET_OLD && !IsSettledVanilla)
 			continue;
 
 		// this client is trying to recover, don't spam snapshots
@@ -2901,6 +2903,17 @@ void CServer::UpdateServerInfo(bool Resend)
 	}
 
 	m_ServerInfoNeedsUpdate = false;
+}
+
+int CServer::GetMaxClients(int ClientId) const
+{
+	if(m_aClients[ClientId].m_Sixup)
+		return LEGACY_MAX_CLIENTS;
+	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_128_PLAYERS)
+		return MAX_CLIENTS;
+	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_OLD)
+		return LEGACY_MAX_CLIENTS;
+	return VANILLA_MAX_CLIENTS;
 }
 
 void CServer::PumpNetwork(bool PacketWaiting)

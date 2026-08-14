@@ -33,6 +33,7 @@ class CPlayerMapping
 
 	// Number of players per page for see others feature in +spectate
 	static constexpr int ms_MaxNumSeeOthers = 34;
+	static constexpr int ms_MaxNumSeeOthersVanilla = 15;
 	// Teams are messy. Dont highlight teams bigger than 10 tees in playermapping so that big teams wont break anything
 	static constexpr int ms_MaxTeamSizePlayerMap = 10;
 
@@ -57,7 +58,7 @@ class CPlayerMapping
 		void Add(int MapId, int ClientId);
 		int Remove(int MapId);
 		void InsertNextEmpty(int ClientId);
-		int MapSize() const { return LEGACY_MAX_CLIENTS - m_NumReserved; }
+		int MapSize() const;
 		// See others
 		int m_SeeOthersPage;
 		int m_TotalOverhang;
@@ -69,6 +70,7 @@ class CPlayerMapping
 		void CycleSeeOthers();
 		void UpdateSeeOthers() const;
 		void ResetSeeOthers();
+		int MaxNumSeeOthers();
 	} m_aMap[MAX_CLIENTS];
 	void UpdatePlayerMap(int ClientId);
 
@@ -90,7 +92,7 @@ public:
 		PLAYER = 0,
 		BUTTON = 1,
 	};
-	int SeeOthersId() const;
+	int SeeOthersId(int ClientId) const;
 	bool DoSeeOthers(int ClientId, int SelectedId, bool DoByVote = false);
 	void ResetSeeOthers(int ClientId);
 	int TotalOverhang(int ClientId) const;

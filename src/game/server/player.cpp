@@ -487,7 +487,7 @@ void CPlayer::FakeSnap()
 		return;
 
 	// see others in spec
-	int SeeOthersId = GameServer()->m_PlayerMapping.SeeOthersId();
+	int SeeOthersId = GameServer()->m_PlayerMapping.SeeOthersId(m_ClientId);
 
 	if(Server()->IsSixup(m_ClientId))
 	{
@@ -524,7 +524,7 @@ void CPlayer::FakeSnap()
 		Server()->SnapNewItem(SeeOthersId, PlayerInfo);
 	}
 
-	int FakeId = LEGACY_MAX_CLIENTS - 1;
+	int FakeId = Server()->GetMaxClients(m_ClientId) - 1;
 	CNetObj_ClientInfo ClientInfo = {};
 	StrToInts(ClientInfo.m_aName, std::size(ClientInfo.m_aName), " ");
 	StrToInts(ClientInfo.m_aClan, std::size(ClientInfo.m_aClan), "");
