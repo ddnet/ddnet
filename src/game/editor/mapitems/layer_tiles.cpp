@@ -7,7 +7,6 @@
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-#include <engine/shared/map.h>
 
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
@@ -135,20 +134,6 @@ void CLayerTiles::PrepareForSave()
 		for(int y = 0; y < m_Height; y++)
 			for(int x = 0; x < m_Width; x++)
 				m_pTiles[y * m_Width + x].m_Flags |= Map()->m_vpImages[m_Image]->m_aTileFlags[m_pTiles[y * m_Width + x].m_Index];
-	}
-}
-
-void CLayerTiles::ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesSize) const
-{
-	const size_t DestSize = (size_t)m_Width * m_Height;
-	if(SavedTilesSize >= DestSize)
-	{
-		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
-		for(size_t TileIndex = 0; TileIndex < DestSize; ++TileIndex)
-		{
-			m_pTiles[TileIndex].m_Skip = 0;
-			m_pTiles[TileIndex].m_MustBe0 = 0;
-		}
 	}
 }
 

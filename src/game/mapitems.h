@@ -424,18 +424,10 @@ public:
 	int m_Flags;
 };
 
-class CMapItemLayerTilemap
+// Teeworlds version 2 tiles layer items. Earliest supported version of tiles layers.
+class CMapItemLayerTilemap_v2
 {
 public:
-	/**
-	 * @link CMapItemLayerTilemap @endlink with this version are only written to maps in upstream Teeworlds.
-	 * The tile data of tilemaps using this version must be unpacked by repeating tiles according to the
-	 * @link CTile::m_Skip @endlink values of the packed tile data.
-	 *
-	 * @see CMap::ExtractTiles
-	 */
-	static constexpr int VERSION_TEEWORLDS_TILESKIP = 4;
-
 	CMapItemLayer m_Layer;
 	int m_Version;
 
@@ -449,17 +441,45 @@ public:
 
 	int m_Image;
 	int m_Data;
+};
 
-	int m_aName[3];
-
-	// DDRace
-
+// DDRace added its own member variables to the existing Teeworlds version 2 tiles layer items.
+// Note that version 2 tiles layer items may also contain only a prefix of these member variables.
+class CMapItemLayerTilemap_v2Legacy : public CMapItemLayerTilemap_v2
+{
+public:
 	int m_Tele;
 	int m_Speedup;
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
 };
+
+// Teeworlds added layer names to tiles layers in version 3 based on the original version 2 items.
+// Note that this map item is not compatible with the legacy version 2 map item added by DDRace.
+class CMapItemLayerTilemap_v3Teeworlds : public CMapItemLayerTilemap_v2
+{
+public:
+	int m_aName[3];
+};
+
+// DDRace added its own member variables to Teeworlds version 3 tiles layer items again.
+class CMapItemLayerTilemap : public CMapItemLayerTilemap_v3Teeworlds
+{
+public:
+	int m_Tele;
+	int m_Speedup;
+	int m_Front;
+	int m_Switch;
+	int m_Tune;
+};
+
+// The tiles layer items are cast from the raw map file data, so the base classes
+// must not add any padding to the derived classes.
+static_assert(sizeof(CMapItemLayerTilemap_v2) == 60);
+static_assert(sizeof(CMapItemLayerTilemap_v2Legacy) == 80);
+static_assert(sizeof(CMapItemLayerTilemap_v3Teeworlds) == 72);
+static_assert(sizeof(CMapItemLayerTilemap) == 92);
 
 class CMapItemLayerQuads
 {
@@ -644,6 +664,7 @@ public:
 	unsigned char m_Force;
 	unsigned char m_MaxSpeed;
 	unsigned char m_Type;
+	unsigned char m_MustBe0;
 	short m_Angle;
 };
 

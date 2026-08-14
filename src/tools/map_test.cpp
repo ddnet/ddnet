@@ -57,10 +57,11 @@ static int TestMap(const char *pMapPath, bool CalcHashes, IStorage *pStorage)
 	{
 		log_info(TOOL_NAME, "Data %d:", Index);
 
+		// The data must be loaded first, as the size is only final after the data has been processed.
+		const void *pData = pMap->GetData(Index);
 		const int Size = pMap->GetDataSize(Index);
 		log_info(TOOL_NAME, "  Size: %d bytes", Size);
 
-		const void *pData = pMap->GetData(Index);
 		if(pData == nullptr)
 		{
 			log_info(TOOL_NAME, "  Data erroneous");
@@ -83,7 +84,9 @@ static int TestMap(const char *pMapPath, bool CalcHashes, IStorage *pStorage)
 int main(int argc, const char **argv)
 {
 	const CCmdlineFix CmdlineFix(&argc, &argv);
-	log_set_global_logger_default();
+	ILogger *pDefaultLogger = log_logger_default().release();
+	pDefaultLogger->SetFilter(CLogFilter{LEVEL_DEBUG});
+	log_set_global_logger(pDefaultLogger);
 
 	const char *pMapPath;
 	bool CalcHashes;

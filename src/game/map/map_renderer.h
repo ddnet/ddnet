@@ -17,7 +17,7 @@ public:
 	void Render(const CRenderLayerParams &Params);
 
 private:
-	int GetLayerType(const CMapItemLayer *pLayer, const CLayers *pLayers) const;
+	int GetLayerType(const CMapItemLayer *pLayer) const;
 
 	std::vector<std::unique_ptr<CRenderLayer>> m_vpRenderLayers;
 };

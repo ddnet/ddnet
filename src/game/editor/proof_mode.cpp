@@ -62,21 +62,18 @@ void CProofMode::InitMenuBackgroundPositions()
 	std::array<vec2, CMenuBackground::NUM_POS> aBackgroundPositions = GenerateMenuBackgroundPositions();
 	State.m_vMenuBackgroundPositions.assign(aBackgroundPositions.begin(), aBackgroundPositions.end());
 
-	if(Map()->m_pGameLayer)
+	for(int y = 0; y < Map()->m_pGameLayer->m_Height; ++y)
 	{
-		for(int y = 0; y < Map()->m_pGameLayer->m_Height; ++y)
+		for(int x = 0; x < Map()->m_pGameLayer->m_Width; ++x)
 		{
-			for(int x = 0; x < Map()->m_pGameLayer->m_Width; ++x)
+			CTile Tile = Map()->m_pGameLayer->GetTile(x, y);
+			if(Tile.m_Index >= TILE_TIME_CHECKPOINT_FIRST && Tile.m_Index <= TILE_TIME_CHECKPOINT_LAST)
 			{
-				CTile Tile = Map()->m_pGameLayer->GetTile(x, y);
-				if(Tile.m_Index >= TILE_TIME_CHECKPOINT_FIRST && Tile.m_Index <= TILE_TIME_CHECKPOINT_LAST)
-				{
-					int ArrayIndex = std::clamp<int>((Tile.m_Index - TILE_TIME_CHECKPOINT_FIRST), 0, CMenuBackground::NUM_POS);
-					State.m_vMenuBackgroundPositions[ArrayIndex] = vec2(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-				}
-
-				x += Tile.m_Skip;
+				int ArrayIndex = std::clamp<int>((Tile.m_Index - TILE_TIME_CHECKPOINT_FIRST), 0, CMenuBackground::NUM_POS);
+				State.m_vMenuBackgroundPositions[ArrayIndex] = vec2(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 			}
+
+			x += Tile.m_Skip;
 		}
 	}
 

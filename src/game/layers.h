@@ -48,7 +48,7 @@ private:
 	CMapItemLayerTilemap *m_pSwitchLayer;
 	CMapItemLayerTilemap *m_pTuneLayer;
 
-	void InitTilemapSkip(bool GameOnly);
+	void InitTilemapSkip();
 };
 
 #endif
