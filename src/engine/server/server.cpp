@@ -2324,13 +2324,13 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	} while(0)
 
 	p.AddString(GameServer()->Version(), 32);
-	if(Type != SERVERINFO_VANILLA)
+	if(Type != SERVERINFO_VANILLA && Type != SERVERINFO_64_LEGACY)
 	{
 		p.AddString(Config()->m_SvName, 256);
 	}
 	else
 	{
-		if(m_NetServer.MaxClients() <= VANILLA_MAX_CLIENTS)
+		if(m_NetServer.MaxClients() <= (Type == SERVERINFO_VANILLA ? VANILLA_MAX_CLIENTS : LEGACY_MAX_CLIENTS))
 		{
 			p.AddString(Config()->m_SvName, 64);
 		}
@@ -2371,6 +2371,25 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 		MaxClientsProtocol = VANILLA_MAX_CLIENTS;
 		if(PlayerCount > ClientCount)
 			PlayerCount = ClientCount;
+	}
+	else if(Type == SERVERINFO_64_LEGACY)
+	{
+		if(ClientCount >= LEGACY_MAX_CLIENTS)
+		{
+			const int MaxIncludedClients = ClientCount < MaxClients ? LEGACY_MAX_CLIENTS - 1 : LEGACY_MAX_CLIENTS;
+			PlayerCount = 0;
+			ClientCount = 0;
+			for(int i = 0; i < MAX_CLIENTS && ClientCount < MaxIncludedClients; i++)
+			{
+				if(m_aClients[i].IncludedInServerInfo())
+				{
+					if(GameServer()->IsClientPlayer(i))
+						PlayerCount++;
+					ClientCount++;
+				}
+			}
+		}
+		MaxClientsProtocol = LEGACY_MAX_CLIENTS;
 	}
 
 	ADD_INT(p, PlayerCount); // num players
@@ -2438,6 +2457,8 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	{
 		if(m_aClients[i].IncludedInServerInfo())
 		{
+			if(Type == SERVERINFO_64_LEGACY && PlayersStored == ClientCount)
+				break;
 			if(Remaining == 0)
 			{
 				if(Type == SERVERINFO_VANILLA || Type == SERVERINFO_INGAME)
