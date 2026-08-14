@@ -199,6 +199,7 @@ bool CNetServer::Connlimit(NETADDR Addr)
 	{
 		if(!net_addr_comp_noport(&m_aSpamConns[i].m_Addr, &Addr))
 		{
+			m_aSpamConns[i].m_LastSeen = Now;
 			if(m_aSpamConns[i].m_Time > Now - time_freq() * g_Config.m_SvConnlimitTime)
 			{
 				if(m_aSpamConns[i].m_Conns >= g_Config.m_SvConnlimit)
@@ -213,12 +214,13 @@ bool CNetServer::Connlimit(NETADDR Addr)
 			return false;
 		}
 
-		if(m_aSpamConns[i].m_Time < m_aSpamConns[Oldest].m_Time)
+		if(m_aSpamConns[i].m_LastSeen < m_aSpamConns[Oldest].m_LastSeen)
 			Oldest = i;
 	}
 
 	m_aSpamConns[Oldest].m_Addr = Addr;
 	m_aSpamConns[Oldest].m_Time = Now;
+	m_aSpamConns[Oldest].m_LastSeen = Now;
 	m_aSpamConns[Oldest].m_Conns = 1;
 	return false;
 }

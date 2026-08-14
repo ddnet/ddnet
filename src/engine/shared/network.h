@@ -101,7 +101,9 @@ enum
 
 	NET_CONN_BUFFERSIZE = 1024 * 32,
 
-	NET_CONNLIMIT_IPS = 16,
+	// Addresses tracked for `sv_connlimit`, evicted least recently used. The limit stops
+	// applying once addresses are evicted before they reach `sv_connlimit`.
+	NET_CONNLIMIT_IPS = 256,
 
 	NET_TOKENCACHE_ADDRESSEXPIRY = 64,
 	NET_TOKENCACHE_PACKETEXPIRY = 5,
@@ -425,7 +427,10 @@ class CNetServer
 	struct CSpamConn
 	{
 		NETADDR m_Addr;
+		// start of the timespan the connections are counted in
 		int64_t m_Time;
+		// last connection, only used to pick the entry to evict
+		int64_t m_LastSeen;
 		int m_Conns;
 	};
 
@@ -456,7 +461,7 @@ class CNetServer
 	int m_NumPreConnDecompress = 0;
 	int m_NumBanReplies = 0;
 
-	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS];
+	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS] = {};
 
 	CPacketChunkUnpacker m_PacketChunkUnpacker;
 	CNetPacketConstruct m_RecvBuffer;
