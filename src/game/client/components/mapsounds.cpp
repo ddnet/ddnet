@@ -234,6 +234,6 @@ void CMapSounds::Clear()
 
 void CMapSounds::OnStateChange(int NewState, int OldState)
 {
-	if(NewState < IClient::STATE_ONLINE)
+	if(NewState < IClient::STATE_READY)
 		Clear();
 }

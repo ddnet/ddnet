@@ -1035,6 +1035,7 @@ void CMenus::Render()
 		break;
 
 	case IClient::STATE_LOADING:
+	case IClient::STATE_READY:
 		RenderPopupLoading(Screen);
 		break;
 

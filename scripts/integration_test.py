@@ -744,7 +744,7 @@ def client_can_rejoin_existing_slot(test_env):
 	rejoined.command("debug 1")
 	rejoined.command("stdout_output_level 2; loglevel 2")
 	rejoined.command(f"connect 127.0.0.1:{relay.port}")
-	rejoined.wait_for_log_exact("client: state change. last=2 current=3", timeout=30)
+	rejoined.wait_for_log_exact("client: state change. last=3 current=4", timeout=30)
 	rejoined.command("stdout_output_level 0; loglevel 0")
 	rejoined.command("debug 0")
 
@@ -804,7 +804,7 @@ def smoke_test(test_env):
 	client1.command("stdout_output_level 2; loglevel 2")
 	client1.command(f"connect localhost:{server.port}")
 	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
-	client1.wait_for_log_exact("client: state change. last=2 current=3", timeout=30)
+	client1.wait_for_log_exact("client: state change. last=3 current=4", timeout=30)
 	client1.command("stdout_output_level 0; loglevel 0")
 	client1.command("debug 0")
 	client1.command("record client1")

@@ -122,8 +122,12 @@ public:
 			STATE_AUTH,
 			STATE_CONNECTING,
 			STATE_READY,
+			STATE_REJOINING,
 			STATE_INGAME,
 		};
+
+		// Whether the client has an in-game session.
+		bool IsIngame() const { return m_State == STATE_REJOINING || m_State == STATE_INGAME; }
 
 		enum
 		{
@@ -143,11 +147,6 @@ public:
 		int m_State;
 		int m_Latency;
 		int m_SnapRate;
-		/**
-		 * Whether this client is reloading the map after rejoining its slot,
-		 * i.e. it stays `STATE_INGAME` but cannot handle snapshots yet.
-		 */
-		bool m_ReloadingMap;
 
 		double m_Traffic;
 		int64_t m_TrafficSince;

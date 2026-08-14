@@ -230,7 +230,6 @@ void CServer::CClient::Reset()
 	m_LastAckedSnapshot = -1;
 	m_LastInputTick = -1;
 	m_SnapRate = CClient::SNAPRATE_INIT;
-	m_ReloadingMap = false;
 	m_Score = -1;
 	m_NextMapChunk = 0;
 	m_Flags = 0;
@@ -705,7 +704,7 @@ bool CServer::GetClientInfo(int ClientId, CClientInfo *pInfo) const
 	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	dbg_assert(pInfo != nullptr, "pInfo cannot be null");
 
-	if(m_aClients[ClientId].m_State == CClient::STATE_INGAME)
+	if(m_aClients[ClientId].IsIngame())
 	{
 		pInfo->m_pName = m_aClients[ClientId].m_aName;
 		pInfo->m_Latency = m_aClients[ClientId].m_Latency;
@@ -730,7 +729,7 @@ void CServer::SetClientDDNetVersion(int ClientId, int DDNetVersion)
 {
 	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 
-	if(m_aClients[ClientId].m_State == CClient::STATE_INGAME)
+	if(m_aClients[ClientId].IsIngame())
 	{
 		m_aClients[ClientId].m_DDNetVersion = DDNetVersion;
 		m_aClients[ClientId].m_DDNetVersionSettled = true;
@@ -763,7 +762,7 @@ const char *CServer::ClientName(int ClientId) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 		return "(invalid)";
-	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME || m_aClients[ClientId].m_State == CServer::CClient::STATE_REDIRECTED)
+	if(m_aClients[ClientId].IsIngame() || m_aClients[ClientId].m_State == CServer::CClient::STATE_REDIRECTED)
 		return m_aClients[ClientId].m_aName;
 	else
 		return "(connecting)";
@@ -773,7 +772,7 @@ const char *CServer::ClientClan(int ClientId) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 		return "";
-	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME)
+	if(m_aClients[ClientId].IsIngame())
 		return m_aClients[ClientId].m_aClan;
 	else
 		return "";
@@ -783,7 +782,7 @@ int CServer::ClientCountry(int ClientId) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 		return -1;
-	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME)
+	if(m_aClients[ClientId].IsIngame())
 		return m_aClients[ClientId].m_Country;
 	else
 		return -1;
@@ -796,7 +795,7 @@ bool CServer::ClientSlotEmpty(int ClientId) const
 
 bool CServer::ClientIngame(int ClientId) const
 {
-	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME;
+	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].IsIngame();
 }
 
 int CServer::Port() const
@@ -944,7 +943,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
-				if(m_aClients[i].m_State == CClient::STATE_INGAME)
+				if(m_aClients[i].IsIngame())
 				{
 					CPacker *pPack = m_aClients[i].m_Sixup ? &Pack7 : &Pack6;
 					Packet.m_pData = pPack->Data();
@@ -1037,10 +1036,6 @@ void CServer::DoSnapshot()
 	{
 		// client must be ingame to receive snapshots
 		if(m_aClients[i].m_State != CClient::STATE_INGAME)
-			continue;
-
-		// client is loading the map again after rejoining
-		if(m_aClients[i].m_ReloadingMap)
 			continue;
 
 		// don't send snapshots to clients that haven't identified as DDNet-based yet, can crash them.
@@ -1194,9 +1189,13 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser)
 	pThis->Antibot()->OnEngineClientDrop(ClientId, "rejoin");
 	pThis->Antibot()->OnEngineClientJoin(ClientId);
 
-	// The client keeps its slot and therefore `STATE_INGAME`, but it has to load
-	// the map again before it can handle snapshots.
-	pThis->m_aClients[ClientId].m_ReloadingMap = true;
+	// A client that already has a session keeps its slot and session, but it has
+	// to load the map again before it can handle snapshots. A client that is
+	// still connecting keeps its state and simply repeats the handshake.
+	if(pThis->m_aClients[ClientId].m_State == CClient::STATE_INGAME)
+	{
+		pThis->m_aClients[ClientId].m_State = CClient::STATE_REJOINING;
+	}
 	pThis->SendMap(ClientId);
 
 	return 0;
@@ -2088,7 +2087,10 @@ void CServer::OnNetMsgReady(int ClientId)
 
 	// Make rejoining session possible before timeout protection triggers
 	// https://github.com/ddnet/ddnet/pull/301
-	m_aClients[ClientId].m_ReloadingMap = false;
+	if(m_aClients[ClientId].m_State == CClient::STATE_REJOINING)
+	{
+		m_aClients[ClientId].m_State = CClient::STATE_INGAME;
+	}
 	SendConnectionReady(ClientId);
 }
 
@@ -3353,7 +3355,7 @@ int CServer::Run()
 					// ask the game for the data it wants to persist past a map change
 					for(int i = 0; i < MAX_CLIENTS; i++)
 					{
-						if(m_aClients[i].m_State == CClient::STATE_INGAME)
+						if(m_aClients[i].IsIngame())
 						{
 							m_aClients[i].m_HasPersistentData = GameServer()->OnClientDataPersist(i, m_aClients[i].m_pPersistentData);
 						}
@@ -4799,7 +4801,9 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	m_aClients[ClientId].m_DDNetVersion = m_aClients[OrigId].m_DDNetVersion;
 	m_aClients[ClientId].m_GotDDNetVersionPacket = m_aClients[OrigId].m_GotDDNetVersionPacket;
 	m_aClients[ClientId].m_DDNetVersionSettled = m_aClients[OrigId].m_DDNetVersionSettled;
-	m_aClients[ClientId].m_ReloadingMap = m_aClients[OrigId].m_ReloadingMap;
+	// The resumed connection belongs to a client that has already loaded the map,
+	// so the slot must not keep a pending map reload from the abandoned session.
+	m_aClients[ClientId].m_State = m_aClients[OrigId].m_State;
 
 	DelClientCallback(OrigId, "Timeout Protection used", this);
 
