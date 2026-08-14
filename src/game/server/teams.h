@@ -14,6 +14,7 @@
 
 class CCharacter;
 class CPlayer;
+class IServer;
 struct CScoreSaveResult;
 
 class CGameTeams
@@ -71,7 +72,8 @@ public:
 	CPlayer *GetPlayer(int ClientId);
 	CGameContext *GameServer();
 	const CGameContext *GameServer() const;
-	class IServer *Server();
+	IServer *Server();
+	const IServer *Server() const;
 
 	/**
 	 * Translate a team number for a client that does not support all team numbers yet.
@@ -79,6 +81,7 @@ public:
 	 * @param ClientId The client the team number is sent to
 	 */
 	int TeamForClient(int Team, int ClientId) const;
+	bool ClientSupportsServerNumTeams(int ClientId) const;
 
 	void OnCharacterStart(int ClientId);
 	void OnCharacterFinish(int ClientId);
