@@ -530,6 +530,30 @@ void CPlayer::FakeSnap()
 	StrToInts(ClientInfo.m_aClan, std::size(ClientInfo.m_aClan), "");
 	StrToInts(ClientInfo.m_aSkin, std::size(ClientInfo.m_aSkin), "default");
 	Server()->SnapNewItem(FakeId, ClientInfo);
+
+	// Support pause feature for vanilla 0.6. Requires local object on client side
+	if(GetClientVersion() != VERSION_VANILLA || m_Paused != PAUSE_PAUSED)
+		return;
+
+	CNetObj_PlayerInfo PlayerInfo = {};
+	PlayerInfo.m_Latency = m_Latency.m_Min;
+	PlayerInfo.m_Local = 1;
+	PlayerInfo.m_ClientId = FakeId;
+	PlayerInfo.m_Score = FinishTime::NOT_FINISHED_TIMESCORE;
+	PlayerInfo.m_Team = TEAM_SPECTATORS;
+	Server()->SnapNewItem(FakeId, PlayerInfo);
+
+	int SpectatorId = m_SpectatorId;
+	if(SpectatorId >= 0 && !Server()->Translate(SpectatorId, m_ClientId))
+	{
+		SpectatorId = FakeId;
+	}
+
+	CNetObj_SpectatorInfo SpectatorInfo = {};
+	SpectatorInfo.m_SpectatorId = SpectatorId;
+	SpectatorInfo.m_X = m_ViewPos.x;
+	SpectatorInfo.m_Y = m_ViewPos.y;
+	Server()->SnapNewItem(FakeId, SpectatorInfo);
 }
 
 void CPlayer::SendConnect(int FakeId, int ClientId)
