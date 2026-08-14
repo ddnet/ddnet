@@ -51,6 +51,7 @@ void CPlayer::Reset()
 	m_DieTick = Server()->Tick();
 	m_PreviousDieTick = m_DieTick;
 	m_JoinTick = Server()->Tick();
+	m_DDNetVersionKickTick = Server()->Tick() + 3 * Server()->TickSpeed();
 	delete m_pCharacter;
 	m_pCharacter = nullptr;
 	SetSpectatorId(SPEC_FREEVIEW);
