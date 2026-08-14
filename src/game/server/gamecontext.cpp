@@ -1230,9 +1230,6 @@ void CGameContext::OnTick()
 	{
 		if(m_apPlayers[i])
 		{
-			// By supporting 128 players with full backwards compatibility (in +spectate menu too), it's basically impossible and
-			// really unnecessary to have old 16 player clients supported
-			// We do it anyways but allow the admin of a server to toggle it off.
 			IServer::CClientInfo Info;
 			if(m_apPlayers[i]->m_DDNetVersionKickTick > 0 && Server()->Tick() >= m_apPlayers[i]->m_DDNetVersionKickTick && !Server()->IsSixup(i) &&
 				Server()->GetClientInfo(i, &Info) && Info.m_DDNetVersion < VERSION_DDNET_OLD)
@@ -1242,8 +1239,6 @@ void CGameContext::OnTick()
 					Server()->Kick(i, "Old Teeworlds 0.6 versions are unsupported. Use DDNet client or Teeworlds 0.7");
 					continue;
 				}
-				// Settle `VERSION_VANILLA` and begin receiving snapshots
-				Server()->SetClientDDNetVersion(i, VERSION_VANILLA);
 				m_apPlayers[i]->m_DDNetVersionKickTick = -1;
 			}
 
@@ -2794,6 +2789,8 @@ void CGameContext::OnIsDDNetLegacyNetMessage(const CNetMsg_Cl_IsDDNetLegacy *pMs
 	}
 	Server()->SetClientDDNetVersion(ClientId, DDNetVersion);
 	OnClientDDNetVersionKnown(ClientId);
+	// Initial identification, currently identified as 16p client, make sure we allow 64 slots
+	m_PlayerMapping.InitPlayerMap(ClientId);
 }
 
 void CGameContext::OnShowOthersLegacyNetMessage(const CNetMsg_Cl_ShowOthersLegacy *pMsg, int ClientId)
