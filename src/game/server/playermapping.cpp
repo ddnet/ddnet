@@ -125,30 +125,14 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 		m_pReverseMap[i] = -1;
 
 	m_NumReserved = 2;
+	// The player with the empty name is only snapped for 0.6 clients. 0.7 clients count
+	// every Sv_ClientInfo as a player and strip the name to an empty one anyway
 	m_pMap[LEGACY_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 	m_pMap[m_pPlayerMapping->SeeOthersId()] = -1; // see others in spec menu
 	m_TotalOverhang = 0;
 
-	if(m_pPlayerMapping->Server()->IsSixup(m_ClientId))
-	{
-		protocol7::CNetMsg_Sv_ClientInfo FakeInfo;
-		FakeInfo.m_ClientId = LEGACY_MAX_CLIENTS - 1;
-		FakeInfo.m_Local = 0;
-		FakeInfo.m_Team = TEAM_BLUE;
-		FakeInfo.m_pName = " ";
-		FakeInfo.m_pClan = "";
-		FakeInfo.m_Country = -1;
-		FakeInfo.m_Silent = 1;
-		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-		{
-			FakeInfo.m_apSkinPartNames[p] = "standard";
-			FakeInfo.m_aUseCustomColors[p] = 0;
-			FakeInfo.m_aSkinPartColors[p] = 0;
-		}
-		m_pPlayerMapping->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
-		// see others
-		UpdateSeeOthers();
-	}
+	// see others
+	UpdateSeeOthers();
 
 	// Breaks with more than 64 tees from the same ip
 	if(NextFreeId < MapSize())
@@ -557,5 +541,7 @@ void CPlayerMapping::CPlayerMap::UpdateSeeOthers() const
 	}
 
 	m_pPlayerMapping->Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
-	m_pPlayerMapping->Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
+	// 0.7 clients count every Sv_ClientInfo as a player, so only announce it while it is snapped
+	if(m_TotalOverhang > 0)
+		m_pPlayerMapping->Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
 }
