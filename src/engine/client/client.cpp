@@ -587,7 +587,9 @@ static void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const
 	md5_update(&Md5, (unsigned char *)pSeed, str_length(pSeed) + 1);
 	for(int i = 0; i < NumAddrs; i++)
 	{
-		md5_update(&Md5, (unsigned char *)&pAddrs[i], sizeof(pAddrs[i]));
+		md5_update(&Md5, (unsigned char *)&pAddrs[i].type, sizeof(pAddrs[i].type));
+		md5_update(&Md5, (unsigned char *)pAddrs[i].ip, sizeof(pAddrs[i].ip));
+		md5_update(&Md5, (unsigned char *)&pAddrs[i].port, sizeof(pAddrs[i].port));
 	}
 	MD5_DIGEST Digest = md5_finish(&Md5);
 
