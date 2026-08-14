@@ -163,6 +163,13 @@ public:
 				// with noname and sending a whisper to ourselves show our own client id as targetid because otherwise it would be two times id 63 with same text which gets shown twice the same msg
 				if(MsgCopy.m_Mode == WhisperSend && *pId == ClientId)
 					Translate(*pId, ClientId);
+				else if(IsSixup(ClientId))
+				{
+					MsgCopy.m_ClientId = -1;
+					MsgCopy.m_TargetId = -1;
+					if(MsgCopy.m_Mode == WhisperSend || MsgCopy.m_Mode == WhisperRecv)
+						MsgCopy.m_Mode = protocol7::CHAT_ALL;
+				}
 				else
 					*pId = LEGACY_MAX_CLIENTS - 1;
 			}
