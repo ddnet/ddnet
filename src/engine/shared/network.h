@@ -451,6 +451,11 @@ class CNetServer
 	int64_t m_VConnFirst;
 	int m_VConnNum;
 
+	// per-tick budgets for work unauthenticated peers can request, reset in Update()
+	int m_NumRecvPackets = 0;
+	int m_NumPreConnDecompress = 0;
+	int m_NumBanReplies = 0;
+
 	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS];
 
 	CPacketChunkUnpacker m_PacketChunkUnpacker;
@@ -658,7 +663,10 @@ public:
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false);
 
 	static std::optional<int> UnpackPacketFlags(unsigned char *pBuffer, int Size);
-	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
+	// `AllowDecompression` false rejects compressed packets instead of decompressing them,
+	// decompression being the most expensive part of receiving a packet. `pDecompressed` is
+	// set when decompression was attempted, successfully or not.
+	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, bool AllowDecompression, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr, bool *pDecompressed = nullptr);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
 	static bool IsSeqInBackroom(int Seq, int Ack);
