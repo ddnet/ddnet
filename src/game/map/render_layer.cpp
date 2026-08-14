@@ -1013,7 +1013,7 @@ void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &P
 				if(Color.a < 0.0f)
 					Color.a = 0.0f;
 				QInfo.m_Color = Color;
-				const bool IsVisible = Color.a >= 0.0f;
+				const bool IsVisible = Color.a > 0.0f;
 				AnyVisible |= IsVisible;
 
 				if(IsVisible)
