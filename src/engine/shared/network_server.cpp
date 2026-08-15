@@ -110,10 +110,15 @@ void CNetServer::Drop(int ClientId, const char *pReason)
 
 void CNetServer::Update()
 {
-	// called once per tick, before that tick's packets are received
 	m_NumRecvPackets = 0;
-	m_NumPreConnDecompress = 0;
-	m_NumBanReplies = 0;
+
+	const int64_t Now = time_get();
+	if(Now > m_BudgetStart + time_freq())
+	{
+		m_BudgetStart = Now;
+		m_NumPreConnDecompress = 0;
+		m_NumBanReplies = 0;
+	}
 
 	for(int i = 0; i < MaxClients(); i++)
 	{
@@ -617,9 +622,9 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		if(m_PacketChunkUnpacker.UnpackNextChunk(pChunk))
 			return 1;
 
-		// Stop draining the socket once this tick's budget is used up, otherwise traffic
+		// Stop draining the socket once this batch's budget is used up, otherwise traffic
 		// arriving faster than it can be processed keeps this loop from ever returning.
-		if(g_Config.m_SvMaxPacketsPerTick != 0 && m_NumRecvPackets >= g_Config.m_SvMaxPacketsPerTick)
+		if(g_Config.m_SvMaxPacketsPerRecv != 0 && m_NumRecvPackets >= g_Config.m_SvMaxPacketsPerRecv)
 		{
 			break;
 		}
@@ -638,9 +643,9 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		char aBuf[128];
 		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
 		{
-			// Banned, reply with a message. Budgeted per tick, unlimited replies would
+			// Banned, reply with a message. Rate limited, unlimited replies would
 			// make a banned flooder cost more to handle than an unbanned one.
-			if(g_Config.m_SvBanRepliesPerTick == 0 || m_NumBanReplies < g_Config.m_SvBanRepliesPerTick)
+			if(g_Config.m_SvBanRepliesPerSecond == 0 || m_NumBanReplies < g_Config.m_SvBanRepliesPerSecond)
 			{
 				m_NumBanReplies++;
 				CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, NET_SECURITY_TOKEN_UNSUPPORTED);
@@ -671,8 +676,8 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			AllowDecompression =
 				g_Config.m_SvVanillaAntiSpoof &&
 				g_Config.m_Password[0] == '\0' &&
-				(g_Config.m_SvPreConnDecompressPerTick == 0 ||
-					m_NumPreConnDecompress < g_Config.m_SvPreConnDecompressPerTick);
+				(g_Config.m_SvPreConnDecompressPerSecond == 0 ||
+					m_NumPreConnDecompress < g_Config.m_SvPreConnDecompressPerSecond);
 		}
 		else if(Sixup)
 		{

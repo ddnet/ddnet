@@ -456,8 +456,10 @@ class CNetServer
 	int64_t m_VConnFirst;
 	int m_VConnNum;
 
-	// per-tick budgets for work unauthenticated peers can request, reset in Update()
+	// budgets for work unauthenticated peers can request, reset in Update():
+	// `m_NumRecvPackets` per Recv() batch, the others per second
 	int m_NumRecvPackets = 0;
+	int64_t m_BudgetStart = 0;
 	int m_NumPreConnDecompress = 0;
 	int m_NumBanReplies = 0;
 
