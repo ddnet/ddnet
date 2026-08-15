@@ -2859,7 +2859,7 @@ void CServer::UpdateServerInfo(bool Resend)
 	m_ServerInfoNeedsUpdate = false;
 }
 
-void CServer::PumpNetwork(bool PacketWaiting)
+void CServer::PumpNetwork()
 {
 	CNetChunk Packet;
 	SECURITY_TOKEN ResponseToken;
@@ -2871,7 +2871,8 @@ void CServer::PumpNetwork(bool PacketWaiting)
 	// per recipient, flushed once all packets have been handled below.
 	m_NetServer.BeginFlushBatch();
 
-	if(PacketWaiting)
+	// Receive unconditionally, `net_udp_recv()` can hold packets that
+	// `net_socket_read_wait()` does not see.
 	{
 		// process packets
 		ResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
@@ -3263,7 +3264,6 @@ int CServer::Run()
 	// start game
 	{
 		bool NonActive = false;
-		bool PacketWaiting = false;
 
 		m_GameStartTime = time_get();
 
@@ -3271,7 +3271,7 @@ int CServer::Run()
 		while(m_RunServer < STOPPING)
 		{
 			if(NonActive)
-				PumpNetwork(PacketWaiting);
+				PumpNetwork();
 
 			set_new_tick();
 
@@ -3489,7 +3489,7 @@ int CServer::Run()
 			}
 
 			if(!NonActive)
-				PumpNetwork(PacketWaiting);
+				PumpNetwork();
 
 			NonActive = true;
 			for(const auto &Client : m_aClients)
@@ -3528,14 +3528,15 @@ int CServer::Run()
 				!m_aDemoRecorder[RECORDER_MANUAL].IsRecording() &&
 				!m_aDemoRecorder[RECORDER_AUTO].IsRecording())
 			{
-				PacketWaiting = net_socket_read_wait(m_NetServer.Socket(), 1s);
+				net_socket_read_wait(m_NetServer.Socket(), 1s);
 			}
 			else
 			{
 				set_new_tick();
 				LastTime = time_get();
 				const auto MicrosecondsToWait = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(TickStartTime(m_CurrentGameTick + 1) - LastTime)) + 1us;
-				PacketWaiting = MicrosecondsToWait > 0us ? net_socket_read_wait(m_NetServer.Socket(), MicrosecondsToWait) : true;
+				if(MicrosecondsToWait > 0us)
+					net_socket_read_wait(m_NetServer.Socket(), MicrosecondsToWait);
 			}
 			if(IsInterrupted())
 			{
