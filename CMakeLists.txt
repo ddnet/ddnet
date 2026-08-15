@@ -3753,6 +3753,7 @@ if(CLIENT AND DMGBUILD_FOUND)
   if(SERVER)
     set(DMG_SERVER_COMMANDS
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/data/maps
+      COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/data/autoexec_server.cfg ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/data/
       COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${SERVER_EXECUTABLE}.icns ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/
       COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-server> $<TARGET_FILE:game-server-launcher> ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/
