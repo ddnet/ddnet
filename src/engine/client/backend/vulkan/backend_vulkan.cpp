@@ -5871,15 +5871,14 @@ public:
 			UniformBufferDescrPool.m_DefaultAllocSize = 512;
 		}
 
-		bool Ret = AllocateDescriptorPool(m_StandardTextureDescrPool, CCommandBuffer::MAX_TEXTURES);
-		Ret |= AllocateDescriptorPool(m_TextTextureDescrPool, 8);
-
+		bool Success = true;
+		Success &= AllocateDescriptorPool(m_StandardTextureDescrPool, CCommandBuffer::MAX_TEXTURES);
+		Success &= AllocateDescriptorPool(m_TextTextureDescrPool, 8);
 		for(auto &UniformBufferDescrPool : m_vUniformBufferDescrPools)
 		{
-			Ret |= AllocateDescriptorPool(UniformBufferDescrPool, 64);
+			Success &= AllocateDescriptorPool(UniformBufferDescrPool, 64);
 		}
-
-		return Ret;
+		return Success;
 	}
 
 	void DestroyDescriptorPools()
