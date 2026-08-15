@@ -532,7 +532,7 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 	vec2 Vel = *pInoutVel;
 
 	float Distance = length(Vel);
-	int Max = (int)Distance;
+	int Max = round_truncate(Distance);
 
 	if(Distance > 0.00001f)
 	{
