@@ -794,7 +794,7 @@ void CTouchControls::OnWindowResize()
 	}
 }
 
-bool CTouchControls::OnTouchState(const std::vector<IInput::CTouchFingerState> &vTouchFingerStates)
+bool CTouchControls::OnTouchState(std::vector<IInput::CTouchFingerState> &vTouchFingerStates)
 {
 	if(!g_Config.m_ClTouchControls)
 		return false;
@@ -815,6 +815,7 @@ bool CTouchControls::OnTouchState(const std::vector<IInput::CTouchFingerState> &
 		UpdateButtonsEditor(vTouchFingerStates);
 	else
 		UpdateButtonsGame(vTouchFingerStates);
+	vTouchFingerStates.clear();
 	return true;
 }
 
