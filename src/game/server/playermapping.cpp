@@ -81,7 +81,7 @@ CPlayer *CPlayerMapping::CPlayerMap::Player() const
 	return m_pPlayerMapping->GameServer()->m_apPlayers[m_ClientId];
 }
 
-void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
+void CPlayerMapping::CPlayerMap::InitPlayer(CSixupCfg SixupCfg)
 {
 	std::fill(std::begin(m_aReserved), std::end(m_aReserved), false);
 
@@ -100,7 +100,7 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 			{
 				// For 0.7 timeout: Rejoin has to check ourselves because it's the id of the old connection that we want to skip
 				// Do not access our own reverse map on initial initialization, as it's only initialized below
-				if((i != m_ClientId || Timeout) && m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] == NextFreeId)
+				if((i != m_ClientId || SixupCfg.m_SkipTimeoutedId) && m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] == NextFreeId)
 				{
 					NextFreeId++;
 					Finished = false;
@@ -111,7 +111,7 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 
 	// make sure no outdated data is stored, so we can start and insert new values
 	// after a timeout remove all players from the previous map in correct order (important for 0.7 net msgs...)
-	if(Timeout)
+	if(SixupCfg.m_ClearSlots)
 	{
 		m_UpdateTeamsState = true; // to get back all teams
 		for(int i = 0; i < LEGACY_MAX_CLIENTS; i++)
@@ -124,34 +124,41 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_pReverseMap[i] = -1;
 
-	m_NumReserved = 2;
-	m_pMap[m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1] = -1; // player with empty name to say chat msgs
-	m_pMap[m_pPlayerMapping->SeeOthersId(m_ClientId)] = -1; // see others in spec menu
-	m_TotalOverhang = 0;
-
-	if(m_pPlayerMapping->Server()->IsSixup(m_ClientId))
+	m_NumReserved = 0;
+	const bool PlayerMappingRequired = !m_pPlayerMapping->Server()->ClientSupportsServerMaxClients(m_ClientId);
+	if(PlayerMappingRequired)
 	{
-		protocol7::CNetMsg_Sv_ClientInfo FakeInfo;
-		FakeInfo.m_ClientId = m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1;
-		FakeInfo.m_Local = 0;
-		FakeInfo.m_Team = TEAM_BLUE;
-		FakeInfo.m_pName = " ";
-		FakeInfo.m_pClan = "";
-		FakeInfo.m_Country = -1;
-		FakeInfo.m_Silent = 1;
-		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+		m_NumReserved = 2;
+		m_pMap[m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1] = -1; // player with empty name to say chat msgs
+		m_pMap[m_pPlayerMapping->SeeOthersId(m_ClientId)] = -1; // see others in spec menu
+		m_TotalOverhang = 0;
+
+		if(m_pPlayerMapping->Server()->IsSixup(m_ClientId))
 		{
-			FakeInfo.m_apSkinPartNames[p] = "standard";
-			FakeInfo.m_aUseCustomColors[p] = 0;
-			FakeInfo.m_aSkinPartColors[p] = 0;
+			protocol7::CNetMsg_Sv_ClientInfo FakeInfo;
+			FakeInfo.m_ClientId = m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1;
+			FakeInfo.m_Local = 0;
+			FakeInfo.m_Team = TEAM_BLUE;
+			FakeInfo.m_pName = " ";
+			FakeInfo.m_pClan = "";
+			FakeInfo.m_Country = -1;
+			FakeInfo.m_Silent = 1;
+			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+			{
+				FakeInfo.m_apSkinPartNames[p] = "standard";
+				FakeInfo.m_aUseCustomColors[p] = 0;
+				FakeInfo.m_aSkinPartColors[p] = 0;
+			}
+			m_pPlayerMapping->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
+			// see others
+			UpdateSeeOthers();
 		}
-		m_pPlayerMapping->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
-		// see others
-		UpdateSeeOthers();
 	}
 
 	// Breaks with more than `MapSize` tees from the same ip, but not a problem on official servers.
-	if(NextFreeId < MapSize())
+	// Required for other player maps, even when this specific one doesn't need playermapping and supports max_clients
+	const bool NextIdValid = NextFreeId < LEGACY_MAX_CLIENTS;
+	if(NextFreeId < MapSize() && NextIdValid)
 	{
 		m_aReserved[m_ClientId] = true;
 		Add(NextFreeId, m_ClientId);
@@ -167,14 +174,14 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 			continue;
 
 		// update us with other same ip player infos
-		if(m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] < MapSize())
+		if(PlayerMappingRequired && m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] < MapSize())
 		{
 			m_aReserved[i] = true;
 			Add(m_pPlayerMapping->m_aMap[i].m_pReverseMap[i], i);
 		}
 
 		// update other same ip players with our info
-		if(NextFreeId < m_pPlayerMapping->m_aMap[i].MapSize())
+		if(NextIdValid && NextFreeId < m_pPlayerMapping->m_aMap[i].MapSize())
 		{
 			m_pPlayerMapping->m_aMap[i].m_aReserved[m_ClientId] = true;
 			m_pPlayerMapping->m_aMap[i].Add(NextFreeId, m_ClientId);
@@ -448,16 +455,16 @@ void CPlayerMapping::UpdatePlayerMap(int ClientId)
 
 		for(auto &Map : m_aMap)
 		{
-			if(!Map.Player())
+			if(!Map.Player() || Server()->ClientSupportsServerMaxClients(Map.m_ClientId))
 				continue;
 
 			// Calculate overhang every tick, not only when the map updates
 			int Overhang = std::max(0, ClientCount - Map.MapSize());
 			if(Overhang != Map.m_TotalOverhang)
 			{
-				int MaxNumSeeOthers = Map.MaxNumSeeOthers();
+				const int MaxNumSeeOthers = Map.MaxNumSeeOthers();
 				Map.m_TotalOverhang = Overhang;
-				Map.m_NumPages = std::max(1, (Overhang + MaxNumSeeOthers - 1) / MaxNumSeeOthers);
+				Map.m_NumPages = MaxNumSeeOthers > 0 ? std::max(1, (Overhang + MaxNumSeeOthers - 1) / MaxNumSeeOthers) : 1;
 				if(Map.m_TotalOverhang <= 0 && Map.m_SeeOthersPage != -1)
 					Map.ResetSeeOthers();
 
@@ -523,14 +530,13 @@ void CPlayerMapping::CPlayerMap::CycleSeeOthers()
 	{
 		if(!m_pPlayerMapping->GameServer()->m_apPlayers[i] || m_aWasSeeOthers[i])
 			continue;
+		if(Added >= Size)
+			break;
 
 		Add(MapId, i);
 		m_aWasSeeOthers[i] = true;
 		Added++;
 		MapId--;
-
-		if(Added >= Size)
-			break;
 	}
 
 	m_NumSeeOthers = Added;

@@ -532,7 +532,7 @@ void CPlayer::FakeSnap()
 	Server()->SnapNewItem(FakeId, ClientInfo);
 
 	// Support pause feature for vanilla 0.6. Requires local object on client side
-	if(GetClientVersion() != VERSION_VANILLA || m_Paused != PAUSE_PAUSED)
+	if(GetClientVersion() >= VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED)
 		return;
 
 	CNetObj_PlayerInfo PlayerInfo = {};
