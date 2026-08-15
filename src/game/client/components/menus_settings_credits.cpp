@@ -49,20 +49,20 @@ void CMenus::RenderSettingsCredits(CUIRect MainView)
 		s_ScrollRegion.AddRect(Line);
 		if(PrefixOwnLine)
 		{
-			Ui()->DoLabel(&Line, pPrefix, FontSize, TEXTALIGN_ML);
+			Ui()->DoLabel(&Line, pPrefix, FontSize, TEXTALIGN_TL);
 			MainView.HSplitTop(LineHeight, &Line, &MainView);
 			s_ScrollRegion.AddRect(Line);
 		}
 		else
 		{
 			Line.VSplitLeft(PrefixWidth, &Prefix, &Line);
-			Ui()->DoLabel(&Prefix, pPrefix, FontSize, TEXTALIGN_ML);
+			Ui()->DoLabel(&Prefix, pPrefix, FontSize, TEXTALIGN_TL);
 		}
 
 		Line.VSplitLeft(TextRender()->TextWidth(FontSize, pLink), &LinkRect, &Line);
 		const ColorRGBA LinkColor = Ui()->HotItem() == pLinkId ? ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f) : ColorRGBA(0.4f, 0.7f, 1.0f, 1.0f);
 		TextRender()->TextColor(LinkColor);
-		Ui()->DoLabel(&LinkRect, pLink, FontSize, TEXTALIGN_ML);
+		Ui()->DoLabel(&LinkRect, pLink, FontSize, TEXTALIGN_TL);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 
 		CUIRect Underline;
@@ -74,7 +74,7 @@ void CMenus::RenderSettingsCredits(CUIRect MainView)
 			Client()->ViewLink(pUrl);
 		}
 
-		Ui()->DoLabel(&Line, pSuffix, FontSize, TEXTALIGN_ML);
+		Ui()->DoLabel(&Line, pSuffix, FontSize, TEXTALIGN_TL);
 	};
 
 	static char s_StaffLinkId;
