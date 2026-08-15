@@ -461,8 +461,9 @@ class CNetServer
 	int OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token);
 	void OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet);
 	void OnConnCtrlMsg(NETADDR &Addr, int ClientId, int ControlMsg, const CNetPacketConstruct &Packet);
-	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr) != -1; }
-	int GetClientSlot(const NETADDR &Addr);
+	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr).has_value(); }
+	std::optional<int> GetClientSlot(const NETADDR &Addr);
+	std::optional<int> FindSlot(const NETADDR &Addr, int Flags, unsigned char *pBuffer, bool *pSixup);
 	void SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
 
 	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth = false, bool Sixup = false, SECURITY_TOKEN Token = 0);
@@ -659,7 +660,7 @@ public:
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false);
 
 	static std::optional<int> UnpackPacketFlags(unsigned char *pBuffer, int Size);
-	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
+	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
 	static bool IsSeqInBackroom(int Seq, int Ack);

@@ -280,7 +280,7 @@ std::optional<int> CNetBase::UnpackPacketFlags(unsigned char *pBuffer, int Size)
 }
 
 // TODO: rename this function
-int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
+int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool Sixup, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
 {
 	if(pResponseToken != nullptr)
 	{
@@ -308,7 +308,6 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
-		Sixup = (pBuffer[0] & 0x3) == 1;
 		if(Sixup && (pSecurityToken == nullptr || pResponseToken == nullptr))
 			return -1;
 		int Offset = Sixup ? 9 : 6;
@@ -336,8 +335,6 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	}
 	else
 	{
-		if(pPacket->m_Flags & NET_PACKETFLAG_UNUSED)
-			Sixup = true;
 		if(Sixup && pSecurityToken == nullptr)
 			return -1;
 		int DataStart = Sixup ? 7 : NET_PACKETHEADERSIZE;
