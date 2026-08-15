@@ -27,6 +27,20 @@ class CPlayer;
 
 class CPlayerMapping
 {
+public:
+	class CSixupCfg
+	{
+	public:
+		CSixupCfg() :
+			m_SkipTimeoutedId(false),
+			m_ClearSlots(false)
+		{
+		}
+		bool m_SkipTimeoutedId;
+		bool m_ClearSlots;
+	};
+
+private:
 	class CGameContext *m_pGameServer;
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
@@ -46,7 +60,7 @@ class CPlayerMapping
 	{
 	public:
 		void Init(int ClientId, CPlayerMapping *pPlayerMapping);
-		void InitPlayer(bool Timeout);
+		void InitPlayer(CSixupCfg SixupCfg);
 		CPlayerMapping *m_pPlayerMapping;
 		CPlayer *Player() const;
 		int m_ClientId;
@@ -84,7 +98,7 @@ public:
 	void Init(CGameContext *pGameServer);
 	void Tick();
 
-	void InitPlayerMap(int ClientId, bool Timeout = false) { m_aMap[ClientId].InitPlayer(Timeout); }
+	void InitPlayerMap(int ClientId, CSixupCfg SixupCfg = CSixupCfg()) { m_aMap[ClientId].InitPlayer(SixupCfg); }
 	void UpdateTeamsState(int ClientId) { m_aMap[ClientId].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientId) { m_aMap[ClientId].InsertNextEmptyOrReplace(Insert); }
 

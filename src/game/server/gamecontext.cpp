@@ -2795,9 +2795,12 @@ void CGameContext::OnIsDDNetLegacyNetMessage(const CNetMsg_Cl_IsDDNetLegacy *pMs
 		DDNetVersion = VERSION_DDRACE;
 	}
 	Server()->SetClientDDNetVersion(ClientId, DDNetVersion);
-	OnClientDDNetVersionKnown(ClientId);
+	if(OnClientDDNetVersionKnown(ClientId))
+		return;
 	// Initial identification, currently identified as 16p client, make sure we allow 64 slots
-	m_PlayerMapping.InitPlayerMap(ClientId);
+	CPlayerMapping::CSixupCfg SixupCfg;
+	SixupCfg.m_ClearSlots = true;
+	m_PlayerMapping.InitPlayerMap(ClientId, SixupCfg);
 }
 
 void CGameContext::OnShowOthersLegacyNetMessage(const CNetMsg_Cl_ShowOthersLegacy *pMsg, int ClientId)
@@ -5431,9 +5434,12 @@ bool CGameContext::PracticeByDefault() const
 	return g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands;
 }
 
-void CGameContext::OnSetTimedOut(int ClientId)
+void CGameContext::ReinitPlayerMap(int ClientId, bool Timeout)
 {
-	// Timeout=true when calling InitPlayerMap because that will make sure each disconnect packet gets sent out to 0.7 clients correctly before inserting
-	// new players on their slots. Resend=true will also trigger teams state update, otherwise you wouldn't see teams correctly in some cases.
-	m_PlayerMapping.InitPlayerMap(ClientId, true);
+	// Timeout, when calling InitPlayerMap because that will make sure each disconnect packet gets sent out to 0.7 clients correctly before inserting
+	// new players on their slots. will also trigger teams state update, otherwise you wouldn't see teams correctly in some cases.
+	CPlayerMapping::CSixupCfg SixupCfg;
+	SixupCfg.m_SkipTimeoutedId = Timeout;
+	SixupCfg.m_ClearSlots = true;
+	m_PlayerMapping.InitPlayerMap(ClientId, SixupCfg);
 }

@@ -2110,6 +2110,7 @@ void CServer::OnNetMsgRconCmd(int ClientId, const char *pCmd)
 		if(GameServer()->PlayerExists(ClientId) && Version < VERSION_DDNET_OLD)
 		{
 			m_aClients[ClientId].m_DDNetVersion = VERSION_DDNET_OLD;
+			GameServer()->ReinitPlayerMap(ClientId, false);
 		}
 	}
 	else if(IsRconAuthed(ClientId))
@@ -2878,6 +2879,10 @@ int CServer::GetMaxClients(int ClientId) const
 
 bool CServer::ClientSupportsServerMaxClients(int ClientId) const
 {
+	// server demo pseudo clients operate on untranslated ids
+	if(ClientId == SERVER_DEMO_CLIENT)
+		return true;
+
 	// We can use `m_NetServer.MaxClients()` instead of `MAX_CLIENTS` here because it can't be changed ingame.
 	// The playermapping code currently relies on sixup (0.7) clients taking the route through playermapping.
 	return GetMaxClients(ClientId) >= m_NetServer.MaxClients() && !m_aClients[ClientId].m_Sixup;
@@ -4759,13 +4764,13 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 
 	DelClientCallback(OrigId, "Timeout Protection used", this);
 
-	// OnSetTimedOut must be called after DelClientCallback to preserve the client id.
+	// ReinitPlayerMap must be called after DelClientCallback to preserve the client id.
 	// The order is important for the player initialization algorithm in CPlayerMapping::CPlayerMap::InitPlayer
 	// because it loops over all players to find others with the same ip address.
 	// IP matching is important for hammerfly/dummy copy to work by guaran-tee-ing dummy and player map have the same ids
 	// Never forget: 0.7 really implemented netmsgs for join/leave, means client ids have to be stable across using timeout protection.
 	// When InitPlayer runs it has to assign the same client id as before since local id cant be changed in 0.7
-	GameServer()->OnSetTimedOut(ClientId);
+	GameServer()->ReinitPlayerMap(ClientId, true);
 	return true;
 }
 
