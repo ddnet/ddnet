@@ -1248,9 +1248,6 @@ void CGameContext::OnTick()
 	{
 		if(m_apPlayers[i])
 		{
-			if(KickClientWithoutDDNetVersion(i))
-				continue;
-
 			// send vote options
 			ProgressVoteOptions(i);
 
@@ -1795,10 +1792,10 @@ void CGameContext::OnClientEnter(int ClientId)
 		// 0.7 clients can send ddnet message, F-Client does that for example
 		if(!Info.m_GotDDNetVersion && !Server()->IsSixup(ClientId))
 		{
-			// DDNet clients older than 13.0.2 don't send their version during the connection process yet,
-			// they only send the legacy DDNet message once they received their first snapshot. Give them
-			// some time to identify themselves before kicking them in CGameContext::OnTick.
-			m_apPlayers[ClientId]->m_DDNetVersionKickTick = Server()->Tick() + 3 * Server()->TickSpeed();
+			// By supporting 128 players with full backwards compatibility (in +spectate menu too), it's basically impossible and
+			// really unnecessary to have old 16 player clients supported
+			Server()->Kick(ClientId, "Old Teeworlds 0.6 versions are unsupported. Use DDNet client or Teeworlds 0.7");
+			return;
 		}
 		else if(OnClientDDNetVersionKnown(ClientId))
 		{
@@ -2079,27 +2076,6 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientId)
 	m_PlayerMapping.UpdateTeamsState(ClientId);
 
 	return false;
-}
-
-bool CGameContext::KickClientWithoutDDNetVersion(int ClientId)
-{
-	CPlayer *pPlayer = m_apPlayers[ClientId];
-	if(pPlayer->m_DDNetVersionKickTick == -1 || Server()->Tick() < pPlayer->m_DDNetVersionKickTick)
-	{
-		return false;
-	}
-	pPlayer->m_DDNetVersionKickTick = -1;
-
-	IServer::CClientInfo Info;
-	if(Server()->GetClientInfo(ClientId, &Info) && Info.m_GotDDNetVersion)
-	{
-		return false;
-	}
-
-	// By supporting 128 players with full backwards compatibility (in +spectate menu too), it's basically impossible and
-	// really unnecessary to have old 16 player clients supported
-	Server()->Kick(ClientId, "Old Teeworlds 0.6 versions are unsupported. Use DDNet client or Teeworlds 0.7");
-	return true;
 }
 
 void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientId)
