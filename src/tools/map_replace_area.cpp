@@ -89,8 +89,6 @@ int main(int argc, const char *argv[])
 		aaaGameAreas[i][1][1] = aaaGameAreas[i][1][0] + str_tofloat(argv[8]) * 32; //y + height
 	}
 
-	cmdline_free(argc, argv);
-
 	dbg_msg("map_replace_area", "from_map='%s'; to_map='%s'; from_area='%fx,%fy'; to_area='%fx,%fy'; area_width='%fpx'; area_height='%fpx'; output_map='%s'",
 		aaMapNames[0], aaMapNames[1], aaaGameAreas[0][0][0], aaaGameAreas[0][1][0], aaaGameAreas[1][0][0], aaaGameAreas[1][1][0],
 		aaaGameAreas[0][0][1] - aaaGameAreas[0][0][0], aaaGameAreas[0][1][1] - aaaGameAreas[0][1][0], aaMapNames[2]);
