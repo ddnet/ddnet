@@ -3149,7 +3149,7 @@ void CClient::Run()
 		return;
 	}
 
-	if(!m_pHttp->Init(std::chrono::seconds{1}))
+	if(!m_pHttp->Init(std::chrono::seconds{0}))
 	{
 		const char *pErrorMessage = "Failed to initialize the HTTP client.";
 		log_error("client", "%s", pErrorMessage);
