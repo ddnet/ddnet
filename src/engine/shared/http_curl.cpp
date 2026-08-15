@@ -512,6 +512,10 @@ void CHttpCurl::RunLoop()
 			m_PendingRequests.insert(m_PendingRequests.end(), std::make_move_iterator(NewRequests.begin()), std::make_move_iterator(NewRequests.end()));
 			break;
 		}
+
+		// Otherwise next curl_multi_poll sleeps whole shutdown delay even when no requests are left
+		if(m_Shutdown && m_RunningRequests.empty() && m_PendingRequests.empty())
+			break;
 	}
 
 	if(!Lock.owns_lock())
