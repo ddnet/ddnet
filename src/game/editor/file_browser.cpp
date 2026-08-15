@@ -191,15 +191,6 @@ void CFileBrowser::Render()
 		Ui()->DoLabel(&FileBoxLabel, "Filename:", 10.0f, TEXTALIGN_ML);
 		if(Ui()->DoEditBox(&m_FilenameInput, &FileBox, 10.0f))
 		{
-			// Remove '/' and '\'
-			for(int i = 0; m_FilenameInput.GetString()[i]; ++i)
-			{
-				if(m_FilenameInput.GetString()[i] == '/' || m_FilenameInput.GetString()[i] == '\\')
-				{
-					m_FilenameInput.SetRange(m_FilenameInput.GetString() + i + 1, i, m_FilenameInput.GetLength());
-					--i;
-				}
-			}
 			UpdateSelectedIndex(m_FilenameInput.GetString());
 		}
 	}
@@ -366,15 +357,17 @@ void CFileBrowser::Render()
 		else // file
 		{
 			const int StorageType = m_SelectedFileIndex >= 0 ? m_vpFilteredFileList[m_SelectedFileIndex]->m_StorageType : m_StorageType;
-			char aSaveFilePath[IO_MAX_PATH_LENGTH];
-			str_format(aSaveFilePath, sizeof(aSaveFilePath), "%s/%s", m_pCurrentPath, m_FilenameInput.GetString());
-			if(!str_endswith(aSaveFilePath, FILETYPE_EXTENSIONS[(int)m_FileType]))
-			{
-				str_append(aSaveFilePath, FILETYPE_EXTENSIONS[(int)m_FileType]);
-			}
 
 			char aFilename[IO_MAX_PATH_LENGTH];
-			fs_split_file_extension(fs_filename(aSaveFilePath), aFilename, sizeof(aFilename));
+			str_copy(aFilename, m_FilenameInput.GetString());
+			if(!str_endswith(aFilename, FILETYPE_EXTENSIONS[(int)m_FileType]))
+			{
+				str_append(aFilename, FILETYPE_EXTENSIONS[(int)m_FileType]);
+			}
+
+			char aSaveFilePath[IO_MAX_PATH_LENGTH];
+			str_format(aSaveFilePath, sizeof(aSaveFilePath), "%s/%s", m_pCurrentPath, aFilename);
+
 			if(m_SaveAction && !str_valid_filename(aFilename))
 			{
 				Editor()->ShowFileDialogError("This name cannot be used for files and folders.");
