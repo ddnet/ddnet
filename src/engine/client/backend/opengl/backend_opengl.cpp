@@ -662,8 +662,8 @@ void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int
 
 	if(m_vTextures[Slot].m_RescaleCount > 0)
 	{
-		int OldWidth = Width;
-		int OldHeight = Height;
+		const int OldWidth = Width;
+		const int OldHeight = Height;
 		for(int i = 0; i < m_vTextures[Slot].m_RescaleCount; ++i)
 		{
 			Width >>= 1;
@@ -758,23 +758,17 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 	int RescaleCount = 0;
 	if(GLFormat == GL_RGBA)
 	{
-		int OldWidth = Width;
-		int OldHeight = Height;
-		bool NeedsResize = false;
-
 		if(Width > m_MaxTexSize || Height > m_MaxTexSize)
 		{
+			const int OldWidth = Width;
+			const int OldHeight = Height;
 			do
 			{
 				Width >>= 1;
 				Height >>= 1;
 				++RescaleCount;
 			} while(Width > m_MaxTexSize || Height > m_MaxTexSize);
-			NeedsResize = true;
-		}
 
-		if(NeedsResize)
-		{
 			uint8_t *pTmpData = ResizeImage(pTexData, OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
