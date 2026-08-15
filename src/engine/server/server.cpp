@@ -1876,6 +1876,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			pInput->m_GameTick = IntendedTick;
 			mem_copy(pInput->m_aData, aInputData, Size);
 
+			// Bound before the pre-input relay below, so that the other clients predict
+			// with the same input as this server uses
+			GameServer()->OnClientPrepareInput(ClientId, pInput->m_aData);
+
 			if(g_Config.m_SvPreInput &&
 				IntendedTick <= Tick() + 4 * TickSpeed() + 1)
 			{
@@ -1923,7 +1927,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 			}
 
-			GameServer()->OnClientPrepareInput(ClientId, pInput->m_aData);
 			mem_copy(m_aClients[ClientId].m_LatestInput.m_aData, pInput->m_aData, sizeof(m_aClients[ClientId].m_LatestInput.m_aData));
 
 			m_aClients[ClientId].m_CurrentInput++;
