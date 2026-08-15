@@ -137,7 +137,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static_assert(SKIP_DURATIONS_SECONDS[DEFAULT_SKIP_DURATION_INDEX] == 5.0f);
 	static_assert(std::size(SKIP_DURATIONS_SECONDS) == std::size(SKIP_DURATIONS_STRINGS));
 
-	const int DemoLengthSeconds = TotalTicks / Client()->GameTickSpeed();
+	const float DemoLengthSeconds = TotalTicks / static_cast<float>(Client()->GameTickSpeed());
 	int NumDurationLabels = 0;
 	for(size_t i = 0; i < std::size(SKIP_DURATIONS_SECONDS); ++i)
 	{
@@ -145,8 +145,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			break;
 		NumDurationLabels = i + 1;
 	}
-	if(NumDurationLabels > 0 && m_SkipDurationIndex >= NumDurationLabels)
-		m_SkipDurationIndex = std::max(0, NumDurationLabels - 1);
+	if(NumDurationLabels < 2)
+	{
+		m_SkipDurationIndex = 0;
+	}
+	else if(m_SkipDurationIndex >= NumDurationLabels)
+	{
+		m_SkipDurationIndex = NumDurationLabels - 1;
+	}
 
 	// handle keyboard shortcuts independent of active menu
 	float PositionToSeek = -1.0f;
@@ -186,20 +192,38 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(Input()->KeyPress(KEY_LEFT) || Input()->KeyPress(KEY_J))
 		{
 			if(Input()->ModifierIsPressed())
+			{
 				PositionToSeek = FindPreviousMarkerPosition();
+			}
 			else if(Input()->ShiftIsPressed())
-				m_SkipDurationIndex = std::max(m_SkipDurationIndex - 1, 0);
+			{
+				if(m_SkipDurationIndex > 0)
+				{
+					--m_SkipDurationIndex;
+				}
+			}
 			else
+			{
 				TimeToSeek = -SKIP_DURATIONS_SECONDS[m_SkipDurationIndex];
+			}
 		}
 		else if(Input()->KeyPress(KEY_RIGHT) || Input()->KeyPress(KEY_L))
 		{
 			if(Input()->ModifierIsPressed())
+			{
 				PositionToSeek = FindNextMarkerPosition();
+			}
 			else if(Input()->ShiftIsPressed())
-				m_SkipDurationIndex = std::min(m_SkipDurationIndex + 1, NumDurationLabels - 1);
+			{
+				if(m_SkipDurationIndex < NumDurationLabels - 1)
+				{
+					++m_SkipDurationIndex;
+				}
+			}
 			else
+			{
 				TimeToSeek = SKIP_DURATIONS_SECONDS[m_SkipDurationIndex];
+			}
 		}
 
 		// seek to 0-90%
