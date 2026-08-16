@@ -863,7 +863,7 @@ void CNamePlates::OnRender()
 	if(IVideo::Current())
 		ShowDirection = g_Config.m_ClVideoShowDirection;
 #endif
-	if(!g_Config.m_ClNamePlates && ShowDirection == 0)
+	if(!g_Config.m_ClNamePlates && !g_Config.m_ClNamePlatesOwn && ShowDirection == 0)
 		return;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
