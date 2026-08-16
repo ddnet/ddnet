@@ -1639,7 +1639,7 @@ void CUi::RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFini
 		return;
 
 	char aBuf[128];
-	str_time(((int64_t)absolute(Seconds)) * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
+	str_time(absolute(static_cast<int64_t>(Seconds)) * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
 	SecondsText.Update(TextRender(), aBuf, FontSize);
 
 	// align in vertical middle
