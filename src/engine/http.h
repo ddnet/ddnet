@@ -129,7 +129,7 @@ public:
 	std::optional<int64_t> ResultLastModified() const;
 
 protected:
-	static const char *const USER_AGENT_STRING;
+	static const char *UserAgent();
 	enum class REQUEST
 	{
 		GET,
