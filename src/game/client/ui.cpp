@@ -478,8 +478,8 @@ void CUi::ClipEnable(const CUIRect *pRect)
 		CUIRect Intersection;
 		Intersection.x = std::max(pRect->x, pOldRect->x);
 		Intersection.y = std::max(pRect->y, pOldRect->y);
-		Intersection.w = std::min(pRect->x + pRect->w, pOldRect->x + pOldRect->w) - pRect->x;
-		Intersection.h = std::min(pRect->y + pRect->h, pOldRect->y + pOldRect->h) - pRect->y;
+		Intersection.w = std::min(pRect->x + pRect->w, pOldRect->x + pOldRect->w) - Intersection.x;
+		Intersection.h = std::min(pRect->y + pRect->h, pOldRect->y + pOldRect->h) - Intersection.y;
 		m_vClips.push_back(Intersection);
 	}
 	else
