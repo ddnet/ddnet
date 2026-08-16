@@ -231,6 +231,9 @@ void CServer::CClient::Reset()
 	m_SnapRate = CClient::SNAPRATE_INIT;
 	m_Score = -1;
 	m_NextMapChunk = 0;
+	m_NumMapChunks = 0;
+	m_PreInputsTick = -1;
+	m_NumPreInputs = 0;
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
 
@@ -1396,6 +1399,7 @@ void CServer::SendMap(int ClientId)
 	}
 
 	m_aClients[ClientId].m_NextMapChunk = 0;
+	m_aClients[ClientId].m_NumMapChunks = 0;
 }
 
 void CServer::SendMapData(int ClientId, int Chunk)
@@ -1408,6 +1412,13 @@ void CServer::SendMapData(int ClientId, int Chunk)
 	// drop faulty map data requests
 	if(Chunk < 0 || Offset > m_aCurrentMapSize[MapType])
 		return;
+
+	// a client can ask for the same chunk any number of times
+	CClient &Client = m_aClients[ClientId];
+	const unsigned int NumChunks = (m_aCurrentMapSize[MapType] + ChunkSize - 1) / ChunkSize;
+	if(Client.m_NumMapChunks >= (int)(2 * NumChunks))
+		return;
+	Client.m_NumMapChunks++;
 
 	if(Offset + ChunkSize >= m_aCurrentMapSize[MapType])
 	{
@@ -1667,6 +1678,24 @@ bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 	return false;
 }
 
+bool CServer::TakePreInputBudget(int ClientId)
+{
+	// nothing stops a client from sending more than one input per tick
+	CClient &Client = m_aClients[ClientId];
+	if(Client.m_PreInputsTick != Tick())
+	{
+		Client.m_PreInputsTick = Tick();
+		Client.m_NumPreInputs = 0;
+	}
+	if(Config()->m_SvMaxPreInputsPerTick != 0 &&
+		Client.m_NumPreInputs >= Config()->m_SvMaxPreInputsPerTick)
+	{
+		return false;
+	}
+	Client.m_NumPreInputs++;
+	return true;
+}
+
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
 {
 	int ClientId = pPacket->m_ClientId;
@@ -1874,7 +1903,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 
 			if(g_Config.m_SvPreInput &&
-				IntendedTick <= Tick() + 4 * TickSpeed() + 1)
+				IntendedTick <= Tick() + 4 * TickSpeed() + 1 &&
+				TakePreInputBudget(ClientId))
 			{
 				// send preinputs of ClientId to valid clients
 				bool aPreInputClients[MAX_CLIENTS] = {};
