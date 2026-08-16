@@ -7,6 +7,7 @@
 
 #include <generated/protocol.h>
 
+#include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/teamscore.h>
 
@@ -17,6 +18,8 @@ CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER, true)
 {
 	m_Pos = Pos;
+	m_Number = 0;
+	m_Layer = LAYER_GAME;
 	m_Core = Dir;
 	m_Freeze = Freeze;
 	m_Explosive = Explosive;
