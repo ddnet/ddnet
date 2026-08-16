@@ -263,6 +263,8 @@ private:
 	int64_t m_LastUpdateTime;
 	int64_t m_LastRecvTime;
 	int64_t m_LastSendTime;
+	int64_t m_LastResendTime;
+	bool m_ResendRequested;
 
 	char m_aErrorString[256];
 
@@ -295,6 +297,7 @@ private:
 	void SendControlWithToken7(int ControlMsg, SECURITY_TOKEN ResponseToken);
 	void ResendChunk(CNetChunkResend *pResend);
 	void Resend();
+	void AnswerResendRequest(int64_t Now);
 
 public:
 	bool m_TimeoutProtected;
