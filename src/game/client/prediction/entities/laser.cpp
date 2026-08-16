@@ -184,10 +184,12 @@ void CLaser::Tick()
 	}
 }
 
-CLaser::CLaser(CGameWorld *pGameWorld, int Id, CLaserData *pLaser) :
+CLaser::CLaser(CGameWorld *pGameWorld, int Id, const CLaserData *pLaser) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Pos = pLaser->m_To;
+	m_Number = pLaser->m_SwitchNumber;
+	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
 	m_From = pLaser->m_From;
 	m_EvalTick = pLaser->m_StartTick;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
