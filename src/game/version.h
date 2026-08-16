@@ -3,14 +3,15 @@
 #ifndef GAME_VERSION_H
 #define GAME_VERSION_H
 
+#include <generated/git_revision.h>
+
 // ddnet
 #define GAME_NAME "DDNet"
 #define DDNET_VERSION_NUMBER 20010
 extern const char *GIT_SHORTREV_HASH;
-#ifndef GAME_RELEASE_VERSION_INTERNAL
-#define GAME_RELEASE_VERSION_INTERNAL 20.1
-#endif
-#define GAME_RELEASE_VERSION STRINGIFY(GAME_RELEASE_VERSION_INTERNAL)
+// Set this to the version being tagged, e.g. `20.1-rc1` or `20.1`. In versions
+// ending in `-dev` the `-dev` is replaced by the git revision hash.
+#define GAME_RELEASE_VERSION_INTERNAL "20.1-dev"
 
 // teeworlds
 #define CLIENT_VERSION7 0x0705
