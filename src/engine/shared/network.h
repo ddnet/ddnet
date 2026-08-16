@@ -412,6 +412,8 @@ private:
 	NETADDR m_Addr;
 	CNetConnection *m_pConnection;
 	int m_CurrentChunk;
+	// offset of the next chunk header in m_Data.m_aChunkData
+	int m_CurrentOffset;
 	int m_ClientId;
 	CNetPacketConstruct m_Data;
 };
