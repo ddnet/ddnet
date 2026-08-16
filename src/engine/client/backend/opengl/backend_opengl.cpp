@@ -662,8 +662,8 @@ void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int
 
 	if(m_vTextures[Slot].m_RescaleCount > 0)
 	{
-		int OldWidth = Width;
-		int OldHeight = Height;
+		const int OldWidth = Width;
+		const int OldHeight = Height;
 		for(int i = 0; i < m_vTextures[Slot].m_RescaleCount; ++i)
 		{
 			Width >>= 1;
@@ -758,23 +758,17 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 	int RescaleCount = 0;
 	if(GLFormat == GL_RGBA)
 	{
-		int OldWidth = Width;
-		int OldHeight = Height;
-		bool NeedsResize = false;
-
 		if(Width > m_MaxTexSize || Height > m_MaxTexSize)
 		{
+			const int OldWidth = Width;
+			const int OldHeight = Height;
 			do
 			{
 				Width >>= 1;
 				Height >>= 1;
 				++RescaleCount;
 			} while(Width > m_MaxTexSize || Height > m_MaxTexSize);
-			NeedsResize = true;
-		}
 
-		if(NeedsResize)
-		{
 			uint8_t *pTmpData = ResizeImage(pTexData, OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
@@ -1618,6 +1612,7 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
 			else
 				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+
 			{
 				CGLSL PrimitiveVertexShader;
 				CGLSL PrimitiveFragmentShader;
@@ -1634,10 +1629,6 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 				m_pPrimitive3DProgram->m_LocPos = m_pPrimitive3DProgram->GetUniformLoc("gPos");
 			}
 
-			if(pCommand->m_pCapabilities->m_2DArrayTextures)
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-			else
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
 			{
 				CGLSL PrimitiveVertexShader;
 				CGLSL PrimitiveFragmentShader;
@@ -1658,10 +1649,7 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 				m_pPrimitive3DProgramTextured->m_LocPos = m_pPrimitive3DProgramTextured->GetUniformLoc("gPos");
 				m_pPrimitive3DProgramTextured->m_LocTextureSampler = m_pPrimitive3DProgramTextured->GetUniformLoc("gTextureSampler");
 			}
-			if(pCommand->m_pCapabilities->m_2DArrayTextures)
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-			else
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+
 			{
 				CGLSL VertexShader;
 				CGLSL FragmentShader;
@@ -1681,10 +1669,7 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 				m_pTileProgram->m_LocPos = m_pTileProgram->GetUniformLoc("gPos");
 				m_pTileProgram->m_LocColor = m_pTileProgram->GetUniformLoc("gVertColor");
 			}
-			if(pCommand->m_pCapabilities->m_2DArrayTextures)
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-			else
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+
 			{
 				CGLSL VertexShader;
 				CGLSL FragmentShader;
@@ -1699,8 +1684,8 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 				m_pTileProgramTextured->AddShader(&VertexShader);
 				m_pTileProgramTextured->AddShader(&FragmentShader);
 
-				glBindAttribLocation(m_pTileProgram->GetProgramId(), 0, "inVertex");
-				glBindAttribLocation(m_pTileProgram->GetProgramId(), 1, "inVertexTexCoord");
+				glBindAttribLocation(m_pTileProgramTextured->GetProgramId(), 0, "inVertex");
+				glBindAttribLocation(m_pTileProgramTextured->GetProgramId(), 1, "inVertexTexCoord");
 
 				m_pTileProgramTextured->LinkProgram();
 
@@ -1710,10 +1695,7 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 				m_pTileProgramTextured->m_LocTextureSampler = m_pTileProgramTextured->GetUniformLoc("gTextureSampler");
 				m_pTileProgramTextured->m_LocColor = m_pTileProgramTextured->GetUniformLoc("gVertColor");
 			}
-			if(pCommand->m_pCapabilities->m_2DArrayTextures)
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-			else
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+
 			{
 				CGLSL VertexShader;
 				CGLSL FragmentShader;
@@ -1736,10 +1718,7 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 				m_pBorderTileProgram->m_LocOffset = m_pBorderTileProgram->GetUniformLoc("gOffset");
 				m_pBorderTileProgram->m_LocScale = m_pBorderTileProgram->GetUniformLoc("gScale");
 			}
-			if(pCommand->m_pCapabilities->m_2DArrayTextures)
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
-			else
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+
 			{
 				CGLSL VertexShader;
 				CGLSL FragmentShader;
@@ -1799,13 +1778,35 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 
 void CCommandProcessorFragment_OpenGL2::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
 {
-	// TODO: cleanup the OpenGL context too
+	if(m_HasShaders)
+	{
+		glUseProgram(0);
+	}
+
+	m_pTileProgram->DeleteProgram();
+	m_pTileProgramTextured->DeleteProgram();
+	m_pBorderTileProgram->DeleteProgram();
+	m_pBorderTileProgramTextured->DeleteProgram();
+	m_pPrimitive3DProgram->DeleteProgram();
+	m_pPrimitive3DProgramTextured->DeleteProgram();
+
 	delete m_pTileProgram;
 	delete m_pTileProgramTextured;
+	delete m_pBorderTileProgram;
+	delete m_pBorderTileProgramTextured;
 	delete m_pPrimitive3DProgram;
 	delete m_pPrimitive3DProgramTextured;
+
+	for(int i = 0; i < (int)m_vTextures.size(); ++i)
+	{
+		DestroyTexture(i);
+	}
+
 	for(auto &BufferObject : m_vBufferObjectIndices)
+	{
+		glDeleteBuffers(1, &BufferObject.m_BufferObjectId);
 		free(BufferObject.m_pData);
+	}
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand)

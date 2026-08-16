@@ -121,7 +121,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		{
 			std::string Log(LogLength, '\0');
 			glGetShaderInfoLog(ShaderId, Log.size(), nullptr, &Log.front());
-			if(Log[Log.size() - 2] == '\n')
+			if(Log.size() >= 2 && Log[Log.size() - 2] == '\n')
 			{
 				Log[Log.size() - 2] = '\0';
 			}

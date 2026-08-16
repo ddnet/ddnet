@@ -51,7 +51,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 				++pBuff;
 			}
 
-			while(*pBuff && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
+			while(*pBuff && TmpStrSize < sizeof(aTmpStr) - 1 && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
 			{
 				aTmpStr[TmpStrSize++] = *pBuff;
 				++pBuff;
@@ -59,19 +59,20 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 
 			if(TmpStrSize > 0)
 			{
-				aTmpStr[TmpStrSize] = 0;
+				aTmpStr[TmpStrSize] = '\0';
 				TmpStrSize = 0;
+
 				if(str_comp(aTmpStr, "layout") == 0)
 				{
-					//search for ' in'
-					while(*pBuff && (*pBuff != ' ' || (*(pBuff + 1) && *(pBuff + 1) != 'i') || *(pBuff + 2) != 'n'))
+					// search for ' in'
+					while(*pBuff && !str_startswith(pBuff, " in"))
 					{
 						++pBuff;
 					}
 
-					if(*pBuff == ' ' && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
+					if(const char *pInStart = str_startswith(pBuff, " in"))
 					{
-						pBuff += 3;
+						pBuff = pInStart;
 						Line.append("attribute");
 						Line.append(pBuff);
 						return;
@@ -83,30 +84,23 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 				}
 				else if(str_comp(aTmpStr, "noperspective") == 0 || str_comp(aTmpStr, "smooth") == 0 || str_comp(aTmpStr, "flat") == 0)
 				{
-					//search for 'in' or 'out'
-					while(*pBuff && ((*pBuff != 'i' || *(pBuff + 1) != 'n') && (*pBuff != 'o' || (*(pBuff + 1) && *(pBuff + 1) != 'u') || *(pBuff + 2) != 't')))
+					// search for 'in' or 'out'
+					while(*pBuff && !str_startswith(pBuff, "in") && !str_startswith(pBuff, "out"))
 					{
 						// append anything that is inbetween noperspective & in/out vars
 						Line.push_back(*pBuff);
 						++pBuff;
 					}
 
-					bool Found = false;
-					if(*pBuff)
+					if(const char *pInStart = str_startswith(pBuff, "in"))
 					{
-						if(*pBuff == 'i' && *(pBuff + 1) == 'n')
-						{
-							pBuff += 2;
-							Found = true;
-						}
-						else if(*pBuff == 'o' && *(pBuff + 1) == 'u' && *(pBuff + 2) == 't')
-						{
-							pBuff += 3;
-							Found = true;
-						}
+						pBuff = pInStart;
 					}
-
-					if(!Found)
+					else if(const char *pOutStart = str_startswith(pBuff, "out"))
+					{
+						pBuff = pOutStart;
+					}
+					else
 					{
 						dbg_msg("shadercompiler", "Fix shader for older OpenGL versions.");
 					}
@@ -170,7 +164,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 					++pBuff;
 				}
 
-				while(*pBuff && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
+				while(*pBuff && TmpStrSize < sizeof(aTmpStr) - 1 && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
 				{
 					aTmpStr[TmpStrSize++] = *pBuff;
 					++pBuff;
@@ -178,7 +172,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 
 				if(TmpStrSize > 0)
 				{
-					aTmpStr[TmpStrSize] = 0;
+					aTmpStr[TmpStrSize] = '\0';
 					TmpStrSize = 0;
 
 					if(str_comp(aTmpStr, "noperspective") == 0)
@@ -196,7 +190,6 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 						while(*pBuff && *pBuff != '(')
 						{
 							Line.append(1, *pBuff);
-
 							++pBuff;
 						}
 
@@ -228,7 +221,6 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 						}
 
 						Line.append(pBuff);
-
 						return;
 					}
 					else

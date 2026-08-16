@@ -65,7 +65,7 @@ bool CGLSLProgram::LinkProgram()
 		{
 			std::string Log(LogLength, '\0');
 			glGetProgramInfoLog(m_ProgramId, Log.size(), nullptr, &Log.front());
-			if(Log[Log.size() - 2] == '\n')
+			if(Log.size() >= 2 && Log[Log.size() - 2] == '\n')
 			{
 				Log[Log.size() - 2] = '\0';
 			}
@@ -87,7 +87,7 @@ void CGLSLProgram::DetachAllShaders() const
 	GLsizei ReturnedCount = 0;
 	while(true)
 	{
-		glGetAttachedShaders(m_ProgramId, 100, &ReturnedCount, aShaders);
+		glGetAttachedShaders(m_ProgramId, std::size(aShaders), &ReturnedCount, aShaders);
 
 		if(ReturnedCount > 0)
 		{
@@ -97,8 +97,10 @@ void CGLSLProgram::DetachAllShaders() const
 			}
 		}
 
-		if(ReturnedCount < 100)
+		if(ReturnedCount < (GLsizei)std::size(aShaders))
+		{
 			break;
+		}
 	}
 }
 

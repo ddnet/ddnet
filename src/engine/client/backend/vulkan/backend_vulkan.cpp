@@ -2575,6 +2575,8 @@ protected:
 
 		if(Tex.m_RescaleCount > 0)
 		{
+			const size_t OldWidth = Width;
+			const size_t OldHeight = Height;
 			for(uint32_t i = 0; i < Tex.m_RescaleCount; ++i)
 			{
 				Width >>= 1;
@@ -2584,7 +2586,7 @@ protected:
 				YOff /= 2;
 			}
 
-			uint8_t *pTmpData = ResizeImage(pData, Width, Height, Width, Height, VulkanFormatToPixelSize(Format));
+			uint8_t *pTmpData = ResizeImage(pData, OldWidth, OldHeight, Width, Height, VulkanFormatToPixelSize(Format));
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2631,6 +2633,8 @@ protected:
 		uint32_t RescaleCount = 0;
 		if((size_t)Width > m_MaxTextureSize || (size_t)Height > m_MaxTextureSize)
 		{
+			const size_t OldWidth = Width;
+			const size_t OldHeight = Height;
 			do
 			{
 				Width >>= 1;
@@ -2638,7 +2642,7 @@ protected:
 				++RescaleCount;
 			} while((size_t)Width > m_MaxTextureSize || (size_t)Height > m_MaxTextureSize);
 
-			uint8_t *pTmpData = ResizeImage(pData, Width, Height, Width, Height, PixelSize);
+			uint8_t *pTmpData = ResizeImage(pData, OldWidth, OldHeight, Width, Height, PixelSize);
 			free(pData);
 			pData = pTmpData;
 		}
@@ -5867,15 +5871,14 @@ public:
 			UniformBufferDescrPool.m_DefaultAllocSize = 512;
 		}
 
-		bool Ret = AllocateDescriptorPool(m_StandardTextureDescrPool, CCommandBuffer::MAX_TEXTURES);
-		Ret |= AllocateDescriptorPool(m_TextTextureDescrPool, 8);
-
+		bool Success = true;
+		Success &= AllocateDescriptorPool(m_StandardTextureDescrPool, CCommandBuffer::MAX_TEXTURES);
+		Success &= AllocateDescriptorPool(m_TextTextureDescrPool, 8);
 		for(auto &UniformBufferDescrPool : m_vUniformBufferDescrPools)
 		{
-			Ret |= AllocateDescriptorPool(UniformBufferDescrPool, 64);
+			Success &= AllocateDescriptorPool(UniformBufferDescrPool, 64);
 		}
-
-		return Ret;
+		return Success;
 	}
 
 	void DestroyDescriptorPools()

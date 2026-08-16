@@ -536,6 +536,8 @@ void CCommandProcessorFragment_OpenGL3_3::TextureUpdate(int Slot, int X, int Y, 
 
 	if(m_vTextures[Slot].m_RescaleCount > 0)
 	{
+		const int OldWidth = Width;
+		const int OldHeight = Height;
 		for(int i = 0; i < m_vTextures[Slot].m_RescaleCount; ++i)
 		{
 			Width >>= 1;
@@ -545,7 +547,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureUpdate(int Slot, int X, int Y, 
 			Y /= 2;
 		}
 
-		uint8_t *pTmpData = ResizeImage(pTexData, Width, Height, Width, Height, GLFormatToPixelSize(GLFormat));
+		uint8_t *pTmpData = ResizeImage(pTexData, OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
 		free(pTexData);
 		pTexData = pTmpData;
 	}
@@ -573,6 +575,8 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 	{
 		if(Width > m_MaxTexSize || Height > m_MaxTexSize)
 		{
+			const int OldWidth = Width;
+			const int OldHeight = Height;
 			do
 			{
 				Width >>= 1;
@@ -580,7 +584,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 				++RescaleCount;
 			} while(Width > m_MaxTexSize || Height > m_MaxTexSize);
 
-			uint8_t *pTmpData = ResizeImage(pTexData, Width, Height, Width, Height, GLFormatToPixelSize(GLFormat));
+			uint8_t *pTmpData = ResizeImage(pTexData, OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
