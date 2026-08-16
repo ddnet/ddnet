@@ -586,6 +586,7 @@ void CNetConnection::ResumeConnection(const NETADDR *pAddr, int Sequence, int Ac
 
 		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend) + pFirst->m_DataSize);
 		mem_copy(pResend, pFirst, sizeof(CNetChunkResend) + pFirst->m_DataSize);
+		pResend->m_pData = (unsigned char *)(pResend + 1);
 
 		pResendBuffer->PopFirst();
 	}
