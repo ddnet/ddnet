@@ -15,6 +15,14 @@
 #include <game/server/save.h>
 #include <game/server/teams.h>
 
+#include <algorithm>
+
+static vec2 ClampPlacement(vec2 Pos)
+{
+	constexpr float Max = 1 << 28;
+	return vec2(std::clamp(Pos.x, -Max, Max), std::clamp(Pos.y, -Max, Max));
+}
+
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -80,7 +88,9 @@ void CGameContext::MoveCharacter(int ClientId, int X, int Y, bool Raw)
 	if(!pChr)
 		return;
 
-	pChr->Move(vec2((Raw ? 1 : 32) * X, (Raw ? 1 : 32) * Y));
+	const float Scale = Raw ? 1.0f : 32.0f; // Scaled in float, 32 * X would overflow an int
+	pChr->Move(vec2(Scale * X, Scale * Y));
+	pChr->SetPosition(ClampPlacement(pChr->Core()->m_Pos));
 	pChr->ResetVelocity();
 	pChr->m_DDRaceState = ERaceState::CHEATED;
 }
@@ -418,6 +428,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 
 void CGameContext::Teleport(CCharacter *pChr, vec2 Pos)
 {
+	Pos = ClampPlacement(Pos);
 	pChr->SetPosition(Pos);
 	pChr->m_Pos = Pos;
 	pChr->m_PrevPos = Pos;
