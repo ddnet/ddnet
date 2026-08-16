@@ -269,6 +269,7 @@ public:
 	CDemoRecorder m_aDemoRecorder[NUM_RECORDERS];
 	CAuthManager m_AuthManager;
 
+	// start of the second the connection-less server info responses are counted in
 	int64_t m_ServerInfoFirstRequest;
 	int m_ServerInfoNumRequests;
 
@@ -415,8 +416,9 @@ public:
 	void CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxConsideredClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void GetServerInfoSixup(CPacker *pPacker, bool SendClients);
-	bool RateLimitServerInfoConnless();
-	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
+	// Whether a connection-less server info response may be sent, and if so whether it
+	// includes the client list.
+	std::optional<bool> RateLimitServerInfoConnless();
 	void UpdateRegisterServerInfo();
 	void UpdateServerInfo(bool Resend);
 
