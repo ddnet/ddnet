@@ -87,6 +87,7 @@ void CPlayer::Reset()
 	m_FirstPacket = true;
 
 	m_SendVoteIndex = -1;
+	m_pLastSentVoteOption = nullptr;
 
 	if(g_Config.m_Events)
 	{
