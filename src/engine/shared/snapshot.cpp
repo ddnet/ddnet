@@ -892,6 +892,17 @@ void *CSnapshotBuilder::NewItemRaw(int Type, int Id, int Size)
 	dbg_assert(Id >= 0 && Id <= CSnapshot::MAX_ID, "Invalid snap item Id: %d", Id);
 	dbg_assert(Size >= 0 && (size_t)Size <= CSnapshot::MAX_SIZE - sizeof(CSnapshot) - sizeof(CSnapshotItem) - sizeof(int) && Size % sizeof(int32_t) == 0, "Invalid snap item Size: %d", Size);
 
+	// resolve extended types first for capacity checks below
+	if(Extended)
+	{
+		const int ExtendedItemTypeIndex = GetExtendedItemTypeIndex(Type);
+		if(ExtendedItemTypeIndex == -1)
+		{
+			return nullptr;
+		}
+		Type = GetTypeFromIndex(ExtendedItemTypeIndex);
+	}
+
 	if(m_NumItems >= CSnapshot::MAX_ITEMS)
 	{
 		return nullptr;
@@ -902,16 +913,6 @@ void *CSnapshotBuilder::NewItemRaw(int Type, int Id, int Size)
 	if(sizeof(CSnapshot) + OffsetSize + m_DataSize + ItemSize > CSnapshot::MAX_SIZE)
 	{
 		return nullptr;
-	}
-
-	if(Extended)
-	{
-		const int ExtendedItemTypeIndex = GetExtendedItemTypeIndex(Type);
-		if(ExtendedItemTypeIndex == -1)
-		{
-			return nullptr;
-		}
-		Type = GetTypeFromIndex(ExtendedItemTypeIndex);
 	}
 
 	CSnapshotItem *pObj = (CSnapshotItem *)(m_aData + m_DataSize);
