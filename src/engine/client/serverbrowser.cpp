@@ -729,8 +729,12 @@ static void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR 
 		{
 			str_append(pBuffer, ",", BufferSize);
 		}
-		char aIpAddr[NETADDR_URL_MAXSTRSIZE];
-		net_addr_url_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true);
+		if(pAddrs[i].type & NETTYPE_TW7)
+		{
+			str_append(pBuffer, "tw-0.7+udp://", BufferSize);
+		}
+		char aIpAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true);
 		str_append(pBuffer, aIpAddr, BufferSize);
 	}
 }
