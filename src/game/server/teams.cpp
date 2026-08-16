@@ -623,7 +623,7 @@ void CGameTeams::SendTeamsState(int ClientId)
 	CMsgPacker MsgLegacy(NETMSGTYPE_SV_TEAMSSTATELEGACY);
 
 	int ClientVersion = GameServer()->GetClientVersion(ClientId);
-	bool PlayerMappingRequired = ClientVersion < VERSION_DDNET_128_PLAYERS;
+	bool PlayerMappingRequired = !Server()->Supports128Players(ClientId);
 
 	for(unsigned i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -710,7 +710,7 @@ int CGameTeams::TeamForClient(int Team, int ClientId) const
 	if(ClientVersion >= VERSION_DDNET_128_TEAMS)
 		return Team;
 	// If the team's slots are not reserved, dont highlight it. Causes mismatch between dummy and main when playermapping is active.
-	if(ClientVersion < VERSION_DDNET_128_PLAYERS && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team))
+	if(!GameServer()->Server()->Supports128Players(ClientId) && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team))
 		return TEAM_FLOCK;
 	return m_aLegacyTeamMap[Team];
 }

@@ -83,6 +83,12 @@ public:
 	 * On errors, VERSION_NONE is returned.
 	 */
 	virtual int GetClientVersion(int ClientId) const = 0;
+
+	bool Supports128Players(int ClientId) const
+	{
+		return GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS && !IsSixup(ClientId);
+	}
+
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientId) = 0;
 
 	template<class T>
@@ -152,7 +158,7 @@ public:
 
 		// 128 player translation
 		char aBuf[512];
-		if(GetClientVersion(ClientId) < VERSION_DDNET_128_PLAYERS)
+		if(!Supports128Players(ClientId))
 		{
 			// force "Name: message" for team messages from other players to not show duplicate messages when dummy is connected
 			if(*pId >= 0 && ((MsgCopy.m_Mode == protocol7::CHAT_TEAM && *pId != ClientId) || MsgCopy.m_Mode == WhisperRecv || !Translate(*pId, ClientId)))
@@ -289,7 +295,7 @@ public:
 		// console and server demo pseudo clients operate on untranslated ids (SERVER_DEMO_CLIENT == IConsole::CLIENT_ID_UNSPECIFIED)
 		if(ClientId == SERVER_DEMO_CLIENT || ClientId == IConsole::CLIENT_ID_GAME || ClientId == IConsole::CLIENT_ID_NO_GAME)
 			return true;
-		if(GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS)
+		if(Supports128Players(ClientId))
 			return true;
 		if(Target < 0 || Target >= MAX_CLIENTS)
 			return false;
@@ -305,7 +311,7 @@ public:
 		// console and server demo pseudo clients operate on untranslated ids (SERVER_DEMO_CLIENT == IConsole::CLIENT_ID_UNSPECIFIED)
 		if(ClientId == SERVER_DEMO_CLIENT || ClientId == IConsole::CLIENT_ID_GAME || ClientId == IConsole::CLIENT_ID_NO_GAME)
 			return true;
-		if(GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS)
+		if(Supports128Players(ClientId))
 			return true;
 		if(Target < 0 || Target >= LEGACY_MAX_CLIENTS)
 			return false;

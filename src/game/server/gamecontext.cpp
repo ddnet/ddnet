@@ -1085,7 +1085,7 @@ void CGameContext::SendVoteStatus(int ClientId, int Total, int Yes, int No)
 		return;
 	}
 
-	if(Total > LEGACY_MAX_CLIENTS && m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetClientVersion() < VERSION_DDNET_128_PLAYERS)
+	if(Total > LEGACY_MAX_CLIENTS && m_apPlayers[ClientId] && !Server()->Supports128Players(ClientId))
 	{
 		Yes = (Yes * LEGACY_MAX_CLIENTS) / (float)Total;
 		No = (No * LEGACY_MAX_CLIENTS) / (float)Total;
