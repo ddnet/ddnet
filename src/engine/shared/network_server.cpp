@@ -441,12 +441,20 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 	}
 	else if(!IsCtrl && g_Config.m_SvVanillaAntiSpoof && g_Config.m_Password[0] == '\0')
 	{
-		CNetChunkHeader h;
-
-		unsigned char *pData = Packet.m_aChunkData;
-		pData = h.Unpack(pData);
+		// the chunk header is two bytes, three for vital chunks
+		if(Packet.m_DataSize < 2)
+		{
+			return;
+		}
+		CNetChunkHeader Header;
+		unsigned char *pData = Header.Unpack(Packet.m_aChunkData);
+		const int Remaining = Packet.m_DataSize - (int)(pData - Packet.m_aChunkData);
+		if(Remaining < 0)
+		{
+			return;
+		}
 		CUnpacker Unpacker;
-		Unpacker.Reset(pData, h.m_Size);
+		Unpacker.Reset(pData, std::min(Header.m_Size, Remaining));
 		int Msg = Unpacker.GetInt() >> 1;
 
 		if(Msg == NETMSG_INPUT)
