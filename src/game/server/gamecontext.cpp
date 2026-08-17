@@ -936,9 +936,9 @@ void CGameContext::SendRename7(int ClientId)
 
 	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 	{
-		Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
-		Info.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
-		Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+		Info.m_apSkinPartNames[p] = pPlayer->TeeInfos().m_aaSkinPartNames[p];
+		Info.m_aSkinPartColors[p] = pPlayer->TeeInfos().m_aSkinPartColors[p];
+		Info.m_aUseCustomColors[p] = pPlayer->TeeInfos().m_aUseCustomColors[p];
 	}
 
 	for(int i = 0; i < Server()->MaxClients(); i++)
@@ -956,7 +956,7 @@ void CGameContext::SendSkinChange7(int ClientId)
 	dbg_assert(in_range(ClientId, 0, MAX_CLIENTS - 1), "Invalid ClientId: %d", ClientId);
 	dbg_assert(m_apPlayers[ClientId] != nullptr, "Client not online: %d", ClientId);
 
-	const CTeeInfo &Info = m_apPlayers[ClientId]->m_TeeInfos;
+	const CTeeInfo &Info = m_apPlayers[ClientId]->TeeInfos();
 	protocol7::CNetMsg_Sv_SkinChange Msg;
 	Msg.m_ClientId = ClientId;
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
@@ -1900,6 +1900,12 @@ void CGameContext::OnClientConnected(int ClientId, void *pData)
 	Server()->ExpireServerInfo();
 }
 
+void CGameContext::OnClientInfoChange(int ClientId)
+{
+	if(m_apPlayers[ClientId])
+		m_apPlayers[ClientId]->InvalidateClientInfo();
+}
+
 void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 {
 	LogEvent("Disconnect", ClientId);
@@ -2109,15 +2115,16 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			pMsg->m_pClan = pMsg7->m_pClan;
 			pMsg->m_Country = pMsg7->m_Country;
 
-			pPlayer->m_TeeInfos = CTeeInfo(pMsg7->m_apSkinPartNames, pMsg7->m_aUseCustomColors, pMsg7->m_aSkinPartColors);
-			pPlayer->m_TeeInfos.FromSixup();
+			CTeeInfo TeeInfos(pMsg7->m_apSkinPartNames, pMsg7->m_aUseCustomColors, pMsg7->m_aSkinPartColors);
+			TeeInfos.FromSixup();
+			pPlayer->SetTeeInfos(TeeInfos);
 
-			str_copy(s_aRawMsg + sizeof(*pMsg), pPlayer->m_TeeInfos.m_aSkinName, sizeof(s_aRawMsg) - sizeof(*pMsg));
+			str_copy(s_aRawMsg + sizeof(*pMsg), pPlayer->TeeInfos().m_aSkinName, sizeof(s_aRawMsg) - sizeof(*pMsg));
 
 			pMsg->m_pSkin = s_aRawMsg + sizeof(*pMsg);
-			pMsg->m_UseCustomColor = pPlayer->m_TeeInfos.m_UseCustomColor;
-			pMsg->m_ColorBody = pPlayer->m_TeeInfos.m_ColorBody;
-			pMsg->m_ColorFeet = pPlayer->m_TeeInfos.m_ColorFeet;
+			pMsg->m_UseCustomColor = pPlayer->TeeInfos().m_UseCustomColor;
+			pMsg->m_ColorBody = pPlayer->TeeInfos().m_ColorBody;
+			pMsg->m_ColorFeet = pPlayer->TeeInfos().m_ColorFeet;
 		}
 		else if(*pMsgId == protocol7::NETMSGTYPE_CL_SKINCHANGE)
 		{
@@ -2130,7 +2137,7 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 
 			CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
 			Info.FromSixup();
-			pPlayer->m_TeeInfos = Info;
+			pPlayer->SetTeeInfos(Info);
 			SendSkinChange7(ClientId);
 
 			return nullptr;
@@ -2896,12 +2903,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		Server()->SetClientCountry(ClientId, pMsg->m_Country);
 	}
 
-	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin);
-	pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
-	pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
-	pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
-	if(!Server()->IsSixup(ClientId))
-		pPlayer->m_TeeInfos.ToSixup();
+	pPlayer->SetTeeInfos(pMsg->m_pSkin, pMsg->m_UseCustomColor, pMsg->m_ColorBody, pMsg->m_ColorFeet);
 
 	if(SixupNeedsUpdate)
 	{
@@ -3059,12 +3061,7 @@ void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int C
 		return;
 	}
 	Server()->SetClientCountry(ClientId, pMsg->m_Country);
-	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin);
-	pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
-	pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
-	pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
-	if(!Server()->IsSixup(ClientId))
-		pPlayer->m_TeeInfos.ToSixup();
+	pPlayer->SetTeeInfos(pMsg->m_pSkin, pMsg->m_UseCustomColor, pMsg->m_ColorBody, pMsg->m_ColorFeet);
 
 	// send clear vote options
 	CNetMsg_Sv_VoteClearOptions ClearMsg;
@@ -5348,7 +5345,7 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int Client
 	if(!m_apPlayers[ClientId])
 		return;
 
-	CTeeInfo &TeeInfo = m_apPlayers[ClientId]->m_TeeInfos;
+	const CTeeInfo &TeeInfo = m_apPlayers[ClientId]->TeeInfos();
 
 	pJsonWriter->WriteAttribute("skin");
 	pJsonWriter->BeginObject();
