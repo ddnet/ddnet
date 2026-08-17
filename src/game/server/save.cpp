@@ -9,6 +9,7 @@
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 
+#include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/ddnet.h>
@@ -240,6 +241,13 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	else
 	{
 		pChr->m_Core.SetHookedPlayer(m_HookedPlayer);
+	}
+	// A hook attached to the ground requires a hookable tile at its position.
+	if(pChr->m_Core.m_HookState == HOOK_GRABBED && pChr->m_Core.HookedPlayer() == -1 &&
+		pChr->Collision()->GetCollisionAt(pChr->m_Core.m_HookPos.x, pChr->m_Core.m_HookPos.y) != TILE_SOLID)
+	{
+		pChr->m_Core.m_HookState = HOOK_RETRACTED;
+		pChr->m_Core.m_HookPos = pChr->m_Core.m_Pos;
 	}
 	pChr->m_Core.m_NewHook = m_NewHook;
 	pChr->m_SavedInput.m_Direction = m_InputDirection;
