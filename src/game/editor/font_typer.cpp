@@ -45,6 +45,8 @@ void CFontTyper::SetTile(ivec2 Pos, unsigned char Index, const std::shared_ptr<C
 void CFontTyper::PlaceTile(unsigned char Index, const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	CState &State = Map()->m_FontTyperState;
+	if(Index != 0 && State.m_TextIndex.x < State.m_LineStart)
+		State.m_LineStart = State.m_TextIndex.x;
 	SetTile(State.m_TextIndex, Index, pLayer);
 	State.m_TextIndex.x++;
 }
