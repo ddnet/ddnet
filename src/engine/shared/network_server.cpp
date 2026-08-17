@@ -110,6 +110,16 @@ void CNetServer::Drop(int ClientId, const char *pReason)
 
 void CNetServer::Update()
 {
+	m_NumRecvPackets = 0;
+
+	const int64_t Now = time_get();
+	if(Now > m_BudgetStart + time_freq())
+	{
+		m_BudgetStart = Now;
+		m_NumPreConnDecompress = 0;
+		m_NumBanReplies = 0;
+	}
+
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		m_aSlots[i].m_Connection.Update();
@@ -194,6 +204,7 @@ bool CNetServer::Connlimit(NETADDR Addr)
 	{
 		if(!net_addr_comp_noport(&m_aSpamConns[i].m_Addr, &Addr))
 		{
+			m_aSpamConns[i].m_LastSeen = Now;
 			if(m_aSpamConns[i].m_Time > Now - time_freq() * g_Config.m_SvConnlimitTime)
 			{
 				if(m_aSpamConns[i].m_Conns >= g_Config.m_SvConnlimit)
@@ -208,12 +219,13 @@ bool CNetServer::Connlimit(NETADDR Addr)
 			return false;
 		}
 
-		if(m_aSpamConns[i].m_Time < m_aSpamConns[Oldest].m_Time)
+		if(m_aSpamConns[i].m_LastSeen < m_aSpamConns[Oldest].m_LastSeen)
 			Oldest = i;
 	}
 
 	m_aSpamConns[Oldest].m_Addr = Addr;
 	m_aSpamConns[Oldest].m_Time = Now;
+	m_aSpamConns[Oldest].m_LastSeen = Now;
 	m_aSpamConns[Oldest].m_Conns = 1;
 	return false;
 }
@@ -622,6 +634,13 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			}
 		}
 
+		// Stop draining the socket once this batch's budget is used up, otherwise traffic
+		// arriving faster than it can be processed keeps this loop from ever returning.
+		if(g_Config.m_SvMaxPacketsPerRecv != 0 && m_NumRecvPackets >= g_Config.m_SvMaxPacketsPerRecv)
+		{
+			break;
+		}
+
 		// TODO: empty the recvinfo
 		NETADDR Addr;
 		unsigned char *pData;
@@ -630,13 +649,19 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		// no more packets for now
 		if(Bytes <= 0)
 			break;
+		m_NumRecvPackets++;
 
 		// check if we just should drop the packet
 		char aBuf[128];
 		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
 		{
-			// banned, reply with a message
-			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, NET_SECURITY_TOKEN_UNSUPPORTED);
+			// Banned, reply with a message. Rate limited, unlimited replies would
+			// make a banned flooder cost more to handle than an unbanned one.
+			if(g_Config.m_SvBanRepliesPerSecond == 0 || m_NumBanReplies < g_Config.m_SvBanRepliesPerSecond)
+			{
+				m_NumBanReplies++;
+				CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, NET_SECURITY_TOKEN_UNSUPPORTED);
+			}
 			continue;
 		}
 
@@ -651,7 +676,40 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		SECURITY_TOKEN Token;
 		int Slot = (*Flags & NET_PACKETFLAG_CONNLESS) == 0 ? GetClientSlot(Addr) : -1;
 		bool Sixup = Slot != -1 && m_aSlots[Slot].m_Connection.m_Sixup;
-		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Sixup, &Token, pResponseToken) == 0)
+
+		// Decompressing costs far more than everything else done per packet, so only do it
+		// for packets that can still turn out to be authentic. In 0.7 the security token is
+		// in the packet header and is compared first. In 0.6 it is inside the payload, so
+		// packets from addresses without a connection can only be attributed after decoding;
+		// the vanilla anti-spoof handshake is the only legitimate one and gets a budget.
+		bool AllowDecompression;
+		if(Slot == -1)
+		{
+			AllowDecompression =
+				g_Config.m_SvVanillaAntiSpoof &&
+				g_Config.m_Password[0] == '\0' &&
+				(g_Config.m_SvPreConnDecompressPerSecond == 0 ||
+					m_NumPreConnDecompress < g_Config.m_SvPreConnDecompressPerSecond);
+		}
+		else if(Sixup)
+		{
+			AllowDecompression =
+				Bytes >= NET_PACKETHEADERSIZE + (int)sizeof(SECURITY_TOKEN) &&
+				ToSecurityToken(pData + NET_PACKETHEADERSIZE) == m_aSlots[Slot].m_Connection.m_Token;
+		}
+		else
+		{
+			AllowDecompression = true;
+		}
+
+		bool Decompressed = false;
+		const int UnpackResult = CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Sixup, AllowDecompression, &Token, pResponseToken, &Decompressed);
+		if(Slot == -1 && Decompressed)
+		{
+			m_NumPreConnDecompress++;
+		}
+
+		if(UnpackResult == 0)
 		{
 			if(m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{

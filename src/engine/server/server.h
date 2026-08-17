@@ -420,7 +420,7 @@ public:
 	void UpdateRegisterServerInfo();
 	void UpdateServerInfo(bool Resend);
 
-	void PumpNetwork(bool PacketWaiting);
+	void PumpNetwork();
 
 	void ChangeMap(const char *pMap) override;
 	void ReloadMap() override;
