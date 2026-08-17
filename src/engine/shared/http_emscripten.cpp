@@ -139,6 +139,13 @@ void CHttpRequestEmscripten::OnFailure()
 
 void CHttpRequestEmscripten::OnProgress()
 {
+	if(m_MaxResponseSize >= 0 &&
+		(m_pFetch->totalBytes > (uint64_t)m_MaxResponseSize ||
+			m_pFetch->dataOffset > (uint64_t)m_MaxResponseSize))
+	{
+		m_pHttp->AddPendingStateChange(m_pFetch, EHttpState::ERROR);
+		return;
+	}
 	m_Current.store(m_pFetch->dataOffset, std::memory_order_relaxed);
 	m_Size.store(m_pFetch->totalBytes, std::memory_order_relaxed);
 	m_Progress.store(m_pFetch->totalBytes == 0 ? 0 : (100 * m_pFetch->dataOffset) / m_pFetch->totalBytes, std::memory_order_relaxed);
