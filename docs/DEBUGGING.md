@@ -23,8 +23,15 @@ On macOS with the Homebrew `sdl2-compat` package you need to set `DYLD_LIBRARY_P
 DYLD_LIBRARY_PATH=$(brew --prefix sdl3)/lib ./DDNet
 ```
 
-For valgrind's memcheck compile a normal Debug build and run with: `valgrind --tool=memcheck ./DDNet`
-Expect a large slow down.
+For valgrind's memcheck compile a Debug build with `-O1`:
+
+```sh
+CFLAGS=-O1 CXXFLAGS=-O1 cmake -DCMAKE_BUILD_TYPE=Debug -Bbuild -GNinja
+cmake --build build
+```
+
+and run with: `valgrind --tool=memcheck ./DDNet`
+Expect a large slow down. Valgrind recommends `-O1` because unoptimized code is a lot slower to check, while `-O2` and higher can cause spurious uninitialized value reports.
 
 ## Symbolizing a crash dump (`.RTP`) for an official Windows release
 
