@@ -194,7 +194,7 @@ protected:
 
 	// Abort the request if `OnData()` returns something other than
 	// `DataSize`.
-	size_t OnData(const char *pData, size_t DataSize);
+	[[nodiscard]] size_t OnData(const char *pData, size_t DataSize);
 	void OnCompletionInternal(EHttpState State);
 };
 

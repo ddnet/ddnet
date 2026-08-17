@@ -120,9 +120,9 @@ void CHttpRequestEmscripten::OnSuccess()
 	dbg_assert(m_pFetch != nullptr, "OnSuccess was called with an unset fetch handle");
 	m_CallbackFinished = true;
 
-	OnData(m_pFetch->data, m_pFetch->numBytes);
+	const bool Success = OnData(m_pFetch->data, m_pFetch->numBytes) == m_pFetch->numBytes;
 
-	m_pHttp->AddPendingStateChange(m_pFetch, EHttpState::DONE);
+	m_pHttp->AddPendingStateChange(m_pFetch, Success ? EHttpState::DONE : EHttpState::ERROR);
 }
 
 void CHttpRequestEmscripten::OnFailure()
