@@ -656,6 +656,7 @@ public:
 	CMenus();
 	int Sizeof() const override { return sizeof(*this); }
 
+	void RenderLoadingDirect(const char *pCaption, const char *pContent, std::optional<float> Progress);
 	void RenderLoading(const char *pCaption, const char *pContent, int IncreaseCounter);
 	void FinishLoading();
 

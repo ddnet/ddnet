@@ -27,7 +27,7 @@ class CMapItemLayerQuads;
 class IMap;
 class CMapImages;
 
-typedef std::function<void(const char *pCaption, const char *pContent, int IncreaseCounter)> FRenderUploadCallback;
+typedef std::function<void(int GroupId, int LayerId)> FCallbackLayerInit;
 
 constexpr int BorderRenderDistance = 201;
 
@@ -65,7 +65,7 @@ class CRenderLayer : public CRenderComponent
 {
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
-	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional);
+	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -84,12 +84,12 @@ protected:
 
 	void UseTexture(IGraphics::CTextureHandle TextureHandle);
 	virtual IGraphics::CTextureHandle GetTexture() const = 0;
-	void RenderLoading() const;
+	virtual void InitCallback() const;
 
 	class IMap *m_pMap = nullptr;
 	IMapImages *m_pMapImages = nullptr;
 	std::shared_ptr<CEnvelopeManager> m_pEnvelopeManager;
-	std::optional<FRenderUploadCallback> m_RenderUploadCallback;
+	std::optional<FCallbackLayerInit> m_InitCallback;
 	std::optional<CClipRegion> m_LayerClip;
 };
 
@@ -98,15 +98,19 @@ class CRenderLayerGroup : public CRenderLayer
 public:
 	CRenderLayerGroup(int GroupId, CMapItemGroup *pGroup);
 	~CRenderLayerGroup() override = default;
-	void Init() override {}
+	void Init() override;
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
 	bool IsValid() const override { return m_pGroup != nullptr; }
 	bool IsGroup() const override { return true; }
 	void Unload() override {}
+	void InitCallback() const override;
 
 protected:
-	IGraphics::CTextureHandle GetTexture() const override { return IGraphics::CTextureHandle(); }
+	IGraphics::CTextureHandle GetTexture() const override
+	{
+		return IGraphics::CTextureHandle();
+	}
 
 	CMapItemGroup *m_pGroup;
 };
@@ -119,7 +123,7 @@ public:
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
 	void Init() override;
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
 
 	virtual int GetDataIndex() const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
@@ -228,7 +232,7 @@ class CRenderLayerQuads : public CRenderLayer
 {
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
 	void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
 	void Render(const CRenderLayerParams &Params) override;
