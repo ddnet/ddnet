@@ -478,8 +478,8 @@ void CUi::ClipEnable(const CUIRect *pRect)
 		CUIRect Intersection;
 		Intersection.x = std::max(pRect->x, pOldRect->x);
 		Intersection.y = std::max(pRect->y, pOldRect->y);
-		Intersection.w = std::min(pRect->x + pRect->w, pOldRect->x + pOldRect->w) - pRect->x;
-		Intersection.h = std::min(pRect->y + pRect->h, pOldRect->y + pOldRect->h) - pRect->y;
+		Intersection.w = std::min(pRect->x + pRect->w, pOldRect->x + pOldRect->w) - Intersection.x;
+		Intersection.h = std::min(pRect->y + pRect->h, pOldRect->y + pOldRect->h) - Intersection.y;
 		m_vClips.push_back(Intersection);
 	}
 	else
@@ -1639,7 +1639,7 @@ void CUi::RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFini
 		return;
 
 	char aBuf[128];
-	str_time(((int64_t)absolute(Seconds)) * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
+	str_time(absolute(static_cast<int64_t>(Seconds)) * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
 	SecondsText.Update(TextRender(), aBuf, FontSize);
 
 	// align in vertical middle
@@ -1769,9 +1769,9 @@ void CUi::DoBackButton()
 		ButtonRect.y = ButtonPos.y;
 	}
 
-	if(Result && Clicked)
+	if(Clicked || Abrupted)
 	{
-		if(m_BackButtonOp == EBackButtonOp::CLICKED && m_DispatchInputFunction)
+		if(Result && Clicked && m_BackButtonOp == EBackButtonOp::CLICKED && m_DispatchInputFunction)
 		{
 			IInput::CEvent Event;
 			Event.m_Key = KEY_ESCAPE;
@@ -1782,10 +1782,6 @@ void CUi::DoBackButton()
 			Event.m_Flags = IInput::FLAG_RELEASE;
 			m_DispatchInputFunction(Event);
 		}
-		m_BackButtonOp = EBackButtonOp::NONE;
-	}
-	else if(Result && Abrupted)
-	{
 		m_BackButtonOp = EBackButtonOp::NONE;
 	}
 
