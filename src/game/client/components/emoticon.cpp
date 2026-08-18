@@ -50,6 +50,8 @@ void CEmoticon::OnReset()
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
 	m_TouchPressedOutside = false;
+	m_LastEmote = -1;
+	m_LastEmoteTime = -1.0f;
 }
 
 void CEmoticon::OnRelease()
@@ -81,6 +83,9 @@ void CEmoticon::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
+
+	if(m_LastEmote != -1 && g_Config.m_ClEyeWheelLastEmoteTimeout != 0 && Client()->LocalTime() - m_LastEmoteTime > g_Config.m_ClEyeWheelLastEmoteTimeout)
+		m_LastEmote = -1;
 
 	if(!m_Active)
 	{
@@ -144,6 +149,11 @@ void CEmoticon::OnRender()
 		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * (float)NUM_EMOTICONS);
 	else if(length(m_SelectorMouse) > 40.0f)
 		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * (float)NUM_EMOTES);
+	else if(g_Config.m_ClEyeWheelMouseReset && m_LastEmote != -1)
+		m_SelectedEmote = m_LastEmote;
+
+	if(length(m_SelectorMouse) > 40.0f)
+		m_LastEmote = -1; // leaving the center deselects the remembered last emote
 
 	const vec2 ScreenCenter = Screen.Center();
 
@@ -201,13 +211,38 @@ void CEmoticon::OnRender()
 		Graphics()->QuadsEnd();
 	}
 	else
+	{
 		m_SelectedEyeEmote = -1;
+
+		if(m_LastEmote != -1)
+		{
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0, 0, 0, 0.3f);
+			Graphics()->DrawCircle(ScreenCenter.x, ScreenCenter.y, 36.0f, 64);
+			Graphics()->QuadsEnd();
+		}
+	}
+
+	if(m_LastEmote != -1)
+	{
+		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[m_LastEmote]);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		Graphics()->QuadsBegin();
+		const float Size = m_SelectedEmote == m_LastEmote ? 48.0f : 32.0f;
+		IGraphics::CQuadItem QuadItem(ScreenCenter.x, ScreenCenter.y, Size, Size);
+		Graphics()->QuadsDraw(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+	}
 
 	RenderTools()->RenderCursor(ScreenCenter + m_SelectorMouse, 24.0f);
 }
 
 void CEmoticon::Emote(int Emoticon)
 {
+	m_LastEmote = Emoticon;
+	m_LastEmoteTime = Client()->LocalTime();
+
 	CNetMsg_Cl_Emoticon Msg;
 	Msg.m_Emoticon = Emoticon;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);

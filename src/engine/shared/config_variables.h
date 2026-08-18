@@ -94,6 +94,7 @@ MACRO_CONFIG_INT(ClShowfps, cl_showfps, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, 
 MACRO_CONFIG_INT(ClShowpred, cl_showpred, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show ingame prediction time in milliseconds")
 MACRO_CONFIG_INT(ClEyeWheel, cl_eye_wheel, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show eye wheel along together with emotes")
 MACRO_CONFIG_INT(ClEyeWheelMouseReset, cl_eye_wheel_mouse_reset, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reset mouse cursor position when opening the emote selector")
+MACRO_CONFIG_INT(ClEyeWheelLastEmoteTimeout, cl_eye_wheel_last_emote_timeout, 10, 0, 999999, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How long in seconds the last selected emote stays selectable in the center of the emote wheel, 0 to never expire")
 MACRO_CONFIG_INT(ClEyeDuration, cl_eye_duration, 999999, 1, 999999, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How long the eyes emotes last")
 MACRO_CONFIG_INT(ClFreezeStars, cl_freeze_stars, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show old star particles for frozen tees")
 
