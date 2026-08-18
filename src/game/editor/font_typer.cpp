@@ -45,8 +45,23 @@ void CFontTyper::SetTile(ivec2 Pos, unsigned char Index, const std::shared_ptr<C
 void CFontTyper::PlaceTile(unsigned char Index, const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	CState &State = Map()->m_FontTyperState;
-	if(Index != 0 && State.m_TextIndex.x < State.m_LineStart)
+	// handle cursor behind right column and do line break
+	if(State.m_TextIndex.x == pLayer->m_Width)
+	{
+		if(Index == 0)
+			return;
+		State.m_TextIndex.x = State.m_LineStart;
+		State.m_TextIndex.y++;
+
+		// corner case
+		if(State.m_TextIndex.y >= pLayer->m_Height)
+			return;
+	}
+	// handle writing left of the line start
+	else if(Index != 0 && State.m_TextIndex.x < State.m_LineStart)
+	{
 		State.m_LineStart = State.m_TextIndex.x;
+	}
 	SetTile(State.m_TextIndex, Index, pLayer);
 	State.m_TextIndex.x++;
 }
@@ -135,7 +150,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		State.m_TextIndex.y--;
 	if(Event.m_Key == KEY_DOWN)
 		State.m_TextIndex.y++;
-	State.m_TextIndex.x = std::clamp(State.m_TextIndex.x, 0, pLayer->m_Width - 1);
+	State.m_TextIndex.x = std::clamp(State.m_TextIndex.x, 0, pLayer->m_Width);
 	State.m_TextIndex.y = std::clamp(State.m_TextIndex.y, 0, pLayer->m_Height - 1);
 	m_CursorRenderTime = time_get_nanoseconds() - 501ms;
 	float Dist = distance(
@@ -221,7 +236,7 @@ void CFontTyper::Render()
 		return;
 	}
 	State.m_pLastLayer = pLayer;
-	State.m_TextIndex.x = std::clamp(State.m_TextIndex.x, 0, pLayer->m_Width - 1);
+	State.m_TextIndex.x = std::clamp(State.m_TextIndex.x, 0, pLayer->m_Width);
 	State.m_TextIndex.y = std::clamp(State.m_TextIndex.y, 0, pLayer->m_Height - 1);
 
 	const auto CurTime = time_get_nanoseconds();
