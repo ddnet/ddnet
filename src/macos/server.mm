@@ -26,7 +26,11 @@
 {
 	NSData *pData = [[[notification userInfo] objectForKey: NSFileHandleNotificationDataItem] retain];
 	NSString *pString = [[NSString alloc] initWithData: pData encoding: NSASCIIStringEncoding];
-	NSAttributedString *pAttrStr = [[NSAttributedString alloc] initWithString: pString];
+	NSDictionary *pAttributes = @{
+		NSForegroundColorAttributeName: [NSColor whiteColor],
+		NSFontAttributeName: [NSFont monospacedSystemFontOfSize: [NSFont systemFontSize] weight: NSFontWeightRegular],
+	};
+	NSAttributedString *pAttrStr = [[NSAttributedString alloc] initWithString: pString attributes: pAttributes];
 
 	[[self textStorage] appendAttributedString: pAttrStr];
 	int length = [[self textStorage] length];
@@ -97,6 +101,7 @@ void runServer()
 
 	pView = [[[ServerView alloc] initWithFrame: GraphicsRect] autorelease];
 	[pView setEditable: NO];
+	[pView setBackgroundColor: [NSColor blackColor]];
 	[pView setRulerVisible: YES];
 
 	[pWindow setContentView: pView];
