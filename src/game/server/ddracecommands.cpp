@@ -90,7 +90,7 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
-	int Victim = pResult->GetVictim();
+	int Victim = pResult->GetVictim(0);
 
 	if(pSelf->m_apPlayers[Victim])
 	{
@@ -462,8 +462,9 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
-	int Tele = pResult->NumArguments() == 2 ? pResult->GetInteger(0) : pResult->m_ClientId;
-	int TeleTo = pResult->NumArguments() ? pResult->GetInteger(pResult->NumArguments() - 1) : pResult->m_ClientId;
+	const bool HasSource = pResult->NumArguments() == 2;
+	int Tele = HasSource ? pResult->GetVictim(0) : pResult->m_ClientId;
+	int TeleTo = pResult->NumArguments() ? pResult->GetVictim(HasSource ? 1 : 0) : pResult->m_ClientId;
 	int AuthLevel = pSelf->Server()->GetAuthedState(pResult->m_ClientId);
 
 	if(Tele != pResult->m_ClientId && AuthLevel < g_Config.m_SvTeleOthersAuthLevel)
@@ -508,7 +509,7 @@ void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
+	int Victim = pResult->GetVictim(0);
 	int Seconds = 0;
 	if(pResult->NumArguments() > 1)
 		Seconds = std::clamp(pResult->GetInteger(1), 0, 360);
@@ -555,7 +556,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	const int Target = pResult->GetVictim();
+	const int Target = pResult->GetVictim(0);
 	CPlayer *pPlayer = pSelf->m_apPlayers[Target];
 	if(!pPlayer)
 		return;
@@ -578,7 +579,7 @@ void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	auto *pController = pSelf->m_pController;
 
-	const int Target = pResult->GetVictim();
+	const int Target = pResult->GetVictim(0);
 	if(!pSelf->m_apPlayers[Target])
 		return;
 
