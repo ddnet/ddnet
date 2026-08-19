@@ -15,6 +15,8 @@
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 
+#include <utility>
+
 /*
 	Usage: map_convert_07 <source map filepath> <dest map filepath>
 */
@@ -23,8 +25,7 @@ static CDataFileReader g_DataReader;
 static CDataFileWriter g_DataWriter;
 
 // global new image data (set by ReplaceImageItem)
-static int g_aNewDataSize[MAX_MAPIMAGES];
-static void *g_apNewData[MAX_MAPIMAGES];
+static CImageInfo g_aNewImageInfos[MAX_MAPIMAGES];
 
 static int g_Index = 0;
 static int g_NextDataItemId = -1;
@@ -99,8 +100,7 @@ static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage 
 	pNewImgItem->m_External = false;
 	pNewImgItem->m_ImageData = g_NextDataItemId++;
 
-	g_apNewData[g_Index] = ImgInfo.m_pData;
-	g_aNewDataSize[g_Index] = ImgInfo.DataSize();
+	g_aNewImageInfos[g_Index] = std::move(ImgInfo);
 	g_Index++;
 
 	return (void *)pNewImgItem;
@@ -221,7 +221,7 @@ int main(int argc, const char **argv)
 
 	for(int Index = 0; Index < g_Index; Index++)
 	{
-		g_DataWriter.AddData(g_aNewDataSize[Index], g_apNewData[Index]);
+		g_DataWriter.AddData(g_aNewImageInfos[Index].DataSize(), g_aNewImageInfos[Index].m_pData);
 	}
 
 	g_DataReader.Close();
