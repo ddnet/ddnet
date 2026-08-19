@@ -708,7 +708,7 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 		if(ProcessSpamProtection(SpamProtectionClientId))
 			return;
 
-	char aText[256];
+	char aText[MAX_CHAT_LENGTH];
 	str_copy(aText, pText);
 	const char *pTeamString = Team == TEAM_ALL ? "chat" : "teamchat";
 	if(ChatterClientId == -1)
@@ -2338,7 +2338,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 		else if(pEnd == nullptr)
 			pEnd = pStrOld;
 
-		if(++Length >= 256)
+		if(++Length >= MAX_CHAT_LENGTH)
 		{
 			*(const_cast<char *>(p)) = 0;
 			break;

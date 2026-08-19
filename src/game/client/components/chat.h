@@ -29,10 +29,9 @@ class CChat : public CComponent
 	enum
 	{
 		MAX_LINES = 64,
-		MAX_LINE_LENGTH = 256
 	};
 
-	CLineInputBuffered<MAX_LINE_LENGTH> m_Input;
+	CLineInputBuffered<MAX_CHAT_LENGTH> m_Input;
 	class CLine
 	{
 	public:
@@ -48,7 +47,7 @@ class CChat : public CComponent
 		bool m_Whisper;
 		int m_NameColor;
 		char m_aName[64];
-		char m_aText[MAX_LINE_LENGTH];
+		char m_aText[MAX_CHAT_LENGTH];
 		bool m_Friend;
 		bool m_Highlighted;
 		std::optional<ColorRGBA> m_CustomColor;
@@ -95,10 +94,10 @@ class CChat : public CComponent
 	bool m_Show;
 	bool m_CompletionUsed;
 	int m_CompletionChosen;
-	char m_aCompletionBuffer[MAX_LINE_LENGTH];
+	char m_aCompletionBuffer[MAX_CHAT_LENGTH];
 	int m_PlaceholderOffset;
 	int m_PlaceholderLength;
-	static char ms_aDisplayText[MAX_LINE_LENGTH];
+	static char ms_aDisplayText[MAX_CHAT_LENGTH];
 	class CRateablePlayer
 	{
 	public:
@@ -141,7 +140,7 @@ class CChat : public CComponent
 	int64_t m_LastChatSend;
 	int64_t m_aLastSoundPlayed[CHAT_NUM];
 	bool m_IsInputCensored;
-	char m_aCurrentInputText[MAX_LINE_LENGTH];
+	char m_aCurrentInputText[MAX_CHAT_LENGTH];
 	bool m_EditingNewLine;
 
 	bool m_ServerSupportsCommandInfo;

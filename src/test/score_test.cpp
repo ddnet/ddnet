@@ -364,6 +364,96 @@ TEST_P(TeamScore, RankUpdates)
 			"---------------------------------"});
 }
 
+// A team of MAX_CLIENTS players with names of maximum length, which is the
+// worst case for the chat messages that show team ranks.
+struct BigTeamScore : public Score // NOLINT(readability-identifier-naming)
+{
+	void SetUp() override
+	{
+		str_copy(g_Config.m_SvSqlServerName, "USA");
+		CSqlTeamScoreData TeamScoreData;
+		str_copy(TeamScoreData.m_aMap, "Kobra 3");
+		str_copy(TeamScoreData.m_aGameUuid, "8d300ecf-5873-4297-bee5-95668fdff320");
+		TeamScoreData.m_Size = MAX_CLIENTS;
+		TeamScoreData.m_Time = 100.0f;
+		str_copy(TeamScoreData.m_aTimestamp, "2021-11-24 19:24:08");
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			str_format(TeamScoreData.m_aaNames[i], sizeof(TeamScoreData.m_aaNames[i]), "playertee12_%03d", i);
+			ASSERT_EQ(str_length(TeamScoreData.m_aaNames[i]), MAX_NAME_LENGTH - 1);
+		}
+		ASSERT_TRUE(CScoreWorker::SaveTeamScore(m_pConn, &TeamScoreData, Write::NORMAL, m_aError, sizeof(m_aError))) << m_aError;
+
+		CSqlScoreData ScoreData(std::make_shared<CScorePlayerResult>());
+		str_copy(ScoreData.m_aMap, "Kobra 3");
+		str_copy(ScoreData.m_aGameUuid, "8d300ecf-5873-4297-bee5-95668fdff320");
+		ScoreData.m_Time = 100.0f;
+		str_copy(ScoreData.m_aTimestamp, "2021-11-24 19:24:08");
+		std::fill(std::begin(ScoreData.m_aCurrentTimeCp), std::end(ScoreData.m_aCurrentTimeCp), 0);
+		str_copy(ScoreData.m_aRequestingPlayer, TeamScoreData.m_aaNames[0]);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			str_copy(ScoreData.m_aName, TeamScoreData.m_aaNames[i]);
+			ScoreData.m_ClientId = i;
+			ASSERT_TRUE(CScoreWorker::SaveScore(m_pConn, &ScoreData, Write::NORMAL, m_aError, sizeof(m_aError))) << m_aError;
+		}
+
+		str_copy(m_PlayerRequest.m_aMap, "Kobra 3");
+		str_copy(m_PlayerRequest.m_aRequestingPlayer, TeamScoreData.m_aaNames[0]);
+		str_copy(m_PlayerRequest.m_aName, TeamScoreData.m_aaNames[0]);
+		str_copy(m_PlayerRequest.m_aServer, "USA");
+		m_PlayerRequest.m_Offset = 0;
+	}
+
+	// Messages longer than this are truncated before they reach the client.
+	void ExpectMessagesFitIntoChat()
+	{
+		for(const auto &aMessage : m_pPlayerResult->m_Data.m_aaMessages)
+		{
+			EXPECT_LT(str_length(aMessage), MAX_CHAT_LENGTH) << aMessage;
+		}
+	}
+};
+
+TEST_P(BigTeamScore, TeamRankShortensNames)
+{
+	ASSERT_TRUE(CScoreWorker::ShowTeamRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectMessagesFitIntoChat();
+
+	// The names that don't fit into the chat message are summarized.
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[0],
+		"1. playertee12_000, playertee12_001, playertee12_002, playertee12_003, "
+		"playertee12_004, playertee12_005, playertee12_006, playertee12_007, "
+		"playertee12_008, playertee12_009 & 118 more Team time: 01:40.00, "
+		"better than 100%, requested by playertee12_000");
+}
+
+TEST_P(BigTeamScore, TeamTop5ShortensNames)
+{
+	g_Config.m_SvRegionalRankings = false;
+	ASSERT_TRUE(CScoreWorker::ShowTeamTop5(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectMessagesFitIntoChat();
+
+	// Five teams can't be wrapped, so the names that don't fit are summarized.
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[1],
+		"1. playertee12_000, playertee12_001, playertee12_002, playertee12_003, "
+		"playertee12_004, playertee12_005, playertee12_006, playertee12_007, "
+		"playertee12_008, playertee12_009, playertee12_010, playertee12_011, "
+		"playertee12_012 & 115 more Team Time: 01:40.00");
+}
+
+TEST_P(BigTeamScore, PlayerTeamTop5ShortensNames)
+{
+	ASSERT_TRUE(CScoreWorker::ShowPlayerTeamTop5(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectMessagesFitIntoChat();
+
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[1],
+		"1. playertee12_000, playertee12_001, playertee12_002, playertee12_003, "
+		"playertee12_004, playertee12_005, playertee12_006, playertee12_007, "
+		"playertee12_008, playertee12_009, playertee12_010, playertee12_011, "
+		"playertee12_012 & 115 more Team Time: 01:40.00");
+}
+
 struct MapInfo : public Score // NOLINT(readability-identifier-naming)
 {
 	MapInfo()
@@ -672,6 +762,7 @@ static auto g_TestValues{
 
 INSTANTIATE(SingleScore);
 INSTANTIATE(TeamScore);
+INSTANTIATE(BigTeamScore);
 INSTANTIATE(MapInfo);
 INSTANTIATE(MapVote);
 INSTANTIATE(Points);
