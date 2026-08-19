@@ -155,7 +155,9 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	if(str_isallnum(pStr))
 	{
 		int ClientId = str_toint(pStr);
-		if(ClientId < 0 || ClientId >= MAX_CLIENTS || pThis->Server()->m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
+		if(!pThis->Server()->ClientUsesRealClientIds(pResult->m_ClientId))
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (use a more recent DDNet client)");
+		else if(ClientId < 0 || ClientId >= MAX_CLIENTS || pThis->Server()->m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid client id)");
 		else
 			pThis->BanAddr(pThis->Server()->ClientAddr(ClientId), Minutes * 60, pReason, false);
@@ -2233,6 +2235,11 @@ void CServer::OnNetMsgRconAuth(int ClientId, const char *pName, const char *pPw,
 			}
 			}
 
+			if(!ClientUsesRealClientIds(ClientId))
+			{
+				SendRconLine(ClientId, "Your client does not see the real client IDs of this server. Use a more recent DDNet client.");
+			}
+
 			// DDRace
 			GameServer()->OnSetAuthed(ClientId, AuthLevel);
 		}
@@ -3655,11 +3662,11 @@ void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Kicked (%s)", pResult->GetString(1));
-		((CServer *)pUser)->Kick(pResult->GetVictim(), aBuf);
+		((CServer *)pUser)->Kick(pResult->GetVictim(0), aBuf);
 	}
 	else
 	{
-		((CServer *)pUser)->Kick(pResult->GetVictim(), "Kicked by console");
+		((CServer *)pUser)->Kick(pResult->GetVictim(0), "Kicked by console");
 	}
 }
 
@@ -3746,6 +3753,9 @@ bool CServer::CanClientUseCommandCallback(int ClientId, const IConsole::ICommand
 
 bool CServer::CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
 {
+	// make sure we don't affect the wrong client, disallow id targeting commands when a moderator is using id translation
+	if(pCommand->TakesClientId() && !ClientUsesRealClientIds(ClientId))
+		return false;
 	if(pCommand->Flags() & CFGFLAG_CHAT)
 		return true;
 	if(pCommand->Flags() & CMDFLAG_PRACTICE)
