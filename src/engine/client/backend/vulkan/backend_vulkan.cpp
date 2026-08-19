@@ -1,3 +1,6 @@
+#include <engine/image.h>
+
+#include <cstdint>
 #if defined(CONF_BACKEND_VULKAN)
 
 #include <base/dbg.h>
@@ -915,6 +918,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	uint32_t m_MinUniformAlign;
 
 	std::vector<uint8_t> m_vReadPixelHelper;
+	// avoid having to allocate and free the buffer for every screenshot
 	std::vector<uint8_t> m_vScreenshotHelper;
 
 	SDeviceMemoryBlock m_GetPresentedImgDataHelperMem;
@@ -6938,13 +6942,22 @@ public:
 		uint32_t Height;
 		CImageInfo::EImageFormat Format;
 
-		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, true, {}))
+		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, false, {}))
 		{
+			dbg_assert(Format == CImageInfo::FORMAT_RGBA, "Vulkan backend returned unexpected image format");
+
 			pCommand->m_pImage->m_Width = (int)Width;
 			pCommand->m_pImage->m_Height = (int)Height;
-			pCommand->m_pImage->m_Format = Format;
+			pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGB;
 			pCommand->m_pImage->Allocate();
-			mem_copy(pCommand->m_pImage->m_pData, m_vScreenshotHelper.data(), pCommand->m_pImage->DataSize());
+			const unsigned char *pScreenshotData = m_vScreenshotHelper.data();
+			uint8_t *pImageData = pCommand->m_pImage->m_pData;
+
+			// RGBA to RGB
+			for(size_t PixelIndex = 0; PixelIndex < static_cast<size_t>(Width) * Height; ++PixelIndex)
+			{
+				mem_copy(&pImageData[PixelIndex * 3], &pScreenshotData[PixelIndex * 4], 3);
+			}
 		}
 		else
 		{

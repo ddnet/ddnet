@@ -1017,33 +1017,32 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 
 	pCommand->m_pImage->m_Width = w;
 	pCommand->m_pImage->m_Height = h;
-	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGBA;
+	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGB;
 	pCommand->m_pImage->Allocate();
 
 	uint8_t *pPixelData = pCommand->m_pImage->m_pData;
 
 	// we create a tmp row to use when we are flipping the texture
-	std::vector<uint8_t> vTmpRow(w * 4);
+	size_t RowByteSize = static_cast<size_t>(w) * 3;
+	std::vector<uint8_t> vTmpRow(RowByteSize);
 	uint8_t *pTempRow = vTmpRow.data();
 
 	// fetch the pixels
 	GLint Alignment;
 	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pPixelData);
+	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
 	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 
 	// flip the pixel because opengl works from bottom left corner
 	for(int y = 0; y < h / 2; y++)
 	{
-		mem_copy(pTempRow, pPixelData + y * w * 4, w * 4);
-		mem_copy(pPixelData + y * w * 4, pPixelData + (h - y - 1) * w * 4, w * 4);
-		mem_copy(pPixelData + (h - y - 1) * w * 4, pTempRow, w * 4);
-		for(int x = 0; x < w; x++)
-		{
-			pPixelData[y * w * 4 + x * 4 + 3] = 255;
-			pPixelData[(h - y - 1) * w * 4 + x * 4 + 3] = 255;
-		}
+		uint8_t *pTopRow = pPixelData + y * RowByteSize;
+		uint8_t *pBottomRow = pPixelData + (h - 1 - y) * RowByteSize;
+
+		mem_copy(pTempRow, pTopRow, RowByteSize);
+		mem_copy(pTopRow, pBottomRow, RowByteSize);
+		mem_copy(pBottomRow, pTempRow, RowByteSize);
 	}
 }
 
