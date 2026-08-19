@@ -136,8 +136,7 @@ void CTeamrank::FormatNames(char *pBuf, int BufSize) const
 
 void CTeamrank::FormatTeamTopLine(char *pMessage, int MessageSize, int Rank, const char *pTime) const
 {
-	// Format without any names first to measure how much room the names have
-	// in the chat message they share with the rank and the time.
+	// format without names to measure remaining space for names
 	const int EmptyLength = str_format(pMessage, MessageSize, "%d. %s Team Time: %s", Rank, "", pTime);
 	char aFormattedNames[MAX_TEAM_NAMES_LENGTH];
 	FormatNames(aFormattedNames, MAX_CHAT_LENGTH - EmptyLength);
@@ -1060,7 +1059,7 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 		{
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
 
-			// Format without any names first to measure how much room the names have.
+			// format without names to measure remaining space for names
 			const int EmptyLength = str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
 				"%d. %s Team time: %s, better than %d%%, requested by %s",
 				Rank, "", aBuf, BetterThanPercent, pData->m_aRequestingPlayer);
@@ -1761,7 +1760,13 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char aSaveId[UUID_MAXSTRSIZE];
 	FormatUuid(pResult->m_SaveId, aSaveId, UUID_MAXSTRSIZE);
 
-	char *pSaveState = pResult->m_SavedTeam.GetString();
+	const char *pSaveState = pResult->m_SavedTeam.GetString();
+	if(!pSaveState)
+	{
+		pResult->m_Status = CScoreSaveResult::SAVE_FAILED;
+		str_copy(pResult->m_aMessage, "Your team is too large to save");
+		return true;
+	}
 	char aBuf[65536];
 
 	dbg_msg("score/dbg", "code=%s failure=%d", pData->m_aCode, (int)w);
@@ -1886,7 +1891,7 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 		}
 	}
 
-	char aSaveString[65536];
+	char aSaveString[MAX_SAVE_STRING_LENGTH];
 	pSqlServer->GetString(1, aSaveString, sizeof(aSaveString));
 	int Num = pResult->m_SavedTeam.FromString(aSaveString);
 

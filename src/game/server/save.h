@@ -35,6 +35,12 @@ enum class ESaveResult
 	DRAGGER_ACTIVE
 };
 
+enum
+{
+	MAX_SAVE_TEE_STRING_LENGTH = 2048,
+	MAX_SAVE_STRING_LENGTH = 65536,
+};
+
 class CSaveTee
 {
 public:
@@ -64,7 +70,7 @@ public:
 private:
 	int m_ClientId;
 
-	char m_aString[2048];
+	char m_aString[MAX_SAVE_TEE_STRING_LENGTH];
 	char m_aName[16];
 
 	int m_Alive;
@@ -174,9 +180,9 @@ private:
 class CSaveTeam
 {
 public:
-	CSaveTeam();
 	~CSaveTeam();
-	char *GetString();
+	// Returns nullptr if the team is too large to be saved
+	const char *GetString();
 	int GetMembersCount() const { return m_MembersCount; }
 	// MatchPlayers has to be called afterwards
 	int FromString(const char *pString);
@@ -193,7 +199,7 @@ public:
 private:
 	CCharacter *MatchCharacter(CGameContext *pGameServer, int ClientId, int SaveId, bool KeepCurrentCharacter) const;
 
-	char m_aString[65536];
+	char m_aString[MAX_SAVE_STRING_LENGTH];
 
 	struct SSimpleSwitchers
 	{
