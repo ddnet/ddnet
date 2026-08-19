@@ -101,9 +101,12 @@ public:
 			 * Skin failed to be downloaded because it could not be found.
 			 */
 			NOT_FOUND,
+			NUM_STATES,
 		};
 
-		CSkinContainer(CSkinContainer &&Other) = default;
+		// The default move constructor is no longer safe because the destructor uses m_pSkins
+		// to decrement the state counter; therefore the moved-from object's m_pSkins must be nulled.
+		CSkinContainer(CSkinContainer &&Other) noexcept;
 		CSkinContainer(CSkins *pSkins, const char *pName, EType Type, int StorageType);
 		~CSkinContainer();
 
@@ -300,6 +303,10 @@ private:
 	 * Only contains pending and loaded skins as only these are unloaded.
 	 */
 	std::list<std::string_view> m_SkinsUsageList;
+
+	size_t m_aStateCounts[(int)CSkinContainer::EState::NUM_STATES] = {};
+	std::list<CSkinContainer *> m_PendingSkins;
+	std::list<CSkinContainer *> m_LoadingSkins;
 
 	CSkinList m_SkinList;
 	std::set<std::string> m_Favorites;

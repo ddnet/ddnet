@@ -53,6 +53,28 @@ CSkins::CSkinContainer::CSkinContainer(CSkins *pSkins, const char *pName, EType 
 	m_Vanilla = IsVanillaSkin(m_aName);
 	m_Special = IsSpecialSkin(m_aName);
 	m_AlwaysLoaded = m_Vanilla; // Vanilla skins are loaded immediately and not unloaded
+
+	m_pSkins->m_aStateCounts[(int)m_State]++;
+}
+
+CSkins::CSkinContainer::CSkinContainer(CSkinContainer &&Other) noexcept :
+	m_pSkins(std::exchange(Other.m_pSkins, nullptr)),
+	m_Type(Other.m_Type),
+	m_StorageType(Other.m_StorageType),
+	m_Vanilla(Other.m_Vanilla),
+	m_Special(Other.m_Special),
+	m_AlwaysLoaded(Other.m_AlwaysLoaded),
+	m_State(Other.m_State),
+	m_pSkin(std::move(Other.m_pSkin)),
+	m_pLoadJob(std::move(Other.m_pLoadJob)),
+	m_FirstLoadRequest(std::move(Other.m_FirstLoadRequest)),
+	m_LastLoadRequest(std::move(Other.m_LastLoadRequest)),
+	m_UsageEntryIterator(std::move(Other.m_UsageEntryIterator))
+{
+	// The default move constructor is no longer safe because the destructor now uses
+	// m_pSkins to decrement the state counter. We null the moved-from object's m_pSkins
+	// so its destructor becomes a no-op for the counter.
+	str_copy(m_aName, Other.m_aName);
 }
 
 CSkins::CSkinContainer::~CSkinContainer()
@@ -60,6 +82,12 @@ CSkins::CSkinContainer::~CSkinContainer()
 	if(m_pLoadJob)
 	{
 		m_pLoadJob->Abort();
+	}
+	if(m_pSkins)
+	{
+		m_pSkins->m_aStateCounts[(int)m_State]--;
+		m_pSkins->m_PendingSkins.remove(this);
+		m_pSkins->m_LoadingSkins.remove(this);
 	}
 }
 
@@ -96,7 +124,7 @@ void CSkins::CSkinContainer::RequestLoad()
 		}
 		else if(Now - m_FirstLoadRequest.value() > MIN_REQUESTED_TIME_FOR_PENDING)
 		{
-			m_State = EState::PENDING;
+			SetState(EState::PENDING);
 		}
 	}
 	else if(m_State == EState::PENDING ||
@@ -139,6 +167,32 @@ CSkins::CSkinContainer::EState CSkins::CSkinContainer::DetermineInitialState() c
 
 void CSkins::CSkinContainer::SetState(EState State)
 {
+	dbg_assert(State != EState::NUM_STATES, "NUM_STATES is not a valid state");
+
+	const EState OldState = m_State;
+	if(OldState != State)
+	{
+		m_pSkins->m_aStateCounts[(int)OldState]--;
+		m_pSkins->m_aStateCounts[(int)State]++;
+
+		if(OldState == EState::PENDING)
+		{
+			m_pSkins->m_PendingSkins.remove(this);
+		}
+		if(OldState == EState::LOADING)
+		{
+			m_pSkins->m_LoadingSkins.remove(this);
+		}
+		if(State == EState::PENDING)
+		{
+			m_pSkins->m_PendingSkins.push_back(this);
+		}
+		if(State == EState::LOADING)
+		{
+			m_pSkins->m_LoadingSkins.push_back(this);
+		}
+	}
+
 	m_State = State;
 
 	if(m_State == EState::PENDING ||
@@ -594,16 +648,21 @@ void CSkins::UpdateUnloadSkins(CSkinLoadingStats &Stats)
 
 void CSkins::UpdateStartLoading(CSkinLoadingStats &Stats)
 {
-	for(auto &[_, pSkinContainer] : m_Skins)
+	auto It = m_PendingSkins.begin();
+	while(It != m_PendingSkins.end())
 	{
 		if(Stats.m_NumPending == 0 || Stats.m_NumLoading + Stats.m_NumLoaded >= (size_t)g_Config.m_ClSkinsLoadedMax)
 		{
 			break;
 		}
+
+		CSkinContainer *pSkinContainer = *It;
 		if(pSkinContainer->m_State != CSkinContainer::EState::PENDING)
 		{
+			++It;
 			continue;
 		}
+
 		switch(pSkinContainer->Type())
 		{
 		case CSkinContainer::EType::LOCAL:
@@ -616,36 +675,54 @@ void CSkins::UpdateStartLoading(CSkinLoadingStats &Stats)
 			dbg_assert_failed("pSkinContainer->Type() invalid");
 		}
 		Engine()->AddJob(pSkinContainer->m_pLoadJob);
+
+		// SetState will remove from m_PendingSkins and add to m_LoadingSkins.
+		// Save next iterator before modifying the list.
+		auto Next = It;
+		++Next;
 		pSkinContainer->SetState(CSkinContainer::EState::LOADING);
 		Stats.m_NumPending--;
 		Stats.m_NumLoading++;
+		It = Next;
 	}
 }
 
 void CSkins::UpdateFinishLoading(CSkinLoadingStats &Stats, std::chrono::nanoseconds StartTime, std::chrono::nanoseconds MaxTime)
 {
-	for(auto &[_, pSkinContainer] : m_Skins)
+	auto It = m_LoadingSkins.begin();
+	while(It != m_LoadingSkins.end())
 	{
 		if(Stats.m_NumLoading == 0)
 		{
 			break;
 		}
+
+		CSkinContainer *pSkinContainer = *It;
 		if(pSkinContainer->m_State != CSkinContainer::EState::LOADING)
 		{
+			++It;
 			continue;
 		}
 		dbg_assert(pSkinContainer->m_pLoadJob != nullptr, "Skin container in loading state must have a load job");
 		if(!pSkinContainer->m_pLoadJob->Done())
 		{
+			++It;
 			continue;
 		}
 		Stats.m_NumLoading--;
 		if(pSkinContainer->m_pLoadJob->State() == IJob::STATE_DONE && pSkinContainer->m_pLoadJob->m_Data.m_Info.m_pData)
 		{
-			LoadSkinFinish(pSkinContainer.get(), pSkinContainer->m_pLoadJob->m_Data);
+			// Save next iterator before LoadSkinFinish modifies m_LoadingSkins
+			auto Next = It;
+			++Next;
+
+			LoadSkinFinish(pSkinContainer, pSkinContainer->m_pLoadJob->m_Data);
 			GameClient()->OnSkinUpdate(pSkinContainer->Name());
 			pSkinContainer->m_pLoadJob = nullptr;
 			Stats.m_NumLoaded++;
+
+			It = Next;
+
 			if(time_get_nanoseconds() - StartTime >= MaxTime)
 			{
 				// Avoid using too much frame time for loading skins
@@ -654,6 +731,10 @@ void CSkins::UpdateFinishLoading(CSkinLoadingStats &Stats, std::chrono::nanoseco
 		}
 		else
 		{
+			// Save next iterator before SetState modifies m_LoadingSkins
+			auto Next = It;
+			++Next;
+
 			if(pSkinContainer->m_pLoadJob->State() == IJob::STATE_DONE && pSkinContainer->m_pLoadJob->m_NotFound)
 			{
 				pSkinContainer->SetState(CSkinContainer::EState::NOT_FOUND);
@@ -665,6 +746,8 @@ void CSkins::UpdateFinishLoading(CSkinLoadingStats &Stats, std::chrono::nanoseco
 				Stats.m_NumError++;
 			}
 			pSkinContainer->m_pLoadJob = nullptr;
+
+			It = Next;
 		}
 	}
 }
@@ -711,30 +794,12 @@ void CSkins::Refresh(TSkinLoadedCallback &&SkinLoadedCallback)
 CSkins::CSkinLoadingStats CSkins::LoadingStats() const
 {
 	CSkinLoadingStats Stats;
-	for(const auto &[_, pSkinContainer] : m_Skins)
-	{
-		switch(pSkinContainer->m_State)
-		{
-		case CSkinContainer::EState::UNLOADED:
-			Stats.m_NumUnloaded++;
-			break;
-		case CSkinContainer::EState::PENDING:
-			Stats.m_NumPending++;
-			break;
-		case CSkinContainer::EState::LOADING:
-			Stats.m_NumLoading++;
-			break;
-		case CSkinContainer::EState::LOADED:
-			Stats.m_NumLoaded++;
-			break;
-		case CSkinContainer::EState::ERROR:
-			Stats.m_NumError++;
-			break;
-		case CSkinContainer::EState::NOT_FOUND:
-			Stats.m_NumNotFound++;
-			break;
-		}
-	}
+	Stats.m_NumUnloaded = m_aStateCounts[(int)CSkinContainer::EState::UNLOADED];
+	Stats.m_NumPending = m_aStateCounts[(int)CSkinContainer::EState::PENDING];
+	Stats.m_NumLoading = m_aStateCounts[(int)CSkinContainer::EState::LOADING];
+	Stats.m_NumLoaded = m_aStateCounts[(int)CSkinContainer::EState::LOADED];
+	Stats.m_NumError = m_aStateCounts[(int)CSkinContainer::EState::ERROR];
+	Stats.m_NumNotFound = m_aStateCounts[(int)CSkinContainer::EState::NOT_FOUND];
 	return Stats;
 }
 
