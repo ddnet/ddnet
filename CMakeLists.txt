@@ -184,8 +184,6 @@ if(NOT(CMAKE_BUILD_TYPE MATCHES "^(Release|Debug|RelWithDebInfo|MinSizeRel)$"))
   message(WARNING "Unknown CMAKE_BUILD_TYPE, should be one of Release, Debug, RelWithDebInfo or MinSizeRel")
 endif()
 
-set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
-
 if(IPO)
   include(CheckIPOSupported)
   check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output)
