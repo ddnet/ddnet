@@ -165,6 +165,12 @@ void CCharacterCore::Reset()
 	m_Jumps = 2;
 	m_TriggeredEvents = 0;
 
+	// m_ActiveWeapon is used to index m_aWeapons, leaving it uninitialized causes
+	// out of bounds accesses in the client prediction (CCharacter::Unfreeze() etc.)
+	m_ActiveWeapon = WEAPON_GUN;
+	for(CWeaponStat &Weapon : m_aWeapons)
+		Weapon = CWeaponStat{};
+
 	// DDNet Character
 	m_Solo = false;
 	m_Jetpack = false;
