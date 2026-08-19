@@ -89,6 +89,17 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) con
 	return ColorParse(m_apArgs[Index], DarkestLighting).value_or(ColorHSLA(0, 0, 0));
 }
 
+bool CConsole::CCommand::TakesClientId() const
+{
+	const char *pFormat = m_pParams;
+	for(char Param = *pFormat; Param != '\0'; Param = NextParam(pFormat))
+	{
+		if(Param == 'v')
+			return true;
+	}
+	return false;
+}
+
 void CConsole::CCommand::SetAccessLevel(EAccessLevel AccessLevel)
 {
 	m_AccessLevel = AccessLevel;
@@ -189,7 +200,8 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 	char *pStr = pResult->m_pArgsStart;
 	bool Optional = false;
 
-	pResult->ResetVictim();
+	pResult->ResetVictims();
+	unsigned VictimSlot = 0;
 
 	for(char Command = *pFormat; Command != '\0'; Command = NextParam(pFormat))
 	{
@@ -212,7 +224,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 			{
 				if(Command == 'v')
 				{
-					pResult->SetVictim("me");
+					pResult->SetVictim(VictimSlot, "me");
 					break;
 				}
 				Command = NextParam(pFormat);
@@ -268,7 +280,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 			// validate arguments
 			if(Command == 'v')
 			{
-				pResult->SetVictim(pResult->GetString(pResult->NumArguments() - 1));
+				pResult->SetVictim(VictimSlot++, pResult->GetString(pResult->NumArguments() - 1));
 			}
 			else if(Command == 'i')
 			{
@@ -598,32 +610,41 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 							m_pfnTeeHistorianCommandCallback(ClientId, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
 						}
 
-						if(Result.m_aSpecialVictim[0])
+						int FanOutSlot = -1;
+						std::vector<int> vFanOutIds;
+						for(unsigned Slot = 0; Slot < CResult::MAX_VICTIMS; Slot++)
 						{
+							if(!Result.m_aaSpecialVictims[Slot][0])
+								continue;
 							std::optional<std::vector<int>> Victims;
 							if(m_pfnGetVictimsCommandCallback)
+								Victims = m_pfnGetVictimsCommandCallback(ClientId, Result.m_aaSpecialVictims[Slot], m_pGetVictimsCommandUserData);
+							// at most one parameter may expand to multiple clients
+							if(!Victims.has_value() || (Victims->size() != 1 && FanOutSlot >= 0))
 							{
-								Victims = m_pfnGetVictimsCommandCallback(ClientId, Result.m_aSpecialVictim, m_pGetVictimsCommandUserData);
-							}
-							else
-							{
-								Victims = std::nullopt;
-							}
-
-							if(!Victims.has_value())
-							{
-								log_error("console", "Invalid victim '%s'", Result.m_aSpecialVictim);
+								log_error("console", "Invalid victim '%s'", Result.m_aaSpecialVictims[Slot]);
 								return;
 							}
-							for(const int VictimId : Victims.value())
+							if(Victims->size() == 1)
+								Result.SetVictim(Slot, Victims->front());
+							else
 							{
-								Result.SetVictim(VictimId);
-								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+								FanOutSlot = Slot;
+								vFanOutIds = std::move(Victims.value());
 							}
+						}
+
+						if(FanOutSlot < 0)
+						{
+							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 						}
 						else
 						{
-							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+							for(const int VictimId : vFanOutIds)
+							{
+								Result.SetVictim(FanOutSlot, VictimId);
+								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+							}
 						}
 
 						if(pCommand->m_Flags & CMDFLAG_TEST)
@@ -1140,34 +1161,39 @@ const IConsole::ICommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 
 std::unique_ptr<IConsole> CreateConsole(int FlagMask) { return std::make_unique<CConsole>(FlagMask); }
 
-int CConsole::CResult::GetVictim() const
+int CConsole::CResult::GetVictim(unsigned Slot) const
 {
-	dbg_assert(m_VictimId.has_value(), "m_VictimId has no value");
-	return m_VictimId.value();
+	dbg_assert(m_aVictimIds[Slot].has_value(), "victim %u has no value", Slot);
+	return m_aVictimIds[Slot].value();
 }
 
-void CConsole::CResult::ResetVictim()
+void CConsole::CResult::ResetVictims()
 {
-	m_VictimId = std::nullopt;
-	m_aSpecialVictim[0] = '\0';
+	for(unsigned Slot = 0; Slot < MAX_VICTIMS; Slot++)
+	{
+		m_aVictimIds[Slot] = std::nullopt;
+		m_aaSpecialVictims[Slot][0] = '\0';
+	}
 }
 
-void CConsole::CResult::SetVictim(int Victim)
+void CConsole::CResult::SetVictim(unsigned Slot, int Victim)
 {
+	dbg_assert(Slot < MAX_VICTIMS, "victim slot %u out of range", Slot);
 	dbg_assert(in_range(Victim, 0, MAX_CLIENTS - 1), "Victim ID %d out of range [0, %d]", Victim, MAX_CLIENTS - 1);
-	m_VictimId = Victim;
+	m_aVictimIds[Slot] = Victim;
 }
 
-void CConsole::CResult::SetVictim(const char *pVictim)
+void CConsole::CResult::SetVictim(unsigned Slot, const char *pVictim)
 {
+	dbg_assert(Slot < MAX_VICTIMS, "victim slot %u out of range", Slot);
 	int Value;
 	if(!str_toint(pVictim, &Value) || !in_range(Value, 0, MAX_CLIENTS - 1))
 	{
-		str_copy(m_aSpecialVictim, pVictim);
+		str_copy(m_aaSpecialVictims[Slot], pVictim);
 		return;
 	}
 
-	SetVictim(Value);
+	SetVictim(Slot, Value);
 }
 
 std::optional<ColorHSLA> CConsole::ColorParse(const char *pStr, float DarkestLighting)
