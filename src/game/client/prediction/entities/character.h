@@ -88,6 +88,9 @@ public:
 	int GetLastWeapon() const { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
 	int GetActiveWeapon() const { return m_Core.m_ActiveWeapon; }
+	// m_ActiveWeapon is -1 when no weapon is active, everything else has to be a
+	// valid index into m_aWeapons before it may be used as one
+	bool HasValidActiveWeapon() const { return m_Core.m_ActiveWeapon >= 0 && m_Core.m_ActiveWeapon < NUM_WEAPONS; }
 	void SetActiveWeapon(int ActiveWeapon);
 	CCharacterCore GetCore() { return m_Core; }
 	void SetCore(const CCharacterCore &Core) { m_Core = Core; }
