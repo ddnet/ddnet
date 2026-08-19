@@ -243,7 +243,8 @@ public:
 	void Quantize();
 
 	// DDRace
-	int m_Id;
+	// -1 means no player, assigned by the owner after Reset()
+	int m_Id = -1;
 	bool m_Reset;
 	CCollision *Collision() { return m_pCollision; }
 
@@ -281,7 +282,9 @@ public:
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
-	int m_HookedPlayer;
+	// Reset() passes this to SetHookedPlayer(), which reads it and m_Id before
+	// either has been assigned, so both need a defined value from the start
+	int m_HookedPlayer = -1;
 	static bool IsSwitchActiveCb(unsigned char Number, void *pUser);
 
 	FAntiPingInterfereCallback m_AntiPingInterfereCallback = [](int ClientId, bool DisallowReset) {};
