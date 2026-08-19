@@ -1766,7 +1766,7 @@ Unable to save the skin with a reserved name
 == %d/%d KiB (%.1f KiB/s)
 
 No local servers found (ports %d-%d)
-== Nie znaleziono serwerów LAN (porty %d-%d)
+== Nie znaleziono serwerów lokalnych (porty %d-%d)
 
 Example of usage
 == Przykładowe użycie
@@ -2677,18 +2677,18 @@ The extra menu with the given number is activated.
 
 [AntiPing: predict other players]
 Off
-== 
+== Wyłączone
 
 [AntiPing: predict other players]
 All
-== 
+== Wszystkich
 
 [AntiPing: predict other players]
 Interact
-== 
+== Interakcja
 
 Always predict frozen players
-== 
+== Zawsze przewiduj zamrożonych graczy
 
 No country flags match your filter criteria
-== 
+== Żadna flaga nie odpowiada twoim kryteriom
