@@ -79,6 +79,15 @@ public:
 	const CSnapshot *AsSnapshot() const { return (const CSnapshot *)m_aData; }
 };
 
+class alignas(int32_t) CSnapshotDeltaBuffer
+{
+	// A delta always fits into twice the snapshot size.
+	static constexpr int MAX_SIZE = 2 * CSnapshot::MAX_SIZE;
+
+public:
+	unsigned char m_aData[MAX_SIZE];
+};
+
 // CSnapshotDelta
 
 class CSnapshotDelta
@@ -113,7 +122,7 @@ public:
 	uint64_t GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, size_t Size);
 	const CData *EmptyDelta() const;
-	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData);
+	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, CSnapshotDeltaBuffer *pDstData);
 	int UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, const void *pSrcData, int DataSize);
 	int DebugDumpDelta(const void *pSrcData, int DataSize);
 };

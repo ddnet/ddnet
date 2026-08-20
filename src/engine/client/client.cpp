@@ -2109,7 +2109,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if((NumParts < CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == (((uint64_t)(1) << NumParts) - 1)) ||
 					(NumParts == CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == std::numeric_limits<uint64_t>::max()))
 				{
-					unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
+					CSnapshotDeltaBuffer TmpBuffer2;
 					CSnapshotBuffer TmpBuffer3;
 
 					// reset snapshotting
@@ -2143,12 +2143,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					if(m_aSnapshotIncomingDataSize[Conn])
 					{
-						int IntSize = CVariableInt::Decompress(m_aaSnapshotIncomingData[Conn], m_aSnapshotIncomingDataSize[Conn], aTmpBuffer2, sizeof(aTmpBuffer2));
+						int IntSize = CVariableInt::Decompress(m_aaSnapshotIncomingData[Conn], m_aSnapshotIncomingDataSize[Conn], TmpBuffer2.m_aData, sizeof(TmpBuffer2.m_aData));
 
 						if(IntSize < 0) // failure during decompression
 							return;
 
-						pDeltaData = aTmpBuffer2;
+						pDeltaData = TmpBuffer2.m_aData;
 						DeltaSize = IntSize;
 					}
 
