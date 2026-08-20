@@ -396,7 +396,20 @@ void CTeeHistorian::RecordTeamPractice(int Team, bool Practice)
 
 void CTeeHistorian::Write(const void *pData, int DataSize)
 {
-	m_pfnWriteCallback(pData, DataSize, m_pWriteCallbackUserdata);
+	if(m_State == STATE_START || m_State == STATE_BEFORE_TICK)
+	{
+		// Outside of a tick, i.e. the header and the finish. Write directly.
+		m_pfnWriteCallback(pData, DataSize, m_pWriteCallbackUserdata);
+	}
+	else
+	{
+		// Batch all records within a tick into a single write callback
+		// invocation in `EndTick`; each callback (an `aio_write` on the
+		// server) costs a mutex round-trip plus a semaphore wakeup of the
+		// writer thread.
+		const unsigned char *pBytes = (const unsigned char *)pData;
+		m_vTickBuffer.insert(m_vTickBuffer.end(), pBytes, pBytes + DataSize);
+	}
 }
 
 void CTeeHistorian::EnsureTickWritten()
@@ -736,6 +749,12 @@ void CTeeHistorian::EndTick()
 {
 	dbg_assert(m_State == STATE_BEFORE_ENDTICK, "invalid teehistorian state");
 	m_State = STATE_BEFORE_TICK;
+
+	if(!m_vTickBuffer.empty())
+	{
+		m_pfnWriteCallback(m_vTickBuffer.data(), (int)m_vTickBuffer.size(), m_pWriteCallbackUserdata);
+		m_vTickBuffer.clear();
+	}
 }
 
 void CTeeHistorian::RecordDDNetVersionOld(int ClientId, int DDNetVersion)
