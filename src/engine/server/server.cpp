@@ -197,11 +197,13 @@ class CRconClientLogger : public ILogger
 {
 	CServer *m_pServer;
 	int m_ClientId;
+	ILogger *m_pOuterLogger;
 
 public:
-	CRconClientLogger(CServer *pServer, int ClientId) :
+	CRconClientLogger(CServer *pServer, int ClientId, ILogger *pOuterLogger) :
 		m_pServer(pServer),
-		m_ClientId(ClientId)
+		m_ClientId(ClientId),
+		m_pOuterLogger(pOuterLogger)
 	{
 	}
 	void Log(const CLogMessage *pMessage) override;
@@ -214,6 +216,8 @@ void CRconClientLogger::Log(const CLogMessage *pMessage)
 		return;
 	}
 	m_pServer->SendRconLogLine(m_ClientId, pMessage);
+	// forward to server log
+	m_pOuterLogger->Log(pMessage);
 }
 
 void CServer::CClient::Reset()
@@ -1463,7 +1467,8 @@ void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(m_aClients[i].m_State != CClient::STATE_EMPTY && IsRconAuthedAdmin(i))
+			// don't duplicate
+			if(i != m_RconClientId && m_aClients[i].m_State != CClient::STATE_EMPTY && IsRconAuthedAdmin(i))
 				SendRconLine(i, m_aClients[i].m_ShowIps ? aLine : aLineWithoutIps);
 		}
 	}
@@ -2124,7 +2129,7 @@ void CServer::OnNetMsgRconCmd(int ClientId, const char *pCmd)
 			m_RconClientId = ClientId;
 			m_RconAuthLevel = GetAuthedState(ClientId);
 			{
-				CRconClientLogger Logger(this, ClientId);
+				CRconClientLogger Logger(this, ClientId, log_get_scope_logger());
 				CLogScope Scope(&Logger);
 				Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientId);
 			}
