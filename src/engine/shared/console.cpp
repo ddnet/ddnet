@@ -645,14 +645,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 						if(FanOutSlot < 0)
 						{
-							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+							ExecuteCommand(pCommand, &Result);
 						}
 						else
 						{
 							for(const int VictimId : vFanOutIds)
 							{
 								Result.SetVictim(FanOutSlot, VictimId);
-								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+								ExecuteCommand(pCommand, &Result);
 							}
 						}
 
@@ -685,6 +685,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 		pStr = pNextPart;
 	}
+}
+
+void CConsole::ExecuteCommand(CCommand *pCommand, CResult *pResult)
+{
+	const bool PrevResponseCommand = m_ExecutingResponseCommand;
+	m_ExecutingResponseCommand = (pCommand->m_Flags & CMDFLAG_RESPONSE) != 0;
+	pCommand->m_pfnCallback(pResult, pCommand->m_pUserData);
+	m_ExecutingResponseCommand = PrevResponseCommand;
 }
 
 bool CConsole::CanUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
@@ -1147,7 +1155,7 @@ void CConsole::StoreCommands(bool Store)
 	{
 		for(CExecutionQueueEntry &Entry : m_vExecutionQueue)
 		{
-			Entry.m_pCommand->m_pfnCallback(&Entry.m_Result, Entry.m_pCommand->m_pUserData);
+			ExecuteCommand(Entry.m_pCommand, &Entry.m_Result);
 		}
 		m_vExecutionQueue.clear();
 	}

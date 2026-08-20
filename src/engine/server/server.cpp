@@ -199,11 +199,13 @@ class CRconClientLogger : public ILogger
 {
 	CServer *m_pServer;
 	int m_ClientId;
+	ILogger *m_pOuterLogger;
 
 public:
-	CRconClientLogger(CServer *pServer, int ClientId) :
+	CRconClientLogger(CServer *pServer, int ClientId, ILogger *pOuterLogger) :
 		m_pServer(pServer),
-		m_ClientId(ClientId)
+		m_ClientId(ClientId),
+		m_pOuterLogger(pOuterLogger)
 	{
 	}
 	void Log(const CLogMessage *pMessage) override;
@@ -211,11 +213,18 @@ public:
 
 void CRconClientLogger::Log(const CLogMessage *pMessage)
 {
-	if(m_Filter.Filters(pMessage))
+	if(!m_Filter.Filters(pMessage))
 	{
-		return;
+		m_pServer->SendRconLogLine(m_ClientId, pMessage);
+		m_pServer->m_pRconClientLogLine = pMessage;
 	}
-	m_pServer->SendRconLogLine(m_ClientId, pMessage);
+	// Output that is only a response to the invoker is not interesting for the server log or other rcon clients
+	const bool Response = str_comp(pMessage->m_aSystem, "chatresp") == 0 || str_comp(pMessage->m_aSystem, "config") == 0 || m_pServer->Console()->ExecutingResponseCommand();
+	if(!Response)
+	{
+		m_pOuterLogger->Log(pMessage);
+	}
+	m_pServer->m_pRconClientLogLine = nullptr;
 }
 
 void CServer::CClient::Reset()
@@ -1497,6 +1506,9 @@ void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
+			// the invoking client already got this line directly
+			if(i == m_RconClientId && pMessage == m_pRconClientLogLine)
+				continue;
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY && IsRconAuthedAdmin(i))
 				SendRconLine(i, m_aClients[i].m_ShowIps ? aLine : aLineWithoutIps);
 		}
@@ -2199,7 +2211,7 @@ void CServer::OnNetMsgRconCmd(int ClientId, const char *pCmd)
 			m_RconClientId = ClientId;
 			m_RconAuthLevel = GetAuthedState(ClientId);
 			{
-				CRconClientLogger Logger(this, ClientId);
+				CRconClientLogger Logger(this, ClientId, log_get_scope_logger());
 				CLogScope Scope(&Logger);
 				Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientId);
 			}
@@ -4652,7 +4664,7 @@ void CServer::RegisterCommands()
 
 	// register console commands
 	Console()->Register("kick", "v[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
-	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players");
+	Console()->Register("status", "?r[name]", CFGFLAG_SERVER | CMDFLAG_RESPONSE, ConStatus, this, "List players containing name or all players");
 	Console()->Register("shutdown", "?r[reason]", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)");
@@ -4672,7 +4684,7 @@ void CServer::RegisterCommands()
 	Console()->Register("auth_change", "s[ident] s[level] r[pw]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthUpdate, this, "Update a rcon key");
 	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data");
 	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key");
-	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
+	Console()->Register("auth_list", "", CFGFLAG_SERVER | CMDFLAG_RESPONSE, ConAuthList, this, "List all rcon keys");
 
 	Console()->Register("reload_announcement", "", CFGFLAG_SERVER, ConReloadAnnouncement, this, "Reload the announcements");
 	Console()->Register("reload_maplist", "", CFGFLAG_SERVER, ConReloadMaplist, this, "Reload the maplist");

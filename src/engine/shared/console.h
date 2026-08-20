@@ -170,6 +170,9 @@ class CConsole : public IConsole
 	CCommand *FindCommand(const char *pName, int FlagMask);
 
 	bool m_Cheated;
+	bool m_ExecutingResponseCommand = false;
+
+	void ExecuteCommand(CCommand *pCommand, CResult *pResult);
 
 public:
 	CConsole(int FlagMask);
@@ -224,6 +227,7 @@ public:
 	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
 
 	bool Cheated() const override { return m_Cheated; }
+	bool ExecutingResponseCommand() const override { return m_ExecutingResponseCommand; }
 
 	int FlagMask() const override { return m_FlagMask; }
 	void SetFlagMask(int FlagMask) override { m_FlagMask = FlagMask; }

@@ -248,6 +248,8 @@ public:
 	bool m_ReloadedWhenEmpty;
 	int m_RconClientId;
 	int m_RconAuthLevel;
+	// Log message that was already sent to the invoking rcon client directly
+	const CLogMessage *m_pRconClientLogLine = nullptr;
 	int m_PrintCBIndex;
 	char m_aShutdownReason[128];
 	void *m_pPersistentData;

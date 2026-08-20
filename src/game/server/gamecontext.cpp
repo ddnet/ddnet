@@ -3870,9 +3870,9 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("tune", "s[tuning] ?f[value]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value or show current value");
 	Console()->Register("toggle_tune", "s[tuning] f[value 1] f[value 2]", CFGFLAG_SERVER, ConToggleTuneParam, this, "Toggle tune variable");
 	Console()->Register("tune_reset", "?s[tuning]", CFGFLAG_SERVER, ConTuneReset, this, "Reset all or one tuning variable to default");
-	Console()->Register("tunes", "", CFGFLAG_SERVER, ConTunes, this, "List all tuning variables and their values");
+	Console()->Register("tunes", "", CFGFLAG_SERVER | CMDFLAG_RESPONSE, ConTunes, this, "List all tuning variables and their values");
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
-	Console()->Register("tune_zone_dump", "i[zone]", CFGFLAG_SERVER, ConTuneDumpZone, this, "Dump zone tuning in zone x");
+	Console()->Register("tune_zone_dump", "i[zone]", CFGFLAG_SERVER | CMDFLAG_RESPONSE, ConTuneDumpZone, this, "Dump zone tuning in zone x");
 	Console()->Register("tune_zone_reset", "?i[zone]", CFGFLAG_SERVER, ConTuneResetZone, this, "Reset zone tuning in zone x or in all zones");
 	Console()->Register("tune_zone_enter", "i[zone] r[message]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneSetZoneMsgEnter, this, "Which message to display on zone enter; use 0 for normal area");
 	Console()->Register("tune_zone_leave", "i[zone] r[message]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneSetZoneMsgLeave, this, "Which message to display on zone leave; use 0 for normal area");
@@ -3897,8 +3897,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
 	Console()->Register("add_map_votes", "?s[directory]", CFGFLAG_SERVER, ConAddMapVotes, this, "Automatically adds voting options for all maps");
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
-	Console()->Register("votes", "?i[page]", CFGFLAG_SERVER, ConVotes, this, "Show all votes (page 0 by default, 20 entries per page)");
-	Console()->Register("dump_antibot", "", CFGFLAG_SERVER | CFGFLAG_STORE, ConDumpAntibot, this, "Dumps the antibot status");
+	Console()->Register("votes", "?i[page]", CFGFLAG_SERVER | CMDFLAG_RESPONSE, ConVotes, this, "Show all votes (page 0 by default, 20 entries per page)");
+	Console()->Register("dump_antibot", "", CFGFLAG_SERVER | CFGFLAG_STORE | CMDFLAG_RESPONSE, ConDumpAntibot, this, "Dumps the antibot status");
 	Console()->Register("antibot", "r[command]", CFGFLAG_SERVER | CFGFLAG_STORE, ConAntibot, this, "Sends a command to the antibot");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
@@ -3970,7 +3970,7 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("unmute", "i[index]", CFGFLAG_SERVER, ConUnmute, this, "Unmute player with list index");
 	Console()->Register("unmuteid", "v[id]", CFGFLAG_SERVER, ConUnmuteId, this, "Unmute player with client ID");
 	Console()->Register("unmuteip", "s[ip]", CFGFLAG_SERVER, ConUnmuteIp, this, "Unmute player with IP address");
-	Console()->Register("mutes", "?i[page]", CFGFLAG_SERVER, ConMutes, this, "Show list of mutes (page 1 by default, 20 entries per page)");
+	Console()->Register("mutes", "?i[page]", CFGFLAG_SERVER | CMDFLAG_RESPONSE, ConMutes, this, "Show list of mutes (page 1 by default, 20 entries per page)");
 
 	Console()->Register("vote_mute", "", CFGFLAG_SERVER, ConVoteMute, this, "Deprecated. Use either 'vote_muteid <client_id> <seconds> <reason>' or 'vote_muteip <ip> <seconds> <reason>'");
 	Console()->Register("vote_muteid", "v[id] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConVoteMuteId, this, "Remove right to vote from player with client ID");
@@ -3978,12 +3978,12 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("vote_unmute", "i[index]", CFGFLAG_SERVER, ConVoteUnmute, this, "Give back right to vote to player with list index");
 	Console()->Register("vote_unmuteid", "v[id]", CFGFLAG_SERVER, ConVoteUnmuteId, this, "Give back right to vote to player with client ID");
 	Console()->Register("vote_unmuteip", "s[ip]", CFGFLAG_SERVER, ConVoteUnmuteIp, this, "Give back right to vote to player with IP address");
-	Console()->Register("vote_mutes", "?i[page]", CFGFLAG_SERVER, ConVoteMutes, this, "Show list of vote mutes (page 1 by default, 20 entries per page)");
+	Console()->Register("vote_mutes", "?i[page]", CFGFLAG_SERVER | CMDFLAG_RESPONSE, ConVoteMutes, this, "Show list of vote mutes (page 1 by default, 20 entries per page)");
 
 	Console()->Register("moderate", "", CFGFLAG_SERVER, ConModerate, this, "Enables/disables active moderator mode for the player");
 	Console()->Register("vote_no", "", CFGFLAG_SERVER, ConVoteNo, this, "Same as \"vote no\"");
 	Console()->Register("save_dry", "", CFGFLAG_SERVER, ConDrySave, this, "Dump the current savestring");
-	Console()->Register("dump_log", "?i[seconds]", CFGFLAG_SERVER, ConDumpLog, this, "Show logs of the last i seconds");
+	Console()->Register("dump_log", "?i[seconds]", CFGFLAG_SERVER | CMDFLAG_RESPONSE, ConDumpLog, this, "Show logs of the last i seconds");
 
 	Console()->Chain("sv_practice_by_default", ConchainPracticeByDefaultUpdate, this);
 }
