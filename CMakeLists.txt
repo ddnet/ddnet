@@ -1056,6 +1056,7 @@ endif()
 set(CARGO_BUILD_DIR_DEBUG "${CARGO_BUILD_DIR}debug")
 set(CARGO_BUILD_DIR_RELEASE "${CARGO_BUILD_DIR}release")
 set(CARGO_BUILD_DIR_RELWITHDEBINFO "${CARGO_BUILD_DIR}relwithdebinfo")
+set(CARGO_BUILD_DIR_MINSIZEREL "${CARGO_BUILD_DIR}minsizerel")
 
 # We can't check this directly; it is a cmake property, not a variable
 get_cmake_property(MULTI_CONFIG_BUILD GENERATOR_IS_MULTI_CONFIG)
@@ -1063,11 +1064,13 @@ if(MULTI_CONFIG_BUILD)
   if(CMAKE_VERSION VERSION_LESS 3.20)
     message(SEND_ERROR "Multi-config generators only supported from CMake 3.20 and up")
   else()
-    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR}$<IF:$<CONFIG:Debug>,debug,$<IF:$<CONFIG:RelWithDebInfo>,relwithdebinfo,release>>")
+    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR}$<IF:$<CONFIG:Debug>,debug,$<IF:$<CONFIG:RelWithDebInfo>,relwithdebinfo,$<IF:$<CONFIG:MinSizeRel>,minsizerel,release>>>")
     list(APPEND CARGO_BUILD
       $<$<CONFIG:RelWithDebInfo>:--profile>
       $<$<CONFIG:RelWithDebInfo>:relwithdebinfo>
-      $<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>>:--release>)
+      $<$<CONFIG:MinSizeRel>:--profile>
+      $<$<CONFIG:MinSizeRel>:minsizerel>
+      $<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>>:--release>)
   endif()
 else()
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -1075,6 +1078,9 @@ else()
   elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
     set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR_RELWITHDEBINFO}")
     list(APPEND CARGO_BUILD --profile relwithdebinfo)
+  elseif(CMAKE_BUILD_TYPE STREQUAL MinSizeRel)
+    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR_MINSIZEREL}")
+    list(APPEND CARGO_BUILD --profile minsizerel)
   else()
     set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR_RELEASE}")
     list(APPEND CARGO_BUILD --release)
@@ -1119,6 +1125,7 @@ if(NOT CMAKE_OSX_ARCHITECTURES OR TARGET_OS STREQUAL "ios")
       IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELEASE}/${LIBRARY_NAME}"
       IMPORTED_LOCATION_DEBUG "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_DEBUG}/${LIBRARY_NAME}"
       IMPORTED_LOCATION_RELWITHDEBINFO "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELWITHDEBINFO}/${LIBRARY_NAME}"
+      IMPORTED_LOCATION_MINSIZEREL "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_MINSIZEREL}/${LIBRARY_NAME}"
     )
     list(APPEND RUST_OUTPUTS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
   endforeach()
@@ -1137,6 +1144,7 @@ else()
       IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELEASE}/${LIBRARY_NAME}"
       IMPORTED_LOCATION_DEBUG "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_DEBUG}/${LIBRARY_NAME}"
       IMPORTED_LOCATION_RELWITHDEBINFO "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELWITHDEBINFO}/${LIBRARY_NAME}"
+      IMPORTED_LOCATION_MINSIZEREL "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_MINSIZEREL}/${LIBRARY_NAME}"
     )
     add_custom_target(rust_${rust_target}_target DEPENDS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
     add_dependencies(rust_${rust_target} rust_${rust_target}_target)
@@ -3485,7 +3493,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   add_custom_target(run_tests
     DEPENDS run_cxx_tests
   )
-  if(NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release OR CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
+  if(NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release OR CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo OR CMAKE_BUILD_TYPE STREQUAL MinSizeRel)
     # On MSVC, Rust tests only work in the release mode because we link our C++
     # code with the debug C standard library (/MTd) but Rust only supports
     # linking to the release C standard library (/MT).
