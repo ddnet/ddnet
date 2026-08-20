@@ -25,6 +25,7 @@
 
 #include <gtest/gtest.h>
 
+#include <limits>
 #include <memory>
 #include <thread>
 
@@ -306,4 +307,14 @@ TEST_F(GameWorld, CharacterEmote)
 	// /emote angry 3 chat command and frozen
 	pChr->Freeze(10);
 	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
+}
+
+TEST(Tunings, OutOfRangeBecomesIntMin)
+{
+	const float IntMin = std::numeric_limits<int>::min() / 100.0f;
+	CTuneParam Param;
+	EXPECT_EQ((float)(Param = 555555555555555.0f), IntMin);
+	EXPECT_EQ((float)(Param = -555555555555555.0f), IntMin);
+	EXPECT_EQ((float)(Param = std::numeric_limits<float>::quiet_NaN()), IntMin);
+	EXPECT_EQ((float)(Param = 0.5f), 0.5f);
 }

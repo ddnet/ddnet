@@ -13,6 +13,7 @@
 
 #include <game/teamscore.h>
 
+#include <limits>
 #include <set>
 #include <vector>
 
@@ -24,16 +25,14 @@ class CTuneParam
 	int m_Value;
 
 public:
-	void Set(int v) { m_Value = v; }
 	int Get() const { return m_Value; }
-	CTuneParam &operator=(int v)
-	{
-		m_Value = (int)(v * 100.0f);
-		return *this;
-	}
 	CTuneParam &operator=(float v)
 	{
-		m_Value = (int)(v * 100.0f);
+		const float Fixed = v * 100.0f;
+		if(Fixed >= static_cast<float>(std::numeric_limits<int>::min()) && Fixed < static_cast<float>(std::numeric_limits<int>::max()))
+			m_Value = static_cast<int>(Fixed);
+		else
+			m_Value = std::numeric_limits<int>::min();
 		return *this;
 	}
 	operator float() const { return m_Value / 100.0f; }
@@ -46,7 +45,7 @@ class CTuningParams
 public:
 	CTuningParams()
 	{
-#define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) m_##Name.Set((int)((Value) * 100.0f));
+#define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) m_##Name = (Value);
 #include "tuning.h"
 #undef MACRO_TUNING_PARAM
 	}
