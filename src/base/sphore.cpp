@@ -9,7 +9,7 @@
 #include <windows.h>
 
 #include <limits>
-#elif defined(CONF_PLATFORM_MACOS)
+#elif defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
 #include "process.h"
 #include "secure.h"
 #include "str.h"
@@ -40,7 +40,7 @@ void sphore_destroy(SEMAPHORE *sem)
 {
 	dbg_assert(CloseHandle((HANDLE)*sem), "CloseHandle failure");
 }
-#elif defined(CONF_PLATFORM_MACOS)
+#elif defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
 void sphore_init(SEMAPHORE *sem)
 {
 	unsigned Random;

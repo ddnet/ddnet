@@ -178,6 +178,12 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 					if(str_comp(aTmpStr, "noperspective") == 0)
 					{
 						// GLES does not support noperspective. Drop it to use the default (smooth) inexplicitly because shaders fail to compile on iOS otherwise.
+						// The centroid qualifier has to be dropped with it, because the qualifiers of the
+						// vertex shader outputs and the fragment shader inputs must match exactly on GLES.
+						if(const char *pCentroidEnd = str_startswith(str_skip_whitespaces_const(pBuff), "centroid"))
+						{
+							pBuff = pCentroidEnd;
+						}
 						Line.append(pBuff);
 						return;
 					}

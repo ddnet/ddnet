@@ -31,7 +31,7 @@
 #error NOT IMPLEMENTED
 #endif
 
-#if defined(CONF_PLATFORM_MACOS)
+#if defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
 #include <mach-o/dyld.h> // _NSGetExecutablePath
 #endif
 
@@ -327,6 +327,8 @@ int fs_storage_path(const char *appname, char *path, int max)
 
 #if defined(CONF_PLATFORM_HAIKU)
 	str_format(path, max, "%s/config/settings/%s", home, appname);
+#elif defined(CONF_PLATFORM_IOS)
+	str_format(path, max, "%s/Documents", home);
 #elif defined(CONF_PLATFORM_MACOS)
 	str_format(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
@@ -377,7 +379,7 @@ int fs_executable_path(char *buffer, int buffer_size)
 	}
 	str_copy(buffer, path.value().c_str(), buffer_size);
 	return 0;
-#elif defined(CONF_PLATFORM_MACOS)
+#elif defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
 	// Get the size
 	uint32_t path_size = 0;
 	_NSGetExecutablePath(nullptr, &path_size);

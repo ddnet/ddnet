@@ -872,6 +872,14 @@ int CInput::Update()
 			}
 			break;
 
+#if defined(CONF_PLATFORM_IOS)
+		// Save the config before the app is suspended on iOS, it can be killed
+		// without any further notice afterwards.
+		case SDL_APP_WILLENTERBACKGROUND:
+			m_pConfigManager->Save();
+			break;
+#endif
+
 		// other messages
 		case SDL_QUIT:
 			return 1;
