@@ -24,6 +24,10 @@ public:
 	virtual void OnShutdown() = 0;
 };
 
-IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
+// `NetTypes` are the `NETTYPE_*` flags of the network types the server's
+// listen socket is actually bound to, together with `NETTYPE_WEBSOCKET_TLS`
+// if websockets are served with TLS (wss). They determine which websocket
+// protocols are registered and under which scheme.
+IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int NetTypes, int ServerPort, unsigned SixupSecurityToken);
 
 #endif

@@ -757,6 +757,16 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if(DoButton_CheckBox(&g_Config.m_BrFilterConnectingPlayers, Localize("Filter connecting players"), g_Config.m_BrFilterConnectingPlayers, &Button))
 		g_Config.m_BrFilterConnectingPlayers ^= 1;
 
+	// The compatible protocols filter is not applied to the LAN tab or to
+	// favorited servers, so it has no effect on the favorites tab.
+	const int BrowserType = ServerBrowser()->GetCurrentType();
+	if(BrowserType != IServerBrowser::TYPE_LAN && BrowserType != IServerBrowser::TYPE_FAVORITES)
+	{
+		View.HSplitTop(RowHeight, &Button, &View);
+		if(DoButton_CheckBox(&g_Config.m_BrFilterCompatibleProtocols, Localize("Compatible protocols only"), g_Config.m_BrFilterCompatibleProtocols, &Button))
+			g_Config.m_BrFilterCompatibleProtocols ^= 1;
+	}
+
 	// map finish filters
 	if(ServerBrowser()->CommunityCache().AnyRanksAvailable())
 	{
@@ -843,6 +853,7 @@ void CMenus::ResetServerbrowserFilters()
 	g_Config.m_BrFilterGametype[0] = '\0';
 	g_Config.m_BrFilterGametypeStrict = 0;
 	g_Config.m_BrFilterConnectingPlayers = 1;
+	g_Config.m_BrFilterCompatibleProtocols = 1;
 	g_Config.m_BrFilterServerAddress[0] = '\0';
 	g_Config.m_BrFilterLogin = true;
 

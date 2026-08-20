@@ -14,7 +14,9 @@
 
 // NOLINTBEGIN(readability-identifier-naming)
 void websocket_init();
+void websocket_reload_certs();
 int websocket_create(const NETADDR *bindaddr);
+bool websocket_has_tls(int socket);
 void websocket_destroy(int socket);
 int websocket_recv(int socket, unsigned char *data, size_t maxsize, NETADDR *addr);
 int websocket_send(int socket, const unsigned char *data, size_t size, const NETADDR *addr);

@@ -637,36 +637,104 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	const char *pNextAddr = pAddress;
 	char aBuffer[128];
 	bool OnlySixup = true;
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	int ConnectWebsocketSecure = -1;
+	bool ConnectWebsocketSecureExplicit = false;
+#endif
 	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
 		NETADDR NextAddr;
-		char aHost[128];
-		const int UrlParseResult = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
-		bool Sixup = NextAddr.type & NETTYPE_TW7;
-		if(UrlParseResult > 0)
-			str_copy(aHost, aBuffer);
-
-		if(net_host_lookup(aHost, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
+		if(net_addr_from_url_lookup(&NextAddr, aBuffer, m_aNetClient[CONN_MAIN].NetType()) != 0)
 		{
-			log_error("client", "could not find address of %s", aHost);
+			log_error("client", "could not find address of %s", aBuffer);
 			continue;
 		}
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+		// The browser can only connect via websockets, so addresses that explicitly
+		// specify another transport are unusable. Addresses without a scheme are
+		// implicitly used via websocket.
+		if(str_find(aBuffer, "://") != nullptr && (NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) == 0)
+		{
+			log_error("client", "only websockets (ddnet-20+ws:// and ddnet-20+wss://) are supported by this client, ignoring '%s'", aBuffer);
+			continue;
+		}
+		// Emscripten tunnels all traffic through websockets, whose ws/wss scheme
+		// is a single global setting instead of a per-address one, so all connect
+		// addresses must agree on the scheme. Addresses with an explicit ws/wss
+		// scheme determine it; addresses without a scheme tunnel over either and
+		// only assume the page default as long as no explicit scheme was seen.
+		bool WebsocketSecure;
+		bool WebsocketSecureExplicit;
+		if((NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) != 0)
+		{
+			WebsocketSecure = (NextAddr.type & NETTYPE_WEBSOCKET_TLS) != 0;
+			WebsocketSecureExplicit = true;
+			if(!WebsocketSecure && net_websocket_secure_default())
+			{
+				log_warn("client", "insecure websocket address '%s' is likely blocked by the browser as mixed content on an https page", aBuffer);
+			}
+			const bool Ipv4 = (NextAddr.type & NETTYPE_WEBSOCKET_IPV4) != 0;
+			NextAddr.type &= ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6 | NETTYPE_WEBSOCKET_TLS);
+			NextAddr.type |= Ipv4 ? NETTYPE_IPV4 : NETTYPE_IPV6;
+		}
+		else
+		{
+			WebsocketSecure = net_websocket_secure_default();
+			WebsocketSecureExplicit = false;
+		}
+		if(ConnectWebsocketSecure == -1)
+		{
+			ConnectWebsocketSecure = (int)WebsocketSecure;
+			ConnectWebsocketSecureExplicit = WebsocketSecureExplicit;
+			net_websocket_set_secure(WebsocketSecure);
+		}
+		else if((bool)ConnectWebsocketSecure == WebsocketSecure)
+		{
+			ConnectWebsocketSecureExplicit = ConnectWebsocketSecureExplicit || WebsocketSecureExplicit;
+		}
+		else if(WebsocketSecureExplicit && !ConnectWebsocketSecureExplicit)
+		{
+			// The scheme so far was only assumed from the page default, so the
+			// explicit scheme takes over; already accepted schemeless addresses
+			// tunnel over the new scheme just as well.
+			ConnectWebsocketSecure = (int)WebsocketSecure;
+			ConnectWebsocketSecureExplicit = true;
+			net_websocket_set_secure(WebsocketSecure);
+		}
+		else if(WebsocketSecureExplicit)
+		{
+			log_error("client", "websocket scheme of '%s' conflicts with the previous connect addresses, ignoring it", aBuffer);
+			continue;
+		}
+		// else: schemeless address, tunnels over the already chosen scheme
+#else
+		if((NextAddr.type & NETTYPE_WEBSOCKET_TLS) != 0)
+		{
+			log_error("client", "secure websockets (ddnet-20+wss://) are not supported by this client");
+			continue;
+		}
+		if((NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) != 0 &&
+			(m_aNetClient[CONN_MAIN].NetType() & NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) == 0)
+		{
+			log_error("client", "websockets (ddnet-20+ws://) are not supported by this client for the address family of %s", aBuffer);
+			continue;
+		}
+#endif
+		const bool Sixup = (NextAddr.type & NETTYPE_TW7) != 0;
 		if(NumConnectAddrs == (int)std::size(aConnectAddrs))
 		{
-			log_warn("client", "too many connect addresses, ignoring %s", aHost);
+			log_warn("client", "too many connect addresses, ignoring %s", aBuffer);
 			continue;
 		}
 		if(NextAddr.port == 0)
 		{
 			NextAddr.port = 8303;
 		}
-		if(Sixup)
-			NextAddr.type |= NETTYPE_TW7;
-		else
+		if(!Sixup)
 			OnlySixup = false;
 
-		char aNextAddr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&NextAddr, aNextAddr, sizeof(aNextAddr), true);
+		char aNextAddr[NETADDR_URL_MAXSTRSIZE];
+		net_addr_url_str(&NextAddr, aNextAddr, sizeof(aNextAddr), true);
 		log_debug("client", "resolved connect address '%s' to %s", aBuffer, aNextAddr);
 
 		if(NextAddr == LastAddr)
@@ -3107,7 +3175,7 @@ void CClient::InitInterfaces()
 
 	m_DemoEditor.Init(&m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pConsole, m_pStorage);
 
-	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
+	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], &m_aNetClient[CONN_MAIN], m_pGameClient->NetVersion());
 
 #if defined(CONF_AUTOUPDATE)
 	m_Updater.Init();
