@@ -112,16 +112,15 @@ CClient::CClient() :
 {
 	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorders)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
+		DemoRecorder.Init(&m_SnapshotDelta);
 	for(auto &DemoRecorder : m_aDemoRecordersSixup)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDeltaSixup);
+		DemoRecorder.Init(&m_SnapshotDeltaSixup);
 	m_LastRenderTime = time_get();
 	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
 	for(auto &SnapshotStorage : m_aSnapshotStorage)
 		SnapshotStorage.Init();
 	mem_zero(m_aDemorecSnapshotHolders, sizeof(m_aDemorecSnapshotHolders));
-	m_CurrentServerInfo = {};
 	mem_zero(&m_Checksum, sizeof(m_Checksum));
 	for(auto &GameTime : m_aGameTime)
 		GameTime.Init(0);
@@ -772,7 +771,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	ResetMapDownload(true);
 
 	// clear the current server info
-	m_CurrentServerInfo = {};
+	m_CurrentServerInfo.Reset();
 
 	// clear snapshots
 	m_aapSnapshots[0][SNAP_CURRENT] = nullptr;
@@ -885,7 +884,7 @@ const CServerInfo &CClient::ServerInfo() const
 
 void CClient::ServerInfoRequest()
 {
-	m_CurrentServerInfo = {};
+	m_CurrentServerInfo.Reset();
 	m_CurrentServerInfoRequestTime = 0;
 }
 
@@ -1352,7 +1351,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 {
 	CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(*pFrom);
 
-	CServerInfo Info = {0};
+	CServerInfo Info = {};
 	int SavedType = SavedServerInfoType(RawType);
 	if(SavedType == SERVERINFO_EXTENDED && pEntry && pEntry->m_GotInfo && SavedType == pEntry->m_Info.m_Type)
 	{
@@ -4058,7 +4057,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	}
 
 	// setup current server info
-	m_CurrentServerInfo = {};
+	m_CurrentServerInfo.Reset();
 	str_copy(m_CurrentServerInfo.m_aMap, pMapInfo->m_aName);
 	m_CurrentServerInfo.m_MapCrc = pMapInfo->m_Crc;
 	m_CurrentServerInfo.m_MapSize = pMapInfo->m_Size;
