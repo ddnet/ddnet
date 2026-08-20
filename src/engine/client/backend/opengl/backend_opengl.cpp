@@ -22,7 +22,12 @@
 #ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
 #else
+#if defined(CONF_PLATFORM_IOS)
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
+#else
 #include <GLES3/gl3.h>
+#endif
 #define GL_TEXTURE_2D_ARRAY_EXT GL_TEXTURE_2D_ARRAY
 // GLES doesn't support GL_QUADS, but the code is also never executed
 #define GL_QUADS GL_TRIANGLES

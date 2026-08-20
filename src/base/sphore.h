@@ -19,7 +19,7 @@
  * @ingroup Semaphore
  */
 typedef void *SEMAPHORE;
-#elif defined(CONF_PLATFORM_MACOS)
+#elif defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
 #include <semaphore.h>
 /**
  * @ingroup Semaphore

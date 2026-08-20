@@ -65,7 +65,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 		pSelf->m_BufferSwapCond.wait(Lock, [&pSelf] { return pSelf->m_pBuffer != nullptr || pSelf->m_Shutdown; });
 		if(pSelf->m_pBuffer)
 		{
-#ifdef CONF_PLATFORM_MACOS
+#if defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
 			CAutoreleasePool AutoreleasePool;
 #endif
 			pSelf->m_pProcessor->RunBuffer(pSelf->m_pBuffer);
