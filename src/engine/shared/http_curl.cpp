@@ -512,6 +512,9 @@ void CHttpCurl::RunLoop()
 			m_PendingRequests.insert(m_PendingRequests.end(), std::make_move_iterator(NewRequests.begin()), std::make_move_iterator(NewRequests.end()));
 			break;
 		}
+
+		if(m_Shutdown && m_RunningRequests.empty() && m_PendingRequests.empty())
+			break;
 	}
 
 	if(!Lock.owns_lock())
