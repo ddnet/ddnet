@@ -264,42 +264,47 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				pStr[0] = '\0';
 				pStr++;
 			}
-
-			// validate arguments
-			if(Command == 'v')
-			{
-				pResult->SetVictim(pResult->GetString(pResult->NumArguments() - 1));
-			}
-			else if(Command == 'i')
-			{
-				int Value;
-				if(!str_toint(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
-					Value == std::numeric_limits<int>::max() ||
-					Value == std::numeric_limits<int>::min())
-				{
-					return PARSEARGS_INVALID_INTEGER;
-				}
-			}
-			else if(Command == 'c')
-			{
-				auto Color = ColorParse(pResult->GetString(pResult->NumArguments() - 1), 0.0f);
-				if(!Color.has_value())
-				{
-					return PARSEARGS_INVALID_COLOR;
-				}
-			}
-			else if(Command == 'f')
-			{
-				float Value;
-				if(!str_tofloat(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
-					Value == std::numeric_limits<float>::max() ||
-					Value == std::numeric_limits<float>::min())
-				{
-					return PARSEARGS_INVALID_FLOAT;
-				}
-			}
-			// 's' and unknown commands are handled as strings
 		}
+
+		// validate arguments
+		if(Command == 'v')
+		{
+			const char *pVictim = pResult->GetString(pResult->NumArguments() - 1);
+			if(pVictim[0] == '\0')
+			{
+				return PARSEARGS_MISSING_VALUE;
+			}
+			pResult->SetVictim(pVictim);
+		}
+		else if(Command == 'i')
+		{
+			int Value;
+			if(!str_toint(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
+				Value == std::numeric_limits<int>::max() ||
+				Value == std::numeric_limits<int>::min())
+			{
+				return PARSEARGS_INVALID_INTEGER;
+			}
+		}
+		else if(Command == 'c')
+		{
+			auto Color = ColorParse(pResult->GetString(pResult->NumArguments() - 1), 0.0f);
+			if(!Color.has_value())
+			{
+				return PARSEARGS_INVALID_COLOR;
+			}
+		}
+		else if(Command == 'f')
+		{
+			float Value;
+			if(!str_tofloat(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
+				Value == std::numeric_limits<float>::max() ||
+				Value == std::numeric_limits<float>::min())
+			{
+				return PARSEARGS_INVALID_FLOAT;
+			}
+		}
+		// 's' and unknown commands are handled as strings
 	}
 
 	return PARSEARGS_OK;
