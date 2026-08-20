@@ -31,6 +31,7 @@
 #include <engine/shared/json.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/memheap.h>
+#include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/protocolglue.h>
 #include <engine/storage.h>
@@ -827,8 +828,14 @@ void CGameContext::SendSettings(int ClientId) const
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
+// One byte message id, UUID of extended messages and the null-terminated text must fit into one network chunk
+static constexpr int MAX_MESSAGE_TEXT_SIZE = NET_MAX_CHUNK_SIZE - 1 - sizeof(CUuid);
+
 void CGameContext::SendServerAlert(const char *pMessage)
 {
+	char aMessage[MAX_MESSAGE_TEXT_SIZE];
+	str_copy(aMessage, pMessage);
+
 	for(int ClientId = 0; ClientId < Server()->MaxClients(); ClientId++)
 	{
 		if(!m_apPlayers[ClientId])
@@ -839,14 +846,14 @@ void CGameContext::SendServerAlert(const char *pMessage)
 		if(m_apPlayers[ClientId]->GetClientVersion() >= VERSION_DDNET_IMPORTANT_ALERT)
 		{
 			CNetMsg_Sv_ServerAlert Msg;
-			Msg.m_pMessage = pMessage;
+			Msg.m_pMessage = aMessage;
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 		}
 		else
 		{
 			char aBroadcastText[1024 + 32];
 			str_copy(aBroadcastText, "SERVER ALERT\n\n");
-			str_append(aBroadcastText, pMessage);
+			str_append(aBroadcastText, aMessage);
 			SendBroadcast(aBroadcastText, ClientId, true);
 		}
 	}
@@ -855,7 +862,7 @@ void CGameContext::SendServerAlert(const char *pMessage)
 	// TODO: Workaround https://github.com/ddnet/ddnet/issues/11144 by using client ID 0,
 	//       otherwise the message is recorded multiple times.
 	CNetMsg_Sv_ServerAlert Msg;
-	Msg.m_pMessage = pMessage;
+	Msg.m_pMessage = aMessage;
 	Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, 0);
 }
 
@@ -864,17 +871,20 @@ void CGameContext::SendModeratorAlert(int ToClientId, const char *pMessage)
 	dbg_assert(in_range(ToClientId, 0, MAX_CLIENTS - 1), "SendImportantAlert ToClientId invalid: %d", ToClientId);
 	dbg_assert(m_apPlayers[ToClientId] != nullptr, "Client not online: %d", ToClientId);
 
+	char aMessage[MAX_MESSAGE_TEXT_SIZE];
+	str_copy(aMessage, pMessage);
+
 	if(m_apPlayers[ToClientId]->GetClientVersion() >= VERSION_DDNET_IMPORTANT_ALERT)
 	{
 		CNetMsg_Sv_ModeratorAlert Msg;
-		Msg.m_pMessage = pMessage;
+		Msg.m_pMessage = aMessage;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ToClientId);
 	}
 	else
 	{
 		char aBroadcastText[1024 + 32];
 		str_copy(aBroadcastText, "MODERATOR ALERT\n\n");
-		str_append(aBroadcastText, pMessage);
+		str_append(aBroadcastText, aMessage);
 		SendBroadcast(aBroadcastText, ToClientId, true);
 		log_info("moderator_alert", "Notice: player uses an old client version and may not see moderator alerts: %s (ID %d)", Server()->ClientName(ToClientId), ToClientId);
 	}
@@ -882,8 +892,11 @@ void CGameContext::SendModeratorAlert(int ToClientId, const char *pMessage)
 
 void CGameContext::SendBroadcast(const char *pText, int ClientId, bool IsImportant)
 {
+	char aText[MAX_MESSAGE_TEXT_SIZE];
+	str_copy(aText, pText);
+
 	CNetMsg_Sv_Broadcast Msg;
-	Msg.m_pMessage = pText;
+	Msg.m_pMessage = aText;
 
 	if(ClientId == -1)
 	{
