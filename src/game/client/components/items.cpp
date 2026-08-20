@@ -97,16 +97,17 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, bool 
 
 	vec2 Vel = Pos - PrevPos;
 
+	static float s_Time = 0.0f;
+	static float s_LastLocalTime = LocalTime();
+	s_Time += (LocalTime() - s_LastLocalTime) * GameClient()->GetAnimationPlaybackSpeed();
+	s_LastLocalTime = LocalTime();
+
 	// add particle for this projectile
 	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compatibility
 	if(CurWeapon == WEAPON_GRENADE)
 	{
 		GameClient()->m_Effects.SmokeTrail(Pos, Vel * -1, Alpha, 0.0f);
-		static float s_Time = 0.0f;
-		static float s_LastLocalTime = LocalTime();
-		s_Time += (LocalTime() - s_LastLocalTime) * GameClient()->GetAnimationPlaybackSpeed();
 		Graphics()->QuadsSetRotation(s_Time * pi * 2 * 2 + ItemId);
-		s_LastLocalTime = LocalTime();
 	}
 	else
 	{
@@ -123,6 +124,20 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, bool 
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aProjectileOffset[CurWeapon], Pos.x, Pos.y);
+
+		if(pCurrent->m_TeleType != ProjTele::NONE)
+		{
+			const float SpinSpeed = 0.85f;
+			const float Angle = s_Time * pi * 2.0f * SpinSpeed + ItemId;
+			Graphics()->QuadsSetRotation(Angle);
+
+			const bool IsEvilTele = pCurrent->m_TeleType == ProjTele::CFROM_EVIL;
+			Graphics()->TextureSet(IsEvilTele ? GameClient()->m_ExtrasSkin.m_SpriteParticleBulletTeleRed : GameClient()->m_ExtrasSkin.m_SpriteParticleBulletTeleBlue);
+			Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
+			Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, IsEvilTele ? m_BulletTeleRedOffset : m_BulletTeleBlueOffset, Pos.x, Pos.y);
+
+			Graphics()->QuadsSetRotation(0);
+		}
 	}
 }
 
@@ -694,6 +709,12 @@ void CItems::OnInit()
 
 	IGraphics::CQuadItem Brick(0, 0, 16.0f, 16.0f);
 	m_DoorHeadOffset = Graphics()->QuadContainerAddQuads(m_ItemsQuadContainerIndex, &Brick, 1);
+
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_BulletTeleRedOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 32.f);
+
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_BulletTeleBlueOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 32.f);
 
 	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
 }

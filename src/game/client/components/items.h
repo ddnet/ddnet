@@ -44,6 +44,8 @@ private:
 	int m_DoorHeadOffset;
 	int m_PulleyHeadOffset;
 	int m_FreezeHeadOffset;
+	int m_BulletTeleRedOffset;
+	int m_BulletTeleBlueOffset;
 };
 
 #endif

@@ -4505,6 +4505,8 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSparkle);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpritePulley);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteHectagon);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleBulletTeleRed);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleBulletTeleBlue);
 
 		for(auto &SpriteParticle : m_ExtrasSkin.m_aSpriteParticles)
 			SpriteParticle = IGraphics::CTextureHandle();
@@ -4528,11 +4530,15 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		m_ExtrasSkin.m_SpriteParticleSparkle = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PART_SPARKLE]);
 		m_ExtrasSkin.m_SpritePulley = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PART_PULLEY]);
 		m_ExtrasSkin.m_SpriteHectagon = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PART_HECTAGON]);
+		m_ExtrasSkin.m_SpriteParticleBulletTeleRed = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PART_BULLET_TELE_RED]);
+		m_ExtrasSkin.m_SpriteParticleBulletTeleBlue = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PART_BULLET_TELE_BLUE]);
 
 		m_ExtrasSkin.m_aSpriteParticles[0] = m_ExtrasSkin.m_SpriteParticleSnowflake;
 		m_ExtrasSkin.m_aSpriteParticles[1] = m_ExtrasSkin.m_SpriteParticleSparkle;
 		m_ExtrasSkin.m_aSpriteParticles[2] = m_ExtrasSkin.m_SpritePulley;
 		m_ExtrasSkin.m_aSpriteParticles[3] = m_ExtrasSkin.m_SpriteHectagon;
+		m_ExtrasSkin.m_aSpriteParticles[4] = m_ExtrasSkin.m_SpriteParticleBulletTeleRed;
+		m_ExtrasSkin.m_aSpriteParticles[5] = m_ExtrasSkin.m_SpriteParticleBulletTeleBlue;
 
 		m_ExtrasSkinLoaded = true;
 	}
