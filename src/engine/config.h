@@ -12,7 +12,18 @@ public:
 	typedef void (*SAVECALLBACKFUNC)(IConfigManager *pConfig, void *pUserData);
 	typedef void (*POSSIBLECFGFUNC)(const struct SConfigVariable *, void *pUserData);
 
-	virtual void Init() = 0;
+	enum class EInitializationType
+	{
+		// Set all config variables to their default values.
+		STANDALONE,
+		// For an integrated server sharing the process-global config with a
+		// running client: set only the variables exclusive to the server to
+		// their default values, so every server start begins from a clean
+		// server configuration without touching the client's configuration.
+		INTEGRATED_SERVER,
+	};
+
+	virtual void Init(EInitializationType InitializationType = EInitializationType::STANDALONE) = 0;
 	virtual void Reset(const char *pScriptName) = 0;
 	virtual void ResetGameSettings() = 0;
 	virtual void SetReadOnly(const char *pScriptName, bool ReadOnly) = 0;

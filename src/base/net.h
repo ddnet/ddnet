@@ -250,6 +250,19 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
  */
 
 /**
+ * Enables or disables the in-memory loopback transport for UDP sockets. When
+ * enabled, packets to localhost addresses are exchanged through in-process
+ * queues instead of real sockets, allowing a client and server in the same
+ * process to communicate. Enabled by default only on Emscripten, where no
+ * real loopback sockets exist. This function is intended for tests.
+ *
+ * @ingroup Network-UDP
+ *
+ * @param enabled Whether the loopback transport should be enabled.
+ */
+void net_loopback_set_enabled(bool enabled);
+
+/**
  * Creates a UDP socket and binds it to a port.
  *
  * @ingroup Network-UDP

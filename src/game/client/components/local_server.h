@@ -18,7 +18,7 @@ public:
 private:
 	char m_aRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 
-#if !defined(CONF_PLATFORM_ANDROID)
+#if !defined(CONF_PLATFORM_ANDROID) && !defined(CONF_INTEGRATED_SERVER)
 	PROCESS m_Process = INVALID_PROCESS;
 #endif
 };

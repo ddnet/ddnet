@@ -601,8 +601,30 @@ void CGameClient::OnConnected()
 		pComponent->OnReset();
 	}
 
-	ConfigManager()->ResetGameSettings();
+	// The integrated server shares the process-global g_Config with this
+	// client, so while it is running it owns the game config variables. The
+	// client must neither restore its own values nor apply the settings of the
+	// map being loaded here, as that would change the settings of the running
+	// server, which is serving a possibly different map and whose settings may
+	// have been changed via rcon. When connected to the integrated server, the
+	// values it already loaded from its own map are the ones the client needs.
+#if defined(CONF_INTEGRATED_SERVER)
+	const bool GameSettingsOwnedByLocalServer = m_LocalServer.IsServerRunning();
+#else
+	const bool GameSettingsOwnedByLocalServer = false;
+#endif
+	if(GameSettingsOwnedByLocalServer)
+	{
+		// The map's tunings and map bugs are client-local, so they are still
+		// loaded, only the game config variables are protected.
+		ConfigManager()->SetGameSettingsReadOnly(true);
+	}
+	else
+	{
+		ConfigManager()->ResetGameSettings();
+	}
 	LoadMapSettings();
+	ConfigManager()->SetGameSettingsReadOnly(false);
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
