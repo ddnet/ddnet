@@ -130,6 +130,10 @@ build_cmake_lib opus https://github.com/xiph/opus "branch" "v1.5.2"
 log_info_header "Building opusfile..."
 build_opusfile
 
+# wavpack
+log_info_header "Building wavpack..."
+build_cmake_lib wavpack https://github.com/dbry/WavPack "branch" "5.9.0"
+
 # sqlite3
 log_info_header "Building sqlite3..."
 build_sqlite3
@@ -230,6 +234,13 @@ function _copy_opus() {
 }
 copy_libs_for_arches _copy_opus
 
+function _copy_wavpack() {
+	local target_libs_folder="ddnet-libs/wavpack/$TARGET_PLATFORM/$2"
+	mkdir -p "$target_libs_folder"
+	cp compile_libs/wavpack/"$1"/libwavpack.a "$target_libs_folder"/libwavpack.a
+}
+copy_libs_for_arches _copy_wavpack
+
 function _copy_sqlite3() {
 	local target_libs_folder="ddnet-libs/sqlite3/$TARGET_PLATFORM/$2"
 	mkdir -p "$target_libs_folder"
@@ -287,6 +298,7 @@ if [[ "$TARGET_PLATFORM" == "ios" ]]; then
 	_create_ios_xcframework "ddnet-libs/png" "libpng16.a"
 	_create_ios_xcframework "ddnet-libs/sdl" "libSDL2.a"
 	_create_ios_xcframework "ddnet-libs/sqlite3" "libsqlite3.a"
+	_create_ios_xcframework "ddnet-libs/wavpack" "libwavpack.a"
 
 	function _cleanup_ios_library() {
 		local library_folder="ddnet-libs/$1/ios"
@@ -298,6 +310,7 @@ if [[ "$TARGET_PLATFORM" == "ios" ]]; then
 	_cleanup_ios_library png
 	_cleanup_ios_library sdl
 	_cleanup_ios_library sqlite3
+	_cleanup_ios_library wavpack
 fi
 
 log_info "Done."
