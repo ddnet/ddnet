@@ -465,7 +465,7 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 	}
 }
 
-void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State)
+void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State, int NumPlayersForSize)
 {
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Team invalid");
 
@@ -474,7 +474,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const bool TimeScore = GameClient()->m_GameInfo.m_TimeScore;
 	const bool MillisecondScore = GameClient()->m_ReceivedDDNetPlayerFinishTimes;
 	const bool TrueMilliseconds = GameClient()->m_ReceivedDDNetPlayerFinishTimesMillis;
-	const int NumPlayers = CountEnd - CountStart;
+	const int NumPlayers = NumPlayersForSize >= 0 ? NumPlayersForSize : (CountEnd - CountStart);
 	const bool LowScoreboardWidth = Scoreboard.w < 350.0f;
 
 	bool Race7 = Client()->IsSixup() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
@@ -527,7 +527,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		RoundRadius = 2.5f;
 		FontSize = 8.0f;
 	}
-	else if(LowScoreboardWidth)
+	else if(LowScoreboardWidth && NumPlayers <= 48)
 	{
 		LineHeight = 7.5f;
 		TeeSizeMod = 0.125f;
@@ -549,13 +549,22 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const float TeeOffset = ScoreOffset + ScoreLength + MARGIN;
 	const float TeeLength = 60.0f * TeeSizeMod;
 	const float NameOffset = TeeOffset + TeeLength;
-	const float NameLength = (LowScoreboardWidth ? 90.0f : 150.0f) - TeeLength;
 	const float CountryLength = (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f;
 	const float PingLength = 27.5f;
 	const float PingOffset = Scoreboard.x + Scoreboard.w - PingLength - MARGIN;
 	const float CountryOffset = PingOffset - CountryLength;
+
+	float NameLength = (LowScoreboardWidth ? 90.0f : 150.0f) - TeeLength;
+	const float MinMiddleGap = 5.0f; // 2.5 before and after clan
+	const float AvailableMiddle = CountryOffset - NameOffset;
+	if(NameLength + MinMiddleGap > AvailableMiddle)
+	{
+		const float Shrinkable = AvailableMiddle - MinMiddleGap;
+		NameLength = std::max(0.0f, Shrinkable * 0.7f);
+	}
+
 	const float ClanOffset = NameOffset + NameLength + 2.5f;
-	const float ClanLength = CountryOffset - ClanOffset - 2.5f;
+	const float ClanLength = std::max(0.0f, CountryOffset - ClanOffset - 2.5f);
 
 	// render headlines
 	const float HeadlineFontsize = 11.0f;
@@ -986,8 +995,25 @@ void CScoreboard::OnRender()
 
 		RenderTitleBar(RedTitle, TEAM_RED, pRedTeamName == nullptr ? Localize("Red team") : pRedTeamName);
 		RenderTitleBar(BlueTitle, TEAM_BLUE, pBlueTeamName == nullptr ? Localize("Blue team") : pBlueTeamName);
-		RenderScoreboard(RedScoreboard, TEAM_RED, 0, NumPlayers, RenderState);
-		RenderScoreboard(BlueScoreboard, TEAM_BLUE, 0, NumPlayers, RenderState);
+
+		auto RenderTeamScoreboard = [&](CUIRect TeamScoreboard, int Team, int TeamSize) {
+			if(TeamSize <= 64)
+			{
+				RenderScoreboard(TeamScoreboard, Team, 0, TeamSize, RenderState);
+			}
+			else
+			{
+				const int FirstColumnSize = 64;
+				CUIRect LeftColumn, RightColumn;
+				TeamScoreboard.VSplitMid(&LeftColumn, &RightColumn, 2.5f);
+
+				RenderScoreboard(LeftColumn, Team, 0, FirstColumnSize, RenderState, FirstColumnSize);
+				RenderScoreboard(RightColumn, Team, FirstColumnSize, TeamSize, RenderState, FirstColumnSize);
+			}
+		};
+
+		RenderTeamScoreboard(RedScoreboard, TEAM_RED, aTeamSize[TEAM_RED]);
+		RenderTeamScoreboard(BlueScoreboard, TEAM_BLUE, aTeamSize[TEAM_BLUE]);
 	}
 	else
 	{
