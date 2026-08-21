@@ -244,8 +244,6 @@ private:
 
 	int m_aCheckInfo[NUM_DUMMIES];
 
-	char m_aDDNetVersionStr[64];
-
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 	static void ConReadyChange7(IConsole::IResult *pResult, void *pUserData);

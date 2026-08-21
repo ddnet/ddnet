@@ -31,6 +31,9 @@ else()
   message(FATAL_ERROR "Couldn't parse version from src/game/version.h")
 endif()
 
+# Full version including any suffix like `-dev` or `-rc1`
+string(REGEX REPLACE "^[^\"]*\"([^\"]*)\".*$" "\\1" VERSION_FULL "${VERSION_LINE}")
+
 if(VERSION_PATCH STREQUAL "0")
   project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 else()
@@ -155,7 +158,7 @@ endif()
 
 # Set version if not explicitly set
 if(NOT VERSION)
-  set(VERSION ${PROJECT_VERSION})
+  set(VERSION ${VERSION_FULL})
 endif()
 
 set(OpenGL_GL_PREFERENCE LEGACY)
@@ -2064,15 +2067,20 @@ if(NOT PROJECT_GIT_DIR_ERROR)
     ${PROJECT_GIT_DIR}/logs/HEAD
   )
 endif()
-add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+add_custom_command(OUTPUT
+    ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+    ${PROJECT_BINARY_DIR}/src/generated/git_revision.h
   COMMAND ${Python3_EXECUTABLE}
     scripts/git_revision.py
-    > ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+    ${VERSION}
+    ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+    ${PROJECT_BINARY_DIR}/src/generated/git_revision.h
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   DEPENDS
     ${GIT_REVISION_EXTRA_DEPS}
     scripts/git_revision.py
 )
+add_custom_target(git_revision DEPENDS ${PROJECT_BINARY_DIR}/src/generated/git_revision.h)
 # tidy-alphabetical-start
 generate_source("src/generated/client_data.cpp" "client_content_source")
 generate_source("src/generated/client_data.h" "client_content_header")
@@ -4003,6 +4011,8 @@ foreach(target ${TARGETS_OWN})
   set_property(TARGET ${target} PROPERTY CXX_STANDARD 20)
   set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
   set_property(TARGET ${target} PROPERTY CXX_EXTENSIONS OFF)
+  # <game/version.h> includes the generated <generated/git_revision.h>
+  add_dependencies(${target} git_revision)
 
   if(MSVC)
     # tidy-alphabetical-start
@@ -4093,9 +4103,6 @@ foreach(target ${TARGETS_OWN})
     if(DISCORD_DYNAMIC)
       target_compile_definitions(${target} PRIVATE CONF_DISCORD_DYNAMIC)
     endif()
-  endif()
-  if(VERSION)
-    target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION_INTERNAL=${VERSION})
   endif()
   if(TARGET_OS STREQUAL "android")
     if(ANDROID_PACKAGE_NAME)

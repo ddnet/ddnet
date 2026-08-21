@@ -406,7 +406,6 @@ public:
 
 	CUuid GameUuid() const override;
 	const char *GameType() const override;
-	char m_aVersionString[32];
 	const char *Version() const override;
 	const char *NetVersion() const override;
 

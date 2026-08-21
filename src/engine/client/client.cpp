@@ -2500,6 +2500,11 @@ static const TVersion gs_InvalidVersion = std::make_tuple(-1, -1, -1);
 
 static TVersion ToVersion(char *pStr)
 {
+	// Cut off suffixes like `-dev-1a2b3c4d` and `-rc1`
+	char *pSuffix = strchr(pStr, '-');
+	if(pSuffix != nullptr)
+		*pSuffix = '\0';
+
 	int aVersion[3] = {0, 0, 0};
 	const char *p = strtok(pStr, ".");
 

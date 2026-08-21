@@ -91,7 +91,7 @@ const char *CGameClient::Version() const { return GAME_VERSION; }
 const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
 const char *CGameClient::NetVersion7() const { return GAME_NETVERSION7; }
 int CGameClient::DDNetVersion() const { return DDNET_VERSION_NUMBER; }
-const char *CGameClient::DDNetVersionStr() const { return m_aDDNetVersionStr; }
+const char *CGameClient::DDNetVersionStr() const { return GAME_NAME " " GAME_RELEASE_VERSION; }
 int CGameClient::ClientVersion7() const { return CLIENT_VERSION7; }
 const char *CGameClient::GetItemName(int Type) const { return m_NetObjHandler.GetObjName(Type); }
 
@@ -344,15 +344,6 @@ void CGameClient::OnInit()
 	});
 	m_RenderTools.Init(Graphics(), TextRender());
 	m_RenderMap.Init(Graphics(), TextRender());
-
-	if(GIT_SHORTREV_HASH)
-	{
-		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s (%s)", GAME_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH);
-	}
-	else
-	{
-		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s", GAME_NAME, GAME_RELEASE_VERSION);
-	}
 
 	// TODO: this should be different
 	// setup item sizes
@@ -635,8 +626,6 @@ void CGameClient::OnReset()
 	m_LastFlagCarrierBlue = -4;
 
 	std::fill(std::begin(m_aCheckInfo), std::end(m_aCheckInfo), -1);
-
-	// m_aDDNetVersionStr is initialized once in OnInit
 
 	std::fill(std::begin(m_aLastPos), std::end(m_aLastPos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aLastActive), std::end(m_aLastActive), false);
