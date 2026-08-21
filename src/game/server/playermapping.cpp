@@ -138,7 +138,7 @@ void CPlayerMapping::CPlayerMap::InitPlayer(CSixupCfg SixupCfg)
 			protocol7::CNetMsg_Sv_ClientInfo FakeInfo;
 			FakeInfo.m_ClientId = m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1;
 			FakeInfo.m_Local = 0;
-			FakeInfo.m_Team = TEAM_BLUE;
+			FakeInfo.m_Team = TEAM_BLUE; // `TEAM_BLUE` to hide from ddrace scoreboards
 			FakeInfo.m_pName = " ";
 			FakeInfo.m_pClan = "";
 			FakeInfo.m_Country = -1;
@@ -609,7 +609,7 @@ void CPlayerMapping::CPlayerMap::UpdateSeeOthers() const
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 	NewClientInfoMsg.m_ClientId = SeeOthersId;
 	NewClientInfoMsg.m_Local = 0;
-	NewClientInfoMsg.m_Team = TEAM_BLUE;
+	NewClientInfoMsg.m_Team = TEAM_BLUE; // `TEAM_BLUE` to hide from ddrace scoreboards
 	NewClientInfoMsg.m_pName = m_pPlayerMapping->SeeOthersName(m_ClientId);
 	NewClientInfoMsg.m_pClan = "";
 	NewClientInfoMsg.m_Country = -1;

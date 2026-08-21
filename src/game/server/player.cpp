@@ -507,11 +507,12 @@ void CPlayer::FakeSnap()
 	if(Server()->ClientSupportsServerMaxClients(m_ClientId))
 		return;
 
-	// see others in spec
+	// see others in spec and vote menu
 	int SeeOthersId = GameServer()->m_PlayerMapping.SeeOthersId(m_ClientId);
 
 	if(Server()->IsSixup(m_ClientId))
 	{
+		// 0.7 removed `PLAYERFLAG_IN_MENU` so they have to receive the fake player at all times to support voting
 		if(GameServer()->m_PlayerMapping.TotalOverhang(m_ClientId))
 		{
 			protocol7::CNetObj_PlayerInfo PlayerInfo = {};
@@ -525,8 +526,11 @@ void CPlayer::FakeSnap()
 		return;
 	}
 
-	// see others
-	if(GameServer()->m_PlayerMapping.TotalOverhang(m_ClientId))
+	// See Others. For better 0.6 mod compatibility: Hide fake player even from `TEAM_BLUE` scoreboard if's not available currently and mod is TeamPlay
+	// Note: this causes Player and Vote menu to jump one line up when at the bottom, because the player gets removed after closing the menu.
+	const bool SeeOthersAvailable = (m_Paused != PAUSE_NONE || m_Team == TEAM_SPECTATORS || (m_PlayerFlags & PLAYERFLAG_IN_MENU));
+	const bool ShowSeeOthersPlayer = !GameServer()->m_pController->IsTeamPlay() || SeeOthersAvailable;
+	if(GameServer()->m_PlayerMapping.TotalOverhang(m_ClientId) && ShowSeeOthersPlayer)
 	{
 		CNetObj_ClientInfo ClientInfo = {};
 		StrToInts(ClientInfo.m_aName, std::size(ClientInfo.m_aName), GameServer()->m_PlayerMapping.SeeOthersName(m_ClientId));
@@ -541,10 +545,11 @@ void CPlayer::FakeSnap()
 		PlayerInfo.m_Local = 0;
 		PlayerInfo.m_ClientId = SeeOthersId;
 		PlayerInfo.m_Score = FinishTime::NOT_FINISHED_TIMESCORE;
-		PlayerInfo.m_Team = TEAM_BLUE;
+		PlayerInfo.m_Team = TEAM_BLUE; // `TEAM_BLUE` to hide from ddrace scoreboards
 		Server()->SnapNewItem(SeeOthersId, PlayerInfo);
 	}
 
+	// Empty fake player for chat messages from untranslated players
 	int FakeId = Server()->GetMaxClients(m_ClientId) - 1;
 	CNetObj_ClientInfo ClientInfo = {};
 	StrToInts(ClientInfo.m_aName, std::size(ClientInfo.m_aName), " ");
