@@ -63,6 +63,13 @@ bool CHttpRequestEmscripten::ConfigureAndRun()
 		return false;
 	}
 
+	if(!str_startswith(m_aUrl, "https://") &&
+		(!g_Config.m_HttpAllowInsecure || !str_startswith(m_aUrl, "http://")))
+	{
+		log_error("http", "unsupported protocol: %s", m_aUrl);
+		return false;
+	}
+
 	HeaderString("User-Agent", USER_AGENT_STRING);
 
 	if(m_Type == REQUEST::POST_JSON)
