@@ -43,12 +43,7 @@ void CHttpRequestEmscripten::Abort()
 
 	IHttpRequest::Abort();
 
-	if(m_pFetch == nullptr)
-	{
-		return;
-	}
-
-	m_pHttp->AddPendingStateChange(m_pFetch, EHttpState::ABORTED);
+	m_pHttp->AddPendingStateChange(m_RequestId, EHttpState::ABORTED);
 }
 
 EM_JS(void, FormatTimestampJsImpl, (char *pBuf, size_t Size, time_t Timestamp), {
@@ -129,7 +124,7 @@ void CHttpRequestEmscripten::OnSuccess()
 
 	const bool Success = OnData(m_pFetch->data, m_pFetch->numBytes) == m_pFetch->numBytes;
 
-	m_pHttp->AddPendingStateChange(m_pFetch, Success ? EHttpState::DONE : EHttpState::ERROR);
+	m_pHttp->AddPendingStateChange(m_RequestId, Success ? EHttpState::DONE : EHttpState::ERROR);
 }
 
 void CHttpRequestEmscripten::OnFailure()
@@ -141,7 +136,7 @@ void CHttpRequestEmscripten::OnFailure()
 	}
 	m_CallbackFinished = true;
 
-	m_pHttp->AddPendingStateChange(m_pFetch, !m_FailOnErrorStatus && m_pFetch->status >= 400 ? EHttpState::DONE : EHttpState::ERROR);
+	m_pHttp->AddPendingStateChange(m_RequestId, !m_FailOnErrorStatus && m_pFetch->status >= 400 ? EHttpState::DONE : EHttpState::ERROR);
 }
 
 void CHttpRequestEmscripten::OnProgress()
@@ -150,7 +145,7 @@ void CHttpRequestEmscripten::OnProgress()
 		(m_pFetch->totalBytes > (uint64_t)m_MaxResponseSize ||
 			m_pFetch->dataOffset > (uint64_t)m_MaxResponseSize))
 	{
-		m_pHttp->AddPendingStateChange(m_pFetch, EHttpState::ERROR);
+		m_pHttp->AddPendingStateChange(m_RequestId, EHttpState::ERROR);
 		return;
 	}
 	m_Current.store(m_pFetch->dataOffset, std::memory_order_relaxed);
@@ -315,6 +310,8 @@ void CHttpEmscripten::Run(std::shared_ptr<IHttpRequest> pRequest)
 		dbg_assert(m_Initialized, "HTTP not initialized");
 		std::shared_ptr<CHttpRequestEmscripten> pRequestImpl = std::static_pointer_cast<CHttpRequestEmscripten>(pRequest);
 		pRequestImpl->m_pHttp = this;
+		pRequestImpl->m_RequestId = m_NextRequestId;
+		++m_NextRequestId;
 		if(m_Shutdown)
 		{
 			pRequestImpl->OnCompletionInternal(EHttpState::ABORTED, "Shutting down");
@@ -377,7 +374,7 @@ void CHttpEmscripten::RunLoop()
 					{
 						for(auto &[_, pRequest] : m_RunningRequests)
 						{
-							auto [ExistingElement, Inserted] = m_PendingFetchChanges.emplace(pRequest->m_pFetch, EHttpState::ABORTED);
+							auto [ExistingElement, Inserted] = m_PendingFetchChanges.emplace(pRequest->m_RequestId, EHttpState::ABORTED);
 							if(!Inserted)
 							{
 								ExistingElement->second = EHttpState::ABORTED;
@@ -435,17 +432,24 @@ void CHttpEmscripten::RunLoop()
 				continue;
 			}
 
+			if(pRequest->IsAbortRequested())
 			{
-				emscripten_fetch_t *pFetch = pRequest->m_pFetch;
-				auto [_, Inserted] = m_RunningRequests.emplace(pFetch, std::move(pRequest));
-				dbg_assert(Inserted, "Request with same fetch handle already running");
+				pRequest->OnCompletionInternal(EHttpState::ABORTED, "Request aborted");
+				PendingRequests.pop_front();
+				continue;
+			}
+
+			{
+				uint64_t RequestId = pRequest->m_RequestId;
+				auto [_, Inserted] = m_RunningRequests.emplace(RequestId, std::move(pRequest));
+				dbg_assert(Inserted, "Request with same ID already running");
 			}
 			PendingRequests.pop_front();
 		}
 
-		for(const auto &[pFetch, NewState] : PendingFetchChanges)
+		for(const auto &[RequestId, NewState] : PendingFetchChanges)
 		{
-			auto pRequest = m_RunningRequests.find(pFetch);
+			auto pRequest = m_RunningRequests.find(RequestId);
 			if(pRequest == m_RunningRequests.end())
 			{
 				// Requests can be aborted even if they are not in m_RunningRequests anymore.
@@ -496,11 +500,11 @@ void CHttpEmscripten::RunLoop()
 	m_RunningRequests.clear();
 }
 
-void CHttpEmscripten::AddPendingStateChange(emscripten_fetch_t *pFetch, EHttpState State)
+void CHttpEmscripten::AddPendingStateChange(uint64_t RequestId, EHttpState State)
 {
 	{
 		std::unique_lock Lock(m_Lock);
-		auto [ExistingElement, Inserted] = m_PendingFetchChanges.emplace(pFetch, State);
+		auto [ExistingElement, Inserted] = m_PendingFetchChanges.emplace(RequestId, State);
 		if(!Inserted && ExistingElement->second != EHttpState::ABORTED)
 		{
 			ExistingElement->second = State;
