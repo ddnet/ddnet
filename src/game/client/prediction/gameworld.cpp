@@ -17,6 +17,7 @@
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>
+#include <game/collision.h>
 #include <game/mapbugs.h>
 #include <game/mapitems.h>
 
@@ -515,10 +516,17 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 		CEntity *pEnt = new CPickup(NetPickup);
 		InsertEntity(pEnt, true);
 	}
-	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
+	else if(ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER)
 	{
 		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, pDataEx);
 		if(!IsLocalTeam(Data.m_Owner) || !Data.m_Predict)
+		{
+			return;
+		}
+
+		// Doors are static world geometry that only ever adds move restrictions to tiles,
+		// so they follow the tile physics config rather than the weapon prediction config.
+		if(!(Data.m_Type == LASERTYPE_DOOR ? m_WorldConfig.m_PredictTiles : m_WorldConfig.m_PredictWeapons))
 		{
 			return;
 		}
@@ -581,7 +589,6 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 				return;
 			}
 			CDoor *pEnt = new CDoor(NetDoor);
-			pEnt->ResetCollision();
 			InsertEntity(pEnt);
 		}
 		else if(Data.m_Type == LASERTYPE_PLASMA)
@@ -598,6 +605,29 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 			InsertEntity(pEnt);
 		}
 	}
+}
+
+void CGameWorld::ResetDoorCollision()
+{
+	// Doors add their move restrictions to the collision grid shared by the whole client
+	// rather than keeping them on the entity, so the grid is rebuilt after every snapshot:
+	// a destroyed door clears its entire span, including tiles another door still occupies.
+	// Doors are applied in map order, the order the server creates them in, so intersecting
+	// doors resolve to the same tile on both sides. Two doors originating on the same tile
+	// share a map index; the server creates the game/front-layer door before the switch-layer
+	// one, so the switch door (m_Number > 0) stamps the shared origin tile last and wins.
+	std::vector<CDoor *> vpDoors;
+	for(CEntity *pEnt = FindFirst(ENTTYPE_DOOR); pEnt; pEnt = pEnt->TypeNext())
+		vpDoors.push_back(static_cast<CDoor *>(pEnt));
+	std::stable_sort(vpDoors.begin(), vpDoors.end(), [this](const CDoor *pLeft, const CDoor *pRight) {
+		const int LeftIndex = Collision()->GetPureMapIndex(pLeft->m_Pos);
+		const int RightIndex = Collision()->GetPureMapIndex(pRight->m_Pos);
+		if(LeftIndex != RightIndex)
+			return LeftIndex < RightIndex;
+		return (pLeft->m_Number > 0) < (pRight->m_Number > 0);
+	});
+	for(CDoor *pDoor : vpDoors)
+		pDoor->ResetCollision();
 }
 
 void CGameWorld::NetObjEnd()
@@ -617,6 +647,7 @@ void CGameWorld::NetObjEnd()
 						pHookedChar->m_MarkedForDestroy = false;
 					}
 	RemoveEntities();
+	ResetDoorCollision();
 
 	// Update character IDs and pointers
 	for(int i = 0; i < MAX_CLIENTS; i++)
