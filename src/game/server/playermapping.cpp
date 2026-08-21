@@ -72,7 +72,7 @@ void CPlayerMapping::CPlayerMap::Init(int ClientId, CPlayerMapping *pPlayerMappi
 	m_NumPages = 0;
 	m_TotalOverhang = 0;
 	m_NumReserved = 0;
-	m_DoSeeOthersByVote = false;
+	m_DoSeeOthersByVoteTick = 0;
 	ResetSeeOthers();
 }
 
@@ -238,13 +238,13 @@ void CPlayerMapping::CPlayerMap::Update()
 	if(m_pPlayerMapping->Server()->ClientSupportsServerMaxClients(m_ClientId))
 		return;
 
-	if(m_DoSeeOthersByVote)
+	if(m_DoSeeOthersByVoteTick > 0)
 	{
 		CCharacter *pChr = m_pPlayerMapping->GameServer()->GetPlayerChar(m_ClientId);
 		if(pChr && !pChr->IsIdle())
 		{
 			ResetSeeOthers();
-			m_DoSeeOthersByVote = false;
+			m_DoSeeOthersByVoteTick = 0;
 		}
 	}
 
@@ -414,7 +414,10 @@ bool CPlayerMapping::DoSeeOthers(int ClientId, int SelectedId, bool DoByVote)
 	{
 		if(DoByVote)
 		{
-			m_aMap[ClientId].m_DoSeeOthersByVote = true;
+			// Less conservative rate limit than normal 3 seconds for voting. Let's settle for 1 second for now. Comparison: +spectate has 250ms.
+			if(m_aMap[ClientId].m_DoSeeOthersByVoteTick > 0 && m_aMap[ClientId].m_DoSeeOthersByVoteTick > Server()->Tick() - Server()->TickSpeed())
+				return true;
+			m_aMap[ClientId].m_DoSeeOthersByVoteTick = Server()->Tick();
 		}
 		m_aMap[ClientId].DoSeeOthers();
 		return true;
@@ -586,8 +589,8 @@ int CPlayerMapping::CPlayerMap::MaxNumSeeOthers()
 	int NumSeeOthersSlots = 0;
 	for(int i = MapSize() - 1; i >= 0; i--)
 	{
-		int MappenClientId = m_pMap[i];
-		if(MappenClientId != -1 && m_aReserved[MappenClientId])
+		int MappedClientId = m_pMap[i];
+		if(MappedClientId != -1 && m_aReserved[MappedClientId])
 			break;
 		NumSeeOthersSlots++;
 	}
