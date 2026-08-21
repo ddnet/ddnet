@@ -201,19 +201,20 @@ void CHttpRequestEmscripten::OnCompletionInternal(EHttpState State, const char *
 			char *pHeaders = static_cast<char *>(malloc(HeadersLength + 1));
 			dbg_assert(emscripten_fetch_get_response_headers(m_pFetch, pHeaders, HeadersLength + 1) == HeadersLength + 1, "emscripten_fetch_get_response_headers failure");
 			char **ppUnpackedHeaders = emscripten_fetch_unpack_response_headers(pHeaders);
-
-			int HeaderIndex = 0;
-			while(ppUnpackedHeaders[HeaderIndex] != nullptr)
+			if(ppUnpackedHeaders != nullptr)
 			{
-				const char *pName = ppUnpackedHeaders[HeaderIndex];
-				++HeaderIndex;
-				const char *pValue = ppUnpackedHeaders[HeaderIndex];
-				++HeaderIndex;
-				dbg_assert(pValue != nullptr, "emscripten_fetch_unpack_response_headers result unexpected: value is nullptr for header '%s'", pName);
-				OnHeader(pName, pValue);
+				int HeaderIndex = 0;
+				while(ppUnpackedHeaders[HeaderIndex] != nullptr)
+				{
+					const char *pName = ppUnpackedHeaders[HeaderIndex];
+					++HeaderIndex;
+					const char *pValue = ppUnpackedHeaders[HeaderIndex];
+					++HeaderIndex;
+					dbg_assert(pValue != nullptr, "emscripten_fetch_unpack_response_headers result unexpected: value is nullptr for header '%s'", pName);
+					OnHeader(pName, pValue);
+				}
+				emscripten_fetch_free_unpacked_response_headers(ppUnpackedHeaders);
 			}
-
-			emscripten_fetch_free_unpacked_response_headers(ppUnpackedHeaders);
 			free(pHeaders);
 		}
 
