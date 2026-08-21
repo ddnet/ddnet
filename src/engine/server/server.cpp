@@ -2902,6 +2902,10 @@ void CServer::UpdateServerInfo(bool Resend)
 
 int CServer::GetMaxClients(int ClientId) const
 {
+	// Shouldn't catch anything currently
+	if(ClientId == SERVER_DEMO_CLIENT)
+		return MAX_CLIENTS;
+
 	if(m_aClients[ClientId].m_Sixup)
 		return LEGACY_MAX_CLIENTS;
 	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_128_PLAYERS)
