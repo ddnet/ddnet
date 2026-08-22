@@ -139,7 +139,7 @@ void CProjectile::Tick()
 		else if(m_Type == WEAPON_GUN)
 		{
 			if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
-				GameWorld()->CreatePredictedDamageIndEvent(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_StartTick);
+				GameWorld()->CreatePredictedDamageIndEvent(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_StartTick, m_Owner);
 			m_MarkedForDestroy = true;
 		}
 		else if(!m_Freeze)

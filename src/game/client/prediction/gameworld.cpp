@@ -352,7 +352,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 	if(m_WorldConfig.m_IsDDRace && m_WorldConfig.m_PredictDDRace)
 	{
 		// vanilla has different projectile physics
-		CreatePredictedExplosionEvent(Pos, Id);
+		CreatePredictedExplosionEvent(Pos, Id, Owner);
 	}
 
 	// deal damage
@@ -864,23 +864,23 @@ void CGameWorld::CreatePredictedSound(vec2 Pos, int SoundId, int Id)
 	if(!g_Config.m_SndEnable)
 		return;
 
-	CPredictedEvent Event(NETEVENTTYPE_SOUNDWORLD, Pos, Id, GameTick(), SoundId);
+	CPredictedEvent Event(NETEVENTTYPE_SOUNDWORLD, Pos, Id, GameTick(), -1, SoundId);
 	CreatePredictedEvent(Event);
 }
 
-void CGameWorld::CreatePredictedExplosionEvent(vec2 Pos, int Id)
+void CGameWorld::CreatePredictedExplosionEvent(vec2 Pos, int Id, int ClientId)
 {
-	CPredictedEvent Event(NETEVENTTYPE_EXPLOSION, Pos, Id, GameTick());
+	CPredictedEvent Event(NETEVENTTYPE_EXPLOSIONEX, Pos, Id, GameTick(), ClientId);
 	CreatePredictedEvent(Event);
 }
 
-void CGameWorld::CreatePredictedHammerHitEvent(vec2 Pos, int Id)
+void CGameWorld::CreatePredictedHammerHitEvent(vec2 Pos, int Id, int ClientId)
 {
-	CPredictedEvent Event(NETEVENTTYPE_HAMMERHIT, Pos, Id, GameTick());
+	CPredictedEvent Event(NETEVENTTYPE_HAMMERHITEX, Pos, Id, GameTick(), ClientId);
 	CreatePredictedEvent(Event);
 }
 
-void CGameWorld::CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount, int Id)
+void CGameWorld::CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount, int Id, int ClientId)
 {
 	float a = 3 * pi / 2 + Angle;
 	float s = a - pi / 3;
@@ -889,7 +889,7 @@ void CGameWorld::CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount
 	{
 		float f = mix(s, e, (i + 1) / (float)(Amount + 1));
 
-		CPredictedEvent Event(NETEVENTTYPE_DAMAGEIND, Pos, Id, GameTick(), (int)(f * 256.0f));
+		CPredictedEvent Event(NETEVENTTYPE_DAMAGEINDEX, Pos, Id, GameTick(), ClientId, (int)(f * 256.0f));
 		CreatePredictedEvent(Event);
 	}
 }

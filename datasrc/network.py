@@ -363,9 +363,19 @@ Objects = [
 		NetIntAny("m_Angle"),
 	]),
 
-	NetEventEx("Birthday:Common", "birthday@netevent.ddnet.org", []),
+	NetEventEx("CommonEx:Common", "common-ex@netevent.ddnet.org", [
+		NetIntRange("m_ClientId", -1, 'MAX_CLIENTS-1', default=-1),
+	]),
 
-	NetEventEx("Finish:Common", "finish@netevent.ddnet.org", []),
+	NetEventEx("Birthday:CommonEx", "birthday@netevent.ddnet.org", []),
+	NetEventEx("Finish:CommonEx", "finish@netevent.ddnet.org", []),
+	NetEventEx("ExplosionEx:CommonEx", "explosion-ex@netevent.ddnet.org", []),
+	NetEventEx("SpawnEx:CommonEx", "spawn-ex@netevent.ddnet.org", []),
+	NetEventEx("HammerHitEx:CommonEx", "hammerhit-ex@netevent.ddnet.org", []),
+	
+	NetEventEx("DamageIndEx:CommonEx", "damageind-ex@netevent.ddnet.org", [
+		NetIntAny("m_Angle"),
+	]),
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),

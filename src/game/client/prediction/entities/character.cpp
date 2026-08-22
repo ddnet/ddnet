@@ -331,9 +331,9 @@ void CCharacter::FireWeapon()
 
 			// set their velocity to fast upward (for now)
 			if(length(pTarget->m_Pos - ProjStartPos) > 0.0f)
-				GameWorld()->CreatePredictedHammerHitEvent(pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f, GetCid());
+				GameWorld()->CreatePredictedHammerHitEvent(pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f, GetCid(), GetCid());
 			else
-				GameWorld()->CreatePredictedHammerHitEvent(ProjStartPos, GetCid());
+				GameWorld()->CreatePredictedHammerHitEvent(ProjStartPos, GetCid(), GetCid());
 
 			vec2 Dir;
 			if(length(pTarget->m_Pos - m_Pos) > 0.0f)

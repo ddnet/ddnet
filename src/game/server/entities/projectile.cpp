@@ -214,7 +214,7 @@ void CProjectile::Tick()
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_TeamMask);
+			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_Owner, m_TeamMask);
 			m_MarkedForDestroy = true;
 			return;
 		}
