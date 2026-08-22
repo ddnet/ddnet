@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 
 class CLayer;
 class CLayerTiles;
@@ -24,7 +25,7 @@ public:
 		bool m_Active;
 		ivec2 m_TextIndex;
 		// column a newline returns to
-		int m_LineStart;
+		std::optional<int> m_LineStart;
 		std::shared_ptr<CLayer> m_pLastLayer;
 		int m_TilesPlacedSinceActivate;
 

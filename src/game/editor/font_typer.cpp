@@ -18,7 +18,7 @@ void CFontTyper::CState::Reset()
 {
 	m_Active = false;
 	m_TextIndex = ivec2(0, 0);
-	m_LineStart = 0;
+	m_LineStart = std::nullopt;
 	m_pLastLayer = nullptr;
 	m_TilesPlacedSinceActivate = 0;
 }
@@ -50,18 +50,20 @@ void CFontTyper::PlaceTile(unsigned char Index, const std::shared_ptr<CLayerTile
 	{
 		if(Index == 0)
 			return;
-		State.m_TextIndex.x = State.m_LineStart;
+		State.m_TextIndex.x = State.m_LineStart.value_or(0);
 		State.m_TextIndex.y++;
 
 		// corner case
 		if(State.m_TextIndex.y >= pLayer->m_Height)
+		{
+			State.m_TextIndex.x = pLayer->m_Width;
+			State.m_TextIndex.y = pLayer->m_Height - 1;
 			return;
+		}
 	}
-	// handle writing left of the line start
-	else if(Index != 0 && State.m_TextIndex.x < State.m_LineStart)
-	{
+
+	if(Index != 0 && (!State.m_LineStart.has_value() || State.m_TextIndex.x < State.m_LineStart))
 		State.m_LineStart = State.m_TextIndex.x;
-	}
 	SetTile(State.m_TextIndex, Index, pLayer);
 	State.m_TextIndex.x++;
 }
@@ -103,6 +105,70 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	if(!(Event.m_Flags & IInput::FLAG_PRESS))
 		return false;
 
+	if(State.m_LineStart.has_value())
+		State.m_LineStart = std::clamp(State.m_LineStart.value(), 0, pLayer->m_Width - 1);
+
+	// handle all ctrl+S binds instead of writing "S"
+	if(Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_S))
+	{
+		TextModeOff();
+		return false;
+	}
+
+	if(Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_V))
+	{
+		std::string Clipboard = Input()->GetClipboardText();
+		if(!Clipboard.empty())
+		{
+			if(Clipboard.size() > 10000)
+			{
+				Editor()->ShowFileDialogError("The clipboard contains %" PRIzu " characters, please post it in chunks", Clipboard.size());
+				return false;
+			}
+			str_sanitize(Clipboard.data());
+			for(auto &Char : Clipboard)
+			{
+				if(Char == '\r')
+					continue;
+				if(Char == '\t')
+					Char = ' ';
+
+				// handle space
+				if(Char == ' ')
+				{
+					PlaceTile(0, pLayer);
+				}
+				// handle linebreaks
+				else if(Char == '\n')
+				{
+					if(State.m_TextIndex.y < pLayer->m_Height - 1)
+					{
+						State.m_TextIndex.y++;
+						if(State.m_LineStart.has_value())
+							State.m_TextIndex.x = State.m_LineStart.value();
+					}
+				}
+				// handle numbers
+				else if(str_isnum(Char))
+				{
+					if(Char == '0')
+						PlaceTile(KEY_0 - KEY_1 + NUMBER_OFFSET, pLayer);
+					else
+						PlaceTile(Char - '1' + NUMBER_OFFSET, pLayer);
+				}
+				else
+				{
+					Char = str_uppercase(Char);
+					if(Char >= 'A' && Char <= 'Z')
+					{
+						PlaceTile(Char - 'A' + LETTER_OFFSET, pLayer);
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	// letters
 	if(Event.m_Key >= KEY_A && Event.m_Key <= KEY_Z)
 		PlaceTile(Event.m_Key - KEY_A + LETTER_OFFSET, pLayer);
@@ -118,6 +184,12 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		State.m_TextIndex.x--;
 		SetTile(State.m_TextIndex, 0, pLayer);
 	}
+	else if(Event.m_Key == KEY_DELETE)
+	{
+		if(State.m_TextIndex.x < pLayer->m_Width)
+			SetTile(State.m_TextIndex, 0, pLayer);
+	}
+
 	// space
 	if(Event.m_Key == KEY_SPACE)
 		PlaceTile(0, pLayer);
@@ -125,13 +197,39 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	if(Event.m_Key == KEY_RETURN)
 	{
 		State.m_TextIndex.y++;
-		State.m_TextIndex.x = State.m_LineStart;
+		if(State.m_LineStart.has_value())
+			State.m_TextIndex.x = State.m_LineStart.value();
 	}
+
+	// special key navigation
+	if(Event.m_Key == KEY_HOME)
+	{
+		for(int StartIndex = State.m_LineStart.value_or(0); StartIndex < pLayer->m_Width; ++StartIndex)
+		{
+			State.m_TextIndex.x = StartIndex;
+			if(pLayer->GetTile(StartIndex, State.m_TextIndex.y).m_Index != 0)
+				break;
+		}
+		// no char found
+		if(pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index == 0)
+			State.m_TextIndex.x = State.m_LineStart.value_or(0);
+	}
+	else if(Event.m_Key == KEY_END)
+	{
+		int LastIndex = -1;
+		for(int EndIndex = State.m_LineStart.value_or(0); EndIndex < pLayer->m_Width; ++EndIndex)
+		{
+			if(pLayer->GetTile(EndIndex, State.m_TextIndex.y).m_Index)
+				LastIndex = EndIndex;
+		}
+		State.m_TextIndex.x = LastIndex >= 0 ? LastIndex + 1 : State.m_LineStart.value_or(0);
+	}
+
 	// arrow key navigation
 	if(Event.m_Key == KEY_LEFT)
 	{
 		State.m_TextIndex.x--;
-		if(Input()->KeyIsPressed(KEY_LCTRL))
+		if(Input()->ModifierIsPressed())
 		{
 			while(State.m_TextIndex.x >= 1 && State.m_TextIndex.x <= pLayer->m_Width - 2 && pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index)
 				State.m_TextIndex.x--;
@@ -140,7 +238,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	if(Event.m_Key == KEY_RIGHT)
 	{
 		State.m_TextIndex.x++;
-		if(Input()->KeyIsPressed(KEY_LCTRL))
+		if(Input()->ModifierIsPressed())
 		{
 			while(State.m_TextIndex.x >= 1 && State.m_TextIndex.x <= pLayer->m_Width - 2 && pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index)
 				State.m_TextIndex.x++;
@@ -195,7 +293,6 @@ void CFontTyper::SetCursor()
 {
 	Map()->m_FontTyperState.m_TextIndex.x = (int)(Editor()->MapView()->MouseWorldPos().x / 32);
 	Map()->m_FontTyperState.m_TextIndex.y = (int)(Editor()->MapView()->MouseWorldPos().y / 32);
-	Map()->m_FontTyperState.m_LineStart = Map()->m_FontTyperState.m_TextIndex.x;
 	m_CursorRenderTime = time_get_nanoseconds() - 501ms;
 }
 
