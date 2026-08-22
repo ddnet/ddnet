@@ -24,7 +24,7 @@ GameInfoFlags = [
 ]
 GameInfoFlags2 = [
 	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO",
-	"HUD_DDRACE", "NO_WEAK_HOOK", "NO_SKIN_CHANGE_FOR_FROZEN", "DDRACE_TEAM", "PREDICT_EVENTS", "SUPPORTS_128_TEAMS"
+	"HUD_DDRACE", "NO_WEAK_HOOK", "NO_SKIN_CHANGE_FOR_FROZEN", "DDRACE_TEAM", "PREDICT_EVENTS"
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
@@ -272,6 +272,9 @@ Objects = [
 		NetIntAny("m_Flags", default=0),
 		NetIntAny("m_Version", default=0),
 		NetIntAny("m_Flags2", default=0),
+		NetIntRange("m_MinTeamSize", 0, 'MAX_CLIENTS', default=0),
+		NetIntRange("m_MaxTeamSize", 0, 'MAX_CLIENTS', default=0),
+		NetIntAny("m_NumDDRaceTeams", default=0),
 	], validate_size=False),
 
 	# The code assumes that this has the same in-memory representation as
