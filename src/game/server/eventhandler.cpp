@@ -69,10 +69,10 @@ void CEventHandler::Snap(int SnappingClient)
 					       Type == NETEVENTTYPE_SOUNDWORLDEX;
 				};
 
-				const auto &&SnapEvent = [&](bool ForceVanillaEvent = false) {
+				const auto &&SnapEvent = [&]() {
 					if(GameServer()->Server()->IsSixup(SnappingClient))
 						EventToSixup(&Type, &Size, &pData);
-					if(SnappingClientVersion < VERSION_DDNET_EVENTS_EX || ForceVanillaEvent)
+					if(SnappingClientVersion < VERSION_DDNET_EVENTS_EX)
 						EventExToVanilla(&Type, &Size, &pData);
 					GameServer()->Server()->SnapNewItem(Type, i, pData, Size);
 				};
@@ -82,13 +82,15 @@ void CEventHandler::Snap(int SnappingClient)
 					if(GameServer()->Server()->Translate(*pClientId, SnappingClient))
 					{
 						SnapEvent();
-						*pClientId = ClientId; // Reset Id for others
 					}
 					else if(CommonExEvent())
 					{
-						// Send vanilla event without ClientId if playermap is full
-						SnapEvent(true);
+						// Send event with ClientId = -1 if playermap is full/translation fails
+						*pClientId = -1;
+						SnapEvent();
 					}
+					// Reset Id for others
+					*pClientId = ClientId;
 				};
 
 				if(Type == NETEVENTTYPE_DEATH)
