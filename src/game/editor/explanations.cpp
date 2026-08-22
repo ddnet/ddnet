@@ -337,6 +337,10 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 	case TILE_CREDITS_7:
 	case TILE_CREDITS_8:
 		return "CREDITS: Who designed the entities.";
+	case TILE_ENV_TRIGGER:
+		if(Layer == LAYER_SWITCH)
+			return "ENVELOPE TRIGGER: Starts/stops/resets/loops an envelope. Can be used to play sounds.";
+		break;
 	case TILE_ENTITIES_OFF_1:
 	case TILE_ENTITIES_OFF_2:
 		return "ENTITIES OFF SIGN: Informs people playing with entities about important marks, tips, information or text on the map.";
