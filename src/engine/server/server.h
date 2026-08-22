@@ -167,6 +167,11 @@ public:
 		int m_AuthTries;
 		bool m_AuthHidden;
 		int m_NextMapChunk;
+		// map data chunks sent since the last map change
+		int m_NumMapChunks;
+		// per-tick preinput budget
+		int m_PreInputsTick;
+		int m_NumPreInputs;
 		int m_Flags;
 		bool m_ShowIps;
 		bool m_DebugDummy;
@@ -269,6 +274,7 @@ public:
 	CDemoRecorder m_aDemoRecorder[NUM_RECORDERS];
 	CAuthManager m_AuthManager;
 
+	// start of the second the connection-less server info responses are counted in
 	int64_t m_ServerInfoFirstRequest;
 	int m_ServerInfoNumRequests;
 
@@ -373,6 +379,7 @@ public:
 	void UpdateClientMaplistEntries(int ClientId);
 
 	bool CheckReservedSlotAuth(int ClientId, const char *pPassword);
+	bool TakePreInputBudget(int ClientId);
 	void ProcessClientPacket(CNetChunk *pPacket);
 	void OnNetMsgClientVer(int ClientId, CUuid *pConnectionId, int DDNetVersion, const char *pDDNetVersionStr);
 	void OnNetMsgInfo(int ClientId, const char *pVersion, const char *pPasswordOrNullptr);
@@ -415,8 +422,9 @@ public:
 	void CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxConsideredClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void GetServerInfoSixup(CPacker *pPacker, bool SendClients);
-	bool RateLimitServerInfoConnless();
-	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
+	// Whether a connection-less server info response may be sent, and if so whether it
+	// includes the client list.
+	std::optional<bool> RateLimitServerInfoConnless();
 	void UpdateRegisterServerInfo();
 	void UpdateServerInfo(bool Resend);
 

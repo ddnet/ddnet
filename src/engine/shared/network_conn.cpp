@@ -69,6 +69,8 @@ void CNetConnection::Reset(bool Rejoin)
 
 	m_LastSendTime = 0;
 	m_LastRecvTime = 0;
+	m_LastResendTime = 0;
+	m_ResendRequested = false;
 
 	mem_zero(&m_aConnectAddrs, sizeof(m_aConnectAddrs));
 	m_NumConnectAddrs = 0;
@@ -231,6 +233,20 @@ void CNetConnection::Resend()
 		ResendChunk(pResend);
 }
 
+void CNetConnection::AnswerResendRequest(int64_t Now)
+{
+	// requests that arrive within the interval are answered together by the next one
+	if(!m_ResendRequested)
+		return;
+	if(g_Config.m_ConnResendRequestsPerSecond != 0 &&
+		Now - m_LastResendTime < time_freq() / g_Config.m_ConnResendRequestsPerSecond)
+		return;
+
+	m_ResendRequested = false;
+	m_LastResendTime = Now;
+	Resend();
+}
+
 int CNetConnection::Connect(const NETADDR *pAddr, int NumAddrs)
 {
 	if(State() != EState::OFFLINE)
@@ -381,9 +397,9 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 
 	int64_t Now = time_get();
 
-	// check if resend is requested
 	if(pPacket->m_Flags & NET_PACKETFLAG_RESEND)
-		Resend();
+		m_ResendRequested = true;
+	AnswerResendRequest(Now);
 
 	//
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
@@ -502,6 +518,8 @@ int CNetConnection::Update()
 		return 0;
 
 	m_TimeoutSituation = false;
+
+	AnswerResendRequest(Now);
 
 	// check for timeout
 	if(State() != EState::CONNECT &&

@@ -20,6 +20,7 @@
 class CCharacter;
 class CGameContext;
 class IServer;
+struct CVoteOptionServer;
 struct CNetObj_PlayerInput;
 struct CScorePlayerResult;
 
@@ -106,6 +107,9 @@ public:
 	int m_LastInvited;
 
 	int m_SendVoteIndex;
+	// last option sent, only read while m_SendVoteIndex is greater than zero. Options
+	// appended after the list was fully sent follow it.
+	const CVoteOptionServer *m_pLastSentVoteOption;
 
 	const CTeeInfo &TeeInfos() const { return m_TeeInfos; }
 	void SetTeeInfos(const CTeeInfo &TeeInfos);
