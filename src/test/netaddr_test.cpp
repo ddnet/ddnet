@@ -79,18 +79,27 @@ TEST(NetAddr, FromUrlLookup)
 {
 	NETADDR Addr;
 
-	EXPECT_EQ(net_addr_from_url_lookup(&Addr, "127.0.0.1:8303", NETTYPE_ALL), 0);
+	EXPECT_TRUE(net_addr_from_url_lookup(&Addr, "127.0.0.1:8303", NETTYPE_ALL));
 	EXPECT_EQ(Addr.type, NETTYPE_IPV4);
 	EXPECT_EQ(Addr.port, 8303);
 
-	EXPECT_EQ(net_addr_from_url_lookup(&Addr, "tw-0.7+udp://127.0.0.1:8303", NETTYPE_ALL), 0);
+	EXPECT_TRUE(net_addr_from_url_lookup(&Addr, "tw-0.7+udp://127.0.0.1:8303", NETTYPE_ALL));
 	EXPECT_EQ(Addr.type, NETTYPE_IPV4 | NETTYPE_TW7);
 
-	EXPECT_EQ(net_addr_from_url_lookup(&Addr, "ddnet-20+ws://127.0.0.1:8303", NETTYPE_ALL), 0);
+	EXPECT_TRUE(net_addr_from_url_lookup(&Addr, "ddnet-20+ws://127.0.0.1:8303", NETTYPE_ALL));
 	EXPECT_EQ(Addr.type, NETTYPE_WEBSOCKET_IPV4);
 
-	EXPECT_EQ(net_addr_from_url_lookup(&Addr, "ddnet-20+wss://[::1]:8303", NETTYPE_ALL), 0);
+	EXPECT_TRUE(net_addr_from_url_lookup(&Addr, "ddnet-20+wss://[::1]:8303", NETTYPE_ALL));
 	EXPECT_EQ(Addr.type, NETTYPE_WEBSOCKET_IPV6 | NETTYPE_WEBSOCKET_TLS);
+}
+
+TEST(NetAddr, FromUrlLookupInvalid)
+{
+	NETADDR Addr;
+
+	// Unterminated IPv6 addresses are not valid hostnames either, with and without a URL scheme.
+	EXPECT_FALSE(net_addr_from_url_lookup(&Addr, "[::1", NETTYPE_ALL));
+	EXPECT_FALSE(net_addr_from_url_lookup(&Addr, "ddnet-20+wss://[::1", NETTYPE_ALL));
 }
 
 TEST(NetAddr, UrlStr)

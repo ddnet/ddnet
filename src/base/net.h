@@ -135,12 +135,12 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
  *               contain a hostname instead of an IP address.
  * @param types The types of IP that should be returned, see `net_host_lookup`.
  *
- * @return `0` on success.
+ * @return `true` on success.
  *
  * @remark The network types of the URL scheme are applied to the resolved address, so the
  * result can be used with `net_udp_send` etc. without further conversion.
  */
-int net_addr_from_url_lookup(NETADDR *addr, const char *string, int types);
+bool net_addr_from_url_lookup(NETADDR *addr, const char *string, int types);
 
 /**
  * Turns a network address into a representative string with the URL scheme of its type.
@@ -213,12 +213,14 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 void net_websocket_set_secure(bool secure);
 
 /**
- * Resets the websocket scheme to the default, which is determined by the protocol
- * of the page, see `other/emscripten/index.html`.
+ * Returns the default websocket scheme, which is determined by the protocol of the
+ * page, see `other/emscripten/index.html`.
  *
  * @ingroup Network-General
+ *
+ * @return Whether `wss` is the default.
  */
-void net_websocket_reset_secure();
+bool net_websocket_secure_default();
 #endif
 
 /**

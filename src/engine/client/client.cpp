@@ -639,28 +639,36 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	const char *pNextAddr = pAddress;
 	char aBuffer[128];
 	bool OnlySixup = true;
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	bool SecureWebsockets = false;
+#endif
 	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
 		NETADDR NextAddr;
-		if(net_addr_from_url_lookup(&NextAddr, aBuffer, m_aNetClient[CONN_MAIN].NetType()) != 0)
+		if(!net_addr_from_url_lookup(&NextAddr, aBuffer, m_aNetClient[CONN_MAIN].NetType()))
 		{
 			log_error("client", "could not find address of %s", aBuffer);
 			continue;
 		}
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
 		// Emscripten tunnels all traffic through websockets, so websocket addresses are
-		// used like normal addresses and only their scheme is applied globally.
+		// used like normal addresses and only their scheme is applied. The scheme is a
+		// single global setting and all addresses are connected to at once, so they must
+		// agree on it.
+		bool Secure = net_websocket_secure_default();
 		if((NextAddr.type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) != 0)
 		{
-			net_websocket_set_secure((NextAddr.type & NETTYPE_WEBSOCKET_TLS) != 0);
+			Secure = (NextAddr.type & NETTYPE_WEBSOCKET_TLS) != 0;
 			const bool Ipv4 = (NextAddr.type & NETTYPE_WEBSOCKET_IPV4) != 0;
 			NextAddr.type &= ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6 | NETTYPE_WEBSOCKET_TLS);
 			NextAddr.type |= Ipv4 ? NETTYPE_IPV4 : NETTYPE_IPV6;
 		}
-		else
+		if(NumConnectAddrs != 0 && Secure != SecureWebsockets)
 		{
-			net_websocket_reset_secure();
+			log_error("client", "connect addresses must all use the same websocket scheme, ignoring %s", aBuffer);
+			continue;
 		}
+		SecureWebsockets = Secure;
 #else
 		if((NextAddr.type & NETTYPE_WEBSOCKET_TLS) != 0)
 		{
@@ -710,6 +718,10 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		AddWarning(Warning);
 		return;
 	}
+
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	net_websocket_set_secure(SecureWebsockets);
+#endif
 
 	m_ConnectionId = RandomUuid();
 	ServerInfoRequest();

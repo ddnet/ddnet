@@ -449,12 +449,12 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 	return failure;
 }
 
-int net_addr_from_url_lookup(NETADDR *addr, const char *string, int types)
+bool net_addr_from_url_lookup(NETADDR *addr, const char *string, int types)
 {
 	char host[128];
 	const int url_failure = net_addr_from_url(addr, string, host, sizeof(host));
 	if(url_failure == 0)
-		return 0;
+		return true;
 
 	int url_types = 0;
 	if(url_failure > 0)
@@ -468,10 +468,10 @@ int net_addr_from_url_lookup(NETADDR *addr, const char *string, int types)
 	}
 
 	if(net_host_lookup(host, addr, types) != 0)
-		return -1;
+		return false;
 
 	net_addr_apply_url_types(addr, url_types);
-	return 0;
+	return true;
 }
 
 void net_addr_url_str(const NETADDR *addr, char *string, int max_length, bool add_port)
@@ -695,21 +695,39 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
 static bool websocket_secure_default = false;
+static bool websocket_secure = false;
 
 void net_websocket_set_secure(bool secure)
 {
+	if(secure == websocket_secure)
+	{
+		return;
+	}
+	websocket_secure = secure;
 	MAIN_THREAD_EM_ASM({
 		var url = $0 ? "wss://" : "ws://";
 		(Module["websocket"] = Module["websocket"] || {})["url"] = url;
-		if(typeof SOCKFS != "undefined" && SOCKFS.websocketArgs)
+		if(typeof SOCKFS == "undefined" || !SOCKFS.websocketArgs)
 		{
-			SOCKFS.websocketArgs["url"] = url;
+			return;
+		}
+		SOCKFS.websocketArgs["url"] = url;
+		// The URL is only used while establishing a connection. Existing connections
+		// were established with the previous scheme and would be reused for subsequent
+		// connections to the same address, so they must be closed.
+		for(var fd = 0; fd < FS.streams.length; fd++)
+		{
+			var sock = SOCKFS.getSocket(fd);
+			if(sock)
+			{
+				sock.sock_ops.close(sock);
+			}
 		} }, secure);
 }
 
-void net_websocket_reset_secure()
+bool net_websocket_secure_default()
 {
-	net_websocket_set_secure(websocket_secure_default);
+	return websocket_secure_default;
 }
 #endif
 
@@ -720,6 +738,7 @@ void net_init()
 		var url = (Module["websocket"] && Module["websocket"]["url"]) || "";
 		return url.startsWith("wss") ? 1 : 0;
 	}) != 0;
+	websocket_secure = websocket_secure_default;
 #endif
 #if defined(CONF_FAMILY_WINDOWS)
 	WSADATA wsa_data;

@@ -50,6 +50,30 @@ struct per_session_data
 	TSendBuffer send_buffer;
 };
 
+// Accepting a connection completes its TLS handshake on the game loop's thread,
+// before any DDNet-level limit can apply, so this is what keeps an
+// unauthenticated peer from stalling the server's ticks by connecting in a loop.
+// Far above what legitimate joins need, far below what a flood achieves.
+static constexpr int WEBSOCKET_MAX_ACCEPTS_PER_SECOND = 50;
+// Checked before the limit above, so that a single peer connecting in a loop cannot
+// use up the budget of all other peers.
+static constexpr int WEBSOCKET_MAX_ACCEPTS_PER_SECOND_PER_IP = 10;
+// Peers tracked for the per peer limit, the one idle the longest is replaced.
+static constexpr int WEBSOCKET_ACCEPT_TRACKED_IPS = 256;
+#if defined(LWS_WITH_PEER_LIMITS)
+// Bounds concurrent connections per peer. Only available when lws was built with
+// peer limits, so the accept rate limits above cannot rely on it.
+static constexpr unsigned short WEBSOCKET_MAX_CONNECTIONS_PER_IP = 20;
+#endif
+
+// Accepts counted in a one second window, for a whole context or for one peer.
+struct accept_counter
+{
+	NETADDR addr; // Unused by the context wide counter.
+	int64_t window_start;
+	int count;
+};
+
 struct context_data
 {
 	char bindaddr_str[NETADDR_MAXSTRSIZE];
@@ -65,20 +89,9 @@ struct context_data
 	// must be watched for the handshake to progress between select() timeouts.
 	std::set<lws *> adopted_wsis;
 	TRecvBuffer recv_buffer;
-	int64_t accept_window_start;
-	int accept_window_count;
+	accept_counter accepts_total;
+	accept_counter accepts_per_ip[WEBSOCKET_ACCEPT_TRACKED_IPS];
 };
-
-// Accepting a connection completes its TLS handshake on the game loop's thread,
-// before any DDNet-level limit can apply, so this is what keeps an
-// unauthenticated peer from stalling the server's ticks by connecting in a loop.
-// Far above what legitimate joins need, far below what a flood achieves.
-static constexpr int WEBSOCKET_MAX_ACCEPTS_PER_SECOND = 50;
-#if defined(LWS_WITH_PEER_LIMITS)
-// Bounds concurrent connections per peer. Only available when lws was built with
-// peer limits, so the accept rate limit above cannot rely on it.
-static constexpr unsigned short WEBSOCKET_MAX_CONNECTIONS_PER_IP = 20;
-#endif
 
 // Client has main, dummy and contact connections with IPv4 and IPv6
 static context_data contexts[3 * 2];
@@ -127,6 +140,40 @@ static void sockaddr_to_netaddr_websocket(const sockaddr *src, socklen_t src_len
 	}
 }
 
+// Counts one accept in the current window and reports whether it stays within the limit.
+static bool count_accept(accept_counter *counter, int limit, int64_t now)
+{
+	if(now - counter->window_start > time_freq())
+	{
+		counter->window_start = now;
+		counter->count = 0;
+	}
+	counter->count++;
+	return counter->count <= limit;
+}
+
+// Returns the counter of the given peer, replacing the counter whose window started
+// longest ago when the peer is not tracked yet.
+static accept_counter *accept_counter_for_addr(context_data *ctx_data, const NETADDR *addr, int64_t now)
+{
+	accept_counter *oldest = &ctx_data->accepts_per_ip[0];
+	for(accept_counter &counter : ctx_data->accepts_per_ip)
+	{
+		if(net_addr_comp_noport(&counter.addr, addr) == 0)
+		{
+			return &counter;
+		}
+		if(counter.window_start < oldest->window_start)
+		{
+			oldest = &counter;
+		}
+	}
+	oldest->addr = *addr;
+	oldest->window_start = now;
+	oldest->count = 0;
+	return oldest;
+}
+
 static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len)
 {
 	per_session_data *pss = (per_session_data *)user;
@@ -139,18 +186,15 @@ static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reaso
 		// Issued right after accept(), before the TLS handshake is started, and
 		// returning non-zero closes the connection there. Rate limit it, because
 		// everything past this point runs on the game loop's thread.
+		const lws_filter_network_conn_args *filter_args = (const lws_filter_network_conn_args *)user;
+		NETADDR addr;
+		sockaddr_to_netaddr_websocket((const sockaddr *)&filter_args->cli_addr, filter_args->clilen, &addr);
 		const int64_t now = time_get();
-		if(now - ctx_data->accept_window_start > time_freq())
-		{
-			ctx_data->accept_window_start = now;
-			ctx_data->accept_window_count = 0;
-		}
-		ctx_data->accept_window_count++;
-		if(ctx_data->accept_window_count > WEBSOCKET_MAX_ACCEPTS_PER_SECOND)
+		if(!count_accept(accept_counter_for_addr(ctx_data, &addr, now), WEBSOCKET_MAX_ACCEPTS_PER_SECOND_PER_IP, now))
 		{
 			return 1;
 		}
-		return 0;
+		return count_accept(&ctx_data->accepts_total, WEBSOCKET_MAX_ACCEPTS_PER_SECOND, now) ? 0 : 1;
 	}
 
 	case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
@@ -339,7 +383,12 @@ void websocket_reload_certs()
 			continue;
 		}
 		log_info("websockets", "Reloading certificate '%s'", ctx_data.ssl_cert_path);
-		lws_tls_cert_updated(ctx_data.context, ctx_data.ssl_cert_path, ctx_data.ssl_key_path, nullptr, 0, nullptr, 0);
+		// lws reports a certificate that fails to load only in its own log and keeps
+		// serving the old one.
+		if(lws_tls_cert_updated(ctx_data.context, ctx_data.ssl_cert_path, ctx_data.ssl_key_path, nullptr, 0, nullptr, 0) != 0)
+		{
+			log_error("websockets", "Failed to reload certificate '%s'", ctx_data.ssl_cert_path);
+		}
 	}
 #else
 	log_error("websockets", "Cannot reload certificate: libwebsockets was built without TLS support");
