@@ -1591,6 +1591,11 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Si
 
 void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 {
+	if(State() >= IClient::STATE_QUITTING)
+	{
+		return;
+	}
+
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
@@ -1854,6 +1859,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				return;
 			}
 			GameClient()->OnConnected();
+			if(State() == IClient::STATE_LOADING)
+			{
+				SetState(IClient::STATE_READY);
+			}
 			if(m_DummyReconnectOnReload)
 			{
 				m_DummySendConnInfo = true;
@@ -2057,8 +2066,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
 			// We are not allowed to process snapshots yet.
-			if(State() < IClient::STATE_LOADING ||
-				!GameClient()->Map()->IsLoaded())
+			if(State() < IClient::STATE_READY)
 			{
 				return;
 			}

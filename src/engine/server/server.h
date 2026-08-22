@@ -122,8 +122,12 @@ public:
 			STATE_AUTH,
 			STATE_CONNECTING,
 			STATE_READY,
+			STATE_REJOINING,
 			STATE_INGAME,
 		};
+
+		// Whether the client has an in-game session.
+		bool IsIngame() const { return m_State == STATE_REJOINING || m_State == STATE_INGAME; }
 
 		enum
 		{

@@ -1117,7 +1117,7 @@ void CGameConsole::Prompt(char (&aPrompt)[32])
 	}
 	else if(m_ConsoleType == CONSOLETYPE_REMOTE)
 	{
-		if(Client()->State() == IClient::STATE_LOADING || Client()->State() == IClient::STATE_ONLINE)
+		if(Client()->State() == IClient::STATE_LOADING || Client()->State() == IClient::STATE_READY || Client()->State() == IClient::STATE_ONLINE)
 		{
 			if(Client()->RconAuthed())
 				str_copy(aPrompt, "rcon> ");

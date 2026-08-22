@@ -46,6 +46,7 @@ public:
 		STATE_OFFLINE - The client is offline.
 		STATE_CONNECTING - The client is trying to connect to a server.
 		STATE_LOADING - The client has connected to a server and is loading resources.
+		STATE_READY - The client has initialized the game logic, waiting for the first snapshot.
 		STATE_ONLINE - The client is connected to a server and running the game.
 		STATE_DEMOPLAYBACK - The client is playing a demo
 		STATE_QUITTING - The client is quitting.
@@ -56,6 +57,7 @@ public:
 		STATE_OFFLINE = 0,
 		STATE_CONNECTING,
 		STATE_LOADING,
+		STATE_READY,
 		STATE_ONLINE,
 		STATE_DEMOPLAYBACK,
 		STATE_QUITTING,

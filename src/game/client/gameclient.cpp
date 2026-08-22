@@ -1295,8 +1295,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 void CGameClient::OnStateChange(int NewState, int OldState)
 {
-	// reset everything when not already connected (to keep gathered stuff)
-	if(NewState < IClient::STATE_ONLINE)
+	// reset everything when the map logic is not initialized (to keep gathered stuff)
+	if(NewState < IClient::STATE_READY)
 		OnReset();
 
 	// then change the state
