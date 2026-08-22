@@ -1719,6 +1719,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Info.m_MinTeamSize = pInfoEx->m_MinTeamSize;
 		Info.m_MaxTeamSize = pInfoEx->m_MaxTeamSize;
 	}
+	if(Version >= 14)
+	{
+		g_Config.m_SvOldLaser = Flags2 & GAMEINFOFLAG2_OLD_LASER;
+	}
 
 	return Info;
 }
