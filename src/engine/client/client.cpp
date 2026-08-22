@@ -1625,6 +1625,11 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Si
 
 void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 {
+	if(State() >= IClient::STATE_QUITTING)
+	{
+		return;
+	}
+
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
