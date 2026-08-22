@@ -1195,8 +1195,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 			}
 		}
 
-		if(i <= 16)
-			m_Teams.m_IsDDRace16 = true;
+		if(i <= VANILLA_MAX_CLIENTS)
+			m_Teams.m_NumDDRaceTeams = VANILLA_MAX_CLIENTS + 1;
 
 		m_Ghost.m_AllowRestart = true;
 		m_RaceDemo.m_AllowRestart = true;
@@ -1640,9 +1640,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_NoSkinChangeForFrozen = false;
 	Info.m_DDRaceTeam = false;
 	Info.m_PredictEvents = Vanilla;
-	Info.m_Supports128Teams = false;
 	Info.m_MinTeamSize = 0;
 	Info.m_MaxTeamSize = 0;
+	Info.m_NumDDRaceTeams = 65; // `TEAM_SUPER + 1`, fallback for ddrace64 servers
+	Info.m_OldLaser = false;
 
 	if(Version >= 0)
 	{
@@ -1712,12 +1713,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	}
 	if(Version >= 12)
 	{
-		Info.m_Supports128Teams = Flags2 & GAMEINFOFLAG2_SUPPORTS_128_TEAMS;
-	}
-	if(Version >= 13)
-	{
 		Info.m_MinTeamSize = pInfoEx->m_MinTeamSize;
 		Info.m_MaxTeamSize = pInfoEx->m_MaxTeamSize;
+		Info.m_NumDDRaceTeams = pInfoEx->m_NumDDRaceTeams;
+		Info.m_OldLaser = Flags2 & GAMEINFOFLAG2_OLD_LASER;
 	}
 
 	return Info;
@@ -2139,7 +2138,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	}
 
 	// Sv_TeamsState can arrive before the first snapshot, so derive this here instead of in the message handler
-	m_Teams.m_IsDDRace64 = !m_GameInfo.m_Supports128Teams;
+	m_Teams.m_NumDDRaceTeams = m_GameInfo.m_NumDDRaceTeams;
 
 	for(CClientData &Client : m_aClients)
 	{
@@ -3538,6 +3537,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_BugDDRaceInput = m_GameInfo.m_BugDDRaceInput;
 	m_GameWorld.m_WorldConfig.m_NoWeakHookAndBounce = m_GameInfo.m_NoWeakHookAndBounce;
 	m_GameWorld.m_WorldConfig.m_PredictEvents = m_GameInfo.m_PredictEvents;
+	m_GameWorld.m_WorldConfig.m_OldLaser = m_GameInfo.m_OldLaser;
 
 	if(!m_Snap.m_pLocalCharacter)
 	{

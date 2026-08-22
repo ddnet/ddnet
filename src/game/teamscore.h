@@ -28,12 +28,14 @@ class CTeamsCore
 	bool m_aIsSolo[MAX_CLIENTS];
 
 public:
-	bool m_IsDDRace16;
-	bool m_IsDDRace64;
+	int m_NumDDRaceTeams;
 
 	CTeamsCore();
 
-	int TeamSuper() const { return m_IsDDRace16 ? VANILLA_TEAM_SUPER : (m_IsDDRace64 ? LEGACY_TEAM_SUPER : TEAM_SUPER); }
+	int TeamSuper() const
+	{
+		return m_NumDDRaceTeams - 1;
+	}
 
 	bool SameTeam(int ClientId1, int ClientId2) const;
 
