@@ -622,14 +622,13 @@ void CGameTeams::SendTeamsState(int ClientId)
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 	CMsgPacker MsgLegacy(NETMSGTYPE_SV_TEAMSSTATELEGACY);
 
-	int ClientVersion = GameServer()->GetClientVersion(ClientId);
-	bool PlayerMappingRequired = ClientVersion < VERSION_DDNET_128_PLAYERS;
+	bool PlayerMappingRequired = !Server()->ClientSupportsServerMaxClients(ClientId);
 
 	for(unsigned i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(PlayerMappingRequired)
 		{
-			if(i >= LEGACY_MAX_CLIENTS)
+			if(i >= (unsigned)Server()->GetMaxClients(ClientId))
 				break;
 
 			// see others selector
@@ -663,6 +662,7 @@ void CGameTeams::SendTeamsState(int ClientId)
 		MsgLegacy.AddInt(Team);
 	}
 
+	int ClientVersion = GameServer()->GetClientVersion(ClientId);
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 	if(!Server()->IsSixup(ClientId) && VERSION_DDRACE < ClientVersion && ClientVersion < VERSION_DDNET_MSG_LEGACY)
 	{
@@ -706,13 +706,18 @@ void CGameTeams::UpdateLegacyTeamMap()
 
 int CGameTeams::TeamForClient(int Team, int ClientId) const
 {
-	int ClientVersion = GameServer()->GetClientVersion(ClientId);
-	if(ClientVersion >= VERSION_DDNET_128_TEAMS)
+	if(ClientSupportsServerNumTeams(ClientId))
 		return Team;
 	// If the team's slots are not reserved, dont highlight it. Causes mismatch between dummy and main when playermapping is active.
-	if(ClientVersion < VERSION_DDNET_128_PLAYERS && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team))
+	if(!Server()->ClientSupportsServerMaxClients(ClientId) && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team, ClientId))
 		return TEAM_FLOCK;
 	return m_aLegacyTeamMap[Team];
+}
+
+bool CGameTeams::ClientSupportsServerNumTeams(int ClientId) const
+{
+	const int ClientVersion = GameServer()->GetClientVersion(ClientId);
+	return ClientVersion >= VERSION_DDNET_128_TEAMS;
 }
 
 ERaceState CGameTeams::GetDDRaceState(const CPlayer *Player) const
@@ -954,7 +959,12 @@ const CGameContext *CGameTeams::GameServer() const
 	return m_pGameContext;
 }
 
-class IServer *CGameTeams::Server()
+IServer *CGameTeams::Server()
+{
+	return m_pGameContext->Server();
+}
+
+const IServer *CGameTeams::Server() const
 {
 	return m_pGameContext->Server();
 }

@@ -28,7 +28,7 @@ void CPlayerMapping::Tick()
 	bool NeedsLegacyMapping = false;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->m_apPlayers[i] && GameServer()->GetClientVersion(i) < VERSION_DDNET_128_PLAYERS)
+		if(GameServer()->m_apPlayers[i] && !Server()->ClientSupportsServerMaxClients(i) && GameServer()->GetClientVersion(i) >= VERSION_DDNET_OLD)
 		{
 			NeedsLegacyMapping = true;
 			break;
@@ -48,7 +48,7 @@ void CPlayerMapping::Tick()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-		if(!pPlayer || GameServer()->GetClientVersion(i) >= VERSION_DDNET_128_PLAYERS)
+		if(!pPlayer || Server()->ClientSupportsServerMaxClients(i) || GameServer()->GetClientVersion(i) < VERSION_DDNET_OLD)
 			continue;
 
 		int StrongWeakId = 0;
@@ -72,7 +72,7 @@ void CPlayerMapping::CPlayerMap::Init(int ClientId, CPlayerMapping *pPlayerMappi
 	m_NumPages = 0;
 	m_TotalOverhang = 0;
 	m_NumReserved = 0;
-	m_DoSeeOthersByVote = false;
+	m_DoSeeOthersByVoteTick = 0;
 	ResetSeeOthers();
 }
 
@@ -81,7 +81,7 @@ CPlayer *CPlayerMapping::CPlayerMap::Player() const
 	return m_pPlayerMapping->GameServer()->m_apPlayers[m_ClientId];
 }
 
-void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
+void CPlayerMapping::CPlayerMap::InitPlayer(CSixupCfg SixupCfg)
 {
 	std::fill(std::begin(m_aReserved), std::end(m_aReserved), false);
 
@@ -100,7 +100,7 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 			{
 				// For 0.7 timeout: Rejoin has to check ourselves because it's the id of the old connection that we want to skip
 				// Do not access our own reverse map on initial initialization, as it's only initialized below
-				if((i != m_ClientId || Timeout) && m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] == NextFreeId)
+				if((i != m_ClientId || SixupCfg.m_SkipTimeoutedId) && m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] == NextFreeId)
 				{
 					NextFreeId++;
 					Finished = false;
@@ -111,7 +111,7 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 
 	// make sure no outdated data is stored, so we can start and insert new values
 	// after a timeout remove all players from the previous map in correct order (important for 0.7 net msgs...)
-	if(Timeout)
+	if(SixupCfg.m_ClearSlots)
 	{
 		m_UpdateTeamsState = true; // to get back all teams
 		for(int i = 0; i < LEGACY_MAX_CLIENTS; i++)
@@ -124,34 +124,41 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_pReverseMap[i] = -1;
 
-	m_NumReserved = 2;
-	m_pMap[LEGACY_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
-	m_pMap[m_pPlayerMapping->SeeOthersId()] = -1; // see others in spec menu
-	m_TotalOverhang = 0;
-
-	if(m_pPlayerMapping->Server()->IsSixup(m_ClientId))
+	m_NumReserved = 0;
+	const bool PlayerMappingRequired = !m_pPlayerMapping->Server()->ClientSupportsServerMaxClients(m_ClientId);
+	if(PlayerMappingRequired)
 	{
-		protocol7::CNetMsg_Sv_ClientInfo FakeInfo;
-		FakeInfo.m_ClientId = LEGACY_MAX_CLIENTS - 1;
-		FakeInfo.m_Local = 0;
-		FakeInfo.m_Team = TEAM_BLUE;
-		FakeInfo.m_pName = " ";
-		FakeInfo.m_pClan = "";
-		FakeInfo.m_Country = -1;
-		FakeInfo.m_Silent = 1;
-		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+		m_NumReserved = 2;
+		m_pMap[m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1] = -1; // player with empty name to say chat msgs
+		m_pMap[m_pPlayerMapping->SeeOthersId(m_ClientId)] = -1; // see others in spec menu
+		m_TotalOverhang = 0;
+
+		if(m_pPlayerMapping->Server()->IsSixup(m_ClientId))
 		{
-			FakeInfo.m_apSkinPartNames[p] = "standard";
-			FakeInfo.m_aUseCustomColors[p] = 0;
-			FakeInfo.m_aSkinPartColors[p] = 0;
+			protocol7::CNetMsg_Sv_ClientInfo FakeInfo;
+			FakeInfo.m_ClientId = m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - 1;
+			FakeInfo.m_Local = 0;
+			FakeInfo.m_Team = TEAM_BLUE; // `TEAM_BLUE` to hide from ddrace scoreboards
+			FakeInfo.m_pName = " ";
+			FakeInfo.m_pClan = "";
+			FakeInfo.m_Country = -1;
+			FakeInfo.m_Silent = 1;
+			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+			{
+				FakeInfo.m_apSkinPartNames[p] = "standard";
+				FakeInfo.m_aUseCustomColors[p] = 0;
+				FakeInfo.m_aSkinPartColors[p] = 0;
+			}
+			m_pPlayerMapping->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
+			// see others
+			UpdateSeeOthers();
 		}
-		m_pPlayerMapping->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
-		// see others
-		UpdateSeeOthers();
 	}
 
-	// Breaks with more than 64 tees from the same ip
-	if(NextFreeId < MapSize())
+	// Breaks with more than `MapSize` tees from the same ip, but not a problem on official servers.
+	// Required for other player maps, even when this specific one doesn't need playermapping and supports max_clients
+	const bool NextIdValid = NextFreeId < LEGACY_MAX_CLIENTS;
+	if(NextFreeId < MapSize() && NextIdValid)
 	{
 		m_aReserved[m_ClientId] = true;
 		Add(NextFreeId, m_ClientId);
@@ -167,14 +174,14 @@ void CPlayerMapping::CPlayerMap::InitPlayer(bool Timeout)
 			continue;
 
 		// update us with other same ip player infos
-		if(m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] < MapSize())
+		if(PlayerMappingRequired && m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] < MapSize())
 		{
 			m_aReserved[i] = true;
 			Add(m_pPlayerMapping->m_aMap[i].m_pReverseMap[i], i);
 		}
 
 		// update other same ip players with our info
-		if(NextFreeId < m_pPlayerMapping->m_aMap[i].MapSize())
+		if(NextIdValid && NextFreeId < m_pPlayerMapping->m_aMap[i].MapSize())
 		{
 			m_pPlayerMapping->m_aMap[i].m_aReserved[m_ClientId] = true;
 			m_pPlayerMapping->m_aMap[i].Add(NextFreeId, m_ClientId);
@@ -228,16 +235,16 @@ void CPlayerMapping::CPlayerMap::Update()
 {
 	if(!m_pPlayerMapping->Server()->ClientIngame(m_ClientId) || !Player())
 		return;
-	if(m_pPlayerMapping->GameServer()->GetClientVersion(m_ClientId) >= VERSION_DDNET_128_PLAYERS)
+	if(m_pPlayerMapping->Server()->ClientSupportsServerMaxClients(m_ClientId))
 		return;
 
-	if(m_DoSeeOthersByVote)
+	if(m_DoSeeOthersByVoteTick > 0)
 	{
 		CCharacter *pChr = m_pPlayerMapping->GameServer()->GetPlayerChar(m_ClientId);
 		if(pChr && !pChr->IsIdle())
 		{
 			ResetSeeOthers();
-			m_DoSeeOthersByVote = false;
+			m_DoSeeOthersByVoteTick = 0;
 		}
 	}
 
@@ -261,7 +268,7 @@ void CPlayerMapping::CPlayerMap::Update()
 		// If a team (not 0) has more than 10 players, do not reserve their slots because it can get messy quickly if a few huge teams form.
 		// To keep teams state the same on main and dummy big teams do not get highlighted at all.
 		int DDTeam = m_pPlayerMapping->GameServer()->GetDDRaceTeam(i);
-		bool ReserveTeamSlots = m_pPlayerMapping->ReserveTeamSlots(DDTeam);
+		bool ReserveTeamSlots = m_pPlayerMapping->ReserveTeamSlots(DDTeam, m_ClientId);
 
 		if(m_aReserved[i])
 		{
@@ -317,7 +324,7 @@ void CPlayerMapping::CPlayerMap::Update()
 		}
 		else if(pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(m_ClientId))
 		{
-			InsertNextEmpty(i);
+			InsertNextEmptyOrReplace(i);
 		}
 	}
 
@@ -328,11 +335,12 @@ void CPlayerMapping::CPlayerMap::Update()
 	}
 }
 
-void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
+void CPlayerMapping::CPlayerMap::InsertNextEmptyOrReplace(int ClientId)
 {
 	if(ClientId == -1 || m_pReverseMap[ClientId] != -1)
 		return;
 
+	// Fast path: find an empty slot or a slot occupied by a character-less player.
 	for(int i = 0; i < MapSize() - m_NumSeeOthers; i++)
 	{
 		int MappedClientId = m_pMap[i];
@@ -342,30 +350,74 @@ void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
 		if(MappedClientId == -1 || (!m_pPlayerMapping->GameServer()->GetPlayerChar(MappedClientId) || m_pPlayerMapping->GameServer()->GetPlayerChar(MappedClientId)->NetworkClipped(m_ClientId)))
 		{
 			Add(i, ClientId);
-			break;
+			return;
 		}
+	}
+
+	// Overflow fallback: all visible non-reserved slots are occupied.
+	// Replace the farthest non-reserved player if the new player is closer.
+	CCharacter *pNewChar = m_pPlayerMapping->GameServer()->GetPlayerChar(ClientId);
+	if(!pNewChar || !Player())
+		return;
+
+	vec2 ViewPos = Player()->m_ViewPos;
+	float NewDist = distance_squared(ViewPos, pNewChar->GetPos());
+
+	int ReplaceIndex = -1;
+	float MaxDist = NewDist;
+
+	for(int i = 0; i < MapSize() - m_NumSeeOthers; i++)
+	{
+		int MappedClientId = m_pMap[i];
+		if(MappedClientId == -1 || m_aReserved[MappedClientId])
+			continue;
+
+		CCharacter *pMappedChar = m_pPlayerMapping->GameServer()->GetPlayerChar(MappedClientId);
+		if(!pMappedChar)
+			continue;
+
+		float Dist = distance_squared(ViewPos, pMappedChar->GetPos());
+		if(Dist > MaxDist)
+		{
+			MaxDist = Dist;
+			ReplaceIndex = i;
+		}
+	}
+
+	if(ReplaceIndex != -1)
+	{
+		Add(ReplaceIndex, ClientId);
 	}
 }
 
-bool CPlayerMapping::ReserveTeamSlots(int DDTeam) const
+int CPlayerMapping::CPlayerMap::MapSize() const
 {
-	return !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap;
+	return m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) - m_NumReserved;
 }
 
-int CPlayerMapping::SeeOthersId() const
+bool CPlayerMapping::ReserveTeamSlots(int DDTeam, int ClientId) const
 {
-	return LEGACY_MAX_CLIENTS - 2;
+	const bool IsDDNet = m_pGameServer->GetClientVersion(ClientId) >= VERSION_DDNET_OLD;
+	return !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap && IsDDNet;
+}
+
+int CPlayerMapping::SeeOthersId(int ClientId) const
+{
+	return m_pServer->GetMaxClients(ClientId) - 2;
 }
 
 bool CPlayerMapping::DoSeeOthers(int ClientId, int SelectedId, bool DoByVote)
 {
-	if(GameServer()->GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS)
+	if(Server()->ClientSupportsServerMaxClients(ClientId))
 		return false;
-	if(SelectedId == SeeOthersId())
+	if(SelectedId == SeeOthersId(ClientId))
 	{
 		if(DoByVote)
 		{
-			m_aMap[ClientId].m_DoSeeOthersByVote = true;
+			// Less conservative rate limit than normal 3 seconds for voting. Let's settle for 1 second for now. Comparison: +spectate has 250ms.
+			if(m_aMap[ClientId].m_DoSeeOthersByVoteTick > 0 && m_aMap[ClientId].m_DoSeeOthersByVoteTick > Server()->Tick() - Server()->TickSpeed())
+				return true;
+			m_aMap[ClientId].m_DoSeeOthersByVoteTick = Server()->Tick();
 		}
 		m_aMap[ClientId].DoSeeOthers();
 		return true;
@@ -406,15 +458,16 @@ void CPlayerMapping::UpdatePlayerMap(int ClientId)
 
 		for(auto &Map : m_aMap)
 		{
-			if(!Map.Player())
+			if(!Map.Player() || Server()->ClientSupportsServerMaxClients(Map.m_ClientId))
 				continue;
 
 			// Calculate overhang every tick, not only when the map updates
 			int Overhang = std::max(0, ClientCount - Map.MapSize());
 			if(Overhang != Map.m_TotalOverhang)
 			{
+				const int MaxNumSeeOthers = Map.MaxNumSeeOthers();
 				Map.m_TotalOverhang = Overhang;
-				Map.m_NumPages = std::max(1, (Overhang + ms_MaxNumSeeOthers - 1) / ms_MaxNumSeeOthers);
+				Map.m_NumPages = MaxNumSeeOthers > 0 ? std::max(1, (Overhang + MaxNumSeeOthers - 1) / MaxNumSeeOthers) : 1;
 				if(Map.m_TotalOverhang <= 0 && Map.m_SeeOthersPage != -1)
 					Map.ResetSeeOthers();
 
@@ -436,7 +489,7 @@ void CPlayerMapping::UpdatePlayerMap(int ClientId)
 
 CPlayerMapping::ESeeOthersInd CPlayerMapping::SeeOthersInd(int ClientId, int MapId) const
 {
-	if(m_aMap[ClientId].m_TotalOverhang && MapId == SeeOthersId())
+	if(m_aMap[ClientId].m_TotalOverhang && MapId == SeeOthersId(ClientId))
 		return ESeeOthersInd::BUTTON;
 	if(m_aMap[ClientId].m_NumSeeOthers && MapId >= m_aMap[ClientId].MapSize() - m_aMap[ClientId].m_NumSeeOthers && MapId < m_aMap[ClientId].MapSize())
 		return ESeeOthersInd::PLAYER;
@@ -452,7 +505,7 @@ const char *CPlayerMapping::SeeOthersName(int ClientId)
 	}
 	else if(m_aMap[ClientId].m_SeeOthersPage != -1)
 	{
-		if(m_aMap[ClientId].m_TotalOverhang > ms_MaxNumSeeOthers)
+		if(m_aMap[ClientId].m_TotalOverhang > m_aMap[ClientId].MaxNumSeeOthers())
 			str_format(m_aSeeOthersName, sizeof(m_aSeeOthersName), "⋅ %d/%d", Page, m_aMap[ClientId].m_NumPages);
 		else
 			str_copy(m_aSeeOthersName, "⋅ Close");
@@ -469,25 +522,24 @@ void CPlayerMapping::CPlayerMap::CycleSeeOthers()
 	if(m_TotalOverhang <= 0)
 		return;
 
-	for(int i = 0; i < LEGACY_MAX_CLIENTS; i++)
+	for(int i = 0; i < m_pPlayerMapping->Server()->GetMaxClients(m_ClientId); i++)
 		if(m_pMap[i] != -1)
 			m_aWasSeeOthers[m_pMap[i]] = true;
 
-	int Size = std::min(m_TotalOverhang, ms_MaxNumSeeOthers);
+	int Size = std::min(m_TotalOverhang, MaxNumSeeOthers());
 	int Added = 0;
 	int MapId = MapSize() - 1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(!m_pPlayerMapping->GameServer()->m_apPlayers[i] || m_aWasSeeOthers[i])
 			continue;
+		if(Added >= Size)
+			break;
 
 		Add(MapId, i);
 		m_aWasSeeOthers[i] = true;
 		Added++;
 		MapId--;
-
-		if(Added >= Size)
-			break;
 	}
 
 	m_NumSeeOthers = Added;
@@ -529,12 +581,29 @@ void CPlayerMapping::CPlayerMap::ResetSeeOthers()
 	UpdateSeeOthers();
 }
 
+int CPlayerMapping::CPlayerMap::MaxNumSeeOthers()
+{
+	const int Max = m_pPlayerMapping->Server()->GetMaxClients(m_ClientId) == VANILLA_MAX_CLIENTS ? ms_MaxNumSeeOthersVanilla : ms_MaxNumSeeOthers;
+
+	// count non-reserved slots
+	int NumSeeOthersSlots = 0;
+	for(int i = MapSize() - 1; i >= 0; i--)
+	{
+		int MappedClientId = m_pMap[i];
+		if(MappedClientId != -1 && m_aReserved[MappedClientId])
+			break;
+		NumSeeOthersSlots++;
+	}
+
+	return std::min({Max, MapSize(), NumSeeOthersSlots});
+}
+
 void CPlayerMapping::CPlayerMap::UpdateSeeOthers() const
 {
 	if(!m_pPlayerMapping->Server()->IsSixup(m_ClientId))
 		return;
 
-	int SeeOthersId = m_pPlayerMapping->SeeOthersId();
+	int SeeOthersId = m_pPlayerMapping->SeeOthersId(m_ClientId);
 	protocol7::CNetMsg_Sv_ClientDrop ClientDropMsg;
 	ClientDropMsg.m_ClientId = SeeOthersId;
 	ClientDropMsg.m_pReason = "";
@@ -543,7 +612,7 @@ void CPlayerMapping::CPlayerMap::UpdateSeeOthers() const
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 	NewClientInfoMsg.m_ClientId = SeeOthersId;
 	NewClientInfoMsg.m_Local = 0;
-	NewClientInfoMsg.m_Team = TEAM_BLUE;
+	NewClientInfoMsg.m_Team = TEAM_BLUE; // `TEAM_BLUE` to hide from ddrace scoreboards
 	NewClientInfoMsg.m_pName = m_pPlayerMapping->SeeOthersName(m_ClientId);
 	NewClientInfoMsg.m_pClan = "";
 	NewClientInfoMsg.m_Country = -1;

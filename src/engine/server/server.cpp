@@ -1040,10 +1040,6 @@ void CServer::DoSnapshot()
 		if(m_aClients[i].m_State != CClient::STATE_INGAME)
 			continue;
 
-		// don't send snapshots to clients that haven't identified as DDNet-based yet, can crash them.
-		if(!m_aClients[i].m_Sixup && m_aClients[i].m_DDNetVersion < VERSION_DDNET_OLD)
-			continue;
-
 		// this client is trying to recover, don't spam snapshots
 		if(m_aClients[i].m_SnapRate == CClient::SNAPRATE_RECOVER && (Tick() % TickSpeed()) != 0)
 			continue;
@@ -2114,6 +2110,7 @@ void CServer::OnNetMsgRconCmd(int ClientId, const char *pCmd)
 		if(GameServer()->PlayerExists(ClientId) && Version < VERSION_DDNET_OLD)
 		{
 			m_aClients[ClientId].m_DDNetVersion = VERSION_DDNET_OLD;
+			GameServer()->ReinitPlayerMap(ClientId, false);
 		}
 	}
 	else if(IsRconAuthed(ClientId))
@@ -2867,6 +2864,32 @@ void CServer::UpdateServerInfo(bool Resend)
 	}
 
 	m_ServerInfoNeedsUpdate = false;
+}
+
+int CServer::GetMaxClients(int ClientId) const
+{
+	// Shouldn't catch anything currently
+	if(ClientId == SERVER_DEMO_CLIENT)
+		return MAX_CLIENTS;
+
+	if(m_aClients[ClientId].m_Sixup)
+		return LEGACY_MAX_CLIENTS;
+	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_128_PLAYERS)
+		return MAX_CLIENTS;
+	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_OLD)
+		return LEGACY_MAX_CLIENTS;
+	return VANILLA_MAX_CLIENTS;
+}
+
+bool CServer::ClientSupportsServerMaxClients(int ClientId) const
+{
+	// server demo pseudo clients operate on untranslated ids
+	if(ClientId == SERVER_DEMO_CLIENT)
+		return true;
+
+	// We can use `m_NetServer.MaxClients()` instead of `MAX_CLIENTS` here because it can't be changed ingame.
+	// The playermapping code currently relies on sixup (0.7) clients taking the route through playermapping.
+	return GetMaxClients(ClientId) >= m_NetServer.MaxClients() && !m_aClients[ClientId].m_Sixup;
 }
 
 void CServer::PumpNetwork()
@@ -4745,13 +4768,13 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 
 	DelClientCallback(OrigId, "Timeout Protection used", this);
 
-	// OnSetTimedOut must be called after DelClientCallback to preserve the client id.
+	// ReinitPlayerMap must be called after DelClientCallback to preserve the client id.
 	// The order is important for the player initialization algorithm in CPlayerMapping::CPlayerMap::InitPlayer
 	// because it loops over all players to find others with the same ip address.
 	// IP matching is important for hammerfly/dummy copy to work by guaran-tee-ing dummy and player map have the same ids
 	// Never forget: 0.7 really implemented netmsgs for join/leave, means client ids have to be stable across using timeout protection.
 	// When InitPlayer runs it has to assign the same client id as before since local id cant be changed in 0.7
-	GameServer()->OnSetTimedOut(ClientId);
+	GameServer()->ReinitPlayerMap(ClientId, true);
 	return true;
 }
 
