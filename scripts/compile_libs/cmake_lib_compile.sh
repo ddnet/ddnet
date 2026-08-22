@@ -85,7 +85,8 @@ function make_cmake() {
 			# Use Apple's native TLS stack on iOS for now. This is removed in curl 8.15 due to its inability to support TLS 1.3
 			# SecTrust is available in curl 8.17
 			cmake_arguments+=("-DCURL_ENABLE_SSL=ON")
-			cmake_arguments+=("-DCURL_USE_SECTRANSPORT=ON")
+			# The option is spelled CURL_USE_SECTRANSP up to and including the pinned curl 8.8.0.
+			cmake_arguments+=("-DCURL_USE_SECTRANSP=ON")
 			cmake_arguments+=("-DCURL_USE_OPENSSL=OFF")
 		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 			log_error "ERROR: Compiling ${TARGET_LIBRARY} for ${TARGET_PLATFORM} is unnecessary."

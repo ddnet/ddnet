@@ -641,6 +641,7 @@ public:
 
 	// error and state
 	int NetType() const { return net_socket_type(m_Socket); }
+	bool SocketIsBroken() const { return m_Socket != nullptr && net_udp_is_broken(m_Socket); }
 	int State();
 	const NETADDR *ServerAddress() const { return m_Connection.PeerAddress(); }
 	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const { m_Connection.ConnectAddresses(ppAddrs, pNumAddrs); }

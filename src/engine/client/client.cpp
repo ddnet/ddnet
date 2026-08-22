@@ -73,6 +73,8 @@
 
 #if defined(CONF_PLATFORM_ANDROID)
 #include <android/android_main.h>
+#elif defined(CONF_PLATFORM_IOS)
+#include <ios/ios_main.h>
 #endif
 
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
@@ -84,7 +86,9 @@
 #undef main
 #endif
 
+#include <algorithm>
 #include <chrono>
+#include <iterator>
 #include <limits>
 #include <stack>
 #include <thread>
@@ -1124,6 +1128,36 @@ void CClient::ResetSocket()
 			log_error("client", "%s", aError);
 	}
 }
+
+#if defined(CONF_PLATFORM_IOS)
+void CClient::RecreateBrokenSockets()
+{
+	if(std::none_of(std::begin(m_aNetClient), std::end(m_aNetClient), [](const CNetClient &NetClient) { return NetClient.SocketIsBroken(); }))
+	{
+		return;
+	}
+
+	// iOS closes the sockets of suspended apps. Sending on them keeps failing
+	// with EPIPE, so they have to be recreated once the app is resumed.
+	log_info("client", "network sockets were closed by the system, recreating them");
+
+	// Reconnect afterwards, so the server can be rejoined with timeout protection.
+	char aConnectAddress[sizeof(m_aConnectAddressStr)];
+	str_copy(aConnectAddress, m_aConnectAddressStr);
+	const bool Reconnect = m_State != IClient::STATE_OFFLINE && m_State < IClient::STATE_QUITTING;
+
+	Disconnect();
+	ResetSocket();
+	// The recreated sockets do not know the stun servers of the old ones yet.
+	LoadDDNetInfo();
+
+	if(Reconnect)
+	{
+		Connect(aConnectAddress);
+	}
+}
+#endif
+
 const char *CClient::PlayerName() const
 {
 	if(g_Config.m_PlayerName[0])
@@ -2618,6 +2652,10 @@ int CClient::ConnectNetTypes() const
 
 void CClient::PumpNetwork()
 {
+#if defined(CONF_PLATFORM_IOS)
+	RecreateBrokenSockets();
+#endif
+
 	for(auto &NetClient : m_aNetClient)
 	{
 		NetClient.Update();
@@ -4743,14 +4781,19 @@ extern "C" int TWMain(int argc, const char **argv)
 static int gs_AndroidStarted = false;
 extern "C" [[gnu::visibility("default")]] int SDL_main(int argc, char *argv[]);
 int SDL_main(int argc, char *argv2[])
+#elif defined(CONF_PLATFORM_IOS)
+extern "C" int SDL_main(int argc, char *argv[]);
+int SDL_main(int argc, char *argv2[])
 #else
 int main(int argc, const char **argv)
 #endif
 {
 	const int64_t MainStart = time_get();
 
-#if defined(CONF_PLATFORM_ANDROID)
+#if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_IOS)
 	const char **argv = const_cast<const char **>(argv2);
+#endif
+#if defined(CONF_PLATFORM_ANDROID)
 	// Android might not unload the library from memory, causing globals like gs_AndroidStarted
 	// not to be initialized correctly when starting the app again.
 	if(gs_AndroidStarted)
@@ -4804,6 +4847,16 @@ int main(int argc, const char **argv)
 		std::exit(0);
 	}
 #endif
+#if defined(CONF_PLATFORM_IOS)
+	// Initialize iOS after logger is available
+	const char *pIosInitError = InitIos();
+	if(pIosInitError != nullptr)
+	{
+		log_error("ios", "%s", pIosInitError);
+		ShowMessageBoxWithoutGraphics({.m_pTitle = "iOS Error", .m_pMessage = pIosInitError});
+		std::exit(0);
+	}
+#endif
 
 	std::stack<std::function<void()>> CleanerFunctions;
 	std::function<void()> PerformCleanup = [&CleanerFunctions]() mutable {
@@ -4826,6 +4879,10 @@ int main(int argc, const char **argv)
 		// TODO: This is not the correct way to close an activity on Android, as it
 		//       ignores the activity lifecycle entirely, which may cause issues if
 		//       we ever used any global resources like the camera.
+		std::exit(0);
+#elif defined(CONF_PLATFORM_IOS)
+		// iOS does not reliably terminate when returning from SDL_main.
+		// For local debugging we terminate explicitly on Quit.
 		std::exit(0);
 #elif defined(CONF_PLATFORM_EMSCRIPTEN)
 		// We cannot use atexit with Emscripten so we finish the global logger here.
@@ -5169,6 +5226,8 @@ int main(int argc, const char **argv)
 	// Trap the Android back button so it can be handled in our code reliably
 	// instead of letting the system handle it.
 	SDL_SetHint("SDL_ANDROID_TRAP_BACK_BUTTON", "1");
+#endif
+#if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_IOS)
 	// Force landscape screen orientation.
 	SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
 #endif
@@ -5402,7 +5461,7 @@ int CClient::UdpConnectivity(int NetType)
 
 static bool ViewLinkImpl(const char *pLink)
 {
-#if defined(CONF_PLATFORM_ANDROID)
+#if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_IOS)
 	if(SDL_OpenURL(pLink) == 0)
 	{
 		return true;
@@ -5452,7 +5511,11 @@ bool CClient::ViewFile(const char *pFilename)
 	}
 
 	char aFileLink[IO_MAX_PATH_LENGTH];
+#if defined(CONF_PLATFORM_IOS)
+	str_format(aFileLink, sizeof(aFileLink), "shareddocuments://%s%s", aWorkingDir, pFilename);
+#else
 	str_format(aFileLink, sizeof(aFileLink), "file://%s%s", aWorkingDir, pFilename);
+#endif
 	return ViewLinkImpl(aFileLink);
 #endif
 }
