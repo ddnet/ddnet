@@ -40,48 +40,36 @@ CProjectile::CProjectile(
 	m_Bouncing = 0;
 	m_Freeze = Freeze;
 
-	DetermineTuning();
+	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
 	GameWorld()->InsertEntity(this);
 }
 
-void CProjectile::DetermineTuning()
+vec2 CProjectile::GetPos(float Time)
 {
-	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+	float Curvature = 0;
+	float Speed = 0;
+	CTuningParams *pTuning = GetTuning(m_TuneZone);
 
-	// Fetch current tunings
-	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
-	CTuningParams *pZone = GameWorld()->GetTuning(m_TuneZone);
-	CTuningParams *pTuning = pOwnerChar ? CTuningParams::ApplyLockedTunings(pZone, pOwnerChar->m_LockedTunings) : pZone;
-
-	m_Curvature = 0.0f;
-	m_Speed = 0.0f;
-	m_Lifetime = 0.0f;
 	switch(m_Type)
 	{
 	case WEAPON_GRENADE:
-		m_Curvature = pTuning->m_GrenadeCurvature;
-		m_Speed = pTuning->m_GrenadeSpeed;
-		m_Lifetime = pTuning->m_GrenadeLifetime;
+		Curvature = pTuning->m_GrenadeCurvature;
+		Speed = pTuning->m_GrenadeSpeed;
 		break;
 
 	case WEAPON_SHOTGUN:
-		m_Curvature = pTuning->m_ShotgunCurvature;
-		m_Speed = pTuning->m_ShotgunSpeed;
-		m_Lifetime = pTuning->m_ShotgunLifetime;
+		Curvature = pTuning->m_ShotgunCurvature;
+		Speed = pTuning->m_ShotgunSpeed;
 		break;
 
 	case WEAPON_GUN:
-		m_Curvature = pTuning->m_GunCurvature;
-		m_Speed = pTuning->m_GunSpeed;
-		m_Lifetime = pTuning->m_GunLifetime;
+		Curvature = pTuning->m_GunCurvature;
+		Speed = pTuning->m_GunSpeed;
 		break;
 	}
-}
 
-vec2 CProjectile::GetPos(float Time)
-{
-	return CalcPos(m_Pos, m_Direction, m_Curvature, m_Speed, Time);
+	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
 }
 
 void CProjectile::Tick()
@@ -202,12 +190,23 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 	m_Type = pProj->m_Type;
 	m_StartTick = pProj->m_StartTick;
 	m_TuneZone = pProj->m_TuneZone;
-	m_Curvature = pProj->m_Curvature;
-	m_Speed = pProj->m_Speed;
-	m_Lifetime = pProj->m_Lifetime;
-	float Lifetime = m_Lifetime > 0 ? m_Lifetime : 20.0f;
-	m_LifeSpan = (Lifetime * GameWorld()->GameTickSpeed()) - (pGameWorld->GameTick() - m_StartTick);
-	m_SoundImpact = m_Type == WEAPON_GRENADE ? SOUND_GRENADE_EXPLODE : -1;
+
+	int Lifetime = 20 * GameWorld()->GameTickSpeed();
+	m_SoundImpact = -1;
+	if(m_Type == WEAPON_GRENADE)
+	{
+		Lifetime = GetTuning(m_TuneZone)->m_GrenadeLifetime * GameWorld()->GameTickSpeed();
+		m_SoundImpact = SOUND_GRENADE_EXPLODE;
+	}
+	else if(m_Type == WEAPON_GUN)
+	{
+		Lifetime = GetTuning(m_TuneZone)->m_GunLifetime * GameWorld()->GameTickSpeed();
+	}
+	else if(m_Type == WEAPON_SHOTGUN && !GameWorld()->m_WorldConfig.m_IsDDRace)
+	{
+		Lifetime = GetTuning(m_TuneZone)->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
+	}
+	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
 	m_Id = Id;
 	m_Number = pProj->m_SwitchNumber;
 	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
@@ -227,9 +226,6 @@ CProjectileData CProjectile::GetData() const
 	Result.m_Freeze = m_Freeze;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_SwitchNumber = m_Number;
-	Result.m_Curvature = m_Curvature;
-	Result.m_Speed = m_Speed;
-	Result.m_Lifetime = m_Lifetime;
 	return Result;
 }
 

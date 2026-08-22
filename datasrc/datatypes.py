@@ -608,34 +608,3 @@ class NetTwIntString(NetArray):
 			result += NetVariable(self.var).emit_dump(offset + i)
 			result += [f'dbg_msg("snapshot", "%s\\t{self.base_name}[{int(i)}]=%d\\tIntToStr: %s", aRawData, pObj->{self.base_name}[{int(i)}], aStr);']
 		return result
-
-
-class NetTuningParams(NetVariable):
-	def __init__(self, name, num_params):
-		super().__init__(name)
-		self.num_params = num_params
-
-	def emit_declaration(self):
-		return [
-			f"int {self.name}[{self.num_params}];",
-			f'static_assert(sizeof({self.name}) == sizeof(CTuningParams), "Tuning array size mismatch");',
-			f'static_assert(alignof(decltype({self.name})) == alignof(CTuningParams), "Tuning alignment mismatch");',
-			f"CTuningParams *{self.name}_AsTuning() {{ return reinterpret_cast<CTuningParams*>({self.name}); }}",
-			f"const CTuningParams *{self.name}_AsTuning() const {{ return reinterpret_cast<const CTuningParams*>({self.name}); }}",
-			f"void Set_{self.name}(const CTuningParams &Tuning) {{ mem_copy({self.name}, Tuning.NetworkArray(), sizeof({self.name})); }}",
-		]
-
-	def emit_uncompressed_unpack_obj(self):
-		return [f"for(int &Value : pData->{self.name})", "\tValue = pUnpacker->GetUncompressedInt();"]
-
-	def emit_unpack_msg(self):
-		return [f"for(int &Value : pData->{self.name})", "\tValue = pUnpacker->GetInt();"]
-
-	def emit_pack(self):
-		return [f"for(int Value : pData->{self.name})", "\tpPacker->AddInt(Value);"]
-
-	def num_emit_dump_offsets(self):
-		return self.num_params
-
-	def emit_dump(self, offset):
-		return [f'for(int i = 0; i < {self.num_params}; i++) dbg_msg("snapshot", "%s\\t{self.name}[%d]=%d", aRawData, i, pObj->{self.name}[i]);']

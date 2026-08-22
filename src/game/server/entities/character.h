@@ -184,7 +184,7 @@ private:
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
-	void SendTuneMsg(const char *pMessage);
+	void SendZoneMsgs();
 	IAntibot *Antibot();
 
 	bool m_SetSavePos[NUM_RESCUEMODES];
@@ -222,8 +222,6 @@ public:
 	bool m_FrozenLastTick;
 	int m_TuneZone;
 	int m_TuneZoneOld;
-	LOCKED_TUNES m_LockedTunings;
-	LOCKED_TUNES m_LastLockedTunings;
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
@@ -290,8 +288,7 @@ public:
 	bool IsSuper() const { return m_Core.m_Super; }
 
 	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
-	CTuningParams *GetTuning();
-	void ApplyLockedTunings(bool SendTuningParams = true);
+	CTuningParams *GetTuning(int Zone) { return &TuningList()[Zone]; }
 };
 
 #endif

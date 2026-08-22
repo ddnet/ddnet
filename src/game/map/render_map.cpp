@@ -953,7 +953,7 @@ void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, 
 			int c = x + y * w;
 
 			unsigned char Index = pTune[c].m_Number;
-			if(Index && IsTuneTileNumberUsed(pTune[c].m_Type))
+			if(Index)
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
@@ -1305,9 +1305,8 @@ void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Colo
 				if(Render)
 				{
 					const unsigned char Number = pTune[c].m_Number;
-					const unsigned char Type = pTune[c].m_Number;
 
-					if(Number == 0 || pTuneColorMapper == nullptr || Type < TILE_TUNE || Type > TILE_TUNELOCK)
+					if(Number == 0 || pTuneColorMapper == nullptr)
 						Graphics()->SetColor(Color);
 					else
 					{

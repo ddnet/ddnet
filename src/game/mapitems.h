@@ -169,8 +169,6 @@ enum
 	TILE_THROUGH_ALL = 66,
 	TILE_THROUGH_DIR = 67,
 	TILE_TUNE = 68,
-	TILE_TUNELOCK = 69,
-	TILE_TUNELOCK_RESET = 70,
 	TILE_OLDLASER = 71,
 	TILE_NPC = 72,
 	TILE_EHOOK = 73,
@@ -685,7 +683,6 @@ bool IsSwitchTileFlagsUsed(int Index); // Assumes that Index is a valid switch t
 bool IsSwitchTileNumberUsed(int Index); // Assumes that Index is a valid switch tile index
 bool IsSwitchTileDelayUsed(int Index); // Assumes that Index is a valid switch tile index
 bool IsValidTuneTile(int Index);
-bool IsTuneTileNumberUsed(int Index); // Assumes that Index is a valid tune tile index
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);
 bool IsCreditsTile(int TileIndex);

@@ -259,7 +259,6 @@ private:
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
-	static void ConTuneLock(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -404,10 +403,6 @@ public:
 			const CNetObj_DDNetCharacter *m_pPrevExtendedData;
 			bool m_HasExtendedData;
 			bool m_HasExtendedDisplayInfo;
-
-			CNetObj_CharacterTuning m_Tuning;
-			const CNetObj_CharacterTuning *m_pPrevTuning;
-			bool m_HasTuning;
 		};
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
@@ -968,9 +963,6 @@ private:
 	// tunings for every zone on the map, 0 is a global tune
 	CTuningParams m_aTuningList[TuneZone::NUM];
 	CTuningParams *TuningList() { return m_aTuningList; }
-
-	LOCKED_TUNES m_aLockedTuning[TuneZone::NUM];
-	LOCKED_TUNES *LockedTuning() { return m_aLockedTuning; }
 
 	float m_LastShowDistanceZoom;
 	float m_LastZoom;

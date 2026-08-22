@@ -8,7 +8,6 @@
 #include <generated/protocol.h>
 
 #include <game/team_state.h>
-#include <game/tuning.h>
 
 #include <optional>
 
@@ -112,7 +111,6 @@ private:
 	int m_CollisionEnabled;
 	int m_TuneZone;
 	int m_TuneZoneOld;
-	LOCKED_TUNES m_LockedTunings;
 	int m_HookHitEnabled;
 	int m_Time;
 	vec2 m_Pos;

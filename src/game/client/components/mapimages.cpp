@@ -302,13 +302,10 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			// convert tune tile to gray
 			const size_t CopyWidth = ImgInfo.m_Width / 16;
 			const size_t CopyHeight = ImgInfo.m_Height / 16;
-			for(int TuneIndex = TILE_TUNE; TuneIndex <= TILE_TUNELOCK; ++TuneIndex)
-			{
-				const size_t TuneTileX = static_cast<size_t>(TuneIndex % 16) * CopyWidth;
-				const size_t TuneTileY = static_cast<size_t>(TuneIndex / 16) * CopyHeight;
+			const size_t TuneTileX = static_cast<size_t>(TILE_TUNE % 16) * CopyWidth;
+			const size_t TuneTileY = static_cast<size_t>(TILE_TUNE / 16) * CopyHeight;
 
-				ConvertToGrayscaleRect(ImgInfo, TuneTileX, TuneTileY, CopyWidth, CopyHeight);
-			}
+			ConvertToGrayscaleRect(ImgInfo, TuneTileX, TuneTileY, CopyWidth, CopyHeight);
 
 			// build game layer
 			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
@@ -342,29 +339,24 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			// build tune map from the tune tile
 			if(Graphics()->HasTextureArraysSupport())
 			{
-				for(int TuneIndex = TILE_TUNE; TuneIndex <= TILE_TUNELOCK; ++TuneIndex)
+				CImageInfo TuneMapInfo;
+				TuneMapInfo.m_Width = ImgInfo.m_Width;
+				TuneMapInfo.m_Height = ImgInfo.m_Height;
+				TuneMapInfo.m_Format = ImgInfo.m_Format;
+				TuneMapInfo.AllocateFillZero();
+
+				for(int TileIndex = 1; TileIndex < 256; ++TileIndex)
 				{
-					const size_t TuneTileX = static_cast<size_t>(TuneIndex % 16) * CopyWidth;
-					const size_t TuneTileY = static_cast<size_t>(TuneIndex / 16) * CopyHeight;
-
-					CImageInfo TuneMapInfo;
-					TuneMapInfo.m_Width = ImgInfo.m_Width;
-					TuneMapInfo.m_Height = ImgInfo.m_Height;
-					TuneMapInfo.m_Format = ImgInfo.m_Format;
-					TuneMapInfo.AllocateFillZero();
-
-					for(int TileIndex = 1; TileIndex < 256; ++TileIndex)
-					{
-						size_t StartX = CopyWidth * (TileIndex % 16);
-						size_t StartY = CopyHeight * (TileIndex / 16);
-						TuneMapInfo.CopyRectFrom(ImgInfo, TuneTileX, TuneTileY, CopyWidth, CopyHeight, StartX, StartY);
-						float Hue = std::fmod((TileIndex - 1) * normalized_golden_angle, 1.0f);
-						ColorizeWithHueRect(TuneMapInfo, Hue, 0.75f, StartX, StartY, CopyWidth, CopyHeight);
-					}
-					m_aTuneColorMapTexture[TuneIndex - TILE_TUNE] = Graphics()->LoadTextureRawMove(TuneMapInfo, TextureLoadFlag);
+					size_t StartX = CopyWidth * (TileIndex % 16);
+					size_t StartY = CopyHeight * (TileIndex / 16);
+					TuneMapInfo.CopyRectFrom(ImgInfo, TuneTileX, TuneTileY, CopyWidth, CopyHeight, StartX, StartY);
+					float Hue = std::fmod((TileIndex - 1) * normalized_golden_angle, 1.0f);
+					ColorizeWithHueRect(TuneMapInfo, Hue, 0.75f, StartX, StartY, CopyWidth, CopyHeight);
 				}
+				m_TuneColorMapTexture = Graphics()->LoadTextureRawMove(TuneMapInfo, TextureLoadFlag);
 				m_TuneColorsIsLoaded = true;
 			}
+
 			ImgInfo.Free();
 		}
 	}
@@ -383,18 +375,17 @@ IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
 	return m_SpeedupArrowTexture;
 }
 
-IGraphics::CTextureHandle CMapImages::GetTuneColors(int TileIndex)
+IGraphics::CTextureHandle CMapImages::GetTuneColors()
 {
 	if(Graphics()->HasTextureArraysSupport())
 	{
-		dbg_assert(TileIndex >= TILE_TUNE && TileIndex <= TILE_TUNELOCK, "Tune Tile Index out of range");
 		if(!m_TuneColorsIsLoaded)
 		{
 			// load entities, this also loads the tune map
 			GetEntities(EMapImageEntityLayerType::MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH);
 			dbg_assert(m_TuneColorsIsLoaded, "Entities did not load the tune color map");
 		}
-		return m_aTuneColorMapTexture[TileIndex - TILE_TUNE];
+		return m_TuneColorMapTexture;
 	}
 	else
 	{

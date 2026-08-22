@@ -1084,8 +1084,6 @@ void CMapSettingsBackend::LoadAllMapSettings()
 	LoadCommand("tune_zone", "i[zone] s[tuning] f[value]", "Tune in zone a variable to value");
 	LoadCommand("tune_zone_enter", "i[zone] r[message]", "Which message to display on zone enter; use 0 for normal area");
 	LoadCommand("tune_zone_leave", "i[zone] r[message]", "Which message to display on zone leave; use 0 for normal area");
-	LoadCommand("tune_lock", "i[number] s[tuning] f[value]", "Tune for lock a variable to value");
-	LoadCommand("tune_lock_enter", "i[number] r[message]", "which message to display on tune lock enter; use 0 for lock reset");
 	LoadCommand("mapbug", "s[mapbug]", "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 	LoadCommand("switch_open", "i[switch]", "Whether a switch is deactivated by default (otherwise activated)");
 }
@@ -1173,8 +1171,6 @@ void CMapSettingsBackend::LoadConstraints()
 	Command("tune_zone", 3).Multiple(0).Unique(1);
 	Command("tune_zone_enter", 2).Unique(0);
 	Command("tune_zone_leave", 2).Unique(0);
-	Command("tune_lock", 3).Multiple(0).Unique(1);
-	Command("tune_lock_enter", 2).Unique(0);
 	Command("switch_open", 1).Unique(0);
 	Command("mapbug", 1).Unique(0);
 }
@@ -2174,7 +2170,6 @@ void CMapSettingsBackend::InitValueLoaders()
 	// Load the different possible values for some specific settings
 	RegisterLoader("tune", SValueLoader::LoadTuneValues);
 	RegisterLoader("tune_zone", SValueLoader::LoadTuneZoneValues);
-	RegisterLoader("tune_lock", SValueLoader::LoadTuneZoneValues);
 	RegisterLoader("mapbug", SValueLoader::LoadMapBugs);
 }
 

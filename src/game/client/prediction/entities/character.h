@@ -113,8 +113,8 @@ public:
 	int GetAttackTick() const { return m_AttackTick; }
 	int GetStrongWeakId() const { return m_StrongWeakId; }
 
-	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = nullptr, CNetObj_CharacterTuning *pTuning = nullptr);
-	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_CharacterTuning *pTuning, bool IsLocal);
+	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = nullptr);
+	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;
@@ -127,9 +127,6 @@ public:
 	void SetTuneZone(int Zone);
 	int GetOverriddenTuneZone() const;
 	int GetPureTuneZone() const;
-
-	CTuningParams *GetTuning() const;
-	LOCKED_TUNES m_LockedTunings;
 
 	bool HammerHitDisabled() const { return m_Core.m_HammerHitDisabled; }
 	bool ShotgunHitDisabled() const { return m_Core.m_ShotgunHitDisabled; }
