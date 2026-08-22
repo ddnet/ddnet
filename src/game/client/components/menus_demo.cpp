@@ -1721,12 +1721,19 @@ void CMenus::PopupConfirmPlayDemo()
 	}
 }
 
+void CMenus::DemolistSelectNeighbor()
+{
+	const int NeighborIndex = m_DemolistSelectedIndex + 1 < (int)m_vpFilteredDemos.size() ? m_DemolistSelectedIndex + 1 : m_DemolistSelectedIndex - 1;
+	str_copy(m_aCurrentDemoSelectionName, NeighborIndex >= 0 ? m_vpFilteredDemos[NeighborIndex]->m_aName : "");
+}
+
 void CMenus::PopupConfirmDeleteDemo()
 {
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
 	if(Storage()->RemoveFile(aBuf, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType))
 	{
+		DemolistSelectNeighbor();
 		DemolistPopulate();
 		DemolistOnUpdate(false);
 	}
@@ -1744,6 +1751,7 @@ void CMenus::PopupConfirmDeleteFolder()
 	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
 	if(Storage()->RemoveFolder(aBuf, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType))
 	{
+		DemolistSelectNeighbor();
 		DemolistPopulate();
 		DemolistOnUpdate(false);
 	}
