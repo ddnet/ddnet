@@ -105,8 +105,8 @@ bool CHttpRequestEmscripten::ConfigureAndRun()
 	FetchAttributes.onerror = FetchCallbackFailure;
 	FetchAttributes.onprogress = FetchCallbackProgress;
 	FetchAttributes.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
-	// Using low speed limit/time properties of timeout is not supported.
-	FetchAttributes.timeoutMSecs = m_Timeout.m_ConnectTimeoutMs + m_Timeout.m_TimeoutMs;
+	// Only timeout property for whole transfer is supported.
+	FetchAttributes.timeoutMSecs = m_Timeout.m_TimeoutMs;
 	FetchAttributes.requestHeaders = vpPackedHeaders.data();
 	FetchAttributes.requestData = reinterpret_cast<const char *>(m_pBody);
 	FetchAttributes.requestDataSize = m_BodyLength;
