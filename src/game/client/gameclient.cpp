@@ -3944,14 +3944,19 @@ void CGameClient::UpdateRenderedCharacters()
 
 void CGameClient::HandlePredictedEvents(const int Tick)
 {
-	const float Alpha = 1.0f;
-	const float Volume = 1.0f;
-
 	auto EventsIterator = m_PredictedWorld.m_PredictedEvents.begin();
 	while(EventsIterator != m_PredictedWorld.m_PredictedEvents.end())
 	{
 		if(!EventsIterator->m_Handled && EventsIterator->m_Tick <= Tick)
 		{
+			float Alpha = 1.0f;
+			float Volume = 1.0f;
+			if(IsOtherTeam(EventsIterator->m_ClientId))
+			{
+				Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+				Volume = Alpha;
+			}
+
 			if(EventsIterator->m_EventId == NETEVENTTYPE_SOUNDWORLDEX)
 			{
 				if(m_GameInfo.m_RaceSounds && ((EventsIterator->m_ExtraInfo == SOUND_GUN_FIRE && !g_Config.m_SndGun) || (EventsIterator->m_ExtraInfo == SOUND_PLAYER_PAIN_LONG && !g_Config.m_SndLongPain)))
