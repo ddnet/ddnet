@@ -793,6 +793,9 @@ def smoke_test(test_env):
 	)
 	client1.wait_for_log_exact("chat/server: *** the end", timeout=15)
 
+	server.wait_for_log_exact("net_ban: unbanned all entries", timeout=15)
+	server.wait_for_log_exact("chat: *** the end", timeout=15)
+
 	server.command("stoprecord")
 	client1.command("stoprecord")
 
