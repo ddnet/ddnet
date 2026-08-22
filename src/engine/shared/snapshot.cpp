@@ -429,7 +429,7 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 	// (all other items should be copied from the last full snap)
 	for(int d = 0; d < pDelta->m_NumDeletedItems; d++)
 	{
-		int Type = pDeleted[d] >> 16;
+		int Type = (pDeleted[d] >> 16) & 0xffff;
 		int Id = pDeleted[d] & 0xffff;
 		dbg_msg("delta_dump", "  %3d %12d %08x deleted Type=%d Id=%d", DumpIndex++, pDeleted[d], pDeleted[d], Type, Id);
 	}
@@ -823,7 +823,9 @@ int CSnapshotBuilder::Finish(CSnapshotBuffer *pBuffer)
 
 int CSnapshotBuilder::GetTypeFromIndex(int Index) const
 {
-	return CSnapshot::MAX_TYPE - Index;
+	// Extended item types count down from 0x7fff, which is the highest item
+	// type id supported by earlier versions.
+	return 0x7fff - Index;
 }
 
 bool CSnapshotBuilder::AddExtendedItemType(int Index)
@@ -930,7 +932,7 @@ void *CSnapshotBuilder::NewItemRaw(int Type, int Id, int Size)
 	else if(Type < 0)
 		return nullptr;
 
-	pObj->m_TypeAndId = (Type << 16) | Id;
+	pObj->m_TypeAndId = ((unsigned)Type << 16) | (unsigned)Id;
 	m_aOffsets[m_NumItems] = m_DataSize;
 	m_DataSize += ItemSize;
 	m_NumItems++;

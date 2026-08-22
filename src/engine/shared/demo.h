@@ -132,7 +132,7 @@ private:
 
 	// Depending on the chunk header
 	// this is either a full CSnapshot or a CSnapshotDelta.
-	unsigned char m_aChunkData[CSnapshot::MAX_SIZE];
+	alignas(int32_t) unsigned char m_aChunkData[CSnapshot::MAX_SIZE];
 	// Storage for the full snapshot
 	// where the delta gets unpacked into.
 	CSnapshotBuffer m_Snapshot;

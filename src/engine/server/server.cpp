@@ -1112,7 +1112,7 @@ void CServer::DoSnapshot()
 
 			// create delta
 			CSnapshotDelta *const pSnapshotDelta = IsSixup(i) ? &m_SnapshotDeltaSixup : &m_SnapshotDelta;
-			char aDeltaData[CSnapshot::MAX_SIZE];
+			alignas(int32_t) char aDeltaData[CSnapshot::MAX_SIZE];
 			int DeltaSize = pSnapshotDelta->CreateDelta(pDeltashot, Data.AsSnapshot(), aDeltaData);
 
 			if(DeltaSize)
