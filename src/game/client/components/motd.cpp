@@ -17,6 +17,9 @@
 #include <game/client/components/important_alert.h>
 #include <game/client/gameclient.h>
 
+#include <algorithm>
+#include <chrono>
+
 CMotd::CMotd()
 {
 	m_aServerMotd[0] = '\0';
@@ -27,6 +30,7 @@ CMotd::CMotd()
 void CMotd::Clear()
 {
 	m_ServerMotdTime = 0;
+	m_TouchRect.reset();
 	Graphics()->DeleteQuadContainer(m_RectQuadContainer);
 	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 }
@@ -72,6 +76,7 @@ void CMotd::OnRender()
 	const float RectWidth = 630.0f + 2.0f * FontSize;
 	const float RectX = ScreenWidth / 2.0f - RectWidth / 2.0f;
 	const float RectY = 160.0f;
+	m_TouchRect = CUIRect{RectX / ScreenWidth, RectY / ScreenHeight, RectWidth / ScreenWidth, RectHeight / ScreenHeight};
 
 	if(m_RectQuadContainer == -1)
 	{
@@ -144,6 +149,8 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 			log_info_color(LogColor, "motd", "%s", pLast);
 		}
 
+		if(!IsActive())
+			m_ShownSince = time_get_nanoseconds();
 		m_ServerMotdUpdateTime = time();
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
 			m_ServerMotdTime = m_ServerMotdUpdateTime + time_freq() * g_Config.m_ClMotdTime;
@@ -160,5 +167,44 @@ bool CMotd::OnInput(const IInput::CEvent &Event)
 		Clear();
 		return true;
 	}
+	return false;
+}
+
+bool CMotd::OnTouchState(std::vector<IInput::CTouchFingerState> &vTouchFingerStates)
+{
+	// Remove the finger that dismissed the MOTD so it does not activate other components until it is released.
+	if(m_DismissTouchFinger.has_value())
+	{
+		const auto DismissFingerState = std::find_if(vTouchFingerStates.begin(), vTouchFingerStates.end(), [&](const IInput::CTouchFingerState &State) {
+			return State.m_Finger == *m_DismissTouchFinger;
+		});
+		if(DismissFingerState == vTouchFingerStates.end())
+			m_DismissTouchFinger.reset();
+		else
+			vTouchFingerStates.erase(DismissFingerState);
+	}
+
+	if(!IsActive())
+		return false;
+	if(GameClient()->m_Chat.IsActive() ||
+		GameClient()->m_GameConsole.IsActive() ||
+		GameClient()->m_Menus.IsActive() ||
+		GameClient()->m_Emoticon.IsActive() ||
+		GameClient()->m_Spectator.IsActive())
+	{
+		return false;
+	}
+
+	if(!m_TouchRect.has_value())
+		return false;
+	// Only fingers pressed down after the MOTD appeared and outside of its rect dismiss it.
+	const auto DismissFinger = std::find_if(vTouchFingerStates.begin(), vTouchFingerStates.end(), [&](const IInput::CTouchFingerState &State) {
+		return State.m_PressTime > m_ShownSince && !m_TouchRect->Inside(State.m_Position);
+	});
+	if(DismissFinger == vTouchFingerStates.end())
+		return false;
+	Clear();
+	m_DismissTouchFinger = DismissFinger->m_Finger;
+	vTouchFingerStates.erase(DismissFinger);
 	return false;
 }
