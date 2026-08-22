@@ -10,7 +10,9 @@ import io
 import json
 import os
 import queue
+import select
 import shutil
+import socket
 import sqlite3
 import subprocess
 import sys
@@ -360,7 +362,9 @@ def run_test_timeout_thread(name, test_env, input_queue, param):
 
 
 class Runnable:
-	def __init__(self, test_env, name, args, *, extra_env_vars={}, log_is_stderr=False, allow_unclean_exit=False):  # noqa: B006 mutable-default-arguments
+	def __init__(self, test_env, name, args, *, extra_env_vars=None, log_is_stderr=False, allow_unclean_exit=False):
+		if extra_env_vars is None:
+			extra_env_vars = {}
 		self.name = name
 		cur_env_vars = dict(os.environ)
 		intersection = set(cur_env_vars) & (set(test_env.runner.extra_env_vars) | set(extra_env_vars))
@@ -457,7 +461,9 @@ def open_fifo(name):
 
 
 class Client(Runnable):
-	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
+	def __init__(self, test_env, extra_args=None, *, allow_unclean_exit=False):
+		if extra_args is None:
+			extra_args = []
 		name = f"client{test_env.num_clients}"
 		self.fifo_name, self.fifo_path = fifo_name_path(test_env, name)
 		# Delay opening the FIFO until the client has started, because it will
@@ -474,6 +480,7 @@ class Client(Runnable):
 				f"conn_timeout {test_env.runner.conn_timeout}",
 			]
 			+ extra_args,
+			allow_unclean_exit=allow_unclean_exit,
 		)
 		test_env.num_clients += 1
 
@@ -490,7 +497,9 @@ class Client(Runnable):
 
 
 class Server(Runnable):
-	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
+	def __init__(self, test_env, extra_args=None):
+		if extra_args is None:
+			extra_args = []
 		name = f"server{test_env.num_servers}"
 		self.fifo_name, self.fifo_path = fifo_name_path(test_env, name)
 		# Delay opening the FIFO until the server has started, because it will
@@ -533,7 +542,9 @@ class Server(Runnable):
 
 
 class Mastersrv(Runnable):
-	def __init__(self, test_env, extra_args=[], config=None, communities_json=None):  # noqa: B006 mutable-default-arguments
+	def __init__(self, test_env, extra_args=None, config=None, communities_json=None):
+		if extra_args is None:
+			extra_args = []
 		name = f"mastersrv{test_env.num_mastersrvs}"
 		if communities_json is not None:
 			communities_json_filename = f"{name}-communities.json"
@@ -589,6 +600,35 @@ json = {communities_json_filename!r}
 
 	def servers_json(self):
 		return json.loads(urlopen(f"http://[::1]:{self.port}/ddnet/15/test-servers.json").read())
+
+
+class UdpRelay:
+	"""Keeps the address a server sees stable across client restarts."""
+
+	def __init__(self, server_port):
+		self.server_addr = ("127.0.0.1", server_port)
+		self.from_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.from_client.bind(("127.0.0.1", 0))
+		self.to_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.to_server.bind(("127.0.0.1", 0))
+		self.port = self.from_client.getsockname()[1]
+		Thread(name="udp_relay", target=self.run, daemon=True).start()
+
+	def run(self):
+		client_addr = None
+		while True:
+			ready, _, _ = select.select([self.from_client, self.to_server], [], [])
+			for sock in ready:
+				try:
+					data, addr = sock.recvfrom(65535)
+					if sock is self.from_client:
+						client_addr = addr
+						self.to_server.sendto(data, self.server_addr)
+					elif client_addr is not None:
+						self.from_client.sendto(data, client_addr)
+				except OSError:
+					# The client is gone while it is being restarted.
+					pass
 
 
 ALL_TESTS = []
@@ -691,6 +731,44 @@ def client_can_connect_7(test_env):
 	client.wait_for_exit()
 
 
+@test
+def client_can_rejoin_existing_slot(test_env):
+	server = test_env.server()
+	wait_for_startup([server])
+	relay = UdpRelay(server.port)
+
+	client = test_env.client(["player_name rejoiner"], allow_unclean_exit=True)
+	wait_for_startup([client])
+	client.command(f"connect 127.0.0.1:{relay.port}")
+	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+
+	# Kill instead of disconnect so the server keeps the slot and the reconnect
+	# goes through `CServer::ClientRejoinCallback`.
+	client.process.kill()
+
+	rejoined = test_env.client(["player_name rejoiner"])
+	wait_for_startup([rejoined])
+	rejoined.command("debug 1")
+	rejoined.command("stdout_output_level 2; loglevel 2")
+	rejoined.command(f"connect 127.0.0.1:{relay.port}")
+	rejoined.wait_for_log_exact("client: state change. last=3 current=4", timeout=30)
+	rejoined.command("stdout_output_level 0; loglevel 0")
+	rejoined.command("debug 0")
+
+	# If the rejoin lost the client version or the player id map, the server
+	# cannot translate the client's own id and the line arrives as
+	# " : rejoiner: hello" from the nameless placeholder client.
+	rejoined.command("say hello")
+	server.wait_for_log_suffix("rejoiner: hello", timeout=15)
+	rejoined.wait_for_log_exact("chat/all: rejoiner: hello", timeout=15)
+
+	server.exit()
+	rejoined.wait_for_log_exact("client: offline error='Server shutdown'")
+	rejoined.exit()
+	server.wait_for_exit()
+	rejoined.wait_for_exit()
+
+
 @test(requires_websockets=True)
 def client_can_connect_websockets(test_env):
 	client = test_env.client(["dbg_websockets 1", "stdout_output_level 1"])
@@ -733,7 +811,7 @@ def smoke_test(test_env):
 	client1.command("stdout_output_level 2; loglevel 2")
 	client1.command(f"connect localhost:{server.port}")
 	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
-	client1.wait_for_log_exact("client: state change. last=2 current=3", timeout=30)
+	client1.wait_for_log_exact("client: state change. last=3 current=4", timeout=30)
 	client1.command("stdout_output_level 0; loglevel 0")
 	client1.command("debug 0")
 	client1.command("record client1")
