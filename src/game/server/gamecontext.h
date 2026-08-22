@@ -670,6 +670,9 @@ public:
 	void SendSaveCode(int Team, int TeamSize, int State, const char *pError, const char *pSaveRequester, const char *pServerName, const char *pGeneratedCode, const char *pCode);
 	void OnSetAuthed(int ClientId, int Level) override;
 	void ReinitPlayerMap(int ClientId, bool Timeout) override;
+	void OnClientRejoin(int ClientId) override;
+
+	void SendStartMessages(int ClientId);
 
 	void ResetTuning();
 };

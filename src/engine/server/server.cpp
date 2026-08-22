@@ -608,6 +608,7 @@ int CServer::Init()
 		Client.m_Latency = 0;
 		Client.m_Sixup = false;
 		Client.m_RedirectDropTime = 0;
+		Client.m_Rejoining = false;
 	}
 
 	m_CurrentGameTick = MIN_TICK;
@@ -1033,7 +1034,7 @@ void CServer::DoSnapshot()
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		// client must be ingame to receive snapshots
-		if(m_aClients[i].m_State != CClient::STATE_INGAME)
+		if(m_aClients[i].m_State != CClient::STATE_INGAME || m_aClients[i].m_Rejoining)
 			continue;
 
 		// this client is trying to recover, don't spam snapshots
@@ -1162,9 +1163,16 @@ void CServer::DoSnapshot()
 	}
 }
 
-int CServer::ClientRejoinCallback(int ClientId, void *pUser)
+int CServer::ClientRejoinCallback(int ClientId, void *pUser, bool Sixup, bool VanillaAuth)
 {
 	CServer *pThis = (CServer *)pUser;
+
+	if(pThis->m_aClients[ClientId].m_State != CClient::STATE_INGAME)
+	{
+		if(VanillaAuth)
+			return NewClientNoAuthCallback(ClientId, pUser);
+		return NewClientCallback(ClientId, pUser, Sixup);
+	}
 
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
@@ -1174,6 +1182,9 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 
 	pThis->m_aClients[ClientId].Reset();
+	// m_Rejoining guides the client back into the connection without modifying current slot state.
+	pThis->m_aClients[ClientId].m_Rejoining = true;
+	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
 	pThis->GameServer()->TeehistorianRecordPlayerRejoin(ClientId);
 	pThis->Antibot()->OnEngineClientDrop(ClientId, "rejoin");
@@ -1329,6 +1340,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientId].m_Sixup = false;
 	pThis->m_aClients[ClientId].m_RedirectDropTime = 0;
+	pThis->m_aClients[ClientId].m_Rejoining = false;
 	pThis->m_aClients[ClientId].m_HasPersistentData = false;
 
 	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientId, pReason);
@@ -1985,7 +1997,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 void CServer::OnNetMsgClientVer(int ClientId, CUuid *pConnectionId, int DDNetVersion, const char *pDDNetVersionStr)
 {
-	if(m_aClients[ClientId].m_State != CClient::STATE_PREAUTH)
+	if(m_aClients[ClientId].m_State != CClient::STATE_PREAUTH && !m_aClients[ClientId].m_Rejoining)
 		return;
 	if(DDNetVersion < 0)
 		return;
@@ -1995,12 +2007,16 @@ void CServer::OnNetMsgClientVer(int ClientId, CUuid *pConnectionId, int DDNetVer
 	str_copy(m_aClients[ClientId].m_aDDNetVersionStr, pDDNetVersionStr);
 	m_aClients[ClientId].m_DDNetVersionSettled = true;
 	m_aClients[ClientId].m_GotDDNetVersionPacket = true;
-	m_aClients[ClientId].m_State = CClient::STATE_AUTH;
+
+	if(!m_aClients[ClientId].m_Rejoining)
+	{
+		m_aClients[ClientId].m_State = CClient::STATE_AUTH;
+	}
 }
 
 void CServer::OnNetMsgInfo(int ClientId, const char *pVersion, const char *pPasswordOrNullptr)
 {
-	if((m_aClients[ClientId].m_State != CClient::STATE_PREAUTH && m_aClients[ClientId].m_State != CClient::STATE_AUTH))
+	if(m_aClients[ClientId].m_State != CClient::STATE_PREAUTH && m_aClients[ClientId].m_State != CClient::STATE_AUTH && !m_aClients[ClientId].m_Rejoining)
 		return;
 
 	if(str_comp(pVersion, GameServer()->NetVersion()) != 0 && str_comp(pVersion, "0.7 802f1be60a05665f") != 0)
@@ -2039,10 +2055,14 @@ void CServer::OnNetMsgInfo(int ClientId, const char *pVersion, const char *pPass
 		return;
 	}
 
-	m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
 	SendRconType(ClientId, m_AuthManager.NumNonDefaultKeys() > 0);
 	SendCapabilities(ClientId);
-	SendMap(ClientId);
+
+	if(!m_aClients[ClientId].m_Rejoining)
+	{
+		m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
+		SendMap(ClientId);
+	}
 }
 
 void CServer::OnNetMsgReady(int ClientId)
@@ -2069,10 +2089,23 @@ void CServer::OnNetMsgReady(int ClientId)
 	// Make rejoining session possible before timeout protection triggers
 	// https://github.com/ddnet/ddnet/pull/301
 	SendConnectionReady(ClientId);
+
+	if(m_aClients[ClientId].m_Rejoining)
+	{
+		CNetMsg_Sv_ReadyToEnter Msg;
+		SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+	}
 }
 
 void CServer::OnNetMsgEnterGame(int ClientId)
 {
+	if(m_aClients[ClientId].m_Rejoining)
+	{
+		m_aClients[ClientId].m_Rejoining = false;
+		GameServer()->OnClientRejoin(ClientId);
+		return;
+	}
+
 	if(m_aClients[ClientId].m_State != CClient::STATE_READY)
 		return;
 	if(!GameServer()->IsClientReady(ClientId))

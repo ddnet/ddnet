@@ -49,23 +49,20 @@ void CNetConnection::ResetStats()
 	m_LastUpdateTime = 0;
 }
 
-void CNetConnection::Reset(bool Rejoin)
+void CNetConnection::Reset()
 {
 	m_Sequence = 0;
 	m_Ack = 0;
 	m_PeerAck = 0;
 	m_RemoteClosed = 0;
 
-	if(!Rejoin)
-	{
-		m_TimeoutProtected = false;
-		m_TimeoutSituation = false;
+	m_TimeoutProtected = false;
+	m_TimeoutSituation = false;
 
-		m_State = EState::OFFLINE;
-		m_Token = -1;
-		m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
-		m_Sixup = false;
-	}
+	m_State = EState::OFFLINE;
+	m_Token = -1;
+	m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
+	m_Sixup = false;
 
 	m_LastSendTime = 0;
 	m_LastRecvTime = 0;

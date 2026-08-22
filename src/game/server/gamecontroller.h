@@ -217,6 +217,8 @@ public:
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
 	bool IsTeamPlay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
+	int GameFlags() const { return m_GameFlags; }
+
 	// DDRace
 
 	std::optional<float> m_CurrentRecord;
