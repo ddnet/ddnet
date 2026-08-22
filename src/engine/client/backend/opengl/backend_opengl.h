@@ -13,6 +13,7 @@
 #include <base/dbg.h>
 
 #include <engine/client/backend/backend_base.h>
+#include <engine/client/backend_sdl.h>
 #include <engine/client/graphics_defines.h>
 
 class CGLSLTWProgram;
