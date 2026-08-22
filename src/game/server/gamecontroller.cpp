@@ -659,6 +659,8 @@ void IGameController::Snap(int SnappingClient)
 			      GAMEINFOFLAG2_PREDICT_EVENTS;
 	if(g_Config.m_SvNoWeakHook)
 		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
+	if(g_Config.m_SvOldLaser)
+		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_OLD_LASER;
 	GameInfoEx.m_Version = GAMEINFO_CURVERSION;
 	GameInfoEx.m_MinTeamSize = g_Config.m_SvMinTeamSize;
 	GameInfoEx.m_MaxTeamSize = g_Config.m_SvMaxTeamSize;
