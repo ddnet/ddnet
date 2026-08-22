@@ -159,7 +159,7 @@ void CCharacter::SetWeapon(int W)
 	m_LastWeapon = m_Core.m_ActiveWeapon;
 	m_QueuedWeapon = -1;
 	m_Core.m_ActiveWeapon = W;
-	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, m_pPlayer->GetCid(), TeamMask());
 
 	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_WEAPONS)
 		m_Core.m_ActiveWeapon = 0;
@@ -380,7 +380,7 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// Hit a player, give them damage and stuffs...
-				GameServer()->CreateSound(pChr->m_Pos, SOUND_NINJA_HIT, TeamMask());
+				GameServer()->CreateSound(pChr->m_Pos, SOUND_NINJA_HIT, m_pPlayer->GetCid(), TeamMask());
 				// set their velocity to fast upward (for now)
 				dbg_assert(m_NumObjectsHit < MAX_CLIENTS, "m_aHitObjects overflow");
 				m_aHitObjects[m_NumObjectsHit++] = ClientId;
@@ -498,7 +498,7 @@ void CCharacter::FireWeapon()
 		if(m_PainSoundTimer <= 0 && !(m_LatestPrevInput.m_Fire & 1))
 		{
 			m_PainSoundTimer = 1 * Server()->TickSpeed();
-			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, m_pPlayer->GetCid(), TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 		}
 		return;
 	}
@@ -513,7 +513,7 @@ void CCharacter::FireWeapon()
 	{
 	case WEAPON_HAMMER:
 	{
-		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, m_pPlayer->GetCid(), TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 
 		Antibot()->OnHammerFire(m_pPlayer->GetCid());
 
@@ -586,7 +586,7 @@ void CCharacter::FireWeapon()
 				MouseTarget //InitDir
 			);
 
-			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, m_pPlayer->GetCid(), TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 		}
 	}
 	break;
@@ -596,7 +596,7 @@ void CCharacter::FireWeapon()
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
 		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
-		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, m_pPlayer->GetCid(), TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
@@ -617,7 +617,7 @@ void CCharacter::FireWeapon()
 			MouseTarget // MouseTarget
 		);
 
-		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, m_pPlayer->GetCid(), TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
@@ -626,7 +626,7 @@ void CCharacter::FireWeapon()
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
 		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
-		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, m_pPlayer->GetCid(), TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
@@ -641,7 +641,7 @@ void CCharacter::FireWeapon()
 		// clamp to prevent massive MoveBox calculation lag with SG bug
 		m_Core.m_Ninja.m_OldVelAmount = std::clamp(length(m_Core.m_Vel), 0.0f, 6000.0f);
 
-		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, m_pPlayer->GetCid(), TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 	}
@@ -920,16 +920,16 @@ void CCharacter::TickDeferred()
 			CClientMask TeamMaskExceptSixup = Teams()->TeamMask(Team(), -1, CID, CGameContext::FLAG_SIX);
 
 			if(Events & COREEVENT_GROUND_JUMP)
-				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelfAndSixup);
+				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, m_pPlayer->GetCid(), TeamMaskExceptSelfAndSixup);
 
 			if(Events & COREEVENT_HOOK_ATTACH_PLAYER)
-				GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMaskExceptSixup);
+				GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, m_pPlayer->GetCid(), TeamMaskExceptSixup);
 
 			if(Events & COREEVENT_HOOK_ATTACH_GROUND)
-				GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelfAndSixup);
+				GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, m_pPlayer->GetCid(), TeamMaskExceptSelfAndSixup);
 
 			if(Events & COREEVENT_HOOK_HIT_NOHOOK)
-				GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelfAndSixup);
+				GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, m_pPlayer->GetCid(), TeamMaskExceptSelfAndSixup);
 		}
 
 		if(Events & COREEVENT_GROUND_JUMP)
@@ -1032,7 +1032,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	}
 
 	// a nice sound, and bursting tee death effect
-	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
+	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, m_pPlayer->GetCid(), TeamMask());
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
 
 	// this is to rate limit respawning to 3 secs
@@ -1491,7 +1491,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 			if(Server()->Tick() - m_pPlayer->m_DieTick >= Server()->TickSpeed())
 			{
 				m_pPlayer->m_DieTick = Server()->Tick();
-				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
+				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, m_pPlayer->GetCid(), TeamMask());
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
 			}
 		}
@@ -2356,7 +2356,7 @@ void CCharacter::DDRacePostCoreTick()
 		if(!m_IsBlueTeleGunTeleport)
 			m_Core.m_Vel = vec2(0, 0);
 		GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCid(), TeamMask());
-		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, TeamMask());
+		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, m_pPlayer->GetCid(), TeamMask());
 		m_TeleGunTeleport = false;
 		m_IsBlueTeleGunTeleport = false;
 	}

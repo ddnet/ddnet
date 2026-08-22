@@ -60,7 +60,13 @@ void CEventHandler::Snap(int SnappingClient)
 				const char *pData = &m_aData[m_aOffsets[i]];
 
 				const auto &&CommonExEvent = [&] {
-					return Type == NETEVENTTYPE_FINISH || Type == NETEVENTTYPE_BIRTHDAY || Type == NETEVENTTYPE_DAMAGEINDEX || Type == NETEVENTTYPE_EXPLOSIONEX || Type == NETEVENTTYPE_HAMMERHITEX || Type == NETEVENTTYPE_SPAWNEX;
+					return Type == NETEVENTTYPE_FINISH ||
+					       Type == NETEVENTTYPE_BIRTHDAY ||
+					       Type == NETEVENTTYPE_DAMAGEINDEX ||
+					       Type == NETEVENTTYPE_EXPLOSIONEX ||
+					       Type == NETEVENTTYPE_HAMMERHITEX ||
+					       Type == NETEVENTTYPE_SPAWNEX ||
+					       Type == NETEVENTTYPE_SOUNDWORLDEX;
 				};
 
 				const auto &&SnapEvent = [&](bool ForceVanillaEvent = false) {
@@ -117,6 +123,19 @@ void CEventHandler::EventExToVanilla(int *pType, int *pSize, const char **ppData
 		pEvent->m_X = pEventEx->m_X;
 		pEvent->m_Y = pEventEx->m_Y;
 		pEvent->m_Angle = pEventEx->m_Angle;
+
+		*ppData = s_aEventStore;
+	}
+	else if(*pType == NETEVENTTYPE_SOUNDWORLDEX)
+	{
+		const CNetEvent_SoundWorldEx *pEventEx = (const CNetEvent_SoundWorldEx *)(*ppData);
+		CNetEvent_SoundWorld *pEvent = (CNetEvent_SoundWorld *)s_aEventStore;
+		*pType = NETEVENTTYPE_SOUNDWORLD;
+		*pSize = sizeof(*pEvent);
+
+		pEvent->m_X = pEventEx->m_X;
+		pEvent->m_Y = pEventEx->m_Y;
+		pEvent->m_SoundId = pEventEx->m_SoundId;
 
 		*ppData = s_aEventStore;
 	}

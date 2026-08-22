@@ -903,7 +903,7 @@ void CPlayer::ProcessPause()
 	{
 		m_pCharacter->Pause(true);
 		GameServer()->CreateDeath(m_pCharacter->m_Pos, m_ClientId, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientId));
-		GameServer()->CreateSound(m_pCharacter->m_Pos, SOUND_PLAYER_DIE, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientId));
+		GameServer()->CreateSound(m_pCharacter->m_Pos, SOUND_PLAYER_DIE, m_ClientId, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientId));
 	}
 }
 

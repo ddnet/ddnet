@@ -1461,6 +1461,21 @@ bool CGameClient::EventVanillaToEx(int *pType, int *pSize, const void **ppData)
 		*ppData = s_aEventStore;
 		return true;
 	}
+	else if(*pType == NETEVENTTYPE_SOUNDWORLD)
+	{
+		const CNetEvent_SoundWorld *pEvent = (const CNetEvent_SoundWorld *)(*ppData);
+		CNetEvent_SoundWorldEx *pEventEx = (CNetEvent_SoundWorldEx *)s_aEventStore;
+		*pType = NETEVENTTYPE_SOUNDWORLDEX;
+		*pSize = sizeof(*pEventEx);
+
+		pEventEx->m_X = pEvent->m_X;
+		pEventEx->m_Y = pEvent->m_Y;
+		pEventEx->m_ClientId = -1;
+		pEventEx->m_SoundId = pEvent->m_SoundId;
+
+		*ppData = s_aEventStore;
+		return true;
+	}
 	else if(*pType == NETEVENTTYPE_EXPLOSION || *pType == NETEVENTTYPE_HAMMERHIT || *pType == NETEVENTTYPE_SPAWN)
 	{
 		const CNetEvent_Common *pEvent = (const CNetEvent_Common *)(*ppData);
@@ -1480,7 +1495,13 @@ bool CGameClient::EventVanillaToEx(int *pType, int *pSize, const void **ppData)
 		*ppData = s_aEventStore;
 		return true;
 	}
-	else if(*pType == NETEVENTTYPE_FINISH || *pType == NETEVENTTYPE_BIRTHDAY || *pType == NETEVENTTYPE_DAMAGEINDEX || *pType == NETEVENTTYPE_EXPLOSIONEX || *pType == NETEVENTTYPE_HAMMERHITEX || *pType == NETEVENTTYPE_SPAWNEX)
+	else if(*pType == NETEVENTTYPE_FINISH ||
+		*pType == NETEVENTTYPE_BIRTHDAY ||
+		*pType == NETEVENTTYPE_DAMAGEINDEX ||
+		*pType == NETEVENTTYPE_EXPLOSIONEX ||
+		*pType == NETEVENTTYPE_HAMMERHITEX ||
+		*pType == NETEVENTTYPE_SPAWNEX ||
+		*pType == NETEVENTTYPE_SOUNDWORLDEX)
 	{
 		// Event is already CommonEx
 		return true;
@@ -1499,7 +1520,7 @@ void CGameClient::ProcessEvents()
 	{
 		IClient::CSnapItem Item = Client()->SnapGetItem(SnapType, Index);
 
-		const float Volume = 1.0f;
+		float Volume = 1.0f;
 		float Alpha = 1.0f;
 		int AlphaClientId = -1;
 
@@ -1515,7 +1536,10 @@ void CGameClient::ProcessEvents()
 		}
 
 		if(IsOtherTeam(AlphaClientId))
+		{
 			Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+			Volume = Alpha;
+		}
 
 		if(Item.m_Type == NETEVENTTYPE_DAMAGEINDEX)
 		{
@@ -1567,9 +1591,9 @@ void CGameClient::ProcessEvents()
 			const CNetEvent_Death *pEvent = (const CNetEvent_Death *)Item.m_pData;
 			m_Effects.PlayerDeath(vec2(pEvent->m_X, pEvent->m_Y), pEvent->m_ClientId, Alpha);
 		}
-		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLD)
+		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLDEX)
 		{
-			const CNetEvent_SoundWorld *pEvent = (const CNetEvent_SoundWorld *)Item.m_pData;
+			const CNetEvent_SoundWorldEx *pEvent = (const CNetEvent_SoundWorldEx *)Item.m_pData;
 			if(!Config()->m_SndGame)
 				continue;
 
@@ -1577,9 +1601,9 @@ void CGameClient::ProcessEvents()
 				continue;
 
 			vec2 SoundPos = vec2(pEvent->m_X, pEvent->m_Y);
-			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, SoundPos, -1, Client()->GameTick(g_Config.m_ClDummy), -1, pEvent->m_SoundId)))
+			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, SoundPos, -1, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_ClientId, pEvent->m_SoundId)))
 			{
-				m_Sounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, 1.0f, SoundPos);
+				m_Sounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, Volume, SoundPos);
 			}
 		}
 		else if(Item.m_Type == NETEVENTTYPE_MAPSOUNDWORLD)
@@ -2834,7 +2858,7 @@ void CGameClient::OnPredict()
 					m_Sounds.PlayAndRecord(CSounds::CHN_WORLD, SOUND_HOOK_NOATTACH, 1.0f, Pos);
 				if(Events & COREEVENT_HOOK_ATTACH_PLAYER)
 				{
-					m_PredictedWorld.CreatePredictedSound(Pos, SOUND_HOOK_ATTACH_PLAYER, pLocalChar->GetCid());
+					m_PredictedWorld.CreatePredictedSound(Pos, SOUND_HOOK_ATTACH_PLAYER, pLocalChar->GetCid(), pLocalChar->GetCid());
 				}
 			}
 		}
@@ -3928,7 +3952,7 @@ void CGameClient::HandlePredictedEvents(const int Tick)
 	{
 		if(!EventsIterator->m_Handled && EventsIterator->m_Tick <= Tick)
 		{
-			if(EventsIterator->m_EventId == NETEVENTTYPE_SOUNDWORLD)
+			if(EventsIterator->m_EventId == NETEVENTTYPE_SOUNDWORLDEX)
 			{
 				if(m_GameInfo.m_RaceSounds && ((EventsIterator->m_ExtraInfo == SOUND_GUN_FIRE && !g_Config.m_SndGun) || (EventsIterator->m_ExtraInfo == SOUND_PLAYER_PAIN_LONG && !g_Config.m_SndLongPain)))
 				{

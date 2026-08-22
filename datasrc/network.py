@@ -372,9 +372,13 @@ Objects = [
 	NetEventEx("ExplosionEx:CommonEx", "explosion-ex@netevent.ddnet.org", []),
 	NetEventEx("SpawnEx:CommonEx", "spawn-ex@netevent.ddnet.org", []),
 	NetEventEx("HammerHitEx:CommonEx", "hammerhit-ex@netevent.ddnet.org", []),
-	
+
 	NetEventEx("DamageIndEx:CommonEx", "damageind-ex@netevent.ddnet.org", [
 		NetIntAny("m_Angle"),
+	]),
+
+	NetEventEx("SoundWorldEx:CommonEx", "soundworld-ex@netevent.ddnet.org", [
+		NetIntRange("m_SoundId", 0, 'NUM_SOUNDS-1'),
 	]),
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [

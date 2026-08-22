@@ -480,18 +480,19 @@ void CGameContext::CreateFinishEffect(vec2 Pos, int ClientId, CClientMask Mask)
 	}
 }
 
-void CGameContext::CreateSound(vec2 Pos, int Sound, CClientMask Mask)
+void CGameContext::CreateSound(vec2 Pos, int Sound, int ClientId, CClientMask Mask)
 {
 	if(Sound < 0)
 		return;
 
 	// create a sound
-	CNetEvent_SoundWorld *pEvent = m_Events.Create<CNetEvent_SoundWorld>(Mask);
+	CNetEvent_SoundWorldEx *pEvent = m_Events.Create<CNetEvent_SoundWorldEx>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
 		pEvent->m_SoundId = Sound;
+		pEvent->m_ClientId = ClientId;
 	}
 }
 

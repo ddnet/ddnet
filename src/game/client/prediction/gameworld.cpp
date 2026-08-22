@@ -859,12 +859,12 @@ bool CGameWorld::CheckPredictedEventHandled(const CPredictedEvent &CheckEvent)
 	return true;
 }
 
-void CGameWorld::CreatePredictedSound(vec2 Pos, int SoundId, int Id)
+void CGameWorld::CreatePredictedSound(vec2 Pos, int SoundId, int Id, int ClientId)
 {
 	if(!g_Config.m_SndEnable)
 		return;
 
-	CPredictedEvent Event(NETEVENTTYPE_SOUNDWORLD, Pos, Id, GameTick(), -1, SoundId);
+	CPredictedEvent Event(NETEVENTTYPE_SOUNDWORLDEX, Pos, Id, GameTick(), ClientId, SoundId);
 	CreatePredictedEvent(Event);
 }
 

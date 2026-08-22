@@ -295,7 +295,7 @@ public:
 	void CreateDeath(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
 	void CreateBirthdayEffect(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
 	void CreateFinishEffect(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
-	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
+	void CreateSound(vec2 Pos, int Sound, int ClientId, CClientMask Mask = CClientMask().set());
 	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
 	void SnapSwitchers(int SnappingClient);

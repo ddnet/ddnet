@@ -23,7 +23,7 @@ void CCharacter::SetWeapon(int Weapon)
 	m_QueuedWeapon = -1;
 	SetActiveWeapon(Weapon);
 
-	GameWorld()->CreatePredictedSound(m_Pos, SOUND_WEAPON_SWITCH, GetCid());
+	GameWorld()->CreatePredictedSound(m_Pos, SOUND_WEAPON_SWITCH, GetCid(), GetCid());
 }
 
 void CCharacter::SetSolo(bool Solo)
@@ -177,7 +177,7 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// Hit a player, give them damage and stuffs...
-				GameWorld()->CreatePredictedSound(pChr->m_Pos, SOUND_NINJA_HIT, GetCid());
+				GameWorld()->CreatePredictedSound(pChr->m_Pos, SOUND_NINJA_HIT, GetCid(), GetCid());
 				// set their velocity to fast upward (for now)
 				dbg_assert(m_NumObjectsHit < MAX_CLIENTS, "m_aHitObjects overflow");
 				m_aHitObjects[m_NumObjectsHit++] = ClientId;
@@ -295,7 +295,7 @@ void CCharacter::FireWeapon()
 		if(m_PainSoundTimer <= 0 && !(m_LatestPrevInput.m_Fire & 1))
 		{
 			m_PainSoundTimer = 1 * GameWorld()->GameTickSpeed();
-			GameWorld()->CreatePredictedSound(m_Pos, SOUND_PLAYER_PAIN_LONG, GetCid());
+			GameWorld()->CreatePredictedSound(m_Pos, SOUND_PLAYER_PAIN_LONG, GetCid(), GetCid());
 		}
 		return;
 	}
@@ -315,7 +315,7 @@ void CCharacter::FireWeapon()
 		if(m_Core.m_HammerHitDisabled)
 			break;
 
-		GameWorld()->CreatePredictedSound(m_Pos, SOUND_HAMMER_FIRE, GetCid());
+		GameWorld()->CreatePredictedSound(m_Pos, SOUND_HAMMER_FIRE, GetCid(), GetCid());
 
 		CEntity *apEnts[MAX_CLIENTS];
 		int Hits = 0;
@@ -404,7 +404,7 @@ void CCharacter::FireWeapon()
 				-1 //SoundImpact
 			);
 
-			GameWorld()->CreatePredictedSound(m_Pos, SOUND_GUN_FIRE, GetCid()); // NOLINT(clang-analyzer-unix.Malloc)
+			GameWorld()->CreatePredictedSound(m_Pos, SOUND_GUN_FIRE, GetCid(), GetCid()); // NOLINT(clang-analyzer-unix.Malloc)
 		}
 	}
 	break;
@@ -441,7 +441,7 @@ void CCharacter::FireWeapon()
 			new CLaser(GameWorld(), m_Pos, Direction, LaserReach, GetCid(), WEAPON_SHOTGUN);
 		}
 
-		GameWorld()->CreatePredictedSound(m_Pos, SOUND_SHOTGUN_FIRE, GetCid());
+		GameWorld()->CreatePredictedSound(m_Pos, SOUND_SHOTGUN_FIRE, GetCid(), GetCid());
 	}
 	break;
 
@@ -461,7 +461,7 @@ void CCharacter::FireWeapon()
 			SOUND_GRENADE_EXPLODE //SoundImpact
 		); //SoundImpact
 
-		GameWorld()->CreatePredictedSound(m_Pos, SOUND_GRENADE_FIRE, GetCid());
+		GameWorld()->CreatePredictedSound(m_Pos, SOUND_GRENADE_FIRE, GetCid(), GetCid());
 	}
 	break;
 
@@ -470,7 +470,7 @@ void CCharacter::FireWeapon()
 		float LaserReach = GetTuning(GetOverriddenTuneZone())->m_LaserReach;
 
 		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, GetCid(), WEAPON_LASER);
-		GameWorld()->CreatePredictedSound(m_Pos, SOUND_LASER_FIRE, GetCid());
+		GameWorld()->CreatePredictedSound(m_Pos, SOUND_LASER_FIRE, GetCid(), GetCid());
 	}
 	break;
 
@@ -485,7 +485,7 @@ void CCharacter::FireWeapon()
 		// clamp to prevent massive MoveBox calculation lag with SG bug
 		m_Core.m_Ninja.m_OldVelAmount = std::clamp(length(m_Core.m_Vel), 0.0f, 6000.0f);
 
-		GameWorld()->CreatePredictedSound(m_Pos, SOUND_NINJA_FIRE, GetCid());
+		GameWorld()->CreatePredictedSound(m_Pos, SOUND_NINJA_FIRE, GetCid(), GetCid());
 	}
 	break;
 	}
@@ -530,7 +530,7 @@ void CCharacter::GiveNinja()
 	SetActiveWeapon(WEAPON_NINJA);
 
 	if(GameWorld()->m_WorldConfig.m_IsVanilla)
-		GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_NINJA, GetCid());
+		GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_NINJA, GetCid(), GetCid());
 }
 
 void CCharacter::OnPredictedInput(const CNetObj_PlayerInput *pNewInput)
