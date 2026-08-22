@@ -564,7 +564,7 @@ public:
 	virtual void TakeScreenshot(const char *pFilename) = 0;
 	virtual void TakeCustomScreenshot(const char *pFilename) = 0;
 	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) = 0;
-	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) = 0;
+	virtual bool GetCurrentVideoMode(CVideoMode &CurMode, int Screen) = 0;
 	virtual void Swap() = 0;
 	virtual int GetNumScreens() const = 0;
 	virtual const char *GetScreenName(int Screen) const = 0;
@@ -680,6 +680,11 @@ public:
 
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
+
+	/**
+	 * @return The id of the game window, or `0` if there is currently no window.
+	 */
+	virtual uint32_t GetWindowId() const = 0;
 };
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded();
