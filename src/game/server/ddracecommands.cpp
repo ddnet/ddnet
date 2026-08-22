@@ -609,14 +609,20 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 
 	char aTimestamp[32];
 	str_timestamp(aTimestamp, sizeof(aTimestamp));
+	const char *pSaveState = SavedTeam.GetString();
+	if(!pSaveState)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Your team is too large to save");
+		return;
+	}
+
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "%s_%s_%s.save", pSelf->Map()->BaseName(), aTimestamp, pSelf->Server()->GetAuthName(pResult->m_ClientId));
 	IOHANDLE File = pSelf->Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!File)
 		return;
 
-	int Len = str_length(SavedTeam.GetString());
-	io_write(File, SavedTeam.GetString(), Len);
+	io_write(File, pSaveState, str_length(pSaveState));
 	io_close(File);
 }
 

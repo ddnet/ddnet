@@ -1179,10 +1179,14 @@ void CGameTeams::ProcessSaveTeam()
 		{
 			if(GameServer()->TeeHistorianActive())
 			{
-				GameServer()->TeeHistorian()->RecordTeamSaveSuccess(
-					Team,
-					m_apSaveTeamResult[Team]->m_SaveId,
-					m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
+				const char *pSaveState = m_apSaveTeamResult[Team]->m_SavedTeam.GetString();
+				if(pSaveState)
+				{
+					GameServer()->TeeHistorian()->RecordTeamSaveSuccess(
+						Team,
+						m_apSaveTeamResult[Team]->m_SaveId,
+						pSaveState);
+				}
 			}
 			for(int i = 0; i < Size; i++)
 			{
@@ -1212,10 +1216,14 @@ void CGameTeams::ProcessSaveTeam()
 		{
 			if(GameServer()->TeeHistorianActive())
 			{
-				GameServer()->TeeHistorian()->RecordTeamLoadSuccess(
-					Team,
-					m_apSaveTeamResult[Team]->m_SaveId,
-					m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
+				const char *pSaveState = m_apSaveTeamResult[Team]->m_SavedTeam.GetString();
+				if(pSaveState)
+				{
+					GameServer()->TeeHistorian()->RecordTeamLoadSuccess(
+						Team,
+						m_apSaveTeamResult[Team]->m_SaveId,
+						pSaveState);
+				}
 			}
 
 			bool TeamValid = false;

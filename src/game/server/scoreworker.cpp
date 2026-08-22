@@ -80,8 +80,11 @@ bool CTeamrank::NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pErro
 			*pEnd = false;
 			return true;
 		}
-		pSqlServer->GetString(2, m_aaNames[m_NumNames], sizeof(m_aaNames[m_NumNames]));
-		m_NumNames++;
+		if(m_NumNames < MAX_CLIENTS)
+		{
+			pSqlServer->GetString(2, m_aaNames[m_NumNames], sizeof(m_aaNames[m_NumNames]));
+			m_NumNames++;
+		}
 	}
 	if(!End)
 	{
@@ -103,6 +106,43 @@ bool CTeamrank::SamePlayers(const std::vector<std::string> *pvSortedNames)
 	return true;
 }
 
+void CTeamrank::FormatNames(char *pBuf, int BufSize) const
+{
+	// Reserve room for the longest suffix that could be needed.
+	char aMore[16];
+	str_format(aMore, sizeof(aMore), " & %d more", (int)m_NumNames);
+	const int NamesSize = BufSize - str_length(aMore);
+
+	pBuf[0] = '\0';
+	int Length = 0;
+	unsigned int Name = 0;
+	for(; Name < m_NumNames; Name++)
+	{
+		char aName[3 + MAX_NAME_LENGTH];
+		str_format(aName, sizeof(aName), "%s%s",
+			Length == 0 ? "" : (Name == m_NumNames - 1 ? " & " : ", "),
+			m_aaNames[Name]);
+		if(Length + str_length(aName) >= NamesSize)
+			break;
+		str_append(pBuf, aName, NamesSize);
+		Length += str_length(aName);
+	}
+	if(Name < m_NumNames)
+	{
+		str_format(aMore, sizeof(aMore), " & %d more", (int)(m_NumNames - Name));
+		str_append(pBuf, aMore, BufSize);
+	}
+}
+
+void CTeamrank::FormatTeamTopLine(char *pMessage, int MessageSize, int Rank, const char *pTime) const
+{
+	// format without names to measure remaining space for names
+	const int EmptyLength = str_format(pMessage, MessageSize, "%d. %s Team Time: %s", Rank, "", pTime);
+	char aFormattedNames[MAX_TEAM_NAMES_LENGTH];
+	FormatNames(aFormattedNames, MAX_CHAT_LENGTH - EmptyLength);
+	str_format(pMessage, MessageSize, "%d. %s Team Time: %s", Rank, aFormattedNames, pTime);
+}
+
 bool CTeamrank::GetSqlTop5Team(IDbConnection *pSqlServer, bool *pEnd, char *pError, int ErrorSize, char (*paMessages)[512], int *Line, int Count)
 {
 	char aTime[32];
@@ -115,16 +155,14 @@ bool CTeamrank::GetSqlTop5Team(IDbConnection *pSqlServer, bool *pEnd, char *pErr
 		int Rank = pSqlServer->GetInt(3);
 		int TeamSize = pSqlServer->GetInt(4);
 
-		char aNames[2300] = {0};
+		CTeamrank Teamrank;
 		for(int i = 0; i < TeamSize; i++)
 		{
-			char aName[MAX_NAME_LENGTH];
-			pSqlServer->GetString(1, aName, sizeof(aName));
-			str_append(aNames, aName);
-			if(i < TeamSize - 2)
-				str_append(aNames, ", ");
-			else if(i == TeamSize - 2)
-				str_append(aNames, " & ");
+			if(Teamrank.m_NumNames < MAX_CLIENTS)
+			{
+				pSqlServer->GetString(1, Teamrank.m_aaNames[Teamrank.m_NumNames], sizeof(Teamrank.m_aaNames[0]));
+				Teamrank.m_NumNames++;
+			}
 			if(!pSqlServer->Step(&Last, pError, ErrorSize))
 			{
 				return false;
@@ -134,8 +172,7 @@ bool CTeamrank::GetSqlTop5Team(IDbConnection *pSqlServer, bool *pEnd, char *pErr
 				break;
 			}
 		}
-		str_format(paMessages[*Line], sizeof(paMessages[*Line]), "%d. %s Team Time: %s",
-			Rank, aNames, aTime);
+		Teamrank.FormatTeamTopLine(paMessages[*Line], sizeof(paMessages[*Line]), Rank, aTime);
 		if(Last)
 		{
 			(*Line)++;
@@ -1013,17 +1050,6 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 			return false;
 		}
 
-		char aFormattedNames[512] = "";
-		for(unsigned int Name = 0; Name < Teamrank.m_NumNames; Name++)
-		{
-			str_append(aFormattedNames, Teamrank.m_aaNames[Name]);
-
-			if(Name < Teamrank.m_NumNames - 2)
-				str_append(aFormattedNames, ", ");
-			else if(Name < Teamrank.m_NumNames - 1)
-				str_append(aFormattedNames, " & ");
-		}
-
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
@@ -1032,6 +1058,13 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 		else
 		{
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
+
+			// format without names to measure remaining space for names
+			const int EmptyLength = str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+				"%d. %s Team time: %s, better than %d%%, requested by %s",
+				Rank, "", aBuf, BetterThanPercent, pData->m_aRequestingPlayer);
+			char aFormattedNames[MAX_TEAM_NAMES_LENGTH];
+			Teamrank.FormatNames(aFormattedNames, MAX_CHAT_LENGTH - EmptyLength);
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
 				"%d. %s Team time: %s, better than %d%%, requested by %s",
 				Rank, aFormattedNames, aBuf, BetterThanPercent, pData->m_aRequestingPlayer);
@@ -1329,19 +1362,7 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 				return false;
 			}
 
-			char aFormattedNames[512] = "";
-			for(unsigned int Name = 0; Name < Teamrank.m_NumNames; Name++)
-			{
-				str_append(aFormattedNames, Teamrank.m_aaNames[Name]);
-
-				if(Name < Teamrank.m_NumNames - 2)
-					str_append(aFormattedNames, ", ");
-				else if(Name < Teamrank.m_NumNames - 1)
-					str_append(aFormattedNames, " & ");
-			}
-
-			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %s",
-				Rank, aFormattedNames, aBuf);
+			Teamrank.FormatTeamTopLine(paMessages[Line], sizeof(paMessages[Line]), Rank, aBuf);
 			if(Last)
 			{
 				Line++;
@@ -1739,7 +1760,13 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char aSaveId[UUID_MAXSTRSIZE];
 	FormatUuid(pResult->m_SaveId, aSaveId, UUID_MAXSTRSIZE);
 
-	char *pSaveState = pResult->m_SavedTeam.GetString();
+	const char *pSaveState = pResult->m_SavedTeam.GetString();
+	if(!pSaveState)
+	{
+		pResult->m_Status = CScoreSaveResult::SAVE_FAILED;
+		str_copy(pResult->m_aMessage, "Your team is too large to save");
+		return true;
+	}
 	char aBuf[65536];
 
 	dbg_msg("score/dbg", "code=%s failure=%d", pData->m_aCode, (int)w);
@@ -1864,7 +1891,7 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 		}
 	}
 
-	char aSaveString[65536];
+	char aSaveString[MAX_SAVE_STRING_LENGTH];
 	pSqlServer->GetString(1, aSaveString, sizeof(aSaveString));
 	int Num = pResult->m_SavedTeam.FromString(aSaveString);
 
