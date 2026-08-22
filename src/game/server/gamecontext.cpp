@@ -31,6 +31,7 @@
 #include <engine/shared/json.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/memheap.h>
+#include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/protocolglue.h>
 #include <engine/storage.h>
@@ -829,6 +830,10 @@ void CGameContext::SendSettings(int ClientId) const
 
 void CGameContext::SendServerAlert(const char *pMessage)
 {
+	char aMessage[NET_MAX_CHUNK_PAYLOAD];
+	str_copy(aMessage, pMessage);
+	pMessage = aMessage;
+
 	for(int ClientId = 0; ClientId < Server()->MaxClients(); ClientId++)
 	{
 		if(!m_apPlayers[ClientId])
@@ -864,6 +869,10 @@ void CGameContext::SendModeratorAlert(int ToClientId, const char *pMessage)
 	dbg_assert(in_range(ToClientId, 0, MAX_CLIENTS - 1), "SendImportantAlert ToClientId invalid: %d", ToClientId);
 	dbg_assert(m_apPlayers[ToClientId] != nullptr, "Client not online: %d", ToClientId);
 
+	char aMessage[NET_MAX_CHUNK_PAYLOAD];
+	str_copy(aMessage, pMessage);
+	pMessage = aMessage;
+
 	if(m_apPlayers[ToClientId]->GetClientVersion() >= VERSION_DDNET_IMPORTANT_ALERT)
 	{
 		CNetMsg_Sv_ModeratorAlert Msg;
@@ -882,8 +891,11 @@ void CGameContext::SendModeratorAlert(int ToClientId, const char *pMessage)
 
 void CGameContext::SendBroadcast(const char *pText, int ClientId, bool IsImportant)
 {
+	char aText[NET_MAX_CHUNK_PAYLOAD];
+	str_copy(aText, pText);
+
 	CNetMsg_Sv_Broadcast Msg;
-	Msg.m_pMessage = pText;
+	Msg.m_pMessage = aText;
 
 	if(ClientId == -1)
 	{

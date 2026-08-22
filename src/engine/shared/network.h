@@ -73,6 +73,12 @@ enum
 	 * This is 1023 because the size is packed into 10 bits in the chunk header.
 	 */
 	NET_MAX_CHUNK_SIZE = 1023,
+	/**
+	 * Maximum payload packed into a single vital chunk.
+	 *
+	 * The 128 byte margin leaves room for the message header.
+	 */
+	NET_MAX_CHUNK_PAYLOAD = NET_MAX_CHUNK_SIZE - 128,
 	NET_MAX_CHUNKHEADERSIZE = 3,
 	NET_PACKETHEADERSIZE = 3,
 	NET_CONNLESS_EXTRA_SIZE = 4,
