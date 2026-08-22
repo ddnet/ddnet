@@ -498,10 +498,14 @@ public:
 		SCommand_Update_Viewport() :
 			SCommand(CMD_UPDATE_VIEWPORT) {}
 
-		int m_X;
-		int m_Y;
-		int m_Width;
-		int m_Height;
+		// Viewport rectangle, relative to the top left of the drawable area.
+		int m_X = 0;
+		int m_Y = 0;
+		int m_Width = 0;
+		int m_Height = 0;
+		// Size of the whole drawable area, which the viewport can be smaller than.
+		int m_DrawableWidth = 0;
+		int m_DrawableHeight = 0;
 		bool m_ByResize; // resized by an resize event.. a hint to make clear that the viewport update can be deferred if wanted
 	};
 

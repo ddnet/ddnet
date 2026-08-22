@@ -102,6 +102,7 @@ private:
 	void HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event);
 	void HandleJoystickAddedEvent(const SDL_JoyDeviceEvent &Event);
 	void HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event);
+	vec2 WindowFractionToViewport(vec2 Fraction) const;
 	void HandleTouchDownEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchUpEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event);

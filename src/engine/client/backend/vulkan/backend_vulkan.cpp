@@ -7003,11 +7003,9 @@ public:
 			{
 				m_HasDynamicViewport = true;
 
-				// convert viewport from OGL to vulkan
-				int32_t ViewportY = (int32_t)Viewport.height - ((int32_t)pCommand->m_Y + (int32_t)pCommand->m_Height);
-				uint32_t ViewportH = (int32_t)pCommand->m_Height;
-				m_DynamicViewportOffset = {(int32_t)pCommand->m_X, ViewportY};
-				m_DynamicViewportSize = {(uint32_t)pCommand->m_Width, ViewportH};
+				// The viewport rectangle and Vulkan both use a top left origin.
+				m_DynamicViewportOffset = {(int32_t)pCommand->m_X, (int32_t)pCommand->m_Y};
+				m_DynamicViewportSize = {(uint32_t)pCommand->m_Width, (uint32_t)pCommand->m_Height};
 			}
 			else
 			{
