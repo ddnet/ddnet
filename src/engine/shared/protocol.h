@@ -182,6 +182,13 @@ namespace TuneZone
 	inline constexpr int NUM = 256;
 };
 
+namespace ProjTele
+{
+	inline constexpr int NONE = -1;
+	inline constexpr int CFROM_EVIL = 0;
+	inline constexpr int CFROM_BLUE = 1;
+};
+
 namespace FinishTime
 {
 	inline constexpr int NOT_FINISHED_TIMESCORE = -9999;

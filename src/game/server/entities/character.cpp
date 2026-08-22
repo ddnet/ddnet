@@ -79,6 +79,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_TeleGunTeleport = false;
 	m_IsBlueTeleGunTeleport = false;
+	m_TeleBulletTeleport = ProjTele::NONE;
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -1867,6 +1868,13 @@ void CCharacter::HandleTiles(int Index)
 			Freeze(SwitchDelay);
 		}
 	}
+	else if(SwitchType == TILE_UNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
+	{
+		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
+		{
+			Unfreeze();
+		}
+	}
 	else if(SwitchType == TILE_DFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
 	{
 		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
@@ -2053,74 +2061,65 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(Collision()->IsCheckEvilTeleport(MapIndex))
 	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
+		if(TeleToCheckpoint(true))
 			return;
-		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
-		{
-			if(!Collision()->TeleCheckOuts(k).empty())
-			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
-				m_Core.m_Vel = vec2(0, 0);
-
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
-				}
-
-				return;
-			}
-		}
-		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GetPlayer()->GetCid()))
-		{
-			m_Core.m_Pos = SpawnPos;
-			m_Core.m_Vel = vec2(0, 0);
-
-			if(!g_Config.m_SvTeleportHoldHook)
-			{
-				ResetHook();
-				GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
-			}
-		}
-		return;
 	}
 	if(Collision()->IsCheckTeleport(MapIndex))
 	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
+		if(TeleToCheckpoint(false))
 			return;
-		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+	}
+}
+
+bool CCharacter::TeleToCheckpoint(bool Evil)
+{
+	if(m_Core.m_Super || m_Core.m_Invincible)
+		return false;
+	// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+	for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+	{
+		if(!Collision()->TeleCheckOuts(k).empty())
 		{
-			if(!Collision()->TeleCheckOuts(k).empty())
+			int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+			m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+			if(Evil)
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
-
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-				}
-
-				return;
+				m_Core.m_Vel = vec2(0, 0);
 			}
-		}
-		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GetPlayer()->GetCid()))
-		{
-			m_Core.m_Pos = SpawnPos;
 
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
 				ResetHook();
+				if(Evil)
+				{
+					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+				}
+			}
+
+			return true;
+		}
+	}
+	// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+	vec2 SpawnPos;
+	if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GetPlayer()->GetCid()))
+	{
+		m_Core.m_Pos = SpawnPos;
+		if(Evil)
+		{
+			m_Core.m_Vel = vec2(0, 0);
+		}
+
+		if(!g_Config.m_SvTeleportHoldHook)
+		{
+			ResetHook();
+			if(Evil)
+			{
+				GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
 			}
 		}
-		return;
+		return true;
 	}
+	return false;
 }
 
 void CCharacter::HandleTuneLayer()
@@ -2359,6 +2358,13 @@ void CCharacter::DDRacePostCoreTick()
 		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, TeamMask());
 		m_TeleGunTeleport = false;
 		m_IsBlueTeleGunTeleport = false;
+	}
+
+	if(m_TeleBulletTeleport != ProjTele::NONE)
+	{
+		if(TeleToCheckpoint(m_TeleBulletTeleport == ProjTele::CFROM_EVIL))
+			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
+		m_TeleBulletTeleport = ProjTele::NONE;
 	}
 
 	HandleBroadcast();

@@ -112,6 +112,8 @@ enum
 
 	// Doors
 	ENTITY_DOOR = 49,
+	// Teleport shotgun bullet
+	ENTITY_BULLET_TELEPORT_CFROM = 50,
 	// End Of Lower Tiles
 
 	ENTITY_OFFSET = 255 - 16 * 4,
@@ -175,6 +177,7 @@ enum
 	TILE_NOHIT = 74,
 	TILE_NPH = 75,
 	TILE_UNLOCK_TEAM = 76,
+	TILE_TELEINENTITY = 77,
 	TILE_ADD_TIME = 79,
 	TILE_NPC_DISABLE = 88,
 	TILE_UNLIMITED_JUMPS_DISABLE = 89,

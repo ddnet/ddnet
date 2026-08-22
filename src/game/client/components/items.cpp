@@ -19,7 +19,7 @@
 #include <game/client/projectile_data.h>
 #include <game/mapitems.h>
 
-void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, const CScreenRect &ScreenRect)
+void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, bool Inactive, const CScreenRect &ScreenRect)
 {
 	int CurWeapon = std::clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 
@@ -89,7 +89,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, const
 		return;
 	vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct - 0.001f);
 
-	float Alpha = 1.f;
+	float Alpha = Inactive ? 0.5f : 1.f;
 	if(IsOtherTeam)
 	{
 		Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
@@ -97,16 +97,17 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, const
 
 	vec2 Vel = Pos - PrevPos;
 
+	static float s_Time = 0.0f;
+	static float s_LastLocalTime = LocalTime();
+	s_Time += (LocalTime() - s_LastLocalTime) * GameClient()->GetAnimationPlaybackSpeed();
+	s_LastLocalTime = LocalTime();
+
 	// add particle for this projectile
 	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compatibility
 	if(CurWeapon == WEAPON_GRENADE)
 	{
 		GameClient()->m_Effects.SmokeTrail(Pos, Vel * -1, Alpha, 0.0f);
-		static float s_Time = 0.0f;
-		static float s_LastLocalTime = LocalTime();
-		s_Time += (LocalTime() - s_LastLocalTime) * GameClient()->GetAnimationPlaybackSpeed();
 		Graphics()->QuadsSetRotation(s_Time * pi * 2 * 2 + ItemId);
-		s_LastLocalTime = LocalTime();
 	}
 	else
 	{
@@ -123,6 +124,20 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, const
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aProjectileOffset[CurWeapon], Pos.x, Pos.y);
+
+		if(pCurrent->m_TeleType != ProjTele::NONE)
+		{
+			const float SpinSpeed = 0.85f;
+			const float Angle = s_Time * pi * 2.0f * SpinSpeed + ItemId;
+			Graphics()->QuadsSetRotation(Angle);
+
+			const bool IsEvilTele = pCurrent->m_TeleType == ProjTele::CFROM_EVIL;
+			Graphics()->TextureSet(IsEvilTele ? GameClient()->m_ExtrasSkin.m_SpriteParticleBulletTeleRed : GameClient()->m_ExtrasSkin.m_SpriteParticleBulletTeleBlue);
+			Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
+			Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, IsEvilTele ? m_BulletTeleRedOffset : m_BulletTeleBlueOffset, Pos.x, Pos.y);
+
+			Graphics()->QuadsSetRotation(0);
+		}
 	}
 }
 
@@ -483,11 +498,12 @@ void CItems::OnRender()
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
-			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_aStatus[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
+			bool Inactive = !IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_aStatus[SwitcherTeam];
+			if(Inactive && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
 
 			CProjectileData Data = pProj->GetData();
-			RenderProjectile(&Data, pProj->GetId(), ScreenRectProjectile);
+			RenderProjectile(&Data, pProj->GetId(), Inactive, ScreenRectProjectile);
 		}
 		for(CEntity *pEnt = GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->NextEntity())
 		{
@@ -535,7 +551,7 @@ void CItems::OnRender()
 				if(auto *pProj = (CProjectile *)GameClient()->m_GameWorld.FindMatch(Item.m_Id, Item.m_Type, pData))
 				{
 					bool IsOtherTeam = GameClient()->IsOtherTeam(pProj->GetOwner());
-					if(pProj->m_LastRenderTick <= 0 && (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
+					if(pProj->m_LastRenderTick <= 0 && (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive && pProj->m_TeleType == ProjTele::NONE)) // skip ddrace shotgun bullets
 						&& (pProj->m_Type == WEAPON_SHOTGUN || absolute(length(pProj->m_Direction) - 1.f) < 0.02f) // workaround to skip grenades on ball mod
 						&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal || IsOtherTeam) // skip locally predicted projectiles
 						&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id))
@@ -547,7 +563,7 @@ void CItems::OnRender()
 						continue;
 				}
 			}
-			RenderProjectile(&Data, Item.m_Id, ScreenRectProjectile);
+			RenderProjectile(&Data, Item.m_Id, Inactive, ScreenRectProjectile);
 		}
 		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP)
 		{
@@ -693,6 +709,12 @@ void CItems::OnInit()
 
 	IGraphics::CQuadItem Brick(0, 0, 16.0f, 16.0f);
 	m_DoorHeadOffset = Graphics()->QuadContainerAddQuads(m_ItemsQuadContainerIndex, &Brick, 1);
+
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_BulletTeleRedOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 32.f);
+
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_BulletTeleBlueOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 32.f);
 
 	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
 }

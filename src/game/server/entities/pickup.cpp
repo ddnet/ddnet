@@ -194,5 +194,10 @@ void CPickup::Move()
 	{
 		GameServer()->Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;
+
+		if(m_Core != vec2(0.0f, 0.0f))
+		{
+			TeleportToTile(m_Pos - m_Core, m_Pos);
+		}
 	}
 }

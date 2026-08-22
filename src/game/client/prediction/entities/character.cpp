@@ -1000,6 +1000,13 @@ void CCharacter::HandleTiles(int Index)
 			Freeze(SwitchDelay);
 		}
 	}
+	else if(SwitchType == TILE_UNFREEZE && Team() != TeamsCore()->TeamSuper() && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
+	{
+		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
+		{
+			Unfreeze();
+		}
+	}
 	else if(SwitchType == TILE_DFREEZE && Team() != TeamsCore()->TeamSuper() && !m_Core.m_Invincible)
 	{
 		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
