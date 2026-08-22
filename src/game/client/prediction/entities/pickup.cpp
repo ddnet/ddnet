@@ -35,7 +35,7 @@ void CPickup::Tick()
 				if(!GameWorld()->m_WorldConfig.m_PredictDDRace)
 					continue;
 				if(pChr->Freeze())
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->GetCid());
+					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->GetCid(), pChr->GetCid());
 				break;
 
 			case POWERUP_ARMOR:
@@ -58,7 +58,7 @@ void CPickup::Tick()
 				if(CreateSound)
 				{
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid());
+					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid(), pChr->GetCid());
 				}
 				if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -74,7 +74,7 @@ void CPickup::Tick()
 					pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
 					pChr->SetWeaponAmmo(WEAPON_SHOTGUN, 0);
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid());
+					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid(), pChr->GetCid());
 				}
 				if(pChr->GetActiveWeapon() == WEAPON_SHOTGUN)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -90,7 +90,7 @@ void CPickup::Tick()
 					pChr->SetWeaponGot(WEAPON_GRENADE, false);
 					pChr->SetWeaponAmmo(WEAPON_GRENADE, 0);
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid());
+					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid(), pChr->GetCid());
 				}
 				if(pChr->GetActiveWeapon() == WEAPON_GRENADE)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -116,7 +116,7 @@ void CPickup::Tick()
 					pChr->SetWeaponGot(WEAPON_LASER, false);
 					pChr->SetWeaponAmmo(WEAPON_LASER, 0);
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid());
+					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid(), pChr->GetCid());
 				}
 				if(pChr->GetActiveWeapon() == WEAPON_LASER)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -130,11 +130,11 @@ void CPickup::Tick()
 					if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
 					{
 						if(m_Subtype == WEAPON_GRENADE)
-							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->GetCid());
+							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->GetCid(), pChr->GetCid());
 						else if(m_Subtype == WEAPON_SHOTGUN)
-							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->GetCid());
+							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->GetCid(), pChr->GetCid());
 						else if(m_Subtype == WEAPON_LASER)
-							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->GetCid());
+							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->GetCid(), pChr->GetCid());
 					}
 				}
 				break;

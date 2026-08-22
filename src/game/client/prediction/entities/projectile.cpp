@@ -108,7 +108,7 @@ void CProjectile::Tick()
 			if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
 			{
 				// vanilla has different projectile physics
-				GameWorld()->CreatePredictedSound(ColPos, m_SoundImpact, m_StartTick);
+				GameWorld()->CreatePredictedSound(ColPos, m_SoundImpact, m_StartTick, m_Owner);
 			}
 		}
 		else if(m_Freeze)
@@ -139,7 +139,7 @@ void CProjectile::Tick()
 		else if(m_Type == WEAPON_GUN)
 		{
 			if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
-				GameWorld()->CreatePredictedDamageIndEvent(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_StartTick);
+				GameWorld()->CreatePredictedDamageIndEvent(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_StartTick, m_Owner);
 			m_MarkedForDestroy = true;
 		}
 		else if(!m_Freeze)
@@ -155,7 +155,7 @@ void CProjectile::Tick()
 				pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
 
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()), CClientMask().set(), m_StartTick);
-			GameWorld()->CreatePredictedSound(ColPos, m_SoundImpact, m_StartTick);
+			GameWorld()->CreatePredictedSound(ColPos, m_SoundImpact, m_StartTick, m_Owner);
 		}
 		m_MarkedForDestroy = true;
 	}

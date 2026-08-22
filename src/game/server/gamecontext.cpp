@@ -347,7 +347,7 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 	}
 }
 
-void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, CClientMask Mask)
+void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, int ClientId, CClientMask Mask)
 {
 	float a = 3 * pi / 2 + Angle;
 	float s = a - pi / 3;
@@ -355,34 +355,37 @@ void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, CClientMas
 	for(int i = 0; i < Amount; i++)
 	{
 		float f = mix(s, e, (i + 1) / (float)(Amount + 1));
-		CNetEvent_DamageInd *pEvent = m_Events.Create<CNetEvent_DamageInd>(Mask);
+		CNetEvent_DamageIndEx *pEvent = m_Events.Create<CNetEvent_DamageIndEx>(Mask);
 		if(pEvent)
 		{
 			pEvent->m_X = (int)Pos.x;
 			pEvent->m_Y = (int)Pos.y;
 			pEvent->m_Angle = (int)(f * 256.0f);
+			pEvent->m_ClientId = ClientId;
 		}
 	}
 }
 
-void CGameContext::CreateHammerHit(vec2 Pos, CClientMask Mask)
+void CGameContext::CreateHammerHit(vec2 Pos, int ClientId, CClientMask Mask)
 {
-	CNetEvent_HammerHit *pEvent = m_Events.Create<CNetEvent_HammerHit>(Mask);
+	CNetEvent_HammerHitEx *pEvent = m_Events.Create<CNetEvent_HammerHitEx>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
+		pEvent->m_ClientId = ClientId;
 	}
 }
 
 void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
 {
 	// create the event
-	CNetEvent_Explosion *pEvent = m_Events.Create<CNetEvent_Explosion>(Mask);
+	CNetEvent_ExplosionEx *pEvent = m_Events.Create<CNetEvent_ExplosionEx>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
+		pEvent->m_ClientId = Owner;
 	}
 
 	// deal damage
@@ -433,13 +436,14 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	}
 }
 
-void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)
+void CGameContext::CreatePlayerSpawn(vec2 Pos, int ClientId, CClientMask Mask)
 {
-	CNetEvent_Spawn *pEvent = m_Events.Create<CNetEvent_Spawn>(Mask);
+	CNetEvent_SpawnEx *pEvent = m_Events.Create<CNetEvent_SpawnEx>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
+		pEvent->m_ClientId = ClientId;
 	}
 }
 
@@ -454,38 +458,41 @@ void CGameContext::CreateDeath(vec2 Pos, int ClientId, CClientMask Mask)
 	}
 }
 
-void CGameContext::CreateBirthdayEffect(vec2 Pos, CClientMask Mask)
+void CGameContext::CreateBirthdayEffect(vec2 Pos, int ClientId, CClientMask Mask)
 {
 	CNetEvent_Birthday *pEvent = m_Events.Create<CNetEvent_Birthday>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
+		pEvent->m_ClientId = ClientId;
 	}
 }
 
-void CGameContext::CreateFinishEffect(vec2 Pos, CClientMask Mask)
+void CGameContext::CreateFinishEffect(vec2 Pos, int ClientId, CClientMask Mask)
 {
 	CNetEvent_Finish *pEvent = m_Events.Create<CNetEvent_Finish>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
+		pEvent->m_ClientId = ClientId;
 	}
 }
 
-void CGameContext::CreateSound(vec2 Pos, int Sound, CClientMask Mask)
+void CGameContext::CreateSound(vec2 Pos, int Sound, int ClientId, CClientMask Mask)
 {
 	if(Sound < 0)
 		return;
 
 	// create a sound
-	CNetEvent_SoundWorld *pEvent = m_Events.Create<CNetEvent_SoundWorld>(Mask);
+	CNetEvent_SoundWorldEx *pEvent = m_Events.Create<CNetEvent_SoundWorldEx>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
 		pEvent->m_SoundId = Sound;
+		pEvent->m_ClientId = ClientId;
 	}
 }
 
