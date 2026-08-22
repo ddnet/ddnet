@@ -935,6 +935,18 @@ bool CGameClient::IsTeamPlay() const
 	       (m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
 }
 
+int CGameClient::MinTeamSize() const
+{
+	// old servers only expose it if the map settings happen to contain it
+	return m_GameInfo.m_MinTeamSize != 0 ? m_GameInfo.m_MinTeamSize : Config()->m_SvMinTeamSize;
+}
+
+int CGameClient::MaxTeamSize() const
+{
+	// old servers only expose it if the map settings happen to contain it
+	return m_GameInfo.m_MaxTeamSize != 0 ? m_GameInfo.m_MaxTeamSize : Config()->m_SvMaxTeamSize;
+}
+
 bool CGameClient::IsWorldPaused() const
 {
 	return m_Snap.m_pGameInfoObj &&
@@ -1629,6 +1641,8 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_DDRaceTeam = false;
 	Info.m_PredictEvents = Vanilla;
 	Info.m_Supports128Teams = false;
+	Info.m_MinTeamSize = 0;
+	Info.m_MaxTeamSize = 0;
 
 	if(Version >= 0)
 	{
@@ -1699,6 +1713,11 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 12)
 	{
 		Info.m_Supports128Teams = Flags2 & GAMEINFOFLAG2_SUPPORTS_128_TEAMS;
+	}
+	if(Version >= 13)
+	{
+		Info.m_MinTeamSize = pInfoEx->m_MinTeamSize;
+		Info.m_MaxTeamSize = pInfoEx->m_MaxTeamSize;
 	}
 
 	return Info;

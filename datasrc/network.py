@@ -77,7 +77,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=12,
+	GAMEINFO_CURVERSION=13,
 };
 '''
 
@@ -272,6 +272,8 @@ Objects = [
 		NetIntAny("m_Flags", default=0),
 		NetIntAny("m_Version", default=0),
 		NetIntAny("m_Flags2", default=0),
+		NetIntRange("m_MinTeamSize", 0, 'MAX_CLIENTS', default=0),
+		NetIntRange("m_MaxTeamSize", 0, 'MAX_CLIENTS', default=0),
 	], validate_size=False),
 
 	# The code assumes that this has the same in-memory representation as
