@@ -733,9 +733,11 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 					DiffAngle = SpeederAngle - TeeAngle;
 					SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
-					if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+					const float SpeedLeftAbs = absolute(SpeedLeft);
+					const bool Exceeds = SpeedLeftAbs >= (float)(Force + 1) && SpeedLeftAbs < 2147483648.0f;
+					if(Exceeds && SpeedLeft > 0.0000001f)
 						TempVel += Direction * Force;
-					else if(absolute((int)SpeedLeft) > Force)
+					else if(Exceeds)
 						TempVel += Direction * -Force;
 					else
 						TempVel += Direction * SpeedLeft;

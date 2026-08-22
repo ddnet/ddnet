@@ -352,8 +352,8 @@ CNetObj_DDNetProjectile CProjectile::NetInfo(int SnappingClient)
 		Flags |= PROJECTILEFLAG_NORMALIZE_VEL;
 	}
 
-	Result.m_X = round_to_int(m_Pos.x * 100.0f);
-	Result.m_Y = round_to_int(m_Pos.y * 100.0f);
+	Result.m_X = round_to_int_checked(m_Pos.x * 100.0f);
+	Result.m_Y = round_to_int_checked(m_Pos.y * 100.0f);
 	Result.m_Type = m_Type;
 	Result.m_StartTick = m_StartTick;
 	Result.m_Owner = Owner;

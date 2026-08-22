@@ -14,14 +14,25 @@ concept Numeric = std::integral<T> || std::floating_point<T>;
 constexpr float pi = 3.1415926535897932384626433f;
 constexpr float normalized_golden_angle = 137.50776f / 360.0f;
 
+// Converting a float that is NaN or outside the int range is undefined behaviour. x86-64
+// yields INT_MIN for every one of them, which is what the servers have always sent, so the
+// range check reproduces exactly that rather than picking a new value.
+constexpr int round_truncate(float f)
+{
+	constexpr float imin = (float)std::numeric_limits<int>::min();
+	return f >= imin && f < -imin ? (int)f : std::numeric_limits<int>::min();
+}
+
+// The caller must know the value is representable. The collision loops convert twice per
+// step and the range check costs them a third of their time, hence the two variants.
 constexpr int round_to_int(float f)
 {
 	return f > 0 ? (int)(f + 0.5f) : (int)(f - 0.5f);
 }
 
-constexpr int round_truncate(float f)
+constexpr int round_to_int_checked(float f)
 {
-	return (int)f;
+	return f > 0 ? round_truncate(f + 0.5f) : round_truncate(f - 0.5f);
 }
 
 template<typename T, typename TB>

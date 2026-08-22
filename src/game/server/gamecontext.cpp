@@ -1565,6 +1565,13 @@ void CGameContext::OnClientPrepareInput(int ClientId, void *pInput)
 
 	if(Server()->IsSixup(ClientId))
 		pPlayerInput->m_PlayerFlags = PlayerFlags_SevenToSix(pPlayerInput->m_PlayerFlags);
+
+	constexpr int MaxTarget = 1 << 20;
+	pPlayerInput->m_TargetX = std::clamp(pPlayerInput->m_TargetX, -MaxTarget, MaxTarget);
+	pPlayerInput->m_TargetY = std::clamp(pPlayerInput->m_TargetY, -MaxTarget, MaxTarget);
+
+	if(pPlayerInput->m_WantedWeapon < 0 || pPlayerInput->m_WantedWeapon > NUM_WEAPONS)
+		pPlayerInput->m_WantedWeapon = 0;
 }
 
 void CGameContext::OnClientDirectInput(int ClientId, const void *pInput)
