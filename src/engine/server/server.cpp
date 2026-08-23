@@ -1025,7 +1025,7 @@ void CServer::DoSnapshot()
 		CSnapshotBuffer Data;
 
 		// build snap and possibly add some messages
-		m_SnapshotBuilder.Init();
+		m_SnapshotBuilder.Init(false, true);
 		GameServer()->OnSnap(-1, IsGlobalSnap, true);
 		int SnapshotSize = m_SnapshotBuilder.Finish(&Data);
 
@@ -1056,7 +1056,8 @@ void CServer::DoSnapshot()
 			continue;
 
 		{
-			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
+			const bool SizeExtended = GetClientVersion(i) >= VERSION_DDNET_SIZEEXTENDEDSNAPSHOT;
+			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup, SizeExtended);
 
 			// only snap events on global ticks
 			GameServer()->OnSnap(i, IsGlobalSnap, m_aDemoRecorder[i].IsRecording());
@@ -1356,14 +1357,15 @@ void CServer::SendRconType(int ClientId, bool UsernameReq)
 void CServer::SendCapabilities(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
-	Msg.AddInt(SERVERCAP_CURVERSION); // version
+	Msg.AddInt(SERVERCAP_CURVERSION);
 	Msg.AddInt(
 		SERVERCAPFLAG_DDNET |
 		SERVERCAPFLAG_CHATTIMEOUTCODE |
 		SERVERCAPFLAG_ANYPLAYERFLAG |
 		SERVERCAPFLAG_PINGEX |
 		SERVERCAPFLAG_ALLOWDUMMY |
-		SERVERCAPFLAG_SYNCWEAPONINPUT); // flags
+		SERVERCAPFLAG_SYNCWEAPONINPUT |
+		SERVERCAPFLAG_SIZEEXTENDEDSNAPSHOT);
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
