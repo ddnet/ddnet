@@ -10,6 +10,8 @@
 
 #if defined(CONF_PLATFORM_ANDROID)
 #include <android/android_main.h>
+#elif defined(CONF_INTEGRATED_SERVER)
+#include <engine/server/emscripten_server.h>
 #else
 #include <base/process.h>
 #endif
@@ -32,6 +34,21 @@ bool CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
 	else
 	{
 		Client()->AddWarning(SWarning(Localize("Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.")));
+		mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
+		return false;
+	}
+#elif defined(CONF_INTEGRATED_SERVER)
+	// Registering is pointless as the server is only reachable within this
+	// browser tab via the in-memory loopback transport.
+	vpArgumentsWithAuth.push_back("sv_register 0");
+	if(StartEmscriptenServer(vpArgumentsWithAuth.data(), vpArgumentsWithAuth.size()))
+	{
+		GameClient()->m_Menus.ForceRefreshLanPage();
+		return true;
+	}
+	else
+	{
+		Client()->AddWarning(SWarning(Localize("Server could not be started")));
 		mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
 		return false;
 	}
@@ -75,6 +92,9 @@ void CLocalServer::KillServer()
 #if defined(CONF_PLATFORM_ANDROID)
 	ExecuteAndroidServerCommand("shutdown");
 	GameClient()->m_Menus.ForceRefreshLanPage();
+#elif defined(CONF_INTEGRATED_SERVER)
+	ExecuteEmscriptenServerCommand("shutdown");
+	GameClient()->m_Menus.ForceRefreshLanPage();
 #else
 	if(m_Process != INVALID_PROCESS && process_kill(m_Process))
 	{
@@ -89,6 +109,8 @@ bool CLocalServer::IsServerRunning()
 {
 #if defined(CONF_PLATFORM_ANDROID)
 	return IsAndroidServerRunning();
+#elif defined(CONF_INTEGRATED_SERVER)
+	return IsEmscriptenServerRunning();
 #else
 	if(m_Process != INVALID_PROCESS && !process_is_alive(m_Process))
 	{

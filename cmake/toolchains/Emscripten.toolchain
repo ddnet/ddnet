@@ -6,9 +6,11 @@ set(WASM_CXX_FLAGS "")
 set(WASM_LINKER_FLAGS "")
 
 # Enable pthreads. Use thread pool of fixed sized, as workers cannot be created while our code is running.
+# The pool must also accommodate the threads of the integrated server (server main
+# thread, database worker, job pool).
 set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -pthread")
 set(WASM_LINKER_FLAGS "-s LLD_REPORT_UNDEFINED -s USE_PTHREADS=1 -pthread")
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE=10")
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE=24")
 # Abort if we try to create too many threads, instead of likely causing a deadlock in our code.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE_STRICT=2")
 # TODO: Not supported in SDL2 currently. May also require `OFFSCREENCANVAS_SUPPORT` and/or `OFFSCREEN_FRAMEBUFFER` but canvas/context cannot be proxied to the thread.

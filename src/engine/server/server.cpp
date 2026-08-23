@@ -52,8 +52,8 @@
 
 using namespace std::chrono_literals;
 
-#if defined(CONF_PLATFORM_ANDROID)
-extern std::vector<std::string> FetchAndroidServerCommandQueue();
+#if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_EMSCRIPTEN)
+extern std::vector<std::string> FetchLocalServerCommandQueue();
 #endif
 
 void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer)
@@ -3243,7 +3243,15 @@ int CServer::Run()
 			return -1;
 		}
 		char aFullPath[IO_MAX_PATH_LENGTH];
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+		// The save directory is backed by IDBFS, whose fsync suspends the
+		// browser main thread with Asyncify. This is not supported when the
+		// fsync is proxied from a database thread, so store the database in
+		// the in-memory filesystem instead.
+		str_format(aFullPath, sizeof(aFullPath), "/tmp/%s", Config()->m_SvSqliteFile);
+#else
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, Config()->m_SvSqliteFile, aFullPath, sizeof(aFullPath));
+#endif
 
 		if(Config()->m_SvUseSql)
 		{
@@ -3488,9 +3496,9 @@ int CServer::Run()
 
 				m_Fifo.Update();
 
-#if defined(CONF_PLATFORM_ANDROID)
-				std::vector<std::string> vAndroidCommandQueue = FetchAndroidServerCommandQueue();
-				for(const std::string &Command : vAndroidCommandQueue)
+#if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_EMSCRIPTEN)
+				std::vector<std::string> vLocalServerCommandQueue = FetchLocalServerCommandQueue();
+				for(const std::string &Command : vLocalServerCommandQueue)
 				{
 					Console()->ExecuteLineFlag(Command.c_str(), CFGFLAG_SERVER, IConsole::CLIENT_ID_UNSPECIFIED);
 				}

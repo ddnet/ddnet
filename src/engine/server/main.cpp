@@ -31,6 +31,14 @@
 #include <base/fs.h>
 
 #include <jni.h>
+#elif defined(CONF_PLATFORM_EMSCRIPTEN)
+#include "emscripten_server.h"
+
+#include <base/thread.h>
+
+#include <atomic>
+#include <string>
+#include <thread>
 #endif
 
 #include <csignal>
@@ -51,7 +59,29 @@ static void HandleSigIntTerm(int Param)
 	signal(SIGTERM, SIG_DFL);
 }
 
+#if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_EMSCRIPTEN)
+std::mutex LocalServerCommandMutex;
+std::vector<std::string> vLocalServerCommandQueue;
+
+std::vector<std::string> FetchLocalServerCommandQueue()
+{
+	std::vector<std::string> vResult;
+	{
+		const std::unique_lock Lock(LocalServerCommandMutex);
+		vResult.swap(vLocalServerCommandQueue);
+	}
+	return vResult;
+}
+#endif
+
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+// The server is linked into the client binary on Emscripten, which provides its
+// own main function. The server main function is instead run on a separate
+// thread, started with StartEmscriptenServer.
+static int ddnet_server_main(int argc, const char **argv)
+#else
 int main(int argc, const char **argv)
+#endif
 {
 	const int64_t MainStart = time_get();
 
@@ -97,7 +127,13 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureConsoleLogger);
 	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
 	vpLoggers.push_back(pFutureAssertionLogger);
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	// The client already set the global logger for this process, which logs to
+	// the browser console.
+	(void)vpLoggers;
+#else
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
+#endif
 
 	if(MysqlInit() != 0)
 	{
@@ -166,7 +202,17 @@ int main(int argc, const char **argv)
 
 	pEngine->Init();
 	pConsole->Init();
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	// The integrated server shares the process-global g_Config with the
+	// running client. Writing all defaults again would reset the client's
+	// entire configuration mid-session and the client would persist the wipe
+	// on exit. Resetting nothing would leak the settings of one local-server
+	// run into the next. So only the variables exclusive to the server are
+	// set to their default values.
+	pConfigManager->Init(IConfigManager::EInitializationType::INTEGRATED_SERVER);
+#else
 	pConfigManager->Init();
+#endif
 
 	// register all console commands
 	pServer->RegisterCommands();
@@ -239,19 +285,6 @@ int main(int argc, const char **argv)
 #define JNI_EXPORTED_FUNCTION(PACKAGE, CLASS, FUNCTION, RETURN_TYPE, ...) \
 	extern "C" JNIEXPORT RETURN_TYPE JNICALL EXPAND_MACRO(JNI_MAKE_NAME(PACKAGE, CLASS, FUNCTION))(__VA_ARGS__)
 
-std::mutex AndroidNativeMutex;
-std::vector<std::string> vAndroidCommandQueue;
-
-std::vector<std::string> FetchAndroidServerCommandQueue()
-{
-	std::vector<std::string> vResult;
-	{
-		const std::unique_lock Lock(AndroidNativeMutex);
-		vResult.swap(vAndroidCommandQueue);
-	}
-	return vResult;
-}
-
 JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME_JNI, NativeServer, runServer, jint, JNIEnv *pEnv, jobject Object, jstring WorkingDirectory, jobjectArray ArgumentsArray)
 {
 	// Set working directory to external storage location. This is not possible
@@ -291,8 +324,8 @@ JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME_JNI, NativeServer, executeCommand, vo
 {
 	const char *pCommand = pEnv->GetStringUTFChars(Command, nullptr);
 	{
-		const std::unique_lock Lock(AndroidNativeMutex);
-		vAndroidCommandQueue.emplace_back(pCommand);
+		const std::unique_lock Lock(LocalServerCommandMutex);
+		vLocalServerCommandQueue.emplace_back(pCommand);
 	}
 	pEnv->ReleaseStringUTFChars(Command, pCommand);
 }
@@ -300,4 +333,60 @@ JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME_JNI, NativeServer, executeCommand, vo
 #undef EXPAND_MACRO
 #undef JNI_MAKE_NAME
 #undef JNI_EXPORTED_FUNCTION
+#endif
+
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+static std::atomic_bool EmscriptenServerRunning = false;
+
+static void EmscriptenServerThread(void *pUser)
+{
+	auto *pvArguments = static_cast<std::vector<std::string> *>(pUser);
+	std::vector<const char *> vpArguments;
+	vpArguments.reserve(pvArguments->size() + 1);
+	vpArguments.push_back(GAME_NAME "-Server");
+	for(const std::string &Argument : *pvArguments)
+	{
+		vpArguments.push_back(Argument.c_str());
+	}
+	ddnet_server_main(vpArguments.size(), vpArguments.data());
+	delete pvArguments;
+	EmscriptenServerRunning = false;
+}
+
+bool StartEmscriptenServer(const char **ppArguments, size_t NumArguments)
+{
+	// Wait for a previous server to finish shutting down, so its port and
+	// other global state are released before the new instance starts.
+	for(int Attempt = 0; Attempt < 200 && EmscriptenServerRunning; Attempt++)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	if(EmscriptenServerRunning.exchange(true))
+	{
+		return false;
+	}
+	{
+		const std::unique_lock Lock(LocalServerCommandMutex);
+		vLocalServerCommandQueue.clear();
+	}
+	auto *pvArguments = new std::vector<std::string>();
+	pvArguments->reserve(NumArguments);
+	for(size_t ArgumentIndex = 0; ArgumentIndex < NumArguments; ArgumentIndex++)
+	{
+		pvArguments->emplace_back(ppArguments[ArgumentIndex]);
+	}
+	thread_init_and_detach(EmscriptenServerThread, pvArguments, "server");
+	return true;
+}
+
+void ExecuteEmscriptenServerCommand(const char *pCommand)
+{
+	const std::unique_lock Lock(LocalServerCommandMutex);
+	vLocalServerCommandQueue.emplace_back(pCommand);
+}
+
+bool IsEmscriptenServerRunning()
+{
+	return EmscriptenServerRunning;
+}
 #endif
