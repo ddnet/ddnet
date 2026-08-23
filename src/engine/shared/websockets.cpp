@@ -5,7 +5,9 @@
 #include <base/dbg.h>
 #include <base/log.h>
 #include <base/mem.h>
+#include <base/net.h>
 #include <base/str.h>
+#include <base/time.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
@@ -21,6 +23,7 @@
 
 #include <cstdlib>
 #include <map>
+#include <set>
 #include <string>
 
 // NOLINTBEGIN(readability-identifier-naming)
@@ -47,13 +50,47 @@ struct per_session_data
 	TSendBuffer send_buffer;
 };
 
+// Accepting a connection completes its TLS handshake on the game loop's thread,
+// before any DDNet-level limit can apply, so this is what keeps an
+// unauthenticated peer from stalling the server's ticks by connecting in a loop.
+// Far above what legitimate joins need, far below what a flood achieves.
+static constexpr int WEBSOCKET_MAX_ACCEPTS_PER_SECOND = 50;
+// Checked before the limit above, so that a single peer connecting in a loop cannot
+// use up the budget of all other peers.
+static constexpr int WEBSOCKET_MAX_ACCEPTS_PER_SECOND_PER_IP = 10;
+// Peers tracked for the per peer limit, the one idle the longest is replaced.
+static constexpr int WEBSOCKET_ACCEPT_TRACKED_IPS = 256;
+#if defined(LWS_WITH_PEER_LIMITS)
+// Bounds concurrent connections per peer. Only available when lws was built with
+// peer limits, so the accept rate limits above cannot rely on it.
+static constexpr unsigned short WEBSOCKET_MAX_CONNECTIONS_PER_IP = 20;
+#endif
+
+// Accepts counted in a one second window, for a whole context or for one peer.
+struct accept_counter
+{
+	NETADDR addr; // Unused by the context wide counter.
+	int64_t window_start;
+	int count;
+};
+
 struct context_data
 {
 	char bindaddr_str[NETADDR_MAXSTRSIZE];
+	// Copies of the paths as they were when the context was created. lws keeps its
+	// own copy, which only these still match after the config has been changed.
+	char ssl_cert_path[IO_MAX_PATH_LENGTH];
+	char ssl_key_path[IO_MAX_PATH_LENGTH];
 	lws_context_creation_info creation_info;
 	lws_context *context;
 	std::map<NETADDR, per_session_data *> port_map;
+	// Accepted connections from adoption until destruction. Unlike port_map, this
+	// also covers connections still in the TLS/HTTP handshake phase, whose sockets
+	// must be watched for the handshake to progress between select() timeouts.
+	std::set<lws *> adopted_wsis;
 	TRecvBuffer recv_buffer;
+	accept_counter accepts_total;
+	accept_counter accepts_per_ip[WEBSOCKET_ACCEPT_TRACKED_IPS];
 };
 
 // Client has main, dummy and contact connections with IPv4 and IPv6
@@ -103,6 +140,40 @@ static void sockaddr_to_netaddr_websocket(const sockaddr *src, socklen_t src_len
 	}
 }
 
+// Counts one accept in the current window and reports whether it stays within the limit.
+static bool count_accept(accept_counter *counter, int limit, int64_t now)
+{
+	if(now - counter->window_start > time_freq())
+	{
+		counter->window_start = now;
+		counter->count = 0;
+	}
+	counter->count++;
+	return counter->count <= limit;
+}
+
+// Returns the counter of the given peer, replacing the counter whose window started
+// longest ago when the peer is not tracked yet.
+static accept_counter *accept_counter_for_addr(context_data *ctx_data, const NETADDR *addr, int64_t now)
+{
+	accept_counter *oldest = &ctx_data->accepts_per_ip[0];
+	for(accept_counter &counter : ctx_data->accepts_per_ip)
+	{
+		if(net_addr_comp_noport(&counter.addr, addr) == 0)
+		{
+			return &counter;
+		}
+		if(counter.window_start < oldest->window_start)
+		{
+			oldest = &counter;
+		}
+	}
+	oldest->addr = *addr;
+	oldest->window_start = now;
+	oldest->count = 0;
+	return oldest;
+}
+
 static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len)
 {
 	per_session_data *pss = (per_session_data *)user;
@@ -110,17 +181,52 @@ static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reaso
 	context_data *ctx_data = contexts_map[context];
 	switch(reason)
 	{
+	case LWS_CALLBACK_FILTER_NETWORK_CONNECTION:
+	{
+		// Issued right after accept(), before the TLS handshake is started, and
+		// returning non-zero closes the connection there. Rate limit it, because
+		// everything past this point runs on the game loop's thread.
+		const lws_filter_network_conn_args *filter_args = (const lws_filter_network_conn_args *)user;
+		NETADDR addr;
+		sockaddr_to_netaddr_websocket((const sockaddr *)&filter_args->cli_addr, filter_args->clilen, &addr);
+		const int64_t now = time_get();
+		if(!count_accept(accept_counter_for_addr(ctx_data, &addr, now), WEBSOCKET_MAX_ACCEPTS_PER_SECOND_PER_IP, now))
+		{
+			return 1;
+		}
+		return count_accept(&ctx_data->accepts_total, WEBSOCKET_MAX_ACCEPTS_PER_SECOND, now) ? 0 : 1;
+	}
+
+	case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
+		// Fires once the accepted connection has its socket attached. From here on
+		// every death of the wsi goes through LWS_CALLBACK_WSI_DESTROY, which is
+		// not guaranteed for wsis that failed adoption before this point.
+		ctx_data->adopted_wsis.insert(wsi);
+		return 0;
+
+	case LWS_CALLBACK_ESTABLISHED:
+		// Bit 0 of len marks a websocket running over an HTTP/2 stream (RFC 8441).
+		// All streams of an HTTP/2 connection share its peer address, which is the
+		// only identity the network layer knows a connection by, so they cannot be
+		// told apart and are refused by returning non-zero, which closes them.
+		if((len & 1) != 0)
+		{
+			return 1;
+		}
+		[[fallthrough]];
 	case LWS_CALLBACK_WSI_CREATE:
+	{
 		if(pss == nullptr)
 		{
 			return 0;
 		}
-		[[fallthrough]];
-	case LWS_CALLBACK_ESTABLISHED:
-	{
 		sockaddr_storage peersockaddr;
 		socklen_t peersockaddr_size = sizeof(peersockaddr);
-		getpeername(lws_get_socket_fd(wsi), (sockaddr *)&peersockaddr, &peersockaddr_size);
+		if(getpeername(lws_get_socket_fd(wsi), (sockaddr *)&peersockaddr, &peersockaddr_size) != 0)
+		{
+			log_warn("websockets", "Failed to determine peer address: %s", net_error_message().c_str());
+			return 0;
+		}
 		NETADDR addr;
 		sockaddr_to_netaddr_websocket((sockaddr *)&peersockaddr, peersockaddr_size, &addr);
 		if(addr.type == NETTYPE_INVALID)
@@ -143,6 +249,12 @@ static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reaso
 		[[fallthrough]];
 	case LWS_CALLBACK_CLOSED:
 	{
+		if(pss == nullptr || pss->addr.type == NETTYPE_INVALID)
+		{
+			// Never registered in port_map, e.g. a refused ws-over-h2 stream or a
+			// failed handshake, so there is no connection to report as closed.
+			return 0;
+		}
 		char addr_str[NETADDR_MAXSTRSIZE];
 		net_addr_str(&pss->addr, addr_str, sizeof(addr_str), true);
 		log_trace("websockets", "Connection closed with '%s'", addr_str);
@@ -154,6 +266,7 @@ static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reaso
 
 	case LWS_CALLBACK_WSI_DESTROY:
 	{
+		ctx_data->adopted_wsis.erase(wsi);
 		if(pss == nullptr)
 		{
 			return 0;
@@ -253,6 +366,35 @@ void websocket_init()
 	lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO, websocket_log_callback);
 }
 
+void websocket_reload_certs()
+{
+#if defined(LWS_WITH_TLS)
+	for(context_data &ctx_data : contexts)
+	{
+		if(ctx_data.context == nullptr || ctx_data.creation_info.ssl_cert_filepath == nullptr)
+		{
+			continue;
+		}
+		if(str_comp(ctx_data.ssl_cert_path, g_Config.m_SvWebsocketCert) != 0 || str_comp(ctx_data.ssl_key_path, g_Config.m_SvWebsocketKey) != 0)
+		{
+			// lws can only reload a certificate under the path it was given at startup,
+			// so changing the config and reloading would silently keep the old one.
+			log_warn("websockets", "Cannot reload certificate from a different path than '%s', restart the server instead", ctx_data.ssl_cert_path);
+			continue;
+		}
+		log_info("websockets", "Reloading certificate '%s'", ctx_data.ssl_cert_path);
+		// lws reports a certificate that fails to load only in its own log and keeps
+		// serving the old one.
+		if(lws_tls_cert_updated(ctx_data.context, ctx_data.ssl_cert_path, ctx_data.ssl_key_path, nullptr, 0, nullptr, 0) != 0)
+		{
+			log_error("websockets", "Failed to reload certificate '%s'", ctx_data.ssl_cert_path);
+		}
+	}
+#else
+	log_error("websockets", "Cannot reload certificate: libwebsockets was built without TLS support");
+#endif
+}
+
 int websocket_create(const NETADDR *bindaddr)
 {
 	// find free context
@@ -289,6 +431,36 @@ int websocket_create(const NETADDR *bindaddr)
 	ctx_data->creation_info.iface = ctx_data->bindaddr_str;
 	ctx_data->creation_info.port = bindaddr->port;
 	ctx_data->creation_info.protocols = protocols;
+#if defined(LWS_WITH_TLS)
+	// Only offer HTTP/1.1. Browsers that negotiate HTTP/2 run websockets over it as
+	// streams (RFC 8441), which all share the peer address of their connection and
+	// therefore cannot be told apart. ALPN is a TLS extension, and the field only
+	// exists when lws was built with TLS support.
+	ctx_data->creation_info.alpn = "http/1.1";
+#endif
+#if defined(LWS_WITH_PEER_LIMITS)
+	ctx_data->creation_info.ip_limit_wsi = WEBSOCKET_MAX_CONNECTIONS_PER_IP;
+#endif
+	if(g_Config.m_SvWebsocketCert[0] != '\0' || g_Config.m_SvWebsocketKey[0] != '\0')
+	{
+#if defined(LWS_WITH_TLS)
+		if(g_Config.m_SvWebsocketCert[0] == '\0' || g_Config.m_SvWebsocketKey[0] == '\0')
+		{
+			log_error("websockets", "sv_websocket_cert and sv_websocket_key must both be set to serve wss");
+			return -1;
+		}
+		str_copy(ctx_data->ssl_cert_path, g_Config.m_SvWebsocketCert);
+		str_copy(ctx_data->ssl_key_path, g_Config.m_SvWebsocketKey);
+		ctx_data->creation_info.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
+		ctx_data->creation_info.ssl_cert_filepath = ctx_data->ssl_cert_path;
+		ctx_data->creation_info.ssl_private_key_filepath = ctx_data->ssl_key_path;
+#else
+		// lws without TLS support ignores the certificate config and would
+		// silently serve unencrypted websockets instead of wss.
+		log_error("websockets", "Cannot serve wss: libwebsockets was built without TLS support");
+		return -1;
+#endif
+	}
 	ctx_data->creation_info.gid = -1;
 	ctx_data->creation_info.uid = -1;
 	ctx_data->creation_info.user = ctx_data;
@@ -301,6 +473,15 @@ int websocket_create(const NETADDR *bindaddr)
 	contexts_map[ctx_data->context] = ctx_data;
 	ctx_data->recv_buffer.Init();
 	return first_free;
+}
+
+bool websocket_has_tls(int socket)
+{
+#if defined(LWS_WITH_TLS)
+	return contexts[socket].creation_info.ssl_cert_filepath != nullptr;
+#else
+	return false;
+#endif
 }
 
 void websocket_destroy(int socket)
@@ -391,6 +572,16 @@ int websocket_fd_set(int socket, fd_set *set)
 
 	context_data *ctx_data = contexts_map[context];
 	int max = 0;
+	for(lws *wsi : ctx_data->adopted_wsis)
+	{
+		const int fd = lws_get_socket_fd(wsi);
+		if(fd < 0)
+		{
+			continue;
+		}
+		max = std::max(fd, max);
+		FD_SET(fd, set);
+	}
 	for(const auto &[_, pss] : ctx_data->port_map)
 	{
 		if(pss == nullptr)
@@ -410,6 +601,20 @@ int websocket_fd_get(int socket, fd_set *set)
 	lws_service(context, -1);
 
 	context_data *ctx_data = contexts_map[context];
+	if(ctx_data->recv_buffer.First() != nullptr)
+	{
+		// Packets already consumed by lws_service are no longer readable on the
+		// socket, so select cannot see them and they would never be processed.
+		return 1;
+	}
+	for(lws *wsi : ctx_data->adopted_wsis)
+	{
+		const int fd = lws_get_socket_fd(wsi);
+		if(fd >= 0 && FD_ISSET(fd, set))
+		{
+			return 1;
+		}
+	}
 	for(const auto &[_, pss] : ctx_data->port_map)
 	{
 		if(pss == nullptr)

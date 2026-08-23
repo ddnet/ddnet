@@ -9,6 +9,21 @@ containing an opaque token to the game server. The game server will include
 this token in its next register and the register process will succeed
 (`success`).
 
+For the websocket protocols (`ddnet-20+ws://` and `ddnet-20+wss://`), the
+challenge message is instead delivered by connecting to the game server via an
+actual websocket connection and sending the token as a binary message. For
+`ddnet-20+wss://`, the TLS certificate of the game server is verified against
+the system's root certificates, so a successful registration also proves that
+browsers can connect to the server.
+
+Websocket registrations are only accepted with the `--websockets` option,
+without it they are rejected with the status code 501, which tells game
+servers to stop registering their websocket addresses.
+Mastersrv versions without websocket support cannot read state dumps
+containing websocket addresses, so in a setup with multiple mastersrv
+instances syncing via `--write-dump`/`--read-dump-dir`, first upgrade all
+instances, then enable `--websockets`.
+
 To build the mastersrv, have a recent version of
 [Rust](https://www.rust-lang.org/) installed and run `cargo build --release` in
 the `src/mastersrv` folder. The resulting binary should appear in

@@ -20,6 +20,10 @@ clap = { version = "2.34.0", default-features = false, features = [
 constant_time_eq = "0.4.2"
 crc32fast = "1.5.0"
 env_logger = "0.8.3"
+futures-util = { version = "0.3", default-features = false, features = [
+  "sink",
+  "std",
+] }
 headers = "0.3.7"
 hex = "0.4.3"
 ipnet = "2.9.0"
@@ -27,6 +31,10 @@ libloc = "0.1.0"
 log = "0.4.17"
 mime = "0.3.16"
 rand = "0.8.4"
+# Also selects the rustls cryptography provider for tokio-tungstenite, which
+# doesn't enable one itself.
+rustls = { version = "0.23", default-features = false, features = ["ring"] }
+rustls-native-certs = "0.8.4"
 serde = { version = "1.0.126", features = ["derive"] }
 serde_json = { version = "1.0.64", features = [
   "float_roundtrip",
@@ -40,7 +48,12 @@ tokio = { version = "1.43.0", features = [
   "rt",
   "rt-multi-thread",
   "signal",
+  "sync",
+  "time",
 ] }
 tokio-stream = { version = "0.1.8", features = ["net"] }
+tokio-tungstenite = { version = "0.24.0", features = [
+  "rustls-tls-native-roots",
+] }
 url = { version = "2.2.2", features = ["serde"] }
 warp = { version = "0.3.1", default-features = false }

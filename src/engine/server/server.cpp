@@ -40,6 +40,7 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/websockets.h>
 #include <engine/storage.h>
 
 #include <game/version.h>
@@ -3299,7 +3300,9 @@ int CServer::Run()
 	}
 
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
-	m_pRegister = CreateRegister(&g_Config, m_pConsole, m_pEngine, m_pHttp, g_Config.m_SvRegisterPort > 0 ? g_Config.m_SvRegisterPort : this->Port(), m_NetServer.GetGlobalToken());
+	// The socket types include NETTYPE_WEBSOCKET_TLS if websockets are served
+	// with TLS, which determines the advertised websocket scheme (ws or wss).
+	m_pRegister = CreateRegister(&g_Config, m_pConsole, m_pEngine, m_pHttp, net_socket_type(m_NetServer.Socket()), g_Config.m_SvRegisterPort > 0 ? g_Config.m_SvRegisterPort : this->Port(), m_NetServer.GetGlobalToken());
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
@@ -4283,6 +4286,13 @@ void CServer::ConReloadAnnouncement(IConsole::IResult *pResult, void *pUserData)
 	pThis->ReadAnnouncementsFile();
 }
 
+#if defined(CONF_WEBSOCKETS)
+void CServer::ConReloadWebsocketCert(IConsole::IResult *pResult, void *pUserData)
+{
+	websocket_reload_certs();
+}
+#endif
+
 void CServer::ConReloadMaplist(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pThis = static_cast<CServer *>(pUserData);
@@ -4586,6 +4596,9 @@ void CServer::RegisterCommands()
 
 	Console()->Register("reload_announcement", "", CFGFLAG_SERVER, ConReloadAnnouncement, this, "Reload the announcements");
 	Console()->Register("reload_maplist", "", CFGFLAG_SERVER, ConReloadMaplist, this, "Reload the maplist");
+#if defined(CONF_WEBSOCKETS)
+	Console()->Register("reload_websocket_cert", "", CFGFLAG_SERVER, ConReloadWebsocketCert, this, "Reload the TLS certificate used for websocket connections");
+#endif
 
 	RustVersionRegister(*Console());
 

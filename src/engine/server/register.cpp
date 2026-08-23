@@ -35,12 +35,15 @@ class CRegister : public IRegister
 		PROTOCOL_TW6_IPV4,
 		PROTOCOL_TW7_IPV6,
 		PROTOCOL_TW7_IPV4,
+		PROTOCOL_WS_IPV6,
+		PROTOCOL_WS_IPV4,
 		NUM_PROTOCOLS,
 	};
 
 	static bool StatusFromString(int *pResult, const char *pString);
-	static const char *ProtocolToScheme(int Protocol);
+	const char *ProtocolToScheme(int Protocol) const;
 	static const char *ProtocolToString(int Protocol);
+	static bool ProtocolIsWebsocket(int Protocol);
 	static bool ProtocolFromString(int *pResult, const char *pString);
 	static const char *ProtocolToSystem(int Protocol);
 	static IPRESOLVE ProtocolToIpresolve(int Protocol);
@@ -70,6 +73,10 @@ class CRegister : public IRegister
 			int m_NumTotalRequests GUARDED_BY(m_Lock) = 0;
 			int m_LatestResponseStatus GUARDED_BY(m_Lock) = STATUS_NONE;
 			int m_LatestResponseIndex GUARDED_BY(m_Lock) = -1;
+			// Whether the master said it doesn't accept the websocket
+			// protocols. Checked in `SendRegister`, so that no caller can
+			// register anyway.
+			bool m_MasterUnsupported GUARDED_BY(m_Lock) = false;
 		};
 
 		class CJob : public IJob
@@ -116,6 +123,7 @@ class CRegister : public IRegister
 		void SendRegister();
 		void SendDeleteIfRegistered(bool Shutdown);
 		void Update();
+		void ResetMasterUnsupported();
 	};
 
 	CConfig *m_pConfig;
@@ -126,11 +134,12 @@ class CRegister : public IRegister
 	// Don't start sending registers before the server has initialized
 	// completely.
 	bool m_GotFirstUpdateCall = false;
+	int m_NetTypes;
 	int m_ServerPort;
 	char m_aConnlessTokenHex[16];
 
 	std::shared_ptr<CGlobal> m_pGlobal = std::make_shared<CGlobal>();
-	bool m_aProtocolEnabled[NUM_PROTOCOLS] = {true, true, true, true};
+	bool m_aProtocolEnabled[NUM_PROTOCOLS] = {true, true, true, true, true, true};
 	CProtocol m_aProtocols[NUM_PROTOCOLS];
 
 	bool m_GotCommunityToken = false;
@@ -146,7 +155,7 @@ class CRegister : public IRegister
 	char m_aServerInfo[100 * 1024];
 
 public:
-	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
+	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int NetTypes, int ServerPort, unsigned SixupSecurityToken);
 	void Update() override;
 	void OnConfigChange() override;
 	bool OnPacket(const CNetChunk *pPacket) override;
@@ -180,7 +189,7 @@ bool CRegister::StatusFromString(int *pResult, const char *pString)
 	return false;
 }
 
-const char *CRegister::ProtocolToScheme(int Protocol)
+const char *CRegister::ProtocolToScheme(int Protocol) const
 {
 	switch(Protocol)
 	{
@@ -188,6 +197,8 @@ const char *CRegister::ProtocolToScheme(int Protocol)
 	case PROTOCOL_TW6_IPV4: return "tw-0.6+udp://";
 	case PROTOCOL_TW7_IPV6: return "tw-0.7+udp://";
 	case PROTOCOL_TW7_IPV4: return "tw-0.7+udp://";
+	case PROTOCOL_WS_IPV6:
+	case PROTOCOL_WS_IPV4: return (m_NetTypes & NETTYPE_WEBSOCKET_TLS) != 0 ? "ddnet-20+wss://" : "ddnet-20+ws://";
 	}
 	dbg_assert_failed("invalid protocol");
 }
@@ -200,8 +211,15 @@ const char *CRegister::ProtocolToString(int Protocol)
 	case PROTOCOL_TW6_IPV4: return "tw0.6/ipv4";
 	case PROTOCOL_TW7_IPV6: return "tw0.7/ipv6";
 	case PROTOCOL_TW7_IPV4: return "tw0.7/ipv4";
+	case PROTOCOL_WS_IPV6: return "ws/ipv6";
+	case PROTOCOL_WS_IPV4: return "ws/ipv4";
 	}
 	dbg_assert_failed("invalid protocol");
+}
+
+bool CRegister::ProtocolIsWebsocket(int Protocol)
+{
+	return Protocol == PROTOCOL_WS_IPV6 || Protocol == PROTOCOL_WS_IPV4;
 }
 
 bool CRegister::ProtocolFromString(int *pResult, const char *pString)
@@ -222,6 +240,14 @@ bool CRegister::ProtocolFromString(int *pResult, const char *pString)
 	{
 		*pResult = PROTOCOL_TW7_IPV4;
 	}
+	else if(str_comp(pString, "ws/ipv6") == 0)
+	{
+		*pResult = PROTOCOL_WS_IPV6;
+	}
+	else if(str_comp(pString, "ws/ipv4") == 0)
+	{
+		*pResult = PROTOCOL_WS_IPV4;
+	}
 	else
 	{
 		*pResult = -1;
@@ -238,6 +264,8 @@ const char *CRegister::ProtocolToSystem(int Protocol)
 	case PROTOCOL_TW6_IPV4: return "register/6/ipv4";
 	case PROTOCOL_TW7_IPV6: return "register/7/ipv6";
 	case PROTOCOL_TW7_IPV4: return "register/7/ipv4";
+	case PROTOCOL_WS_IPV6: return "register/ws/ipv6";
+	case PROTOCOL_WS_IPV4: return "register/ws/ipv4";
 	}
 	dbg_assert_failed("invalid protocol");
 }
@@ -250,6 +278,8 @@ IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
 	case PROTOCOL_TW6_IPV4: return IPRESOLVE::V4;
 	case PROTOCOL_TW7_IPV6: return IPRESOLVE::V6;
 	case PROTOCOL_TW7_IPV4: return IPRESOLVE::V4;
+	case PROTOCOL_WS_IPV6: return IPRESOLVE::V6;
+	case PROTOCOL_WS_IPV4: return IPRESOLVE::V4;
 	}
 	dbg_assert_failed("invalid protocol");
 }
@@ -265,11 +295,19 @@ void CRegister::ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserDa
 
 void CRegister::CProtocol::SendRegister()
 {
+	{
+		const CLockScope LockScope(m_pShared->m_Lock);
+		if(m_pShared->m_MasterUnsupported)
+		{
+			return;
+		}
+	}
+
 	int64_t Now = time_get();
 	int64_t Freq = time_freq();
 
 	char aAddress[64];
-	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", m_pParent->ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
 
 	char aSecret[UUID_MAXSTRSIZE];
 	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
@@ -348,7 +386,7 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 	}
 
 	char aAddress[64];
-	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", m_pParent->ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
 
 	char aSecret[UUID_MAXSTRSIZE];
 	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
@@ -411,6 +449,12 @@ void CRegister::CProtocol::Update()
 	}
 }
 
+void CRegister::CProtocol::ResetMasterUnsupported()
+{
+	const CLockScope LockScope(m_pShared->m_Lock);
+	m_pShared->m_MasterUnsupported = false;
+}
+
 void CRegister::CProtocol::OnToken(const char *pToken)
 {
 	m_NewChallengeToken = true;
@@ -465,6 +509,18 @@ void CRegister::CProtocol::CJob::Run()
 			return;
 		}
 		log_error(ProtocolToSystem(m_Protocol), "error response from master: %d: %s", m_pRegister->StatusCode(), (const char *)Message);
+		if(ProtocolIsWebsocket(m_Protocol) && m_pRegister->StatusCode() == 501)
+		{
+			// The master says it doesn't accept the websocket protocols, so
+			// retrying can not succeed. Otherwise, this would log an error for
+			// every register attempt.
+			const CLockScope LockScope(m_pShared->m_Lock);
+			if(!m_pShared->m_MasterUnsupported)
+			{
+				m_pShared->m_MasterUnsupported = true;
+				log_warn(ProtocolToSystem(m_Protocol), "master server does not accept websocket registration, disabling it until the next register config change");
+			}
+		}
 		json_value_free(pJson);
 		return;
 	}
@@ -489,8 +545,18 @@ void CRegister::CProtocol::CJob::Run()
 		}
 		if(Status == m_pShared->m_LatestResponseStatus && Status == STATUS_NEEDCHALLENGE)
 		{
-			log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
-			log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
+			if(ProtocolIsWebsocket(m_Protocol))
+			{
+				// Only warn: the server can still be fully functional over the
+				// UDP protocols while its websocket port is not reachable.
+				log_warn(ProtocolToSystem(m_Protocol), "WARNING: the master server reports that clients can not connect to this server via websocket.");
+				log_warn(ProtocolToSystem(m_Protocol), "WARNING: configure your firewall/nat to let through tcp on port %d, when using wss make sure the TLS certificate is valid for this server's IP addresses, or remove 'ws' from sv_register.", m_ServerPort);
+			}
+			else
+			{
+				log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
+				log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
+			}
 		}
 		json_value_free(pJson);
 		if(m_Index > m_pShared->m_LatestResponseIndex)
@@ -518,17 +584,20 @@ void CRegister::CProtocol::CJob::Run()
 	}
 }
 
-CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken) :
+CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int NetTypes, int ServerPort, unsigned SixupSecurityToken) :
 	m_pConfig(pConfig),
 	m_pConsole(pConsole),
 	m_pEngine(pEngine),
 	m_pHttp(pHttp),
+	m_NetTypes(NetTypes),
 	m_ServerPort(ServerPort),
 	m_aProtocols{
 		CProtocol(this, PROTOCOL_TW6_IPV6),
 		CProtocol(this, PROTOCOL_TW6_IPV4),
 		CProtocol(this, PROTOCOL_TW7_IPV6),
 		CProtocol(this, PROTOCOL_TW7_IPV4),
+		CProtocol(this, PROTOCOL_WS_IPV6),
+		CProtocol(this, PROTOCOL_WS_IPV4),
 	}
 {
 	static constexpr int HEADER_LEN = sizeof(SERVERBROWSE_CHALLENGE);
@@ -551,8 +620,8 @@ void CRegister::Update()
 {
 	if(!m_GotFirstUpdateCall)
 	{
-		bool Ipv6 = m_aProtocolEnabled[PROTOCOL_TW6_IPV6] || m_aProtocolEnabled[PROTOCOL_TW7_IPV6];
-		bool Ipv4 = m_aProtocolEnabled[PROTOCOL_TW6_IPV4] || m_aProtocolEnabled[PROTOCOL_TW7_IPV4];
+		bool Ipv6 = m_aProtocolEnabled[PROTOCOL_TW6_IPV6] || m_aProtocolEnabled[PROTOCOL_TW7_IPV6] || m_aProtocolEnabled[PROTOCOL_WS_IPV6];
+		bool Ipv4 = m_aProtocolEnabled[PROTOCOL_TW6_IPV4] || m_aProtocolEnabled[PROTOCOL_TW7_IPV4] || m_aProtocolEnabled[PROTOCOL_WS_IPV4];
 		if(Ipv6 && Ipv4)
 		{
 			dbg_assert(!m_pHttp->HasIpresolveBug(), "curl version < 7.77.0 does not support registering via both IPv4 and IPv6, set `sv_register ipv6` or `sv_register ipv4`");
@@ -580,6 +649,7 @@ void CRegister::OnConfigChange()
 	{
 		aOldProtocolEnabled[i] = m_aProtocolEnabled[i];
 	}
+	bool WebsocketsRequested = false;
 	const char *pProtocols = m_pConfig->m_SvRegister;
 	if(str_comp(pProtocols, "1") == 0)
 	{
@@ -601,7 +671,7 @@ void CRegister::OnConfigChange()
 		{
 			Enabled = false;
 		}
-		char aBuf[16];
+		char aBuf[sizeof(m_pConfig->m_SvRegister)];
 		while((pProtocols = str_next_token(pProtocols, ",", aBuf, sizeof(aBuf))))
 		{
 			int Protocol;
@@ -609,11 +679,13 @@ void CRegister::OnConfigChange()
 			{
 				m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = true;
 				m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = true;
+				m_aProtocolEnabled[PROTOCOL_WS_IPV6] = true;
 			}
 			else if(str_comp(aBuf, "ipv4") == 0)
 			{
 				m_aProtocolEnabled[PROTOCOL_TW6_IPV4] = true;
 				m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = true;
+				m_aProtocolEnabled[PROTOCOL_WS_IPV4] = true;
 			}
 			else if(str_comp(aBuf, "tw0.6") == 0)
 			{
@@ -625,9 +697,16 @@ void CRegister::OnConfigChange()
 				m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = true;
 				m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = true;
 			}
+			else if(str_comp(aBuf, "ws") == 0)
+			{
+				m_aProtocolEnabled[PROTOCOL_WS_IPV6] = true;
+				m_aProtocolEnabled[PROTOCOL_WS_IPV4] = true;
+				WebsocketsRequested = true;
+			}
 			else if(!ProtocolFromString(&Protocol, aBuf))
 			{
 				m_aProtocolEnabled[Protocol] = true;
+				WebsocketsRequested = WebsocketsRequested || ProtocolIsWebsocket(Protocol);
 			}
 			else
 			{
@@ -645,6 +724,30 @@ void CRegister::OnConfigChange()
 	{
 		m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = false;
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
+		m_aProtocolEnabled[PROTOCOL_WS_IPV6] = false;
+	}
+	// Only register websocket protocols if the corresponding websocket
+	// listen socket was actually bound.
+	if((m_NetTypes & NETTYPE_WEBSOCKET_IPV6) == 0)
+	{
+		m_aProtocolEnabled[PROTOCOL_WS_IPV6] = false;
+	}
+	if((m_NetTypes & NETTYPE_WEBSOCKET_IPV4) == 0)
+	{
+		m_aProtocolEnabled[PROTOCOL_WS_IPV4] = false;
+	}
+	if(WebsocketsRequested && !m_aProtocolEnabled[PROTOCOL_WS_IPV6] && !m_aProtocolEnabled[PROTOCOL_WS_IPV4])
+	{
+		log_warn("register", "websocket protocols requested in sv_register, but no websocket listen socket is bound, not registering via websocket");
+	}
+	bool AnyProtocolEnabled = false;
+	for(bool Enabled : m_aProtocolEnabled)
+	{
+		AnyProtocolEnabled = AnyProtocolEnabled || Enabled;
+	}
+	if(!AnyProtocolEnabled && str_comp(m_pConfig->m_SvRegister, "0") != 0)
+	{
+		log_warn("register", "no protocols to register with (sv_register '%s'), the server will not be listed", m_pConfig->m_SvRegister);
 	}
 	m_GotCommunityToken = (bool)m_pConfig->m_SvRegisterCommunityToken[0];
 	if(m_GotCommunityToken)
@@ -668,6 +771,12 @@ void CRegister::OnConfigChange()
 		}
 		str_copy(m_aaExtraHeaders[m_NumExtraHeaders], aHeader);
 		m_NumExtraHeaders += 1;
+	}
+	// A register config change (e.g. another sv_register_url) can make
+	// registration acceptable to the master again.
+	for(auto &Protocol : m_aProtocols)
+	{
+		Protocol.ResetMasterUnsupported();
 	}
 	// Don't start registering before the first `CRegister::Update` call.
 	if(!m_GotFirstUpdateCall)
@@ -801,7 +910,7 @@ void CRegister::OnShutdown()
 	}
 }
 
-IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken)
+IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int NetTypes, int ServerPort, unsigned SixupSecurityToken)
 {
-	return new CRegister(pConfig, pConsole, pEngine, pHttp, ServerPort, SixupSecurityToken);
+	return new CRegister(pConfig, pConsole, pEngine, pHttp, NetTypes, ServerPort, SixupSecurityToken);
 }
