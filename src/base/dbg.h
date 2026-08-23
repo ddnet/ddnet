@@ -27,7 +27,7 @@
 #define dbg_assert(test, fmt, ...) \
 	do \
 	{ \
-		if(!(test)) \
+		if(!(test)) [[unlikely]] \
 		{ \
 			dbg_assert_imp(__FILE__, __LINE__, fmt, ##__VA_ARGS__); \
 		} \
@@ -44,7 +44,7 @@
  *
  * @see dbg_break
  */
-#define dbg_assert_failed(fmt, ...) dbg_assert_imp(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define dbg_assert_failed(fmt, ...) [[unlikely]] dbg_assert_imp(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
 /**
  * Use the @link dbg_assert @endlink function instead!
