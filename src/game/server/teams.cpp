@@ -527,6 +527,7 @@ void CGameTeams::ChangeTeamState(int Team, ETeamState State)
 
 void CGameTeams::KillTeam(int Team, int NewStrongId, int ExceptId)
 {
+	CClientMask KilledMask;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
@@ -534,6 +535,8 @@ void CGameTeams::KillTeam(int Team, int NewStrongId, int ExceptId)
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
 			if(i != ExceptId)
 			{
+				if(GameServer()->m_apPlayers[i]->GetCharacter())
+					KilledMask.set(i);
 				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF, false);
 				if(NewStrongId != -1 && i != NewStrongId)
 				{
@@ -558,6 +561,22 @@ void CGameTeams::KillTeam(int Team, int NewStrongId, int ExceptId)
 		if(!Server()->ClientIngame(i))
 			continue;
 		Msg.m_Team = TeamForClient(Team, i);
+		if(Msg.m_Team == TEAM_FLOCK && Team != TEAM_FLOCK)
+		{
+			// The client resets prediction for every tee it thinks is in the killed team.
+			for(int Killed = 0; Killed < MAX_CLIENTS; Killed++)
+			{
+				if(!KilledMask.test(Killed))
+					continue;
+				CNetMsg_Sv_KillMsg KillMsg;
+				KillMsg.m_Killer = Killed;
+				KillMsg.m_Victim = Killed;
+				KillMsg.m_Weapon = WEAPON_SELF;
+				KillMsg.m_ModeSpecial = 0;
+				Server()->SendPackMsg(&KillMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+			}
+			continue;
+		}
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 	}
 }
