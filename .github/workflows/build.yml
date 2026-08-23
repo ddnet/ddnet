@@ -484,6 +484,16 @@ jobs:
     - name: Build iOS simulator app in debug mode
       run: scripts/ios/cmake_ios.sh sim-arm64 DDNet org.ddnet.client Debug build-ios-sim
 
+    - name: Smoke test iOS simulator app in debug mode
+      timeout-minutes: 15
+      run: |
+        UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; print(next(device["udid"] for devices in json.load(sys.stdin)["devices"].values() for device in devices if "iPhone" in device["name"]))')
+        xcrun simctl bootstatus "$UDID" -b
+        xcrun simctl install "$UDID" build-ios-sim/Debug-iphonesimulator/DDNet.app
+        xcrun simctl launch --console-pty "$UDID" org.ddnet.client quit > simulator-console.log 2>&1
+        cat simulator-console.log
+        grep -q "config: saved to settings_ddnet.cfg" simulator-console.log
+
     - name: Build iOS device app in release mode
       run: scripts/ios/cmake_ios.sh device DDNet org.ddnet.client Release build-ios-device
 
