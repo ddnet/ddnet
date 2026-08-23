@@ -1028,7 +1028,9 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				if(aMessage[0] == 0)
 					break;
 
-				if(GameServer()->ProcessSpamProtection(m_ClientId) && PrimaryMessage)
+				// Only the primary message counts towards the chat score, the
+				// follow-up messages of one command must not mute the player.
+				if(PrimaryMessage && GameServer()->ProcessSpamProtection(m_ClientId))
 					break;
 
 				GameServer()->SendChat(-1, TEAM_ALL, aMessage, -1);
