@@ -47,7 +47,7 @@ public:
 	void OnInit() override;
 	void OnReset() override;
 	void OnWindowResize() override;
-	bool OnTouchState(const std::vector<IInput::CTouchFingerState> &vTouchFingerStates) override;
+	bool OnTouchState(std::vector<IInput::CTouchFingerState> &vTouchFingerStates) override;
 	void OnRender() override;
 
 	bool LoadConfigurationFromFile(int StorageType);
