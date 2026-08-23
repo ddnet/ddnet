@@ -124,11 +124,13 @@ public:
 
 	bool m_PredictEvents;
 
-	bool m_Supports128Teams;
+	bool m_OldLaser;
 
 	// zero if the server does not send them
 	int m_MinTeamSize;
 	int m_MaxTeamSize;
+
+	int m_NumDDRaceTeams;
 };
 
 class CSnapEntities

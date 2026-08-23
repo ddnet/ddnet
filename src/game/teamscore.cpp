@@ -44,8 +44,7 @@ bool CTeamsCore::CanCollide(int ClientId1, int ClientId2) const
 
 void CTeamsCore::Reset()
 {
-	m_IsDDRace16 = false;
-	m_IsDDRace64 = false;
+	m_NumDDRaceTeams = NUM_DDRACE_TEAMS;
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
