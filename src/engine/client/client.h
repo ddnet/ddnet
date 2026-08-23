@@ -54,6 +54,7 @@ public:
 	bool m_PingEx = false;
 	bool m_AllowDummy = false;
 	bool m_SyncWeaponInput = false;
+	bool m_SizeExtendedSnapshot = false;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -97,7 +98,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr = NETADDR_ZEROED;
 
-	uint64_t m_aSnapshotParts[NUM_DUMMIES] = {0, 0};
+	std::bitset<CSnapshot::MAX_PARTS> m_aSnapshotParts[NUM_DUMMIES];
 	int64_t m_LocalStartTime = 0;
 	int64_t m_GlobalStartTime = 0;
 

@@ -736,7 +736,7 @@ void CDemoPlayer::DoTick()
 			}
 
 			// process delta snapshot
-			DataSize = SnapshotDelta()->UnpackDelta(m_LastSnapshotData.AsSnapshot(), &m_Snapshot, m_aChunkData, DataSize);
+			DataSize = SnapshotDelta()->UnpackDelta(m_LastSnapshotData.AsSnapshot(), &m_Snapshot, m_aChunkData, DataSize, true);
 
 			if(DataSize < 0)
 			{
@@ -747,7 +747,7 @@ void CDemoPlayer::DoTick()
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 				}
 			}
-			else if(!m_Snapshot.AsSnapshot()->IsValid(DataSize))
+			else if(!m_Snapshot.AsSnapshot()->IsValid(DataSize, true))
 			{
 				if(m_pConsole)
 				{
@@ -770,7 +770,7 @@ void CDemoPlayer::DoTick()
 		{
 			// process full snapshot
 			CSnapshot *pSnap = (CSnapshot *)m_aChunkData;
-			if(!pSnap->IsValid(DataSize))
+			if(!pSnap->IsValid(DataSize, true))
 			{
 				if(m_pConsole)
 				{
