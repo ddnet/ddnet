@@ -544,6 +544,7 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		const bool DontModifySpectate = FreeOnly && str_comp(Get(KEY_MOUSE_3, KeyModifier::NONE), "+spectate") != 0;
 		Bind(KEY_MOUSE_3, "toggle_scoreboard_cursor; +spectate", DontModifySpectate);
 		Bind(KEY_LALT, "toggle_scoreboard_cursor", FreeOnly);
+		Bind(KEY_RALT, "toggle_scoreboard_cursor", FreeOnly);
 	}
 
 	if(g_Config.m_ClDDRaceBindsSet < 3)
