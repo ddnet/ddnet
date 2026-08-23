@@ -30,6 +30,9 @@ typedef bool (*DEMOFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 // "6be6da4a-cebd-380c-9b5b-1289c842d780"
 // "demoitem-sha256@ddnet.tw"
 extern const CUuid SHA256_EXTENSION;
+// "0ecc9a45-f53f-3fd3-81d9-b5abf9039327"
+// "demoitem-sizeextendedsnapshot@ddnet.org"
+extern const CUuid SIZEEXTENDEDSNAPSHOT_EXTENSION;
 
 struct CDemoHeader
 {
@@ -100,7 +103,7 @@ public:
 	virtual bool IsPlaying() const = 0;
 	virtual const CInfo *BaseInfo() const = 0;
 	virtual void GetDemoName(char *pBuffer, size_t BufferSize) const = 0;
-	virtual bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const = 0;
+	virtual bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0, bool *pSizeExtendedSnapshot = nullptr) const = 0;
 };
 
 class IDemoRecorder : public IInterface

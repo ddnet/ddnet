@@ -27,8 +27,13 @@ const CUuid SHA256_EXTENSION =
 	{{0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
 		0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
 
-static const unsigned char gs_CurVersion = 6;
+const CUuid SIZEEXTENDEDSNAPSHOT_EXTENSION =
+	{{0x0e, 0xcc, 0x9a, 0x45, 0xf5, 0x3f, 0x3f, 0xd3,
+		0x81, 0xd9, 0xb5, 0xab, 0xf9, 0x03, 0x93, 0x27}};
+
+static const unsigned char gs_CurVersion = 7;
 static const unsigned char gs_OldVersion = 3;
+static const unsigned char gs_VersionSizeExtendedSnapshot = 7;
 static const unsigned char gs_Sha256Version = 6;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 
@@ -180,6 +185,10 @@ int CDemoRecorder::Start(IStorage *pStorage, IConsole *pConsole, const char *pFi
 	io_write(DemoFile, SHA256_EXTENSION.m_aData, sizeof(SHA256_EXTENSION.m_aData));
 	io_write(DemoFile, &Sha256, sizeof(SHA256_DIGEST));
 
+	io_write(DemoFile, SIZEEXTENDEDSNAPSHOT_EXTENSION.m_aData, sizeof(SIZEEXTENDEDSNAPSHOT_EXTENSION.m_aData));
+	unsigned char SizeExtendedSnapshot = 1;
+	io_write(DemoFile, &SizeExtendedSnapshot, sizeof(SizeExtendedSnapshot));
+
 	if(MapSize == 0)
 	{
 	}
@@ -283,13 +292,13 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	if(!m_File)
 		return;
 
-	if(Size > 64 * 1024)
+	unsigned char aBuffer[CSnapshot::MAX_SIZE];
+	unsigned char aBuffer2[CSnapshot::MAX_SIZE];
+	if(Size <= 0 || Size > (int)sizeof(aBuffer))
 		return;
 
 	/* pad the data with 0 so we get an alignment of 4,
 	else the compression won't work and miss some bytes */
-	char aBuffer[64 * 1024];
-	char aBuffer2[64 * 1024];
 	mem_copy(aBuffer2, pData, Size);
 	while(Size & 3)
 		aBuffer2[Size++] = 0;
@@ -301,28 +310,26 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	if(Size < 0)
 		return;
 
-	unsigned char aChunk[3];
+	unsigned char aChunk[4];
 	aChunk[0] = ((Type & 0x3) << 5);
 	if(Size < 30)
 	{
 		aChunk[0] |= Size;
 		io_write(m_File, aChunk, 1);
 	}
+	else if(Size < 256)
+	{
+		aChunk[0] |= 30;
+		aChunk[1] = Size & 0xff;
+		io_write(m_File, aChunk, 2);
+	}
 	else
 	{
-		if(Size < 256)
-		{
-			aChunk[0] |= 30;
-			aChunk[1] = Size & 0xff;
-			io_write(m_File, aChunk, 2);
-		}
-		else
-		{
-			aChunk[0] |= 31;
-			aChunk[1] = Size & 0xff;
-			aChunk[2] = Size >> 8;
-			io_write(m_File, aChunk, 3);
-		}
+		aChunk[0] |= 31;
+		aChunk[1] = Size & 0xff;
+		aChunk[2] = (Size >> 8) & 0xff;
+		aChunk[3] = (Size >> 16) & 0xff;
+		io_write(m_File, aChunk, 4);
 	}
 
 	io_write(m_File, aBuffer2, Size);
@@ -578,10 +585,20 @@ CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int
 		}
 		else if(*pSize == 31)
 		{
-			unsigned char aSizedata[2];
-			if(io_read(m_File, aSizedata, sizeof(aSizedata)) != sizeof(aSizedata))
-				return CHUNKHEADER_ERROR;
-			*pSize = (aSizedata[1] << 8) | aSizedata[0];
+			if(m_Info.m_Header.m_Version >= gs_VersionSizeExtendedSnapshot)
+			{
+				unsigned char aSizedata[3];
+				if(io_read(m_File, aSizedata, sizeof(aSizedata)) != sizeof(aSizedata))
+					return CHUNKHEADER_ERROR;
+				*pSize = (aSizedata[2] << 16) | (aSizedata[1] << 8) | aSizedata[0];
+			}
+			else
+			{
+				unsigned char aSizedata[2];
+				if(io_read(m_File, aSizedata, sizeof(aSizedata)) != sizeof(aSizedata))
+					return CHUNKHEADER_ERROR;
+				*pSize = (aSizedata[1] << 8) | aSizedata[0];
+			}
 		}
 	}
 
@@ -736,7 +753,7 @@ void CDemoPlayer::DoTick()
 			}
 
 			// process delta snapshot
-			DataSize = SnapshotDelta()->UnpackDelta(m_LastSnapshotData.AsSnapshot(), &m_Snapshot, m_aChunkData, DataSize, true);
+			DataSize = SnapshotDelta()->UnpackDelta(m_LastSnapshotData.AsSnapshot(), &m_Snapshot, m_aChunkData, DataSize, m_SizeExtendedSnapshot);
 
 			if(DataSize < 0)
 			{
@@ -747,7 +764,7 @@ void CDemoPlayer::DoTick()
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 				}
 			}
-			else if(!m_Snapshot.AsSnapshot()->IsValid(DataSize, true))
+			else if(!m_Snapshot.AsSnapshot()->IsValid(DataSize, m_SizeExtendedSnapshot))
 			{
 				if(m_pConsole)
 				{
@@ -770,7 +787,7 @@ void CDemoPlayer::DoTick()
 		{
 			// process full snapshot
 			CSnapshot *pSnap = (CSnapshot *)m_aChunkData;
-			if(!pSnap->IsValid(DataSize, true))
+			if(!pSnap->IsValid(DataSize, m_SizeExtendedSnapshot))
 			{
 				if(m_pConsole)
 				{
@@ -857,7 +874,7 @@ int CDemoPlayer::Load(IStorage *pStorage, IConsole *pConsole, const char *pFilen
 	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
 	m_LastSnapshotDataSize = -1;
 
-	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
+	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage), &m_SizeExtendedSnapshot))
 	{
 		str_copy(m_aFilename, "");
 		return -1;
@@ -1299,7 +1316,7 @@ void CDemoPlayer::GetDemoName(char *pBuffer, size_t BufferSize) const
 	fs_split_file_extension(fs_filename(m_aFilename), pBuffer, BufferSize);
 }
 
-bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize) const
+bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize, bool *pSizeExtendedSnapshot) const
 {
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
 	mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
@@ -1381,6 +1398,39 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 				return false;
 			}
 		}
+	}
+
+	if(pSizeExtendedSnapshot)
+		*pSizeExtendedSnapshot = false;
+
+	if(pDemoHeader->m_Version >= gs_VersionSizeExtendedSnapshot)
+	{
+		CUuid SizeExtendedUuid = {};
+		const unsigned SizeExtendedUuidSize = io_read(File, &SizeExtendedUuid.m_aData, sizeof(SizeExtendedUuid.m_aData));
+
+		if(SizeExtendedUuidSize != sizeof(SizeExtendedUuid.m_aData) || SizeExtendedUuid != SIZEEXTENDEDSNAPSHOT_EXTENSION)
+		{
+			if(pErrorMessage != nullptr)
+				str_copy(pErrorMessage, "Error reading size-extended snapshot extension", ErrorMessageSize);
+			mem_zero(pDemoHeader, sizeof(CDemoHeader));
+			mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
+			io_close(File);
+			return false;
+		}
+
+		unsigned char Flag;
+		if(io_read(File, &Flag, sizeof(Flag)) != sizeof(Flag))
+		{
+			if(pErrorMessage != nullptr)
+				str_copy(pErrorMessage, "Error reading size-extended snapshot flag", ErrorMessageSize);
+			mem_zero(pDemoHeader, sizeof(CDemoHeader));
+			mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
+			io_close(File);
+			return false;
+		}
+
+		if(pSizeExtendedSnapshot)
+			*pSizeExtendedSnapshot = (Flag != 0);
 	}
 
 	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName);

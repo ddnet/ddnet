@@ -165,6 +165,7 @@ private:
 
 	int64_t Time();
 	bool m_Sixup;
+	bool m_SizeExtendedSnapshot;
 
 	CSnapshotDelta *SnapshotDelta();
 	void Construct(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo);
@@ -192,7 +193,7 @@ public:
 	bool SetPos(int WantedTick) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
-	bool GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
+	bool GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0, bool *pSizeExtendedSnapshot = nullptr) const override;
 	const char *Filename() const { return m_aFilename; }
 	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
