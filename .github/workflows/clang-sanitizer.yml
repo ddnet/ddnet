@@ -21,7 +21,7 @@ jobs:
       LSAN_OPTIONS: suppressions=../lsan.supp
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         submodules: recursive
 
@@ -37,7 +37,7 @@ jobs:
         cache: true
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
+      uses: Swatinem/rust-cache@v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
@@ -140,7 +140,7 @@ jobs:
     - name: Upload integration test results
       id: integration_test_artifact_upload
       if: steps.integration_test.outcome == 'failure'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ddnet-clang-sanitizer-integration-test-results
         path: clang-sanitizer/integration_*
