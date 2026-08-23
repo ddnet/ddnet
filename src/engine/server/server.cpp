@@ -2906,8 +2906,8 @@ int CServer::GetMaxClients(int ClientId) const
 
 	if(m_aClients[ClientId].m_Sixup)
 		return DDRACE64_MAX_CLIENTS;
-	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_256_PLAYERS_AND_TEAMS)
-		return DDRACE256_MAX_CLIENTS;
+	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_512_PLAYERS_AND_TEAMS)
+		return DDRACE512_MAX_CLIENTS;
 	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_128_PLAYERS)
 		return DDRACE128_MAX_CLIENTS;
 	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_OLD)
