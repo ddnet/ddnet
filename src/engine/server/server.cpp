@@ -2897,11 +2897,11 @@ int CServer::GetMaxClients(int ClientId) const
 		return MAX_CLIENTS;
 
 	if(m_aClients[ClientId].m_Sixup)
-		return LEGACY_MAX_CLIENTS;
+		return DDRACE64_MAX_CLIENTS;
 	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_128_PLAYERS)
-		return MAX_CLIENTS;
+		return DDRACE128_MAX_CLIENTS;
 	if(m_aClients[ClientId].m_DDNetVersion >= VERSION_DDNET_OLD)
-		return LEGACY_MAX_CLIENTS;
+		return DDRACE64_MAX_CLIENTS;
 	return VANILLA_MAX_CLIENTS;
 }
 
