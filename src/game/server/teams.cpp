@@ -672,7 +672,7 @@ void CGameTeams::SendTeamsState(int ClientId)
 
 void CGameTeams::UpdateLegacyTeamMap()
 {
-	// Clients before VERSION_DDNET_128_TEAMS only know team numbers up to LEGACY_TEAM_SUPER. Only whether
+	// Clients before VERSION_DDNET_128_TEAMS only know team numbers up to DDRACE64_MAX_CLIENTS. Only whether
 	// two team numbers are equal matters to a client, so the teams that such a client cannot represent are
 	// renumbered into the team numbers that are currently unused. This keeps collision and hook prediction
 	// correct, at the cost of showing a different team number than the one the player joined.
@@ -681,22 +681,22 @@ void CGameTeams::UpdateLegacyTeamMap()
 		aTeamOccupied[m_Core.Team(i)] = true;
 
 	// teams that the client can represent keep their own number
-	for(int Team = TEAM_FLOCK; Team < LEGACY_TEAM_SUPER; Team++)
+	for(int Team = TEAM_FLOCK; Team < DDRACE64_MAX_CLIENTS; Team++)
 		m_aLegacyTeamMap[Team] = Team;
-	for(int Team = LEGACY_TEAM_SUPER; Team < TEAM_SUPER; Team++)
+	for(int Team = DDRACE64_MAX_CLIENTS; Team < TEAM_SUPER; Team++)
 		m_aLegacyTeamMap[Team] = TEAM_FLOCK;
-	m_aLegacyTeamMap[TEAM_SUPER] = LEGACY_TEAM_SUPER;
+	m_aLegacyTeamMap[TEAM_SUPER] = DDRACE64_MAX_CLIENTS;
 
 	// the teams that are left get the numbers that no team is currently using
 	int NextNumber = TEAM_FLOCK + 1;
-	for(int Team = LEGACY_TEAM_SUPER; Team < TEAM_SUPER; Team++)
+	for(int Team = DDRACE64_MAX_CLIENTS; Team < TEAM_SUPER; Team++)
 	{
 		if(!aTeamOccupied[Team])
 			continue;
 
-		while(NextNumber < LEGACY_TEAM_SUPER && aTeamOccupied[NextNumber])
+		while(NextNumber < LEGACY_MAX_CLIENTS && aTeamOccupied[NextNumber])
 			NextNumber++;
-		if(NextNumber == LEGACY_TEAM_SUPER)
+		if(NextNumber == LEGACY_MAX_CLIENTS)
 			break; // more teams than the client can represent, the rest stays TEAM_FLOCK
 
 		m_aLegacyTeamMap[Team] = NextNumber;
@@ -706,18 +706,31 @@ void CGameTeams::UpdateLegacyTeamMap()
 
 int CGameTeams::TeamForClient(int Team, int ClientId) const
 {
-	if(ClientSupportsServerNumTeams(ClientId))
-		return Team;
 	// If the team's slots are not reserved, dont highlight it. Causes mismatch between dummy and main when playermapping is active.
 	if(!Server()->ClientSupportsServerMaxClients(ClientId) && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team, ClientId))
 		return TEAM_FLOCK;
-	return m_aLegacyTeamMap[Team];
+
+	const int ClientNumTeams = GetClientNumTeams(ClientId);
+	// Client supports this team
+	if(ClientNumTeams >= NUM_DDRACE_TEAMS - 1 || Team < ClientNumTeams)
+		return Team;
+
+	// Client has CTeamsCore::m_NumDDRaceTeams and supports variable TeamSuper()
+	if(ClientNumTeams >= DDRACE128_MAX_CLIENTS && Team == TEAM_SUPER)
+		return TEAM_SUPER;
+
+	// Client doesn't support this team, but we might have a legacy slot
+	if(m_aLegacyTeamMap[Team] < ClientNumTeams)
+		return m_aLegacyTeamMap[Team];
+	return TEAM_FLOCK;
 }
 
-bool CGameTeams::ClientSupportsServerNumTeams(int ClientId) const
+int CGameTeams::GetClientNumTeams(int ClientId) const
 {
 	const int ClientVersion = GameServer()->GetClientVersion(ClientId);
-	return ClientVersion >= VERSION_DDNET_128_TEAMS;
+	if(ClientVersion >= VERSION_DDNET_128_TEAMS)
+		return DDRACE128_MAX_CLIENTS;
+	return DDRACE64_MAX_CLIENTS;
 }
 
 ERaceState CGameTeams::GetDDRaceState(const CPlayer *Player) const
