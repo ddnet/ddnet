@@ -41,6 +41,7 @@
  * @return Length of written string, even if it has been truncated
  *
  * @remark The strings are treated as null-terminated strings.
+ * @remark At most dst_size bytes are read from src.
  * @remark Guarantees that dst string will contain null-termination.
  */
 int str_copy(char *dst, const char *src, int dst_size);

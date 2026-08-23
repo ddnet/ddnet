@@ -86,12 +86,8 @@ protected:
 
 	static void WriteBuffer(std::vector<unsigned char> &vBuffer, const void *pData, size_t DataSize)
 	{
-		if(DataSize <= 0)
-			return;
-
-		const size_t OldSize = vBuffer.size();
-		vBuffer.resize(OldSize + DataSize);
-		mem_copy(&vBuffer[OldSize], pData, DataSize);
+		const unsigned char *pBytes = static_cast<const unsigned char *>(pData);
+		vBuffer.insert(vBuffer.end(), pBytes, pBytes + DataSize);
 	}
 
 	static void Write(const void *pData, int DataSize, void *pUser)

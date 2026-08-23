@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 
 #include <limits>
+#include <vector>
 
 typedef void (*TStringArgumentFunction)(char *pStr);
 template<TStringArgumentFunction Func>
@@ -812,6 +813,20 @@ TEST(Str, Copy)
 	EXPECT_STREQ(aBuf, "DDNet最好了");
 	str_copy(aBuf, pStr);
 	EXPECT_STREQ(aBuf, "DDNet最好了");
+}
+
+TEST(Str, CopyUnterminatedSource)
+{
+	// The source only has to hold dst_size bytes, str_copy must not read
+	// further. CNetConnection relies on this for the disconnect reason
+	// received from the network. Detected by the address sanitizer.
+	const std::vector<char> vSrc(8, 'a');
+	char aBuf[4];
+	str_copy(aBuf, vSrc.data(), sizeof(aBuf));
+	EXPECT_STREQ(aBuf, "aaa");
+	char aExactBuf[9];
+	str_copy(aExactBuf, vSrc.data(), sizeof(aExactBuf));
+	EXPECT_STREQ(aExactBuf, "aaaaaaaa");
 }
 
 TEST(Str, CopyArray)
