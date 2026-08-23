@@ -807,7 +807,7 @@ int CCollision::MoverSpeed(int x, int y, vec2 *pSpeed) const
 
 	int Index, Flags, Speed;
 	bool NoMoverFound = true;
-	int aLayers[] = {LAYER_GAME, LAYER_FRONT, LAYER_SWITCH};
+	int aLayers[] = {LAYER_GAME, LAYER_SWITCH};
 	for(auto Layer : aLayers)
 	{
 		Index = 0;
@@ -821,13 +821,9 @@ int CCollision::MoverSpeed(int x, int y, vec2 *pSpeed) const
 		}
 		else
 		{
-			CTile *pTiles = Layer == LAYER_FRONT ? m_pFront : m_pTiles;
-			if(pTiles)
-			{
-				Index = pTiles[MapIndex].m_Index;
-				Flags = pTiles[MapIndex].m_Flags;
-				Speed = Index == TILE_CP_F ? 16 : 4;
-			}
+			Index = m_pTiles[MapIndex].m_Index;
+			Flags = m_pTiles[MapIndex].m_Flags;
+			Speed = Index == TILE_CP_F ? 16 : 4;
 		}
 
 		if(Index == TILE_CP || Index == TILE_CP_F)
