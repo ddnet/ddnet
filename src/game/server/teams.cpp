@@ -728,6 +728,8 @@ int CGameTeams::TeamForClient(int Team, int ClientId) const
 int CGameTeams::GetClientNumTeams(int ClientId) const
 {
 	const int ClientVersion = GameServer()->GetClientVersion(ClientId);
+	if(ClientVersion >= VERSION_DDNET_256_PLAYERS_AND_TEAMS)
+		return DDRACE256_MAX_CLIENTS;
 	if(ClientVersion >= VERSION_DDNET_128_TEAMS)
 		return DDRACE128_MAX_CLIENTS;
 	return DDRACE64_MAX_CLIENTS;
