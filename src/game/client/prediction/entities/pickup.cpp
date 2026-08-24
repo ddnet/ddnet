@@ -31,7 +31,7 @@ void CPickup::Tick()
 			// player picked us up, is someone was hooking us, let them go
 			switch(m_Type)
 			{
-			case POWERUP_HEALTH:
+			case POWERUP_FREEZE:
 				if(!GameWorld()->m_WorldConfig.m_PredictDDRace)
 					continue;
 				if(pChr->Freeze())

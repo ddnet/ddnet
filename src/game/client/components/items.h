@@ -36,6 +36,7 @@ private:
 	int m_RedFlagOffset;
 	int m_PickupHealthOffset;
 	int m_PickupArmorOffset;
+	int m_PickupFreezeOffset;
 	int m_aPickupWeaponOffset[NUM_WEAPONS];
 	int m_PickupNinjaOffset;
 	int m_aPickupWeaponArmorOffset[4];
