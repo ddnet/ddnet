@@ -458,3 +458,59 @@ jobs:
       with:
         name: ddnet-emscripten
         path: artifacts
+
+  build-ios:
+    runs-on: macos-26
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Prepare macOS
+      run: |
+        sudo xcode-select -s "/Applications/Xcode_26.2.app/Contents/Developer"
+        xcodebuild -version
+        rustup target add aarch64-apple-ios
+        rustup target add aarch64-apple-ios-sim
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+          cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
+          workspaces: ./
+
+    - name: Build iOS simulator app in debug mode
+      run: scripts/ios/cmake_ios.sh sim-arm64 DDNet org.ddnet.client Debug build-ios-sim
+
+    - name: Smoke test iOS simulator app in debug mode
+      timeout-minutes: 15
+      run: |
+        UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; print(next(device["udid"] for devices in json.load(sys.stdin)["devices"].values() for device in devices if "iPhone" in device["name"]))')
+        xcrun simctl bootstatus "$UDID" -b
+        xcrun simctl install "$UDID" build-ios-sim/Debug-iphonesimulator/DDNet.app
+        xcrun simctl launch --console-pty "$UDID" org.ddnet.client quit > simulator-console.log 2>&1
+        cat simulator-console.log
+        grep -q "config: saved to settings_ddnet.cfg" simulator-console.log
+
+    - name: Build iOS device app in release mode
+      run: scripts/ios/cmake_ios.sh device DDNet org.ddnet.client Release build-ios-device
+
+    - name: Package
+      run: |
+        mkdir artifacts
+        # Zip the app bundles, as the artifact upload does not keep the executable bit.
+        cd build-ios-sim/Debug-iphonesimulator
+        zip -qry ../../artifacts/DDNet-simulator.zip DDNet.app
+        cd ../..
+        # The app is unsigned, so it has to be signed before it can be installed.
+        mkdir Payload
+        mv build-ios-device/Release-iphoneos/DDNet.app Payload
+        zip -qry artifacts/DDNet.ipa Payload
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddnet-ios
+        path: artifacts

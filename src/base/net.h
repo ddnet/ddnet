@@ -288,6 +288,20 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data);
 
 /**
+ * Checks whether an UDP socket was closed by the operating system.
+ *
+ * @ingroup Network-UDP
+ *
+ * @param sock Socket to check.
+ *
+ * @return `true` if the socket cannot be used anymore and has to be recreated.
+ *
+ * @remark iOS closes the sockets of apps while they are suspended. Sending on
+ * such a socket keeps failing with `EPIPE` until it is recreated.
+ */
+bool net_udp_is_broken(NETSOCKET sock);
+
+/**
  * Closes an UDP socket.
  *
  * @ingroup Network-UDP

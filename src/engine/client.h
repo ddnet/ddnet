@@ -381,6 +381,8 @@ public:
 	 * @return `true` on success, `false` on failure.
 	 *
 	 * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+	 *
+	 * @remark On iOS the file or directory is shown in the Files app.
 	 */
 	virtual bool ViewFile(const char *pFilename) = 0;
 
