@@ -30,7 +30,7 @@ jobs:
         - name: ubuntu-22.04
           os: ubuntu-22.04
           cmake-path: /usr/bin/
-          cmake-args: -G "Unix Makefiles" -DTEST_MYSQL=ON
+          cmake-args: -G "Unix Makefiles" -DTEST_MYSQL=ON -DPRECOMPILE_HEADERS=OFF
           cmake-args-release: -DIPO=ON
           cmake-init-env: CXXFLAGS=-Werror
           gtest-env: GTEST_FILTER=-*SQLite*

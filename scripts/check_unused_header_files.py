@@ -20,6 +20,8 @@ def find_unused_header_files(directory):
 					if header in content:
 						used_files.add(header)
 
+	used_files.add("pch.h")  # Precompiled header
+
 	return header_files - used_files
 
 
