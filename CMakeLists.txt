@@ -2434,6 +2434,7 @@ set_src(GAME_PHYSICS GLOB src/game/physics
   laser.h
   pickup.h
   plasma.h
+  projectile.h
   world_config.h
   # tidy-alphabetical-end
 )

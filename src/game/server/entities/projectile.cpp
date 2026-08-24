@@ -9,6 +9,7 @@
 #include <generated/protocol.h>
 
 #include <game/mapitems.h>
+#include <game/physics/projectile.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/ddnet.h>
 
@@ -124,14 +125,7 @@ void CProjectile::Tick()
 		}
 		else if(m_Freeze)
 		{
-			CEntity *apEnts[MAX_CLIENTS];
-			int Num = GameWorld()->FindEntities(CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-			for(int i = 0; i < Num; ++i)
-			{
-				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
-				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])))
-					pChr->Freeze();
-			}
+			CProjectilePhysics<CProjectile, CCharacter>::FreezeCharactersNear(this, CurPos);
 		}
 		else if(pTargetChr)
 			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
@@ -179,17 +173,7 @@ void CProjectile::Tick()
 
 		if(Collide && m_Bouncing != 0)
 		{
-			m_StartTick = Server()->Tick();
-			m_Pos = NewPos + (-(m_Direction * 4));
-			if(m_Bouncing == 1)
-				m_Direction.x = -m_Direction.x;
-			else if(m_Bouncing == 2)
-				m_Direction.y = -m_Direction.y;
-			if(absolute(m_Direction.x) < 1e-6f)
-				m_Direction.x = 0;
-			if(absolute(m_Direction.y) < 1e-6f)
-				m_Direction.y = 0;
-			m_Pos += m_Direction;
+			CProjectilePhysics<CProjectile, CCharacter>::Bounce(this, NewPos);
 		}
 		else if(m_Type == WEAPON_GUN)
 		{

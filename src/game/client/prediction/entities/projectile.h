@@ -7,10 +7,14 @@
 
 class CProjectileData;
 
+template<typename TProjectile, typename TCharacter>
+class CProjectilePhysics;
+
 class CProjectile : public CEntity
 {
 	friend class CGameWorld;
 	friend class CItems;
+	friend class CProjectilePhysics<CProjectile, CCharacter>;
 
 public:
 	CProjectile(

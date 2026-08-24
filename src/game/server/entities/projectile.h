@@ -5,8 +5,13 @@
 
 #include <game/server/entity.h>
 
+template<typename TProjectile, typename TCharacter>
+class CProjectilePhysics;
+
 class CProjectile : public CEntity
 {
+	friend class CProjectilePhysics<CProjectile, CCharacter>;
+
 public:
 	CProjectile(
 		CGameWorld *pGameWorld,
