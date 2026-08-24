@@ -18,6 +18,8 @@
 
 #include <SDL.h>
 
+#include <algorithm>
+
 // support older SDL version (pre 2.0.6)
 #ifndef SDL_JOYSTICK_AXIS_MIN
 #define SDL_JOYSTICK_AXIS_MIN (-32768)
@@ -540,13 +542,29 @@ void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 	}
 }
 
+vec2 CInput::TouchPositionToViewport(vec2 Position) const
+{
+	// Touch positions are normalized to the drawable area, whereas the rendered image can
+	// be smaller than it and is aligned to its top left corner. Positions on the area that
+	// is not rendered to are clamped to the image.
+	const vec2 Scaled = Position * Graphics()->DrawableSize() / Graphics()->ScreenSize();
+	return vec2(std::clamp(Scaled.x, 0.0f, 1.0f), std::clamp(Scaled.y, 0.0f, 1.0f));
+}
+
+vec2 CInput::TouchDeltaToViewport(vec2 Delta) const
+{
+	// The scale between the drawable area and the rendered image applies to deltas as well.
+	const vec2 Scaled = Delta * Graphics()->DrawableSize() / Graphics()->ScreenSize();
+	return vec2(std::clamp(Scaled.x, -1.0f, 1.0f), std::clamp(Scaled.y, -1.0f, 1.0f));
+}
+
 void CInput::HandleTouchDownEvent(const SDL_TouchFingerEvent &Event)
 {
 	CTouchFingerState TouchFingerState;
 	TouchFingerState.m_Finger.m_DeviceId = Event.touchId;
 	TouchFingerState.m_Finger.m_FingerId = Event.fingerId;
-	TouchFingerState.m_Position = vec2(Event.x, Event.y);
-	TouchFingerState.m_Delta = vec2(Event.dx, Event.dy);
+	TouchFingerState.m_Position = TouchPositionToViewport(vec2(Event.x, Event.y));
+	TouchFingerState.m_Delta = TouchDeltaToViewport(vec2(Event.dx, Event.dy));
 	TouchFingerState.m_PressTime = time_get_nanoseconds();
 	m_vTouchFingerStates.emplace_back(TouchFingerState);
 }
@@ -569,8 +587,8 @@ void CInput::HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event)
 	});
 	if(FoundState != m_vTouchFingerStates.end())
 	{
-		FoundState->m_Position = vec2(Event.x, Event.y);
-		FoundState->m_Delta += vec2(Event.dx, Event.dy);
+		FoundState->m_Position = TouchPositionToViewport(vec2(Event.x, Event.y));
+		FoundState->m_Delta += TouchDeltaToViewport(vec2(Event.dx, Event.dy));
 	}
 }
 

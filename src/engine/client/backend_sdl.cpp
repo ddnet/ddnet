@@ -1537,6 +1537,8 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CmdSDL2.m_Y = 0;
 		CmdSDL2.m_Width = *pCurrentWidth;
 		CmdSDL2.m_Height = *pCurrentHeight;
+		CmdSDL2.m_DrawableWidth = *pCurrentWidth;
+		CmdSDL2.m_DrawableHeight = *pCurrentHeight;
 		CmdSDL2.m_ByResize = true;
 		CmdBuffer.AddCommandUnsafe(CmdSDL2);
 		RunBuffer(&CmdBuffer);
