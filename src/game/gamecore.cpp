@@ -67,6 +67,29 @@ float CTuningParams::GetWeaponFireDelay(int Weapon) const
 	}
 }
 
+float CTuningParams::ProjectileCurvature(int Weapon) const
+{
+	switch(Weapon)
+	{
+	case WEAPON_GRENADE: return m_GrenadeCurvature;
+	case WEAPON_SHOTGUN: return m_ShotgunCurvature;
+	case WEAPON_GUN: return m_GunCurvature;
+	// other weapon types have no projectile trajectory tuning
+	default: return 0.0f;
+	}
+}
+
+float CTuningParams::ProjectileSpeed(int Weapon) const
+{
+	switch(Weapon)
+	{
+	case WEAPON_GRENADE: return m_GrenadeSpeed;
+	case WEAPON_SHOTGUN: return m_ShotgunSpeed;
+	case WEAPON_GUN: return m_GunSpeed;
+	default: return 0.0f;
+	}
+}
+
 static_assert(std::numeric_limits<char>::is_signed, "char must be signed for StrToInts to work correctly");
 
 void StrToInts(int *pInts, size_t NumInts, const char *pStr)
