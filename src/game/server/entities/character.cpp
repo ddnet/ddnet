@@ -573,6 +573,19 @@ void CCharacter::FireWeapon()
 		{
 			int Lifetime = (int)(Server()->TickSpeed() * GetTuning(m_TuneZone)->m_GunLifetime);
 
+			// the telegun keeps the gun sound, its bullets are the point of the shot
+			CClientMask SoundMask = TeamMask();
+			int Sound = SOUND_GUN_FIRE;
+			if(m_Core.m_Jetpack && !m_Core.m_HasTelegunGun)
+			{
+				Sound = SOUND_JETPACK_FIRE;
+				// clients from before this sound clamp the unknown id to the last sound they know,
+				// which would play the menu music, so they hear nothing instead
+				for(int i = 0; i < MAX_CLIENTS; i++)
+					if(Server()->IsSixup(i) || Server()->GetClientVersion(i) < VERSION_DDNET_JETPACK_SOUND)
+						SoundMask.reset(i);
+			}
+
 			new CProjectile(
 				GameWorld(),
 				WEAPON_GUN, //Type
@@ -586,7 +599,7 @@ void CCharacter::FireWeapon()
 				MouseTarget //InitDir
 			);
 
-			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+			GameServer()->CreateSound(m_Pos, Sound, SoundMask); // NOLINT(clang-analyzer-unix.Malloc)
 		}
 	}
 	break;

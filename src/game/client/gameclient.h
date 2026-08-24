@@ -771,6 +771,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteWeaponGrenade;
 		IGraphics::CTextureHandle m_SpriteWeaponNinja;
 		IGraphics::CTextureHandle m_SpriteWeaponLaser;
+		IGraphics::CTextureHandle m_SpriteJetpack;
 
 		IGraphics::CTextureHandle m_aSpriteWeapons[6];
 

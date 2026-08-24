@@ -1285,6 +1285,9 @@ set(EXPECTED_DATA
   audio/wp_hammer_swing-01.wv
   audio/wp_hammer_swing-02.wv
   audio/wp_hammer_swing-03.wv
+  audio/wp_jetpack_fire-01.wv
+  audio/wp_jetpack_fire-02.wv
+  audio/wp_jetpack_fire-03.wv
   audio/wp_laser_bnce-01.wv
   audio/wp_laser_bnce-02.wv
   audio/wp_laser_bnce-03.wv

@@ -387,7 +387,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GUN:
 	{
-		if(!m_Core.m_Jetpack)
+		if(!m_Core.m_Jetpack || !m_NinjaJetpack || m_Core.m_HasTelegunGun)
 		{
 			int Lifetime = (int)(GameWorld()->GameTickSpeed() * GetTuning(GetOverriddenTuneZone())->m_GunLifetime);
 
@@ -404,7 +404,8 @@ void CCharacter::FireWeapon()
 				-1 //SoundImpact
 			);
 
-			GameWorld()->CreatePredictedSound(m_Pos, SOUND_GUN_FIRE, GetCid()); // NOLINT(clang-analyzer-unix.Malloc)
+			// the telegun keeps the gun sound, its bullets are the point of the shot
+			GameWorld()->CreatePredictedSound(m_Pos, m_Core.m_Jetpack && !m_Core.m_HasTelegunGun ? SOUND_JETPACK_FIRE : SOUND_GUN_FIRE, GetCid()); // NOLINT(clang-analyzer-unix.Malloc)
 		}
 	}
 	break;
@@ -1403,6 +1404,10 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			GiveNinja();
 		else if(!Ninja && m_Core.m_ActiveWeapon == WEAPON_NINJA)
 			RemoveNinja();
+		// ninja jetpack is shown as the ninja while the weapon really is the gun, holding another
+		// weapon says nothing about it, so keep what the last gun snapshot told us
+		if(Ninja || m_Core.m_ActiveWeapon == WEAPON_GUN)
+			m_NinjaJetpack = !Ninja && pChar->m_Weapon == WEAPON_NINJA;
 
 		if(GameWorld()->m_WorldConfig.m_PredictFreeze && pExtended->m_FreezeEnd != 0)
 		{

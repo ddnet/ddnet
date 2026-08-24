@@ -40,6 +40,9 @@ CProjectile::CProjectile(
 	m_Bouncing = 0;
 	m_Freeze = Freeze;
 
+	const CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+	m_JetpackExhaust = m_Type == WEAPON_GUN && pOwnerChar && pOwnerChar->Core()->m_Jetpack && !pOwnerChar->Core()->m_HasTelegunGun;
+
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
 	GameWorld()->InsertEntity(this);
@@ -138,7 +141,7 @@ void CProjectile::Tick()
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
+			if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace && (!m_JetpackExhaust || (pOwnerChar && pOwnerChar->Core()->m_HasTelegunGun)))
 				GameWorld()->CreatePredictedDamageIndEvent(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_StartTick);
 			m_MarkedForDestroy = true;
 		}
@@ -179,12 +182,14 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 		m_Explosive = pProj->m_Explosive;
 		m_Bouncing = pProj->m_Bouncing;
 		m_Freeze = pProj->m_Freeze;
+		m_JetpackExhaust = pProj->m_JetpackExhaust;
 	}
 	else
 	{
 		m_Owner = -1;
 		m_Bouncing = 0;
 		m_Freeze = false;
+		m_JetpackExhaust = false;
 		m_Explosive = (pProj->m_Type == WEAPON_GRENADE) && (absolute(1.0f - length(m_Direction)) < 0.015f);
 	}
 	m_Type = pProj->m_Type;
@@ -224,6 +229,7 @@ CProjectileData CProjectile::GetData() const
 	Result.m_Explosive = m_Explosive;
 	Result.m_Bouncing = m_Bouncing;
 	Result.m_Freeze = m_Freeze;
+	Result.m_JetpackExhaust = m_JetpackExhaust;
 	Result.m_TuneZone = m_TuneZone;
 	Result.m_SwitchNumber = m_Number;
 	return Result;

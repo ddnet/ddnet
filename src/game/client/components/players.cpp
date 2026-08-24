@@ -562,6 +562,125 @@ void CPlayers::RenderHook(
 	RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
 }
 
+void CPlayers::RenderJetpackTrail(int ClientId, vec2 Position, vec2 Direction, vec2 Vel, bool Thrusting, float Alpha)
+{
+	// the exhaust is a ribbon from the barrel tips through their recent positions, each drifting
+	// along the aim it was fired with like a slowing particle, fading and narrowing with age
+	constexpr float Lifespan = 0.5f;
+	constexpr float SampleInterval = 0.02f;
+	constexpr float TravelSlack = 150.0f;
+	constexpr int MaxPoints = CJetpackTrail::MAX_POINTS;
+	CJetpackTrail &Trail = m_aJetpackTrails[ClientId];
+	const float Now = (Client()->PrevGameTick(g_Config.m_ClDummy) + Client()->IntraGameTickSincePrev(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
+
+	// forget everything after a jump back in time, otherwise only expired samples
+	if(Trail.m_Count > 0 && Now < Trail.m_aTime[(Trail.m_First + Trail.m_Count - 1) % MaxPoints])
+		Trail.m_Count = 0;
+	while(Trail.m_Count > 0 && Now - Trail.m_aTime[Trail.m_First] > Lifespan)
+	{
+		Trail.m_First = (Trail.m_First + 1) % MaxPoints;
+		Trail.m_Count--;
+	}
+
+	const vec2 DirectionY(-Direction.y, Direction.x);
+	const vec2 BarrelPos = Position + Direction * 24.0f;
+	if(Thrusting && Trail.m_Count > 0)
+	{
+		const int Newest = (Trail.m_First + Trail.m_Count - 1) % MaxPoints;
+		const float MaxTravel = length(Vel) * Client()->GameTickSpeed() * std::min(Now - Trail.m_aTime[Newest], 3.0f * SampleInterval) + TravelSlack;
+		if(distance(BarrelPos, (Trail.m_aaPos[Newest][0] + Trail.m_aaPos[Newest][1]) * 0.5f) > MaxTravel)
+			Trail.m_Count = 0;
+	}
+	if(Thrusting && (Trail.m_Count == 0 || Now - Trail.m_aTime[(Trail.m_First + Trail.m_Count - 1) % MaxPoints] >= SampleInterval))
+	{
+		if(Trail.m_Count == MaxPoints)
+		{
+			Trail.m_First = (Trail.m_First + 1) % MaxPoints;
+			Trail.m_Count--;
+		}
+		const int Index = (Trail.m_First + Trail.m_Count) % MaxPoints;
+		Trail.m_Count++;
+		Trail.m_aaPos[Index][0] = BarrelPos + DirectionY * 23.0f;
+		Trail.m_aaPos[Index][1] = BarrelPos - DirectionY * 23.0f;
+		Trail.m_aDir[Index] = Direction;
+		Trail.m_aTime[Index] = Now;
+	}
+	// the ribbon starts at the barrels themselves while they thrust
+	const int NumPoints = Trail.m_Count + (Thrusting ? 1 : 0);
+	if(NumPoints < 2)
+		return;
+
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	const ColorRGBA Edge(1.0f, 1.0f, 1.0f, 0.0f);
+	for(int Barrel = 0; Barrel < 2; Barrel++)
+	{
+		vec2 aPoints[MaxPoints + 1];
+		vec2 aDirs[MaxPoints + 1];
+		float aFade[MaxPoints + 1];
+		for(int i = 0; i < NumPoints; i++)
+		{
+			if(i < Trail.m_Count)
+			{
+				const int Index = (Trail.m_First + i) % MaxPoints;
+				const float Age = Now - Trail.m_aTime[Index];
+				aPoints[i] = Trail.m_aaPos[Index][Barrel] + Trail.m_aDir[Index] * 150.0f * (1.0f - std::exp(-Age * 2.0f));
+				aDirs[i] = Trail.m_aDir[Index];
+				aFade[i] = 1.0f - Age / Lifespan;
+			}
+			else
+			{
+				aPoints[i] = BarrelPos + DirectionY * (Barrel == 0 ? 23.0f : -23.0f);
+				aDirs[i] = Direction;
+				aFade[i] = 1.0f;
+			}
+		}
+		// the ribbon runs from the oldest drift back to the barrel, so against the aim
+		vec2 aSide[MaxPoints + 1];
+		for(int i = 0; i < NumPoints; i++)
+		{
+			// sum of the unit directions of the adjacent segments, a raw central difference
+			// puts the side on the wrong edge of the shorter segment and folds the quad
+			vec2 SegmentDir = vec2(0.0f, 0.0f);
+			vec2 Tangent = vec2(0.0f, 0.0f);
+			if(i > 0 && distance(aPoints[i - 1], aPoints[i]) > 0.001f)
+			{
+				SegmentDir = normalize(aPoints[i] - aPoints[i - 1]);
+				Tangent += SegmentDir;
+			}
+			if(i + 1 < NumPoints && distance(aPoints[i], aPoints[i + 1]) > 0.001f)
+			{
+				SegmentDir = normalize(aPoints[i + 1] - aPoints[i]);
+				Tangent += SegmentDir;
+			}
+			if(length(Tangent) < 0.001f)
+			{
+				// a perpendicular tangent pinches the ribbon to zero width where it doubles
+				// back on itself exactly, a fold there is unavoidable with shared sides
+				Tangent = SegmentDir == vec2(0.0f, 0.0f) ? -aDirs[i] : vec2(-SegmentDir.y, SegmentDir.x);
+			}
+			Tangent = normalize(Tangent);
+			aSide[i] = vec2(-Tangent.y, Tangent.x) * mix(1.0f, 6.0f, aFade[i]);
+		}
+		for(int i = 0; i + 1 < NumPoints; i++)
+		{
+			const vec2 &A = aPoints[i];
+			const vec2 &B = aPoints[i + 1];
+			const ColorRGBA CenterA(1.0f, 1.0f, 1.0f, aFade[i] * aFade[i] * 0.8f * Alpha);
+			const ColorRGBA CenterB(1.0f, 1.0f, 1.0f, aFade[i + 1] * aFade[i + 1] * 0.8f * Alpha);
+			// two halves, brightest along the middle and transparent at the edges
+			Graphics()->SetColor4(Edge, CenterA, CenterB, Edge);
+			const IGraphics::CFreeformItem Left(A - aSide[i], A, B - aSide[i + 1], B);
+			Graphics()->QuadsDrawFreeform(&Left, 1);
+			Graphics()->SetColor4(CenterA, Edge, Edge, CenterB);
+			const IGraphics::CFreeformItem Right(A, A + aSide[i], B, B + aSide[i + 1]);
+			Graphics()->QuadsDrawFreeform(&Right, 1);
+		}
+	}
+	Graphics()->QuadsEnd();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+}
+
 void CPlayers::RenderPlayer(
 	const CScreenRect &ScreenRect,
 	const CNetObj_Character *pPrevChar,
@@ -684,6 +803,14 @@ void CPlayers::RenderPlayer(
 	if(!InAir && WantOtherDir && length(Vel * 50) > 500.0f)
 		GameClient()->m_Effects.SkidTrail(Position, Vel, Player.m_Direction, Alpha, Volume);
 
+	const bool JetpackGun = Player.m_Weapon == WEAPON_GUN && ClientId >= 0 && GameClient()->m_aClients[ClientId].m_Jetpack;
+
+	// the jetpack thrusts on every shot, so its exhaust follows the muzzle flash timing, drawn
+	// below the guns worn on the back. exhaust already in the air keeps fading once the tee
+	// stops holding the gun, so this runs no matter which weapon is drawn
+	if(ClientId >= 0)
+		RenderJetpackTrail(ClientId, Position, Direction, Vel, JetpackGun && AttackTicksPassed < g_pData->m_Weapons.m_aId[WEAPON_GUN].m_Muzzleduration + 3.0f, Alpha);
+
 	// draw gun
 	if(Player.m_Weapon >= 0)
 	{
@@ -798,11 +925,20 @@ void CPlayers::RenderPlayer(
 					WeaponPosition.y += 3.0f;
 				if(Player.m_Weapon == WEAPON_GUN && g_Config.m_ClOldGunPosition)
 					WeaponPosition.y -= 8.0f;
-				Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2.0f + Angle);
-				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
+				// the jetpack sprite points down, the weapon sprites point right
+				Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2.0f + Angle - (JetpackGun ? pi / 2.0f : 0.0f));
+				if(JetpackGun)
+				{
+					Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteJetpack);
+					Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, NUM_WEAPONS * 2 + 2 + 2 + NUM_EMOTICONS, Position.x, Position.y);
+				}
+				else
+				{
+					Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
+				}
 			}
 
-			if(Player.m_Weapon == WEAPON_GUN || Player.m_Weapon == WEAPON_SHOTGUN)
+			if(!JetpackGun && (Player.m_Weapon == WEAPON_GUN || Player.m_Weapon == WEAPON_SHOTGUN))
 			{
 				// check if we're firing stuff
 				if(g_pData->m_Weapons.m_aId[CurrentWeapon].m_NumSpriteMuzzles) // prev.attackticks)
@@ -843,7 +979,10 @@ void CPlayers::RenderPlayer(
 
 			switch(Player.m_Weapon)
 			{
-			case WEAPON_GUN: RenderHand(&RenderInfo, WeaponPosition, Direction, -3.0f * pi / 4.0f, vec2(-15.0f, 4.0f), Alpha); break;
+			case WEAPON_GUN:
+				if(!JetpackGun)
+					RenderHand(&RenderInfo, WeaponPosition, Direction, -3.0f * pi / 4.0f, vec2(-15.0f, 4.0f), Alpha);
+				break;
 			case WEAPON_SHOTGUN: RenderHand(&RenderInfo, WeaponPosition, Direction, -pi / 2.0f, vec2(-5.0f, 4.0f), Alpha); break;
 			case WEAPON_GRENADE: RenderHand(&RenderInfo, WeaponPosition, Direction, -pi / 2.0f, vec2(-4.0f, 7.0f), Alpha); break;
 			}
@@ -1118,6 +1257,15 @@ void CPlayers::OnInit()
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 64.f);
 	}
+
+	// at last the jetpack, it draws two guns at the gun's own pixel scale, so its size comes
+	// from the sprite grid instead of a size of its own, which would scale the art
+	const CDataSprite *pGunSprite = g_pData->m_Weapons.m_aId[WEAPON_GUN].m_pSpriteBody;
+	const CDataSprite *pJetpackSprite = &g_pData->m_aSprites[SPRITE_WEAPON_JETPACK];
+	Graphics()->GetSpriteScale(pGunSprite, ScaleX, ScaleY);
+	const float UnitsPerCell = g_pData->m_Weapons.m_aId[WEAPON_GUN].m_VisualSize * ScaleX / pGunSprite->m_W;
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, UnitsPerCell * pJetpackSprite->m_W, UnitsPerCell * pJetpackSprite->m_H);
 	Graphics()->QuadContainerUpload(m_WeaponEmoteQuadContainerIndex);
 
 	for(int i = 0; i < NUM_WEAPONS; ++i)
