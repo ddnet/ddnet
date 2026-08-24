@@ -64,6 +64,9 @@ public:
 
 	bool m_IsLocal;
 
+	// The prediction only simulates alive characters
+	bool IsAlive() const { return true; }
+
 	CTeamsCore *TeamsCore();
 	bool Freeze(int Seconds);
 	bool Freeze();

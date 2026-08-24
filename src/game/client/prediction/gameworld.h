@@ -4,6 +4,7 @@
 #define GAME_CLIENT_PREDICTION_GAMEWORLD_H
 
 #include <game/gamecore.h>
+#include <game/physics/world_config.h>
 #include <game/teamscore.h>
 
 #include <list>
@@ -69,23 +70,7 @@ public:
 	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask, int Id = -1);
 
 	// for client side prediction
-	struct
-	{
-		bool m_IsDDRace;
-		bool m_IsVanilla;
-		bool m_IsFNG;
-		bool m_InfiniteAmmo;
-		bool m_PredictTiles;
-		int m_PredictFreeze;
-		bool m_PredictWeapons;
-		bool m_PredictDDRace;
-		bool m_IsSolo;
-		bool m_UseTuneZones;
-		bool m_BugDDRaceInput;
-		bool m_NoWeakHookAndBounce;
-		bool m_PredictEvents;
-		bool m_OldLaser;
-	} m_WorldConfig;
+	CWorldConfig m_WorldConfig;
 
 	bool m_IsValidCopy;
 	CGameWorld *m_pParent;

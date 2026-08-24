@@ -5,8 +5,13 @@
 
 #include <game/server/entity.h>
 
+template<typename TPickup, typename TCharacter>
+class CPickupPhysics;
+
 class CPickup : public CEntity
 {
+	friend class CPickupPhysics<CPickup, CCharacter>;
+
 public:
 	static const int ms_CollisionExtraSize = 6;
 
@@ -27,7 +32,9 @@ private:
 
 	// DDRace
 
-	void Move();
+	void CreatePickupSound(int Sound, CCharacter *pChr);
+	void AnnounceWeaponPickup(CCharacter *pChr);
+	void OnMoverActivated() {}
 	vec2 m_Core;
 };
 

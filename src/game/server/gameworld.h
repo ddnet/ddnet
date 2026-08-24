@@ -6,6 +6,7 @@
 #include "save.h"
 
 #include <game/gamecore.h>
+#include <game/physics/world_config.h>
 
 #include <vector>
 
@@ -51,6 +52,13 @@ public:
 	bool m_ResetRequested;
 	bool m_Paused;
 	CWorldCore m_Core;
+	// The server always runs the full simulation, so this keeps the
+	// defaults. It exists so physics code shared with the client
+	// prediction can check the same config on both sides.
+	const CWorldConfig m_WorldConfig;
+
+	int GameTick();
+	int GameTickSpeed();
 
 	CGameWorld();
 	~CGameWorld();
