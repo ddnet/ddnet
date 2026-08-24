@@ -1469,302 +1469,13 @@ void CCharacter::HandleTiles(int Index)
 	if(!m_Alive)
 		return;
 
-	// freeze
-	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
-	{
-		Freeze();
-	}
-	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_Core.m_DeepFrozen)
-		Unfreeze();
+	CCharacterPhysics<CCharacter>::HandleTileFlags(this);
+	CCharacterPhysics<CCharacter>::HandleSwitchTiles(this, MapIndex);
 
-	// deep freeze
-	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
-		m_Core.m_DeepFrozen = true;
-	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && m_Core.m_DeepFrozen)
-		m_Core.m_DeepFrozen = false;
-
-	// live freeze
-	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
-	{
-		m_Core.m_LiveFrozen = true;
-	}
-	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
-	{
-		m_Core.m_LiveFrozen = false;
-	}
-
-	// endless hook
-	if(((m_TileIndex == TILE_EHOOK_ENABLE) || (m_TileFIndex == TILE_EHOOK_ENABLE)))
-	{
-		SetEndlessHook(true);
-	}
-	else if(((m_TileIndex == TILE_EHOOK_DISABLE) || (m_TileFIndex == TILE_EHOOK_DISABLE)))
-	{
-		SetEndlessHook(false);
-	}
-
-	// hit others
-	if(((m_TileIndex == TILE_HIT_DISABLE) || (m_TileFIndex == TILE_HIT_DISABLE)) && (!m_Core.m_HammerHitDisabled || !m_Core.m_ShotgunHitDisabled || !m_Core.m_GrenadeHitDisabled || !m_Core.m_LaserHitDisabled))
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hit others");
-		m_Core.m_HammerHitDisabled = true;
-		m_Core.m_ShotgunHitDisabled = true;
-		m_Core.m_GrenadeHitDisabled = true;
-		m_Core.m_LaserHitDisabled = true;
-	}
-	else if(((m_TileIndex == TILE_HIT_ENABLE) || (m_TileFIndex == TILE_HIT_ENABLE)) && (m_Core.m_HammerHitDisabled || m_Core.m_ShotgunHitDisabled || m_Core.m_GrenadeHitDisabled || m_Core.m_LaserHitDisabled))
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hit others");
-		m_Core.m_ShotgunHitDisabled = false;
-		m_Core.m_GrenadeHitDisabled = false;
-		m_Core.m_HammerHitDisabled = false;
-		m_Core.m_LaserHitDisabled = false;
-	}
-
-	// collide with others
-	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && !m_Core.m_CollisionDisabled)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't collide with others");
-		m_Core.m_CollisionDisabled = true;
-	}
-	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_CollisionDisabled)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can collide with others");
-		m_Core.m_CollisionDisabled = false;
-	}
-
-	// hook others
-	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && !m_Core.m_HookHitDisabled)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hook others");
-		m_Core.m_HookHitDisabled = true;
-	}
-	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_HookHitDisabled)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hook others");
-		m_Core.m_HookHitDisabled = false;
-	}
-
-	// unlimited air jumps
-	if(((m_TileIndex == TILE_UNLIMITED_JUMPS_ENABLE) || (m_TileFIndex == TILE_UNLIMITED_JUMPS_ENABLE)) && !m_Core.m_EndlessJump)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You have unlimited air jumps");
-		m_Core.m_EndlessJump = true;
-	}
-	else if(((m_TileIndex == TILE_UNLIMITED_JUMPS_DISABLE) || (m_TileFIndex == TILE_UNLIMITED_JUMPS_DISABLE)) && m_Core.m_EndlessJump)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You don't have unlimited air jumps");
-		m_Core.m_EndlessJump = false;
-	}
-
-	// walljump
-	if((m_TileIndex == TILE_WALLJUMP) || (m_TileFIndex == TILE_WALLJUMP))
-	{
-		if(m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_LeftWall)
-		{
-			m_Core.m_LeftWall = false;
-			m_Core.m_JumpedTotal = m_Core.m_Jumps >= 2 ? m_Core.m_Jumps - 2 : 0;
-			m_Core.m_Jumped = 1;
-		}
-	}
-
-	// jetpack gun
-	if(((m_TileIndex == TILE_JETPACK_ENABLE) || (m_TileFIndex == TILE_JETPACK_ENABLE)) && !m_Core.m_Jetpack)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You have a jetpack gun");
-		m_Core.m_Jetpack = true;
-	}
-	else if(((m_TileIndex == TILE_JETPACK_DISABLE) || (m_TileFIndex == TILE_JETPACK_DISABLE)) && m_Core.m_Jetpack)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You lost your jetpack gun");
-		m_Core.m_Jetpack = false;
-	}
-
-	// refill jumps
-	if(((m_TileIndex == TILE_REFILL_JUMPS) || (m_TileFIndex == TILE_REFILL_JUMPS)) && !m_LastRefillJumps)
-	{
-		m_Core.m_JumpedTotal = 0;
-		m_Core.m_Jumped = 0;
-		m_LastRefillJumps = true;
-	}
-	if((m_TileIndex != TILE_REFILL_JUMPS) && (m_TileFIndex != TILE_REFILL_JUMPS))
-	{
-		m_LastRefillJumps = false;
-	}
-
-	// Teleport gun
-	if(((m_TileIndex == TILE_TELE_GUN_ENABLE) || (m_TileFIndex == TILE_TELE_GUN_ENABLE)) && !m_Core.m_HasTelegunGun)
-	{
-		m_Core.m_HasTelegunGun = true;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport gun enabled");
-	}
-	else if(((m_TileIndex == TILE_TELE_GUN_DISABLE) || (m_TileFIndex == TILE_TELE_GUN_DISABLE)) && m_Core.m_HasTelegunGun)
-	{
-		m_Core.m_HasTelegunGun = false;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport gun disabled");
-	}
-
-	if(((m_TileIndex == TILE_TELE_GRENADE_ENABLE) || (m_TileFIndex == TILE_TELE_GRENADE_ENABLE)) && !m_Core.m_HasTelegunGrenade)
-	{
-		m_Core.m_HasTelegunGrenade = true;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport grenade enabled");
-	}
-	else if(((m_TileIndex == TILE_TELE_GRENADE_DISABLE) || (m_TileFIndex == TILE_TELE_GRENADE_DISABLE)) && m_Core.m_HasTelegunGrenade)
-	{
-		m_Core.m_HasTelegunGrenade = false;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport grenade disabled");
-	}
-
-	if(((m_TileIndex == TILE_TELE_LASER_ENABLE) || (m_TileFIndex == TILE_TELE_LASER_ENABLE)) && !m_Core.m_HasTelegunLaser)
-	{
-		m_Core.m_HasTelegunLaser = true;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport laser enabled");
-	}
-	else if(((m_TileIndex == TILE_TELE_LASER_DISABLE) || (m_TileFIndex == TILE_TELE_LASER_DISABLE)) && m_Core.m_HasTelegunLaser)
-	{
-		m_Core.m_HasTelegunLaser = false;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport laser disabled");
-	}
-
-	// stopper
-	if(m_Core.m_Vel.y > 0 && (m_MoveRestrictions & CANTMOVE_DOWN))
-	{
-		m_Core.m_Jumped = 0;
-		m_Core.m_JumpedTotal = 0;
-	}
-	ApplyMoveRestrictions();
-
-	// handle switch tiles
 	const int SwitchType = Collision()->GetSwitchType(MapIndex);
 	const int SwitchNumber = Collision()->GetSwitchNumber(MapIndex);
 	const int SwitchDelay = Collision()->GetSwitchDelay(MapIndex);
-	if(SwitchType == TILE_SWITCHOPEN && Team() != TEAM_SUPER && SwitchNumber > 0)
-	{
-		Switchers()[SwitchNumber].m_aStatus[Team()] = true;
-		Switchers()[SwitchNumber].m_aEndTick[Team()] = 0;
-		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHOPEN;
-		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = Server()->Tick();
-	}
-	else if(SwitchType == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && SwitchNumber > 0)
-	{
-		Switchers()[SwitchNumber].m_aStatus[Team()] = true;
-		Switchers()[SwitchNumber].m_aEndTick[Team()] = Server()->Tick() + 1 + SwitchDelay * Server()->TickSpeed();
-		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHTIMEDOPEN;
-		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = Server()->Tick();
-	}
-	else if(SwitchType == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && SwitchNumber > 0)
-	{
-		Switchers()[SwitchNumber].m_aStatus[Team()] = false;
-		Switchers()[SwitchNumber].m_aEndTick[Team()] = Server()->Tick() + 1 + SwitchDelay * Server()->TickSpeed();
-		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHTIMEDCLOSE;
-		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = Server()->Tick();
-	}
-	else if(SwitchType == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && SwitchNumber > 0)
-	{
-		Switchers()[SwitchNumber].m_aStatus[Team()] = false;
-		Switchers()[SwitchNumber].m_aEndTick[Team()] = 0;
-		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHCLOSE;
-		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = Server()->Tick();
-	}
-	else if(SwitchType == TILE_FREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-		{
-			Freeze(SwitchDelay);
-		}
-	}
-	else if(SwitchType == TILE_DFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-			m_Core.m_DeepFrozen = true;
-	}
-	else if(SwitchType == TILE_DUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-			m_Core.m_DeepFrozen = false;
-	}
-	else if(SwitchType == TILE_LFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-		{
-			m_Core.m_LiveFrozen = true;
-		}
-	}
-	else if(SwitchType == TILE_LUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-		{
-			m_Core.m_LiveFrozen = false;
-		}
-	}
-	else if(SwitchType == TILE_HIT_ENABLE && m_Core.m_HammerHitDisabled && SwitchDelay == WEAPON_HAMMER)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hammer hit others");
-		m_Core.m_HammerHitDisabled = false;
-	}
-	else if(SwitchType == TILE_HIT_DISABLE && !(m_Core.m_HammerHitDisabled) && SwitchDelay == WEAPON_HAMMER)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hammer hit others");
-		m_Core.m_HammerHitDisabled = true;
-	}
-	else if(SwitchType == TILE_HIT_ENABLE && m_Core.m_ShotgunHitDisabled && SwitchDelay == WEAPON_SHOTGUN)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with shotgun");
-		m_Core.m_ShotgunHitDisabled = false;
-	}
-	else if(SwitchType == TILE_HIT_DISABLE && !(m_Core.m_ShotgunHitDisabled) && SwitchDelay == WEAPON_SHOTGUN)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with shotgun");
-		m_Core.m_ShotgunHitDisabled = true;
-	}
-	else if(SwitchType == TILE_HIT_ENABLE && m_Core.m_GrenadeHitDisabled && SwitchDelay == WEAPON_GRENADE)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with grenade");
-		m_Core.m_GrenadeHitDisabled = false;
-	}
-	else if(SwitchType == TILE_HIT_DISABLE && !(m_Core.m_GrenadeHitDisabled) && SwitchDelay == WEAPON_GRENADE)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with grenade");
-		m_Core.m_GrenadeHitDisabled = true;
-	}
-	else if(SwitchType == TILE_HIT_ENABLE && m_Core.m_LaserHitDisabled && SwitchDelay == WEAPON_LASER)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with laser");
-		m_Core.m_LaserHitDisabled = false;
-	}
-	else if(SwitchType == TILE_HIT_DISABLE && !(m_Core.m_LaserHitDisabled) && SwitchDelay == WEAPON_LASER)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with laser");
-		m_Core.m_LaserHitDisabled = true;
-	}
-	else if(SwitchType == TILE_JUMP)
-	{
-		int NewJumps = SwitchDelay;
-		if(NewJumps == 255)
-		{
-			NewJumps = -1;
-		}
-
-		if(NewJumps != m_Core.m_Jumps)
-		{
-			char aBuf[256];
-			if(NewJumps == -1)
-				str_copy(aBuf, "You only have your ground jump now");
-			else if(NewJumps == 1)
-				str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
-			else
-				str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
-			GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
-			m_Core.m_Jumps = NewJumps;
-		}
-	}
-	else if(SwitchType == TILE_ADD_TIME && !m_LastPenalty)
+	if(SwitchType == TILE_ADD_TIME && !m_LastPenalty)
 	{
 		const int Minutes = SwitchDelay;
 		const int Seconds = SwitchNumber;
@@ -2003,6 +1714,23 @@ CTeamsCore *CCharacter::TeamsCore()
 int CCharacter::GetCid() const
 {
 	return m_pPlayer->GetCid();
+}
+
+void CCharacter::SendTileChat(const char *pMessage)
+{
+	GameServer()->SendChatTarget(GetPlayer()->GetCid(), pMessage);
+}
+
+void CCharacter::SendJumpsChat(int NewJumps)
+{
+	char aBuf[256];
+	if(NewJumps == -1)
+		str_copy(aBuf, "You only have your ground jump now");
+	else if(NewJumps == 1)
+		str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
+	else
+		str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
+	GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
 }
 
 bool CCharacter::TrySetRescue(int RescueMode)

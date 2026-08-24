@@ -189,6 +189,8 @@ private:
 	void HandleBroadcast();
 	void HandleTuneLayer();
 	void SendZoneMsgs();
+	void SendTileChat(const char *pMessage);
+	void SendJumpsChat(int NewJumps);
 	IAntibot *Antibot();
 
 	bool m_SetSavePos[NUM_RESCUEMODES];

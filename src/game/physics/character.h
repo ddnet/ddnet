@@ -263,6 +263,319 @@ public:
 		}
 	}
 
+	// The game and front layer tile toggles up to the solo tiles, which the
+	// server handles in the game mode controller instead.
+	static void HandleTileFlags(TCharacter *pThis)
+	{
+		// freeze
+		if(((pThis->m_TileIndex == TILE_FREEZE) || (pThis->m_TileFIndex == TILE_FREEZE)) && !pThis->m_Core.m_Super && !pThis->m_Core.m_Invincible && !pThis->m_Core.m_DeepFrozen)
+		{
+			pThis->Freeze();
+		}
+		else if(((pThis->m_TileIndex == TILE_UNFREEZE) || (pThis->m_TileFIndex == TILE_UNFREEZE)) && !pThis->m_Core.m_DeepFrozen)
+		{
+			pThis->Unfreeze();
+		}
+
+		// deep freeze
+		if(((pThis->m_TileIndex == TILE_DFREEZE) || (pThis->m_TileFIndex == TILE_DFREEZE)) && !pThis->m_Core.m_Super && !pThis->m_Core.m_Invincible && !pThis->m_Core.m_DeepFrozen)
+		{
+			pThis->m_Core.m_DeepFrozen = true;
+		}
+		else if(((pThis->m_TileIndex == TILE_DUNFREEZE) || (pThis->m_TileFIndex == TILE_DUNFREEZE)) && !pThis->m_Core.m_Super && !pThis->m_Core.m_Invincible && pThis->m_Core.m_DeepFrozen)
+		{
+			pThis->m_Core.m_DeepFrozen = false;
+		}
+
+		// live freeze
+		if(((pThis->m_TileIndex == TILE_LFREEZE) || (pThis->m_TileFIndex == TILE_LFREEZE)) && !pThis->m_Core.m_Super && !pThis->m_Core.m_Invincible)
+		{
+			pThis->m_Core.m_LiveFrozen = true;
+		}
+		else if(((pThis->m_TileIndex == TILE_LUNFREEZE) || (pThis->m_TileFIndex == TILE_LUNFREEZE)) && !pThis->m_Core.m_Super && !pThis->m_Core.m_Invincible)
+		{
+			pThis->m_Core.m_LiveFrozen = false;
+		}
+
+		// endless hook
+		if((pThis->m_TileIndex == TILE_EHOOK_ENABLE) || (pThis->m_TileFIndex == TILE_EHOOK_ENABLE))
+		{
+			if(!pThis->m_Core.m_EndlessHook)
+			{
+				pThis->SendTileChat("Endless hook has been activated");
+				pThis->m_Core.m_EndlessHook = true;
+			}
+		}
+		else if((pThis->m_TileIndex == TILE_EHOOK_DISABLE) || (pThis->m_TileFIndex == TILE_EHOOK_DISABLE))
+		{
+			if(pThis->m_Core.m_EndlessHook)
+			{
+				pThis->SendTileChat("Endless hook has been deactivated");
+				pThis->m_Core.m_EndlessHook = false;
+			}
+		}
+
+		// hit others
+		if(((pThis->m_TileIndex == TILE_HIT_DISABLE) || (pThis->m_TileFIndex == TILE_HIT_DISABLE)) && (!pThis->m_Core.m_HammerHitDisabled || !pThis->m_Core.m_ShotgunHitDisabled || !pThis->m_Core.m_GrenadeHitDisabled || !pThis->m_Core.m_LaserHitDisabled))
+		{
+			pThis->SendTileChat("You can't hit others");
+			pThis->m_Core.m_HammerHitDisabled = true;
+			pThis->m_Core.m_ShotgunHitDisabled = true;
+			pThis->m_Core.m_GrenadeHitDisabled = true;
+			pThis->m_Core.m_LaserHitDisabled = true;
+		}
+		else if(((pThis->m_TileIndex == TILE_HIT_ENABLE) || (pThis->m_TileFIndex == TILE_HIT_ENABLE)) && (pThis->m_Core.m_HammerHitDisabled || pThis->m_Core.m_ShotgunHitDisabled || pThis->m_Core.m_GrenadeHitDisabled || pThis->m_Core.m_LaserHitDisabled))
+		{
+			pThis->SendTileChat("You can hit others");
+			pThis->m_Core.m_ShotgunHitDisabled = false;
+			pThis->m_Core.m_GrenadeHitDisabled = false;
+			pThis->m_Core.m_HammerHitDisabled = false;
+			pThis->m_Core.m_LaserHitDisabled = false;
+		}
+
+		// collide with others
+		if(((pThis->m_TileIndex == TILE_NPC_DISABLE) || (pThis->m_TileFIndex == TILE_NPC_DISABLE)) && !pThis->m_Core.m_CollisionDisabled)
+		{
+			pThis->SendTileChat("You can't collide with others");
+			pThis->m_Core.m_CollisionDisabled = true;
+		}
+		else if(((pThis->m_TileIndex == TILE_NPC_ENABLE) || (pThis->m_TileFIndex == TILE_NPC_ENABLE)) && pThis->m_Core.m_CollisionDisabled)
+		{
+			pThis->SendTileChat("You can collide with others");
+			pThis->m_Core.m_CollisionDisabled = false;
+		}
+
+		// hook others
+		if(((pThis->m_TileIndex == TILE_NPH_DISABLE) || (pThis->m_TileFIndex == TILE_NPH_DISABLE)) && !pThis->m_Core.m_HookHitDisabled)
+		{
+			pThis->SendTileChat("You can't hook others");
+			pThis->m_Core.m_HookHitDisabled = true;
+		}
+		else if(((pThis->m_TileIndex == TILE_NPH_ENABLE) || (pThis->m_TileFIndex == TILE_NPH_ENABLE)) && pThis->m_Core.m_HookHitDisabled)
+		{
+			pThis->SendTileChat("You can hook others");
+			pThis->m_Core.m_HookHitDisabled = false;
+		}
+
+		// unlimited air jumps
+		if(((pThis->m_TileIndex == TILE_UNLIMITED_JUMPS_ENABLE) || (pThis->m_TileFIndex == TILE_UNLIMITED_JUMPS_ENABLE)) && !pThis->m_Core.m_EndlessJump)
+		{
+			pThis->SendTileChat("You have unlimited air jumps");
+			pThis->m_Core.m_EndlessJump = true;
+		}
+		else if(((pThis->m_TileIndex == TILE_UNLIMITED_JUMPS_DISABLE) || (pThis->m_TileFIndex == TILE_UNLIMITED_JUMPS_DISABLE)) && pThis->m_Core.m_EndlessJump)
+		{
+			pThis->SendTileChat("You don't have unlimited air jumps");
+			pThis->m_Core.m_EndlessJump = false;
+		}
+
+		// walljump
+		if((pThis->m_TileIndex == TILE_WALLJUMP) || (pThis->m_TileFIndex == TILE_WALLJUMP))
+		{
+			if(pThis->m_Core.m_Vel.y > 0 && pThis->m_Core.m_Colliding && pThis->m_Core.m_LeftWall)
+			{
+				pThis->m_Core.m_LeftWall = false;
+				pThis->m_Core.m_JumpedTotal = pThis->m_Core.m_Jumps >= 2 ? pThis->m_Core.m_Jumps - 2 : 0;
+				pThis->m_Core.m_Jumped = 1;
+			}
+		}
+
+		// jetpack gun
+		if(((pThis->m_TileIndex == TILE_JETPACK_ENABLE) || (pThis->m_TileFIndex == TILE_JETPACK_ENABLE)) && !pThis->m_Core.m_Jetpack)
+		{
+			pThis->SendTileChat("You have a jetpack gun");
+			pThis->m_Core.m_Jetpack = true;
+		}
+		else if(((pThis->m_TileIndex == TILE_JETPACK_DISABLE) || (pThis->m_TileFIndex == TILE_JETPACK_DISABLE)) && pThis->m_Core.m_Jetpack)
+		{
+			pThis->SendTileChat("You lost your jetpack gun");
+			pThis->m_Core.m_Jetpack = false;
+		}
+	}
+
+	// The refill jumps, telegun and stopper tiles and the switch layer
+	// handling after the solo tiles.
+	static void HandleSwitchTiles(TCharacter *pThis, int MapIndex)
+	{
+		// refill jumps
+		if(((pThis->m_TileIndex == TILE_REFILL_JUMPS) || (pThis->m_TileFIndex == TILE_REFILL_JUMPS)) && !pThis->m_LastRefillJumps)
+		{
+			pThis->m_Core.m_JumpedTotal = 0;
+			pThis->m_Core.m_Jumped = 0;
+			pThis->m_LastRefillJumps = true;
+		}
+		if((pThis->m_TileIndex != TILE_REFILL_JUMPS) && (pThis->m_TileFIndex != TILE_REFILL_JUMPS))
+		{
+			pThis->m_LastRefillJumps = false;
+		}
+
+		// Teleport gun
+		if(((pThis->m_TileIndex == TILE_TELE_GUN_ENABLE) || (pThis->m_TileFIndex == TILE_TELE_GUN_ENABLE)) && !pThis->m_Core.m_HasTelegunGun)
+		{
+			pThis->m_Core.m_HasTelegunGun = true;
+
+			pThis->SendTileChat("Teleport gun enabled");
+		}
+		else if(((pThis->m_TileIndex == TILE_TELE_GUN_DISABLE) || (pThis->m_TileFIndex == TILE_TELE_GUN_DISABLE)) && pThis->m_Core.m_HasTelegunGun)
+		{
+			pThis->m_Core.m_HasTelegunGun = false;
+
+			pThis->SendTileChat("Teleport gun disabled");
+		}
+
+		if(((pThis->m_TileIndex == TILE_TELE_GRENADE_ENABLE) || (pThis->m_TileFIndex == TILE_TELE_GRENADE_ENABLE)) && !pThis->m_Core.m_HasTelegunGrenade)
+		{
+			pThis->m_Core.m_HasTelegunGrenade = true;
+
+			pThis->SendTileChat("Teleport grenade enabled");
+		}
+		else if(((pThis->m_TileIndex == TILE_TELE_GRENADE_DISABLE) || (pThis->m_TileFIndex == TILE_TELE_GRENADE_DISABLE)) && pThis->m_Core.m_HasTelegunGrenade)
+		{
+			pThis->m_Core.m_HasTelegunGrenade = false;
+
+			pThis->SendTileChat("Teleport grenade disabled");
+		}
+
+		if(((pThis->m_TileIndex == TILE_TELE_LASER_ENABLE) || (pThis->m_TileFIndex == TILE_TELE_LASER_ENABLE)) && !pThis->m_Core.m_HasTelegunLaser)
+		{
+			pThis->m_Core.m_HasTelegunLaser = true;
+
+			pThis->SendTileChat("Teleport laser enabled");
+		}
+		else if(((pThis->m_TileIndex == TILE_TELE_LASER_DISABLE) || (pThis->m_TileFIndex == TILE_TELE_LASER_DISABLE)) && pThis->m_Core.m_HasTelegunLaser)
+		{
+			pThis->m_Core.m_HasTelegunLaser = false;
+
+			pThis->SendTileChat("Teleport laser disabled");
+		}
+
+		// stopper
+		if(pThis->m_Core.m_Vel.y > 0 && (pThis->m_MoveRestrictions & CANTMOVE_DOWN))
+		{
+			pThis->m_Core.m_Jumped = 0;
+			pThis->m_Core.m_JumpedTotal = 0;
+		}
+		pThis->ApplyMoveRestrictions();
+
+		// handle switch tiles
+		const int SwitchType = pThis->Collision()->GetSwitchType(MapIndex);
+		const int SwitchNumber = pThis->Collision()->GetSwitchNumber(MapIndex);
+		const int SwitchDelay = pThis->Collision()->GetSwitchDelay(MapIndex);
+		if(SwitchType == TILE_SWITCHOPEN && pThis->Team() != pThis->TeamsCore()->TeamSuper() && SwitchNumber > 0)
+		{
+			pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()] = true;
+			pThis->Switchers()[SwitchNumber].m_aEndTick[pThis->Team()] = 0;
+			pThis->Switchers()[SwitchNumber].m_aType[pThis->Team()] = TILE_SWITCHOPEN;
+			pThis->Switchers()[SwitchNumber].m_aLastUpdateTick[pThis->Team()] = pThis->GameWorld()->GameTick();
+		}
+		else if(SwitchType == TILE_SWITCHTIMEDOPEN && pThis->Team() != pThis->TeamsCore()->TeamSuper() && SwitchNumber > 0)
+		{
+			pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()] = true;
+			pThis->Switchers()[SwitchNumber].m_aEndTick[pThis->Team()] = pThis->GameWorld()->GameTick() + 1 + SwitchDelay * pThis->GameWorld()->GameTickSpeed();
+			pThis->Switchers()[SwitchNumber].m_aType[pThis->Team()] = TILE_SWITCHTIMEDOPEN;
+			pThis->Switchers()[SwitchNumber].m_aLastUpdateTick[pThis->Team()] = pThis->GameWorld()->GameTick();
+		}
+		else if(SwitchType == TILE_SWITCHTIMEDCLOSE && pThis->Team() != pThis->TeamsCore()->TeamSuper() && SwitchNumber > 0)
+		{
+			pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()] = false;
+			pThis->Switchers()[SwitchNumber].m_aEndTick[pThis->Team()] = pThis->GameWorld()->GameTick() + 1 + SwitchDelay * pThis->GameWorld()->GameTickSpeed();
+			pThis->Switchers()[SwitchNumber].m_aType[pThis->Team()] = TILE_SWITCHTIMEDCLOSE;
+			pThis->Switchers()[SwitchNumber].m_aLastUpdateTick[pThis->Team()] = pThis->GameWorld()->GameTick();
+		}
+		else if(SwitchType == TILE_SWITCHCLOSE && pThis->Team() != pThis->TeamsCore()->TeamSuper() && SwitchNumber > 0)
+		{
+			pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()] = false;
+			pThis->Switchers()[SwitchNumber].m_aEndTick[pThis->Team()] = 0;
+			pThis->Switchers()[SwitchNumber].m_aType[pThis->Team()] = TILE_SWITCHCLOSE;
+			pThis->Switchers()[SwitchNumber].m_aLastUpdateTick[pThis->Team()] = pThis->GameWorld()->GameTick();
+		}
+		else if(SwitchType == TILE_FREEZE && pThis->Team() != pThis->TeamsCore()->TeamSuper() && !pThis->m_Core.m_Invincible)
+		{
+			if(SwitchNumber == 0 || pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()])
+			{
+				pThis->Freeze(SwitchDelay);
+			}
+		}
+		else if(SwitchType == TILE_DFREEZE && pThis->Team() != pThis->TeamsCore()->TeamSuper() && !pThis->m_Core.m_Invincible)
+		{
+			if(SwitchNumber == 0 || pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()])
+				pThis->m_Core.m_DeepFrozen = true;
+		}
+		else if(SwitchType == TILE_DUNFREEZE && pThis->Team() != pThis->TeamsCore()->TeamSuper() && !pThis->m_Core.m_Invincible)
+		{
+			if(SwitchNumber == 0 || pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()])
+				pThis->m_Core.m_DeepFrozen = false;
+		}
+		else if(SwitchType == TILE_LFREEZE && pThis->Team() != pThis->TeamsCore()->TeamSuper() && !pThis->m_Core.m_Invincible)
+		{
+			if(SwitchNumber == 0 || pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()])
+			{
+				pThis->m_Core.m_LiveFrozen = true;
+			}
+		}
+		else if(SwitchType == TILE_LUNFREEZE && pThis->Team() != pThis->TeamsCore()->TeamSuper() && !pThis->m_Core.m_Invincible)
+		{
+			if(SwitchNumber == 0 || pThis->Switchers()[SwitchNumber].m_aStatus[pThis->Team()])
+			{
+				pThis->m_Core.m_LiveFrozen = false;
+			}
+		}
+		else if(SwitchType == TILE_HIT_ENABLE && pThis->m_Core.m_HammerHitDisabled && SwitchDelay == WEAPON_HAMMER)
+		{
+			pThis->SendTileChat("You can hammer hit others");
+			pThis->m_Core.m_HammerHitDisabled = false;
+		}
+		else if(SwitchType == TILE_HIT_DISABLE && !pThis->m_Core.m_HammerHitDisabled && SwitchDelay == WEAPON_HAMMER)
+		{
+			pThis->SendTileChat("You can't hammer hit others");
+			pThis->m_Core.m_HammerHitDisabled = true;
+		}
+		else if(SwitchType == TILE_HIT_ENABLE && pThis->m_Core.m_ShotgunHitDisabled && SwitchDelay == WEAPON_SHOTGUN)
+		{
+			pThis->SendTileChat("You can shoot others with shotgun");
+			pThis->m_Core.m_ShotgunHitDisabled = false;
+		}
+		else if(SwitchType == TILE_HIT_DISABLE && !pThis->m_Core.m_ShotgunHitDisabled && SwitchDelay == WEAPON_SHOTGUN)
+		{
+			pThis->SendTileChat("You can't shoot others with shotgun");
+			pThis->m_Core.m_ShotgunHitDisabled = true;
+		}
+		else if(SwitchType == TILE_HIT_ENABLE && pThis->m_Core.m_GrenadeHitDisabled && SwitchDelay == WEAPON_GRENADE)
+		{
+			pThis->SendTileChat("You can shoot others with grenade");
+			pThis->m_Core.m_GrenadeHitDisabled = false;
+		}
+		else if(SwitchType == TILE_HIT_DISABLE && !pThis->m_Core.m_GrenadeHitDisabled && SwitchDelay == WEAPON_GRENADE)
+		{
+			pThis->SendTileChat("You can't shoot others with grenade");
+			pThis->m_Core.m_GrenadeHitDisabled = true;
+		}
+		else if(SwitchType == TILE_HIT_ENABLE && pThis->m_Core.m_LaserHitDisabled && SwitchDelay == WEAPON_LASER)
+		{
+			pThis->SendTileChat("You can shoot others with laser");
+			pThis->m_Core.m_LaserHitDisabled = false;
+		}
+		else if(SwitchType == TILE_HIT_DISABLE && !pThis->m_Core.m_LaserHitDisabled && SwitchDelay == WEAPON_LASER)
+		{
+			pThis->SendTileChat("You can't shoot others with laser");
+			pThis->m_Core.m_LaserHitDisabled = true;
+		}
+		else if(SwitchType == TILE_JUMP)
+		{
+			int NewJumps = SwitchDelay;
+			if(NewJumps == 255)
+			{
+				NewJumps = -1;
+			}
+
+			if(NewJumps != pThis->m_Core.m_Jumps)
+			{
+				pThis->SendJumpsChat(NewJumps);
+				pThis->m_Core.m_Jumps = NewJumps;
+			}
+		}
+	}
+
 	static void UpdateIsInFreeze(TCharacter *pThis)
 	{
 		// check if the tee is in any type of freeze

@@ -196,6 +196,9 @@ private:
 	bool m_Interfering;
 
 	CTuningParams *CurrentTuning() { return GetTuning(GetOverriddenTuneZone()); }
+	// Tile chat messages only exist on the server
+	void SendTileChat(const char *pMessage) {}
+	void SendJumpsChat(int NewJumps) {}
 };
 
 #endif
