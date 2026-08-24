@@ -20,18 +20,21 @@
  * - They have had a collision with a player, a solid block or a laser stopper
  * - Their life time of 1.5 seconds has expired
  */
+template<typename TPlasma, typename TCharacter>
+class CPlasmaPhysics;
+
 class CPlasma : public CEntity
 {
+	friend class CPlasmaPhysics<CPlasma, CCharacter>;
+
 	vec2 m_Core;
-	int m_Freeze;
+	bool m_Freeze;
 	bool m_Explosive;
 	int m_ForClientId;
 	int m_EvalTick;
 	int m_LifeTime;
 
-	void Move();
-	bool HitCharacter(CCharacter *pTarget);
-	bool HitObstacle(CCharacter *pTarget);
+	void Explode(CCharacter *pTarget);
 
 public:
 	CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,

@@ -95,6 +95,15 @@ public:
 	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
 
 	/**
+	 * Finds the alive character of the player with the given client id.
+	 *
+	 * @param ClientId The client id to look up.
+	 *
+	 * @return Pointer to the character or `nullptr` if there is none.
+	 */
+	CCharacter *GetCharacterById(int ClientId);
+
+	/**
 	 * Finds the CEntity that intersects the line.
 	 *
 	 * @see IntersectCharacter

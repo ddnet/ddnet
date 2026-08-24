@@ -200,6 +200,7 @@ private:
 
 public:
 	CGameTeams *Teams() { return m_pTeams; }
+	CTeamsCore *TeamsCore();
 	void SetTeams(CGameTeams *pTeams);
 	bool TrySetRescue(int RescueMode);
 

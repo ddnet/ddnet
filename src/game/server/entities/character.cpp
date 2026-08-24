@@ -2176,6 +2176,11 @@ void CCharacter::SetTeams(CGameTeams *pTeams)
 	m_Core.SetTeamsCore(&m_pTeams->m_Core);
 }
 
+CTeamsCore *CCharacter::TeamsCore()
+{
+	return &m_pTeams->m_Core;
+}
+
 bool CCharacter::TrySetRescue(int RescueMode)
 {
 	bool Set = false;
