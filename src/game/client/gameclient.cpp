@@ -1432,6 +1432,34 @@ void CGameClient::OnRconLine(const char *pLine)
 	m_GameConsole.PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }
 
+// world sounds carry no shooter, so take the closest gun holder that fired since the last snapshot
+int CGameClient::GunShooter(vec2 SoundPos) const
+{
+	int Shooter = -1;
+	float ShooterDistance = 0.0f;
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		const CSnapState::CCharacterInfo &Character = m_Snap.m_aCharacters[ClientId];
+		if(!Character.m_Active || Character.m_Cur.m_Weapon != WEAPON_GUN || Character.m_Cur.m_AttackTick == Character.m_Prev.m_AttackTick)
+			continue;
+		const float Distance = distance(SoundPos, vec2(Character.m_Cur.m_X, Character.m_Cur.m_Y));
+		if(Shooter == -1 || Distance < ShooterDistance)
+		{
+			Shooter = ClientId;
+			ShooterDistance = Distance;
+		}
+	}
+	return Shooter;
+}
+
+// jetpack shots are sent as the gun sound so that older clients keep hearing one, the client picks the sample
+int CGameClient::GunFireSound(int Shooter) const
+{
+	if(Shooter != -1 && m_GameInfo.m_JetpackExhaust && m_aClients[Shooter].m_Jetpack && !m_aClients[Shooter].m_HasTelegunGun)
+		return SOUND_JETPACK_FIRE;
+	return SOUND_GUN_FIRE;
+}
+
 void CGameClient::ProcessEvents()
 {
 	if(m_SuppressEvents)
@@ -1509,7 +1537,10 @@ void CGameClient::ProcessEvents()
 			vec2 SoundPos = vec2(pEvent->m_X, pEvent->m_Y);
 			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, SoundPos, -1, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_SoundId)))
 			{
-				m_Sounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, 1.0f, SoundPos);
+				int SoundId = pEvent->m_SoundId;
+				if(SoundId == SOUND_GUN_FIRE)
+					SoundId = GunFireSound(GunShooter(SoundPos));
+				m_Sounds.PlayAt(CSounds::CHN_WORLD, SoundId, 1.0f, SoundPos);
 			}
 		}
 		else if(Item.m_Type == NETEVENTTYPE_MAPSOUNDWORLD)
@@ -1630,6 +1661,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_MaxTeamSize = 0;
 	Info.m_NumDDRaceTeams = 65; // `TEAM_SUPER + 1`, fallback for ddrace64 servers
 	Info.m_OldLaser = false;
+	Info.m_JetpackExhaust = false;
 
 	if(Version >= 0)
 	{
@@ -1704,6 +1736,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Info.m_NumDDRaceTeams = pInfoEx->m_NumDDRaceTeams;
 		Info.m_OldLaser = Flags2 & GAMEINFOFLAG2_OLD_LASER;
 	}
+	if(Version >= 13)
+	{
+		Info.m_JetpackExhaust = Flags2 & GAMEINFOFLAG2_JETPACK_EXHAUST;
+	}
 
 	return Info;
 }
@@ -1741,8 +1777,6 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	InvalidateSnapshot();
 
 	m_NewTick = true;
-
-	ProcessEvents();
 
 	if(g_Config.m_DbgStress)
 	{
@@ -2122,6 +2156,9 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	{
 		m_GameInfo = GetGameInfo(nullptr, 0, &ServerInfo);
 	}
+
+	// the events belong to this snapshot, the gun sound needs its characters
+	ProcessEvents();
 
 	// Sv_TeamsState can arrive before the first snapshot, so derive this here instead of in the message handler
 	m_Teams.m_NumDDRaceTeams = m_GameInfo.m_NumDDRaceTeams;
@@ -3524,6 +3561,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_NoWeakHookAndBounce = m_GameInfo.m_NoWeakHookAndBounce;
 	m_GameWorld.m_WorldConfig.m_PredictEvents = m_GameInfo.m_PredictEvents;
 	m_GameWorld.m_WorldConfig.m_OldLaser = m_GameInfo.m_OldLaser;
+	m_GameWorld.m_WorldConfig.m_JetpackExhaust = m_GameInfo.m_JetpackExhaust;
 
 	if(!m_Snap.m_pLocalCharacter)
 	{
@@ -3860,7 +3898,10 @@ void CGameClient::HandlePredictedEvents(const int Tick)
 					EventsIterator = m_PredictedWorld.m_PredictedEvents.erase(EventsIterator);
 					continue;
 				}
-				m_Sounds.PlayAt(CSounds::CHN_WORLD, EventsIterator->m_ExtraInfo, 1.0f, EventsIterator->m_Pos);
+				int SoundId = EventsIterator->m_ExtraInfo;
+				if(SoundId == SOUND_GUN_FIRE)
+					SoundId = GunFireSound(EventsIterator->m_Id);
+				m_Sounds.PlayAt(CSounds::CHN_WORLD, SoundId, 1.0f, EventsIterator->m_Pos);
 			}
 			else if(EventsIterator->m_EventId == NETEVENTTYPE_EXPLOSION)
 			{
