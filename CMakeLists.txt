@@ -2430,6 +2430,7 @@ set_src(GAME_SHARED GLOB src/game
 )
 set_src(GAME_PHYSICS GLOB src/game/physics
   # tidy-alphabetical-start
+  laser.h
   pickup.h
   plasma.h
   world_config.h

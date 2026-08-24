@@ -6,8 +6,13 @@
 #include <game/server/entity.h>
 #include <game/server/interactions.h>
 
+template<typename TLaser, typename TCharacter>
+class CLaserPhysics;
+
 class CLaser : public CEntity
 {
+	friend class CLaserPhysics<CLaser, CCharacter>;
+
 public:
 	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
 
@@ -44,6 +49,7 @@ private:
 	bool m_IsBlueTeleport;
 	bool m_BelongsToPracticeTeam;
 	void SyncInteractState();
+	bool OldLaser();
 };
 
 #endif

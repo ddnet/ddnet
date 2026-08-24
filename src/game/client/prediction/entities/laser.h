@@ -7,9 +7,13 @@
 
 class CLaserData;
 
+template<typename TLaser, typename TCharacter>
+class CLaserPhysics;
+
 class CLaser : public CEntity
 {
 	friend class CGameWorld;
+	friend class CLaserPhysics<CLaser, CCharacter>;
 
 public:
 	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
@@ -41,6 +45,7 @@ private:
 	vec2 m_PrevPos;
 	int m_Type;
 	int m_TuneZone;
+	bool OldLaser();
 };
 
 #endif
