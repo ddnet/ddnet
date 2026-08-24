@@ -235,6 +235,8 @@ public:
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr);
 	void SetCoreWorld(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
 	void Reset();
+	void ReleaseHook();
+	void ResetHook();
 	void TickDeferred();
 	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();

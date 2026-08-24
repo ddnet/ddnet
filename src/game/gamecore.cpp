@@ -215,6 +215,19 @@ void CCharacterCore::Reset()
 	m_Input.m_TargetY = -1;
 }
 
+void CCharacterCore::ReleaseHook()
+{
+	SetHookedPlayer(-1);
+	m_HookState = HOOK_RETRACTED;
+	m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+}
+
+void CCharacterCore::ResetHook()
+{
+	ReleaseHook();
+	m_HookPos = m_Pos;
+}
+
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);

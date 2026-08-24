@@ -584,15 +584,12 @@ void CCharacter::OnDirectInput(const CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::ReleaseHook()
 {
-	m_Core.SetHookedPlayer(-1);
-	m_Core.m_HookState = HOOK_RETRACTED;
-	m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+	m_Core.ReleaseHook();
 }
 
 void CCharacter::ResetHook()
 {
-	ReleaseHook();
-	m_Core.m_HookPos = m_Core.m_Pos;
+	m_Core.ResetHook();
 }
 
 void CCharacter::ResetInput()
