@@ -248,6 +248,9 @@ int CControls::SnapInput(int *pData)
 			m_aMousePosOnAction[g_Config.m_ClDummy] = vec2(0.0f, 0.0f);
 		}
 
+		// the pending hook or fire press is contained in this input, unfreeze the fast input aim
+		m_aFastInputPendingAction[g_Config.m_ClDummy] = false;
+
 		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX = 1;
@@ -337,6 +340,39 @@ int CControls::SnapInput(int *pData)
 	m_LastSendTime = time_get();
 	mem_copy(pData, &m_aInputData[g_Config.m_ClDummy], sizeof(m_aInputData[0]));
 	return sizeof(m_aInputData[0]);
+}
+
+bool CControls::CheckNewInput()
+{
+	CNetObj_PlayerInput Input = m_aInputData[g_Config.m_ClDummy];
+	Input.m_Direction = 0;
+	if(m_aInputDirectionLeft[g_Config.m_ClDummy] && !m_aInputDirectionRight[g_Config.m_ClDummy])
+		Input.m_Direction = -1;
+	if(!m_aInputDirectionLeft[g_Config.m_ClDummy] && m_aInputDirectionRight[g_Config.m_ClDummy])
+		Input.m_Direction = 1;
+	Input.m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
+	Input.m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
+	if(Input.m_TargetX == 0 && Input.m_TargetY == 0)
+		Input.m_TargetX = 1;
+
+	// freeze the aim while a hook or fire press waits to be sent, so the predicted
+	// direction stays stable, with cl_sub_tick_aiming it also matches the aim the
+	// server will receive
+	CNetObj_PlayerInput &FastInput = m_aFastInput[g_Config.m_ClDummy];
+	const bool NewAction = (FastInput.m_Hook == 0 && Input.m_Hook == 1) || (FastInput.m_Fire != Input.m_Fire && (Input.m_Fire & 1) != 0);
+	if(m_aFastInputPendingAction[g_Config.m_ClDummy] && !NewAction)
+	{
+		Input.m_TargetX = FastInput.m_TargetX;
+		Input.m_TargetY = FastInput.m_TargetY;
+	}
+	m_aFastInputPendingAction[g_Config.m_ClDummy] = m_aFastInputPendingAction[g_Config.m_ClDummy] || NewAction;
+
+	const bool NewInput = Input.m_Direction != FastInput.m_Direction || Input.m_Jump != FastInput.m_Jump ||
+			      Input.m_Fire != FastInput.m_Fire || Input.m_Hook != FastInput.m_Hook ||
+			      Input.m_WantedWeapon != FastInput.m_WantedWeapon || Input.m_NextWeapon != FastInput.m_NextWeapon ||
+			      Input.m_PrevWeapon != FastInput.m_PrevWeapon;
+	FastInput = Input;
+	return NewInput;
 }
 
 void CControls::OnRender()
