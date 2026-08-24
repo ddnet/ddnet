@@ -9,6 +9,9 @@
 #include <game/gamecore.h>
 #include <game/race_state.h>
 
+template<typename TCharacter>
+class CCharacterPhysics;
+
 enum
 {
 	FAKETUNE_FREEZE = 1 << 0,
@@ -23,6 +26,7 @@ enum
 class CCharacter : public CEntity
 {
 	friend class CGameWorld;
+	friend class CCharacterPhysics<CCharacter>;
 
 public:
 	~CCharacter() override;
@@ -190,6 +194,8 @@ private:
 	int m_LastTuneZoneTick;
 
 	bool m_Interfering;
+
+	CTuningParams *CurrentTuning() { return GetTuning(GetOverriddenTuneZone()); }
 };
 
 #endif

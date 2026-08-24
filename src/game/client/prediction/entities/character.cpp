@@ -11,6 +11,7 @@
 
 #include <game/collision.h>
 #include <game/mapitems.h>
+#include <game/physics/character.h>
 
 // Character, "physical" player's part
 
@@ -49,45 +50,7 @@ void CCharacter::HandleJetpack()
 	if(m_NumInputs < 2)
 		return;
 
-	if(m_Core.m_ActiveWeapon < 0)
-		return;
-
-	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
-
-	bool FullAuto = false;
-	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
-		FullAuto = true;
-	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
-		FullAuto = true;
-
-	// check if we gonna fire
-	bool WillFire = false;
-	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
-		WillFire = true;
-
-	if(FullAuto && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
-		WillFire = true;
-
-	if(!WillFire)
-		return;
-
-	// check for ammo
-	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo || m_FreezeTime)
-	{
-		return;
-	}
-
-	switch(m_Core.m_ActiveWeapon)
-	{
-	case WEAPON_GUN:
-	{
-		if(m_Core.m_Jetpack)
-		{
-			float Strength = GetTuning(GetOverriddenTuneZone())->m_JetpackStrength;
-			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCid(), m_Core.m_ActiveWeapon);
-		}
-	}
-	}
+	CCharacterPhysics<CCharacter>::HandleJetpack(this);
 }
 
 void CCharacter::RemoveNinja()
@@ -188,14 +151,7 @@ void CCharacter::HandleNinja()
 
 void CCharacter::DoWeaponSwitch()
 {
-	// make sure we can switch
-	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1)
-		return;
-	if(m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
-		return;
-
-	// switch Weapon
-	SetWeapon(m_QueuedWeapon);
+	CCharacterPhysics<CCharacter>::DoWeaponSwitch(this);
 }
 
 void CCharacter::HandleWeaponSwitch()
@@ -203,49 +159,7 @@ void CCharacter::HandleWeaponSwitch()
 	if(m_NumInputs < 2)
 		return;
 
-	int WantedWeapon = m_Core.m_ActiveWeapon;
-	if(m_QueuedWeapon != -1)
-		WantedWeapon = m_QueuedWeapon;
-
-	bool Anything = false;
-	for(int i = 0; i < NUM_WEAPONS - 1; ++i)
-		if(m_Core.m_aWeapons[i].m_Got)
-			Anything = true;
-	if(!Anything)
-		return;
-	// select Weapon
-	int Next = CountInput(m_LatestPrevInput.m_NextWeapon, m_LatestInput.m_NextWeapon).m_Presses;
-	int Prev = CountInput(m_LatestPrevInput.m_PrevWeapon, m_LatestInput.m_PrevWeapon).m_Presses;
-
-	if(Next < 128) // make sure we only try sane stuff
-	{
-		while(Next) // Next Weapon selection
-		{
-			WantedWeapon = (WantedWeapon + 1) % NUM_WEAPONS;
-			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
-				Next--;
-		}
-	}
-
-	if(Prev < 128) // make sure we only try sane stuff
-	{
-		while(Prev) // Prev Weapon selection
-		{
-			WantedWeapon = (WantedWeapon - 1) < 0 ? NUM_WEAPONS - 1 : WantedWeapon - 1;
-			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
-				Prev--;
-		}
-	}
-
-	// Direct Weapon selection
-	if(m_LatestInput.m_WantedWeapon)
-		WantedWeapon = m_Input.m_WantedWeapon - 1;
-
-	// check for insane values
-	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_Core.m_aWeapons[WantedWeapon].m_Got)
-		m_QueuedWeapon = WantedWeapon;
-
-	DoWeaponSwitch();
+	CCharacterPhysics<CCharacter>::HandleWeaponSwitch(this);
 }
 
 void CCharacter::FireWeapon()
@@ -497,22 +411,7 @@ void CCharacter::FireWeapon()
 
 void CCharacter::HandleWeapons()
 {
-	//ninja
-	HandleNinja();
-	HandleJetpack();
-
-	if(m_PainSoundTimer > 0)
-		m_PainSoundTimer--;
-
-	// check reload timer
-	if(m_ReloadTimer)
-	{
-		m_ReloadTimer--;
-		return;
-	}
-
-	// fire Weapon, if wanted
-	FireWeapon();
+	CCharacterPhysics<CCharacter>::HandleWeapons(this);
 }
 
 void CCharacter::GiveNinja()
@@ -1214,34 +1113,12 @@ bool CCharacter::Unfreeze()
 
 void CCharacter::GiveWeapon(int Weapon, bool Remove)
 {
-	if(Weapon == WEAPON_NINJA)
-	{
-		if(Remove)
-			RemoveNinja();
-		else
-			GiveNinja();
-		return;
-	}
-
-	if(Remove)
-	{
-		if(GetActiveWeapon() == Weapon)
-			SetActiveWeapon(WEAPON_GUN);
-	}
-	else
-	{
-		m_Core.m_aWeapons[Weapon].m_Ammo = -1;
-	}
-
-	m_Core.m_aWeapons[Weapon].m_Got = !Remove;
+	CCharacterPhysics<CCharacter>::GiveWeapon(this, Weapon, Remove);
 }
 
 void CCharacter::GiveAllWeapons()
 {
-	for(int i = WEAPON_GUN; i < NUM_WEAPONS - 1; i++)
-	{
-		GiveWeapon(i);
-	}
+	CCharacterPhysics<CCharacter>::GiveAllWeapons(this);
 }
 
 void CCharacter::ResetVelocity()

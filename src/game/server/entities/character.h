@@ -13,6 +13,9 @@ class CGameWorld;
 class IAntibot;
 struct CAntibotCharacterData;
 
+template<typename TCharacter>
+class CCharacterPhysics;
+
 enum
 {
 	FAKETUNE_FREEZE = 1 << 0,
@@ -31,6 +34,7 @@ class CCharacter : public CEntity
 	// need to use core
 	friend class CSaveTee;
 	friend class CSaveHotReloadTee;
+	friend class CCharacterPhysics<CCharacter>;
 
 public:
 	CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput);
@@ -290,6 +294,8 @@ public:
 
 	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
 	CTuningParams *GetTuning(int Zone) { return &TuningList()[Zone]; }
+	CTuningParams *CurrentTuning() { return GetTuning(m_TuneZone); }
+	int GetCid() const;
 };
 
 #endif
