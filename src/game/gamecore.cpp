@@ -237,6 +237,37 @@ void CCharacterCore::ResetHook()
 	m_HookPos = m_Pos;
 }
 
+void CCharacterCore::HandleJumpRules()
+{
+	// following jump rules can be overridden by tiles, like Refill Jumps, Stopper and Wall Jump
+	if(m_Jumps == -1)
+	{
+		// The player has only one ground jump, so their feet are always dark
+		m_Jumped |= 2;
+	}
+	else if(m_Jumps == 0)
+	{
+		// The player has no jumps at all, so their feet are always dark
+		m_Jumped |= 2;
+	}
+	else if(m_Jumps == 1 && m_Jumped > 0)
+	{
+		// If the player has only one jump, each jump is the last one
+		m_Jumped |= 2;
+	}
+	else if(m_JumpedTotal < m_Jumps - 1 && m_Jumped > 1)
+	{
+		// The player has not yet used up all their jumps, so their feet remain light
+		m_Jumped = 1;
+	}
+
+	if((m_Super || m_EndlessJump) && m_Jumped > 1)
+	{
+		// Super players and players with infinite jumps always have light feet
+		m_Jumped = 1;
+	}
+}
+
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);

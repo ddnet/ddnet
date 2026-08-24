@@ -239,6 +239,7 @@ public:
 	void Reset();
 	void ReleaseHook();
 	void ResetHook();
+	void HandleJumpRules();
 	void TickDeferred();
 	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();

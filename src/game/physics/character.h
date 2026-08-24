@@ -3,11 +3,16 @@
 #ifndef GAME_PHYSICS_CHARACTER_H
 #define GAME_PHYSICS_CHARACTER_H
 
+#include <base/math.h>
 #include <base/vmath.h>
 
 #include <generated/protocol.h>
 
+#include <game/collision.h>
 #include <game/gamecore.h>
+#include <game/mapitems.h>
+
+#include <cmath>
 
 // Shared character weapon handling, used by the server character and the
 // client prediction character. TCharacter provides the state and the side
@@ -170,6 +175,119 @@ public:
 		{
 			pThis->GiveWeapon(i);
 		}
+	}
+
+	static void HandleSpeedupTiles(TCharacter *pThis, int Index)
+	{
+		if(!pThis->Collision()->IsSpeedup(Index))
+			return;
+
+		vec2 Direction, TempVel = pThis->m_Core.m_Vel;
+		int Force, Type, MaxSpeed = 0;
+		pThis->Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed, &Type);
+
+		if(Type == TILE_SPEED_BOOST_OLD)
+		{
+			float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
+			if(Force == 255 && MaxSpeed)
+			{
+				pThis->m_Core.m_Vel = Direction * (MaxSpeed / 5);
+			}
+			else
+			{
+				if(MaxSpeed > 0 && MaxSpeed < 5)
+					MaxSpeed = 5;
+				if(MaxSpeed > 0)
+				{
+					if(Direction.x > 0.0000001f)
+						SpeederAngle = -std::atan(Direction.y / Direction.x);
+					else if(Direction.x < 0.0000001f)
+						SpeederAngle = std::atan(Direction.y / Direction.x) + 2.0f * std::asin(1.0f);
+					else if(Direction.y > 0.0000001f)
+						SpeederAngle = std::asin(1.0f);
+					else
+						SpeederAngle = std::asin(-1.0f);
+
+					if(SpeederAngle < 0)
+						SpeederAngle = 4.0f * std::asin(1.0f) + SpeederAngle;
+
+					if(TempVel.x > 0.0000001f)
+						TeeAngle = -std::atan(TempVel.y / TempVel.x);
+					else if(TempVel.x < 0.0000001f)
+						TeeAngle = std::atan(TempVel.y / TempVel.x) + 2.0f * std::asin(1.0f);
+					else if(TempVel.y > 0.0000001f)
+						TeeAngle = std::asin(1.0f);
+					else
+						TeeAngle = std::asin(-1.0f);
+
+					if(TeeAngle < 0)
+						TeeAngle = 4.0f * std::asin(1.0f) + TeeAngle;
+
+					TeeSpeed = std::sqrt(std::pow(TempVel.x, 2) + std::pow(TempVel.y, 2));
+
+					DiffAngle = SpeederAngle - TeeAngle;
+					SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
+					if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+						TempVel += Direction * Force;
+					else if(absolute((int)SpeedLeft) > Force)
+						TempVel += Direction * -Force;
+					else
+						TempVel += Direction * SpeedLeft;
+				}
+				else
+				{
+					TempVel += Direction * Force;
+				}
+
+				pThis->m_Core.m_Vel = ClampVel(pThis->m_MoveRestrictions, TempVel);
+			}
+		}
+		else if(Type == TILE_SPEED_BOOST)
+		{
+			constexpr float MaxSpeedScale = 5.0f;
+			if(MaxSpeed == 0)
+			{
+				float MaxRampSpeed = pThis->CurrentTuning()->m_VelrampRange / (50 * log(std::max((float)pThis->CurrentTuning()->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = std::max(MaxRampSpeed, pThis->CurrentTuning()->m_VelrampStart / 50) * MaxSpeedScale;
+			}
+
+			// (signed) length of projection
+			float CurrentDirectionalSpeed = dot(Direction, pThis->m_Core.m_Vel);
+			float TempMaxSpeed = MaxSpeed / MaxSpeedScale;
+			if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
+				TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
+			else
+				TempVel += Direction * Force;
+
+			pThis->m_Core.m_Vel = ClampVel(pThis->m_MoveRestrictions, TempVel);
+		}
+	}
+
+	static void UpdateIsInFreeze(TCharacter *pThis)
+	{
+		// check if the tee is in any type of freeze
+		int Index = pThis->Collision()->GetPureMapIndex(pThis->m_Pos);
+		const int aTiles[] = {
+			pThis->Collision()->GetTileIndex(Index),
+			pThis->Collision()->GetFrontTileIndex(Index),
+			pThis->Collision()->GetSwitchType(Index)};
+		pThis->m_Core.m_IsInFreeze = false;
+		for(const int Tile : aTiles)
+		{
+			if(Tile == TILE_FREEZE || Tile == TILE_DFREEZE || Tile == TILE_LFREEZE || Tile == TILE_DEATH)
+			{
+				pThis->m_Core.m_IsInFreeze = true;
+				break;
+			}
+		}
+		pThis->m_Core.m_IsInFreeze |= (pThis->Collision()->GetCollisionAt(pThis->m_Pos.x + pThis->GetProximityRadius() / 3.f, pThis->m_Pos.y - pThis->GetProximityRadius() / 3.f) == TILE_DEATH ||
+					       pThis->Collision()->GetCollisionAt(pThis->m_Pos.x + pThis->GetProximityRadius() / 3.f, pThis->m_Pos.y + pThis->GetProximityRadius() / 3.f) == TILE_DEATH ||
+					       pThis->Collision()->GetCollisionAt(pThis->m_Pos.x - pThis->GetProximityRadius() / 3.f, pThis->m_Pos.y - pThis->GetProximityRadius() / 3.f) == TILE_DEATH ||
+					       pThis->Collision()->GetCollisionAt(pThis->m_Pos.x - pThis->GetProximityRadius() / 3.f, pThis->m_Pos.y + pThis->GetProximityRadius() / 3.f) == TILE_DEATH ||
+					       pThis->Collision()->GetFrontCollisionAt(pThis->m_Pos.x + pThis->GetProximityRadius() / 3.f, pThis->m_Pos.y - pThis->GetProximityRadius() / 3.f) == TILE_DEATH ||
+					       pThis->Collision()->GetFrontCollisionAt(pThis->m_Pos.x + pThis->GetProximityRadius() / 3.f, pThis->m_Pos.y + pThis->GetProximityRadius() / 3.f) == TILE_DEATH ||
+					       pThis->Collision()->GetFrontCollisionAt(pThis->m_Pos.x - pThis->GetProximityRadius() / 3.f, pThis->m_Pos.y - pThis->GetProximityRadius() / 3.f) == TILE_DEATH ||
+					       pThis->Collision()->GetFrontCollisionAt(pThis->m_Pos.x - pThis->GetProximityRadius() / 3.f, pThis->m_Pos.y + pThis->GetProximityRadius() / 3.f) == TILE_DEATH);
 	}
 };
 
