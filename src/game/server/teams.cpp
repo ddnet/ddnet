@@ -720,7 +720,7 @@ int CGameTeams::TeamForClient(int Team, int ClientId) const
 		return TEAM_SUPER;
 
 	// Client doesn't support this team, but we might have a legacy slot
-	if(m_aLegacyTeamMap[Team] < ClientNumTeams)
+	if(m_aLegacyTeamMap[Team] <= ClientNumTeams)
 		return m_aLegacyTeamMap[Team];
 	return TEAM_FLOCK;
 }

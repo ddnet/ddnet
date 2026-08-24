@@ -37,8 +37,12 @@ class CScoreboard : public CComponent
 
 	bool m_Active;
 
-	int m_ScoreboardPage = 0;
+	int m_ScoreboardPage;
+	int m_RedTeamScoreboardPage;
+	int m_BlueTeamScoreboardPage;
 	CButtonContainer m_ScoreboardPageButtonId;
+	CButtonContainer m_RedTeamScoreboardPageButtonId;
+	CButtonContainer m_BlueTeamScoreboardPageButtonId;
 
 	IGraphics::CTextureHandle m_DeadTeeTexture;
 

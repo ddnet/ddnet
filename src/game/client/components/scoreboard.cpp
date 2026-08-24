@@ -115,6 +115,8 @@ void CScoreboard::OnReset()
 	m_MouseUnlocked = false;
 	m_LastMousePos = std::nullopt;
 	m_ScoreboardPage = 0;
+	m_RedTeamScoreboardPage = 0;
+	m_BlueTeamScoreboardPage = 0;
 }
 
 void CScoreboard::ResetTexts()
@@ -1006,19 +1008,84 @@ void CScoreboard::OnRender()
 		RenderTitleBar(RedTitle, TEAM_RED, pRedTeamName == nullptr ? Localize("Red team") : pRedTeamName);
 		RenderTitleBar(BlueTitle, TEAM_BLUE, pBlueTeamName == nullptr ? Localize("Blue team") : pBlueTeamName);
 
-		auto RenderTeamScoreboard = [&](CUIRect TeamScoreboard, int Team, int TeamSize) {
-			if(TeamSize <= 64)
+		// Helper to render pagination button for a team
+		auto RenderTeamPageButton = [&](CUIRect ButtonArea, int Team) {
+			int *pPage = (Team == TEAM_RED) ? &m_RedTeamScoreboardPage : &m_BlueTeamScoreboardPage;
+			CButtonContainer *pButtonId = (Team == TEAM_RED) ? &m_RedTeamScoreboardPageButtonId : &m_BlueTeamScoreboardPageButtonId;
+			const int TeamSize = (Team == TEAM_RED) ? aTeamSize[TEAM_RED] : aTeamSize[TEAM_BLUE];
+			const int TeamPlayersPerPage = 128;
+			const int TeamNumPages = std::max(1, (TeamSize + TeamPlayersPerPage - 1) / TeamPlayersPerPage);
+			const int CurrentPage = *pPage;
+
+			char aPageLabel[64];
+			if(CurrentPage == 0)
+				str_format(aPageLabel, sizeof(aPageLabel), "⋅ %d more", std::max(0, TeamSize - TeamPlayersPerPage));
+			else if(CurrentPage == TeamNumPages - 1 && TeamNumPages - 1 == 1)
+				str_copy(aPageLabel, "⋅ Back", sizeof(aPageLabel));
+			else
 			{
-				RenderScoreboard(TeamScoreboard, Team, 0, TeamSize, RenderState);
+				str_format(aPageLabel, sizeof(aPageLabel), "⋅ %d/%d", CurrentPage, TeamNumPages - 1);
+				if(CurrentPage == TeamNumPages - 1)
+					str_append(aPageLabel, " | Back", sizeof(aPageLabel));
+			}
+
+			const float FontSize = 12.0f;
+			const int ButtonResult = Ui()->DoButtonLogic(pButtonId, 0, &ButtonArea, BUTTONFLAG_LEFT);
+			if(ButtonResult != 0)
+			{
+				*pPage = (*pPage + 1) % TeamNumPages;
+			}
+
+			if(Ui()->HotItem() == pButtonId)
+			{
+				ButtonArea.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 6.5f);
+			}
+
+			float TextWidth = TextRender()->TextWidth(FontSize, aPageLabel);
+			float TextX = ButtonArea.x + ButtonArea.w - TextWidth - 10.0f;
+			float TextY = ButtonArea.y + (ButtonArea.h - FontSize) / 2.0f;
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Ui()->HotItem() == pButtonId ? 1.0f : 0.5f);
+			TextRender()->Text(TextX, TextY, FontSize, aPageLabel, -1.0f);
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+		};
+
+		auto RenderTeamScoreboard = [&](CUIRect TeamScoreboard, int Team, int TeamSize) {
+			const int TeamPlayersPerPage = 128;
+			const int TeamNumPages = std::max(1, (TeamSize + TeamPlayersPerPage - 1) / TeamPlayersPerPage);
+			int *pPage = (Team == TEAM_RED) ? &m_RedTeamScoreboardPage : &m_BlueTeamScoreboardPage;
+
+			// Clamp page to valid range
+			*pPage = std::clamp(*pPage, 0, TeamNumPages - 1);
+
+			const int PageStart = *pPage * TeamPlayersPerPage;
+			const int PageEnd = std::min(PageStart + TeamPlayersPerPage, TeamSize);
+			const int PlayersOnPage = PageEnd - PageStart;
+
+			CUIRect PlayerArea = TeamScoreboard;
+			CUIRect ButtonArea;
+			if(TeamNumPages > 1)
+			{
+				PlayerArea.HSplitBottom(13.0f, &PlayerArea, &ButtonArea);
+			}
+
+			if(PlayersOnPage <= 64)
+			{
+				RenderScoreboard(PlayerArea, Team, PageStart, PageEnd, RenderState);
 			}
 			else
 			{
 				const int FirstColumnSize = 64;
 				CUIRect LeftColumn, RightColumn;
-				TeamScoreboard.VSplitMid(&LeftColumn, &RightColumn, 2.5f);
+				PlayerArea.VSplitMid(&LeftColumn, &RightColumn, 2.5f);
 
-				RenderScoreboard(LeftColumn, Team, 0, FirstColumnSize, RenderState, FirstColumnSize);
-				RenderScoreboard(RightColumn, Team, FirstColumnSize, TeamSize, RenderState, FirstColumnSize);
+				const int SecondColumnStart = PageStart + FirstColumnSize;
+				RenderScoreboard(LeftColumn, Team, PageStart, SecondColumnStart, RenderState, FirstColumnSize);
+				RenderScoreboard(RightColumn, Team, SecondColumnStart, PageEnd, RenderState, FirstColumnSize);
+			}
+
+			if(TeamNumPages > 1)
+			{
+				RenderTeamPageButton(ButtonArea, Team);
 			}
 		};
 
