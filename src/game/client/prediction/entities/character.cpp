@@ -41,11 +41,7 @@ void CCharacter::SetSuper(bool Super)
 
 bool CCharacter::IsGrounded()
 {
-	if(Collision()->IsOnGround(m_Pos, GetProximityRadius()))
-		return true;
-
-	int MoveRestrictionsBelow = Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() / 2 + 4), 0.0f);
-	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
+	return IsCharacterGrounded(Collision(), m_Pos, GetProximityRadius());
 }
 
 void CCharacter::HandleJetpack()

@@ -215,6 +215,15 @@ void CCharacterCore::Reset()
 	m_Input.m_TargetY = -1;
 }
 
+bool IsCharacterGrounded(CCollision *pCollision, vec2 Pos, float ProximityRadius)
+{
+	if(pCollision->IsOnGround(Pos, ProximityRadius))
+		return true;
+
+	int MoveRestrictionsBelow = pCollision->GetMoveRestrictions(Pos + vec2(0, ProximityRadius / 2 + 4), 0.0f);
+	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
+}
+
 void CCharacterCore::ReleaseHook()
 {
 	SetHookedPlayer(-1);

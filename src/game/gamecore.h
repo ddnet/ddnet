@@ -110,6 +110,8 @@ inline T SaturatedAdd(T Min, T Max, T Current, T Modifier)
 
 float VelocityRamp(float Value, float Start, float Range, float Curvature);
 
+bool IsCharacterGrounded(CCollision *pCollision, vec2 Pos, float ProximityRadius);
+
 // hooking stuff
 enum
 {
