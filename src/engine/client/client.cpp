@@ -3509,6 +3509,23 @@ void CClient::Run()
 			}
 			Slept = true;
 		}
+		else if(g_Config.m_GfxRefreshRate
+#if defined(CONF_VIDEORECORDER)
+			&& !IVideo::Current()
+#endif
+		)
+		{
+			int64_t WaitTime = LastRenderTime + time_freq() / (int64_t)g_Config.m_GfxRefreshRate - Now.count();
+			if(State() == IClient::STATE_ONLINE)
+			{
+				const int64_t TickLength = time_freq() / GameTickSpeed();
+				WaitTime = std::min(WaitTime, TickLength - m_PredictedTime.Get(Now.count()) % TickLength);
+			}
+			if(WaitTime > 0)
+			{
+				SDL_WaitEventTimeout(nullptr, WaitTime * 1000 / time_freq());
+			}
+		}
 		if(Slept)
 		{
 			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
