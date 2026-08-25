@@ -55,7 +55,7 @@ jobs:
           workaround-issue10203-run-after-configure: rm libwinpthread-1.dll
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: recursive
 
@@ -148,7 +148,7 @@ jobs:
         cache: true
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
+      uses: Swatinem/rust-cache@v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
@@ -237,7 +237,7 @@ jobs:
 
     - name: Upload Codecov report (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v7
       with:
         flags: unittests
 
@@ -283,7 +283,7 @@ jobs:
     - name: Upload integration test results
       id: integration_test_artifact_upload
       if: steps.integration_test.outcome == 'failure' || steps.integration_test_valgrind.outcome == 'failure'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ddnet-${{ matrix.name }}-integration-test-results
         path: headless/integration_*
@@ -313,7 +313,7 @@ jobs:
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v7
       with:
         flags: integrationtests
 
@@ -325,7 +325,7 @@ jobs:
         mv ${{ matrix.package-file }} artifacts
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ddnet-${{ matrix.name }}
         path: release/artifacts
@@ -335,12 +335,12 @@ jobs:
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: recursive
 
     - name: Validate Gradle Wrapper
-      uses: gradle/actions/wrapper-validation@v4
+      uses: gradle/actions/wrapper-validation@v5
 
     - name: Prepare Linux
       run: |
@@ -364,7 +364,7 @@ jobs:
         cache: true
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
+      uses: Swatinem/rust-cache@v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
@@ -387,7 +387,7 @@ jobs:
         mv build-android/DDNet.apk artifacts
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ddnet-android
         path: artifacts
@@ -397,7 +397,7 @@ jobs:
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: recursive
 
@@ -414,7 +414,7 @@ jobs:
         ./emsdk activate 4.0.22
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
+      uses: Swatinem/rust-cache@v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
@@ -454,7 +454,7 @@ jobs:
         mv build-emscripten-release/*-Emscripten.tar.xz artifacts
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ddnet-emscripten
         path: artifacts
@@ -464,7 +464,7 @@ jobs:
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: recursive
 
@@ -476,7 +476,7 @@ jobs:
         rustup target add aarch64-apple-ios-sim
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
+      uses: Swatinem/rust-cache@v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: ./
@@ -510,7 +510,7 @@ jobs:
         zip -qry artifacts/DDNet.ipa Payload
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ddnet-ios
         path: artifacts
