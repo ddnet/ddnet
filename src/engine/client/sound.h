@@ -8,6 +8,7 @@
 #include <engine/sound.h>
 
 #include <SDL_audio.h>
+#include <SDL_events.h>
 
 #include <atomic>
 
@@ -69,7 +70,10 @@ class CSound : public IEngineSound
 	};
 
 	bool m_SoundEnabled = false;
+	SDL_AudioSpec m_AudioSpec = {};
 	SDL_AudioDeviceID m_Device = 0;
+	bool m_DevicePaused = false;
+	std::atomic<bool> m_DeviceChanged = false;
 	CLock m_SoundLock;
 
 	CSample m_aSamples[NUM_SAMPLES] GUARDED_BY(m_SoundLock) = {{0}};
@@ -91,9 +95,19 @@ class CSound : public IEngineSound
 	IStorage *m_pStorage = nullptr;
 
 	int *m_pMixBuffer = nullptr;
+	int64_t m_PlaybackTime = 0;
 
 	CSample *AllocSample() REQUIRES(!m_SoundLock);
 	void RateConvert(CSample &Sample) const;
+
+	static int SDLCALL HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent);
+	bool OpenDevice(bool AllowFrequencyChange);
+	void CloseDevice();
+	void UpdateDevice() REQUIRES(!m_SoundLock);
+	bool HasAudioOutput() const;
+	// Returns how many frames the voice advanced, looping or freeing it at the end of its sample
+	unsigned AdvanceVoice(CVoice &Voice, unsigned Frames) REQUIRES(m_SoundLock);
+	void AdvancePlayback() REQUIRES(!m_SoundLock);
 
 	// pContextName used for error
 	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize, const char *pContextName) const;
@@ -103,7 +117,7 @@ class CSound : public IEngineSound
 
 public:
 	int Init() override REQUIRES(!m_SoundLock);
-	int Update() override;
+	int Update() override REQUIRES(!m_SoundLock);
 	void Shutdown() override REQUIRES(!m_SoundLock);
 
 	bool IsSoundEnabled() override { return m_SoundEnabled; }
