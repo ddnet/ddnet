@@ -244,7 +244,7 @@ mod ffi {
         /// ```
         pub fn NumArguments(self: &IConsole_IResult) -> i32;
 
-        /// Get the value of the sole victim (`v`) parameter.
+        /// Get the value of the victim (`v`) parameter with the given index.
         ///
         /// This is mostly important for commands that have optional parameters
         /// and thus support variable numbers of arguments.
@@ -272,11 +272,11 @@ mod ffi {
         /// # unsafe { executed = *user.cast_mut::<u32>(); *user.cast_mut::<u32>() += 1; }
         /// let result: &IConsole_IResult /* = `command 42` */;
         /// # result = result_param;
-        /// assert_eq!(result.GetVictim(), 42);
+        /// assert_eq!(result.GetVictim(0), 42);
         /// # }
         /// # assert!(executed == 1);
         /// ```
-        pub fn GetVictim(self: &IConsole_IResult) -> i32;
+        pub fn GetVictim(self: &IConsole_IResult, Slot: u32) -> i32;
 
         /// Console interface, consists of logging output and command execution.
         ///

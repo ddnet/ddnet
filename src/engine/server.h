@@ -309,6 +309,11 @@ public:
 		return true;
 	}
 
+	bool ClientUsesRealClientIds(int ClientId) const
+	{
+		return ClientId < 0 || GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS;
+	}
+
 	virtual bool WouldClientNameChange(int ClientId, const char *pNameRequest) = 0;
 	virtual bool WouldClientClanChange(int ClientId, const char *pClanRequest) = 0;
 	virtual void SetClientName(int ClientId, const char *pName) = 0;

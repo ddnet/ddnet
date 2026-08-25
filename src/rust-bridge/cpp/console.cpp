@@ -124,9 +124,9 @@ void cxxbridge1$194$IConsole_IResult$GetColor(::IConsole_IResult const &self, ::
   return (self.*NumArguments$)();
 }
 
-::std::int32_t cxxbridge1$194$IConsole_IResult$GetVictim(::IConsole_IResult const &self) noexcept {
-  ::std::int32_t (::IConsole_IResult::*GetVictim$)() const = &::IConsole_IResult::GetVictim;
-  return (self.*GetVictim$)();
+::std::int32_t cxxbridge1$194$IConsole_IResult$GetVictim(::IConsole_IResult const &self, ::std::uint32_t Slot) noexcept {
+  ::std::int32_t (::IConsole_IResult::*GetVictim$)(::std::uint32_t) const = &::IConsole_IResult::GetVictim;
+  return (self.*GetVictim$)(Slot);
 }
 
 void cxxbridge1$194$IConsole$ExecuteLine(::IConsole &self, ::StrRef *pStr, ::std::int32_t ClientId, bool InterpretSemicolons) noexcept {
