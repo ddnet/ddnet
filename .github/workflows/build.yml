@@ -55,7 +55,7 @@ jobs:
           workaround-issue10203-run-after-configure: rm libwinpthread-1.dll
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         submodules: recursive
 
@@ -142,13 +142,13 @@ jobs:
         rustup set default-host x86_64-pc-windows-gnu
 
     - name: Install Vulkan SDK
-      uses: humbletim/install-vulkan-sdk@v1.2
+      uses: humbletim/install-vulkan-sdk@30ba978f977e81b72d091fc8888feb1fb26f9aff # v1.2
       with:
         version: 1.3.296.0
         cache: true
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2.9.2
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
@@ -237,7 +237,7 @@ jobs:
 
     - name: Upload Codecov report (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v7
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       with:
         flags: unittests
 
@@ -283,7 +283,7 @@ jobs:
     - name: Upload integration test results
       id: integration_test_artifact_upload
       if: steps.integration_test.outcome == 'failure' || steps.integration_test_valgrind.outcome == 'failure'
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: ddnet-${{ matrix.name }}-integration-test-results
         path: headless/integration_*
@@ -313,7 +313,7 @@ jobs:
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v7
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       with:
         flags: integrationtests
 
@@ -325,7 +325,7 @@ jobs:
         mv ${{ matrix.package-file }} artifacts
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: ddnet-${{ matrix.name }}
         path: release/artifacts
@@ -335,12 +335,12 @@ jobs:
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         submodules: recursive
 
     - name: Validate Gradle Wrapper
-      uses: gradle/actions/wrapper-validation@v5
+      uses: gradle/actions/wrapper-validation@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
 
     - name: Prepare Linux
       run: |
@@ -358,13 +358,13 @@ jobs:
         scripts/android/download_android_sdk.sh /home/runner
 
     - name: Install Vulkan SDK
-      uses: humbletim/install-vulkan-sdk@v1.2
+      uses: humbletim/install-vulkan-sdk@30ba978f977e81b72d091fc8888feb1fb26f9aff # v1.2
       with:
         version: 1.3.296.0
         cache: true
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2.9.2
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
@@ -387,7 +387,7 @@ jobs:
         mv build-android/DDNet.apk artifacts
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: ddnet-android
         path: artifacts
@@ -397,7 +397,7 @@ jobs:
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         submodules: recursive
 
@@ -414,7 +414,7 @@ jobs:
         ./emsdk activate 4.0.22
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2.9.2
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
@@ -454,7 +454,7 @@ jobs:
         mv build-emscripten-release/*-Emscripten.tar.xz artifacts
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: ddnet-emscripten
         path: artifacts
@@ -464,7 +464,7 @@ jobs:
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         submodules: recursive
 
@@ -476,7 +476,7 @@ jobs:
         rustup target add aarch64-apple-ios-sim
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2.9.2
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: ./
@@ -510,7 +510,7 @@ jobs:
         zip -qry artifacts/DDNet.ipa Payload
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: ddnet-ios
         path: artifacts

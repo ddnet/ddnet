@@ -21,7 +21,7 @@ jobs:
       LSAN_OPTIONS: suppressions=../lsan.supp
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         submodules: recursive
 
@@ -31,13 +31,13 @@ jobs:
         sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libglew-dev -y
 
     - name: Install Vulkan SDK
-      uses: humbletim/install-vulkan-sdk@v1.2
+      uses: humbletim/install-vulkan-sdk@30ba978f977e81b72d091fc8888feb1fb26f9aff # v1.2
       with:
         version: 1.3.296.0
         cache: true
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2.9.2
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
@@ -140,7 +140,7 @@ jobs:
     - name: Upload integration test results
       id: integration_test_artifact_upload
       if: steps.integration_test.outcome == 'failure'
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: ddnet-clang-sanitizer-integration-test-results
         path: clang-sanitizer/integration_*

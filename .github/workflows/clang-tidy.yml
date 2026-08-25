@@ -18,7 +18,7 @@ jobs:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         submodules: recursive
 
@@ -46,13 +46,13 @@ jobs:
           -y
 
     - name: Install Vulkan SDK
-      uses: humbletim/install-vulkan-sdk@v1.2
+      uses: humbletim/install-vulkan-sdk@30ba978f977e81b72d091fc8888feb1fb26f9aff # v1.2
       with:
         version: 1.3.296.0
         cache: true
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2.9.2
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       with:
           cache-bin: false # WORKAROUND(https://github.com/Swatinem/rust-cache/issues/341)
           workspaces: |
