@@ -31,6 +31,8 @@ extend-ignore-re = [
 	'cl_nameplates_ids_seperate_line',
 	'LWS_.*_WRITEABLE',
 	'0x510E527FUL',
+	# x264 names its generated configuration config.mak
+	'config\.mak',
 	'I\*\*nteger',
 	's\*\*tring',
 ]
