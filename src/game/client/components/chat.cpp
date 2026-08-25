@@ -1350,6 +1350,9 @@ void CChat::SendChat(int Team, const char *pLine)
 		return;
 
 	m_LastChatSend = time();
+	if(str_comp_nocase(pLine, "/pause") == 0 || str_startswith_nocase(pLine, "/pause ") ||
+		str_comp_nocase(pLine, "/spec") == 0 || str_startswith_nocase(pLine, "/spec "))
+		GameClient()->m_Controls.OnSpectateRequested();
 
 	if(GameClient()->Client()->IsSixup())
 	{

@@ -24,16 +24,30 @@
 CControls::CControls()
 {
 	mem_zero(&m_aLastData, sizeof(m_aLastData));
+	mem_zero(&m_aLastSentData, sizeof(m_aLastSentData));
+	mem_zero(&m_aLastSentInputDirectionLeft, sizeof(m_aLastSentInputDirectionLeft));
+	mem_zero(&m_aLastSentInputDirectionRight, sizeof(m_aLastSentInputDirectionRight));
+	mem_zero(&m_SpecInputState, sizeof(m_SpecInputState));
 	std::fill(std::begin(m_aMousePos), std::end(m_aMousePos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aMousePosOnAction), std::end(m_aMousePosOnAction), vec2(0.0f, 0.0f));
+	std::fill(std::begin(m_aLastSentMousePos), std::end(m_aLastSentMousePos), vec2(0.0f, 0.0f));
+	std::fill(std::begin(m_aLastSentMousePosOnAction), std::end(m_aLastSentMousePosOnAction), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aTargetPos), std::end(m_aTargetPos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aMouseInputType), std::end(m_aMouseInputType), EMouseInputType::ABSOLUTE);
+	std::fill(std::begin(m_aLastSentMouseInputType), std::end(m_aLastSentMouseInputType), EMouseInputType::ABSOLUTE);
 }
 
 void CControls::OnReset()
 {
 	ResetInput(0);
 	ResetInput(1);
+	mem_zero(&m_aLastSentData, sizeof(m_aLastSentData));
+	mem_zero(&m_aLastSentInputDirectionLeft, sizeof(m_aLastSentInputDirectionLeft));
+	mem_zero(&m_aLastSentInputDirectionRight, sizeof(m_aLastSentInputDirectionRight));
+	std::fill(std::begin(m_aLastSentMousePos), std::end(m_aLastSentMousePos), vec2(0.0f, 0.0f));
+	std::fill(std::begin(m_aLastSentMousePosOnAction), std::end(m_aLastSentMousePosOnAction), vec2(0.0f, 0.0f));
+	std::fill(std::begin(m_aLastSentMouseInputType), std::end(m_aLastSentMouseInputType), EMouseInputType::ABSOLUTE);
+	m_SpecInputState.m_Pending = false;
 
 	for(int &AmmoCount : m_aAmmoCount)
 		AmmoCount = 0;
@@ -53,6 +67,45 @@ void CControls::ResetInput(int Dummy)
 
 	m_aInputDirectionLeft[Dummy] = 0;
 	m_aInputDirectionRight[Dummy] = 0;
+}
+
+void CControls::OnSpectateRequested()
+{
+	const int Dummy = g_Config.m_ClDummy;
+	const int LocalClientId = GameClient()->m_Snap.m_LocalClientId;
+	if(m_SpecInputState.m_Pending || LocalClientId < 0 ||
+		GameClient()->m_Snap.m_SpecInfo.m_Active)
+		return;
+
+	m_SpecInputState.m_Pending = true;
+	m_SpecInputState.m_Dummy = Dummy;
+	m_SpecInputState.m_InputData = m_aLastSentData[Dummy];
+	m_SpecInputState.m_LastData = m_aLastSentData[Dummy];
+	m_SpecInputState.m_InputDirectionLeft = m_aLastSentInputDirectionLeft[Dummy];
+	m_SpecInputState.m_InputDirectionRight = m_aLastSentInputDirectionRight[Dummy];
+	m_SpecInputState.m_MousePos = m_aLastSentMousePos[Dummy];
+	m_SpecInputState.m_MousePosOnAction = m_aLastSentMousePosOnAction[Dummy];
+	m_SpecInputState.m_MouseInputType = m_aLastSentMouseInputType[Dummy];
+}
+
+void CControls::OnSpectateReceived()
+{
+	if(!m_SpecInputState.m_Pending)
+		return;
+
+	const int LocalClientId = GameClient()->m_Snap.m_LocalClientId;
+	if(LocalClientId < 0 || !GameClient()->m_Snap.m_SpecInfo.m_Active)
+		return;
+
+	const int Dummy = m_SpecInputState.m_Dummy;
+	m_aInputData[Dummy] = m_SpecInputState.m_InputData;
+	m_aLastData[Dummy] = m_SpecInputState.m_LastData;
+	m_aInputDirectionLeft[Dummy] = m_SpecInputState.m_InputDirectionLeft;
+	m_aInputDirectionRight[Dummy] = m_SpecInputState.m_InputDirectionRight;
+	m_aMousePos[Dummy] = m_SpecInputState.m_MousePos;
+	m_aMousePosOnAction[Dummy] = m_SpecInputState.m_MousePosOnAction;
+	m_aMouseInputType[Dummy] = m_SpecInputState.m_MouseInputType;
+	m_SpecInputState.m_Pending = false;
 }
 
 void CControls::OnPlayerDeath()
@@ -335,6 +388,12 @@ int CControls::SnapInput(int *pData)
 		return 0;
 
 	m_LastSendTime = time_get();
+	m_aLastSentData[g_Config.m_ClDummy] = m_aInputData[g_Config.m_ClDummy];
+	m_aLastSentInputDirectionLeft[g_Config.m_ClDummy] = m_aInputDirectionLeft[g_Config.m_ClDummy];
+	m_aLastSentInputDirectionRight[g_Config.m_ClDummy] = m_aInputDirectionRight[g_Config.m_ClDummy];
+	m_aLastSentMousePos[g_Config.m_ClDummy] = vec2(m_aInputData[g_Config.m_ClDummy].m_TargetX, m_aInputData[g_Config.m_ClDummy].m_TargetY);
+	m_aLastSentMousePosOnAction[g_Config.m_ClDummy] = m_aMousePosOnAction[g_Config.m_ClDummy];
+	m_aLastSentMouseInputType[g_Config.m_ClDummy] = m_aMouseInputType[g_Config.m_ClDummy];
 	mem_copy(pData, &m_aInputData[g_Config.m_ClDummy], sizeof(m_aInputData[0]));
 	return sizeof(m_aInputData[0]);
 }

@@ -2505,6 +2505,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	SnapCollectEntities(); // creates a collection that associates EntityEx snap items with the entities they belong to
 
 	UpdateLocalTuning();
+	m_Controls.OnSpectateReceived();
 	m_IsDummySwapping = 0;
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		UpdatePrediction();
