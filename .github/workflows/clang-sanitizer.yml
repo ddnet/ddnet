@@ -11,6 +11,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' && !startsWith(github.ref, 'refs/tags/') }}
 
+permissions:
+  contents: read
+
 jobs:
   check-clang-san:
     runs-on: ubuntu-latest
@@ -24,6 +27,7 @@ jobs:
       uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         submodules: recursive
+        persist-credentials: false
 
     - name: Prepare Linux
       run: |
@@ -149,13 +153,15 @@ jobs:
     - name: Summarize integration test results
       if: steps.integration_test.outcome == 'failure'
       shell: bash
+      env:
+        ARTIFACT_URL: ${{ steps.integration_test_artifact_upload.outputs.artifact-url }}
       run: |
         echo -e "\033[31mFAILED: Integration test failed. Refer to the workflow logs and uploaded artifacts in the steps above for details.\033[m"
         echo "### Integration test failed" >> $GITHUB_STEP_SUMMARY
         echo >> $GITHUB_STEP_SUMMARY
         echo "See summary below. Refer to the workflow logs and uploaded artifacts for details." >> $GITHUB_STEP_SUMMARY
         echo >> $GITHUB_STEP_SUMMARY
-        echo "Artifact URL: ${{ steps.integration_test_artifact_upload.outputs.artifact-url }}" >> $GITHUB_STEP_SUMMARY
+        echo "Artifact URL: ${ARTIFACT_URL}" >> $GITHUB_STEP_SUMMARY
         for integration_dir in clang-sanitizer/integration_*; do
           echo >> $GITHUB_STEP_SUMMARY
           echo "<details><summary>Test $(basename "$integration_dir")</summary>" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,6 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Tags are mutable, so actions must be pinned to a commit hash
+        "*": hash-pin

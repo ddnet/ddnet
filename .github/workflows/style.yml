@@ -11,6 +11,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' && !startsWith(github.ref, 'refs/tags/') }}
 
+permissions:
+  contents: read
+
 jobs:
   check-style:
     runs-on: ubuntu-latest
@@ -21,13 +24,14 @@ jobs:
       uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       with:
         submodules: recursive
+        persist-credentials: false
 
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
         sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake graphviz ninja-build python3-clang -y
         rustup default stable
-        pip3 install "ruff>=0.16,<0.17"
+        pip3 install "ruff>=0.16,<0.17" "zizmor>=1.29,<1.30"
 
     - name: Cache dependencies
       id: cache-dependencies
@@ -100,6 +104,9 @@ jobs:
       run: |
         ruff --version
         ruff check
+
+    - name: Check GitHub Actions (zizmor)
+      run: zizmor --offline .github/workflows/
 
     - name: Check Emscripten HTML style
       run: |
