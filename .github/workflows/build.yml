@@ -23,30 +23,30 @@ jobs:
         include:
         - name: ubuntu-latest-fancy
           os: ubuntu-latest
-          cmake-args: -G Ninja
+          cmake-args: -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
         - name: ubuntu-22.04
           os: ubuntu-22.04
           cmake-path: /usr/bin/
-          cmake-args: -G "Unix Makefiles" -DTEST_MYSQL=ON
+          cmake-args: -G "Unix Makefiles" -DTEST_MYSQL=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake-init-env: CXXFLAGS=-Werror
           gtest-env: GTEST_FILTER=-*SQLite*
           package-file: "*-linux_x86_64.tar.xz"
         - name: macOS-latest
           os: macOS-latest
-          cmake-args: -G Ninja
+          cmake-args: -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-macos.dmg"
         - name: windows-latest
           os: windows-latest
-          cmake-args: -A x64 -DEXCEPTION_HANDLING=ON -DVULKAN=ON
+          cmake-args: -G Ninja -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DEXCEPTION_HANDLING=ON -DVULKAN=ON -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
           executable-suffix: .exe
         - name: windows-latest-mingw
           os: windows-latest
-          cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar -DVULKAN=ON
+          cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar -DVULKAN=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake-init-env: CXXFLAGS=-Werror LDFLAGS=-Werror
           package-file: "*-win64.zip"
           executable-suffix: .exe
@@ -155,6 +155,27 @@ jobs:
               src/mastersrv
               src/masterping
               ./
+
+    - name: Cache compiler output (ccache)
+      if: matrix.name != 'windows-latest'
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.name }}
+        save: ${{ github.event_name == 'push' }}
+        max-size: 1G
+
+    - name: Cache compiler output (sccache)
+      if: matrix.name == 'windows-latest'
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        variant: sccache
+        key: ${{ matrix.name }}
+        save: ${{ github.event_name == 'push' }}
+        max-size: 1G
+
+    - name: Set up MSVC environment
+      if: matrix.name == 'windows-latest'
+      uses: ilammy/msvc-dev-cmd@v1
 
     - name: Build mastersrv
       if: ${{ !contains(matrix.os, 'ubuntu-22.04') }}
@@ -372,10 +393,19 @@ jobs:
               src/masterping
               ./
 
+    - name: Cache compiler output (ccache)
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: android
+        save: ${{ github.event_name == 'push' }}
+        max-size: 1G
+
     - name: Build Android app
       env:
         TW_KEY_NAME: /home/runner/DDNet.jks
         TW_KEY_ALIAS: DDNet-Key
+        CMAKE_C_COMPILER_LAUNCHER: ccache
+        CMAKE_CXX_COMPILER_LAUNCHER: ccache
       run: |
         export TW_KEY_PW="$(openssl rand -base64 32)"
         keytool -genkey -v -keystore "$TW_KEY_NAME" -keyalg RSA -keysize 2048 -validity 10000 -alias "$TW_KEY_ALIAS" -storepass "$TW_KEY_PW" -dname "CN=DDNet CI, OU=DDNet, O=DDNet"
@@ -422,11 +452,18 @@ jobs:
               src/masterping
               ./
 
+    - name: Cache compiler output (ccache)
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: emscripten
+        save: ${{ github.event_name == 'push' }}
+        max-size: 500M
+
     - name: Build headless Emscripten client in debug mode
       run: |
         export PATH=/home/runner/cmake/bin:$PATH
         source emsdk/emsdk_env.sh
-        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-headless -DCMAKE_BUILD_TYPE=Debug -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DHEADLESS_CLIENT=ON -DPREFER_BUNDLED_LIBS=ON
+        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-headless -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DHEADLESS_CLIENT=ON -DPREFER_BUNDLED_LIBS=ON
         cmake --build build-emscripten-headless --target game-client -j$(nproc)
 
     - name: Test headless Emscripten client
@@ -447,7 +484,7 @@ jobs:
         export PATH=/home/runner/cmake/bin:$PATH
         source emsdk/emsdk_env.sh
         # -G "Unix Makefiles" required due to https://gitlab.kitware.com/cmake/cmake/-/issues/16395
-        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-release -DCMAKE_BUILD_TYPE=Release -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON
+        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-release -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON
         cmake --build build-emscripten-release --target game-client -j$(nproc)
         cmake --build build-emscripten-release --target package_default
         mkdir artifacts

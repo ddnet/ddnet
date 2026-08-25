@@ -68,15 +68,40 @@ jobs:
         chmod +x llvm.sh
         sudo ./llvm.sh 20 all
 
+    - name: Cache compiler output (ccache)
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: clang-tidy
+        save: ${{ github.event_name == 'push' }}
+        max-size: 1G
+
+    - name: Install ctcache
+      run: |
+        git clone https://github.com/matus-chochlik/ctcache /home/runner/ctcache
+        git -C /home/runner/ctcache checkout 0c7fee26e09ae8a393ed7d56164102da118ab23a
+
+    - name: Restore clang-tidy result cache (ctcache)
+      uses: actions/cache/restore@v4
+      with:
+        path: /home/runner/.cache/ctcache
+        key: ctcache-${{ github.run_id }}
+        restore-keys: ctcache-
+
     - name: Build with clang-tidy
+      env:
+        CTCACHE_LOCAL: "1"
+        CTCACHE_DIR: /home/runner/.cache/ctcache
+        CTCACHE_CLANG_TIDY: /usr/bin/clang-tidy-20
       run: |
         mkdir clang-tidy
         cd clang-tidy
         cmake -G Ninja \
           -DCMAKE_CXX_COMPILER=clang++-20 \
           -DCMAKE_C_COMPILER=clang-20 \
-          -DCMAKE_CXX_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
-          -DCMAKE_C_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_CLANG_TIDY="/home/runner/ctcache/clang-tidy;-warnings-as-errors=*" \
+          -DCMAKE_C_CLANG_TIDY="/home/runner/ctcache/clang-tidy;-warnings-as-errors=*" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DANTIBOT=ON \
           -DAUTOUPDATE=ON \
@@ -90,3 +115,16 @@ jobs:
           -DWEBSOCKETS=ON \
           -Werror=dev ..
         cmake --build . --config Debug --target everything testrunner -- -k 0
+
+    - name: Show clang-tidy cache statistics
+      run: python3 /home/runner/ctcache/src/ctcache/clang_tidy_cache.py --show-stats
+      env:
+        CTCACHE_LOCAL: "1"
+        CTCACHE_DIR: /home/runner/.cache/ctcache
+
+    - name: Save clang-tidy result cache (ctcache)
+      if: github.event_name == 'push'
+      uses: actions/cache/save@v4
+      with:
+        path: /home/runner/.cache/ctcache
+        key: ctcache-${{ github.run_id }}

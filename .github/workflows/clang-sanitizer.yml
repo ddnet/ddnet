@@ -45,6 +45,13 @@ jobs:
               src/masterping
               ./
 
+    - name: Cache compiler output (ccache)
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: clang-sanitizer
+        save: ${{ github.event_name == 'push' }}
+        max-size: 500M
+
     - name: Build with ASan and UBSan
       run: |
         mkdir clang-sanitizer
@@ -54,7 +61,7 @@ jobs:
         SAN_FLAGS="-fsanitize=address,undefined,leak -fsanitize-recover=all -fno-omit-frame-pointer -fno-common"
         export CXXFLAGS="$SAN_FLAGS"
         export CFLAGS="$SAN_FLAGS"
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON ..
         cmake --build . --config Debug --target everything
 
     - name: Run server and headless client with ASan and UBSan
