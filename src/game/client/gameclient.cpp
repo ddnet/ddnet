@@ -1121,7 +1121,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 	if(Dummy)
 	{
-		if(MsgId == NETMSGTYPE_SV_CHAT && m_aLocalIds[0] >= 0 && m_aLocalIds[1] >= 0)
+		if(MsgId == NETMSGTYPE_SV_READYTOENTER)
+		{
+			Client()->EnterGame(Conn);
+		}
+		else if(MsgId == NETMSGTYPE_SV_CHAT && m_aLocalIds[0] >= 0 && m_aLocalIds[1] >= 0)
 		{
 			CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
