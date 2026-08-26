@@ -202,6 +202,7 @@ public:
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionId;
 		int64_t m_RedirectDropTime;
+		bool m_Rejoining;
 
 		int m_aIdMap[LEGACY_MAX_CLIENTS];
 		int m_aReverseIdMap[MAX_CLIENTS];
@@ -345,7 +346,7 @@ public:
 	static int NewClientNoAuthCallback(int ClientId, void *pUser);
 	static int DelClientCallback(int ClientId, const char *pReason, void *pUser);
 
-	static int ClientRejoinCallback(int ClientId, void *pUser);
+	static int ClientRejoinCallback(int ClientId, void *pUser, bool Sixup, bool VanillaAuth);
 
 	void SendRconType(int ClientId, bool UsernameReq);
 	void SendCapabilities(int ClientId);
