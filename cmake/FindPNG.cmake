@@ -1,5 +1,13 @@
+if(NOT CMAKE_CROSSCOMPILING)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_PNG libpng)
+endif()
+
 if(NOT PREFER_BUNDLED_LIBS)
   set(CMAKE_MODULE_PATH ${ORIGINAL_CMAKE_MODULE_PATH})
+  if(PC_PNG_PREFIX AND NOT PNG_ROOT)
+    set(PNG_ROOT ${PC_PNG_PREFIX})
+  endif()
   find_package(PNG)
   set(CMAKE_MODULE_PATH ${OWN_CMAKE_MODULE_PATH})
   if(PNG_FOUND)

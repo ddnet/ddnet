@@ -143,7 +143,7 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 		return false;
 	}
 
-	png_structp pPngStruct = png_create_read_struct(png_get_libpng_ver(nullptr), &UserErrorStruct, PngErrorCallback, PngWarningCallback);
+	png_structp pPngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, &UserErrorStruct, PngErrorCallback, PngWarningCallback);
 	if(pPngStruct == nullptr)
 	{
 		log_error("png", "libpng internal failure: png_create_read_struct failed.");
@@ -340,7 +340,7 @@ static int PngColorTypeFromFormat(CImageInfo::EImageFormat Format)
 
 bool CImageLoader::SavePng(CByteBufferWriter &Writer, const CImageInfo &Image)
 {
-	png_structp pPngStruct = png_create_write_struct(png_get_libpng_ver(nullptr), nullptr, nullptr, nullptr);
+	png_structp pPngStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 	if(pPngStruct == nullptr)
 	{
 		log_error("png", "libpng internal failure: png_create_write_struct failed.");
