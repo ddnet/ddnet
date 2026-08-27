@@ -22,6 +22,7 @@
 #endif
 
 #include "backend_sdl.h"
+#include "x11_error_handler.h"
 
 #if defined(CONF_HEADLESS_CLIENT)
 #include "backend/null/backend_null.h"
@@ -1170,6 +1171,8 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_INIT_FAILED;
 		}
 	}
+
+	X11IgnoreStaleOutputErrors();
 
 	EBackendType OldBackendType = m_BackendType;
 	m_BackendType = DetectBackend();

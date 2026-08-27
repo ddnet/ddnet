@@ -874,8 +874,13 @@ elseif(TARGET_OS STREQUAL "emscripten")
 else()
   find_package(Notify)
   find_package(OpenGL)
+  find_package(X11)
   set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${NOTIFY_LIBRARIES})
   set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${NOTIFY_INCLUDE_DIRS})
+  if(X11_FOUND)
+    # Only the headers are used, Xlib itself is resolved at runtime.
+    list(APPEND PLATFORM_CLIENT_INCLUDE_DIRS ${X11_INCLUDE_DIR})
+  endif()
   set(PLATFORM_CLIENT)
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS)
@@ -2600,6 +2605,8 @@ if(CLIENT)
     video.cpp
     video.h
     warning.cpp
+    x11_error_handler.cpp
+    x11_error_handler.h
     # tidy-alphabetical-end
   )
   set_src(GAME_CLIENT GLOB_RECURSE src/game/client
@@ -3062,6 +3069,10 @@ if(CLIENT)
 
   if(VULKAN)
     target_compile_definitions(game-client PRIVATE CONF_BACKEND_VULKAN)
+  endif()
+
+  if(X11_FOUND)
+    target_compile_definitions(game-client PRIVATE CONF_X11)
   endif()
 
   list(APPEND TARGETS_OWN game-client)
