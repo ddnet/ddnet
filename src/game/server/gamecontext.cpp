@@ -3612,7 +3612,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 	}
 	else if(str_comp_nocase(pType, "kick") == 0)
 	{
-		if(!pSelf->Server()->ClientUsesRealClientIds(pResult->m_ClientId))
+		if(!pSelf->Server()->ClientSupportsServerMaxClients(pResult->m_ClientId))
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Your client does not see the real client IDs of this server. Use a more recent DDNet client.");
 			return;
@@ -3637,7 +3637,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 	}
 	else if(str_comp_nocase(pType, "spectate") == 0)
 	{
-		if(!pSelf->Server()->ClientUsesRealClientIds(pResult->m_ClientId))
+		if(!pSelf->Server()->ClientSupportsServerMaxClients(pResult->m_ClientId))
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Your client does not see the real client IDs of this server. Use a more recent DDNet client.");
 			return;
