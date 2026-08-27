@@ -24,6 +24,7 @@ class CMapSounds : public CComponent
 	};
 	std::vector<CSourceQueueEntry> m_vSourceQueue;
 	void Clear();
+	bool SoundEnabled();
 
 public:
 	CMapSounds();
@@ -31,6 +32,7 @@ public:
 
 	void Play(int Channel, int SoundId);
 	void PlayAt(int Channel, int SoundId, vec2 Position);
+	void StopAll();
 
 	void OnMapLoad() override;
 	void OnRender() override;

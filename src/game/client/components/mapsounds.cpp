@@ -3,6 +3,7 @@
 #include <base/log.h>
 
 #include <engine/demo.h>
+#include <engine/shared/config.h>
 #include <engine/sound.h>
 
 #include <game/client/components/camera.h>
@@ -19,6 +20,8 @@ CMapSounds::CMapSounds()
 
 void CMapSounds::Play(int Channel, int SoundId)
 {
+	if(!SoundEnabled())
+		return;
 	if(SoundId < 0 || SoundId >= m_Count)
 		return;
 
@@ -27,10 +30,21 @@ void CMapSounds::Play(int Channel, int SoundId)
 
 void CMapSounds::PlayAt(int Channel, int SoundId, vec2 Position)
 {
+	if(!SoundEnabled())
+		return;
 	if(SoundId < 0 || SoundId >= m_Count)
 		return;
 
 	GameClient()->m_Sounds.PlaySampleAt(Channel, m_aSounds[SoundId], 0, 1.0f, Position);
+}
+
+void CMapSounds::StopAll()
+{
+	for(auto &Source : m_vSourceQueue)
+	{
+		Sound()->StopVoice(Source.m_Voice);
+		Source.m_Voice = ISound::CVoiceHandle();
+	}
 }
 
 void CMapSounds::OnMapLoad()
@@ -236,4 +250,9 @@ void CMapSounds::OnStateChange(int NewState, int OldState)
 {
 	if(NewState < IClient::STATE_ONLINE)
 		Clear();
+}
+
+bool CMapSounds::SoundEnabled()
+{
+	return g_Config.m_SndGame && g_Config.m_SndEnable;
 }
