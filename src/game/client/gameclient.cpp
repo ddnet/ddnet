@@ -2376,10 +2376,10 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	{
 		{
 			CNetMsg_Cl_ShowDistance Msg;
-			float x, y;
-			Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), ShowDistanceZoom, &x, &y);
-			Msg.m_X = x;
-			Msg.m_Y = y;
+			float w, h;
+			Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), ShowDistanceZoom, &w, &h);
+			Msg.m_ScreenWidth = w;
+			Msg.m_ScreenHeight = h;
 			CMsgPacker Packer(&Msg);
 			Msg.Pack(&Packer);
 			Client()->SendMsg(IClient::CONN_DUMMY, &Packer, MSGFLAG_VITAL);
@@ -2399,10 +2399,10 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	if(ShowDistanceZoom != m_LastShowDistanceZoom || Graphics()->ScreenAspect() != m_LastScreenAspect)
 	{
 		CNetMsg_Cl_ShowDistance Msg;
-		float x, y;
-		Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), ShowDistanceZoom, &x, &y);
-		Msg.m_X = x;
-		Msg.m_Y = y;
+		float w, h;
+		Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), ShowDistanceZoom, &w, &h);
+		Msg.m_ScreenWidth = w;
+		Msg.m_ScreenHeight = h;
 		Client()->ChecksumData()->m_Zoom = ShowDistanceZoom;
 		CMsgPacker Packer(&Msg);
 		Msg.Pack(&Packer);

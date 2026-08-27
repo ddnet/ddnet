@@ -2778,7 +2778,7 @@ void CGameContext::OnShowOthersNetMessage(const CNetMsg_Cl_ShowOthers *pMsg, int
 void CGameContext::OnShowDistanceNetMessage(const CNetMsg_Cl_ShowDistance *pMsg, int ClientId)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientId];
-	pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
+	pPlayer->m_ShowDistance = vec2(pMsg->m_ScreenWidth, pMsg->m_ScreenHeight);
 }
 
 void CGameContext::OnCameraInfoNetMessage(const CNetMsg_Cl_CameraInfo *pMsg, int ClientId)
