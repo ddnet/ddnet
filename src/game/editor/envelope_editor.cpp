@@ -1320,7 +1320,13 @@ void CEnvelopeEditor::Render(CUIRect View)
 		}
 
 		// handle scaling
-		if(m_Operation == EEnvelopeEditorOp::NONE && !m_NameInput.IsActive() && Input()->KeyIsPressed(KEY_S) && !Input()->ModifierIsPressed() && !Map()->m_vSelectedEnvelopePoints.empty())
+		if(m_Operation == EEnvelopeEditorOp::NONE &&
+			Editor()->m_Dialog == DIALOG_NONE &&
+			!Ui()->IsPopupOpen() &&
+			CLineInput::GetActiveInput() == nullptr &&
+			Input()->KeyIsPressed(KEY_S) &&
+			!Input()->ModifierIsPressed() &&
+			!Map()->m_vSelectedEnvelopePoints.empty())
 		{
 			m_Operation = EEnvelopeEditorOp::SCALE;
 			m_ScaleFactor.x = 1.0f;
