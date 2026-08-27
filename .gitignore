@@ -24,6 +24,8 @@ CPackSourceConfig.cmake
 CTestTestfile.cmake
 Debug
 Makefile
+MinSizeRel
+RelWithDebInfo
 Release
 SAN.*
 _CPack_Packages/
@@ -39,9 +41,11 @@ googletest-src/
 gtest.pc
 gtest_main.pc
 install_manifest*.txt
+minsizerel
 ninja_package
 pack_*/
 release
+relwithdebinfo
 rules.ninja
 testrunner\[1\]_include.cmake
 # tidy-alphabetical-end

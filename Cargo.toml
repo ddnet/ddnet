@@ -23,3 +23,7 @@ panic = "abort"
 [profile.relwithdebinfo]
 inherits = "release"
 debug = true
+
+[profile.minsizerel]
+inherits = "release"
+opt-level = "z"
