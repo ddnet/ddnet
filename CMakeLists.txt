@@ -3096,6 +3096,7 @@ if(SERVER)
     databases/connection_pool.h
     databases/mysql.cpp
     databases/sqlite.cpp
+    enums.h
     main.cpp
     name_ban.cpp
     name_ban.h
