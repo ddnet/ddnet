@@ -35,6 +35,14 @@ public:
 
 private:
 	void RenderColorBar(CUIRect ColorBar, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderPointTimeTooltip(CUIRect View, int PointIndex, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderPointValueTooltip(CUIRect View, int PointIndex, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTangentInTooltip(CUIRect View, int PointIndex, int Channel, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTangentOutTooltip(CUIRect View, int PointIndex, int Channel, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTangentTooltip(CUIRect View, int PointIndex, int Channel, CFixedTime Time, int Value, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderScaleTooltip(CUIRect View, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTimebarTooltip(CUIRect View, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTooltip(CUIRect *pTooltipRect, CUIRect Boundary);
 
 	void UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels);
 
