@@ -23,7 +23,7 @@ jobs:
         include:
         - name: ubuntu-latest-fancy
           os: ubuntu-latest
-          cmake-args: -G Ninja
+          cmake-args: -G Ninja -DTEST_MYSQL=ON -DTEST_POSTGRESQL=ON
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
         - name: ubuntu-22.04
@@ -110,7 +110,7 @@ jobs:
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && contains(matrix.name, 'fancy')
       run: |
-        sudo apt-get install cmake libmariadb-dev libwebsockets-dev mariadb-server -y
+        sudo apt-get install cmake libmariadb-dev libpq-dev libwebsockets-dev mariadb-server postgresql -y
         sudo systemctl stop mysql
         sudo rm -rf /var/lib/mysql/
         sudo mysql_install_db --user=mysql --datadir=/var/lib/mysql/
@@ -121,6 +121,10 @@ jobs:
         CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
         GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
         FLUSH PRIVILEGES;
+        EOF
+        sudo systemctl start postgresql
+        sudo -u postgres psql <<EOF
+        CREATE USER ddnet WITH PASSWORD 'thebestpassword' CREATEDB;
         EOF
 
     - name: Prepare macOS

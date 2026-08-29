@@ -3333,12 +3333,12 @@ int CServer::Run()
 
 		if(Config()->m_SvUseSql)
 		{
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE_BACKUP, aFullPath);
+			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE_BACKUP, aFullPath, 1);
 		}
 		else
 		{
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::READ, aFullPath);
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE, aFullPath);
+			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::READ, aFullPath, 1);
+			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE, aFullPath, 1);
 		}
 	}
 
@@ -4298,9 +4298,9 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->Config()->m_SvUseSql)
 		return;
 
-	if(pResult->NumArguments() < 7 || pResult->NumArguments() > 9)
+	if(pResult->NumArguments() < 7 || pResult->NumArguments() > 10)
 	{
-		log_error("server", "7 to 9 arguments are required");
+		log_error("server", "7 to 10 arguments are required");
 		return;
 	}
 
@@ -4332,12 +4332,137 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	str_copy(Config.m_aSslCa, g_Config.m_SvSqlSslCa);
 	str_copy(Config.m_aSslCert, g_Config.m_SvSqlSslCert);
 	str_copy(Config.m_aSslKey, g_Config.m_SvSqlSslKey);
+	Config.m_SchemaVersion = pResult->NumArguments() >= 10 ? pResult->GetInteger(9) : 1;
+	if(Config.m_SchemaVersion < 1 || Config.m_SchemaVersion > 2)
+	{
+		log_error("server", "SchemaVersion must be 1 or 2");
+		return;
+	}
 
 	log_info("server",
-		"Adding new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d",
+		"Adding new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d Schema: %d",
 		Write ? "Write" : "Read",
-		Config.m_aDatabase, Config.m_aPrefix, Config.m_aUser, Config.m_aIp, Config.m_Port);
+		Config.m_aDatabase, Config.m_aPrefix, Config.m_aUser, Config.m_aIp, Config.m_Port, Config.m_SchemaVersion);
 	pSelf->DbPool()->RegisterMysqlDatabase(Write ? CDbConnectionPool::WRITE : CDbConnectionPool::READ, &Config);
+}
+
+void CServer::ConAddPgsqlServer(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+
+	if(!PostgresqlAvailable())
+	{
+		log_error("server", "can't add PostgreSQL server: compiled without PostgreSQL support");
+		return;
+	}
+
+	if(!pSelf->Config()->m_SvUseSql)
+		return;
+
+	if(pResult->NumArguments() < 7 || pResult->NumArguments() > 9)
+	{
+		log_error("server", "7 to 9 arguments are required");
+		return;
+	}
+
+	CPostgresqlConfig Config;
+	bool Write;
+	if(str_comp_nocase(pResult->GetString(0), "r") == 0)
+	{
+		Write = false;
+	}
+	else if(str_comp_nocase(pResult->GetString(0), "w") == 0)
+	{
+		Write = true;
+	}
+	else
+	{
+		log_error("server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		return;
+	}
+
+	str_copy(Config.m_aDatabase, pResult->GetString(1));
+	str_copy(Config.m_aPrefix, pResult->GetString(2));
+	str_copy(Config.m_aUser, pResult->GetString(3));
+	str_copy(Config.m_aPass, pResult->GetString(4));
+	str_copy(Config.m_aIp, pResult->GetString(5));
+	Config.m_Port = pResult->GetInteger(6);
+	Config.m_Setup = pResult->NumArguments() >= 8 ? pResult->GetInteger(7) : true;
+	Config.m_SchemaVersion = pResult->NumArguments() >= 9 ? pResult->GetInteger(8) : 1;
+	if(Config.m_SchemaVersion < 1 || Config.m_SchemaVersion > 2)
+	{
+		log_error("server", "SchemaVersion must be 1 or 2");
+		return;
+	}
+
+	log_info("server",
+		"Adding new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d Schema: %d",
+		Write ? "Write" : "Read",
+		Config.m_aDatabase, Config.m_aPrefix, Config.m_aUser, Config.m_aIp, Config.m_Port, Config.m_SchemaVersion);
+	pSelf->DbPool()->RegisterPostgresqlDatabase(Write ? CDbConnectionPool::WRITE : CDbConnectionPool::READ, &Config);
+}
+
+static bool DbModeFromString(const char *pMode, CDbConnectionPool::Mode *pDatabaseMode)
+{
+	if(str_comp_nocase(pMode, "r") == 0)
+		*pDatabaseMode = CDbConnectionPool::READ;
+	else if(str_comp_nocase(pMode, "w") == 0)
+		*pDatabaseMode = CDbConnectionPool::WRITE;
+	else if(str_comp_nocase(pMode, "b") == 0)
+		*pDatabaseMode = CDbConnectionPool::WRITE_BACKUP;
+	else
+		return false;
+	return true;
+}
+
+void CServer::ConAddSqliteServer(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+
+	if(!pSelf->Config()->m_SvUseSql)
+		return;
+
+	CDbConnectionPool::Mode DatabaseMode;
+	if(!DbModeFromString(pResult->GetString(0), &DatabaseMode))
+	{
+		log_error("server", "choose 'r' for a read server, 'w' for a write server or 'b' for a write-backup server");
+		return;
+	}
+	const int SchemaVersion = pResult->NumArguments() >= 3 ? pResult->GetInteger(2) : 1;
+	if(SchemaVersion < 1 || SchemaVersion > 2)
+	{
+		log_error("server", "SchemaVersion must be 1 or 2");
+		return;
+	}
+
+	char aFullPath[IO_MAX_PATH_LENGTH];
+	if(fs_is_relative_path(pResult->GetString(1)))
+		pSelf->Storage()->GetCompletePath(IStorage::TYPE_SAVE, pResult->GetString(1), aFullPath, sizeof(aFullPath));
+	else
+		str_copy(aFullPath, pResult->GetString(1));
+
+	log_info("server", "Adding new Sqlite%sServer: DB: '%s' Schema: %d",
+		DatabaseMode == CDbConnectionPool::READ ? "Read" : (DatabaseMode == CDbConnectionPool::WRITE ? "Write" : "WriteBackup"),
+		aFullPath, SchemaVersion);
+	pSelf->DbPool()->RegisterSqliteDatabase(DatabaseMode, aFullPath, SchemaVersion);
+}
+
+void CServer::ConResetSqlServers(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+
+	if(!pSelf->Config()->m_SvUseSql)
+		return;
+
+	CDbConnectionPool::Mode DatabaseMode;
+	if(!DbModeFromString(pResult->GetString(0), &DatabaseMode))
+	{
+		log_error("server", "choose 'r' for the read servers, 'w' for the write server or 'b' for the write-backup server");
+		return;
+	}
+	log_info("server", "Removing all %s databases",
+		DatabaseMode == CDbConnectionPool::READ ? "read" : (DatabaseMode == CDbConnectionPool::WRITE ? "write" : "write-backup"));
+	pSelf->DbPool()->Reset(DatabaseMode);
 }
 
 void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
@@ -4657,7 +4782,10 @@ void CServer::RegisterCommands()
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
 
-	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?] ?i[SSL ?]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAddSqlServer, this, "add a sqlserver");
+	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?] ?i[SSL ?] ?i[SchemaVersion]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAddSqlServer, this, "add a sqlserver");
+	Console()->Register("add_pgsqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?] ?i[SchemaVersion]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAddPgsqlServer, this, "add a postgresql server");
+	Console()->Register("add_sqliteserver", "s['r'|'w'|'b'] s[filename] ?i[SchemaVersion]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAddSqliteServer, this, "add a sqlite database as read, write or write-backup (b) server");
+	Console()->Register("reset_sqlservers", "s['r'|'w'|'b']", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConResetSqlServers, this, "remove all read (r), write (w) or write-backup (b) databases");
 	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
 
 	Console()->Register("auth_add", "s[ident] s[level] r[pw]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key");
