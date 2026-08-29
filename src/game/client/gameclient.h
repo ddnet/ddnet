@@ -744,8 +744,9 @@ public:
 	void LoadHudSkin(const char *pPath, bool AsDir = false);
 	void LoadExtrasSkin(const char *pPath, bool AsDir = false);
 
-	struct SClientGameSkin
+	class CGameSkin
 	{
+	public:
 		bool m_Loaded = false;
 
 		// health armor hud
@@ -832,11 +833,11 @@ public:
 			return m_SpriteNinjaBarFullLeft.IsValid();
 		}
 	};
+	CGameSkin m_GameSkin;
 
-	SClientGameSkin m_GameSkin;
-
-	struct SClientParticlesSkin
+	class CParticlesSkin
 	{
+	public:
 		bool m_Loaded = false;
 		IGraphics::CTextureHandle m_SpriteParticleSlice;
 		IGraphics::CTextureHandle m_SpriteParticleBall;
@@ -848,19 +849,19 @@ public:
 		IGraphics::CTextureHandle m_SpriteParticleHit;
 		IGraphics::CTextureHandle m_aSpriteParticles[10];
 	};
+	CParticlesSkin m_ParticlesSkin;
 
-	SClientParticlesSkin m_ParticlesSkin;
-
-	struct SClientEmoticonsSkin
+	class CEmoticonsSkin
 	{
+	public:
 		bool m_Loaded = false;
 		IGraphics::CTextureHandle m_aSpriteEmoticons[16];
 	};
+	CEmoticonsSkin m_EmoticonsSkin;
 
-	SClientEmoticonsSkin m_EmoticonsSkin;
-
-	struct SClientHudSkin
+	class CHudSkin
 	{
+	public:
 		bool m_Loaded = false;
 		IGraphics::CTextureHandle m_SpriteHudAirjump;
 		IGraphics::CTextureHandle m_SpriteHudAirjumpEmpty;
@@ -894,11 +895,11 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
 		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
 	};
+	CHudSkin m_HudSkin;
 
-	SClientHudSkin m_HudSkin;
-
-	struct SClientExtrasSkin
+	class CExtrasSkin
 	{
+	public:
 		bool m_Loaded = false;
 		IGraphics::CTextureHandle m_SpriteParticleSnowflake;
 		IGraphics::CTextureHandle m_SpriteParticleSparkle;
@@ -906,8 +907,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteHectagon;
 		IGraphics::CTextureHandle m_aSpriteParticles[4];
 	};
-
-	SClientExtrasSkin m_ExtrasSkin;
+	CExtrasSkin m_ExtrasSkin;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
