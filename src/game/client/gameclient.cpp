@@ -399,11 +399,6 @@ void CGameClient::OnInit()
 		++CompCounter;
 	}
 
-	m_GameSkinLoaded = false;
-	m_ParticlesSkinLoaded = false;
-	m_EmoticonsSkinLoaded = false;
-	m_HudSkinLoaded = false;
-
 	// setup load amount, load textures
 	const char *pLoadingMessageAssets = Localize("Initializing assets");
 	for(int i = 0; i < g_pData->m_NumImages; i++)

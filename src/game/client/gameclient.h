@@ -746,6 +746,8 @@ public:
 
 	struct SClientGameSkin
 	{
+		bool m_Loaded = false;
+
 		// health armor hud
 		IGraphics::CTextureHandle m_SpriteHealthFull;
 		IGraphics::CTextureHandle m_SpriteHealthEmpty;
@@ -832,10 +834,10 @@ public:
 	};
 
 	SClientGameSkin m_GameSkin;
-	bool m_GameSkinLoaded = false;
 
 	struct SClientParticlesSkin
 	{
+		bool m_Loaded = false;
 		IGraphics::CTextureHandle m_SpriteParticleSlice;
 		IGraphics::CTextureHandle m_SpriteParticleBall;
 		IGraphics::CTextureHandle m_aSpriteParticleSplat[3];
@@ -848,18 +850,18 @@ public:
 	};
 
 	SClientParticlesSkin m_ParticlesSkin;
-	bool m_ParticlesSkinLoaded = false;
 
 	struct SClientEmoticonsSkin
 	{
+		bool m_Loaded = false;
 		IGraphics::CTextureHandle m_aSpriteEmoticons[16];
 	};
 
 	SClientEmoticonsSkin m_EmoticonsSkin;
-	bool m_EmoticonsSkinLoaded = false;
 
 	struct SClientHudSkin
 	{
+		bool m_Loaded = false;
 		IGraphics::CTextureHandle m_SpriteHudAirjump;
 		IGraphics::CTextureHandle m_SpriteHudAirjumpEmpty;
 		IGraphics::CTextureHandle m_SpriteHudSolo;
@@ -894,10 +896,10 @@ public:
 	};
 
 	SClientHudSkin m_HudSkin;
-	bool m_HudSkinLoaded = false;
 
 	struct SClientExtrasSkin
 	{
+		bool m_Loaded = false;
 		IGraphics::CTextureHandle m_SpriteParticleSnowflake;
 		IGraphics::CTextureHandle m_SpriteParticleSparkle;
 		IGraphics::CTextureHandle m_SpritePulley;
@@ -906,7 +908,6 @@ public:
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;
-	bool m_ExtrasSkinLoaded = false;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 

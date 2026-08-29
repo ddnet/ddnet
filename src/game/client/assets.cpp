@@ -39,7 +39,7 @@ CGameClient::CImageAsset CGameClient::LoadAssetFromPath(const char *pPath, bool 
 
 void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 {
-	if(m_GameSkinLoaded)
+	if(m_GameSkin.m_Loaded)
 	{
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteHealthFull);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteHealthEmpty);
@@ -141,7 +141,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteNinjaBarEmptyRight);
 		}
 
-		m_GameSkinLoaded = false;
+		m_GameSkin.m_Loaded = false;
 	}
 
 	CImageAsset LoadedAsset = LoadAssetFromPath(pPath, AsDir, IMAGE_GAME, "game");
@@ -277,7 +277,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 			m_GameSkin.m_SpriteNinjaBarEmptyRight = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &client_data7::g_pData->m_aSprites[client_data7::SPRITE_NINJA_BAR_EMPTY_RIGHT]);
 		}
 
-		m_GameSkinLoaded = true;
+		m_GameSkin.m_Loaded = true;
 	}
 	ImgInfo.Free();
 	if(FallbackImgInfo.has_value())
@@ -286,12 +286,12 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 
 void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 {
-	if(m_EmoticonsSkinLoaded)
+	if(m_EmoticonsSkin.m_Loaded)
 	{
 		for(auto &SpriteEmoticon : m_EmoticonsSkin.m_aSpriteEmoticons)
 			Graphics()->UnloadTexture(&SpriteEmoticon);
 
-		m_EmoticonsSkinLoaded = false;
+		m_EmoticonsSkin.m_Loaded = false;
 	}
 
 	CImageAsset LoadedAsset = LoadAssetFromPath(pPath, AsDir, IMAGE_EMOTICONS, "emoticons");
@@ -309,7 +309,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 		for(int i = 0; i < 16; ++i)
 			m_EmoticonsSkin.m_aSpriteEmoticons[i] = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_OOP + i]);
 
-		m_EmoticonsSkinLoaded = true;
+		m_EmoticonsSkin.m_Loaded = true;
 	}
 	ImgInfo.Free();
 	if(FallbackImgInfo.has_value())
@@ -318,7 +318,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 
 void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 {
-	if(m_ParticlesSkinLoaded)
+	if(m_ParticlesSkin.m_Loaded)
 	{
 		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleSlice);
 		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleBall);
@@ -332,7 +332,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 
 		std::fill(std::begin(m_ParticlesSkin.m_aSpriteParticles), std::end(m_ParticlesSkin.m_aSpriteParticles), IGraphics::CTextureHandle());
 
-		m_ParticlesSkinLoaded = false;
+		m_ParticlesSkin.m_Loaded = false;
 	}
 
 	CImageAsset LoadedAsset = LoadAssetFromPath(pPath, AsDir, IMAGE_PARTICLES, "particles");
@@ -367,7 +367,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 		m_ParticlesSkin.m_aSpriteParticles[8] = m_ParticlesSkin.m_SpriteParticleAirJump;
 		m_ParticlesSkin.m_aSpriteParticles[9] = m_ParticlesSkin.m_SpriteParticleHit;
 
-		m_ParticlesSkinLoaded = true;
+		m_ParticlesSkin.m_Loaded = true;
 	}
 	ImgInfo.Free();
 	if(FallbackImgInfo.has_value())
@@ -376,7 +376,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 
 void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 {
-	if(m_HudSkinLoaded)
+	if(m_HudSkin.m_Loaded)
 	{
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudAirjump);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudAirjumpEmpty);
@@ -409,7 +409,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudTeam0Mode);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDummyHammer);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDummyCopy);
-		m_HudSkinLoaded = false;
+		m_HudSkin.m_Loaded = false;
 	}
 
 	CImageAsset LoadedAsset = LoadAssetFromPath(pPath, AsDir, IMAGE_HUD, "hud");
@@ -456,7 +456,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		m_HudSkin.m_SpriteHudDummyHammer = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_HAMMER]);
 		m_HudSkin.m_SpriteHudDummyCopy = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_COPY]);
 
-		m_HudSkinLoaded = true;
+		m_HudSkin.m_Loaded = true;
 	}
 	ImgInfo.Free();
 	if(FallbackImgInfo.has_value())
@@ -465,7 +465,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 
 void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 {
-	if(m_ExtrasSkinLoaded)
+	if(m_ExtrasSkin.m_Loaded)
 	{
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSnowflake);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSparkle);
@@ -474,7 +474,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 
 		std::fill(std::begin(m_ExtrasSkin.m_aSpriteParticles), std::end(m_ExtrasSkin.m_aSpriteParticles), IGraphics::CTextureHandle());
 
-		m_ExtrasSkinLoaded = false;
+		m_ExtrasSkin.m_Loaded = false;
 	}
 
 	CImageAsset LoadedAsset = LoadAssetFromPath(pPath, AsDir, IMAGE_EXTRAS, "extras");
@@ -499,7 +499,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		m_ExtrasSkin.m_aSpriteParticles[2] = m_ExtrasSkin.m_SpritePulley;
 		m_ExtrasSkin.m_aSpriteParticles[3] = m_ExtrasSkin.m_SpriteHectagon;
 
-		m_ExtrasSkinLoaded = true;
+		m_ExtrasSkin.m_Loaded = true;
 	}
 	ImgInfo.Free();
 	if(FallbackImgInfo.has_value())
