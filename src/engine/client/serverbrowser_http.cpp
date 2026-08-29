@@ -60,6 +60,7 @@ public:
 	virtual ~CChooseMaster();
 
 	bool GetBestUrl(const char **pBestUrl) const;
+	void Shutdown();
 	void Reset();
 	bool IsRefreshing() const { return m_pJob && !m_pJob->Done(); }
 	void Refresh();
@@ -122,10 +123,7 @@ CChooseMaster::CChooseMaster(IEngine *pEngine, IHttp *pHttp, VALIDATOR pfnValida
 
 CChooseMaster::~CChooseMaster()
 {
-	if(m_pJob)
-	{
-		m_pJob->Abort();
-	}
+	dbg_assert(m_pJob == nullptr, "Choose master job was not cleared");
 }
 
 int CChooseMaster::GetBestIndex() const
@@ -151,6 +149,15 @@ bool CChooseMaster::GetBestUrl(const char **ppBestUrl) const
 	}
 	*ppBestUrl = m_pData->m_aaUrls[Index];
 	return false;
+}
+
+void CChooseMaster::Shutdown()
+{
+	if(m_pJob)
+	{
+		m_pJob->Abort();
+		m_pJob = nullptr;
+	}
 }
 
 void CChooseMaster::Reset()
@@ -310,6 +317,7 @@ class CServerBrowserHttp : public IServerBrowserHttp
 public:
 	CServerBrowserHttp(IEngine *pEngine, IHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex);
 	~CServerBrowserHttp() override;
+	void Shutdown() override;
 	void Update() override;
 	bool IsRefreshing() const override { return m_State != STATE_DONE && m_State != STATE_NO_MASTER; }
 	bool IsError() const override { return m_State == STATE_NO_MASTER; }
@@ -355,10 +363,17 @@ CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IHttp *pHttp, const cha
 
 CServerBrowserHttp::~CServerBrowserHttp()
 {
+	dbg_assert(m_pGetServers == nullptr, "Server browser load job was not cleared");
+}
+
+void CServerBrowserHttp::Shutdown()
+{
 	if(m_pGetServers != nullptr)
 	{
 		m_pGetServers->Abort();
+		m_pGetServers = nullptr;
 	}
+	m_pChooseMaster->Shutdown();
 }
 
 void CServerBrowserHttp::Update()

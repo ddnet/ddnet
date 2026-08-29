@@ -12,6 +12,7 @@ class IServerBrowserHttp
 public:
 	virtual ~IServerBrowserHttp() = default;
 
+	virtual void Shutdown() = 0;
 	virtual void Update() = 0;
 
 	virtual bool IsRefreshing() const = 0;
