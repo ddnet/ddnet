@@ -57,10 +57,7 @@ CSkins::CSkinContainer::CSkinContainer(CSkins *pSkins, const char *pName, EType 
 
 CSkins::CSkinContainer::~CSkinContainer()
 {
-	if(m_pLoadJob)
-	{
-		m_pLoadJob->Abort();
-	}
+	dbg_assert(m_pLoadJob == nullptr, "Skin container load job was not cleared");
 }
 
 bool CSkins::CSkinContainer::operator<(const CSkinContainer &Other) const
@@ -514,6 +511,7 @@ void CSkins::OnShutdown()
 		if(pSkinContainer->m_pLoadJob)
 		{
 			pSkinContainer->m_pLoadJob->Abort();
+			pSkinContainer->m_pLoadJob = nullptr;
 		}
 	}
 	m_Skins.clear();

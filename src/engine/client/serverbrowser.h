@@ -254,6 +254,7 @@ public:
 	~CServerBrowser() override;
 
 	// interface functions
+	void Shutdown() override;
 	void Refresh(int Type, bool Force = false) override;
 	bool IsRefreshing() const override;
 	bool IsGettingServerlist() const override;

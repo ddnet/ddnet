@@ -9,6 +9,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <cstdint>
 #include <deque>
 #include <mutex>
 #include <optional>
@@ -38,6 +39,7 @@ private:
 
 	std::vector<std::pair<std::string, std::string>> m_vRequestHeaders;
 
+	uint64_t m_RequestId;
 	emscripten_fetch_t *m_pFetch = nullptr;
 	bool m_CallbackFinished = false;
 
@@ -74,9 +76,10 @@ private:
 	std::condition_variable m_ConditionVariableInit;
 	std::condition_variable m_ConditionVariableLoop;
 	std::atomic<bool> m_Initialized = false;
+	uint64_t m_NextRequestId = 0;
 	std::deque<std::shared_ptr<CHttpRequestEmscripten>> m_PendingRequests;
-	std::unordered_map<emscripten_fetch_t *, EHttpState> m_PendingFetchChanges;
-	std::unordered_map<emscripten_fetch_t *, std::shared_ptr<CHttpRequestEmscripten>> m_RunningRequests;
+	std::unordered_map<uint64_t, EHttpState> m_PendingFetchChanges;
+	std::unordered_map<uint64_t, std::shared_ptr<CHttpRequestEmscripten>> m_RunningRequests;
 	std::chrono::milliseconds m_ShutdownDelay{};
 	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_ShutdownTime;
 	std::atomic<bool> m_Shutdown = false;
@@ -84,7 +87,7 @@ private:
 
 	static void ThreadMain(void *pUser);
 	void RunLoop();
-	void AddPendingStateChange(emscripten_fetch_t *pFetch, EHttpState State);
+	void AddPendingStateChange(uint64_t RequestId, EHttpState State);
 };
 
 #endif // CONF_PLATFORM_EMSCRIPTEN
