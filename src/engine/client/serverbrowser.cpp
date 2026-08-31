@@ -1383,6 +1383,7 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 		}
 	}
 	ValidateServerlistType();
+	m_CommunityCache.Update(true);
 	RequestResort();
 	return m_pDDNetInfo;
 }
@@ -1530,6 +1531,8 @@ void CServerBrowser::LoadDDNetServers()
 	// Parse communities
 	m_vCommunities.clear();
 	m_CommunityServersByAddr.clear();
+	// The community cache holds pointers into m_vCommunities and must be invalidated.
+	m_CommunityCache.Invalidate();
 
 	if(!m_pDDNetInfo)
 	{
@@ -1887,6 +1890,18 @@ unsigned CServerBrowser::CurrentCommunitiesHash() const
 	return Hash;
 }
 
+void CCommunityCache::Invalidate()
+{
+	m_LastType = IServerBrowser::NUM_TYPES;
+	m_SelectedCommunitiesHash = 0;
+	m_vpSelectedCommunities.clear();
+	m_vpSelectableCountries.clear();
+	m_vpSelectableTypes.clear();
+	m_AnyRanksAvailable = false;
+	m_CountryTypesFilterAvailable = false;
+	m_pCountryTypeFilterKey = IServerBrowser::COMMUNITY_ALL;
+}
+
 void CCommunityCache::Update(bool Force)
 {
 	const unsigned CommunitiesHash = m_pServerBrowser->CurrentCommunitiesHash();
@@ -1899,13 +1914,11 @@ void CCommunityCache::Update(bool Force)
 		m_pServerBrowser->Refresh(m_pServerBrowser->GetCurrentType(), true);
 	}
 
-	if(!Force && m_InfoSha256 == m_pServerBrowser->DDNetInfoSha256() &&
-		!CurrentCommunitiesChanged && !TypeChanged)
+	if(!Force && !CurrentCommunitiesChanged && !TypeChanged)
 	{
 		return;
 	}
 
-	m_InfoSha256 = m_pServerBrowser->DDNetInfoSha256();
 	m_LastType = m_pServerBrowser->GetCurrentType();
 	m_SelectedCommunitiesHash = CommunitiesHash;
 	m_vpSelectedCommunities = m_pServerBrowser->CurrentCommunities();
