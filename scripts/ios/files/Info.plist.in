@@ -35,6 +35,14 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		<!-- Landscape-only apps must opt out of iPad multitasking -->
+		<key>UIRequiresFullScreen</key>
+		<true/>
+		<!-- SDL references CoreBluetooth for wireless game controllers -->
+		<key>NSBluetoothAlwaysUsageDescription</key>
+		<string>DDNet uses Bluetooth to connect wireless game controllers.</string>
+		<key>NSBluetoothPeripheralUsageDescription</key>
+		<string>DDNet uses Bluetooth to connect wireless game controllers.</string>
 		<key>UIStatusBarHidden</key>
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
