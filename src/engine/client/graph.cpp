@@ -191,11 +191,7 @@ void CGraph::RenderDataLines(IGraphics *pGraphics, float x, float y, float w, fl
 		{
 			pGraphics->LinesBatchEnd(&LineItemBatch);
 			pGraphics->LinesBatchBegin(&LineItemBatch);
-
-			const IGraphics::CColorVertex aColorVertices[] = {
-				IGraphics::CColorVertex(0, pEntry0->m_Color.r, pEntry0->m_Color.g, pEntry0->m_Color.b, pEntry0->m_Color.a),
-				IGraphics::CColorVertex(1, pEntry1->m_Color.r, pEntry1->m_Color.g, pEntry1->m_Color.b, pEntry1->m_Color.a)};
-			pGraphics->SetColorVertex(aColorVertices, std::size(aColorVertices));
+			pGraphics->SetColor2(pEntry0->m_Color, pEntry1->m_Color);
 		}
 		const IGraphics::CLineItem Item = IGraphics::CLineItem(
 			x + a0,
