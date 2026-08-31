@@ -212,7 +212,7 @@ void CVoting::RemoveOption(const char *pDescription)
 				pOption->m_pPrev->m_pNext = pOption;
 			m_pRecycleLast = pOption;
 			if(!m_pRecycleFirst)
-				m_pRecycleLast = pOption;
+				m_pRecycleFirst = pOption;
 
 			break;
 		}
