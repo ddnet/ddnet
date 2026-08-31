@@ -35,6 +35,7 @@
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
+#include <game/editor/editor_binds.h>
 #include <game/editor/editor_history.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
@@ -3673,6 +3674,17 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 		Ui()->DoPopupMenu(&s_PopupMenuSettingsId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 280.0f, 148.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
+	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
+
+	CUIRect Controls;
+	static int s_ControlsButton = 0;
+	MenuBar.VSplitLeft(60.0f, &Controls, &MenuBar);
+	if(DoButton_Ex(&s_ControlsButton, "Controls", 0, &Controls, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
+	{
+		static SPopupMenuId s_PopupMenuControlsId;
+		Ui()->DoPopupMenu(&s_PopupMenuControlsId, Controls.x, Controls.y + Controls.h - 1.0f, 700.0f, 550.0f, this, PopupMenuControls, PopupProperties);
+	}
+
 	CUIRect Info, Help, Close;
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
 	MenuBar.VSplitRight(15.0f, &MenuBar, &Close);
@@ -3772,9 +3784,9 @@ void CEditor::Render()
 		// handle undo/redo hotkeys
 		if(Ui()->CheckActiveItem(nullptr))
 		{
-			if(Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed() && !Input()->ShiftIsPressed())
+			if(m_pBindUndo->KeyPress(Input()) && !Input()->ShiftIsPressed())
 				ActiveHistory().Undo();
-			if((Input()->KeyPress(KEY_Y) && Input()->ModifierIsPressed()) || (Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed() && Input()->ShiftIsPressed()))
+			if(m_pBindRedo2->KeyPress(Input()) || m_pBindRedo->KeyPress(Input()))
 				ActiveHistory().Redo();
 		}
 
@@ -4596,6 +4608,57 @@ void CEditor::Init()
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnInit(this);
 
+	m_pBindUndo = RegisterBind(false, true, false, KEY_Z, "Undo your last action.", EBindSection::HISTORY);
+	m_pBindRedo = RegisterBind(true, true, false, KEY_Z, "Redo your last action.", EBindSection::HISTORY);
+	m_pBindRedo2 = RegisterBind(false, true, false, KEY_Y, "Redo your last action.", EBindSection::HISTORY);
+	// example bind
+	RegisterBind(false, true, false, KEY_1, "Example Bind: Save brush to slot 1-9 or 0 (if it's not empty).", EBindSection::BRUSH);
+	RegisterBind(false, false, false, KEY_1, "Example Bind: Load brush from slot 1-9 or 0.", EBindSection::BRUSH);
+
+	RegisterBind(false, true, false, KEY_F, "Change the tile numbers of physics layers to the next free one.", EBindSection::BRUSH);
+	RegisterBind(true, false, false, KEY_MOUSE_WHEEL_DOWN, "Decrease the first property of a physics layers tiles.", EBindSection::BRUSH);
+	RegisterBind(true, true, false, KEY_MOUSE_WHEEL_DOWN, "Decrease the second property of a physics layers tiles.", EBindSection::BRUSH);
+	RegisterBind(true, true, true, KEY_MOUSE_WHEEL_DOWN, "Decrease the third property of a physics layers tiles.", EBindSection::BRUSH);
+	RegisterBind(true, false, false, KEY_MOUSE_WHEEL_UP, "Increase the first property of a physics layers tiles.", EBindSection::BRUSH);
+	RegisterBind(true, true, false, KEY_MOUSE_WHEEL_UP, "Increase the second property of a physics layers tiles.", EBindSection::BRUSH);
+	RegisterBind(true, true, true, KEY_MOUSE_WHEEL_UP, "Increase the third property of a physics layers tiles.", EBindSection::BRUSH);
+	RegisterBind(false, false, true, KEY_NONE, "Hold to axis lock the mouse (brush needs to be not empty).", EBindSection::BRUSH);
+	RegisterBind(true, false, false, KEY_MOUSE_1, "Hold and drag a tile over an area in order to copy it.", EBindSection::BRUSH);
+	RegisterBind(false, false, false, KEY_N, "Flip the brush horizontally.", EBindSection::BRUSH);
+	RegisterBind(false, false, false, KEY_M, "Flip the brush vertically.", EBindSection::BRUSH);
+	RegisterBind(false, false, false, KEY_R, "Rotate brush counter-clockwise.", EBindSection::BRUSH);
+	RegisterBind(false, false, false, KEY_T, "Rotate brush clockwise.", EBindSection::BRUSH);
+	RegisterBind(false, true, false, KEY_T, "Open properties menu on physics layers.", EBindSection::GENERAL);
+	RegisterBind(false, false, false, KEY_TAB, "Toggle gui.", EBindSection::GENERAL);
+	RegisterBind(false, false, false, KEY_F10, "Take a screenshot.", EBindSection::GENERAL);
+	RegisterBind(false, true, false, KEY_TAB, "Switch to the next editor tab.", EBindSection::GENERAL);
+	RegisterBind(true, true, false, KEY_TAB, "Switch to the previous editor tab.", EBindSection::GENERAL);
+	RegisterBind(false, true, false, KEY_I, "Toggle tile info.", EBindSection::GENERAL);
+	RegisterBind(true, true, false, KEY_I, "Toggle hex tile info.", EBindSection::GENERAL);
+	RegisterBind(false, true, false, KEY_U, "Toggle allowing unused tiles.", EBindSection::GENERAL);
+	RegisterBind(false, true, false, KEY_H, "Toggle high detail.", EBindSection::GENERAL);
+	RegisterBind(false, true, false, KEY_M, "Toggle animations.", EBindSection::GENERAL);
+	RegisterBind(false, false, false, KEY_DOWN, "Move down in any menu.", EBindSection::GENERAL);
+	RegisterBind(false, false, false, KEY_UP, "Move up in any menu.", EBindSection::GENERAL);
+	RegisterBind(false, false, false, KEY_RIGHT, "Switch between Layer/Image/Sound mode.", EBindSection::GENERAL);
+	RegisterBind(false, false, false, KEY_LEFT, "Switch between Layer/Image/Sound mode.", EBindSection::GENERAL);
+	RegisterBind(false, false, true, KEY_NONE, "Ignore the grid.", EBindSection::QUADS_AND_SOUNDS);
+	RegisterBind(true, false, false, -1, "Move quad/sound points more precise.", EBindSection::QUADS_AND_SOUNDS);
+	RegisterBind(false, false, false, KEY_MOUSE_2, "Open quad/sound context menu.", EBindSection::QUADS_AND_SOUNDS);
+	RegisterBind(true, false, false, KEY_MOUSE_2, "Delete quad/sound.", EBindSection::QUADS_AND_SOUNDS);
+	RegisterBind(false, true, false, -1, "Enter quad rotation mode.", EBindSection::QUADS_AND_SOUNDS);
+	RegisterBind(true, false, false, KEY_DOWN, "Multi-Select next layer.", EBindSection::LAYERS);
+	RegisterBind(true, false, false, KEY_UP, "Multi-Select previous layer.", EBindSection::LAYERS);
+	RegisterBind(true, false, false, KEY_MOUSE_1, "Add layer or all groups of a layer to the selection.", EBindSection::LAYERS);
+	RegisterBind(false, false, false, KEY_MOUSE_2, "Only show this group or this layer of a group (press eyes symbol).", EBindSection::LAYERS);
+	RegisterBind(true, false, false, KEY_MOUSE_2, "Only show this group or this layer of a group (press eyes symbol) and select it.", EBindSection::LAYERS);
+
+	RegisterServerSettingsBinds();
+
+	// update binds after registering them
+	for(auto &Bind : m_vpEditorBinds)
+		Bind->OnInit(m_pInput);
+
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_NORMAL] = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_H] = Graphics()->LoadTexture("editor/cursor_resize.png", IStorage::TYPE_ALL);
@@ -5175,6 +5238,17 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 			}
 		}
 	}
+}
+
+std::shared_ptr<CEditorBind> CEditor::RegisterBind(bool ShiftPressed, bool ModifierPressed, bool AltPressed, int Key, const char *pDescription, EBindSection Section)
+{
+	dbg_assert(!pDescription || str_endswith(pDescription, ".") != nullptr, "Editor bind description '%s' does not end with a dot.", pDescription);
+
+	CEditorBind NewBind = CEditorBind(ShiftPressed, ModifierPressed, AltPressed, Key, pDescription, Section);
+	if(!NewBind.IsValid())
+		return nullptr;
+	m_vpEditorBinds.push_back(std::make_shared<CEditorBind>(NewBind));
+	return m_vpEditorBinds.back();
 }
 
 IEditor *CreateEditor() { return new CEditor; }

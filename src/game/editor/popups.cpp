@@ -12,9 +12,12 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+#include <engine/textrender.h>
 
 #include <game/client/gameclient.h>
+#include <game/client/ui_rect.h>
 #include <game/client/ui_scrollregion.h>
+#include <game/editor/editor_binds.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
 
@@ -442,6 +445,72 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		}
 	}
 
+	return CUi::POPUP_KEEP_OPEN;
+}
+
+CUi::EPopupMenuFunctionResult CEditor::PopupMenuControls(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	CUIRect Title, Left, Right, SectionLabel;
+	View.HSplitTop(20.0f, &Title, &View);
+	Title.HMargin(3.0f, &Title);
+	pEditor->Ui()->DoLabel(&Title, "Editor Controls", 14.0f, TEXTALIGN_ML);
+
+	constexpr float BindFontSize = 10.0f;
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollUnit = 3.0f * BindFontSize;
+	ScrollParams.m_ForceShowScrollbar = true;
+
+	pEditor->m_EditorControlsScrollRegion.Begin(&View, &ScrollParams);
+
+	constexpr const char *SECTIONS[] = {
+		"General",
+		"History",
+		"Brush",
+		"Quads and Sounds",
+		"Font Typer",
+		"File Browser",
+		"Map View",
+		"Layers",
+		"Server Settings"};
+	static_assert(std::size(SECTIONS) == EBindSection::NUM_SECTIONS, "Number of sections mismatch");
+	for(size_t Section = 0; Section < EBindSection::NUM_SECTIONS; ++Section)
+	{
+		View.HSplitTop(6.0f, nullptr, &View);
+		View.HSplitTop(20.0f, &SectionLabel, &View);
+		if(pEditor->m_EditorControlsScrollRegion.AddRect(SectionLabel))
+		{
+			SectionLabel.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), IGraphics::CORNER_ALL, 4.0f);
+			SectionLabel.VSplitLeft(5.0f, nullptr, &SectionLabel);
+			pEditor->Ui()->DoLabel(&SectionLabel, SECTIONS[Section], 12.0f, TEXTALIGN_ML);
+		}
+		View.HSplitTop(2.0f, nullptr, &View);
+		for(const auto &Bind : pEditor->m_vpEditorBinds)
+		{
+			if(Bind->Section() != Section)
+				continue;
+			CUIRect Row;
+			View.HSplitTop(BindFontSize, &Row, &View);
+			if(pEditor->m_EditorControlsScrollRegion.AddRect(Row))
+			{
+				Row.VSplitLeft(200.0f, &Left, &Right);
+				Row.VSplitLeft(5.0f, nullptr, &Left);
+				pEditor->Ui()->DoLabel(&Left, Bind->KeyBindText(), BindFontSize, TEXTALIGN_TL);
+				pEditor->Ui()->DoLabel(&Right, Bind->Description(), BindFontSize, TEXTALIGN_TL);
+			}
+		}
+	}
+
+	View.HSplitTop(6.0f, &SectionLabel, &View);
+	if(pEditor->m_EditorControlsScrollRegion.AddRect(SectionLabel))
+	{
+		SectionLabel.HMargin(2.0f, &SectionLabel);
+		SectionLabel.VMargin(View.w / 3, &SectionLabel);
+		SectionLabel.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), IGraphics::CORNER_ALL, 1.0f);
+	}
+
+	pEditor->m_EditorControlsScrollRegion.End();
 	return CUi::POPUP_KEEP_OPEN;
 }
 

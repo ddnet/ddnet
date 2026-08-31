@@ -12,12 +12,22 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 
+#include <game/editor/component.h>
 #include <game/editor/editor.h>
+#include <game/editor/editor_binds.h>
 
 static constexpr const char *FILETYPE_EXTENSIONS[] = {
 	".map",
 	".png",
 	".opus"};
+
+void CFileBrowser::OnInit(CEditor *pEditor)
+{
+	CEditorComponent::OnInit(pEditor);
+	pEditor->RegisterBind(false, false, false, KEY_F5, "Refresh files from disk.", EBindSection::FILE_BROWSER);
+	pEditor->RegisterBind(false, true, false, KEY_R, "Refresh files from disk.", EBindSection::FILE_BROWSER);
+	pEditor->RegisterBind(false, true, false, KEY_F, "Select search filter text.", EBindSection::FILE_BROWSER);
+}
 
 void CFileBrowser::ShowFileDialog(
 	int StorageType, EFileType FileType,

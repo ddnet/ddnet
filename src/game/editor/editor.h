@@ -184,12 +184,12 @@ public:
 	void MapDetails();
 	void TestMapLocally();
 	void GotoPosition();
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) CQuickAction m_QuickAction##name;
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, bind, description) CQuickAction m_QuickAction##name;
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 
 	CEditor() :
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) m_QuickAction##name(text, description, callback, disabled, active, button_color),
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, bind, description) m_QuickAction##name(text, description, callback, disabled, active, button_color),
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 		m_Dialog(DIALOG_NONE)
@@ -479,6 +479,7 @@ public:
 	static CUi::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupMenuSettings(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupMenuControls(void *pContext, CUIRect View, bool Active);
 	class CPopupMapTab : public SPopupMenuId
 	{
 	public:
@@ -724,6 +725,10 @@ public:
 	// AdjustValue must be -1, 0 or 1
 	void AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int AdjustValue);
 
+	// binds
+	std::vector<std::shared_ptr<CEditorBind>> m_vpEditorBinds;
+	std::shared_ptr<CEditorBind> RegisterBind(bool ShiftPressed, bool ModifierPressed, bool AltPressed, int Key, const char *pDescription, EBindSection Section);
+
 private:
 	std::vector<std::unique_ptr<CEditorMap>> m_vpMaps;
 	size_t m_SelectedMap;
@@ -731,6 +736,13 @@ private:
 	CEditorHistory &ActiveHistory();
 
 	std::map<int, CPoint[5]> m_QuadDragOriginalPoints;
+
+	void RegisterServerSettingsBinds();
+	CScrollRegion m_EditorControlsScrollRegion;
+	// explicit binds
+	std::shared_ptr<CEditorBind> m_pBindUndo;
+	std::shared_ptr<CEditorBind> m_pBindRedo;
+	std::shared_ptr<CEditorBind> m_pBindRedo2;
 };
 
 #endif

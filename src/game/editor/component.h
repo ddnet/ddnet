@@ -2,6 +2,7 @@
 #define GAME_EDITOR_COMPONENT_H
 
 #include <engine/input.h>
+#include <engine/keys.h>
 
 #include <game/client/ui_rect.h>
 #include <game/editor/editor_object.h>

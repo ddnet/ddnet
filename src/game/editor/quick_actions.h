@@ -1,12 +1,15 @@
 // This file can be included several times.
+#include <engine/keys.h>
 
 #ifndef REGISTER_QUICK_ACTION
 // This helps IDEs properly syntax highlight the uses of the macro below.
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description)
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, bind, description)
 #endif
 
 #define ALWAYS_FALSE []() -> bool { return false; }
 #define DEFAULT_BTN []() -> int { return -1; }
+#define NO_BIND false, false, false, -1, EBindSection::GENERAL
+#define BIND(Shift, Modifier, Alt, Key, Section) Shift, Modifier, Alt, Key, Section
 
 REGISTER_QUICK_ACTION(
 	ShowHelp,
@@ -15,7 +18,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[F1] Open the DDNet Wiki page for the map editor in a web browser.")
+	BIND(false, false, false, KEY_F1, EBindSection::GENERAL),
+	"Open the DDNet Wiki page for the map editor in a web browser.")
 REGISTER_QUICK_ACTION(
 	Exit,
 	"Exit",
@@ -23,7 +27,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Escape] Exit from the editor.")
+	BIND(false, false, false, KEY_ESCAPE, EBindSection::GENERAL),
+	"Exit from the editor.")
 REGISTER_QUICK_ACTION(
 	BrushPicker,
 	"Brush picker",
@@ -36,7 +41,8 @@ REGISTER_QUICK_ACTION(
 	},
 	[&]() -> bool { return m_ShowPickerToggle; },
 	DEFAULT_BTN,
-	"[Ctrl+Space, Hold Space] Toggle brush picker.")
+	BIND(false, true, false, KEY_SPACE, EBindSection::GENERAL),
+	"[Hold Space] Toggle brush picker.")
 REGISTER_QUICK_ACTION(
 	ToggleGrid,
 	"Toggle grid",
@@ -44,7 +50,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return MapView()->MapGrid()->IsEnabled(); },
 	DEFAULT_BTN,
-	"[Ctrl+G] Toggle grid.")
+	BIND(false, true, false, KEY_G, EBindSection::GENERAL),
+	"Toggle grid.")
 REGISTER_QUICK_ACTION(
 	GameTilesAir,
 	"Game tiles: Air",
@@ -52,6 +59,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesHookable,
@@ -60,6 +68,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesDeath,
@@ -68,6 +77,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesUnhookable,
@@ -76,6 +86,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesHookthrough,
@@ -84,6 +95,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesFreeze,
@@ -92,6 +104,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesUnfreeze,
@@ -100,6 +113,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesDeepFreeze,
@@ -108,6 +122,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesDeepUnfreeze,
@@ -116,6 +131,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesBlueCheckTele,
@@ -124,6 +140,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesRedCheckTele,
@@ -132,6 +149,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesLiveFreeze,
@@ -140,6 +158,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesLiveUnfreeze,
@@ -148,6 +167,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	AddGroup,
@@ -156,6 +176,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Add a new group.")
 REGISTER_QUICK_ACTION(
 	ResetZoom,
@@ -164,7 +185,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Numpad*] Zoom to normal and remove editor offset.")
+	BIND(false, false, false, KEY_KP_MULTIPLY, EBindSection::GENERAL),
+	"Zoom to normal and remove editor offset.")
 REGISTER_QUICK_ACTION(
 	ZoomOut,
 	"Zoom out",
@@ -172,7 +194,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Numpad-] Zoom out.")
+	BIND(false, false, false, KEY_KP_MINUS, EBindSection::GENERAL),
+	"Zoom out.")
 REGISTER_QUICK_ACTION(
 	ZoomIn,
 	"Zoom in",
@@ -180,7 +203,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Numpad+] Zoom in.")
+	BIND(false, false, false, KEY_KP_PLUS, EBindSection::GENERAL),
+	"Zoom in.")
 REGISTER_QUICK_ACTION(
 	Refocus,
 	"Refocus",
@@ -188,7 +212,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Home] Restore map focus.")
+	BIND(false, false, false, KEY_HOME, EBindSection::GENERAL),
+	"Restore map focus.")
 REGISTER_QUICK_ACTION(
 	GotoPosition,
 	"Goto position",
@@ -196,6 +221,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Go to a specified coordinate point on the map.")
 REGISTER_QUICK_ACTION(
 	Proof,
@@ -204,9 +230,17 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return MapView()->ProofMode()->IsEnabled(); },
 	DEFAULT_BTN,
+	NO_BIND,
 	"Toggle proof borders. These borders represent the area that a player can see with default zoom.")
 REGISTER_QUICK_ACTION(
-	AddTileLayer, "Add tile layer", [&]() { AddTileLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new tile layer.")
+	AddTileLayer,
+	"Add tile layer",
+	[&]() { AddTileLayer(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	NO_BIND,
+	"Create a new tile layer.")
 REGISTER_QUICK_ACTION(
 	AddSwitchLayer,
 	"Add switch layer",
@@ -214,6 +248,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !Map()->SelectedGroup()->m_GameGroup || Map()->m_pSwitchLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Create a new switch layer.")
 REGISTER_QUICK_ACTION(
 	AddTuneLayer,
@@ -222,6 +257,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !Map()->SelectedGroup()->m_GameGroup || Map()->m_pTuneLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Create a new tuning layer.")
 REGISTER_QUICK_ACTION(
 	AddSpeedupLayer,
@@ -230,6 +266,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !Map()->SelectedGroup()->m_GameGroup || Map()->m_pSpeedupLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Create a new speedup layer.")
 REGISTER_QUICK_ACTION(
 	AddTeleLayer,
@@ -238,6 +275,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !Map()->SelectedGroup()->m_GameGroup || Map()->m_pTeleLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Create a new tele layer.")
 REGISTER_QUICK_ACTION(
 	AddFrontLayer,
@@ -246,11 +284,26 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !Map()->SelectedGroup()->m_GameGroup || Map()->m_pFrontLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Create a new item layer.")
 REGISTER_QUICK_ACTION(
-	AddQuadsLayer, "Add quads layer", [&]() { AddQuadsLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new quads layer.")
+	AddQuadsLayer,
+	"Add quads layer",
+	[&]() { AddQuadsLayer(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	NO_BIND,
+	"Create a new quads layer.")
 REGISTER_QUICK_ACTION(
-	AddSoundLayer, "Add sound layer", [&]() { AddSoundLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new sound layer.")
+	AddSoundLayer,
+	"Add sound layer",
+	[&]() { AddSoundLayer(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	NO_BIND,
+	"Create a new sound layer.")
 REGISTER_QUICK_ACTION(
 	NewMap,
 	"New map",
@@ -261,7 +314,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+N] Create a new map.")
+	BIND(false, true, false, KEY_N, EBindSection::FILE_BROWSER),
+	"Create a new map.")
 REGISTER_QUICK_ACTION(
 	Save,
 	"Save",
@@ -278,7 +332,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+S] Save the current map.")
+	BIND(false, true, false, KEY_S, EBindSection::FILE_BROWSER),
+	"Save the current map.")
 REGISTER_QUICK_ACTION(
 	SaveAs,
 	"Save as",
@@ -288,7 +343,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Shift+S] Save the current map under a new name.")
+	BIND(true, true, false, KEY_S, EBindSection::FILE_BROWSER),
+	"Save the current map under a new name.")
 REGISTER_QUICK_ACTION(
 	SaveCopy,
 	"Save copy",
@@ -298,7 +354,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Shift+Alt+S] Save a copy of the current map under a new name.")
+	BIND(true, true, true, KEY_S, EBindSection::FILE_BROWSER),
+	"Save a copy of the current map under a new name.")
 REGISTER_QUICK_ACTION(
 	LoadMap,
 	"Load map",
@@ -308,7 +365,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+L] Open a map for editing.")
+	BIND(false, true, false, KEY_L, EBindSection::FILE_BROWSER),
+	"Open a map for editing.")
 REGISTER_QUICK_ACTION(
 	LoadIngameMap,
 	"Load ingame map",
@@ -318,7 +376,8 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Shift+L] Open the current ingame map for editing.")
+	BIND(true, true, false, KEY_L, EBindSection::FILE_BROWSER),
+	"Open the current ingame map for editing.")
 REGISTER_QUICK_ACTION(
 	AppendMap,
 	"Append map",
@@ -328,7 +387,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+A] Open a map and add everything from that map to the current map.")
+	BIND(false, true, false, KEY_A, EBindSection::FILE_BROWSER),
+	"Open a map and add everything from that map to the current map.")
 REGISTER_QUICK_ACTION(
 	CloseMap,
 	"Close map",
@@ -336,7 +396,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+F4] Close the current map.")
+	BIND(false, true, false, KEY_F4, EBindSection::FILE_BROWSER),
+	"Close the current map.")
 REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",
@@ -344,6 +405,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES; },
+	NO_BIND,
 	"Toggle the envelope editor.")
 REGISTER_QUICK_ACTION(
 	ServerSettings,
@@ -352,6 +414,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS; },
+	NO_BIND,
 	"Toggle the server settings editor.")
 REGISTER_QUICK_ACTION(
 	History,
@@ -360,6 +423,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_HISTORY; },
+	NO_BIND,
 	"Toggle the editor history view.")
 REGISTER_QUICK_ACTION(
 	AddImage,
@@ -368,6 +432,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Load a new image to use in the map.")
 REGISTER_QUICK_ACTION(
 	LayerPropAddImage,
@@ -376,6 +441,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !IsNonGameTileLayerSelected(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Pick mapres image for currently selected layer.")
 REGISTER_QUICK_ACTION(
 	ShowInfoOff,
@@ -386,6 +452,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_OFF; },
 	DEFAULT_BTN,
+	NO_BIND,
 	"Do not show tile information.")
 REGISTER_QUICK_ACTION(
 	ShowInfoDec,
@@ -396,7 +463,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_DECIMAL; },
 	DEFAULT_BTN,
-	"[Ctrl+I] Show tile information.")
+	BIND(false, true, false, KEY_I, EBindSection::GENERAL),
+	"Show tile information.")
 REGISTER_QUICK_ACTION(
 	ShowInfoHex,
 	"Show info: Hex",
@@ -406,7 +474,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_HEXADECIMAL; },
 	DEFAULT_BTN,
-	"[Ctrl+Shift+I] Show tile information in hexadecimal.")
+	BIND(true, true, false, KEY_I, EBindSection::GENERAL),
+	"Show tile information in hexadecimal.")
 REGISTER_QUICK_ACTION(
 	PreviewQuadEnvelopes,
 	"Preview quad envelopes",
@@ -417,6 +486,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowEnvelopePreview; },
 	DEFAULT_BTN,
+	NO_BIND,
 	"Toggle previewing the paths of quads with a position envelope when a quad layer is selected.")
 REGISTER_QUICK_ACTION(
 	DeleteLayer,
@@ -430,6 +500,7 @@ REGISTER_QUICK_ACTION(
 	},
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Delete the layer.")
 REGISTER_QUICK_ACTION(
 	Pipette,
@@ -438,7 +509,8 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ColorPipetteActive; },
 	DEFAULT_BTN,
-	"[Ctrl+Shift+C] Color pipette. Pick a color from the screen by clicking on it.")
+	BIND(true, true, false, KEY_C, EBindSection::GENERAL),
+	"Color pipette. Pick a color from the screen by clicking on it.")
 REGISTER_QUICK_ACTION(
 	MapDetails,
 	"Map details",
@@ -446,6 +518,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Adjust the map details of the current map.")
 REGISTER_QUICK_ACTION(
 	AddQuad,
@@ -459,7 +532,8 @@ REGISTER_QUICK_ACTION(
 	},
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Q] Add a new quad.")
+	BIND(false, true, false, KEY_Q, EBindSection::QUADS_AND_SOUNDS),
+	"Add a new quad.")
 REGISTER_QUICK_ACTION(
 	AddSoundSource,
 	"Add sound source",
@@ -472,7 +546,8 @@ REGISTER_QUICK_ACTION(
 	},
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Q] Add a new sound source.")
+	BIND(false, true, false, KEY_Q, EBindSection::QUADS_AND_SOUNDS),
+	"Add a new sound source.")
 REGISTER_QUICK_ACTION(
 	TestMapLocally,
 	"Test map locally",
@@ -480,6 +555,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
+	NO_BIND,
 	"Run a local server with the current map and connect you to it.")
 
 #undef ALWAYS_FALSE
