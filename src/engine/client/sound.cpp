@@ -304,7 +304,7 @@ CSample *CSound::AllocSample()
 
 void CSound::RateConvert(CSample &Sample) const
 {
-	dbg_assert(Sample.IsLoaded(), "Sample not loaded");
+	dbg_assert(Sample.IsLoaded(), "Sample not loaded: %d", Sample.m_Index);
 	// make sure that we need to convert this sound
 	if(Sample.m_Rate == m_MixingRate)
 		return;
@@ -674,7 +674,7 @@ void CSound::UnloadSample(int SampleId)
 	if(SampleId == -1)
 		return;
 
-	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
 	const CLockScope LockScope(m_SoundLock);
 	CSample &Sample = m_aSamples[SampleId];
 
@@ -704,19 +704,19 @@ void CSound::UnloadSample(int SampleId)
 
 float CSound::GetSampleTotalTime(int SampleId)
 {
-	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
 
 	const CLockScope LockScope(m_SoundLock);
-	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded: %d", SampleId);
 	return m_aSamples[SampleId].TotalTime();
 }
 
 float CSound::GetSampleCurrentTime(int SampleId)
 {
-	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
 
 	const CLockScope LockScope(m_SoundLock);
-	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded: %d", SampleId);
 	CSample *pSample = &m_aSamples[SampleId];
 	for(auto &Voice : m_aVoices)
 	{
@@ -731,10 +731,10 @@ float CSound::GetSampleCurrentTime(int SampleId)
 
 void CSound::SetSampleCurrentTime(int SampleId, float Time)
 {
-	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
 
 	const CLockScope LockScope(m_SoundLock);
-	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded: %d", SampleId);
 	CSample *pSample = &m_aSamples[SampleId];
 	for(auto &Voice : m_aVoices)
 	{
@@ -750,7 +750,7 @@ void CSound::SetSampleCurrentTime(int SampleId, float Time)
 
 void CSound::SetChannel(int ChannelId, float Vol, float Pan)
 {
-	dbg_assert(ChannelId >= 0 && ChannelId < NUM_CHANNELS, "ChannelId invalid");
+	dbg_assert(ChannelId >= 0 && ChannelId < NUM_CHANNELS, "ChannelId invalid: %d", ChannelId);
 
 	const CLockScope LockScope(m_SoundLock);
 	m_aChannels[ChannelId].m_Vol = (int)(Vol * 255.0f);
@@ -893,6 +893,9 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 
 ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position)
 {
+	dbg_assert(ChannelId >= 0 && ChannelId < NUM_CHANNELS, "ChannelId invalid: %d", ChannelId);
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
+
 	const CLockScope LockScope(m_SoundLock);
 
 	// search for voice
@@ -949,12 +952,12 @@ ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float 
 
 void CSound::Pause(int SampleId)
 {
-	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
 
 	// TODO: a nice fade out
 	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleId];
-	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded: %d", SampleId);
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample == pSample)
@@ -967,12 +970,12 @@ void CSound::Pause(int SampleId)
 
 void CSound::Stop(int SampleId)
 {
-	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
 
 	// TODO: a nice fade out
 	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleId];
-	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded: %d", SampleId);
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample == pSample)
@@ -1020,10 +1023,10 @@ void CSound::StopVoice(CVoiceHandle Voice)
 
 bool CSound::IsPlaying(int SampleId)
 {
-	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
 	const CLockScope LockScope(m_SoundLock);
 	const CSample *pSample = &m_aSamples[SampleId];
-	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded: %d", SampleId);
 	return std::any_of(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
 }
 

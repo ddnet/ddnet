@@ -74,6 +74,7 @@ void CMapSounds::OnMapLoad()
 			{
 				log_error("mapsounds", "Failed to load map sound %d: failed to load name.", i);
 				ShowWarning = true;
+				m_aSounds[i] = -1;
 				continue;
 			}
 			pName = "(error)";
@@ -93,6 +94,7 @@ void CMapSounds::OnMapLoad()
 			{
 				log_error("mapsounds", "Failed to load map sound %d: failed to load data.", i);
 				ShowWarning = true;
+				m_aSounds[i] = -1;
 				continue;
 			}
 			const int SoundDataSize = pMap->GetDataSize(pSound->m_SoundData);
