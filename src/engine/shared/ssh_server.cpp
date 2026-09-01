@@ -731,7 +731,7 @@ void CSshClient::SendScrollRegion()
 	// exclude the status bar from the scroll region
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "\033[1;%dr", m_Term.m_Height - 1);
+	str_format(aBuf, sizeof(aBuf), "\033[1;%dr", m_Term.m_Height - StatusLineHeight());
 	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 
 	SendCursorPos(m_CursorPos);
@@ -1083,6 +1083,36 @@ void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 {
 	if(m_Config.m_StatusLine)
 	{
+		// if we decrease the terminal window height
+		// and on the new smaller height we reached the bottom
+		// of the terminal with out prompt and log
+		// then the status line will override the last line
+		// so toggling term size back and forth will slowly eat up
+		// the back log
+		//
+		// to fix this we trigger a scroll before redrawing the status line
+		//
+		// and forwhatever reason we have to perform this scroll in the old scroll region
+		// of the bigger terminal size which is now outdated
+		// otherwise we get an empty line between prompt and status line and stuff gets bugged
+		if(m_Term.m_Height < OldHeight && m_Channel)
+		{
+			// scroll down once to make sure the status line fits
+			// this is needed when the terminal height is lower
+			// than the banner and current terminal offset when the session started
+			// in that case the status line would override the prompt
+			// so we need to make sure there is extra space for it
+			//
+			// we intentionally do not send \r to keep the prompt alignment
+			ssh_channel_write(m_Channel, "\n", 2);
+
+			// move cursor up again
+			ssh_channel_write(m_Channel, "\x1B[A", 4);
+		}
+
+		// WARNING: this should happen first
+		//          any kind of sending should happen in the new scroll region
+		//          except the one magic anti override scroll hack that is performed above
 		SendScrollRegion();
 
 		// if the terminal height increases
@@ -1105,19 +1135,10 @@ void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 			SendCursorPos({0, PrevStatusY});
 			ssh_channel_write(m_Channel, "\r\033[2K", 6);
 
-			// TODO: this clears the wrong line sometimes
-			//       its actually the same issue as the banner issue
-			//       because if there is initial scroll client side
-			//       which there always is by the prompt that ran the ssh command
-			//       and then we reach the bottom of the term we are at hight y of value n
-			//       but when we resize bigger the old previous line that got scrolled of
-			//       will appear again which means the status line is actually at n+1
-			//       assuming we regained one old line by sizing the terminal up
-
-			// debug to know which line was cleared debugging offset err
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "(cleared this line %d)", OldHeight);
-			ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
+			// // debug to know which line was cleared debugging offset err
+			// char aBuf[512];
+			// str_format(aBuf, sizeof(aBuf), "(cleared this line %d)", OldHeight);
+			// ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 
 			SendCursorPos(m_CursorPos);
 		}
