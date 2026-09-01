@@ -55,7 +55,7 @@
 // TODO: add an option to edit config variables not just override them.
 //       so for example "edit sv_name" or "e sv_name" fills the prompt with the
 //       current value and lets the user edit it in place
-//       for this we need a new prompt mode similar to the sarch mode to show that the user what is being edited
+//       for this we need a new prompt mode similar to the search mode to show that the user what is being edited
 
 // TODO: reaching terminal width length with the input is not supported yet
 //       things get weird
@@ -773,7 +773,7 @@ void CSshClient::EnableAltBuf()
 		return;
 
 	ssh_channel_write(m_Channel, "\033[?1049h", 9);
-	m_CurorPosMainBuf = m_CursorPos;
+	m_CursorPosMainBuf = m_CursorPos;
 }
 
 void CSshClient::DisableAltBuf()
@@ -782,7 +782,7 @@ void CSshClient::DisableAltBuf()
 		return;
 
 	ssh_channel_write(m_Channel, "\033[?1049l", 9);
-	m_CursorPos = m_CurorPosMainBuf;
+	m_CursorPos = m_CursorPosMainBuf;
 }
 
 void CSshClient::SendBell() const

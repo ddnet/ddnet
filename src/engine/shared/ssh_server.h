@@ -185,7 +185,7 @@ public:
 	// when a new buffer is rendered
 	// so a popup or menu with its own cursor position
 	// we restore this once we get back to the main prompt
-	ivec2 m_CurorPosMainBuf = ivec2(0, 0);
+	ivec2 m_CursorPosMainBuf = ivec2(0, 0);
 
 	// current index in the m_aInput array
 	// related to m_Term.m_CursorPos.x but not the same
