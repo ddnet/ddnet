@@ -670,8 +670,18 @@ int CSshClient::PromptLength()
 	return str_length(PromptStr()) + 1;
 }
 
+// TODO: this is a unused concept of a multi row prompt
+//       which has completion preview above or below the input
 int CSshClient::PromptHeight()
 {
+	return 1;
+}
+
+int CSshClient::StatusLineHeight() const
+{
+	if(!m_Config.m_StatusLine)
+		return 0;
+
 	return 1;
 }
 
@@ -828,7 +838,7 @@ void CSshClient::SendCursorPos(ivec2 Pos) const
 	// log_info("ssh", "sending pos x=%d y=%d", Pos.x, Pos.y);
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "\x1B[%d;%dH", std::min(Pos.y, m_Term.m_Height - 1), Pos.x);
+	str_format(aBuf, sizeof(aBuf), "\x1B[%d;%dH", std::min(Pos.y, m_Term.m_Height - StatusLineHeight()), Pos.x);
 	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 
 	// there would also be relative move left and right
@@ -879,7 +889,7 @@ void CSshClient::RenderHistorySearch()
 	const char *apMatches[MAX_TERMINAL_HEIGHT + 1] = {nullptr};
 	m_pHistorySearchMatch = nullptr;
 
-	int MaxLines = std::min(m_Term.m_Height - PromptHeight(), (int)MAX_TERMINAL_HEIGHT);
+	int MaxLines = std::min(m_Term.m_Height - (PromptHeight() + StatusLineHeight()), (int)MAX_TERMINAL_HEIGHT);
 	int NumLines = 0;
 	for(auto &Entry : m_InputHistory)
 	{
@@ -1447,7 +1457,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				str_copy(pClient->m_aPromptInput, pClient->m_aInput);
 				pClient->m_aInput[0] = '\0';
 				pClient->ClearPrompt();
-				pClient->m_CursorPos.y = pClient->m_Term.m_Height - (pClient->PromptHeight() - 1);
+				pClient->m_CursorPos.y = pClient->m_Term.m_Height - pClient->StatusLineHeight();
 				pClient->m_HistorySearchScroll = 0;
 				pClient->RenderHistorySearch();
 			}

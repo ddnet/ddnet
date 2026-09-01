@@ -249,6 +249,7 @@ public:
 	const char *PromptStr();
 	int PromptLength();
 	int PromptHeight();
+	int StatusLineHeight() const;
 	void SetCursorPosToPromptStart();
 	void UpdateStatusLine();
 	void SendScrollRegion();
