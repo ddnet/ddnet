@@ -164,6 +164,11 @@ class CGameConsole : public CComponent
 	bool m_WantsSelectionCopy = false;
 	CUi::CTouchState m_TouchState;
 
+	vec2 m_ButtonPressPosition = vec2(0.0f, 0.0f);
+	bool m_ButtonPressed = false;
+
+	bool DoButton(const CUIRect &Rect, const char *pIcon, vec2 MousePosition, bool Released);
+
 	static constexpr ColorRGBA ms_SearchHighlightColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
 	static constexpr ColorRGBA ms_SearchSelectedColor = ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f);
 
