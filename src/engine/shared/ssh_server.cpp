@@ -1090,7 +1090,19 @@ void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 		// so we need to clear it out
 		if(m_Term.m_Height > OldHeight && m_Channel)
 		{
-			SendCursorPos({0, OldHeight});
+			// The status line is always at the bottom of the terminal window
+			// so when we clear out on resize we want to navigate to
+			// OldHeight (terminal hight) and send a clear line
+			// but it gets more tricky once the client sent and received
+			// so many prompt and log lines that it started to scroll
+			// because then before resize the prompt and status line are capped by the terminal width
+			// and after windows size increase old log lines show up again so the prompt and also the
+			// old status line get shifted to the cursor pos
+			// so we use which ever value is bigger and ther terminal emulator will cap us when we
+			// go out ouf bounds anyways
+			int PrevStatusY = std::max(OldHeight, m_CursorPos.y + PromptHeight());
+
+			SendCursorPos({0, PrevStatusY});
 			ssh_channel_write(m_Channel, "\r\033[2K", 6);
 
 			// TODO: this clears the wrong line sometimes
@@ -1102,10 +1114,10 @@ void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 			//       will appear again which means the status line is actually at n+1
 			//       assuming we regained one old line by sizing the terminal up
 
-			// // debug to know which line was cleared debugging offset err
-			// char aBuf[512];
-			// str_format(aBuf, sizeof(aBuf), "(cleared this line %d)", OldHeight);
-			// ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
+			// debug to know which line was cleared debugging offset err
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "(cleared this line %d)", OldHeight);
+			ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 
 			SendCursorPos(m_CursorPos);
 		}
