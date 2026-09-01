@@ -1083,6 +1083,8 @@ void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 {
 	if(m_Config.m_StatusLine)
 		SendScrollRegion();
+
+	// TODO: handle too long input lines and wrapping
 }
 
 void CSshServer::ProcessMessage(CSshClient *pClient)
@@ -2093,12 +2095,6 @@ int CSshServer::ChannelPtyRequestCallback(ssh_session Session, ssh_channel Chann
 
 int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel Channel, int Width, int Height, int PxWidth, int PwHeight, void *pUserData)
 {
-	// TODO: better handle resize
-	//       have some on resize callback here
-	//       with before width and height
-	//       and handle too long input lines and wrapping
-	//       also redraw the status line and clear out the old one
-
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 	CSshClient *pClient = pCtx->m_pClient;
 	int OldWidth = pClient->m_Term.m_Width;
