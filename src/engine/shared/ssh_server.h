@@ -253,6 +253,7 @@ public:
 	void SetCursorPosToPromptStart();
 	void UpdateStatusLine();
 	void SendScrollRegion();
+	void ResetScrollRegion();
 
 	void ClearCompletionPreview();
 

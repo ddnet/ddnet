@@ -737,6 +737,21 @@ void CSshClient::SendScrollRegion()
 	SendCursorPos(m_CursorPos);
 }
 
+void CSshClient::ResetScrollRegion()
+{
+	if(!m_GotInitialCursorPos || !m_Channel)
+		return;
+
+	// TODO: this only works for a status line of height 1 should clear StatusLineHeight() amount of lines
+
+	char aBuf[512];
+	// 1. \033[r      - Resets the scrolling region to the full screen
+	// 2. \033[%d;1H  - Moves the cursor to the start of the status bar line (m_Height)
+	// 3. \033[2K     - Clears that entire line to remove the leftover status bar artifact
+	str_format(aBuf, sizeof(aBuf), "\033[r\033[%d;1H\033[2K", m_Term.m_Height);
+	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
+}
+
 void CSshClient::ClearCompletionPreview()
 {
 	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
@@ -2301,6 +2316,8 @@ void CSshServer::OnClientDisconnect(int ClientId, const char *pReason)
 
 	log_info("ssh", "disconnect cid=%d reason='%s'", ClientId, pReason);
 	MergeInputHistory(pClient);
+
+	pClient->ResetScrollRegion();
 
 	ssh_channel Channel = pClient->m_Channel;
 	if(Channel)
