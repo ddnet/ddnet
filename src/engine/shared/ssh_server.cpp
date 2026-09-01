@@ -1224,6 +1224,8 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 				}
 			}
 
+			pClient->UpdateStatusLine();
+
 			// skip the sequence
 			return BytesScanned - 1;
 		}
@@ -2147,6 +2149,22 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 		"##################################\r\n";
 	ssh_channel_write(Channel, pBanner, str_length(pBanner));
 	pCtx->m_pClient->NewPrompt();
+
+	if(pCtx->m_pClient->m_Config.m_StatusLine)
+	{
+		// scroll down once to make sure the status line fits
+		// this is needed when the terminal height is lower
+		// than the banner and current terminal offset when the session started
+		// in that case the status line would override the prompt
+		// so we need to make sure there is extra space for it
+		//
+		// we intentionally do not send \r to keep the prompt alignment
+		ssh_channel_write(Channel, "\n", 2);
+
+		// move cursor up again
+		ssh_channel_write(Channel, "\x1B[A", 4);
+	}
+
 	pCtx->m_pClient->RequestCursorPos();
 
 	return SSH_OK;
