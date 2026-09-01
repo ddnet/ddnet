@@ -12,6 +12,23 @@
  * iOS-specific functions.
  */
 
+struct SDL_Window;
+
+/**
+ * Determines the insets of the drawable area of a window which are covered by
+ * the cutout of the display, in pixels.
+ *
+ * @ingroup iOS
+ *
+ * Only the cutout hides content. The home indicator is drawn on top of the
+ * content instead, so the entire height of the display stays usable.
+ *
+ * @param pWindow The window to determine the insets of.
+ * @param pLeft Pointer to variable that will receive the left inset.
+ * @param pRight Pointer to variable that will receive the right inset.
+ */
+void IosDisplayCutoutInsets(SDL_Window *pWindow, int *pLeft, int *pRight);
+
 /**
  * Initializes iOS specific runtime settings.
  *

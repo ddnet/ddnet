@@ -50,6 +50,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Update_Viewport(const CCommandBuffer:
 	{
 		m_CanvasWidth = (uint32_t)pCommand->m_Width;
 		m_CanvasHeight = (uint32_t)pCommand->m_Height;
+		m_HasDisplayCutout = pCommand->m_Width != pCommand->m_DrawableWidth;
 	}
 	glViewport(m_ViewportX, m_ViewportY, pCommand->m_Width, pCommand->m_Height);
 }
@@ -959,11 +960,22 @@ void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_
 	{
 		glDisable(GL_SCISSOR_TEST);
 	}
+	if(m_HasDisplayCutout)
+	{
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glScissor(m_ViewportX, m_ViewportY, m_CanvasWidth, m_CanvasHeight);
+		glEnable(GL_SCISSOR_TEST);
+	}
 	glClearColor(pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if(ClipWasEnabled)
 	{
 		glEnable(GL_SCISSOR_TEST);
+	}
+	else if(m_HasDisplayCutout)
+	{
+		glDisable(GL_SCISSOR_TEST);
 	}
 }
 

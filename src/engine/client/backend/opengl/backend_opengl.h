@@ -58,6 +58,7 @@ protected:
 	int m_ViewportY = 0;
 	uint32_t m_CanvasWidth = 0;
 	uint32_t m_CanvasHeight = 0;
+	bool m_HasDisplayCutout = false;
 
 	TWGLint m_MaxTexSize;
 
