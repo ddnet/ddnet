@@ -2141,6 +2141,45 @@ int CSshServer::ChannelShellRequestCallback(ssh_session Session, ssh_channel Cha
 	pCtx->m_pClient->m_Channel = Channel;
 	pCtx->m_pClient->m_ShellReady = true;
 
+	// TODO: when the terminal width and or height is too low
+	//       that the banner causes scrolling already
+	//       the request cursor pos will get y pos of the bottom
+	//       of the terminal (terminal height) which is less than
+	//       the actual number of rows printed
+	//       meaning if we increase the terminal size after connecting
+	//       without causing anymore newlines
+	//       and then start typing our server side cursor pos might
+	//       only be something like 3 if our terminal height is only 3
+	//       but now we have enough space so the entire banner is shown
+	//       but if we start typing our cursor will be inside of the banner
+	//       because it is longer than 3 lines
+	//       the proper fix for this is not to rely on the lazy cursor pos lookup
+	//       it was convienient to just log whatever we want and have the
+	//       client be in any kind of previous scroll state on connect
+	//       and then just fetch the cursor pos
+	//       but for this small terminal size we need to properly track
+	//       linebreaks server side similar to how the logger does it
+	//       right now its not too bad because the banner is tiny
+	//       so only small terminals are affected once on connect
+	//       if they instantly size up
+	//       but if we start to put more things into the banner this will
+	//       become a bigger problem
+	//       so there should be a helper called SendBannerLine()
+	//       which counts the amount of lines sent also taking
+	//       line width and terminal width wrapping into account
+	//       and then we trust this position more than the terminal height
+	//       capped y index for the scroll offset so we get the proper
+	//       scroll offset when sizing the terminal up.
+	//       the tricky thing if we count server side is that we can not start
+	//       to count x/y at 0/0 because the client prompt
+	//       cursor is expected to be at least offsetet on x by the bash/zsh prompt
+	//       and the y is probably offset too by previous commands
+	//       so really the clean fix would be to fetch the cursor pos
+	//       on connect and block any kind of input while it is pending
+	//       then send the banner and track the x/y server side
+	//       but thats a bigger refactor and the benefit is only fixing
+	//       a tiny glitch right now
+
 	const char *pBanner =
 		"##################################\r\n"
 		"#                                #\r\n"
