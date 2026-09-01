@@ -1082,7 +1082,37 @@ const char *CSshClient::NextInputFromHistory()
 void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 {
 	if(m_Config.m_StatusLine)
+	{
 		SendScrollRegion();
+
+		// if the terminal height increases
+		// the old status bar will be floating mid screen
+		// so we need to clear it out
+		if(m_Term.m_Height > OldHeight && m_Channel)
+		{
+			SendCursorPos({0, OldHeight});
+			ssh_channel_write(m_Channel, "\r\033[2K", 6);
+
+			// TODO: this clears the wrong line sometimes
+			//       its actually the same issue as the banner issue
+			//       because if there is initial scroll client side
+			//       which there always is by the prompt that ran the ssh command
+			//       and then we reach the bottom of the term we are at hight y of value n
+			//       but when we resize bigger the old previous line that got scrolled of
+			//       will appear again which means the status line is actually at n+1
+			//       assuming we regained one old line by sizing the terminal up
+
+			// // debug to know which line was cleared debugging offset err
+			// char aBuf[512];
+			// str_format(aBuf, sizeof(aBuf), "(cleared this line %d)", OldHeight);
+			// ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
+
+			SendCursorPos(m_CursorPos);
+		}
+
+		// redraw status line at the bottom of the new term size
+		UpdateStatusLine();
+	}
 
 	// TODO: handle too long input lines and wrapping
 }
