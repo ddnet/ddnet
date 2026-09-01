@@ -8,6 +8,7 @@
 #include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
+#include <base/time.h>
 
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
@@ -28,6 +29,29 @@ extern "C" {
 static constexpr int SAMPLE_INDEX_USED = -2;
 static constexpr int SAMPLE_INDEX_FULL = -1;
 
+unsigned CSound::AdvanceVoice(CVoice &Voice, unsigned Frames)
+{
+	// make sure that we don't go outside the sound data
+	const unsigned Advanced = std::min(Frames, (unsigned)(Voice.m_pSample->m_NumFrames - Voice.m_Tick));
+	Voice.m_Tick += Advanced;
+
+	// free voice if not used any more
+	if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
+	{
+		if(Voice.m_Flags & ISound::FLAG_LOOP)
+		{
+			Voice.m_Tick = Voice.m_pSample->m_LoopStart;
+		}
+		else
+		{
+			Voice.m_pSample = nullptr;
+			Voice.m_Age++;
+		}
+	}
+
+	return Advanced;
+}
+
 void CSound::Mix(short *pFinalOut, unsigned Frames)
 {
 	Frames = std::min(Frames, m_MaxFrames);
@@ -46,21 +70,18 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 		// mix voice
 		int *pOut = m_pMixBuffer;
 
-		const int Step = Voice.m_pSample->m_Channels; // setup input sources
-		short *pInL = &Voice.m_pSample->m_pData[Voice.m_Tick * Step];
-		short *pInR = &Voice.m_pSample->m_pData[Voice.m_Tick * Step + 1];
+		const CSample *pSample = Voice.m_pSample;
+		const int Step = pSample->m_Channels; // setup input sources
+		short *pInL = &pSample->m_pData[Voice.m_Tick * Step];
+		short *pInR = &pSample->m_pData[Voice.m_Tick * Step + 1];
 
-		unsigned End = Voice.m_pSample->m_NumFrames - Voice.m_Tick;
+		const unsigned End = AdvanceVoice(Voice, Frames);
 
 		int VolumeR = round_truncate(Voice.m_pChannel->m_Vol * (Voice.m_Vol / 255.0f));
 		int VolumeL = VolumeR;
 
-		// make sure that we don't go outside the sound data
-		if(Frames < End)
-			End = Frames;
-
 		// check if we have a mono sound
-		if(Voice.m_pSample->m_Channels == 1)
+		if(pSample->m_Channels == 1)
 			pInR = pInL;
 
 		// volume calculation
@@ -142,21 +163,6 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 			*pOut++ += (*pInR) * VolumeR;
 			pInL += Step;
 			pInR += Step;
-			Voice.m_Tick++;
-		}
-
-		// free voice if not used any more
-		if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
-		{
-			if(Voice.m_Flags & ISound::FLAG_LOOP)
-			{
-				Voice.m_Tick = Voice.m_pSample->m_LoopStart;
-			}
-			else
-			{
-				Voice.m_pSample = nullptr;
-				Voice.m_Age++;
-			}
 		}
 	}
 
@@ -217,44 +223,149 @@ int CSound::Init()
 		return -1;
 	}
 
-	SDL_AudioSpec Format, FormatOut;
-	Format.freq = g_Config.m_SndRate;
-	Format.format = AUDIO_S16;
-	Format.channels = 2;
-	Format.samples = g_Config.m_SndBufferSize;
-	Format.callback = SdlCallback;
-	Format.userdata = this;
+	m_AudioSpec.freq = g_Config.m_SndRate;
+	m_AudioSpec.format = AUDIO_S16;
+	m_AudioSpec.channels = 2;
+	m_AudioSpec.samples = g_Config.m_SndBufferSize;
+	m_AudioSpec.callback = SdlCallback;
+	m_AudioSpec.userdata = this;
 
-	// Open the audio device and start playing sound!
-	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
-	if(m_Device == 0)
-	{
-		log_error("sound", "Unable to open audio device: %s", SDL_GetError());
-		return -1;
-	}
-	else
-	{
-		log_info("sound", "Sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
-	}
-
-	m_MixingRate = FormatOut.freq;
-	m_MaxFrames = FormatOut.samples * 2;
+	m_MixingRate = m_AudioSpec.freq;
+	m_MaxFrames = m_AudioSpec.samples * 2;
 #if defined(CONF_VIDEORECORDER)
 	m_MaxFrames = std::max(m_MaxFrames, 1024u * 2u); // make the buffer bigger just in case
 #endif
 	m_pMixBuffer = (int *)calloc(m_MaxFrames * 2, sizeof(int));
 
 	m_SoundEnabled = true;
-	Update();
+	UpdateVolume();
 
-	SDL_PauseAudioDevice(m_Device, 0);
+	SDL_AddEventWatch(HandleAudioDeviceEvent, this);
+	if(OpenDevice(true))
+	{
+		log_info("sound", "Sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
+	}
+	else
+	{
+		log_error("sound", "Unable to open audio device (%s), waiting for one to become available", SDL_GetError());
+	}
 	return 0;
+}
+
+int SDLCALL CSound::HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent)
+{
+	if((pEvent->type == SDL_AUDIODEVICEADDED || pEvent->type == SDL_AUDIODEVICEREMOVED) && !pEvent->adevice.iscapture)
+	{
+		static_cast<CSound *>(pUser)->m_DeviceChanged.store(true, std::memory_order_relaxed);
+	}
+	return 0;
+}
+
+bool CSound::OpenDevice(bool AllowFrequencyChange)
+{
+	dbg_assert(m_Device == 0, "Audio device already open");
+
+	SDL_AudioSpec FormatOut;
+	m_Device = SDL_OpenAudioDevice(nullptr, 0, &m_AudioSpec, &FormatOut, AllowFrequencyChange ? SDL_AUDIO_ALLOW_FREQUENCY_CHANGE : 0);
+	if(m_Device == 0)
+		return false;
+
+	if(AllowFrequencyChange)
+	{
+		// Samples are converted to this rate when they are loaded, so later devices are asked for it
+		m_MixingRate = FormatOut.freq;
+		m_AudioSpec.freq = m_MixingRate;
+	}
+	SDL_PauseAudioDevice(m_Device, m_DevicePaused ? 1 : 0);
+	return true;
+}
+
+void CSound::CloseDevice()
+{
+	if(m_Device == 0)
+		return;
+
+	SDL_CloseAudioDevice(m_Device);
+	m_Device = 0;
+}
+
+void CSound::UpdateDevice()
+{
+	if(!m_SoundEnabled)
+		return;
+
+	if(m_Device != 0)
+	{
+		if(SDL_GetAudioDeviceStatus(m_Device) != SDL_AUDIO_STOPPED)
+			return;
+		log_info("sound", "Audio device was disconnected");
+		CloseDevice();
+	}
+
+	if(!m_DeviceChanged.exchange(false, std::memory_order_relaxed))
+		return;
+
+	if(OpenDevice(false))
+	{
+		log_info("sound", "Audio device connected, using audio driver '%s'", SDL_GetCurrentAudioDriver());
+	}
+}
+
+bool CSound::HasAudioOutput() const
+{
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
+		return true;
+#endif
+	return m_Device != 0;
 }
 
 int CSound::Update()
 {
 	UpdateVolume();
+	UpdateDevice();
+	AdvancePlayback();
 	return 0;
+}
+
+void CSound::AdvancePlayback()
+{
+	if(!m_SoundEnabled || HasAudioOutput())
+	{
+		m_PlaybackTime = 0;
+		return;
+	}
+
+	// Advance the voices in real time while there is no device, so that sounds
+	// end and loop like they would during playback
+	const int64_t Now = time_get();
+	if(m_PlaybackTime == 0)
+	{
+		m_PlaybackTime = Now;
+		return;
+	}
+
+	// Drop the backlog after the client was blocked for a long time
+	m_PlaybackTime = std::max(m_PlaybackTime, Now - time_freq());
+
+	int64_t Frames = ((Now - m_PlaybackTime) * m_MixingRate) / time_freq();
+	if(Frames <= 0)
+		return;
+	// Only count the whole frames, keeping the remainder for the next update
+	m_PlaybackTime += (Frames * time_freq()) / m_MixingRate;
+
+	const CLockScope LockScope(m_SoundLock);
+	while(Frames > 0)
+	{
+		// Advance in the same chunks as the mixer, so voices loop at the same points
+		const unsigned ChunkFrames = std::min<unsigned>(Frames, m_MaxFrames);
+		for(auto &Voice : m_aVoices)
+		{
+			if(Voice.m_pSample)
+				AdvanceVoice(Voice, ChunkFrames);
+		}
+		Frames -= ChunkFrames;
+	}
 }
 
 void CSound::UpdateVolume()
@@ -270,9 +381,9 @@ void CSound::Shutdown()
 	StopAll();
 
 	// Stop sound callback before freeing sample data
-	SDL_CloseAudioDevice(m_Device);
+	SDL_DelEventWatch(HandleAudioDeviceEvent, this);
+	CloseDevice();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
-	m_Device = 0;
 
 	const CLockScope LockScope(m_SoundLock);
 	for(auto &Sample : m_aSamples)
@@ -1032,12 +1143,20 @@ bool CSound::IsPlaying(int SampleId)
 
 void CSound::PauseAudioDevice()
 {
-	SDL_PauseAudioDevice(m_Device, 1);
+	m_DevicePaused = true;
+	if(m_Device != 0)
+	{
+		SDL_PauseAudioDevice(m_Device, 1);
+	}
 }
 
 void CSound::UnpauseAudioDevice()
 {
-	SDL_PauseAudioDevice(m_Device, 0);
+	m_DevicePaused = false;
+	if(m_Device != 0)
+	{
+		SDL_PauseAudioDevice(m_Device, 0);
+	}
 }
 
 IEngineSound *CreateEngineSound() { return new CSound; }
