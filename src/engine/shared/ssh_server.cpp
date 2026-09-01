@@ -1054,6 +1054,12 @@ const char *CSshClient::NextInputFromHistory()
 	return Entry.data();
 }
 
+void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
+{
+	if(m_Config.m_StatusLine)
+		SendScrollRegion();
+}
+
 void CSshServer::ProcessMessage(CSshClient *pClient)
 {
 	// we aren't interested in any specific message yet
@@ -2070,10 +2076,14 @@ int CSshServer::ChannelPtyWindowChangeCallback(ssh_session Session, ssh_channel 
 
 	CSshClient::CCallbackCtx *pCtx = static_cast<CSshClient::CCallbackCtx *>(pUserData);
 	CSshClient *pClient = pCtx->m_pClient;
+	int OldWidth = pClient->m_Term.m_Width;
+	int OldHeight = pClient->m_Term.m_Height;
 	pClient->m_Term.m_Width = Width;
 	pClient->m_Term.m_Height = Height;
-	if(pClient->m_Config.m_StatusLine)
-		pClient->SendScrollRegion();
+	if(OldWidth != Width || OldHeight != Height)
+	{
+		pClient->OnTerminalResize(OldWidth, OldHeight);
+	}
 	return SSH_OK;
 }
 

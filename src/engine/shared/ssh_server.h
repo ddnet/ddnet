@@ -317,6 +317,8 @@ public:
 	const char *PrevInputFromHistory();
 	const char *NextInputFromHistory();
 
+	void OnTerminalResize(int OldWidth, int OldHeight);
+
 	// We need to manage the memory for this struct
 	// because libssh does not copy it
 	struct ssh_server_callbacks_struct m_ServerCallback = {};
