@@ -754,7 +754,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	// Make sure to clear credentials completely from memory
 	mem_zero(m_aRconUsername, sizeof(m_aRconUsername));
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
-	m_MapDetails = std::nullopt;
+	m_aMapDetails[CONN_MAIN] = std::nullopt;
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_ExpectedRconCommands = -1;
@@ -870,6 +870,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	m_aapSnapshots[1][SNAP_CURRENT] = nullptr;
 	m_aapSnapshots[1][SNAP_PREV] = nullptr;
 	m_aReceivedSnapshots[1] = 0;
+	m_aMapDetails[CONN_DUMMY] = std::nullopt;
 	m_DummyConnected = false;
 	m_DummyConnecting = false;
 	m_DummyReconnectOnReload = false;
@@ -1363,6 +1364,25 @@ const char *CClient::LoadMapSearch(const char *pMapName, const std::optional<SHA
 	return s_aErrorMsg;
 }
 
+// The dummy plays on the map of the main connection and never loads a map
+// itself. When the server was restarted with a different map, the main
+// connection does not notice until it times out, so the dummy must not enter.
+void CClient::DummyCheckMap(const char *pName, unsigned Crc, const std::optional<SHA256_DIGEST> &Sha256)
+{
+	const bool MapLoaded = GameClient()->Map()->IsLoaded();
+	const char *pWantedName = MapLoaded ? GameClient()->Map()->FullName() : m_aMapdownloadName;
+	const unsigned WantedCrc = MapLoaded ? GameClient()->Map()->Crc() : (unsigned)m_MapdownloadCrc;
+	const std::optional<SHA256_DIGEST> WantedSha256 = MapLoaded ? std::make_optional(GameClient()->Map()->Sha256()) : m_MapdownloadSha256;
+	if(str_comp(pName, pWantedName) == 0 && Crc == WantedCrc &&
+		(!Sha256.has_value() || !WantedSha256.has_value() || Sha256.value() == WantedSha256.value()))
+	{
+		return;
+	}
+
+	// PumpNetwork handles this like any other failed dummy connection
+	m_aNetClient[CONN_DUMMY].Disconnect("server runs a different map");
+}
+
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 {
 	// server info
@@ -1672,7 +1692,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 	if(Sys)
 	{
 		// system message
-		if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
+		if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
 		{
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			SHA256_DIGEST *pMapSha256 = (SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
@@ -1689,8 +1709,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				pMapUrl = "";
 			}
 
-			m_MapDetails = std::make_optional<CMapDetails>();
-			CMapDetails &MapDetails = m_MapDetails.value();
+			m_aMapDetails[Conn] = std::make_optional<CMapDetails>();
+			CMapDetails &MapDetails = m_aMapDetails[Conn].value();
 			str_copy(MapDetails.m_aName, pMap);
 			MapDetails.m_Size = MapSize;
 			MapDetails.m_Crc = MapCrc;
@@ -1721,7 +1741,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				m_CanReceiveServerCapabilities = false;
 			}
 			std::optional<CMapDetails> MapDetails = std::nullopt;
-			std::swap(MapDetails, m_MapDetails);
+			std::swap(MapDetails, m_aMapDetails[CONN_MAIN]);
 
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			int MapCrc = Unpacker.GetInt();
@@ -1800,6 +1820,27 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					SendMapRequest();
 				}
 			}
+		}
+		else if(Conn == CONN_DUMMY && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
+		{
+			std::optional<CMapDetails> MapDetails = std::nullopt;
+			std::swap(MapDetails, m_aMapDetails[CONN_DUMMY]);
+			if(!m_DummyConnecting)
+			{
+				return;
+			}
+			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
+			const int MapCrc = Unpacker.GetInt();
+			const int MapSize = Unpacker.GetInt();
+			std::optional<SHA256_DIGEST> MapSha256;
+			if(MapDetails.has_value() &&
+				str_comp(MapDetails->m_aName, pMap) == 0 &&
+				MapDetails->m_Size == MapSize &&
+				MapDetails->m_Crc == MapCrc)
+			{
+				MapSha256 = MapDetails->m_Sha256;
+			}
+			DummyCheckMap(pMap, MapCrc, MapSha256);
 		}
 		else if(Conn == CONN_MAIN && Msg == NETMSG_MAP_DATA)
 		{
