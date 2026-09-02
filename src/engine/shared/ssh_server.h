@@ -133,7 +133,6 @@ public:
 
 class CSshClient
 {
-
 	char m_aPromptBarBottom[2048] = "";
 
 public:
