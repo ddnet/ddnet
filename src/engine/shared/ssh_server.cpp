@@ -634,6 +634,23 @@ void CSshClient::NewPrompt()
 		return;
 
 	ssh_channel_write(m_Channel, "\r\n", 2);
+	if(m_Config.m_PromptBarBottom)
+	{
+		// we first go one row down draw the bottom bar
+		// then go back up and send the input prompt so the
+		// cursor is already aligned
+
+		// go below input prompt
+		ssh_channel_write(m_Channel, "\r\n", 2);
+
+		// send bottom bar
+		ssh_channel_write(m_Channel, PromptBarBottomStr(), str_length(PromptBarBottomStr()));
+
+		// move back up and align to line start and clear previous prompt bar
+		// to draw input prompt
+		ssh_channel_write(m_Channel, "\x1B[A\r\033[2K", 9);
+	}
+
 	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	m_CursorPos.y++;
 	SetCursorPosToPromptStart();
@@ -660,6 +677,12 @@ const char *CSshClient::PromptStr()
 	return "> ";
 }
 
+const char *CSshClient::PromptBarBottomStr()
+{
+	str_copy(m_aPromptBarBottom, "(bottom bar)");
+	return m_aPromptBarBottom;
+}
+
 int CSshClient::PromptLength()
 {
 	// TODO: off by one -,- ?
@@ -668,9 +691,19 @@ int CSshClient::PromptLength()
 
 // TODO: this is a unused concept of a multi row prompt
 //       which has completion preview above or below the input
-int CSshClient::PromptHeight()
+int CSshClient::PromptHeight() const
 {
-	return 1;
+	int Height = 1;
+	if(m_Config.m_PromptBarBottom)
+		Height++;
+	return Height;
+}
+
+int CSshClient::PromptExtHeightBottom() const
+{
+	if(m_Config.m_PromptBarBottom)
+		return 1;
+	return 0;
 }
 
 int CSshClient::StatusLineHeight() const
@@ -848,8 +881,11 @@ void CSshClient::SendCursorPos(ivec2 Pos) const
 {
 	// log_info("ssh", "sending pos x=%d y=%d", Pos.x, Pos.y);
 
+	int PaddingBottom = StatusLineHeight() + PromptExtHeightBottom();
+	int MaxY = m_Term.m_Height - PaddingBottom;
+
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "\x1B[%d;%dH", std::min(Pos.y, m_Term.m_Height - StatusLineHeight()), Pos.x);
+	str_format(aBuf, sizeof(aBuf), "\x1B[%d;%dH", std::min(Pos.y, MaxY), Pos.x);
 	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 
 	// there would also be relative move left and right

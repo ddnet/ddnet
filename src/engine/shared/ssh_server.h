@@ -87,12 +87,18 @@ public:
 	//        because without it it works just fine
 	//
 	//        can scroll regions support proper increase?
-	bool m_StatusLine = true;
+	bool m_StatusLine = false;
 
 	// IDEA: i think i should try having the preview integrated in the prompt again
 	//       and not at the bottom of the screen
 	//       so no status line but a line high prompt with space for annotations
 	//       no scroll regions
+
+	// similar to status line its a row
+	// below the prompt that can be used for annotations
+	// but it does scroll with the prompt and is attached to the prompt
+	// not to the bottom of the screen
+	bool m_PromptBarBottom = true;
 };
 
 static constexpr size_t MAX_SSH_RATELIMIT_ENTRIES = 1024;
@@ -127,6 +133,9 @@ public:
 
 class CSshClient
 {
+
+	char m_aPromptBarBottom[2048] = "";
+
 public:
 	const IConsole *Console() const;
 	IConsole *Console();
@@ -276,8 +285,11 @@ public:
 	void ResendPrompt();
 
 	const char *PromptStr();
+	const char *PromptBarBottomStr();
 	int PromptLength();
-	int PromptHeight();
+	int PromptHeight() const;
+	// height of the bottom prompt extensions
+	int PromptExtHeightBottom() const;
 	int StatusLineHeight() const;
 	void SetCursorPosToPromptStart();
 	void UpdateStatusLine();
