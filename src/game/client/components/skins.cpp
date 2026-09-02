@@ -688,6 +688,7 @@ void CSkins::Refresh(TSkinLoadedCallback &&SkinLoadedCallback)
 		if(pSkinContainer->m_pLoadJob)
 		{
 			pSkinContainer->m_pLoadJob->Abort();
+			pSkinContainer->m_pLoadJob = nullptr;
 		}
 		if(pSkinContainer->m_pSkin)
 		{
