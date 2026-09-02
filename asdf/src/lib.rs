@@ -256,10 +256,8 @@ async fn handle_client_connection_impl(
     let protocol::ClientMessage::ClientHello(client_hello) = reader.read().await? else {
         bail!("first message must be client hello");
     };
-    let Some(server_hello) = protocol::ServerHelloMessage::try_from(client_hello) else {
-        bail!("incompatible client version request");
-    };
-    writer.lock().await.write(&server_hello.into()).await?;
+    let _ = client_hello;
+    writer.lock().await.write(&protocol::ServerHelloMessage.into()).await?;
 
     let mut state = Some(state);
 
@@ -358,12 +356,9 @@ async fn handle_server_connection_impl(
         let mut writer = writer.lock().await;
         writer.write(&protocol::ClientHelloMessage::default().into()).await?;
         let server_hello = reader.read().await?;
-        let protocol::ServerMessage::ServerHello(protocol::ServerHelloMessage { protocol_version })
-                = server_hello else {
+        let protocol::ServerMessage::ServerHello(protocol::ServerHelloMessage) = server_hello else {
             bail!("expected server hello, got {server_hello:?}");
         };
-        // There's only one protocol version right now.
-        assert_eq!(protocol_version, 1);
 
         writer.write(&protocol::SubscribeBansMessage.into()).await?;
     }
