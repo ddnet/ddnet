@@ -81,6 +81,12 @@ enum class EClientMode
 class CUserConfig
 {
 public:
+	// FIXME: with status line on the initial window increase is nasty
+	//        when we didnt scroll much yet and we fullscreen the term after connect
+	//        stuff gets bugged probably because of scroll regions
+	//        because without it it works just fine
+	//
+	//        can scroll regions support proper increase?
 	bool m_StatusLine = true;
 };
 
@@ -135,7 +141,6 @@ public:
 	bool m_Authenticated = false;
 	bool m_ShellReady = false;
 	bool m_Dropped = false;
-	bool m_GotInitialCursorPos = false;
 
 	ssh_session m_Session;
 	ssh_channel m_Channel = nullptr;
@@ -186,6 +191,25 @@ public:
 	// so a popup or menu with its own cursor position
 	// we restore this once we get back to the main prompt
 	ivec2 m_CursorPosMainBuf = ivec2(0, 0);
+
+	// this is the cursor position inside of the clients terminal
+	// when the connection started
+	// this is before the server messed with it in any way
+	// this is to know how many lines of prompt offset already are on
+	// the screen when the connection started
+	// this is important to know to keep track of the cursor position
+	// server side.
+	// We increase the cursor y coordinate on every new line we send to the client
+	// but when there was already an offset before the ssh connection started
+	// and our server sent lines cause scrolling and then the user increases the
+	// window size which will bring back old lines we do not know about because
+	// they are not from us the y offset will shift
+	// to fix that we have this very variable to know the initial offset
+	//
+	// nothing should be sent to the client before this is fetched
+	// and all inputs should be dropped or queued
+	// (this is not properly implemented yet)
+	std::optional<ivec2> m_InitialCursorPos = std::nullopt;
 
 	// current index in the m_aInput array
 	// related to m_Term.m_CursorPos.x but not the same
@@ -327,6 +351,10 @@ public:
 	[[gnu::format(printf, 2, 3)]] void SendChannel(const char *pFormat, ...);
 
 	void OnTerminalResize(int OldWidth, int OldHeight);
+
+	// called once on connect when we know the clients cursor positon
+	// and can send things with the correct offsets
+	void OnTerminalReady();
 
 	// We need to manage the memory for this struct
 	// because libssh does not copy it

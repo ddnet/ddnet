@@ -693,7 +693,7 @@ void CSshClient::UpdateStatusLine()
 	// avoid cursor restore bugs
 	if(m_WaitingForCursorPos)
 		return;
-	if(!m_GotInitialCursorPos)
+	if(!m_InitialCursorPos.has_value())
 		return;
 	if(!m_Config.m_StatusLine)
 		return;
@@ -721,7 +721,7 @@ void CSshClient::SendScrollRegion()
 	// TODO: clear up scroll region and status line on disconnect
 	//       i get a terminal artifact once the connection closes
 
-	if(!m_GotInitialCursorPos)
+	if(!m_InitialCursorPos.has_value())
 		return;
 
 	// exclude the status bar from the scroll region
@@ -735,7 +735,7 @@ void CSshClient::SendScrollRegion()
 
 void CSshClient::ResetScrollRegion()
 {
-	if(!m_GotInitialCursorPos || !m_Channel)
+	if(!m_InitialCursorPos.has_value() || !m_Channel)
 		return;
 
 	// TODO: this only works for a status line of height 1 should clear StatusLineHeight() amount of lines
@@ -1170,6 +1170,90 @@ void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 	// TODO: handle too long input lines and wrapping
 }
 
+void CSshClient::OnTerminalReady()
+{
+	// // TODO: when the terminal width and or height is too low
+	// //       that the banner causes scrolling already
+	// //       the request cursor pos will get y pos of the bottom
+	// //       of the terminal (terminal height) which is less than
+	// //       the actual number of rows printed
+	// //       meaning if we increase the terminal size after connecting
+	// //       without causing anymore newlines
+	// //       and then start typing our server side cursor pos might
+	// //       only be something like 3 if our terminal height is only 3
+	// //       but now we have enough space so the entire banner is shown
+	// //       but if we start typing our cursor will be inside of the banner
+	// //       because it is longer than 3 lines
+	// //       the proper fix for this is not to rely on the lazy cursor pos lookup
+	// //       it was convienient to just log whatever we want and have the
+	// //       client be in any kind of previous scroll state on connect
+	// //       and then just fetch the cursor pos
+	// //       but for this small terminal size we need to properly track
+	// //       linebreaks server side similar to how the logger does it
+	// //       right now its not too bad because the banner is tiny
+	// //       so only small terminals are affected once on connect
+	// //       if they instantly size up
+	// //       but if we start to put more things into the banner this will
+	// //       become a bigger problem
+	// //       so there should be a helper called SendBannerLine()
+	// //       which counts the amount of lines sent also taking
+	// //       line width and terminal width wrapping into account
+	// //       and then we trust this position more than the terminal height
+	// //       capped y index for the scroll offset so we get the proper
+	// //       scroll offset when sizing the terminal up.
+	// //       the tricky thing if we count server side is that we can not start
+	// //       to count x/y at 0/0 because the client prompt
+	// //       cursor is expected to be at least offsetet on x by the bash/zsh prompt
+	// //       and the y is probably offset too by previous commands
+	// //       so really the clean fix would be to fetch the cursor pos
+	// //       on connect and block any kind of input while it is pending
+	// //       then send the banner and track the x/y server side
+	// //       but thats a bigger refactor and the benefit is only fixing
+	// //       a tiny glitch right now
+
+	// log_info("ssh", "cursor y before banner %d", m_CursorPos.y);
+
+	// // send banner
+	// SendChannel(
+	// 	"%s",
+	// 	"##################################\n"
+	// 	"#                                #\n"
+	// 	"#  welcome to the rcon console!  #\n"
+	// 	"#                                #\n"
+	// 	"##################################\n");
+
+	// log_info("ssh", "cursor y after banner %d", m_CursorPos.y);
+
+	// NewPrompt();
+	// return;
+
+	// if(m_Config.m_StatusLine)
+	// {
+	// 	// scroll down once to make sure the status line fits
+	// 	// this is needed when the terminal height is lower
+	// 	// than the banner and current terminal offset when the session started
+	// 	// in that case the status line would override the prompt
+	// 	// so we need to make sure there is extra space for it
+	// 	//
+	// 	// we intentionally do not send \r to keep the prompt alignment
+	// 	ssh_channel_write(m_Channel, "\n", 2);
+
+	// 	// move cursor up again
+	// 	ssh_channel_write(m_Channel, "\x1B[A", 4);
+	// }
+
+	// // TODO: not sure yet if this should be sent before or after the banner
+	// //       and where the status line will go
+	// //       i would like to also call UpdateStatusLine() in this methods
+	// //       but its already called on callsite of this method
+	// if(m_Config.m_StatusLine)
+	// {
+	// 	SendScrollRegion();
+	// }
+
+	// UpdateStatusLine();
+}
+
 void CSshServer::ProcessMessage(CSshClient *pClient)
 {
 	// we aren't interested in any specific message yet
@@ -1298,15 +1382,20 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 			// could have drifted again
 			pClient->SendCursorPos(pClient->m_CursorPos);
 
-			if(!pClient->m_GotInitialCursorPos)
+			if(!pClient->m_InitialCursorPos.has_value())
 			{
-				pClient->m_GotInitialCursorPos = true;
+				log_info("ssh", "got INITIAL cursor pos x=%d y=%d", Column, Row);
+				pClient->m_InitialCursorPos = pClient->m_CursorPos;
+				pClient->OnTerminalReady();
+
+				// TODO: move this into OnTerminalReady()
 				if(pClient->m_Config.m_StatusLine)
 				{
 					pClient->SendScrollRegion();
 				}
 			}
 
+			// TODO: is this still needed here after the init cursor pos refactor?
 			pClient->UpdateStatusLine();
 
 			// skip the sequence
