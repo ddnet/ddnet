@@ -1,9 +1,33 @@
 #ifndef ENGINE_SERVER_ANTIBOT_H
 #define ENGINE_SERVER_ANTIBOT_H
 
-#include <antibot/antibot_data.h>
+#include <antibot/antibot_interface.h>
 
 #include <engine/antibot.h>
+
+#define ANTIBOT_FUNCTIONS(MACRO) \
+	MACRO(AbiVersion) \
+	MACRO(Init) \
+	MACRO(RoundStart) \
+	MACRO(RoundEnd) \
+	MACRO(UpdateData) \
+	MACRO(Destroy) \
+	MACRO(ConsoleCommand) \
+	MACRO(OnPlayerInit) \
+	MACRO(OnPlayerDestroy) \
+	MACRO(OnSpawn) \
+	MACRO(OnHammerFireReloading) \
+	MACRO(OnHammerFire) \
+	MACRO(OnHammerHit) \
+	MACRO(OnDirectInput) \
+	MACRO(OnCharacterTick) \
+	MACRO(OnHookAttach) \
+	MACRO(OnEngineTick) \
+	MACRO(OnEngineClientJoin) \
+	MACRO(OnEngineClientDrop) \
+	MACRO(OnEngineClientMessage) \
+	MACRO(OnEngineServerMessage) \
+	MACRO(OnEngineSimulateClientMessage)
 
 class CAntibot : public IEngineAntibot
 {
@@ -17,8 +41,13 @@ class CAntibot : public IEngineAntibot
 
 	CAntibotData m_Data;
 	CAntibotRoundData m_RoundData;
-	bool m_Initialized;
 
+	void *m_pModule = nullptr;
+#define MACRO_ANTIBOT_FUNCTION(Name) decltype(&Antibot##Name) m_pfn##Name = nullptr;
+	ANTIBOT_FUNCTIONS(MACRO_ANTIBOT_FUNCTION)
+#undef MACRO_ANTIBOT_FUNCTION
+
+	void LoadModule();
 	void Update();
 	static void Kick(int ClientId, const char *pMessage, void *pUser);
 	static void Log(const char *pMessage, void *pUser);
@@ -32,6 +61,7 @@ public:
 
 	// Engine
 	void Init() override;
+	void Reload() override;
 
 	void OnEngineTick() override;
 	void OnEngineClientJoin(int ClientId) override;

@@ -3205,10 +3205,13 @@ if(SERVER)
   set(LIBS_SERVER
     ${MINIUPNPC_LIBRARIES}
     ${MYSQL_LIBRARIES}
-    ${TARGET_ANTIBOT}
 
     ${LIBS}
   )
+  if(ANTIBOT)
+    # Supports hot reloading
+    list(APPEND LIBS_SERVER ${CMAKE_DL_LIBS})
+  endif()
 
   add_library(game-server-without-main OBJECT
       ${DEPS}
@@ -4052,6 +4055,16 @@ if(ANTIBOT)
   # Allow the antibot library to use functions from the server binary.
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
   set_own_rpath(game-server)
+  add_dependencies(game-server ${TARGET_ANTIBOT})
+  if(TARGET testrunner)
+    set_own_rpath(testrunner)
+    add_dependencies(testrunner ${TARGET_ANTIBOT})
+  endif()
+  set(ANTIBOT_LIBRARY "$<TARGET_FILE_NAME:${TARGET_ANTIBOT}>")
+  if(TARGET_OS STREQUAL "mac")
+    set(ANTIBOT_LIBRARY "@executable_path/${ANTIBOT_LIBRARY}")
+  endif()
+  target_compile_definitions(game-server-without-main PRIVATE ANTIBOT_LIBRARY="${ANTIBOT_LIBRARY}")
 endif()
 
 set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})

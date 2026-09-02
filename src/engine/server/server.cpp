@@ -4214,6 +4214,11 @@ void CServer::ConMapReload(IConsole::IResult *pResult, void *pUser)
 	((CServer *)pUser)->ReloadMap();
 }
 
+void CServer::ConReloadAntibot(IConsole::IResult *pResult, void *pUser)
+{
+	((CServer *)pUser)->Antibot()->Reload();
+}
+
 void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pServer = (CServer *)pUser;
@@ -4656,6 +4661,7 @@ void CServer::RegisterCommands()
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
+	Console()->Register("reload_antibot", "", CFGFLAG_SERVER, ConReloadAntibot, this, "Reload the antibot module");
 
 	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?] ?i[SSL ?]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAddSqlServer, this, "add a sqlserver");
 	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
