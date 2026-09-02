@@ -22,6 +22,7 @@
 #include <base/process.h>
 #include <base/secure.h>
 #include <base/str.h>
+#include <base/thread.h>
 #include <base/time.h>
 #include <base/windows.h>
 
@@ -5253,6 +5254,9 @@ int main(int argc, const char **argv)
 		PerformAllCleanup();
 		return -1;
 	}
+
+	// SDL raises the timer resolution on Windows while initializing, the other platforms need this.
+	thread_request_precise_wakeups();
 
 	// run the client
 	log_trace("client", "initialization finished after %.2fms, starting...", (time_get() - MainStart) * 1000.0f / (float)time_freq());

@@ -43,6 +43,17 @@ void thread_wait(void *thread);
 void thread_yield();
 
 /**
+ * Requests the most precise timer wakeups that the system offers for the calling thread.
+ *
+ * @ingroup Threads
+ *
+ * @remark Wakeups from sleeping and waiting are delayed to save power by default,
+ * on macOS by a quarter of the requested duration and on Linux by 50 microseconds.
+ * On Windows SDL already raises the timer resolution while initializing.
+ */
+void thread_request_precise_wakeups();
+
+/**
  * Puts the thread in the detached state, guaranteeing that
  * resources of the thread will be freed immediately when the
  * thread terminates.
