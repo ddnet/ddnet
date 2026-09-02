@@ -1273,7 +1273,7 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 
 			// yes we ask the client for the cursor position
 			// then we force the clients position to that position
-			// this is to double ensure we aee synced
+			// this is to double ensure we are synced
 			// because by the time we exchanged the position the client
 			// could have drifted again
 			pClient->SendCursorPos(pClient->m_CursorPos);
