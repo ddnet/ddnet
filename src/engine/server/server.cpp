@@ -3753,14 +3753,20 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[1024];
 	CServer *pThis = static_cast<CServer *>(pUser);
-	const char *pName = pResult->NumArguments() == 1 ? pResult->GetString(0) : "";
+	const int RequestedId = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : -1;
+
+	if(pResult->NumArguments() == 1 && (RequestedId < 0 || RequestedId >= MAX_CLIENTS || pThis->m_aClients[RequestedId].m_State == CClient::STATE_EMPTY))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid client id");
+		return;
+	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(pThis->m_aClients[i].m_State == CClient::STATE_EMPTY)
 			continue;
 
-		if(!str_utf8_find_nocase(pThis->m_aClients[i].m_aName, pName))
+		if(RequestedId >= 0 && i != RequestedId)
 			continue;
 
 		if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
@@ -4645,7 +4651,7 @@ void CServer::RegisterCommands()
 
 	// register console commands
 	Console()->Register("kick", "v[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
-	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players");
+	Console()->Register("status", "?i[id]", CFGFLAG_SERVER, ConStatus, this, "List the player with this client id or all players");
 	Console()->Register("shutdown", "?r[reason]", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)");
