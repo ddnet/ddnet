@@ -1611,6 +1611,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Si
 	Result.m_PingEx = false;
 	Result.m_AllowDummy = true;
 	Result.m_SyncWeaponInput = false;
+	Result.m_SizeExtendedSnapshot = false;
 	if(Version >= 1)
 	{
 		Result.m_ChatTimeoutCode = Flags & SERVERCAPFLAG_CHATTIMEOUTCODE;
@@ -1630,6 +1631,10 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Si
 	if(Version >= 5)
 	{
 		Result.m_SyncWeaponInput = Flags & SERVERCAPFLAG_SYNCWEAPONINPUT;
+	}
+	if(Version >= 6)
+	{
+		Result.m_SizeExtendedSnapshot = Flags & SERVERCAPFLAG_SIZEEXTENDEDSNAPSHOT;
 	}
 	return Result;
 }
@@ -2145,27 +2150,26 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				if(GameTick != m_aCurrentRecvTick[Conn])
 				{
-					m_aSnapshotParts[Conn] = 0;
+					m_aSnapshotParts[Conn].reset();
 					m_aCurrentRecvTick[Conn] = GameTick;
 					m_aSnapshotIncomingDataSize[Conn] = 0;
 				}
 
 				mem_copy((char *)m_aaSnapshotIncomingData[Conn] + Part * MAX_SNAPSHOT_PACKSIZE, pData, std::clamp(PartSize, 0, (int)sizeof(m_aaSnapshotIncomingData[Conn]) - Part * MAX_SNAPSHOT_PACKSIZE));
-				m_aSnapshotParts[Conn] |= (uint64_t)(1) << Part;
+				m_aSnapshotParts[Conn].set(Part);
 
 				if(Part == NumParts - 1)
 				{
 					m_aSnapshotIncomingDataSize[Conn] = (NumParts - 1) * MAX_SNAPSHOT_PACKSIZE + PartSize;
 				}
 
-				if((NumParts < CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == (((uint64_t)(1) << NumParts) - 1)) ||
-					(NumParts == CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == std::numeric_limits<uint64_t>::max()))
+				if(m_aSnapshotParts[Conn].count() == (size_t)NumParts)
 				{
 					unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
 					CSnapshotBuffer TmpBuffer3;
 
 					// reset snapshotting
-					m_aSnapshotParts[Conn] = 0;
+					m_aSnapshotParts[Conn].reset();
 
 					// find snapshot that we should use as delta
 					const CSnapshot *pDeltaShot = CSnapshot::EmptySnapshot();
@@ -2205,13 +2209,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// unpack delta
-					const int SnapSize = SnapshotDelta()->UnpackDelta(pDeltaShot, &TmpBuffer3, pDeltaData, DeltaSize);
+					const int SnapSize = SnapshotDelta()->UnpackDelta(pDeltaShot, &TmpBuffer3, pDeltaData, DeltaSize, m_ServerCapabilities.m_SizeExtendedSnapshot);
 					if(SnapSize < 0)
 					{
 						dbg_msg("client", "delta unpack failed. error=%d", SnapSize);
 						return;
 					}
-					if(!TmpBuffer3.AsSnapshot()->IsValid(SnapSize))
+					if(!TmpBuffer3.AsSnapshot()->IsValid(SnapSize, m_ServerCapabilities.m_SizeExtendedSnapshot))
 					{
 						dbg_msg("client", "snapshot invalid. SnapSize=%d, DeltaSize=%d", SnapSize, DeltaSize);
 						return;
@@ -2433,7 +2437,7 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 {
 	CUnpacker Unpacker;
 	CSnapshotBuilder Builder;
-	Builder.Init();
+	Builder.Init(false, m_ServerCapabilities.m_SizeExtendedSnapshot);
 	CNetObjHandler *pNetObjHandler = GameClient()->GetNetObjHandler();
 
 	int Num = pFrom->NumItems();

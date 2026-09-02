@@ -27,7 +27,7 @@ class CScoreboard : public CComponent
 	void RenderTitleBar(CUIRect TitleBar, int Team, const char *pTitle);
 	void RenderGoals(CUIRect Goals);
 	void RenderSpectators(CUIRect Spectators);
-	void RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State, int NumPlayersForSize = -1);
+	void RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State, int NumPlayersForSize = -1, bool ForceLowWidth = false);
 	void RenderRecordingNotification(float x);
 
 	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData);
@@ -36,6 +36,13 @@ class CScoreboard : public CComponent
 	const char *GetTeamName(int Team) const;
 
 	bool m_Active;
+
+	int m_ScoreboardPage;
+	int m_RedTeamScoreboardPage;
+	int m_BlueTeamScoreboardPage;
+	CButtonContainer m_ScoreboardPageButtonId;
+	CButtonContainer m_RedTeamScoreboardPageButtonId;
+	CButtonContainer m_BlueTeamScoreboardPageButtonId;
 
 	IGraphics::CTextureHandle m_DeadTeeTexture;
 

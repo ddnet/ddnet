@@ -51,7 +51,8 @@ private:
 	// 16 - 2 - 1 is max for 16p clients, keep local char. MaxNumSeeOthers() will take care if reserved players take up more space.
 	static constexpr int ms_MaxNumSeeOthersVanilla = 13;
 	// Teams are messy. Dont highlight teams bigger than 10 tees in playermapping so that big teams wont break anything
-	static constexpr int ms_MaxTeamSizePlayerMap = 10;
+	static constexpr int ms_MaxTeamSizePlayerMapDDRace64 = 10;
+	static constexpr int ms_MaxTeamSizePlayerMap = 20;
 
 	int m_aTeamSizes[NUM_DDRACE_TEAMS];
 	char m_aSeeOthersName[MAX_NAME_LENGTH];

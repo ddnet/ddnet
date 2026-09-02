@@ -397,8 +397,11 @@ int CPlayerMapping::CPlayerMap::MapSize() const
 
 bool CPlayerMapping::ReserveTeamSlots(int DDTeam, int ClientId) const
 {
-	const bool IsDDNet = m_pGameServer->GetClientVersion(ClientId) >= VERSION_DDNET_OLD;
-	return !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap && IsDDNet;
+	const int ClientVersion = m_pGameServer->GetClientVersion(ClientId);
+	const bool IsDDNet = ClientVersion >= VERSION_DDNET_OLD;
+	// Allow some bigger teams on clients with more slots and team capabilities
+	const int MaxTeamSize = ClientVersion < VERSION_DDNET_128_PLAYERS ? ms_MaxTeamSizePlayerMapDDRace64 : ms_MaxTeamSizePlayerMap;
+	return IsDDNet && !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= MaxTeamSize;
 }
 
 int CPlayerMapping::SeeOthersId(int ClientId) const

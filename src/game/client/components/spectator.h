@@ -13,6 +13,7 @@ class CSpectator : public CComponent
 {
 	enum
 	{
+		PAGE_CYCLE = -5,
 		MULTI_VIEW = -4,
 		NO_SELECTION = -3,
 	};
@@ -20,6 +21,7 @@ class CSpectator : public CComponent
 	bool m_Active;
 	bool m_WasActive;
 
+	int m_SelectorPage;
 	int m_SelectedSpectatorId;
 	vec2 m_SelectorMouse;
 

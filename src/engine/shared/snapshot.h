@@ -45,9 +45,16 @@ public:
 		OFFSET_UUID_TYPE = 0x4000,
 		MAX_TYPE = 0x7fff,
 		MAX_ID = 0xffff,
-		MAX_ITEMS = 1024,
-		MAX_PARTS = 64,
-		MAX_SIZE = MAX_PARTS * 1024
+
+		// Original limits
+		MAX_ITEMS_LEGACY = 1024,
+		MAX_PARTS_LEGACY = 64,
+		MAX_SIZE_LEGACY = MAX_PARTS_LEGACY * 1024,
+
+		// Extended limits
+		MAX_ITEMS = 4096,
+		MAX_PARTS = 256,
+		MAX_SIZE = MAX_PARTS * 1024,
 	};
 
 	int NumItems() const { return m_NumItems; }
@@ -65,7 +72,7 @@ public:
 	// See also `CNetObjHandler::DebugDumpSnapshot(const CSnapshot *pSnap)`
 	// For more detailed annotations of the data.
 	void DebugDump() const;
-	bool IsValid(size_t ActualSize) const;
+	bool IsValid(size_t ActualSize, bool SizeExtended) const;
 
 	static const CSnapshot *EmptySnapshot() { return &ms_EmptySnapshot; }
 };
@@ -114,7 +121,7 @@ public:
 	void SetStaticsize(int ItemType, size_t Size);
 	const CData *EmptyDelta() const;
 	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData);
-	int UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, const void *pSrcData, int DataSize);
+	int UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, const void *pSrcData, int DataSize, bool SizeExtended);
 	int DebugDumpDelta(const void *pSrcData, int DataSize);
 };
 
@@ -174,9 +181,10 @@ class CSnapshotBuilder
 	bool m_Building = false;
 	bool m_HasDroppedItem = false;
 	bool m_Sixup = false;
+	bool m_SizeExtended = false;
 
 public:
-	void Init(bool Sixup = false);
+	void Init(bool Sixup = false, bool SizeExtended = false);
 	void Init7(const CSnapshot *pSnapshot);
 
 	bool NewItem(int Type, int Id, const void *pData, int Size);

@@ -114,6 +114,9 @@ void CScoreboard::OnReset()
 	m_Active = false;
 	m_MouseUnlocked = false;
 	m_LastMousePos = std::nullopt;
+	m_ScoreboardPage = 0;
+	m_RedTeamScoreboardPage = 0;
+	m_BlueTeamScoreboardPage = 0;
 }
 
 void CScoreboard::ResetTexts()
@@ -465,7 +468,7 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 	}
 }
 
-void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State, int NumPlayersForSize)
+void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State, int NumPlayersForSize, bool ForceLowWidth)
 {
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Team invalid");
 
@@ -475,7 +478,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const bool MillisecondScore = GameClient()->m_ReceivedDDNetPlayerFinishTimes;
 	const bool TrueMilliseconds = GameClient()->m_ReceivedDDNetPlayerFinishTimesMillis;
 	const int NumPlayers = NumPlayersForSize >= 0 ? NumPlayersForSize : (CountEnd - CountStart);
-	const bool LowScoreboardWidth = Scoreboard.w < 350.0f;
+	const bool LowScoreboardWidth = ForceLowWidth || Scoreboard.w < 350.0f;
 
 	bool Race7 = Client()->IsSixup() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
 
@@ -931,8 +934,17 @@ void CScoreboard::OnRender()
 	const int NumPlayers = Teams ? std::max(aTeamSize[TEAM_RED], aTeamSize[TEAM_BLUE]) : aTeamSize[TEAM_RED];
 
 	const float ScoreboardSmallWidth = 375.0f + 10.0f;
+	// Keep width consistent for non‑team >16 players (750px), no shrinking
 	const float ScoreboardWidth = !Teams && NumPlayers <= 16 ? ScoreboardSmallWidth : 750.0f;
 	const float TitleHeight = 30.0f;
+
+	// Paging info (non‑team only)
+	const int PlayersPerPage = 128;
+	int NumPages = 1;
+	if(!Teams)
+	{
+		NumPages = std::max(1, (NumPlayers + PlayersPerPage - 1) / PlayersPerPage);
+	}
 
 	CUIRect Scoreboard = {(Screen.w - ScoreboardWidth) / 2.0f, 75.0f, ScoreboardWidth, 355.0f + TitleHeight};
 	CScoreboardRenderState RenderState{};
@@ -996,19 +1008,84 @@ void CScoreboard::OnRender()
 		RenderTitleBar(RedTitle, TEAM_RED, pRedTeamName == nullptr ? Localize("Red team") : pRedTeamName);
 		RenderTitleBar(BlueTitle, TEAM_BLUE, pBlueTeamName == nullptr ? Localize("Blue team") : pBlueTeamName);
 
-		auto RenderTeamScoreboard = [&](CUIRect TeamScoreboard, int Team, int TeamSize) {
-			if(TeamSize <= 64)
+		// Helper to render pagination button for a team
+		auto RenderTeamPageButton = [&](CUIRect ButtonArea, int Team) {
+			int *pPage = (Team == TEAM_RED) ? &m_RedTeamScoreboardPage : &m_BlueTeamScoreboardPage;
+			CButtonContainer *pButtonId = (Team == TEAM_RED) ? &m_RedTeamScoreboardPageButtonId : &m_BlueTeamScoreboardPageButtonId;
+			const int TeamSize = (Team == TEAM_RED) ? aTeamSize[TEAM_RED] : aTeamSize[TEAM_BLUE];
+			const int TeamPlayersPerPage = 128;
+			const int TeamNumPages = std::max(1, (TeamSize + TeamPlayersPerPage - 1) / TeamPlayersPerPage);
+			const int CurrentPage = *pPage;
+
+			char aPageLabel[64];
+			if(CurrentPage == 0)
+				str_format(aPageLabel, sizeof(aPageLabel), "⋅ %d more", std::max(0, TeamSize - TeamPlayersPerPage));
+			else if(CurrentPage == TeamNumPages - 1 && TeamNumPages - 1 == 1)
+				str_copy(aPageLabel, "⋅ Back", sizeof(aPageLabel));
+			else
 			{
-				RenderScoreboard(TeamScoreboard, Team, 0, TeamSize, RenderState);
+				str_format(aPageLabel, sizeof(aPageLabel), "⋅ %d/%d", CurrentPage, TeamNumPages - 1);
+				if(CurrentPage == TeamNumPages - 1)
+					str_append(aPageLabel, " | Back", sizeof(aPageLabel));
+			}
+
+			const float FontSize = 12.0f;
+			const int ButtonResult = Ui()->DoButtonLogic(pButtonId, 0, &ButtonArea, BUTTONFLAG_LEFT);
+			if(ButtonResult != 0)
+			{
+				*pPage = (*pPage + 1) % TeamNumPages;
+			}
+
+			if(Ui()->HotItem() == pButtonId)
+			{
+				ButtonArea.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 6.5f);
+			}
+
+			float TextWidth = TextRender()->TextWidth(FontSize, aPageLabel);
+			float TextX = ButtonArea.x + ButtonArea.w - TextWidth - 10.0f;
+			float TextY = ButtonArea.y + (ButtonArea.h - FontSize) / 2.0f;
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Ui()->HotItem() == pButtonId ? 1.0f : 0.5f);
+			TextRender()->Text(TextX, TextY, FontSize, aPageLabel, -1.0f);
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+		};
+
+		auto RenderTeamScoreboard = [&](CUIRect TeamScoreboard, int Team, int TeamSize) {
+			const int TeamPlayersPerPage = 128;
+			const int TeamNumPages = std::max(1, (TeamSize + TeamPlayersPerPage - 1) / TeamPlayersPerPage);
+			int *pPage = (Team == TEAM_RED) ? &m_RedTeamScoreboardPage : &m_BlueTeamScoreboardPage;
+
+			// Clamp page to valid range
+			*pPage = std::clamp(*pPage, 0, TeamNumPages - 1);
+
+			const int PageStart = *pPage * TeamPlayersPerPage;
+			const int PageEnd = std::min(PageStart + TeamPlayersPerPage, TeamSize);
+			const int PlayersOnPage = PageEnd - PageStart;
+
+			CUIRect PlayerArea = TeamScoreboard;
+			CUIRect ButtonArea;
+			if(TeamNumPages > 1)
+			{
+				PlayerArea.HSplitBottom(13.0f, &PlayerArea, &ButtonArea);
+			}
+
+			if(PlayersOnPage <= 64)
+			{
+				RenderScoreboard(PlayerArea, Team, PageStart, PageEnd, RenderState);
 			}
 			else
 			{
 				const int FirstColumnSize = 64;
 				CUIRect LeftColumn, RightColumn;
-				TeamScoreboard.VSplitMid(&LeftColumn, &RightColumn, 2.5f);
+				PlayerArea.VSplitMid(&LeftColumn, &RightColumn, 2.5f);
 
-				RenderScoreboard(LeftColumn, Team, 0, FirstColumnSize, RenderState, FirstColumnSize);
-				RenderScoreboard(RightColumn, Team, FirstColumnSize, TeamSize, RenderState, FirstColumnSize);
+				const int SecondColumnStart = PageStart + FirstColumnSize;
+				RenderScoreboard(LeftColumn, Team, PageStart, SecondColumnStart, RenderState, FirstColumnSize);
+				RenderScoreboard(RightColumn, Team, SecondColumnStart, PageEnd, RenderState, FirstColumnSize);
+			}
+
+			if(TeamNumPages > 1)
+			{
+				RenderTeamPageButton(ButtonArea, Team);
 			}
 		};
 
@@ -1033,37 +1110,143 @@ void CScoreboard::OnRender()
 		Scoreboard.HSplitTop(TitleHeight, &Title, &Scoreboard);
 		RenderTitleBar(Title, TEAM_GAME, pTitle);
 
-		if(NumPlayers <= 16)
+		// Paging logic
+		if(NumPages <= 1)
+			m_ScoreboardPage = 0;
+		else
+			m_ScoreboardPage = std::clamp(m_ScoreboardPage, 0, NumPages - 1);
+
+		int PageStart = m_ScoreboardPage * PlayersPerPage;
+		int PageEnd = std::min(PageStart + PlayersPerPage, NumPlayers);
+		int PlayersOnPage = PageEnd - PageStart;
+
+		// Lambda to render the page button inside a given rectangle
+		auto RenderPageButton = [&](CUIRect ButtonArea) {
+			char aPageLabel[64];
+			if(m_ScoreboardPage == 0)
+				str_format(aPageLabel, sizeof(aPageLabel), "⋅ %d more", std::max(0, NumPlayers - PlayersPerPage));
+			else if(m_ScoreboardPage == NumPages - 1 && NumPages - 1 == 1)
+				str_copy(aPageLabel, "⋅ Back", sizeof(aPageLabel));
+			else
+			{
+				str_format(aPageLabel, sizeof(aPageLabel), "⋅ %d/%d", m_ScoreboardPage, NumPages - 1);
+				if(m_ScoreboardPage == NumPages - 1)
+					str_append(aPageLabel, " | Back", sizeof(aPageLabel));
+			}
+
+			const float FontSize = 12.0f;
+			const int ButtonResult = Ui()->DoButtonLogic(&m_ScoreboardPageButtonId, 0, &ButtonArea, BUTTONFLAG_LEFT);
+			if(ButtonResult != 0)
+			{
+				m_ScoreboardPage = (m_ScoreboardPage + 1) % NumPages;
+			}
+
+			if(Ui()->HotItem() == &m_ScoreboardPageButtonId)
+			{
+				ButtonArea.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 7.5f);
+			}
+
+			float TextWidth = TextRender()->TextWidth(FontSize, aPageLabel);
+			float TextX = ButtonArea.x + ButtonArea.w - TextWidth - 10.0f;
+			float TextY = ButtonArea.y + (ButtonArea.h - FontSize) / 2.0f;
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Ui()->HotItem() == &m_ScoreboardPageButtonId ? 1.0f : 0.5f);
+			TextRender()->Text(TextX, TextY, FontSize, aPageLabel, -1.0f);
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+		};
+
+		if(PlayersOnPage <= 16)
 		{
-			RenderScoreboard(Scoreboard, TEAM_GAME, 0, NumPlayers, RenderState);
+			if(NumPages > 1)
+			{
+				// Single column; button occupies bottom of the full width column
+				CUIRect PlayerRect, ButtonRect;
+				Scoreboard.HSplitBottom(18.0f, &PlayerRect, &ButtonRect);
+				RenderScoreboard(PlayerRect, TEAM_GAME, PageStart, PageEnd, RenderState);
+				RenderPageButton(ButtonRect);
+			}
+			else
+			{
+				RenderScoreboard(Scoreboard, TEAM_GAME, PageStart, PageEnd, RenderState);
+			}
 		}
-		else if(NumPlayers <= 64)
+		else if(PlayersOnPage <= 64)
 		{
 			int PlayersPerSide;
-			if(NumPlayers <= 24)
+			if(PlayersOnPage <= 24)
 				PlayersPerSide = 12;
-			else if(NumPlayers <= 32)
+			else if(PlayersOnPage <= 32)
 				PlayersPerSide = 16;
-			else if(NumPlayers <= 48)
+			else if(PlayersOnPage <= 48)
 				PlayersPerSide = 24;
 			else
 				PlayersPerSide = 32;
 
 			CUIRect LeftScoreboard, RightScoreboard;
 			Scoreboard.VSplitMid(&LeftScoreboard, &RightScoreboard);
-			RenderScoreboard(LeftScoreboard, TEAM_GAME, 0, PlayersPerSide, RenderState);
-			RenderScoreboard(RightScoreboard, TEAM_GAME, PlayersPerSide, 2 * PlayersPerSide, RenderState);
+
+			if(NumPages > 1)
+			{
+				CUIRect RightPlayerRect, ButtonRect;
+				RightScoreboard.HSplitBottom(18.0f, &RightPlayerRect, &ButtonRect);
+				RenderScoreboard(LeftScoreboard, TEAM_GAME, PageStart, PageStart + PlayersPerSide, RenderState, PlayersPerSide);
+				RenderScoreboard(RightPlayerRect, TEAM_GAME, PageStart + PlayersPerSide, PageEnd, RenderState, PlayersPerSide);
+				RenderPageButton(ButtonRect);
+			}
+			else
+			{
+				RenderScoreboard(LeftScoreboard, TEAM_GAME, PageStart, PageStart + PlayersPerSide, RenderState, PlayersPerSide);
+				RenderScoreboard(RightScoreboard, TEAM_GAME, PageStart + PlayersPerSide, PageEnd, RenderState, PlayersPerSide);
+			}
+		}
+		else if(PlayersOnPage <= 86)
+		{
+			// Two columns: first 43, second rest (both sized as 43 players)
+			const int FirstColumnSize = 43;
+			CUIRect LeftScoreboard, RightScoreboard;
+			Scoreboard.VSplitMid(&LeftScoreboard, &RightScoreboard);
+
+			if(NumPages > 1)
+			{
+				CUIRect RightPlayerRect, ButtonRect;
+				RightScoreboard.HSplitBottom(18.0f, &RightPlayerRect, &ButtonRect);
+				RenderScoreboard(LeftScoreboard, TEAM_GAME, PageStart, PageStart + FirstColumnSize, RenderState, FirstColumnSize, true);
+				RenderScoreboard(RightPlayerRect, TEAM_GAME, PageStart + FirstColumnSize, PageEnd, RenderState, FirstColumnSize, true);
+				RenderPageButton(ButtonRect);
+			}
+			else
+			{
+				RenderScoreboard(LeftScoreboard, TEAM_GAME, PageStart, PageStart + FirstColumnSize, RenderState, FirstColumnSize, true);
+				RenderScoreboard(RightScoreboard, TEAM_GAME, PageStart + FirstColumnSize, PageEnd, RenderState, FirstColumnSize, true);
+			}
 		}
 		else
 		{
+			// Three columns of 43 each
+			const int PlayersPerColumn = 43;
 			const int NumColumns = 3;
-			const int PlayersPerColumn = std::ceil(128.0f / NumColumns);
 			CUIRect RemainingScoreboard = Scoreboard;
 			for(int i = 0; i < NumColumns; ++i)
 			{
+				int ColStart = PageStart + i * PlayersPerColumn;
+				int ColEnd = std::min(PageEnd, ColStart + PlayersPerColumn);
+				if(ColStart >= ColEnd)
+					break;
+
 				CUIRect Column;
 				RemainingScoreboard.VSplitLeft(Scoreboard.w / NumColumns, &Column, &RemainingScoreboard);
-				RenderScoreboard(Column, TEAM_GAME, i * PlayersPerColumn, (i + 1) * PlayersPerColumn, RenderState);
+
+				if(NumPages > 1 && i == NumColumns - 1)
+				{
+					// Last column: reserve bottom for button
+					CUIRect PlayerRect, ButtonRect;
+					Column.HSplitBottom(18.0f, &PlayerRect, &ButtonRect);
+					RenderScoreboard(PlayerRect, TEAM_GAME, ColStart, ColEnd, RenderState, PlayersPerColumn);
+					RenderPageButton(ButtonRect);
+				}
+				else
+				{
+					RenderScoreboard(Column, TEAM_GAME, ColStart, ColEnd, RenderState, PlayersPerColumn);
+				}
 			}
 		}
 	}

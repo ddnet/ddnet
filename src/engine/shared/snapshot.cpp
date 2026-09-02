@@ -136,13 +136,16 @@ void CSnapshot::DebugDump() const
 	}
 }
 
-bool CSnapshot::IsValid(size_t ActualSize) const
+bool CSnapshot::IsValid(size_t ActualSize, bool SizeExtended) const
 {
+	const int MaxItems = SizeExtended ? CSnapshot::MAX_ITEMS : CSnapshot::MAX_ITEMS_LEGACY;
+	const size_t MaxSize = SizeExtended ? CSnapshot::MAX_SIZE : CSnapshot::MAX_SIZE_LEGACY;
+
 	// validate total size
 	if(ActualSize < sizeof(CSnapshot) ||
-		ActualSize > MAX_SIZE ||
+		ActualSize > MaxSize ||
 		m_NumItems < 0 ||
-		m_NumItems > MAX_ITEMS ||
+		m_NumItems > MaxItems ||
 		m_DataSize < 0 ||
 		ActualSize != TotalSize())
 	{
@@ -513,14 +516,14 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 	return 0;
 }
 
-int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, const void *pSrcData, int DataSize)
+int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, const void *pSrcData, int DataSize, bool SizeExtended)
 {
 	CData *pDelta = (CData *)pSrcData;
 	int *pData = (int *)pDelta->m_aData;
 	int *pEnd = (int *)(((char *)pSrcData + DataSize));
 
 	CSnapshotBuilder Builder;
-	Builder.Init();
+	Builder.Init(false, SizeExtended);
 
 	// unpack deleted stuff
 	int *pDeleted = pData;
@@ -745,7 +748,7 @@ int CSnapshotStorage::Get(int Tick, int64_t *pTagtime, const CSnapshot **ppData,
 }
 
 // CSnapshotBuilder
-void CSnapshotBuilder::Init(bool Sixup)
+void CSnapshotBuilder::Init(bool Sixup, bool SizeExtended)
 {
 	dbg_assert(!m_Building, "Snapshot builder is already building snapshot. Call `Finish` for each call to `Init`.");
 
@@ -754,6 +757,7 @@ void CSnapshotBuilder::Init(bool Sixup)
 	m_Building = true;
 	m_HasDroppedItem = false;
 	m_Sixup = Sixup;
+	m_SizeExtended = SizeExtended;
 
 	for(int i = 0; i < m_NumExtendedItemTypes; i++)
 	{
@@ -809,13 +813,16 @@ int CSnapshotBuilder::Finish(CSnapshotBuffer *pBuffer)
 	dbg_assert(m_Building, "Snapshot builder is not building snapshot. Call `Finish` after `Init`.");
 	m_Building = false;
 
+	const int MaxItems = m_SizeExtended ? CSnapshot::MAX_ITEMS : CSnapshot::MAX_ITEMS_LEGACY;
+	const size_t MaxSize = m_SizeExtended ? CSnapshot::MAX_SIZE : CSnapshot::MAX_SIZE_LEGACY;
+
 	// flatten and make the snapshot
-	dbg_assert(m_NumItems <= CSnapshot::MAX_ITEMS, "Too many snap items");
+	dbg_assert(m_NumItems <= MaxItems, "Too many snap items");
 	CSnapshot *pSnap = pBuffer->AsSnapshot();
 	pSnap->m_DataSize = m_DataSize;
 	pSnap->m_NumItems = m_NumItems;
 	const size_t TotalSize = pSnap->TotalSize();
-	dbg_assert(TotalSize <= (size_t)CSnapshot::MAX_SIZE, "Snapshot too large");
+	dbg_assert(TotalSize <= MaxSize, "Snapshot too large");
 	mem_copy(pSnap->Offsets(), m_aOffsets, pSnap->OffsetSize());
 	mem_copy(pSnap->DataStart(), m_aData, m_DataSize);
 	return TotalSize;
@@ -903,14 +910,17 @@ void *CSnapshotBuilder::NewItemRaw(int Type, int Id, int Size)
 		Type = GetTypeFromIndex(ExtendedItemTypeIndex);
 	}
 
-	if(m_NumItems >= CSnapshot::MAX_ITEMS)
+	const int MaxItems = m_SizeExtended ? CSnapshot::MAX_ITEMS : CSnapshot::MAX_ITEMS_LEGACY;
+	const size_t MaxSize = m_SizeExtended ? CSnapshot::MAX_SIZE : CSnapshot::MAX_SIZE_LEGACY;
+
+	if(m_NumItems >= MaxItems)
 	{
 		return nullptr;
 	}
 
 	const size_t OffsetSize = (m_NumItems + 1) * sizeof(int);
 	const size_t ItemSize = sizeof(CSnapshotItem) + Size;
-	if(sizeof(CSnapshot) + OffsetSize + m_DataSize + ItemSize > CSnapshot::MAX_SIZE)
+	if(sizeof(CSnapshot) + OffsetSize + m_DataSize + ItemSize > MaxSize)
 	{
 		return nullptr;
 	}
