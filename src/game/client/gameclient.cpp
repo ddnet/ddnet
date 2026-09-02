@@ -1706,7 +1706,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	{
 		Info.m_MinTeamSize = pInfoEx->m_MinTeamSize;
 		Info.m_MaxTeamSize = pInfoEx->m_MaxTeamSize;
-		Info.m_NumDDRaceTeams = pInfoEx->m_NumDDRaceTeams;
+		// Servers from before this field was added send 0, and this client cannot represent more
+		// teams than it was compiled with. Fall back to our own count for anything out of range.
+		const int NumDDRaceTeams = pInfoEx->m_NumDDRaceTeams;
+		Info.m_NumDDRaceTeams = NumDDRaceTeams > TEAM_FLOCK + 1 && NumDDRaceTeams <= NUM_DDRACE_TEAMS ? NumDDRaceTeams : NUM_DDRACE_TEAMS;
 		Info.m_OldLaser = Flags2 & GAMEINFOFLAG2_OLD_LASER;
 	}
 
