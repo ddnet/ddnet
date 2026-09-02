@@ -276,11 +276,7 @@ void CSshLogger::Log(const CLogMessage *pMessage)
 		{
 			NeedColorReset = false;
 		}
-		char aSshLine[8192];
-		int NumLines = LineWrapForSsh(pMessage->Message(), aSshLine, sizeof(aSshLine), pClient->m_Term.m_Width, &m_pSshServer->m_UnicodeWidthState);
-		pClient->m_CursorPos.y += NumLines;
-		ssh_channel_write(pClient->m_Channel, "\r\n", 2);
-		ssh_channel_write(pClient->m_Channel, aSshLine, str_length(aSshLine));
+		pClient->SendChannel("%s", pMessage->Message());
 		if(NeedColorReset)
 		{
 			pClient->ResetColor();
@@ -1077,6 +1073,30 @@ const char *CSshClient::NextInputFromHistory()
 
 	auto &Entry = m_InputHistory.at(m_HistoryIdx);
 	return Entry.data();
+}
+
+void CSshClient::SendChannel(const char *pFormat, ...)
+{
+	if(!m_Channel)
+		return;
+
+	char aRawLine[16000];
+	va_list Args;
+	va_start(Args, pFormat);
+	str_format_v(aRawLine, sizeof(aRawLine), pFormat, Args);
+	va_end(Args);
+
+	char aSshLine[8192];
+	int NumLines = CSshLogger::LineWrapForSsh(
+		aRawLine,
+		aSshLine,
+		sizeof(aSshLine),
+		m_Term.m_Width,
+		&m_CallbackCtx.m_pServer->m_UnicodeWidthState);
+
+	m_CursorPos.y += NumLines;
+	ssh_channel_write(m_Channel, "\r\n", 2);
+	ssh_channel_write(m_Channel, aSshLine, str_length(aSshLine));
 }
 
 void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)

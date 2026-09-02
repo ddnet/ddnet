@@ -319,6 +319,13 @@ public:
 	const char *PrevInputFromHistory();
 	const char *NextInputFromHistory();
 
+	// Send a string to the client with the side effect of tracking cursor position
+	// this is used for log lines and the banner
+	// the string can contain \n linebreaks and also exceed the terminal width
+	// if it wraps or linebreaks it will offset the cursor position y to properly
+	// keep track of the cursor position on the server side
+	[[gnu::format(printf, 2, 3)]] void SendChannel(const char *pFormat, ...);
+
 	void OnTerminalResize(int OldWidth, int OldHeight);
 
 	// We need to manage the memory for this struct
