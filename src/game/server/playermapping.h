@@ -81,7 +81,8 @@ private:
 		int m_NumPages;
 		int m_NumSeeOthers;
 		bool m_aWasSeeOthers[MAX_CLIENTS];
-		int m_DoSeeOthersByVoteTick;
+		int m_LastSeeOthersVoteTick;
+		bool m_DoSeeOthersByVote;
 		void DoSeeOthers();
 		void CycleSeeOthers();
 		void UpdateSeeOthers() const;
