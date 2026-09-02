@@ -238,14 +238,11 @@ void CPlayerMapping::CPlayerMap::Update()
 	if(m_pPlayerMapping->Server()->ClientSupportsServerMaxClients(m_ClientId))
 		return;
 
-	if(m_DoSeeOthersByVoteTick > 0)
+	if(m_DoSeeOthersByVoteTick > 0 && m_SeeOthersPage != -1)
 	{
 		CCharacter *pChr = m_pPlayerMapping->GameServer()->GetPlayerChar(m_ClientId);
 		if(pChr && !pChr->IsIdle())
-		{
 			ResetSeeOthers();
-			m_DoSeeOthersByVoteTick = 0;
-		}
 	}
 
 	bool ResortReserved = m_ResortReserved;
