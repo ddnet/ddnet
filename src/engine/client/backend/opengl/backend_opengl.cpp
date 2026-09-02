@@ -1581,6 +1581,8 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 
 	m_pTileProgram = nullptr;
 	m_pTileProgramTextured = nullptr;
+	m_pBorderTileProgram = nullptr;
+	m_pBorderTileProgramTextured = nullptr;
 	m_pPrimitive3DProgram = nullptr;
 	m_pPrimitive3DProgramTextured = nullptr;
 
@@ -1801,21 +1803,21 @@ void CCommandProcessorFragment_OpenGL2::Cmd_Shutdown(const SCommand_Shutdown *pC
 	if(m_HasShaders)
 	{
 		glUseProgram(0);
+
+		m_pTileProgram->DeleteProgram();
+		m_pTileProgramTextured->DeleteProgram();
+		m_pBorderTileProgram->DeleteProgram();
+		m_pBorderTileProgramTextured->DeleteProgram();
+		m_pPrimitive3DProgram->DeleteProgram();
+		m_pPrimitive3DProgramTextured->DeleteProgram();
+
+		delete m_pTileProgram;
+		delete m_pTileProgramTextured;
+		delete m_pBorderTileProgram;
+		delete m_pBorderTileProgramTextured;
+		delete m_pPrimitive3DProgram;
+		delete m_pPrimitive3DProgramTextured;
 	}
-
-	m_pTileProgram->DeleteProgram();
-	m_pTileProgramTextured->DeleteProgram();
-	m_pBorderTileProgram->DeleteProgram();
-	m_pBorderTileProgramTextured->DeleteProgram();
-	m_pPrimitive3DProgram->DeleteProgram();
-	m_pPrimitive3DProgramTextured->DeleteProgram();
-
-	delete m_pTileProgram;
-	delete m_pTileProgramTextured;
-	delete m_pBorderTileProgram;
-	delete m_pBorderTileProgramTextured;
-	delete m_pPrimitive3DProgram;
-	delete m_pPrimitive3DProgramTextured;
 
 	for(int i = 0; i < (int)m_vTextures.size(); ++i)
 	{
