@@ -88,6 +88,11 @@ public:
 	//
 	//        can scroll regions support proper increase?
 	bool m_StatusLine = true;
+
+	// IDEA: i think i should try having the preview integrated in the prompt again
+	//       and not at the bottom of the screen
+	//       so no status line but a line high prompt with space for annotations
+	//       no scroll regions
 };
 
 static constexpr size_t MAX_SSH_RATELIMIT_ENTRIES = 1024;
