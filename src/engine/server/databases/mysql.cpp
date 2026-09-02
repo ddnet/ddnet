@@ -252,7 +252,6 @@ bool CMysqlConnection::ConnectImpl()
 	}
 
 	// SSL support
-	int ClientFlags = CLIENT_IGNORE_SIGPIPE;
 	if(m_Config.m_UseSsl)
 	{
 		// Enable SSL, e.g. required by servers with require_secure_transport enabled.
@@ -268,19 +267,21 @@ bool CMysqlConnection::ConnectImpl()
 		if(m_Config.m_aSslCa[0])
 		{
 			mysql_options(&m_Mysql, MYSQL_OPT_SSL_CA, m_Config.m_aSslCa);
-#if defined(MARIADB_VERSION_ID)
-			my_bool OptVerifyServerCert = 1;
-			mysql_options(&m_Mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &OptVerifyServerCert);
-#else
-			// MYSQL_OPT_SSL_VERIFY_SERVER_CERT is deprecated/removed in MySQL 8.0, use MYSQL_OPT_SSL_MODE instead
-			unsigned int OptSslMode = SSL_MODE_VERIFY_IDENTITY;
-			mysql_options(&m_Mysql, MYSQL_OPT_SSL_MODE, &OptSslMode);
-#endif
 		}
-		ClientFlags |= CLIENT_SSL;
+		// The client libraries start TLS based on these options, the CLIENT_SSL client flag is set internally by them.
+#if defined(MARIADB_VERSION_ID)
+		my_bool OptSslEnforce = 1;
+		mysql_options(&m_Mysql, MYSQL_OPT_SSL_ENFORCE, &OptSslEnforce);
+		my_bool OptVerifyServerCert = m_Config.m_aSslCa[0] != '\0';
+		mysql_options(&m_Mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &OptVerifyServerCert);
+#else
+		// MYSQL_OPT_SSL_VERIFY_SERVER_CERT is deprecated/removed in MySQL 8.0, use MYSQL_OPT_SSL_MODE instead
+		unsigned int OptSslMode = m_Config.m_aSslCa[0] != '\0' ? SSL_MODE_VERIFY_IDENTITY : SSL_MODE_REQUIRED;
+		mysql_options(&m_Mysql, MYSQL_OPT_SSL_MODE, &OptSslMode);
+#endif
 	}
 
-	if(!mysql_real_connect(&m_Mysql, m_Config.m_aIp, m_Config.m_aUser, m_Config.m_aPass, nullptr, m_Config.m_Port, nullptr, ClientFlags))
+	if(!mysql_real_connect(&m_Mysql, m_Config.m_aIp, m_Config.m_aUser, m_Config.m_aPass, nullptr, m_Config.m_Port, nullptr, CLIENT_IGNORE_SIGPIPE))
 	{
 		StoreErrorMysql("real_connect");
 		return false;
