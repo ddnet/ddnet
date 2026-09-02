@@ -4508,6 +4508,7 @@ void CEditor::CloseMap(size_t Index, bool Confirm)
 		Reset();
 	}
 
+	Ui()->ClosePopupMenu(&m_PopupMapTab);
 	m_vpMaps.erase(m_vpMaps.begin() + Index);
 	if(m_vpMaps.empty())
 	{
