@@ -988,7 +988,17 @@ void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 	Ui()->DoLabel(&Tab, Localize("Communities"), 12.0f, TEXTALIGN_MC);
 	View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
 
-	const int MaxEntries = ServerBrowser()->Communities().size();
+	std::vector<const CCommunity *> vpCommunities;
+	vpCommunities.reserve(ServerBrowser()->Communities().size());
+	for(const CCommunity &Community : ServerBrowser()->Communities())
+	{
+		vpCommunities.push_back(&Community);
+	}
+	std::stable_sort(vpCommunities.begin(), vpCommunities.end(), [](const CCommunity *pLhs, const CCommunity *pRhs) {
+		return pLhs->NumPlayers() > pRhs->NumPlayers();
+	});
+
+	const int MaxEntries = vpCommunities.size();
 	if(MaxEntries == 0)
 	{
 		CUIRect ErrorLabel;
@@ -1010,10 +1020,10 @@ void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 	const float Spacing = 2.0f;
 
 	const auto &&GetItemName = [&](int ItemIndex) {
-		return ServerBrowser()->Communities()[ItemIndex].Id();
+		return vpCommunities[ItemIndex]->Id();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
-		const auto &Community = ServerBrowser()->Communities()[ItemIndex];
+		const auto &Community = *vpCommunities[ItemIndex];
 		const float Alpha = (Active ? 0.9f : 0.2f) + (Ui()->HotItem() == pItemId ? 0.1f : 0.0f);
 
 		CUIRect Icon, NameLabel, PlayerCountIcon, PlayerCountLabel, FavoriteButton;
