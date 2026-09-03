@@ -302,6 +302,11 @@ void CSound::UpdateDevice()
 		CloseDevice();
 	}
 
+	// Opening the device when the system has none blocks for up to eight seconds
+	// in SDL's WASAPI backend, which would stall the main loop
+	if(SDL_GetNumAudioDevices(0) <= 0)
+		return;
+
 	if(!m_DeviceChanged.exchange(false, std::memory_order_relaxed))
 		return;
 
