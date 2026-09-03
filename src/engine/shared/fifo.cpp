@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <cstdlib>
 
 void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
