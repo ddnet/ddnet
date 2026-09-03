@@ -819,6 +819,18 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 		}
+
+		// Font typer button
+		{
+			ToolbarBottom.VSplitLeft(25.0f, &Button, &ToolbarBottom);
+			int Checked = m_QuickActionFontTyper.Disabled() ? -1 : (m_QuickActionFontTyper.Active() ? 1 : 0);
+			if(DoButton_FontIcon(&m_QuickActionFontTyper, FontIcon::I_CURSOR, Checked, &Button, BUTTONFLAG_LEFT, m_QuickActionFontTyper.Description(), IGraphics::CORNER_ALL))
+			{
+				m_QuickActionFontTyper.Call();
+				m_FontTyper.UpdateDialog();
+			}
+			ToolbarBottom.VSplitLeft(5.0f, nullptr, &ToolbarBottom);
+		}
 	}
 }
 
@@ -4471,6 +4483,7 @@ void CEditor::Reset()
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
 	m_RenderLayersState.Reset();
+	m_FontTyper.UpdateDialog();
 }
 
 void CEditor::AddDefaultMap()
@@ -4481,6 +4494,7 @@ void CEditor::AddDefaultMap()
 	m_SelectedMap = m_vpMaps.size() - 1;
 	m_MapTabsRevealSelected = true;
 	UpdateMapDisplayNames();
+	m_FontTyper.UpdateDialog();
 }
 
 void CEditor::CloseMap(size_t Index, bool Confirm)
