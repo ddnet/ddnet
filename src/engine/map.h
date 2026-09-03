@@ -26,6 +26,8 @@ public:
 	virtual void *GetDataSwapped(int Index) = 0;
 	virtual const char *GetDataString(int Index) = 0;
 	virtual void UnloadData(int Index) = 0;
+	// Keep tile layer data loaded, called by the game which uses it directly, not the editor which copies it.
+	virtual void PinTileLayerData() = 0;
 	virtual int NumData() const = 0;
 
 	virtual int GetItemSize(int Index) = 0;
