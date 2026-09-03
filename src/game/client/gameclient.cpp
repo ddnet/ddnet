@@ -548,8 +548,11 @@ void CGameClient::OnDummySwap()
 		}
 	}
 
-	m_Controls.m_aInputData[g_Config.m_ClDummy].m_NextWeapon = OldDummyInput.m_NextWeapon;
-	m_Controls.m_aInputData[g_Config.m_ClDummy].m_PrevWeapon = OldDummyInput.m_PrevWeapon;
+	if(!g_Config.m_ClDummyHammer)
+	{
+		m_Controls.m_aInputData[g_Config.m_ClDummy].m_NextWeapon = OldDummyInput.m_NextWeapon;
+		m_Controls.m_aInputData[g_Config.m_ClDummy].m_PrevWeapon = OldDummyInput.m_PrevWeapon;
+	}
 
 	m_Controls.m_aLastData[g_Config.m_ClDummy] = m_Controls.m_aInputData[g_Config.m_ClDummy];
 
