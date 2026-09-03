@@ -1172,7 +1172,7 @@ void CMenus::Render()
 
 void CMenus::RenderPopupFullscreen(CUIRect Screen)
 {
-	char aBuf[1536];
+	char aBuf[2048];
 	const char *pTitle = "";
 	const char *pExtraText = "";
 	const char *pButtonText = "";
@@ -1231,10 +1231,11 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	else if(m_Popup == POPUP_FIRST_LAUNCH)
 	{
 		pTitle = Localize("Welcome to DDNet");
-		str_format(aBuf, sizeof(aBuf), "%s\n\n%s\n\n%s\n\n%s",
+		str_format(aBuf, sizeof(aBuf), "%s\n\n%s\n\n%s\n\n%s\n\n%s",
 			Localize("DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you."),
 			Localize("Use k key to kill (restart), q to pause and watch other players. See settings for other key binds."),
 			Localize("It's recommended that you check the settings to adjust them to your liking before joining a server."),
+			Localize("Terms of Use: There is no tolerance for abusive behavior. Do not post anything illegal, hateful, harassing or offensive. Violations lead to bans. Use the block button in the scoreboard or the players menu to hide a player's messages and report them to the server hoster."),
 			Localize("Please enter your nickname below."));
 		pExtraText = aBuf;
 		pButtonText = Localize("Ok");
@@ -1719,21 +1720,35 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Skip.VMargin(20.0f, &Skip);
 		Join.VMargin(20.0f, &Join);
 
+		const ColorRGBA ButtonColor = ColorRGBA(1.0f, 1.0f, 1.0f, m_TermsAccepted ? 0.5f : 0.15f);
+
 		static CButtonContainer s_JoinTutorialButton;
-		if(DoButton_Menu(&s_JoinTutorialButton, Localize("Join Tutorial Server"), 0, &Join) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER))
+		if((DoButton_Menu(&s_JoinTutorialButton, Localize("Join Tutorial Server"), 0, &Join, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.0f, ButtonColor) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)) && m_TermsAccepted)
 		{
+			g_Config.m_ClShowWelcome = false;
 			Client()->RequestDDNetInfo();
 			m_Popup = g_Config.m_BrIndicateFinished ? POPUP_POINTS : POPUP_NONE;
 			JoinTutorial();
 		}
 
 		static CButtonContainer s_SkipTutorialButton;
-		if(DoButton_Menu(&s_SkipTutorialButton, Localize("Skip Tutorial"), 0, &Skip) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+		if((DoButton_Menu(&s_SkipTutorialButton, Localize("Skip Tutorial"), 0, &Skip, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.0f, ButtonColor) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)) && m_TermsAccepted)
 		{
+			g_Config.m_ClShowWelcome = false;
 			Client()->RequestDDNetInfo();
 			m_JoinTutorial.m_Queued = false;
 			m_Popup = g_Config.m_BrIndicateFinished ? POPUP_POINTS : POPUP_NONE;
 		}
+
+#if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_IOS)
+		Box.HSplitBottom(20.f, &Box, &Part);
+		Box.HSplitBottom(24.f, &Box, &Part);
+		Part.VSplitLeft(30.0f, nullptr, &Part);
+		if(DoButton_CheckBox(&m_TermsAccepted, Localize("I agree to the Terms of Use"), m_TermsAccepted, &Part))
+			m_TermsAccepted = !m_TermsAccepted;
+#else
+		m_TermsAccepted = true;
+#endif
 
 		Box.HSplitBottom(20.f, &Box, &Part);
 		Box.HSplitBottom(24.f, &Box, &Part);

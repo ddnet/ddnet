@@ -3310,9 +3310,7 @@ void CClient::Run()
 	m_pConsole->InitChecksum(ChecksumData());
 
 	// request the new ddnet info from server if already past the welcome dialog
-	if(g_Config.m_ClShowWelcome)
-		g_Config.m_ClShowWelcome = 0;
-	else
+	if(!g_Config.m_ClShowWelcome)
 		RequestDDNetInfo();
 
 	if(SoundInitFailed)
