@@ -500,7 +500,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	// headline
 	PlayerList.HSplitTop(34.0f, &ButtonBar, &PlayerList);
-	ButtonBar.VSplitRight(231.0f, &Player, &ButtonBar);
+	ButtonBar.VSplitRight(315.0f, &Player, &ButtonBar);
 	Ui()->DoLabel(&Player, Localize("Player"), 24.0f, TEXTALIGN_ML);
 
 	ButtonBar.HMargin(1.0f, &ButtonBar);
@@ -515,6 +515,14 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	ButtonBar.VSplitLeft(20.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_FRIEND, &Button);
+
+	ButtonBar.VSplitLeft(20.0f, nullptr, &ButtonBar);
+	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	Ui()->DoLabel(&Button, FontIcon::USER_SLASH, 24.0f, TEXTALIGN_MC);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
 	int TotalPlayers = 0;
 	for(const auto &pInfoByName : GameClient()->m_Snap.m_apInfoByName)
@@ -534,7 +542,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	s_ListBox.DoStart(24.0f, TotalPlayers, 1, 3, -1, &PlayerList);
 
 	// options
-	static char s_aPlayerIds[MAX_CLIENTS][4] = {{0}};
+	static char s_aPlayerIds[MAX_CLIENTS][5] = {{0}};
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -557,7 +565,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		if(Count % 2 == 1)
 			Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 		Row.VSplitRight(s_ListBox.ScrollbarWidthMax() - s_ListBox.ScrollbarWidth(), &Row, nullptr);
-		Row.VSplitRight(300.0f, &Player, &Row);
+		Row.VSplitRight(384.0f, &Player, &Row);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
@@ -575,7 +583,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 		Player.HSplitTop(1.5f, nullptr, &Player);
 		Player.VSplitMid(&Player, &Button);
-		Row.VSplitRight(210.0f, &Button2, &Row);
+		Row.VSplitRight(294.0f, &Button2, &Row);
 
 		Ui()->DoLabel(&Player, CurrentClient.m_aName, 14.0f, TEXTALIGN_ML);
 		Ui()->DoLabel(&Button, CurrentClient.m_aClan, 14.0f, TEXTALIGN_ML);
@@ -617,6 +625,15 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 			GameClient()->Client()->ServerBrowserUpdate();
 		}
+
+		// block button
+		Row.VSplitLeft(20.0f, nullptr, &Row);
+		Row.VSplitLeft(Width, &Button, &Row);
+		Button.VSplitLeft((Width - Button.h) / 4.0f, nullptr, &Button);
+		Button.VSplitLeft(Button.h, &Button, nullptr);
+		if(DoButton_Toggle(&s_aPlayerIds[Index][4], CurrentClient.m_Foe, &Button, true))
+			GameClient()->BlockPlayer(Index, !CurrentClient.m_Foe);
+		GameClient()->m_Tooltips.DoToolTip(&s_aPlayerIds[Index][4], &Button, CurrentClient.m_Foe ? Localize("Unblock") : Localize("Block"));
 	}
 
 	s_ListBox.DoEnd();

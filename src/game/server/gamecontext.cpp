@@ -2244,6 +2244,9 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 		case NETMSGTYPE_CL_CAMERAINFO:
 			OnCameraInfoNetMessage(static_cast<CNetMsg_Cl_CameraInfo *>(pRawMsg), ClientId);
 			break;
+		case NETMSGTYPE_CL_REPORTPLAYER:
+			OnReportPlayerNetMessage(static_cast<CNetMsg_Cl_ReportPlayer *>(pRawMsg), ClientId);
+			break;
 		case NETMSGTYPE_CL_SETSPECTATORMODE:
 			OnSetSpectatorModeNetMessage(static_cast<CNetMsg_Cl_SetSpectatorMode *>(pRawMsg), ClientId);
 			break;
@@ -2785,6 +2788,20 @@ void CGameContext::OnCameraInfoNetMessage(const CNetMsg_Cl_CameraInfo *pMsg, int
 {
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 	pPlayer->m_CameraInfo.Write(pMsg);
+}
+
+void CGameContext::OnReportPlayerNetMessage(const CNetMsg_Cl_ReportPlayer *pMsg, int ClientId)
+{
+	int ReportedId = pMsg->m_ClientId;
+	if(!Server()->ReverseTranslate(ReportedId, ClientId) || ReportedId == ClientId || !m_apPlayers[ReportedId])
+		return;
+
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	if(g_Config.m_SvSpamprotection && pPlayer->m_LastReport && pPlayer->m_LastReport + Server()->TickSpeed() > Server()->Tick())
+		return;
+	pPlayer->m_LastReport = Server()->Tick();
+
+	log_info("report", "%d:%s reported %d:%s", ClientId, Server()->ClientName(ClientId), ReportedId, Server()->ClientName(ReportedId));
 }
 
 void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientId)

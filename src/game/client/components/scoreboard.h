@@ -52,6 +52,7 @@ class CScoreboard : public CComponent
 		CButtonContainer m_FriendAction;
 		CButtonContainer m_MuteAction;
 		CButtonContainer m_EmoticonAction;
+		CButtonContainer m_BlockAction;
 
 		CButtonContainer m_SpectateButton;
 
