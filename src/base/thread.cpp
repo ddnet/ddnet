@@ -18,6 +18,14 @@
 #endif
 #endif
 
+#if defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
+#include <mach/task_policy.h>
+#include <mach/thread_act.h>
+#include <mach/thread_policy.h>
+#elif defined(CONF_PLATFORM_LINUX) || defined(CONF_PLATFORM_ANDROID)
+#include <sys/prctl.h>
+#endif
+
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
 #include <emscripten/emscripten.h>
 #endif
@@ -138,6 +146,17 @@ void thread_yield()
 	Sleep(0);
 #else
 #error not implemented
+#endif
+}
+
+void thread_request_precise_wakeups()
+{
+#if defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
+	// Not asserted, the system is free to decline the policy.
+	thread_latency_qos_policy_data_t policy = {LATENCY_QOS_TIER_0};
+	thread_policy_set(pthread_mach_thread_np(pthread_self()), THREAD_LATENCY_QOS_POLICY, (thread_policy_t)&policy, THREAD_LATENCY_QOS_POLICY_COUNT);
+#elif defined(CONF_PLATFORM_LINUX) || defined(CONF_PLATFORM_ANDROID)
+	dbg_assert(prctl(PR_SET_TIMERSLACK, 1) == 0, "prctl(PR_SET_TIMERSLACK) failure");
 #endif
 }
 
