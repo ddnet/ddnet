@@ -601,7 +601,7 @@ void CNetTokenCache::AddToken(const NETADDR *pAddr, TOKEN Token)
 
 	for(auto Iter = m_ConnlessPackets.begin(); Iter != m_ConnlessPackets.end();)
 	{
-		if(Iter->m_Addr == NullAddr)
+		if(Iter->m_Addr == *pAddr || Iter->m_Addr == NullAddr)
 		{
 			CNetBase::SendPacketConnlessWithToken7(m_Socket, &Iter->m_Addr, Iter->m_aData, Iter->m_DataSize, Token, GenerateToken());
 

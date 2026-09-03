@@ -109,9 +109,10 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 		}
 
 		SECURITY_TOKEN Token;
-		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Sixup, true, &Token, pResponseToken) == 0)
+		bool PacketSixup = Sixup;
+		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, PacketSixup, true, &Token, pResponseToken) == 0)
 		{
-			if(Sixup)
+			if(PacketSixup)
 			{
 				Addr.type |= NETTYPE_TW7;
 			}
@@ -132,7 +133,7 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 			else
 			{
 				const bool Control = (m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONTROL) != 0;
-				if(Sixup &&
+				if(PacketSixup &&
 					Control &&
 					m_RecvBuffer.m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN) &&
 					m_RecvBuffer.m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
