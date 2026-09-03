@@ -299,9 +299,9 @@ const CSnapshotDelta::CData *CSnapshotDelta::EmptyDelta() const
 }
 
 // TODO: OPT: this should be made much faster
-int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData)
+int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, CSnapshotDeltaBuffer *pDstData)
 {
-	CData *pDelta = (CData *)pDstData;
+	CData *pDelta = (CData *)pDstData->m_aData;
 	int *pData = (int *)pDelta->m_aData;
 
 	pDelta->m_NumDeletedItems = 0;
@@ -379,7 +379,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 	if(!pDelta->m_NumDeletedItems && !pDelta->m_NumUpdateItems && !pDelta->m_NumTempItems)
 		return 0;
 
-	return (int)((char *)pData - (char *)pDstData);
+	return (int)((char *)pData - (char *)pDelta);
 }
 
 int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
