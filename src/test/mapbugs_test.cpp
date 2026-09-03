@@ -18,8 +18,9 @@ static CMapBugs GetMapBugsImpl(const char *pName, int Size, const char *pSha256)
 TEST(MapBugs, Contains)
 {
 	EXPECT_TRUE(GetMapBugsImpl("Binary", 2022597, BINARY_SHA256).Contains(BUG_GRENADE_DOUBLEEXPLOSION));
-	EXPECT_FALSE(GetMapBugsImpl("Binarx", 2022597, BINARY_SHA256).Contains(BUG_GRENADE_DOUBLEEXPLOSION));
-	EXPECT_FALSE(GetMapBugsImpl("Binary", 2022598, BINARY_SHA256).Contains(BUG_GRENADE_DOUBLEEXPLOSION));
+	EXPECT_FALSE(GetMapBugsImpl("Binarx", 2022597, BINARY_SHA256).Contains(BUG_GRENADE_DOUBLEEXPLOSION)); // mismatched name
+	EXPECT_FALSE(GetMapBugsImpl("Binary", 2022598, BINARY_SHA256).Contains(BUG_GRENADE_DOUBLEEXPLOSION)); // mismatched size
+	EXPECT_FALSE(GetMapBugsImpl("Binary", 2022597, DM1_SHA256).Contains(BUG_GRENADE_DOUBLEEXPLOSION)); // mismatched SHA256
 	EXPECT_FALSE(GetMapBugsImpl("dm1", 5805, DM1_SHA256).Contains(BUG_GRENADE_DOUBLEEXPLOSION));
 }
 
