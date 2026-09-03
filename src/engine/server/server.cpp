@@ -4125,8 +4125,11 @@ void CServer::SaveDemo(int ClientId, float Time)
 {
 	if(IsRecording(ClientId))
 	{
+		char aPlayerName[MAX_NAME_LENGTH];
+		str_copy(aPlayerName, m_aClients[ClientId].m_aName);
+		str_sanitize_filename(aPlayerName);
 		char aNewFilename[IO_MAX_PATH_LENGTH];
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", GameServer()->Map()->BaseName(), m_aClients[ClientId].m_aName, Time);
+		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", GameServer()->Map()->BaseName(), aPlayerName, Time);
 		m_aDemoRecorder[ClientId].Stop(IDemoRecorder::EStopMode::KEEP_FILE, aNewFilename);
 	}
 }
