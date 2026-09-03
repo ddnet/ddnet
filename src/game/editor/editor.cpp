@@ -126,6 +126,8 @@ bool CEditor::CallbackSaveMap(const char *pFilename, int StorageType, void *pUse
 	dbg_assert(StorageType == IStorage::TYPE_SAVE, "Saving only allowed for IStorage::TYPE_SAVE");
 
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
+	const bool CloseAfterSave = pEditor->m_CloseMapAfterSave;
+	pEditor->m_CloseMapAfterSave = false;
 
 	// Save map to specified file
 	if(pEditor->Save(pFilename))
@@ -137,6 +139,7 @@ bool CEditor::CallbackSaveMap(const char *pFilename, int StorageType, void *pUse
 		pEditor->Map()->m_ValidSaveFilename = true;
 		pEditor->Map()->m_Modified = false;
 		pEditor->UpdateMapDisplayNames();
+		pEditor->Map()->m_CloseOnSave = CloseAfterSave;
 	}
 	else
 	{
@@ -4505,6 +4508,7 @@ void CEditor::CloseMap(size_t Index, bool Confirm)
 		Reset();
 	}
 
+	Ui()->ClosePopupMenu(&m_PopupMapTab);
 	m_vpMaps.erase(m_vpMaps.begin() + Index);
 	if(m_vpMaps.empty())
 	{
@@ -4935,6 +4939,7 @@ void CEditor::OnClose()
 void CEditor::OnDialogClose()
 {
 	m_Dialog = DIALOG_NONE;
+	m_CloseMapAfterSave = false;
 	m_FileBrowser.OnDialogClose();
 }
 

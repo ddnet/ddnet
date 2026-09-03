@@ -1925,7 +1925,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP)
 		{
-			pEditor->Map()->m_CloseOnSave = true;
+			pEditor->m_CloseMapAfterSave = true;
 			pEditor->m_QuickActionSave.Call();
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
