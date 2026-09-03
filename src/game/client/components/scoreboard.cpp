@@ -935,6 +935,7 @@ void CScoreboard::OnRender()
 	const float TitleHeight = 30.0f;
 
 	CUIRect Scoreboard = {(Screen.w - ScoreboardWidth) / 2.0f, 75.0f, ScoreboardWidth, 355.0f + TitleHeight};
+	const CUIRect ScoreboardArea = Scoreboard;
 	CScoreboardRenderState RenderState{};
 
 	if(Teams)
@@ -1082,6 +1083,16 @@ void CScoreboard::OnRender()
 
 	if(!GameClient()->m_Menus.IsActive() && !GameClient()->m_Chat.IsActive())
 	{
+		// Touch devices have no scoreboard key to release, so a touch next to the scoreboard closes it.
+		const bool WasTouchPressed = m_TouchState.m_AnyPressed;
+		Ui()->UpdateTouchState(m_TouchState);
+		const CUIRect Board = {ScoreboardArea.x, ScoreboardArea.y, ScoreboardArea.w, Spectators.y + Spectators.h - ScoreboardArea.y};
+		if(m_MouseUnlocked && m_TouchState.m_AnyPressed && !WasTouchPressed && !Ui()->IsPopupOpen() && !Ui()->MouseInside(&Board))
+		{
+			m_Active = false;
+			LockMouse();
+		}
+
 		Ui()->RenderPopupMenus();
 
 		if(m_MouseUnlocked)

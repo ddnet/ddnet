@@ -520,6 +520,20 @@ void CTouchControls::CSpectateTouchButtonBehavior::OnDeactivate(bool ByFinger)
 	m_pTouchControls->Console()->ExecuteLineStroked(1, "+spectate", IConsole::CLIENT_ID_UNSPECIFIED);
 }
 
+// Scoreboard button: keeps the scoreboard open with the cursor unlocked, next touch next to the scoreboard will close it again.
+CTouchControls::CButtonLabel CTouchControls::CScoreboardTouchButtonBehavior::GetLabel() const
+{
+	return {CButtonLabel::EType::LOCALIZED, Localizable("Scoreboard")};
+}
+
+void CTouchControls::CScoreboardTouchButtonBehavior::OnDeactivate(bool ByFinger)
+{
+	if(!ByFinger)
+		return;
+	m_pTouchControls->Console()->ExecuteLineStroked(1, "+scoreboard", IConsole::CLIENT_ID_UNSPECIFIED);
+	m_pTouchControls->Console()->ExecuteLine("toggle_scoreboard_cursor", IConsole::CLIENT_ID_UNSPECIFIED);
+}
+
 // Swap action button:
 // - If joystick is currently active with one action: activate the other action.
 // - Else: swap active action.
@@ -805,6 +819,7 @@ bool CTouchControls::OnTouchState(std::vector<IInput::CTouchFingerState> &vTouch
 		GameClient()->m_Menus.IsActive() ||
 		GameClient()->m_Emoticon.IsActive() ||
 		GameClient()->m_Spectator.IsActive() ||
+		GameClient()->m_Scoreboard.IsMouseUnlocked() ||
 		m_PreviewAllButtons)
 	{
 		ResetButtons();
@@ -827,7 +842,8 @@ void CTouchControls::OnRender()
 		return;
 	if(GameClient()->m_Chat.IsActive() ||
 		GameClient()->m_Emoticon.IsActive() ||
-		GameClient()->m_Spectator.IsActive())
+		GameClient()->m_Spectator.IsActive() ||
+		GameClient()->m_Scoreboard.IsMouseUnlocked())
 	{
 		return;
 	}
@@ -1574,6 +1590,7 @@ std::unique_ptr<CTouchControls::CPredefinedTouchButtonBehavior> CTouchControls::
 		{CExtraMenuTouchButtonBehavior::BEHAVIOR_ID, [&](const json_value *pBehavior) { return ParseExtraMenuBehavior(pBehavior); }},
 		{CEmoticonTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CEmoticonTouchButtonBehavior>(); }},
 		{CSpectateTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CSpectateTouchButtonBehavior>(); }},
+		{CScoreboardTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CScoreboardTouchButtonBehavior>(); }},
 		{CSwapActionTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CSwapActionTouchButtonBehavior>(); }},
 		{CUseActionTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CUseActionTouchButtonBehavior>(); }},
 		{CJoystickActionTouchButtonBehavior::BEHAVIOR_ID, [](const json_value *pBehavior) { return std::make_unique<CJoystickActionTouchButtonBehavior>(); }},
