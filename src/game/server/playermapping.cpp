@@ -15,6 +15,7 @@ void CPlayerMapping::Init(CGameContext *pGameServer)
 	m_pConfig = m_pGameServer->Config();
 	m_pServer = m_pGameServer->Server();
 	std::fill(std::begin(m_aTeamSizes), std::end(m_aTeamSizes), 0);
+	m_ReserveAnyTeamSlots = true;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_aMap[i].Init(i, this);
@@ -399,7 +400,7 @@ int CPlayerMapping::CPlayerMap::MapSize() const
 bool CPlayerMapping::ReserveTeamSlots(int DDTeam, int ClientId) const
 {
 	const bool IsDDNet = m_pGameServer->GetClientVersion(ClientId) >= VERSION_DDNET_OLD;
-	return !g_Config.m_SvSoloServer && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap && IsDDNet;
+	return !g_Config.m_SvSoloServer && m_ReserveAnyTeamSlots && DDTeam != TEAM_FLOCK && m_aTeamSizes[DDTeam] <= ms_MaxTeamSizePlayerMap && IsDDNet;
 }
 
 int CPlayerMapping::SeeOthersId(int ClientId) const
@@ -456,6 +457,12 @@ void CPlayerMapping::UpdatePlayerMap(int ClientId)
 				int DDTeam = GameServer()->GetDDRaceTeam(i);
 				m_aTeamSizes[DDTeam]++;
 			}
+			int NumReservableTeamPlayers = 0;
+			for(int Team = TEAM_FLOCK + 1; Team < NUM_DDRACE_TEAMS; Team++)
+				if(m_aTeamSizes[Team] <= ms_MaxTeamSizePlayerMap)
+					NumReservableTeamPlayers += m_aTeamSizes[Team];
+			// Starvation is only possible when not every player fits into the legacy id map
+			m_ReserveAnyTeamSlots = ClientCount <= LEGACY_MAX_CLIENTS - 2 || NumReservableTeamPlayers <= ms_MaxTotalTeamSizePlayerMap;
 		}
 
 		for(auto &Map : m_aMap)

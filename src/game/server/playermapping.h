@@ -52,8 +52,11 @@ private:
 	static constexpr int ms_MaxNumSeeOthersVanilla = 13;
 	// Teams are messy. Dont highlight teams bigger than 10 tees in playermapping so that big teams wont break anything
 	static constexpr int ms_MaxTeamSizePlayerMap = 10;
+	// Dont reserve more than half of the 62 slots for players in teams, the rest is needed for the closest tees
+	static constexpr int ms_MaxTotalTeamSizePlayerMap = 30;
 
 	int m_aTeamSizes[NUM_DDRACE_TEAMS];
+	bool m_ReserveAnyTeamSlots;
 	char m_aSeeOthersName[MAX_NAME_LENGTH];
 
 	class CPlayerMap
