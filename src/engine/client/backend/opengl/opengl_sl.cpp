@@ -101,19 +101,17 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		vLines.push_back(Line);
 	}
 
-	const char **ShaderCode = new const char *[vLines.size()];
-
-	for(size_t i = 0; i < vLines.size(); ++i)
+	std::vector<const char *> vpShaderCode;
+	vpShaderCode.reserve(vLines.size());
+	for(const auto &Line : vLines)
 	{
-		ShaderCode[i] = vLines[i].c_str();
+		vpShaderCode.push_back(Line.c_str());
 	}
 
 	const TWGLuint ShaderId = glCreateShader(Type);
 
-	glShaderSource(ShaderId, vLines.size(), ShaderCode, nullptr);
+	glShaderSource(ShaderId, vpShaderCode.size(), vpShaderCode.data(), nullptr);
 	glCompileShader(ShaderId);
-
-	delete[] ShaderCode;
 
 	TWGLint CompilationStatus;
 	glGetShaderiv(ShaderId, GL_COMPILE_STATUS, &CompilationStatus);
