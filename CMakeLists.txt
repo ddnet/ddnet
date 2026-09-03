@@ -832,7 +832,7 @@ elseif(TARGET_OS STREQUAL "ios")
   find_library(SECURITY Security)
   find_library(SYSTEMCONFIGURATION SystemConfiguration)
   set(PLATFORM_CLIENT
-    src/ios/ios_main.cpp
+    src/ios/ios_main.mm
   )
   set(PLATFORM_CLIENT_LIBS
     # tidy-alphabetical-start

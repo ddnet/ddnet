@@ -13,6 +13,10 @@
 #include <engine/shared/config.h>
 #include <engine/shared/localization.h>
 
+#if defined(CONF_PLATFORM_IOS)
+#include <ios/ios_main.h>
+#endif
+
 #include <SDL.h>
 #include <SDL_messagebox.h>
 #include <SDL_vulkan.h>
@@ -1782,6 +1786,16 @@ void CGraphicsBackend_SDL_GL::GetViewportSize(int &w, int &h)
 		SDL_GL_GetDrawableSize(m_pWindow, &w, &h);
 	else
 		SDL_Vulkan_GetDrawableSize(m_pWindow, &w, &h);
+}
+
+void CGraphicsBackend_SDL_GL::GetDisplayCutoutInsets(int &Left, int &Right)
+{
+#if defined(CONF_PLATFORM_IOS)
+	IosDisplayCutoutInsets(m_pWindow, &Left, &Right);
+#else
+	Left = 0;
+	Right = 0;
+#endif
 }
 
 void CGraphicsBackend_SDL_GL::NotifyWindow()

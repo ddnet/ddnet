@@ -242,6 +242,7 @@ class IGraphics : public IInterface
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
+	int m_ViewportX = 0;
 	int m_DrawableWidth;
 	int m_DrawableHeight;
 	int m_ScreenRefreshRate;
@@ -282,10 +283,14 @@ public:
 	int WindowHeight() const { return m_ScreenHeight / m_ScreenHiDPIScale; }
 
 	// Size of the whole drawable area, in the same units as ScreenWidth()/ScreenHeight().
-	// The rendered image is clamped to an aspect ratio of at most 5:4 and aligned to the
-	// top left corner, so the area at the bottom can be larger than the image and is not
-	// rendered to.
+	// The rendered image is clamped to an aspect ratio of at most 5:4 and excludes the
+	// area covered by the cutout of the display, so it can be smaller than that area.
+	// The rest of the drawable area is not rendered to.
 	vec2 DrawableSize() const { return vec2(m_DrawableWidth, m_DrawableHeight); }
+
+	// Distance of the rendered image from the left edge of the drawable area, in the
+	// same units as ScreenWidth(). The image is always aligned to the top edge.
+	int ViewportX() const { return m_ViewportX; }
 
 	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
