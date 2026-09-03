@@ -74,7 +74,7 @@ std::wstring windows_utf8_to_wide(const char *str)
 {
 	const int orig_length = str_length(str);
 	if(orig_length == 0)
-		return L"";
+		return std::wstring();
 	const int size_needed = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, orig_length, nullptr, 0);
 	dbg_assert(size_needed > 0, "Invalid UTF-8 passed to windows_utf8_to_wide");
 	std::wstring wide_string(size_needed, L'\0');

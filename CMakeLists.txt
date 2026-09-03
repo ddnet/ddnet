@@ -304,7 +304,9 @@ if(NOT MSVC AND NOT HAIKU)
             endif()
           endif()
         endif()
-      else()
+      elseif(NOT TARGET_OS STREQUAL "windows")
+        # Windows: only the default linker handles GCC+LTO, gold can't produce
+        # PE binaries and lld ignores GCC's LTO plugin, leaving all objects empty.
         add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=gold)
         if(FLAG_SUPPORTED_fuse_ld_gold)
           message(STATUS "Using gold linker")
@@ -347,7 +349,11 @@ if(NOT MSVC AND NOT HAIKU)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS -fsigned-char)
 
   # Support more sections in object files, because the limit is exceeded for some files in debug mode.
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS -Wa,-mbig-obj)
+  # Not with IPO, because GCC's LTO plugin cannot read big-obj COFF files, making
+  # the linker treat all LTO objects as empty. Stays far below the limit with LTO anyway.
+  if(NOT ENABLE_IPO)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -Wa,-mbig-obj)
+  endif()
 
   # Don't insert timestamps into PEs to keep the build reproducible.
   if(TARGET_OS STREQUAL "windows")
@@ -3502,6 +3508,14 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     # See also https://github.com/rust-lang/rust/issues/39016.
     add_dependencies(run_tests run_rust_tests)
   endif()
+endif()
+
+if(ENABLE_IPO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  foreach(target engine-gfx engine-shared game-shared rust-bridge-shared json md5 zlib)
+    if(TARGET ${target})
+      target_compile_options(${target} PRIVATE -ffat-lto-objects)
+    endif()
+  endforeach()
 endif()
 
 add_library(rust_test STATIC EXCLUDE_FROM_ALL

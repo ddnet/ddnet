@@ -55,6 +55,12 @@ static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
 			continue;
 		}
 
+		if(pItem->m_Width <= 0 || pItem->m_Height <= 0)
+		{
+			log_error("map_extract", "ignoring image '%s' with invalid dimensions %dx%d", aBuf, pItem->m_Width, pItem->m_Height);
+			continue;
+		}
+
 		CImageInfo Image;
 		Image.m_Width = pItem->m_Width;
 		Image.m_Height = pItem->m_Height;

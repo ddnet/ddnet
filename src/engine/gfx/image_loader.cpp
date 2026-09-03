@@ -361,7 +361,7 @@ bool CImageLoader::SavePng(CByteBufferWriter &Writer, const CImageInfo &Image)
 	png_write_info(pPngStruct, pPngInfo);
 
 	png_bytepp pRowPointers = new png_bytep[Image.m_Height];
-	const int WidthBytes = Image.m_Width * Image.PixelSize();
+	const size_t WidthBytes = Image.m_Width * Image.PixelSize();
 	ptrdiff_t BufferOffset = 0;
 	for(size_t y = 0; y < Image.m_Height; ++y)
 	{
