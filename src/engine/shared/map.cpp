@@ -12,6 +12,7 @@
 
 #include <game/gamecore.h>
 #include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 CMap::CMap() = default;
 
@@ -109,7 +110,8 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	if(!UpgradeAndValidateInfoItems(NewDataFile) ||
 		!UpgradeAndValidateImageItems(NewDataFile) ||
 		!ValidateSoundItems(NewDataFile) ||
-		!UpgradeAndValidateEnvelopeItems(NewDataFile))
+		!UpgradeAndValidateEnvelopeItems(NewDataFile) ||
+		!ValidateAutomapperConfigItems(NewDataFile))
 	{
 		return false;
 	}
@@ -427,6 +429,23 @@ bool CMap::UpgradeAndValidateEnvelopeItems(CDataFileReader &NewDataFile)
 		else if(EnvelopeItemSize < sizeof(CMapItemEnvelope_v2))
 		{
 			log_error("map/load", "Envelope %d is truncated (version %d, size %" PRIzu ").", EnvelopeIndex, pEnvelopeLegacy->m_Version, EnvelopeItemSize);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CMap::ValidateAutomapperConfigItems(CDataFileReader &NewDataFile)
+{
+	int AutomapperConfigsStart, AutomapperConfigsNum;
+	NewDataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &AutomapperConfigsStart, &AutomapperConfigsNum);
+	for(int AutomapperConfigIndex = 0; AutomapperConfigIndex < AutomapperConfigsNum; AutomapperConfigIndex++)
+	{
+		// The version is not checked because existing maps contain uninitialized versions.
+		const size_t AutomapperConfigItemSize = NewDataFile.GetItemSize(AutomapperConfigsStart + AutomapperConfigIndex);
+		if(AutomapperConfigItemSize < sizeof(CMapItemAutomapperConfig))
+		{
+			log_error("map/load", "Automapper config %d is truncated (size %" PRIzu ").", AutomapperConfigIndex, AutomapperConfigItemSize);
 			return false;
 		}
 	}
