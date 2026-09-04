@@ -108,7 +108,8 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	// Replace map items for old versions with items compatible with latest version to avoid version checks when using the map items.
 	if(!UpgradeAndValidateInfoItems(NewDataFile) ||
 		!UpgradeAndValidateImageItems(NewDataFile) ||
-		!ValidateSoundItems(NewDataFile))
+		!ValidateSoundItems(NewDataFile) ||
+		!UpgradeAndValidateEnvelopeItems(NewDataFile))
 	{
 		return false;
 	}
@@ -377,6 +378,55 @@ bool CMap::ValidateSoundItems(CDataFileReader &NewDataFile)
 		if(pSound->m_Version != 1)
 		{
 			log_error("map/load", "Sound %d has unsupported version %d.", SoundIndex, pSound->m_Version);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CMap::UpgradeAndValidateEnvelopeItems(CDataFileReader &NewDataFile)
+{
+	int EnvelopesStart, EnvelopesNum;
+	NewDataFile.GetType(MAPITEMTYPE_ENVELOPE, &EnvelopesStart, &EnvelopesNum);
+	for(int EnvelopeIndex = 0; EnvelopeIndex < EnvelopesNum; EnvelopeIndex++)
+	{
+		const int EnvelopeItemIndex = EnvelopesStart + EnvelopeIndex;
+		const size_t EnvelopeItemSize = NewDataFile.GetItemSize(EnvelopeItemIndex);
+		if(EnvelopeItemSize < sizeof(CMapItemEnvelope_v1Legacy))
+		{
+			log_error("map/load", "Envelope %d is truncated (size %" PRIzu ").", EnvelopeIndex, EnvelopeItemSize);
+			return false;
+		}
+		const CMapItemEnvelope_v1Legacy *pEnvelopeLegacy = static_cast<CMapItemEnvelope_v1Legacy *>(NewDataFile.GetItem(EnvelopeItemIndex));
+		if(!in_range(pEnvelopeLegacy->m_Version, 1, CMapItemEnvelope::VERSION_TEEWORLDS_BEZIER))
+		{
+			log_error("map/load", "Envelope %d has unsupported version %d.", EnvelopeIndex, pEnvelopeLegacy->m_Version);
+			return false;
+		}
+		if(pEnvelopeLegacy->m_Version == 1)
+		{
+			CMapItemEnvelope UpgradedEnvelope;
+			if(EnvelopeItemSize < sizeof(CMapItemEnvelope_v1))
+			{
+				UpgradedEnvelope.m_Version = pEnvelopeLegacy->m_Version;
+				UpgradedEnvelope.m_Channels = pEnvelopeLegacy->m_Channels;
+				UpgradedEnvelope.m_StartPoint = pEnvelopeLegacy->m_StartPoint;
+				UpgradedEnvelope.m_NumPoints = pEnvelopeLegacy->m_NumPoints;
+				StrToInts(UpgradedEnvelope.m_aName, std::size(UpgradedEnvelope.m_aName), "");
+			}
+			else
+			{
+				mem_copy(&UpgradedEnvelope, pEnvelopeLegacy, sizeof(CMapItemEnvelope_v1));
+			}
+			UpgradedEnvelope.m_Synchronized = 0;
+			if(!NewDataFile.OverrideItemData(EnvelopeItemIndex, &UpgradedEnvelope, sizeof(UpgradedEnvelope)))
+			{
+				return false;
+			}
+		}
+		else if(EnvelopeItemSize < sizeof(CMapItemEnvelope_v2))
+		{
+			log_error("map/load", "Envelope %d is truncated (version %d, size %" PRIzu ").", EnvelopeIndex, pEnvelopeLegacy->m_Version, EnvelopeItemSize);
 			return false;
 		}
 	}

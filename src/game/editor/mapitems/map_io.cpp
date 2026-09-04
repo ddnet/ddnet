@@ -1016,11 +1016,9 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				if(pPointBezier != nullptr)
 					mem_copy(&pEnvelope->m_vPoints[PointIndex].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
 			}
-			if(pItem->m_aName[0] != -1) // compatibility with old maps
-				IntsToStr(pItem->m_aName, std::size(pItem->m_aName), pEnvelope->m_aName, std::size(pEnvelope->m_aName));
+			IntsToStr(pItem->m_aName, std::size(pItem->m_aName), pEnvelope->m_aName, std::size(pEnvelope->m_aName));
+			pEnvelope->m_Synchronized = pItem->m_Synchronized;
 			m_vpEnvelopes.push_back(pEnvelope);
-			if(pItem->m_Version >= 2)
-				pEnvelope->m_Synchronized = pItem->m_Synchronized;
 		}
 	}
 

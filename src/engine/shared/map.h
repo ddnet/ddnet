@@ -55,6 +55,7 @@ private:
 	static bool UpgradeAndValidateInfoItems(CDataFileReader &NewDataFile);
 	static bool UpgradeAndValidateImageItems(CDataFileReader &NewDataFile);
 	static bool ValidateSoundItems(CDataFileReader &NewDataFile);
+	static bool UpgradeAndValidateEnvelopeItems(CDataFileReader &NewDataFile);
 	static bool ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
 	bool UpgradeAndValidateTilesLayerItem(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
 		CMapItemLayerTilemap_v2 *pLayerTilemapBase, int LayerItemIndex, size_t LayerItemSize);

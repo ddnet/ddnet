@@ -548,6 +548,18 @@ public:
 	CEnvPointBezier m_Bezier;
 };
 
+// Version 1 envelope items of very old Teeworlds versions contain a single integer,
+// which is always -1 in existing maps, instead of the name.
+class CMapItemEnvelope_v1Legacy
+{
+public:
+	int m_Version;
+	int m_Channels;
+	int m_StartPoint;
+	int m_NumPoints;
+	int m_Name;
+};
+
 class CMapItemEnvelope_v1
 {
 public:
