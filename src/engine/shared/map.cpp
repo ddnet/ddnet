@@ -40,6 +40,11 @@ const char *CMap::GetDataString(int Index)
 	return m_DataFile.GetDataString(Index);
 }
 
+std::optional<std::vector<const char *>> CMap::GetDataStringArray(int Index)
+{
+	return m_DataFile.GetDataStringArray(Index);
+}
+
 void CMap::UnloadData(int Index)
 {
 	m_DataFile.UnloadData(Index);

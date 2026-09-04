@@ -4598,14 +4598,15 @@ void CGameContext::LoadMapSettings()
 		if(!(pItem->m_Settings > -1))
 			break;
 
-		int Size = pMap->GetDataSize(pItem->m_Settings);
-		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
-		char *pNext = pSettings;
-		while(pNext < pSettings + Size)
+		const std::optional<std::vector<const char *>> vpSettings = pMap->GetDataStringArray(pItem->m_Settings);
+		if(!vpSettings.has_value())
 		{
-			int StrSize = str_length(pNext) + 1;
-			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
-			pNext += StrSize;
+			log_error("mapsettings", "Map settings are invalid.");
+			break;
+		}
+		for(const char *pSetting : vpSettings.value())
+		{
+			Console()->ExecuteLine(pSetting, IConsole::CLIENT_ID_GAME);
 		}
 		pMap->UnloadData(pItem->m_Settings);
 		break;
