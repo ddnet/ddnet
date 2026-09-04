@@ -409,6 +409,13 @@ void CEffects::HammerHit(vec2 Pos, float Alpha, float Volume)
 		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, Volume, Pos);
 }
 
+void CEffects::SkipAdditions()
+{
+	m_Add5hz = false;
+	m_Add50hz = false;
+	m_Add100hz = false;
+}
+
 void CEffects::OnRender()
 {
 	const float Speed = GameClient()->GetAnimationPlaybackSpeed();

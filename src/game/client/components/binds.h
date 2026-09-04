@@ -92,6 +92,6 @@ public:
 
 private:
 	char *m_aapKeyBindings[KeyModifier::COMBINATION_COUNT][KEY_LAST];
-	std::vector<CBindSlot> m_vActiveBinds;
+	std::vector<CBindSlot> m_avActiveBinds[2]; // primary and secondary input
 };
 #endif

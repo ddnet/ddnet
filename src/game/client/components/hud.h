@@ -65,8 +65,6 @@ class CHud : public CComponent
 	STextContainerIndex m_aPlayerPositionContainers[2];
 	float m_aPlayerPrevPosition[2];
 
-	void RenderCursor();
-
 	void RenderTextInfo();
 	void RenderConnectionWarning();
 	void RenderTeambalanceWarning();
@@ -115,6 +113,7 @@ public:
 	void OnWindowResize() override;
 	void OnReset() override;
 	void OnRender() override;
+	void RenderCursor();
 	void OnInit() override;
 	void OnNewSnapshot() override;
 

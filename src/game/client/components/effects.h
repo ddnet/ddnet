@@ -26,6 +26,8 @@ public:
 	int Sizeof() const override { return sizeof(*this); }
 
 	void OnRender() override;
+	// Stops adding effects until the next OnRender, for rendering the world a second time in a frame
+	void SkipAdditions();
 
 	void BulletTrail(vec2 Pos, float Alpha, float TimePassed);
 	void SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed);

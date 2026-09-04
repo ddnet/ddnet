@@ -155,8 +155,8 @@ void CCamera::UpdateCamera()
 	}
 	else if(!CanUseCameraInfo && CurrentZoom != m_UserZoomTarget)
 	{
-		// stop spectating player
-		if(!GameClient()->m_MultiViewActivated)
+		// stop spectating player, unless the zoom is showing both local players
+		if(!GameClient()->m_MultiViewActivated && !GameClient()->LocalMultiplayerShared())
 			ChangeZoom(m_UserZoomTarget, g_Config.m_ClSmoothZoomTime, false);
 		m_AutoSpecCameraZooming = false;
 
@@ -341,9 +341,19 @@ void CCamera::OnRender()
 		}
 
 		if(GameClient()->m_Snap.m_SpecInfo.m_Active)
+		{
 			m_Center = GameClient()->m_Snap.m_SpecInfo.m_Position + m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy];
+		}
+		else if(GameClient()->LocalMultiplayerShared())
+		{
+			vec2 MinPos, MaxPos;
+			GameClient()->LocalMultiplayerBounds(MinPos, MaxPos);
+			m_Center = (MinPos + MaxPos) / 2.0f;
+		}
 		else
+		{
 			m_Center = GameClient()->m_LocalCharacterPos + m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy];
+		}
 	}
 
 	if(m_ForceFreeview && m_CamType == CAMTYPE_SPEC)

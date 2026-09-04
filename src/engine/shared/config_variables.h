@@ -258,6 +258,8 @@ MACRO_CONFIG_INT(ClDummyHammer, cl_dummy_hammer, 0, 0, 1, CFGFLAG_CLIENT | CFGFL
 MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_dummy_resetonswitch, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Whether dummy or player should stop pressing keys when you switch (0 = off, 1 = dummy, 2 = player)")
 MACRO_CONFIG_INT(ClDummyRestoreWeapon, cl_dummy_restore_weapon, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Whether dummy should switch to last weapon after hammerfly")
 MACRO_CONFIG_INT(ClDummyCopyMoves, cl_dummy_copy_moves, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your moves")
+MACRO_CONFIG_INT(ClLocalMultiplayer, cl_local_multiplayer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Second player on this computer controls the dummy with the secondary mouse and keyboard (inp_secondary_*)")
+MACRO_CONFIG_INT(ClLocalMultiplayerSplit, cl_local_multiplayer_split, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Split the screen between both local players instead of zooming out to show both")
 
 // more controllable dummy command
 MACRO_CONFIG_INT(ClDummyControl, cl_dummy_control, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether you can control dummy at the same time (cl_dummy_jump, cl_dummy_fire, cl_dummy_hook)")

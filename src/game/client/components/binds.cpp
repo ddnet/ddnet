@@ -123,26 +123,42 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 	const int KeyModifierMask = GetModifierMaskOfKey(Event.m_Key);
 	const int ModifierMask = GetModifierMask(Input()) & ~KeyModifierMask;
 
+	// In local multiplayer the primary devices always control the main player and the
+	// secondary ones the dummy, so binds run with cl_dummy set accordingly. Each player has
+	// their own active binds, so both can hold the same key and a release always reaches
+	// the player that pressed.
+	const bool LocalMultiplayer = GameClient()->LocalMultiplayer();
+	const bool Secondary = Event.m_Secondary && LocalMultiplayer;
+	const auto &&ExecuteStroked = [&](int Stroke, const char *pBind, bool ForSecondary) {
+		const int ActiveDummy = g_Config.m_ClDummy;
+		if(LocalMultiplayer)
+			g_Config.m_ClDummy = ForSecondary ? 1 : 0;
+		Console()->ExecuteLineStroked(Stroke, pBind, IConsole::CLIENT_ID_UNSPECIFIED);
+		if(LocalMultiplayer)
+			g_Config.m_ClDummy = ActiveDummy;
+	};
+
 	bool Handled = false;
 
 	if(Event.m_Flags & IInput::FLAG_PRESS)
 	{
-		auto ActiveBind = std::find_if(m_vActiveBinds.begin(), m_vActiveBinds.end(), [&](const CBindSlot &Bind) {
+		std::vector<CBindSlot> &vActiveBinds = m_avActiveBinds[Secondary];
+		auto ActiveBind = std::find_if(vActiveBinds.begin(), vActiveBinds.end(), [&](const CBindSlot &Bind) {
 			return Event.m_Key == Bind.m_Key;
 		});
-		if(ActiveBind == m_vActiveBinds.end())
+		if(ActiveBind == vActiveBinds.end())
 		{
 			const auto &&OnKeyPress = [&](int Mask) {
 				const char *pBind = m_aapKeyBindings[Mask][Event.m_Key];
-				if(g_Config.m_ClSubTickAiming)
+				if(g_Config.m_ClSubTickAiming && !Secondary)
 				{
 					if(str_comp("+fire", pBind) == 0 || str_comp("+hook", pBind) == 0)
 					{
 						m_MouseOnAction = true;
 					}
 				}
-				Console()->ExecuteLineStroked(1, pBind, IConsole::CLIENT_ID_UNSPECIFIED);
-				m_vActiveBinds.emplace_back(Event.m_Key, Mask);
+				ExecuteStroked(1, pBind, Secondary);
+				vActiveBinds.emplace_back(Event.m_Key, Mask);
 			};
 
 			if(m_aapKeyBindings[ModifierMask][Event.m_Key])
@@ -164,7 +180,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 			// Have to check for nullptr again because the previous execute can unbind itself
 			if(m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key])
 			{
-				Console()->ExecuteLineStroked(1, m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key], IConsole::CLIENT_ID_UNSPECIFIED);
+				ExecuteStroked(1, m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key], Secondary);
 			}
 			Handled = true;
 		}
@@ -172,7 +188,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 
 	if(Event.m_Flags & IInput::FLAG_RELEASE)
 	{
-		const auto &&OnKeyRelease = [&](const CBindSlot &Bind) {
+		const auto &&OnKeyRelease = [&](const CBindSlot &Bind, bool ForSecondary) {
 			// Prevent binds from being deactivated while chat, console and menus are open, as these components will
 			// still allow key release events to be forwarded to this component, so the active binds can be cleared.
 			if(GameClient()->m_Chat.IsActive() ||
@@ -186,33 +202,42 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 			{
 				return;
 			}
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Bind.m_ModifierMask][Bind.m_Key], IConsole::CLIENT_ID_UNSPECIFIED);
+			ExecuteStroked(0, m_aapKeyBindings[Bind.m_ModifierMask][Bind.m_Key], ForSecondary);
 		};
 
-		// Release active bind that uses this primary key
-		auto ActiveBind = std::find_if(m_vActiveBinds.begin(), m_vActiveBinds.end(), [&](const CBindSlot &Bind) {
-			return Event.m_Key == Bind.m_Key;
-		});
-		if(ActiveBind != m_vActiveBinds.end())
+		// The player that pressed releases first, the other one only if the key was held
+		// before the device assignment changed
+		bool KeyReleased = false;
+		for(const bool ForSecondary : {Secondary, !Secondary})
 		{
-			OnKeyRelease(*ActiveBind);
-			m_vActiveBinds.erase(ActiveBind);
-			Handled = true;
-		}
+			std::vector<CBindSlot> &vActiveBinds = m_avActiveBinds[ForSecondary];
 
-		// Release all active binds that use this modifier key
-		if(KeyModifierMask != KeyModifier::NONE)
-		{
-			while(true)
+			// Release active bind that uses this primary key
+			auto ActiveBind = std::find_if(vActiveBinds.begin(), vActiveBinds.end(), [&](const CBindSlot &Bind) {
+				return Event.m_Key == Bind.m_Key;
+			});
+			if(ActiveBind != vActiveBinds.end() && !KeyReleased)
 			{
-				auto ActiveModifierBind = std::find_if(m_vActiveBinds.begin(), m_vActiveBinds.end(), [&](const CBindSlot &Bind) {
-					return (Bind.m_ModifierMask & KeyModifierMask) != 0;
-				});
-				if(ActiveModifierBind == m_vActiveBinds.end())
-					break;
-				OnKeyRelease(*ActiveModifierBind);
-				m_vActiveBinds.erase(ActiveModifierBind);
+				OnKeyRelease(*ActiveBind, ForSecondary);
+				vActiveBinds.erase(ActiveBind);
+				KeyReleased = true;
 				Handled = true;
+			}
+
+			// Release all active binds that use this modifier key
+			if(KeyModifierMask != KeyModifier::NONE)
+			{
+				while(true)
+				{
+					auto ActiveModifierBind = std::find_if(vActiveBinds.begin(), vActiveBinds.end(), [&](const CBindSlot &Bind) {
+						return (Bind.m_ModifierMask & KeyModifierMask) != 0;
+					});
+					if(ActiveModifierBind == vActiveBinds.end())
+						break;
+					OnKeyRelease(*ActiveModifierBind, ForSecondary);
+					vActiveBinds.erase(ActiveModifierBind);
+					Handled = true;
+				}
 			}
 		}
 	}

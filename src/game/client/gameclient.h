@@ -202,6 +202,8 @@ public:
 
 private:
 	std::vector<class CComponent *> m_vpAll;
+	size_t m_WorldRenderBegin = 0;
+	size_t m_WorldRenderEnd = 0;
 	std::vector<class CComponent *> m_vpInput;
 	CNetObjHandler m_NetObjHandler;
 	protocol7::CNetObjHandler m_NetObjHandler7;
@@ -705,6 +707,17 @@ public:
 	int MinTeamSize() const;
 	int MaxTeamSize() const;
 	bool IsWorldPaused() const;
+	// A second player on this computer controls the dummy with the secondary input devices
+	bool LocalMultiplayer() const;
+	bool LocalMultiplayerShared() const { return LocalMultiplayer() && !g_Config.m_ClLocalMultiplayerSplit && m_Camera.ZoomAllowed(); }
+	bool LocalMultiplayerSplit() const { return LocalMultiplayer() && g_Config.m_ClLocalMultiplayerSplit; }
+	bool LocalTeePosition(int Dummy, vec2 &Pos) const;
+	void EvolveCharacter(CNetObj_Character *pCharacter, int Tick);
+	void SnapCharacter(int ClientId, const CNetObj_Character *pCur, const CNetObj_Character *pPrev);
+	void SnapExtendedCharacter(int ClientId, const CNetObj_DDNetCharacter *pData, const CNetObj_DDNetCharacter *pPrev);
+	void SnapOtherLocalCharacter();
+	CNetObj_DDNetCharacter m_OtherLocalPrevExtendedData;
+	void LocalMultiplayerBounds(vec2 &MinPos, vec2 &MaxPos) const;
 	bool IsDemoPlaybackPaused() const;
 	float GetAnimationPlaybackSpeed() const;
 
@@ -729,6 +742,7 @@ public:
 	void DummyResetInput() override;
 	void Echo(const char *pString) override;
 	bool IsOtherTeam(int ClientId) const;
+	bool IsOtherTeamForPrediction(int ClientId) const;
 	int SwitchStateTeam() const;
 	bool IsLocalCharSuper() const;
 	bool CanDisplayWarning() const override;
@@ -974,7 +988,8 @@ private:
 
 	float m_LastShowDistanceZoom;
 	float m_LastZoom;
-	float m_LastScreenAspect;
+	vec2 m_LastShowDistance;
+	bool m_LocalMultiplayerSwitchBack = false;
 	float m_LastDeadzone;
 	float m_LastFollowFactor;
 	bool m_LastDummyConnected;

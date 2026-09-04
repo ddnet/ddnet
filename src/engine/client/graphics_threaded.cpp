@@ -138,6 +138,7 @@ void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
 	y = std::clamp(y, 0, ScreenHeight());
 	w = std::clamp(w, 0, ScreenWidth() - x);
 	h = std::clamp(h, 0, ScreenHeight() - y);
+	x += ScreenWidth() * m_ViewIndex;
 
 	m_State.m_ClipEnable = true;
 	m_State.m_ClipX = x;
@@ -148,7 +149,27 @@ void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
 
 void CGraphics_Threaded::ClipDisable()
 {
-	m_State.m_ClipEnable = false;
+	if(m_ViewCount > 1)
+		ClipEnable(0, 0, ScreenWidth(), ScreenHeight());
+	else
+		m_State.m_ClipEnable = false;
+}
+
+void CGraphics_Threaded::ViewBegin(int Index, int Count)
+{
+	dbg_assert(m_ViewCount == 1, "called Graphics()->ViewBegin twice");
+	dbg_assert(Index >= 0 && Index < Count, "invalid view %d of %d", Index, Count);
+	m_ViewIndex = Index;
+	m_ViewCount = Count;
+	ClipDisable();
+}
+
+void CGraphics_Threaded::ViewEnd()
+{
+	dbg_assert(m_ViewCount > 1, "called Graphics()->ViewEnd without begin");
+	m_ViewIndex = 0;
+	m_ViewCount = 1;
+	ClipDisable();
 }
 
 void CGraphics_Threaded::BlendNone()
@@ -203,13 +224,18 @@ const TTwGraphicsGpuList &CGraphics_Threaded::GetGpus() const
 
 void CGraphics_Threaded::MapScreen(const CScreenRect &ScreenRect)
 {
-	m_State.m_ScreenTL = ScreenRect.m_TopLeft;
-	m_State.m_ScreenBR = ScreenRect.m_BottomRight;
+	// A view covers only its share of the window, so stretch the mapping over all views
+	const float Width = ScreenRect.Width();
+	m_State.m_ScreenTL = vec2(ScreenRect.m_TopLeft.x - Width * m_ViewIndex, ScreenRect.m_TopLeft.y);
+	m_State.m_ScreenBR = vec2(m_State.m_ScreenTL.x + Width * m_ViewCount, ScreenRect.m_BottomRight.y);
 }
 
 CScreenRect CGraphics_Threaded::GetScreen() const
 {
-	return CScreenRect(m_State.m_ScreenTL, m_State.m_ScreenBR);
+	// the view's share of the mapping, see MapScreen
+	const float Width = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / m_ViewCount;
+	const float Left = m_State.m_ScreenTL.x + Width * m_ViewIndex;
+	return CScreenRect(vec2(Left, m_State.m_ScreenTL.y), vec2(Left + Width, m_State.m_ScreenBR.y));
 }
 
 void CGraphics_Threaded::LinesBegin()
@@ -1732,7 +1758,8 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 
 		WrapClamp();
 
-		CScreenRect ScreenRect = GetScreen();
+		// the mapping of the whole window, GetScreen only returns the view's part of it
+		const CScreenRect ScreenRect(m_State.m_ScreenTL, m_State.m_ScreenBR);
 		CScreenRect CommandScreenRect = ScreenRect.Move({-X, -Y});
 		CommandScreenRect.m_TopLeft /= vec2(ScaleX, ScaleY);
 		CommandScreenRect.m_BottomRight /= vec2(ScaleX, ScaleY);

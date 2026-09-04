@@ -909,6 +909,8 @@ public:
 
 	void ClipEnable(int x, int y, int w, int h) override;
 	void ClipDisable() override;
+	void ViewBegin(int Index, int Count) override;
+	void ViewEnd() override;
 
 	void BlendNone() override;
 	void BlendNormal() override;
