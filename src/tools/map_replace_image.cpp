@@ -9,6 +9,7 @@
 #include <base/str.h>
 
 #include <engine/gfx/image_loader.h>
+#include <engine/map.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
@@ -22,7 +23,7 @@
 		new image filepath must be absolute or relative to the current position
 */
 
-static CDataFileReader g_DataReader;
+static std::unique_ptr<IMap> g_pMap;
 
 // global new image data (set by ReplaceImageItem)
 static int g_NewNameId = -1;
@@ -32,7 +33,7 @@ static CImageInfo g_NewImageInfo;
 
 static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
 {
-	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
+	const char *pName = g_pMap->GetDataString(pImgItem->m_ImageName);
 	if(pName == nullptr || pName[0] == '\0')
 	{
 		dbg_msg("map_replace_image", "failed to load name of image %d", Index);
@@ -95,7 +96,8 @@ int main(int argc, const char **argv)
 	const char *pImageName = argv[3];
 	const char *pImageFile = argv[4];
 
-	if(!g_DataReader.Open(pStorage.get(), pSourceFilename, IStorage::TYPE_ALL))
+	g_pMap = CreateMap();
+	if(!g_pMap->Load(pStorage.get(), pSourceFilename, IStorage::TYPE_ALL))
 	{
 		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFilename);
 		return -1;
@@ -109,11 +111,11 @@ int main(int argc, const char **argv)
 	}
 
 	// add all items
-	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
+	for(int Index = 0; Index < g_pMap->NumItems(); Index++)
 	{
 		int Type, Id;
 		CUuid Uuid;
-		void *pItem = g_DataReader.GetItem(Index, &Type, &Id, &Uuid);
+		void *pItem = g_pMap->GetItem(Index, &Type, &Id, &Uuid);
 
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
@@ -121,7 +123,7 @@ int main(int argc, const char **argv)
 			continue;
 		}
 
-		int Size = g_DataReader.GetItemSize(Index);
+		int Size = g_pMap->GetItemSize(Index);
 
 		CMapItemImage NewImageItem;
 		if(Type == MAPITEMTYPE_IMAGE)
@@ -143,7 +145,7 @@ int main(int argc, const char **argv)
 	}
 
 	// add all data
-	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
+	for(int Index = 0; Index < g_pMap->NumData(); Index++)
 	{
 		void *pData;
 		int Size;
@@ -159,14 +161,19 @@ int main(int argc, const char **argv)
 		}
 		else
 		{
-			pData = g_DataReader.GetData(Index);
-			Size = g_DataReader.GetDataSize(Index);
+			pData = g_pMap->GetData(Index);
+			Size = g_pMap->GetDataSize(Index);
+			if(pData == nullptr)
+			{
+				log_error("map_replace_image", "Failed to load data %d.", Index);
+				return -1;
+			}
 		}
 
 		Writer.AddData(Size, pData);
 	}
 
-	g_DataReader.Close();
+	g_pMap->Unload();
 	Writer.Finish();
 
 	dbg_msg("map_replace_image", "image '%s' replaced", pImageName);

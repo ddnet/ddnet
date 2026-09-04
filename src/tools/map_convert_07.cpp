@@ -9,6 +9,7 @@
 #include <base/str.h>
 
 #include <engine/gfx/image_loader.h>
+#include <engine/map.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
@@ -21,7 +22,7 @@
 	Usage: map_convert_07 <source map filepath> <dest map filepath>
 */
 
-static CDataFileReader g_DataReader;
+static std::unique_ptr<IMap> g_pMap;
 static CDataFileWriter g_DataWriter;
 
 // global new image data (set by ReplaceImageItem)
@@ -46,7 +47,7 @@ static bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pF
 		return true;
 
 	int Type;
-	void *pItem = g_DataReader.GetItem(g_aImageIds[pTMap->m_Image], &Type);
+	void *pItem = g_pMap->GetItem(g_aImageIds[pTMap->m_Image], &Type);
 	if(Type != MAPITEMTYPE_IMAGE)
 		return true;
 
@@ -58,7 +59,7 @@ static bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pF
 	char aTileLayerName[12];
 	IntsToStr(pTMap->m_aName, std::size(pTMap->m_aName), aTileLayerName, std::size(aTileLayerName));
 
-	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
+	const char *pName = g_pMap->GetDataString(pImgItem->m_ImageName);
 	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, height %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName == nullptr ? "(error)" : pName, pImgItem->m_Width, pImgItem->m_Height);
 	return false;
 }
@@ -68,7 +69,7 @@ static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage 
 	if(!pImgItem->m_External)
 		return pImgItem;
 
-	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
+	const char *pName = g_pMap->GetDataString(pImgItem->m_ImageName);
 	if(pName == nullptr || pName[0] == '\0')
 	{
 		dbg_msg("map_convert_07", "failed to load name of image %d", Index);
@@ -150,7 +151,8 @@ int main(int argc, const char **argv)
 		}
 	}
 
-	if(!g_DataReader.Open(pStorage.get(), pSourceFilename, IStorage::TYPE_ABSOLUTE))
+	g_pMap = CreateMap();
+	if(!g_pMap->Load(pStorage.get(), pSourceFilename, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_convert_07", "failed to open source map. filename='%s'", pSourceFilename);
 		return -1;
@@ -162,13 +164,13 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	g_NextDataItemId = g_DataReader.NumData();
+	g_NextDataItemId = g_pMap->NumData();
 
 	size_t i = 0;
-	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
+	for(int Index = 0; Index < g_pMap->NumItems(); Index++)
 	{
 		int Type;
-		g_DataReader.GetItem(Index, &Type);
+		g_pMap->GetItem(Index, &Type);
 		if(Type == MAPITEMTYPE_IMAGE)
 		{
 			if(i >= MAX_MAPIMAGES)
@@ -184,11 +186,11 @@ int main(int argc, const char **argv)
 	bool Success = true;
 
 	// add all items
-	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
+	for(int Index = 0; Index < g_pMap->NumItems(); Index++)
 	{
 		int Type, Id;
 		CUuid Uuid;
-		void *pItem = g_DataReader.GetItem(Index, &Type, &Id, &Uuid);
+		void *pItem = g_pMap->GetItem(Index, &Type, &Id, &Uuid);
 
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
@@ -196,7 +198,7 @@ int main(int argc, const char **argv)
 			continue;
 		}
 
-		int Size = g_DataReader.GetItemSize(Index);
+		int Size = g_pMap->GetItemSize(Index);
 		Success &= CheckImageDimensions(pItem, Type, pSourceFilename);
 
 		CMapItemImage NewImageItem;
@@ -212,10 +214,15 @@ int main(int argc, const char **argv)
 	}
 
 	// add all data
-	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
+	for(int Index = 0; Index < g_pMap->NumData(); Index++)
 	{
-		void *pData = g_DataReader.GetData(Index);
-		int Size = g_DataReader.GetDataSize(Index);
+		void *pData = g_pMap->GetData(Index);
+		int Size = g_pMap->GetDataSize(Index);
+		if(pData == nullptr)
+		{
+			log_error("map_convert_07", "Failed to load data %d.", Index);
+			return -1;
+		}
 		g_DataWriter.AddData(Size, pData);
 	}
 
@@ -224,7 +231,7 @@ int main(int argc, const char **argv)
 		g_DataWriter.AddData(g_aNewImageInfos[Index].DataSize(), g_aNewImageInfos[Index].m_pData);
 	}
 
-	g_DataReader.Close();
+	g_pMap->Unload();
 	g_DataWriter.Finish();
 	return Success ? 0 : -1;
 }

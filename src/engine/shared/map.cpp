@@ -745,6 +745,8 @@ bool CMap::UpgradeAndValidateTilesLayerItem(
 		const CMapItemLayerTilemap_v2Legacy *pLayerTilemapLegacy = static_cast<const CMapItemLayerTilemap_v2Legacy *>(pLayerTilemapBase);
 		CMapItemLayerTilemap OverriddenLayerTilemap;
 		mem_copy(&OverriddenLayerTilemap, pLayerTilemapLegacy, sizeof(CMapItemLayerTilemap_v2));
+		// The upgraded item uses the version 3 layout, which the map tools write back.
+		OverriddenLayerTilemap.m_Version = 3;
 
 		// Version 2 items have no name. Default to empty string. We fix the name of physics layers later.
 		StrToInts(OverriddenLayerTilemap.m_aName, std::size(OverriddenLayerTilemap.m_aName), "");
