@@ -191,6 +191,11 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 			}
 		}
 	}
+	if((int)UsedLayerItemIndices.size() != LayersNum)
+	{
+		log_error("map/load", "%d layers are not used by any group.", LayersNum - (int)UsedLayerItemIndices.size());
+		return false;
+	}
 	if(pGameLayer == nullptr)
 	{
 		log_error("map/load", "Game layer is missing.");
