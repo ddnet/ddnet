@@ -12,6 +12,7 @@
 #include <set>
 
 class CMapItemLayerQuads_v1;
+class CMapItemLayerSounds;
 class CMapItemLayerTilemap;
 class CMapItemLayerTilemap_v2;
 
@@ -64,6 +65,7 @@ private:
 		CMapItemLayerTilemap_v2 *pLayerTilemapBase, int LayerItemIndex, size_t LayerItemSize);
 	static bool UpgradeAndValidateQuadsLayerItem(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
 		const CMapItemLayerQuads_v1 *pLayerQuadsBase, int LayerItemIndex, size_t LayerItemSize);
+	static bool ValidateSoundsLayerItem(int GroupIndex, int LayerIndex, const CMapItemLayerSounds *pLayerSounds, size_t LayerItemSize);
 	bool ValidateAndUnpackTilesLayerData(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex, const CMapItemLayerTilemap *pLayerTilemap,
 		const CMapItemLayerTilemap &GameLayer, std::set<int> &UsedDataIndices);
 };

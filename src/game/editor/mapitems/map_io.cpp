@@ -874,8 +874,6 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
 				{
 					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
-						continue;
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(this);
 					pSounds->m_Flags = pLayerItem->m_Flags;
@@ -914,8 +912,6 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				{
 					// compatibility with old sound layers
 					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
-						continue;
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(this);
 					pSounds->m_Flags = pLayerItem->m_Flags;

@@ -124,8 +124,6 @@ void CMapSounds::OnMapLoad()
 				continue;
 
 			const CMapItemLayerSounds *pSoundLayer = reinterpret_cast<const CMapItemLayerSounds *>(pLayer);
-			if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > 2)
-				continue;
 			if(pSoundLayer->m_Sound < 0 || pSoundLayer->m_Sound >= m_Count || m_aSounds[pSoundLayer->m_Sound] == -1)
 				continue;
 

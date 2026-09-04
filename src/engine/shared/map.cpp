@@ -182,6 +182,13 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 					return false;
 				}
 			}
+			else if(pLayer->m_Type == LAYERTYPE_SOUNDS || pLayer->m_Type == LAYERTYPE_SOUNDS_DEPRECATED)
+			{
+				if(!ValidateSoundsLayerItem(GroupIndex, LayerIndex, reinterpret_cast<CMapItemLayerSounds *>(pLayer), LayerItemSize))
+				{
+					return false;
+				}
+			}
 		}
 	}
 	if(pGameLayer == nullptr)
@@ -826,6 +833,24 @@ bool CMap::UpgradeAndValidateQuadsLayerItem(
 	{
 		log_error("map/load", "Quads layer %d in group %d is truncated (version %d, size %" PRIzu ").",
 			LayerIndex, GroupIndex, pLayerQuadsBase->m_Version, LayerItemSize);
+		return false;
+	}
+	return true;
+}
+
+bool CMap::ValidateSoundsLayerItem(int GroupIndex, int LayerIndex, const CMapItemLayerSounds *pLayerSounds, size_t LayerItemSize)
+{
+	if(LayerItemSize < sizeof(CMapItemLayerSounds))
+	{
+		log_error("map/load", "Sounds layer %d in group %d is truncated (size %" PRIzu ").",
+			LayerIndex, GroupIndex, LayerItemSize);
+		return false;
+	}
+
+	if(!in_range(pLayerSounds->m_Version, 1, 2))
+	{
+		log_error("map/load", "Sounds layer %d in group %d has unsupported version %d.",
+			LayerIndex, GroupIndex, pLayerSounds->m_Version);
 		return false;
 	}
 	return true;
