@@ -950,6 +950,7 @@ private:
 
 	void UpdateLocalTuning();
 	void UpdatePrediction();
+	void LogPredictionDesyncs();
 	void UpdateSpectatorCursor();
 	void UpdateRenderedCharacters();
 	void HandlePredictedEvents(int Tick);

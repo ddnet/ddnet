@@ -3579,6 +3579,7 @@ void CGameClient::UpdatePrediction()
 	// advance the gameworld to the current gametick
 	if(pLocalChar && absolute(m_GameWorld.GameTick() - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed())
 	{
+		const bool PredictsFromPrevSnapshot = m_GameWorld.GameTick() == Client()->PrevGameTick(g_Config.m_ClDummy);
 		for(int Tick = m_GameWorld.GameTick() + 1; Tick <= Client()->GameTick(g_Config.m_ClDummy); Tick++)
 		{
 			CNetObj_PlayerInput *pInput = (CNetObj_PlayerInput *)Client()->GetInput(Tick);
@@ -3609,6 +3610,10 @@ void CGameClient::UpdatePrediction()
 					m_aClients[i].m_aPredTick[Tick % 200] = Tick;
 				}
 		}
+
+		// the world now holds the prediction for the tick the new snapshot describes
+		if(g_Config.m_DbgPredictionDesync && PredictsFromPrevSnapshot)
+			LogPredictionDesyncs();
 	}
 	else
 	{
@@ -3646,6 +3651,149 @@ void CGameClient::UpdatePrediction()
 		m_GameWorld.NetObjAdd(EntData.m_Item.m_Id, EntData.m_Item.m_Type, EntData.m_Item.m_pData, EntData.m_pDataEx);
 
 	m_GameWorld.NetObjEnd();
+}
+
+void CGameClient::LogPredictionDesyncs()
+{
+	const int Tick = Client()->GameTick(g_Config.m_ClDummy);
+	const int PredictedTicks = Tick - Client()->PrevGameTick(g_Config.m_ClDummy);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		const CSnapState::CCharacterInfo &Info = m_Snap.m_aCharacters[i];
+		const CCharacter *pChar = m_GameWorld.GetCharacterById(i);
+		if(!Info.m_Active || !pChar)
+			continue;
+		const bool Own = i == m_Snap.m_LocalClientId || (PredictDummy() && i == m_aLocalIds[!g_Config.m_ClDummy]);
+		if(!Own && g_Config.m_DbgPredictionDesync < 2)
+			continue;
+
+		char aDiff[512] = "";
+		const auto &&Compare = [&aDiff](const char *pName, int Predicted, int Snapped) {
+			if(Predicted == Snapped)
+				return;
+			char aField[64];
+			str_format(aField, sizeof(aField), " %s %d>%d", pName, Predicted, Snapped);
+			str_append(aDiff, aField);
+		};
+
+		const CCharacterCore &Core = *pChar->Core();
+		CNetObj_CharacterCore Predicted;
+		Core.Write(&Predicted);
+		const CNetObj_Character &Snapped = Info.m_Cur;
+		Compare("x", Predicted.m_X, Snapped.m_X);
+		Compare("y", Predicted.m_Y, Snapped.m_Y);
+		Compare("velx", Predicted.m_VelX, Snapped.m_VelX);
+		Compare("vely", Predicted.m_VelY, Snapped.m_VelY);
+		Compare("hookstate", Predicted.m_HookState, Snapped.m_HookState);
+		Compare("hooktick", Predicted.m_HookTick, Snapped.m_HookTick);
+		Compare("hookx", Predicted.m_HookX, Snapped.m_HookX);
+		Compare("hooky", Predicted.m_HookY, Snapped.m_HookY);
+		Compare("hookdx", Predicted.m_HookDx, Snapped.m_HookDx);
+		Compare("hookdy", Predicted.m_HookDy, Snapped.m_HookDy);
+		Compare("hookedplayer", Predicted.m_HookedPlayer, Snapped.m_HookedPlayer);
+		Compare("jumped", Predicted.m_Jumped, Snapped.m_Jumped);
+		Compare("direction", Predicted.m_Direction, Snapped.m_Direction);
+		Compare("angle", Predicted.m_Angle, Snapped.m_Angle);
+		// own weapon fire is only predicted with antiping weapons
+		const bool AttackTickPredicted = !Own || m_GameWorld.m_WorldConfig.m_PredictWeapons;
+		if(AttackTickPredicted)
+			Compare("attacktick", pChar->GetAttackTick(), Snapped.m_AttackTick);
+
+		// the exact target is only known for own tees, other tees are read with a target of a different length
+		bool InputDiffers = Predicted.m_Direction != Snapped.m_Direction || (!Own && Predicted.m_Angle != Snapped.m_Angle);
+		if(Info.m_HasExtendedData)
+		{
+			const CNetObj_DDNetCharacter &Extended = Info.m_ExtendedData;
+			if(Own)
+			{
+				Compare("targetx", Core.m_Input.m_TargetX, Extended.m_TargetX);
+				Compare("targety", Core.m_Input.m_TargetY, Extended.m_TargetY);
+				InputDiffers = InputDiffers || Core.m_Input.m_TargetX != Extended.m_TargetX || Core.m_Input.m_TargetY != Extended.m_TargetY;
+			}
+			Compare("freezeend", Core.m_DeepFrozen ? -1 : (pChar->m_FreezeTime == 0 ? 0 : Tick + pChar->m_FreezeTime), Extended.m_FreezeEnd);
+			Compare("jumps", Core.m_Jumps, Extended.m_Jumps);
+			// Read() forces the jump count to the maximum when no air jump is left
+			if(Extended.m_JumpedTotal != -1 && !(Snapped.m_Jumped & 2))
+				Compare("jumpedtotal", Core.m_JumpedTotal, Extended.m_JumpedTotal);
+			const std::pair<bool, int> aPredictedFlags[] = {
+				{Core.m_Solo, CHARACTERFLAG_SOLO},
+				{Core.m_Jetpack, CHARACTERFLAG_JETPACK},
+				{Core.m_CollisionDisabled, CHARACTERFLAG_COLLISION_DISABLED},
+				{Core.m_EndlessHook, CHARACTERFLAG_ENDLESS_HOOK},
+				{Core.m_EndlessJump, CHARACTERFLAG_ENDLESS_JUMP},
+				{Core.m_Super, CHARACTERFLAG_SUPER},
+				{Core.m_HammerHitDisabled, CHARACTERFLAG_HAMMER_HIT_DISABLED},
+				{Core.m_ShotgunHitDisabled, CHARACTERFLAG_SHOTGUN_HIT_DISABLED},
+				{Core.m_GrenadeHitDisabled, CHARACTERFLAG_GRENADE_HIT_DISABLED},
+				{Core.m_LaserHitDisabled, CHARACTERFLAG_LASER_HIT_DISABLED},
+				{Core.m_HookHitDisabled, CHARACTERFLAG_HOOK_HIT_DISABLED},
+				{Core.m_HasTelegunGun, CHARACTERFLAG_TELEGUN_GUN},
+				{Core.m_HasTelegunGrenade, CHARACTERFLAG_TELEGUN_GRENADE},
+				{Core.m_HasTelegunLaser, CHARACTERFLAG_TELEGUN_LASER},
+				{Core.m_aWeapons[WEAPON_HAMMER].m_Got, CHARACTERFLAG_WEAPON_HAMMER},
+				{Core.m_aWeapons[WEAPON_GUN].m_Got, CHARACTERFLAG_WEAPON_GUN},
+				{Core.m_aWeapons[WEAPON_SHOTGUN].m_Got, CHARACTERFLAG_WEAPON_SHOTGUN},
+				{Core.m_aWeapons[WEAPON_GRENADE].m_Got, CHARACTERFLAG_WEAPON_GRENADE},
+				{Core.m_aWeapons[WEAPON_LASER].m_Got, CHARACTERFLAG_WEAPON_LASER},
+				{Core.m_aWeapons[WEAPON_NINJA].m_Got, CHARACTERFLAG_WEAPON_NINJA},
+				{Core.m_LiveFrozen, CHARACTERFLAG_MOVEMENTS_DISABLED},
+				{Core.m_IsInFreeze, CHARACTERFLAG_IN_FREEZE},
+				{Core.m_Invincible, CHARACTERFLAG_INVINCIBLE},
+			};
+			int PredictedFlags = 0;
+			int FlagMask = 0;
+			for(const auto &[Set, Flag] : aPredictedFlags)
+			{
+				PredictedFlags |= Set ? Flag : 0;
+				FlagMask |= Flag;
+			}
+			Compare("flags", PredictedFlags, Extended.m_Flags & FlagMask);
+		}
+		if(aDiff[0] == '\0')
+			continue;
+
+		// other tees that can push, hook or hammer this one, hooked tees may be out of view,
+		// tees that just spawned are only in the current snapshot
+		int NearbyTees = Snapped.m_HookedPlayer != -1 || Predicted.m_HookedPlayer != -1 ? 1 : 0;
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			if(j == i)
+				continue;
+			const CNetObj_Character *pOther = m_Snap.m_aCharacters[j].m_Active ? &m_Snap.m_aCharacters[j].m_Cur : (const CNetObj_Character *)Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_CHARACTER, j);
+			const bool HookedBefore = m_Snap.m_aCharacters[j].m_Active && m_Snap.m_aCharacters[j].m_Prev.m_HookedPlayer == i;
+			if(pOther && (pOther->m_HookedPlayer == i || HookedBefore || distance(vec2(pOther->m_X, pOther->m_Y), vec2(Snapped.m_X, Snapped.m_Y)) < 3 * 32))
+				NearbyTees++;
+		}
+
+		// a changed own input inside the window may have been applied by the server at a different tick
+		bool NewInput = false;
+		if(Own)
+		{
+			const int IsDummy = i != m_Snap.m_LocalClientId;
+			const int *pFirstInput = Client()->GetInput(Tick - PredictedTicks + 1, IsDummy);
+			for(int PredictedTick = Tick - PredictedTicks + 2; PredictedTick <= Tick; PredictedTick++)
+			{
+				const int *pInput = Client()->GetInput(PredictedTick, IsDummy);
+				NewInput = NewInput || (pInput && pFirstInput && mem_comp(pInput, pFirstInput, sizeof(CNetObj_PlayerInput)) != 0);
+			}
+		}
+
+		const char *pReason = "physics";
+		if(distance(vec2(Predicted.m_X, Predicted.m_Y), vec2(Snapped.m_X, Snapped.m_Y)) > 5 * 32)
+			pReason = "teleport";
+		else if(InputDiffers || (!Own && (Snapped.m_AttackTick != pChar->GetAttackTick() || (Snapped.m_Jumped & 1) != (Predicted.m_Jumped & 1) || (Predicted.m_HookState == HOOK_IDLE) != (Snapped.m_HookState == HOOK_IDLE))))
+			pReason = "input";
+		else if(NewInput)
+			pReason = "newinput";
+		else if(AttackTickPredicted && Snapped.m_AttackTick != pChar->GetAttackTick())
+			pReason = "fire";
+		else if(NearbyTees > 0)
+			pReason = "interaction";
+
+		log_info("prediction", "desync %s tick=%d ticks=%d id=%d name='%s'%s | pos=%d,%d weapon=%d jetpack=%d freeze=%d deep=%d tune=%d tile=%d ftile=%d nearby=%d",
+			pReason, Tick, PredictedTicks, i, m_aClients[i].m_aName, aDiff, Snapped.m_X, Snapped.m_Y, Core.m_ActiveWeapon, Core.m_Jetpack, pChar->m_FreezeTime, Core.m_DeepFrozen,
+			pChar->GetOverriddenTuneZone(), pChar->m_TileIndex, pChar->m_TileFIndex, NearbyTees);
+	}
 }
 
 void CGameClient::UpdateSpectatorCursor()
