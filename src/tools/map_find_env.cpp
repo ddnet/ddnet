@@ -104,6 +104,12 @@ static bool FindEnv(const char aFilename[64], const int EnvId)
 
 		CMapItemLayerQuads *pQuadLayer = (CMapItemLayerQuads *)pItem;
 		CQuad *pQuads = (CQuad *)pMap->GetDataSwapped(pQuadLayer->m_Data);
+		if(pQuads == nullptr || pQuadLayer->m_NumQuads < 0 ||
+			pQuadLayer->m_NumQuads > pMap->GetDataSize(pQuadLayer->m_Data) / (int)sizeof(CQuad))
+		{
+			log_error("map_find_env", "Quads of layer %d are invalid", i);
+			return false;
+		}
 
 		int GroupId = 0, LayerRelativeId = 0;
 		if(!GetLayerGroupIds(pMap.get(), i + 1, GroupId, LayerRelativeId))
