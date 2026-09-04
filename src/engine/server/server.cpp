@@ -3494,7 +3494,10 @@ int CServer::Run()
 						// This was recorded in AuthInit in the past.
 						if(IsRconAuthed(ClientId))
 						{
-							GameServer()->TeehistorianRecordAuthLogin(ClientId, GetAuthedState(ClientId), GetAuthName(ClientId));
+							GameServer()->TeehistorianRecordAuthLogin(
+								ClientId,
+								CAuthManager::AuthLevelToRoleName(GetAuthedState(ClientId)),
+								GetAuthName(ClientId));
 						}
 					}
 
