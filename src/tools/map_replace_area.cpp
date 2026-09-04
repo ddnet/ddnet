@@ -42,7 +42,7 @@ static void ReplaceDestinationTiles(CMapItemLayerTilemap *[2], CTile *[2], float
 static bool AdaptVisibleAreas(const float[2][2][2], const CMapObject[2], float[2][2][2]);
 static bool AdaptReplaceableAreas(const float[2][2][2], const float[2][2][2], const CMapObject[2], float[2][2][2]);
 
-static void ReplaceAreaQuads(std::shared_ptr<IMap>[2], const float[][2][2], const CMapItemGroup *[2], CMapItemLayer *[2], int);
+static bool ReplaceAreaQuads(std::shared_ptr<IMap>[2], const float[][2][2], const CMapItemGroup *[2], CMapItemLayer *[2], int);
 static bool RemoveDestinationQuads(const float[2][2], const CQuad *, int, const CMapItemGroup *, CQuad *, int &);
 static bool InsertDestinationQuads(const float[2][2][2], const CQuad *, int, const CMapItemGroup *[2], CQuad *, int &);
 static bool AdaptVisiblePoint(const float[2][2][2], const float[2][2], const CMapObject[2], float[2]);
@@ -144,7 +144,10 @@ bool ReplaceArea(IStorage *pStorage, const char aaMapNames[3][64], const float a
 				return false;
 		}
 		else if(apItem[0]->m_Type == LAYERTYPE_QUADS)
-			ReplaceAreaQuads(apInputMaps, aaaGameAreas, apLayerGroups, apItem, aLayersStart[1] + i);
+		{
+			if(!ReplaceAreaQuads(apInputMaps, aaaGameAreas, apLayerGroups, apItem, aLayersStart[1] + i))
+				return false;
+		}
 	}
 
 	return SaveOutputMap(apInputMaps[1].get(), OutputMap);
@@ -285,7 +288,9 @@ bool ReplaceAreaTiles(std::shared_ptr<IMap> apInputMaps[2], const float aaaGameA
 	{
 		apTilemap[i] = (CMapItemLayerTilemap *)apItem[i];
 		apTile[i] = (CTile *)apInputMaps[i]->GetData(apTilemap[i]->m_Data);
-		if(apTile[i] == nullptr)
+		// The unused tiles data of physics layers is not validated when loading the map.
+		if(apTile[i] == nullptr ||
+			(int64_t)apTilemap[i]->m_Width * apTilemap[i]->m_Height > apInputMaps[i]->GetDataSize(apTilemap[i]->m_Data) / (int)sizeof(CTile))
 		{
 			log_error("map_replace_area", "Failed to load tiles of a layer.");
 			return false;
@@ -388,7 +393,7 @@ bool AdaptReplaceableAreas(const float aaaGameAreas[2][2][2], const float aaaVis
 	return true;
 }
 
-void ReplaceAreaQuads(std::shared_ptr<IMap> apInputMaps[2], const float aaaGameAreas[][2][2], const CMapItemGroup *apLayerGroups[2], CMapItemLayer *apItem[2], const int ItemNumber)
+bool ReplaceAreaQuads(std::shared_ptr<IMap> apInputMaps[2], const float aaaGameAreas[][2][2], const CMapItemGroup *apLayerGroups[2], CMapItemLayer *apItem[2], const int ItemNumber)
 {
 	CMapItemLayerQuads *apQuadLayer[2];
 	for(int i = 0; i < 2; i++)
@@ -396,7 +401,15 @@ void ReplaceAreaQuads(std::shared_ptr<IMap> apInputMaps[2], const float aaaGameA
 
 	CQuad *apQuads[3];
 	for(int i = 0; i < 2; i++)
+	{
 		apQuads[i] = (CQuad *)apInputMaps[i]->GetDataSwapped(apQuadLayer[i]->m_Data);
+		if(apQuads[i] == nullptr || apQuadLayer[i]->m_NumQuads < 0 ||
+			apQuadLayer[i]->m_NumQuads > apInputMaps[i]->GetDataSize(apQuadLayer[i]->m_Data) / (int)sizeof(CQuad))
+		{
+			log_error("map_replace_area", "Failed to load quads of a layer.");
+			return false;
+		}
+	}
 
 	apQuads[2] = new CQuad[apQuadLayer[0]->m_NumQuads + apQuadLayer[1]->m_NumQuads];
 	int QuadsCounter = 0;
@@ -413,6 +426,8 @@ void ReplaceAreaQuads(std::shared_ptr<IMap> apInputMaps[2], const float aaaGameA
 	}
 	else
 		delete[] apQuads[2];
+
+	return true;
 }
 
 bool RemoveDestinationQuads(const float aaGameArea[2][2], const CQuad *pQuads, const int NumQuads, const CMapItemGroup *pLayerGroup, CQuad *pDestQuads, int &QuadsCounter)
