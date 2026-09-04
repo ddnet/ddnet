@@ -1827,6 +1827,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			{
 				return;
 			}
+			if(Chunk == 0)
+			{
+				m_aClients[ClientId].m_NextMapChunk = 0;
+			}
 			if(Chunk != m_aClients[ClientId].m_NextMapChunk || !Config()->m_SvFastDownload)
 			{
 				SendMapData(ClientId, Chunk);
