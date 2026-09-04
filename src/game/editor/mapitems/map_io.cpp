@@ -660,27 +660,19 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 		{
 			CMapItemGroup *pGItem = (CMapItemGroup *)pMap->GetItem(Start + g);
 
-			if(pGItem->m_Version < 1 || pGItem->m_Version > 3)
-				continue;
-
 			std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 			pGroup->m_ParallaxX = pGItem->m_ParallaxX;
 			pGroup->m_ParallaxY = pGItem->m_ParallaxY;
 			pGroup->m_OffsetX = pGItem->m_OffsetX;
 			pGroup->m_OffsetY = pGItem->m_OffsetY;
-
-			if(pGItem->m_Version >= 2)
-			{
-				pGroup->m_UseClipping = pGItem->m_UseClipping;
-				pGroup->m_ClipX = pGItem->m_ClipX;
-				pGroup->m_ClipY = pGItem->m_ClipY;
-				pGroup->m_ClipW = pGItem->m_ClipW;
-				pGroup->m_ClipH = pGItem->m_ClipH;
-			}
+			pGroup->m_UseClipping = pGItem->m_UseClipping;
+			pGroup->m_ClipX = pGItem->m_ClipX;
+			pGroup->m_ClipY = pGItem->m_ClipY;
+			pGroup->m_ClipW = pGItem->m_ClipW;
+			pGroup->m_ClipH = pGItem->m_ClipH;
 
 			// load group name
-			if(pGItem->m_Version >= 3)
-				IntsToStr(pGItem->m_aName, std::size(pGItem->m_aName), pGroup->m_aName, std::size(pGroup->m_aName));
+			IntsToStr(pGItem->m_aName, std::size(pGItem->m_aName), pGroup->m_aName, std::size(pGroup->m_aName));
 
 			for(int l = 0; l < pGItem->m_NumLayers; l++)
 			{

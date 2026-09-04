@@ -57,6 +57,7 @@ private:
 	static bool ValidateSoundItems(CDataFileReader &NewDataFile);
 	static bool UpgradeAndValidateEnvelopeItems(CDataFileReader &NewDataFile);
 	static bool ValidateAutomapperConfigItems(CDataFileReader &NewDataFile);
+	static bool UpgradeAndValidateGroupItem(CDataFileReader &NewDataFile, int GroupIndex, int GroupItemIndex);
 	static bool ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
 	bool UpgradeAndValidateTilesLayerItem(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
 		CMapItemLayerTilemap_v2 *pLayerTilemapBase, int LayerItemIndex, size_t LayerItemSize);

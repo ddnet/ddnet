@@ -404,7 +404,8 @@ public:
 	int m_NumLayers;
 };
 
-class CMapItemGroup : public CMapItemGroup_v1
+// Clipping was added to group items in version 2.
+class CMapItemGroup_v2 : public CMapItemGroup_v1
 {
 public:
 	int m_UseClipping;
@@ -412,9 +413,20 @@ public:
 	int m_ClipY;
 	int m_ClipW;
 	int m_ClipH;
+};
 
+// Names were added to group items in version 3.
+class CMapItemGroup : public CMapItemGroup_v2
+{
+public:
 	int m_aName[3];
 };
+
+// The group items are cast from the raw map file data, so the base classes
+// must not add any padding to the derived classes.
+static_assert(sizeof(CMapItemGroup_v1) == 28);
+static_assert(sizeof(CMapItemGroup_v2) == 48);
+static_assert(sizeof(CMapItemGroup) == 60);
 
 class CMapItemLayer
 {

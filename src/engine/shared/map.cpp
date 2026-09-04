@@ -125,13 +125,13 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	std::set<int> UsedLayerItemIndices;
 	for(int GroupIndex = 0; GroupIndex < GroupsNum; GroupIndex++)
 	{
-		const size_t GroupItemSize = NewDataFile.GetItemSize(GroupsStart + GroupIndex);
-		if(GroupItemSize < sizeof(CMapItemGroup_v1))
+		const int GroupItemIndex = GroupsStart + GroupIndex;
+		if(!UpgradeAndValidateGroupItem(NewDataFile, GroupIndex, GroupItemIndex))
 		{
-			log_error("map/load", "Group %d is truncated (size %" PRIzu ").", GroupIndex, GroupItemSize);
 			return false;
 		}
-		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + GroupIndex));
+		// The item may have been replaced, so the pointer must be determined afterwards.
+		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupItemIndex));
 		if(pGroup->m_StartLayer < 0 || pGroup->m_NumLayers < 0 ||
 			(int64_t)pGroup->m_StartLayer + pGroup->m_NumLayers > LayersNum)
 		{
@@ -448,6 +448,52 @@ bool CMap::ValidateAutomapperConfigItems(CDataFileReader &NewDataFile)
 			log_error("map/load", "Automapper config %d is truncated (size %" PRIzu ").", AutomapperConfigIndex, AutomapperConfigItemSize);
 			return false;
 		}
+	}
+	return true;
+}
+
+bool CMap::UpgradeAndValidateGroupItem(CDataFileReader &NewDataFile, int GroupIndex, int GroupItemIndex)
+{
+	const size_t GroupItemSize = NewDataFile.GetItemSize(GroupItemIndex);
+	if(GroupItemSize < sizeof(CMapItemGroup_v1))
+	{
+		log_error("map/load", "Group %d is truncated (size %" PRIzu ").", GroupIndex, GroupItemSize);
+		return false;
+	}
+	const CMapItemGroup_v1 *pGroupBase = static_cast<CMapItemGroup_v1 *>(NewDataFile.GetItem(GroupItemIndex));
+	if(!in_range(pGroupBase->m_Version, 1, 3))
+	{
+		log_error("map/load", "Group %d has unsupported version %d.", GroupIndex, pGroupBase->m_Version);
+		return false;
+	}
+	if(pGroupBase->m_Version == 1)
+	{
+		CMapItemGroup UpgradedGroup;
+		mem_copy(&UpgradedGroup, pGroupBase, sizeof(CMapItemGroup_v1));
+		UpgradedGroup.m_UseClipping = 0;
+		UpgradedGroup.m_ClipX = 0;
+		UpgradedGroup.m_ClipY = 0;
+		UpgradedGroup.m_ClipW = 0;
+		UpgradedGroup.m_ClipH = 0;
+		StrToInts(UpgradedGroup.m_aName, std::size(UpgradedGroup.m_aName), "");
+		return NewDataFile.OverrideItemData(GroupItemIndex, &UpgradedGroup, sizeof(UpgradedGroup));
+	}
+	else if(GroupItemSize < sizeof(CMapItemGroup_v2))
+	{
+		log_error("map/load", "Group %d is truncated (version %d, size %" PRIzu ").", GroupIndex, pGroupBase->m_Version, GroupItemSize);
+		return false;
+	}
+	else if(pGroupBase->m_Version == 2)
+	{
+		CMapItemGroup UpgradedGroup;
+		mem_copy(&UpgradedGroup, pGroupBase, sizeof(CMapItemGroup_v2));
+		StrToInts(UpgradedGroup.m_aName, std::size(UpgradedGroup.m_aName), "");
+		return NewDataFile.OverrideItemData(GroupItemIndex, &UpgradedGroup, sizeof(UpgradedGroup));
+	}
+	else if(GroupItemSize < sizeof(CMapItemGroup))
+	{
+		log_error("map/load", "Group %d is truncated (version %d, size %" PRIzu ").", GroupIndex, pGroupBase->m_Version, GroupItemSize);
+		return false;
 	}
 	return true;
 }
