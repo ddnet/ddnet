@@ -4757,14 +4757,8 @@ void CGameClient::LoadMapSettings()
 	{
 		int ItemId;
 		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Map()->GetItem(i, nullptr, &ItemId);
-		int ItemSize = Map()->GetItemSize(i);
 		if(!pItem || ItemId != 0)
 			continue;
-
-		if(ItemSize < (int)sizeof(CMapItemInfoSettings))
-			break;
-		if(!(pItem->m_Settings > -1))
-			break;
 
 		const std::optional<std::vector<const char *>> vpSettings = Map()->GetDataStringArray(pItem->m_Settings);
 		if(!vpSettings.has_value())

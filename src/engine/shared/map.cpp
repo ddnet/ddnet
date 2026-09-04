@@ -105,11 +105,16 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 		return false;
 	}
 
+	// Replace map items for old versions with items compatible with latest version to avoid version checks when using the map items.
+	if(!UpgradeAndValidateInfoItems(NewDataFile))
+	{
+		return false;
+	}
+
 	int GroupsStart, GroupsNum, LayersStart, LayersNum;
 	NewDataFile.GetType(MAPITEMTYPE_GROUP, &GroupsStart, &GroupsNum);
 	NewDataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
 
-	// Replace map items for old versions with items compatible with latest version to avoid version checks when using the map items.
 	// Ensure that we have a game layer and game group.
 	const CMapItemLayerTilemap *pGameLayer = nullptr;
 	std::set<int> UsedLayerItemIndices;
@@ -276,6 +281,40 @@ bool CMap::ValidateMapVersion(CDataFileReader &NewDataFile)
 	{
 		log_error("map/load", "Map version %d is not supported.", pVersionItem->m_Version);
 		return false;
+	}
+	return true;
+}
+
+bool CMap::UpgradeAndValidateInfoItems(CDataFileReader &NewDataFile)
+{
+	int InfoStart, InfoNum;
+	NewDataFile.GetType(MAPITEMTYPE_INFO, &InfoStart, &InfoNum);
+	for(int InfoIndex = 0; InfoIndex < InfoNum; InfoIndex++)
+	{
+		const int InfoItemIndex = InfoStart + InfoIndex;
+		const size_t InfoItemSize = NewDataFile.GetItemSize(InfoItemIndex);
+		if(InfoItemSize < sizeof(CMapItemInfo))
+		{
+			log_error("map/load", "Info item %d is truncated (size %" PRIzu ").", InfoIndex, InfoItemSize);
+			return false;
+		}
+		const CMapItemInfo *pInfo = static_cast<CMapItemInfo *>(NewDataFile.GetItem(InfoItemIndex));
+		if(pInfo->m_Version != 1)
+		{
+			log_error("map/load", "Info item %d has unsupported version %d.", InfoIndex, pInfo->m_Version);
+			return false;
+		}
+		if(InfoItemSize < sizeof(CMapItemInfoSettings))
+		{
+			// The settings data index was added without incrementing the version.
+			CMapItemInfoSettings UpgradedInfo;
+			mem_copy(&UpgradedInfo, pInfo, sizeof(CMapItemInfo));
+			UpgradedInfo.m_Settings = -1;
+			if(!NewDataFile.OverrideItemData(InfoItemIndex, &UpgradedInfo, sizeof(UpgradedInfo)))
+			{
+				return false;
+			}
+		}
 	}
 	return true;
 }

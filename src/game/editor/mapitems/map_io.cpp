@@ -466,7 +466,6 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 		pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 		for(int i = Start; i < Start + Num; i++)
 		{
-			int ItemSize = pMap->GetItemSize(i);
 			int ItemId;
 			CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &ItemId);
 			if(!pItem || ItemId != 0)
@@ -491,12 +490,6 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			ReadStringInfo(pItem->m_MapVersion, m_MapInfo.m_aVersion, sizeof(m_MapInfo.m_aVersion), "version");
 			ReadStringInfo(pItem->m_Credits, m_MapInfo.m_aCredits, sizeof(m_MapInfo.m_aCredits), "credits");
 			ReadStringInfo(pItem->m_License, m_MapInfo.m_aLicense, sizeof(m_MapInfo.m_aLicense), "license");
-
-			if(pItem->m_Version != 1 || ItemSize < (int)sizeof(CMapItemInfoSettings))
-				break;
-
-			if(!(pItem->m_Settings > -1))
-				break;
 
 			const std::optional<std::vector<const char *>> vpSettings = pMap->GetDataStringArray(pItem->m_Settings);
 			if(!vpSettings.has_value())
