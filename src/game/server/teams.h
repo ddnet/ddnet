@@ -81,7 +81,7 @@ public:
 	 * @param ClientId The client the team number is sent to
 	 */
 	int TeamForClient(int Team, int ClientId) const;
-	bool ClientSupportsServerNumTeams(int ClientId) const;
+	int GetClientNumTeams(int ClientId) const;
 
 	void OnCharacterStart(int ClientId);
 	void OnCharacterFinish(int ClientId);
