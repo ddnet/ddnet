@@ -34,6 +34,13 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		if(!(pItem->m_Settings > -1))
 			break;
 
+		const std::optional<std::vector<const char *>> vpSettings = pMap->GetDataStringArray(pItem->m_Settings);
+		if(!vpSettings.has_value())
+		{
+			log_error(TOOL_NAME, "Failed to read settings from map '%s'", pMapName);
+			return;
+		}
+
 		ConfigFound = true;
 		IOHANDLE Config = pStorage->OpenFile(pConfigName, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE);
 		if(!Config)
@@ -41,16 +48,10 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 			log_error(TOOL_NAME, "Failed to open config '%s' for writing", pConfigName);
 			return;
 		}
-
-		int Size = pMap->GetDataSize(pItem->m_Settings);
-		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
-		char *pNext = pSettings;
-		while(pNext < pSettings + Size)
+		for(const char *pSetting : vpSettings.value())
 		{
-			int StrSize = str_length(pNext) + 1;
-			io_write(Config, pNext, StrSize - 1);
+			io_write(Config, pSetting, str_length(pSetting));
 			io_write_newline(Config);
-			pNext += StrSize;
 		}
 		pMap->UnloadData(pItem->m_Settings);
 		io_close(Config);
