@@ -419,12 +419,12 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 		dbg_msg("delta_dump", "|  Invalid delta. Number of deleted items %d is negative.", pDelta->m_NumDeletedItems);
 		return -201;
 	}
-	pData += pDelta->m_NumDeletedItems;
-	if(pData > pEnd)
+	if(pDelta->m_NumDeletedItems > pEnd - pData)
 	{
 		dbg_msg("delta_dump", "|  Invalid delta. Read past the end.");
 		return -101;
 	}
+	pData += pDelta->m_NumDeletedItems;
 
 	// list deleted items
 	// (all other items should be copied from the last full snap)
@@ -527,9 +527,9 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, co
 	int *pDeleted = pData;
 	if(pDelta->m_NumDeletedItems < 0)
 		return -201;
-	pData += pDelta->m_NumDeletedItems;
-	if(pData > pEnd)
+	if(pDelta->m_NumDeletedItems > pEnd - pData)
 		return -101;
+	pData += pDelta->m_NumDeletedItems;
 
 	// copy all non deleted stuff
 	for(int i = 0; i < pFrom->NumItems(); i++)
