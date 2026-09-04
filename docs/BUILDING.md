@@ -65,6 +65,9 @@ FLUSH PRIVILEGES;
 * **-DIPO=[ON|OFF]** <br>
 	Enable interprocedural optimizations, also known as Link Time Optimization (LTO). Default value is OFF.
 
+* **-DPRECOMPILE_HEADERS=[ON|OFF]** <br>
+	Precompile commonly used headers to speed up compilation. Requires CMake 3.16. Default value is ON.
+
 * **-DFUSE_LD=[OFF|LINKER]** <br>
 	Linker to use. Default value is OFF to try mold, lld, gold.
 
