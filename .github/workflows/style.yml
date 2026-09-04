@@ -146,21 +146,33 @@ jobs:
     - name: Check languages
       run: scripts/languages/update_all.py
 
-    - name: Build dilate tool
+    - name: Build dilate and map_test tools
       run: |
         mkdir release
         cd release
         cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCLIENT=OFF -DDOWNLOAD_GTEST=OFF ..
-        cmake --build . --config Release --target dilate
+        cmake --build . --config Release --target dilate map_test
 
     - name: Check dilated images
       run: scripts/check_dilate.py release data
+
+    - name: Check maps (map_test)
+      run: |
+        set +e
+        scripts/map_test.py data/maps map_test release/map_test
+        map_test_result=$?
+        set -e
+        if [ $map_test_result -ne 0 ]; then
+          echo -e "\033[31mFAILED: Map test exit code $map_test_result\033[m"
+          cat map_test/**.log
+          exit 1
+        fi
 
     - name: Build twmap tool
       run: |
         cargo install twmap-tools --git https://gitlab.com/Patiga/twmap.git/ --rev 1f192def57429a1f64ddb3ac8580744476cfdf1c --locked
 
-    - name: Check maps
+    - name: Check maps (twmap)
       run: |
         findings=$(find data -type f -name '*.map' ! -wholename 'data/maps/coverage.map' -print0 | xargs -0 ~/.cargo/bin/twmap-check-ddnet 2>&1 | \
           grep -v -E "\"data/maps/(ctf|dm).*\.map\": Time cps are missing on the map" | \
