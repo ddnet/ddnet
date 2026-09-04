@@ -249,7 +249,7 @@ void CompareGroups(const char aaMapNames[3][64], std::shared_ptr<IMap> apInputMa
 	for(int i = 0; i < 2; i++)
 		apInputMaps[i]->GetType(MAPITEMTYPE_GROUP, &aStart[i], &aNum[i]);
 
-	for(int i = 0; i < std::max(aNum[0], aNum[1]); i++)
+	for(int i = 0; i < std::min(aNum[0], aNum[1]); i++)
 	{
 		CMapItemGroup *apItem[2];
 		for(int j = 0; j < 2; j++)
