@@ -107,7 +107,8 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 
 	// Replace map items for old versions with items compatible with latest version to avoid version checks when using the map items.
 	if(!UpgradeAndValidateInfoItems(NewDataFile) ||
-		!UpgradeAndValidateImageItems(NewDataFile))
+		!UpgradeAndValidateImageItems(NewDataFile) ||
+		!ValidateSoundItems(NewDataFile))
 	{
 		return false;
 	}
@@ -353,6 +354,29 @@ bool CMap::UpgradeAndValidateImageItems(CDataFileReader &NewDataFile)
 		else if(ImageItemSize < sizeof(CMapItemImage_v2))
 		{
 			log_error("map/load", "Image %d is truncated (version %d, size %" PRIzu ").", ImageIndex, pImage->m_Version, ImageItemSize);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CMap::ValidateSoundItems(CDataFileReader &NewDataFile)
+{
+	int SoundsStart, SoundsNum;
+	NewDataFile.GetType(MAPITEMTYPE_SOUND, &SoundsStart, &SoundsNum);
+	for(int SoundIndex = 0; SoundIndex < SoundsNum; SoundIndex++)
+	{
+		const int SoundItemIndex = SoundsStart + SoundIndex;
+		const size_t SoundItemSize = NewDataFile.GetItemSize(SoundItemIndex);
+		if(SoundItemSize < sizeof(CMapItemSound))
+		{
+			log_error("map/load", "Sound %d is truncated (size %" PRIzu ").", SoundIndex, SoundItemSize);
+			return false;
+		}
+		const CMapItemSound *pSound = static_cast<CMapItemSound *>(NewDataFile.GetItem(SoundItemIndex));
+		if(pSound->m_Version != 1)
+		{
+			log_error("map/load", "Sound %d has unsupported version %d.", SoundIndex, pSound->m_Version);
 			return false;
 		}
 	}
