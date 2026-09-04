@@ -106,7 +106,8 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	}
 
 	// Replace map items for old versions with items compatible with latest version to avoid version checks when using the map items.
-	if(!UpgradeAndValidateInfoItems(NewDataFile))
+	if(!UpgradeAndValidateInfoItems(NewDataFile) ||
+		!UpgradeAndValidateImageItems(NewDataFile))
 	{
 		return false;
 	}
@@ -314,6 +315,45 @@ bool CMap::UpgradeAndValidateInfoItems(CDataFileReader &NewDataFile)
 			{
 				return false;
 			}
+		}
+	}
+	return true;
+}
+
+bool CMap::UpgradeAndValidateImageItems(CDataFileReader &NewDataFile)
+{
+	int ImagesStart, ImagesNum;
+	NewDataFile.GetType(MAPITEMTYPE_IMAGE, &ImagesStart, &ImagesNum);
+	for(int ImageIndex = 0; ImageIndex < ImagesNum; ImageIndex++)
+	{
+		const int ImageItemIndex = ImagesStart + ImageIndex;
+		const size_t ImageItemSize = NewDataFile.GetItemSize(ImageItemIndex);
+		if(ImageItemSize < sizeof(CMapItemImage_v1))
+		{
+			log_error("map/load", "Image %d is truncated (size %" PRIzu ").", ImageIndex, ImageItemSize);
+			return false;
+		}
+		const CMapItemImage_v1 *pImage = static_cast<CMapItemImage_v1 *>(NewDataFile.GetItem(ImageItemIndex));
+		if(!in_range(pImage->m_Version, 1, 2))
+		{
+			log_error("map/load", "Image %d has unsupported version %d.", ImageIndex, pImage->m_Version);
+			return false;
+		}
+		if(pImage->m_Version == 1)
+		{
+			// Version 1 images are always RGBA, which version 2 denotes with the format value 1.
+			CMapItemImage_v2 UpgradedImage;
+			mem_copy(&UpgradedImage, pImage, sizeof(CMapItemImage_v1));
+			UpgradedImage.m_MustBe1 = 1;
+			if(!NewDataFile.OverrideItemData(ImageItemIndex, &UpgradedImage, sizeof(UpgradedImage)))
+			{
+				return false;
+			}
+		}
+		else if(ImageItemSize < sizeof(CMapItemImage_v2))
+		{
+			log_error("map/load", "Image %d is truncated (version %d, size %" PRIzu ").", ImageIndex, pImage->m_Version, ImageItemSize);
+			return false;
 		}
 	}
 	return true;

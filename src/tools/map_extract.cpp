@@ -49,7 +49,7 @@ static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
 		str_format(aBuf, sizeof(aBuf), "%s/%s.png", pPathSave, pName);
 		Reader.UnloadData(pItem->m_ImageName);
 
-		if(pItem->m_Version >= 2 && pItem->m_MustBe1 != 1)
+		if(pItem->m_MustBe1 != 1)
 		{
 			log_error("map_extract", "ignoring image '%s' with unknown format %d", aBuf, pItem->m_MustBe1);
 			continue;

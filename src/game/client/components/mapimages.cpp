@@ -125,7 +125,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			pName = "(error)";
 		}
 
-		if(pImg->m_Version > 1 && pImg->m_MustBe1 != 1)
+		if(pImg->m_MustBe1 != 1)
 		{
 			log_error("mapimages", "Failed to load map image %d '%s': invalid map image type.", i, pName);
 			ShowWarning = true;

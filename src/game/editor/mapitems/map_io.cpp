@@ -526,14 +526,14 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			else
 				str_copy(pImg->m_aName, pName);
 
-			if(pItem->m_Version > 1 && pItem->m_MustBe1 != 1)
+			if(pItem->m_MustBe1 != 1)
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "Error: Unsupported image type of image %d '%s'.", i, pImg->m_aName);
 				ErrorHandler(aBuf);
 			}
 
-			if(pImg->m_External || (pItem->m_Version > 1 && pItem->m_MustBe1 != 1))
+			if(pImg->m_External || pItem->m_MustBe1 != 1)
 			{
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pImg->m_aName);
