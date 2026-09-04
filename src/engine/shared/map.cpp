@@ -175,6 +175,13 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 					pGameLayer = pLayerTilemap;
 				}
 			}
+			else if(pLayer->m_Type == LAYERTYPE_QUADS)
+			{
+				if(!UpgradeAndValidateQuadsLayerItem(NewDataFile, GroupIndex, LayerIndex, reinterpret_cast<CMapItemLayerQuads_v1 *>(pLayer), LayerItemIndex, LayerItemSize))
+				{
+					return false;
+				}
+			}
 		}
 	}
 	if(pGameLayer == nullptr)
@@ -786,6 +793,41 @@ bool CMap::UpgradeAndValidateTilesLayerItem(
 		}
 	}
 
+	return true;
+}
+
+bool CMap::UpgradeAndValidateQuadsLayerItem(
+	CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
+	const CMapItemLayerQuads_v1 *pLayerQuadsBase, int LayerItemIndex, size_t LayerItemSize)
+{
+	if(LayerItemSize < sizeof(CMapItemLayerQuads_v1))
+	{
+		log_error("map/load", "Quads layer %d in group %d is truncated (size %" PRIzu ").",
+			LayerIndex, GroupIndex, LayerItemSize);
+		return false;
+	}
+
+	if(!in_range(pLayerQuadsBase->m_Version, 1, 2))
+	{
+		log_error("map/load", "Quads layer %d in group %d has unsupported version %d.",
+			LayerIndex, GroupIndex, pLayerQuadsBase->m_Version);
+		return false;
+	}
+
+	if(pLayerQuadsBase->m_Version == 1)
+	{
+		// Version 1 items have no name. Default to empty string.
+		CMapItemLayerQuads UpgradedLayerQuads;
+		mem_copy(&UpgradedLayerQuads, pLayerQuadsBase, sizeof(CMapItemLayerQuads_v1));
+		StrToInts(UpgradedLayerQuads.m_aName, std::size(UpgradedLayerQuads.m_aName), "");
+		return NewDataFile.OverrideItemData(LayerItemIndex, &UpgradedLayerQuads, sizeof(UpgradedLayerQuads));
+	}
+	else if(LayerItemSize < sizeof(CMapItemLayerQuads))
+	{
+		log_error("map/load", "Quads layer %d in group %d is truncated (version %d, size %" PRIzu ").",
+			LayerIndex, GroupIndex, pLayerQuadsBase->m_Version, LayerItemSize);
+		return false;
+	}
 	return true;
 }
 

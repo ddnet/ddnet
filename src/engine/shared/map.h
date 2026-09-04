@@ -11,6 +11,7 @@
 
 #include <set>
 
+class CMapItemLayerQuads_v1;
 class CMapItemLayerTilemap;
 class CMapItemLayerTilemap_v2;
 
@@ -61,6 +62,8 @@ private:
 	static bool ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
 	bool UpgradeAndValidateTilesLayerItem(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
 		CMapItemLayerTilemap_v2 *pLayerTilemapBase, int LayerItemIndex, size_t LayerItemSize);
+	static bool UpgradeAndValidateQuadsLayerItem(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
+		const CMapItemLayerQuads_v1 *pLayerQuadsBase, int LayerItemIndex, size_t LayerItemSize);
 	bool ValidateAndUnpackTilesLayerData(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex, const CMapItemLayerTilemap *pLayerTilemap,
 		const CMapItemLayerTilemap &GameLayer, std::set<int> &UsedDataIndices);
 };

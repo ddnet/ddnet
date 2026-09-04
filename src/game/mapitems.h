@@ -493,7 +493,7 @@ static_assert(sizeof(CMapItemLayerTilemap_v2Legacy) == 80);
 static_assert(sizeof(CMapItemLayerTilemap_v3Teeworlds) == 72);
 static_assert(sizeof(CMapItemLayerTilemap) == 92);
 
-class CMapItemLayerQuads
+class CMapItemLayerQuads_v1
 {
 public:
 	CMapItemLayer m_Layer;
@@ -502,9 +502,19 @@ public:
 	int m_NumQuads;
 	int m_Data;
 	int m_Image;
+};
 
+// Names were added to quads layer items in version 2.
+class CMapItemLayerQuads : public CMapItemLayerQuads_v1
+{
+public:
 	int m_aName[3];
 };
+
+// The quads layer items are cast from the raw map file data, so the base class
+// must not add any padding to the derived class.
+static_assert(sizeof(CMapItemLayerQuads_v1) == 28);
+static_assert(sizeof(CMapItemLayerQuads) == 40);
 
 class CMapItemVersion
 {
