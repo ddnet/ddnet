@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <cmath>
 
-void CInput::AddKeyEvent(int Key, int Flags)
+void CInput::AddKeyEvent(int Key, int Flags, bool Secondary)
 {
 	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	dbg_assert((Flags & (FLAG_PRESS | FLAG_RELEASE)) != 0 && (Flags & ~(FLAG_PRESS | FLAG_RELEASE | FLAG_REPEAT)) == 0, "Flags invalid (unknown flag): %d", Flags);
@@ -31,6 +31,7 @@ void CInput::AddKeyEvent(int Key, int Flags)
 	Event.m_Flags = Flags;
 	Event.m_aText[0] = '\0';
 	Event.m_InputCount = m_InputCounter;
+	Event.m_Secondary = Secondary || m_aSecondaryKeys[Key];
 	m_vInputEvents.emplace_back(Event);
 
 	if(Flags & IInput::FLAG_PRESS)
@@ -87,6 +88,7 @@ void CInput::Init()
 	MouseModeRelative();
 #endif
 	InitJoysticks();
+	UpdateSecondaryDevices();
 }
 
 void CInput::Shutdown()
@@ -279,12 +281,72 @@ bool CInput::CJoystick::Absolute(float *pX, float *pY)
 	return false;
 }
 
-bool CInput::MouseRelative(float *pX, float *pY)
+bool CInput::TakeMouseMotion(vec2 &Motion, float *pX, float *pY)
 {
 	if(!m_MouseFocus || !m_InputGrabbed)
 		return false;
-	SDL_GetRelativeMouseState(pX, pY);
+	*pX = Motion.x;
+	*pY = Motion.y;
+	Motion = vec2(0.0f, 0.0f);
 	return *pX != 0.0f || *pY != 0.0f;
+}
+
+bool CInput::MouseRelative(float *pX, float *pY)
+{
+	return TakeMouseMotion(m_MouseMotion, pX, pY);
+}
+
+bool CInput::SecondaryMouseRelative(float *pX, float *pY)
+{
+	return TakeMouseMotion(m_SecondaryMouseMotion, pX, pY);
+}
+
+// Names the devices and returns the id of the Number-th one. A single device is never
+// secondary: on systems that do not tell devices apart it is the one all input comes from.
+static uint32_t SecondaryDevice(const uint32_t *pIds, int Num, int Number, const char *(*pfnName)(uint32_t), std::vector<std::string> &vNames)
+{
+	vNames.clear();
+	for(int i = 0; i < Num; i++)
+	{
+		const char *pName = pfnName(pIds[i]);
+		vNames.emplace_back(pName == nullptr ? "unknown" : pName);
+	}
+	if(Num < 2 || Number < 1 || Number > Num)
+		return 0;
+	log_info("input", "Secondary device %d: '%s'", Number, vNames[Number - 1].c_str());
+	return pIds[Number - 1];
+}
+
+void CInput::UpdateSecondaryDevices()
+{
+	m_SecondaryMouseConfig = g_Config.m_InpSecondaryMouse;
+	m_SecondaryKeyboardConfig = g_Config.m_InpSecondaryKeyboard;
+	m_SecondaryKeysConfig = g_Config.m_InpSecondaryKeys;
+
+	int NumMice = 0;
+	SDL_MouseID *pMice = SDL_GetMice(&NumMice);
+	m_SecondaryMouseId = SecondaryDevice(pMice, NumMice, g_Config.m_InpSecondaryMouse, SDL_GetMouseNameForID, m_vMouseNames);
+	SDL_free(pMice);
+
+	// Windows only tells keyboards apart with raw input
+	SDL_SetHint(SDL_HINT_WINDOWS_RAW_KEYBOARD, g_Config.m_InpSecondaryKeyboard != 0 ? "1" : "0");
+	int NumKeyboards = 0;
+	SDL_KeyboardID *pKeyboards = SDL_GetKeyboards(&NumKeyboards);
+	m_SecondaryKeyboardId = SecondaryDevice(pKeyboards, NumKeyboards, g_Config.m_InpSecondaryKeyboard, SDL_GetKeyboardNameForID, m_vKeyboardNames);
+	SDL_free(pKeyboards);
+
+	std::fill(std::begin(m_aSecondaryKeys), std::end(m_aSecondaryKeys), false);
+	char aKeyName[32];
+	const char *pKeys = str_next_token(g_Config.m_InpSecondaryKeys, " ", aKeyName, sizeof(aKeyName));
+	while(pKeys != nullptr)
+	{
+		const int Key = FindKeyByName(aKeyName);
+		if(Key != KEY_UNKNOWN)
+			m_aSecondaryKeys[Key] = true;
+		else if(aKeyName[0] != '\0')
+			log_error("input", "Unknown key '%s' in inp_secondary_keys", aKeyName);
+		pKeys = str_next_token(pKeys, " ", aKeyName, sizeof(aKeyName));
+	}
 }
 
 void CInput::MouseModeAbsolute()
@@ -300,7 +362,9 @@ void CInput::MouseModeRelative()
 	SDL_SetWindowRelativeMouseMode(Window(), true);
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
-	SDL_GetRelativeMouseState(nullptr, nullptr);
+	SDL_FlushEvent(SDL_EVENT_MOUSE_MOTION);
+	m_MouseMotion = vec2(0.0f, 0.0f);
+	m_SecondaryMouseMotion = vec2(0.0f, 0.0f);
 }
 
 vec2 CInput::NativeMousePos() const
@@ -455,20 +519,20 @@ void CInput::HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event)
 
 	if(Event.value <= SDL_JOYSTICK_AXIS_MIN * DeadZone && !m_aCurrentKeyStates[LeftKey])
 	{
-		AddKeyEvent(LeftKey, IInput::FLAG_PRESS);
+		AddKeyEvent(LeftKey, IInput::FLAG_PRESS, false);
 	}
 	else if(Event.value > SDL_JOYSTICK_AXIS_MIN * DeadZone && m_aCurrentKeyStates[LeftKey])
 	{
-		AddKeyEvent(LeftKey, IInput::FLAG_RELEASE);
+		AddKeyEvent(LeftKey, IInput::FLAG_RELEASE, false);
 	}
 
 	if(Event.value >= SDL_JOYSTICK_AXIS_MAX * DeadZone && !m_aCurrentKeyStates[RightKey])
 	{
-		AddKeyEvent(RightKey, IInput::FLAG_PRESS);
+		AddKeyEvent(RightKey, IInput::FLAG_PRESS, false);
 	}
 	else if(Event.value < SDL_JOYSTICK_AXIS_MAX * DeadZone && m_aCurrentKeyStates[RightKey])
 	{
-		AddKeyEvent(RightKey, IInput::FLAG_RELEASE);
+		AddKeyEvent(RightKey, IInput::FLAG_RELEASE, false);
 	}
 }
 
@@ -486,11 +550,11 @@ void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 
 	if(Event.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN)
 	{
-		AddKeyEvent(Key, IInput::FLAG_PRESS);
+		AddKeyEvent(Key, IInput::FLAG_PRESS, false);
 	}
 	else if(Event.type == SDL_EVENT_JOYSTICK_BUTTON_UP)
 	{
-		AddKeyEvent(Key, IInput::FLAG_RELEASE);
+		AddKeyEvent(Key, IInput::FLAG_RELEASE, false);
 	}
 }
 
@@ -511,7 +575,7 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 	{
 		if(Key != aHatKeys[0] && Key != aHatKeys[1] && m_aCurrentKeyStates[Key])
 		{
-			AddKeyEvent(Key, IInput::FLAG_RELEASE);
+			AddKeyEvent(Key, IInput::FLAG_RELEASE, false);
 		}
 	}
 
@@ -519,7 +583,7 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 	{
 		if(CurrentKey != KEY_UNKNOWN && !m_aCurrentKeyStates[CurrentKey])
 		{
-			AddKeyEvent(CurrentKey, IInput::FLAG_PRESS);
+			AddKeyEvent(CurrentKey, IInput::FLAG_PRESS, false);
 		}
 	}
 }
@@ -746,13 +810,18 @@ int CInput::Update()
 	// keep the counter between 1..0xFFFFFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter % std::numeric_limits<decltype(m_InputCounter)>::max()) + 1;
 
+	if(m_SecondaryMouseConfig != g_Config.m_InpSecondaryMouse || m_SecondaryKeyboardConfig != g_Config.m_InpSecondaryKeyboard || m_SecondaryKeysConfig != g_Config.m_InpSecondaryKeys)
+	{
+		UpdateSecondaryDevices();
+	}
+
 	SDL_Event Event;
 	bool IgnoreKeys = false;
 
-	const auto &&AddKeyEventChecked = [&](int Key, int Flags) {
+	const auto &&AddKeyEventChecked = [&](int Key, int Flags, bool Secondary) {
 		if(Key != KEY_UNKNOWN && !IgnoreKeys && (!(Flags & IInput::FLAG_PRESS) || !HasComposition()))
 		{
-			AddKeyEvent(Key, Flags);
+			AddKeyEvent(Key, Flags, Secondary);
 		}
 	};
 
@@ -794,11 +863,16 @@ int CInput::Update()
 
 		// handle keys
 		case SDL_EVENT_KEY_DOWN:
-			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_PRESS | (Event.key.repeat != 0 ? FLAG_REPEAT : 0));
+			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_PRESS | (Event.key.repeat != 0 ? FLAG_REPEAT : 0), IsSecondaryKeyboard(Event.key.which));
 			break;
 
 		case SDL_EVENT_KEY_UP:
-			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_RELEASE);
+			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_RELEASE, IsSecondaryKeyboard(Event.key.which));
+			break;
+
+		case SDL_EVENT_KEYBOARD_ADDED:
+		case SDL_EVENT_KEYBOARD_REMOVED:
+			UpdateSecondaryDevices();
 			break;
 
 		// handle the joystick events
@@ -823,17 +897,29 @@ int CInput::Update()
 			HandleJoystickRemovedEvent(Event.jdevice);
 			break;
 
+		case SDL_EVENT_MOUSE_MOTION:
+			if(IsSecondaryMouse(Event.motion.which))
+				m_SecondaryMouseMotion += vec2(Event.motion.xrel, Event.motion.yrel);
+			else
+				m_MouseMotion += vec2(Event.motion.xrel, Event.motion.yrel);
+			break;
+
+		case SDL_EVENT_MOUSE_ADDED:
+		case SDL_EVENT_MOUSE_REMOVED:
+			UpdateSecondaryDevices();
+			break;
+
 		// handle mouse buttons
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_PRESS);
+			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_PRESS, IsSecondaryMouse(Event.button.which));
 			break;
 
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_RELEASE);
+			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_RELEASE, IsSecondaryMouse(Event.button.which));
 			break;
 
 		case SDL_EVENT_MOUSE_WHEEL:
-			AddKeyEventChecked(TranslateMouseWheelEventKey(Event.wheel), IInput::FLAG_PRESS | IInput::FLAG_RELEASE);
+			AddKeyEventChecked(TranslateMouseWheelEventKey(Event.wheel), IInput::FLAG_PRESS | IInput::FLAG_RELEASE, IsSecondaryMouse(Event.wheel.which));
 			break;
 
 		case SDL_EVENT_FINGER_DOWN:
@@ -889,8 +975,6 @@ int CInput::Update()
 				MouseModeAbsolute();
 #endif
 				MouseModeRelative();
-				// Clear pending relative mouse motion
-				SDL_GetRelativeMouseState(nullptr, nullptr);
 			}
 			m_MouseFocus = true;
 			IgnoreKeys = true;

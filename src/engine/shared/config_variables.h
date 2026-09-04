@@ -440,6 +440,9 @@ MACRO_CONFIG_INT(GfxAsyncRenderOld, gfx_asyncrender_old, 1, 0, 1, CFGFLAG_SAVE |
 MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Render quads as triangles (fixes quad coloring on some GPUs)")
 
 MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 200, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Mouse sensitivity")
+MACRO_CONFIG_INT(InpSecondaryMouse, inp_secondary_mouse, 0, 0, 16, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Number of the mouse whose input is secondary input (0 = none)")
+MACRO_CONFIG_INT(InpSecondaryKeyboard, inp_secondary_keyboard, 0, 0, 16, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Number of the keyboard whose input is secondary input, only on systems that tell keyboards apart (0 = none)")
+MACRO_CONFIG_STR(InpSecondaryKeys, inp_secondary_keys, 256, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Keys whose input is secondary input on any keyboard, separated by spaces")
 MACRO_CONFIG_INT(InpTranslatedKeys, inp_translated_keys, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Translate keys before interpreting them, respects keyboard layouts")
 MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ignored keyboard modifier mask")
 #if defined(CONF_FAMILY_WINDOWS) // native IME doesn't work on Windows with exclusive fullscreen

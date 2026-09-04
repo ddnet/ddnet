@@ -81,6 +81,21 @@ private:
 	bool m_InputGrabbed;
 
 	bool m_MouseFocus;
+	vec2 m_MouseMotion = vec2(0.0f, 0.0f);
+	vec2 m_SecondaryMouseMotion = vec2(0.0f, 0.0f);
+	SDL_MouseID m_SecondaryMouseId = 0;
+	SDL_KeyboardID m_SecondaryKeyboardId = 0;
+	bool m_aSecondaryKeys[KEY_LAST] = {};
+	std::vector<std::string> m_vMouseNames;
+	std::vector<std::string> m_vKeyboardNames;
+	// the config values the secondary devices were resolved from, the settings menu changes them without the console
+	int m_SecondaryMouseConfig = 0;
+	int m_SecondaryKeyboardConfig = 0;
+	std::string m_SecondaryKeysConfig;
+	bool IsSecondaryMouse(SDL_MouseID Id) const { return m_SecondaryMouseId != 0 && Id == m_SecondaryMouseId; }
+	bool IsSecondaryKeyboard(SDL_KeyboardID Id) const { return m_SecondaryKeyboardId != 0 && Id == m_SecondaryKeyboardId; }
+	bool TakeMouseMotion(vec2 &Motion, float *pX, float *pY);
+	void UpdateSecondaryDevices();
 
 	// IME support
 	std::string m_CompositionString;
@@ -92,7 +107,7 @@ private:
 	std::vector<CEvent> m_vInputEvents;
 	int64_t m_LastUpdate;
 	float m_UpdateTime;
-	void AddKeyEvent(int Key, int Flags);
+	void AddKeyEvent(int Key, int Flags, bool Secondary);
 	void AddTextEvent(const char *pText);
 
 	// quick access to input
@@ -145,6 +160,10 @@ public:
 	void SetActiveJoystick(size_t Index) override;
 
 	bool MouseRelative(float *pX, float *pY) override;
+	bool SecondaryMouseRelative(float *pX, float *pY) override;
+	bool HasSecondaryMouse() const override { return m_SecondaryMouseId != 0; }
+	const std::vector<std::string> &MouseNames() const override { return m_vMouseNames; }
+	const std::vector<std::string> &KeyboardNames() const override { return m_vKeyboardNames; }
 	void MouseModeAbsolute() override;
 	void MouseModeRelative() override;
 	vec2 NativeMousePos() const override;
