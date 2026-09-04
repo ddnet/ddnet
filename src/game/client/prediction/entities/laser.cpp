@@ -154,7 +154,7 @@ void CLaser::DoBounce()
 			if(m_Bounces > BounceNum)
 				m_Energy = -1;
 
-			GameWorld()->CreatePredictedSound(m_Pos, SOUND_LASER_BOUNCE, m_Id);
+			GameWorld()->CreatePredictedSound(m_Pos, SOUND_LASER_BOUNCE, m_Id, m_Owner);
 		}
 	}
 	else

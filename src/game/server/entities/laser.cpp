@@ -181,7 +181,7 @@ void CLaser::DoBounce()
 			if(m_Bounces > BounceNum)
 				m_Energy = -1;
 
-			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, m_InteractState.CanSeeMask(GameServer()));
+			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, m_Owner, m_InteractState.CanSeeMask(GameServer()));
 		}
 	}
 	else

@@ -120,12 +120,13 @@ public:
 		vec2 m_Pos; // NetEvent's Pos are integers
 		int m_Id; // identifier to prevent adding the same event multiple times
 		int m_Tick;
+		int m_ClientId;
 
 		int m_ExtraInfo;
 		bool m_Handled = false;
 
-		CPredictedEvent(int EventId, vec2 Pos, int Id, int Tick, int ExtraInfo = -1) :
-			m_EventId(EventId), m_Pos(vec2((int)Pos.x, (int)Pos.y)), m_Id(Id), m_Tick(Tick), m_ExtraInfo(ExtraInfo)
+		CPredictedEvent(int EventId, vec2 Pos, int Id, int Tick, int ClientId, int ExtraInfo = -1) :
+			m_EventId(EventId), m_Pos(vec2((int)Pos.x, (int)Pos.y)), m_Id(Id), m_Tick(Tick), m_ClientId(ClientId), m_ExtraInfo(ExtraInfo)
 		{
 		}
 	};
@@ -136,10 +137,10 @@ public:
 	bool CheckPredictedEventHandled(const CPredictedEvent &CheckEvent);
 	void PlayPredictedEvents(int Tick);
 
-	void CreatePredictedSound(vec2 Pos, int SoundId, int Id = -1);
-	void CreatePredictedExplosionEvent(vec2 Pos, int Id = -1);
-	void CreatePredictedHammerHitEvent(vec2 Pos, int Id = -1);
-	void CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount, int Id = -1);
+	void CreatePredictedSound(vec2 Pos, int SoundId, int Id = -1, int ClientId = -1);
+	void CreatePredictedExplosionEvent(vec2 Pos, int Id = -1, int ClientId = -1);
+	void CreatePredictedHammerHitEvent(vec2 Pos, int Id = -1, int ClientId = -1);
+	void CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount, int Id = -1, int ClientId = -1);
 
 private:
 	void RemoveEntities();

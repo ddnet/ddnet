@@ -233,6 +233,7 @@ private:
 	CUi m_UI;
 	CRaceHelper m_RaceHelper;
 
+	bool EventVanillaToEx(int *pType, int *pSize, const void **ppData);
 	void ProcessEvents();
 	void UpdatePositions();
 

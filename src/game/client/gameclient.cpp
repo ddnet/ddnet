@@ -1437,6 +1437,72 @@ void CGameClient::OnRconLine(const char *pLine)
 	m_GameConsole.PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }
 
+bool CGameClient::EventVanillaToEx(int *pType, int *pSize, const void **ppData)
+{
+	static char s_aEventStore[128];
+	if(*pType == NETEVENTTYPE_DAMAGEIND)
+	{
+		const CNetEvent_DamageInd *pEvent = (const CNetEvent_DamageInd *)(*ppData);
+		CNetEvent_DamageIndEx *pEventEx = (CNetEvent_DamageIndEx *)s_aEventStore;
+		*pType = NETEVENTTYPE_DAMAGEINDEX;
+		*pSize = sizeof(*pEventEx);
+
+		pEventEx->m_X = pEvent->m_X;
+		pEventEx->m_Y = pEvent->m_Y;
+		pEventEx->m_ClientId = -1;
+		pEventEx->m_Angle = pEvent->m_Angle;
+
+		*ppData = s_aEventStore;
+		return true;
+	}
+	else if(*pType == NETEVENTTYPE_SOUNDWORLD)
+	{
+		const CNetEvent_SoundWorld *pEvent = (const CNetEvent_SoundWorld *)(*ppData);
+		CNetEvent_SoundWorldEx *pEventEx = (CNetEvent_SoundWorldEx *)s_aEventStore;
+		*pType = NETEVENTTYPE_SOUNDWORLDEX;
+		*pSize = sizeof(*pEventEx);
+
+		pEventEx->m_X = pEvent->m_X;
+		pEventEx->m_Y = pEvent->m_Y;
+		pEventEx->m_ClientId = -1;
+		pEventEx->m_SoundId = pEvent->m_SoundId;
+
+		*ppData = s_aEventStore;
+		return true;
+	}
+	else if(*pType == NETEVENTTYPE_EXPLOSION || *pType == NETEVENTTYPE_HAMMERHIT || *pType == NETEVENTTYPE_SPAWN)
+	{
+		const CNetEvent_Common *pEvent = (const CNetEvent_Common *)(*ppData);
+		CNetEvent_CommonEx *pEventEx = (CNetEvent_CommonEx *)s_aEventStore;
+		if(*pType == NETEVENTTYPE_EXPLOSION)
+			*pType = NETEVENTTYPE_EXPLOSIONEX;
+		else if(*pType == NETEVENTTYPE_HAMMERHIT)
+			*pType = NETEVENTTYPE_HAMMERHITEX;
+		else if(*pType == NETEVENTTYPE_SPAWN)
+			*pType = NETEVENTTYPE_SPAWNEX;
+		*pSize = sizeof(*pEventEx);
+
+		pEventEx->m_X = pEvent->m_X;
+		pEventEx->m_Y = pEvent->m_Y;
+		pEventEx->m_ClientId = -1;
+
+		*ppData = s_aEventStore;
+		return true;
+	}
+	else if(*pType == NETEVENTTYPE_FINISH ||
+		*pType == NETEVENTTYPE_BIRTHDAY ||
+		*pType == NETEVENTTYPE_DAMAGEINDEX ||
+		*pType == NETEVENTTYPE_EXPLOSIONEX ||
+		*pType == NETEVENTTYPE_HAMMERHITEX ||
+		*pType == NETEVENTTYPE_SPAWNEX ||
+		*pType == NETEVENTTYPE_SOUNDWORLDEX)
+	{
+		// Event is already CommonEx
+		return true;
+	}
+	return false;
+}
+
 void CGameClient::ProcessEvents()
 {
 	if(m_SuppressEvents)
@@ -1446,38 +1512,55 @@ void CGameClient::ProcessEvents()
 	int Num = Client()->SnapNumItems(SnapType);
 	for(int Index = 0; Index < Num; Index++)
 	{
-		const IClient::CSnapItem Item = Client()->SnapGetItem(SnapType, Index);
+		IClient::CSnapItem Item = Client()->SnapGetItem(SnapType, Index);
 
-		// TODO: We don't have enough info about us, others, to know a correct alpha or volume value.
-		const float Alpha = 1.0f;
-		const float Volume = 1.0f;
+		float Volume = 1.0f;
+		float Alpha = 1.0f;
+		int AlphaClientId = -1;
 
-		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
+		if(EventVanillaToEx(&Item.m_Type, &Item.m_DataSize, &Item.m_pData))
 		{
-			const CNetEvent_DamageInd *pEvent = (const CNetEvent_DamageInd *)Item.m_pData;
+			const CNetEvent_CommonEx *pEvent = (const CNetEvent_CommonEx *)Item.m_pData;
+			AlphaClientId = pEvent->m_ClientId;
+		}
+		else if(Item.m_Type == NETEVENTTYPE_DEATH)
+		{
+			const CNetEvent_Death *pEvent = (const CNetEvent_Death *)Item.m_pData;
+			AlphaClientId = pEvent->m_ClientId;
+		}
+
+		if(IsOtherTeam(AlphaClientId))
+		{
+			Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+			Volume = Alpha;
+		}
+
+		if(Item.m_Type == NETEVENTTYPE_DAMAGEINDEX)
+		{
+			const CNetEvent_DamageIndEx *pEvent = (const CNetEvent_DamageIndEx *)Item.m_pData;
 
 			vec2 DamageIndPos = vec2(pEvent->m_X, pEvent->m_Y);
-			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, DamageIndPos, -1, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_Angle)))
+			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, DamageIndPos, -1, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_ClientId, pEvent->m_Angle)))
 			{
 				m_Effects.DamageIndicator(vec2(pEvent->m_X, pEvent->m_Y), direction(pEvent->m_Angle / 256.0f), Alpha);
 			}
 		}
-		else if(Item.m_Type == NETEVENTTYPE_EXPLOSION)
+		else if(Item.m_Type == NETEVENTTYPE_EXPLOSIONEX)
 		{
-			const CNetEvent_Explosion *pEvent = (const CNetEvent_Explosion *)Item.m_pData;
+			const CNetEvent_ExplosionEx *pEvent = (const CNetEvent_ExplosionEx *)Item.m_pData;
 
 			vec2 ExplosionPos = vec2(pEvent->m_X, pEvent->m_Y);
-			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, ExplosionPos, -1, Client()->GameTick(g_Config.m_ClDummy))))
+			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, ExplosionPos, -1, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_ClientId)))
 			{
 				m_Effects.Explosion(ExplosionPos, Alpha);
 			}
 		}
-		else if(Item.m_Type == NETEVENTTYPE_HAMMERHIT)
+		else if(Item.m_Type == NETEVENTTYPE_HAMMERHITEX)
 		{
-			const CNetEvent_HammerHit *pEvent = (const CNetEvent_HammerHit *)Item.m_pData;
+			const CNetEvent_HammerHitEx *pEvent = (const CNetEvent_HammerHitEx *)Item.m_pData;
 
 			vec2 HammerHitPos = vec2(pEvent->m_X, pEvent->m_Y);
-			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, HammerHitPos, -1, Client()->GameTick(g_Config.m_ClDummy))))
+			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, HammerHitPos, -1, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_ClientId)))
 			{
 				m_Effects.HammerHit(HammerHitPos, Alpha, Volume);
 			}
@@ -1492,9 +1575,9 @@ void CGameClient::ProcessEvents()
 			const CNetEvent_Finish *pEvent = (const CNetEvent_Finish *)Item.m_pData;
 			m_Effects.Confetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
-		else if(Item.m_Type == NETEVENTTYPE_SPAWN)
+		else if(Item.m_Type == NETEVENTTYPE_SPAWNEX)
 		{
-			const CNetEvent_Spawn *pEvent = (const CNetEvent_Spawn *)Item.m_pData;
+			const CNetEvent_SpawnEx *pEvent = (const CNetEvent_SpawnEx *)Item.m_pData;
 			m_Effects.PlayerSpawn(vec2(pEvent->m_X, pEvent->m_Y), Alpha, Volume);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_DEATH)
@@ -1502,9 +1585,9 @@ void CGameClient::ProcessEvents()
 			const CNetEvent_Death *pEvent = (const CNetEvent_Death *)Item.m_pData;
 			m_Effects.PlayerDeath(vec2(pEvent->m_X, pEvent->m_Y), pEvent->m_ClientId, Alpha);
 		}
-		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLD)
+		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLDEX)
 		{
-			const CNetEvent_SoundWorld *pEvent = (const CNetEvent_SoundWorld *)Item.m_pData;
+			const CNetEvent_SoundWorldEx *pEvent = (const CNetEvent_SoundWorldEx *)Item.m_pData;
 			if(!Config()->m_SndGame)
 				continue;
 
@@ -1512,9 +1595,9 @@ void CGameClient::ProcessEvents()
 				continue;
 
 			vec2 SoundPos = vec2(pEvent->m_X, pEvent->m_Y);
-			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, SoundPos, -1, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_SoundId)))
+			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, SoundPos, -1, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_ClientId, pEvent->m_SoundId)))
 			{
-				m_Sounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, 1.0f, SoundPos);
+				m_Sounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, Volume, SoundPos);
 			}
 		}
 		else if(Item.m_Type == NETEVENTTYPE_MAPSOUNDWORLD)
@@ -1746,8 +1829,6 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	InvalidateSnapshot();
 
 	m_NewTick = true;
-
-	ProcessEvents();
 
 	if(g_Config.m_DbgStress)
 	{
@@ -2122,6 +2203,9 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 			}
 		}
 	}
+
+	// IsOtherTeam requires m_Snap to be filled.
+	ProcessEvents();
 
 	if(!FoundGameInfoEx)
 	{
@@ -2764,7 +2848,7 @@ void CGameClient::OnPredict()
 					m_Sounds.PlayAndRecord(CSounds::CHN_WORLD, SOUND_HOOK_NOATTACH, 1.0f, Pos);
 				if(Events & COREEVENT_HOOK_ATTACH_PLAYER)
 				{
-					m_PredictedWorld.CreatePredictedSound(Pos, SOUND_HOOK_ATTACH_PLAYER, pLocalChar->GetCid());
+					m_PredictedWorld.CreatePredictedSound(Pos, SOUND_HOOK_ATTACH_PLAYER, pLocalChar->GetCid(), pLocalChar->GetCid());
 				}
 			}
 		}
@@ -3851,15 +3935,20 @@ void CGameClient::UpdateRenderedCharacters()
 
 void CGameClient::HandlePredictedEvents(const int Tick)
 {
-	const float Alpha = 1.0f;
-	const float Volume = 1.0f;
-
 	auto EventsIterator = m_PredictedWorld.m_PredictedEvents.begin();
 	while(EventsIterator != m_PredictedWorld.m_PredictedEvents.end())
 	{
 		if(!EventsIterator->m_Handled && EventsIterator->m_Tick <= Tick)
 		{
-			if(EventsIterator->m_EventId == NETEVENTTYPE_SOUNDWORLD)
+			float Alpha = 1.0f;
+			float Volume = 1.0f;
+			if(IsOtherTeam(EventsIterator->m_ClientId))
+			{
+				Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+				Volume = Alpha;
+			}
+
+			if(EventsIterator->m_EventId == NETEVENTTYPE_SOUNDWORLDEX)
 			{
 				if(m_GameInfo.m_RaceSounds && ((EventsIterator->m_ExtraInfo == SOUND_GUN_FIRE && !g_Config.m_SndGun) || (EventsIterator->m_ExtraInfo == SOUND_PLAYER_PAIN_LONG && !g_Config.m_SndLongPain)))
 				{
@@ -3868,15 +3957,15 @@ void CGameClient::HandlePredictedEvents(const int Tick)
 				}
 				m_Sounds.PlayAt(CSounds::CHN_WORLD, EventsIterator->m_ExtraInfo, 1.0f, EventsIterator->m_Pos);
 			}
-			else if(EventsIterator->m_EventId == NETEVENTTYPE_EXPLOSION)
+			else if(EventsIterator->m_EventId == NETEVENTTYPE_EXPLOSIONEX)
 			{
 				m_Effects.Explosion(EventsIterator->m_Pos, Alpha);
 			}
-			else if(EventsIterator->m_EventId == NETEVENTTYPE_HAMMERHIT)
+			else if(EventsIterator->m_EventId == NETEVENTTYPE_HAMMERHITEX)
 			{
 				m_Effects.HammerHit(EventsIterator->m_Pos, Alpha, Volume);
 			}
-			else if(EventsIterator->m_EventId == NETEVENTTYPE_DAMAGEIND)
+			else if(EventsIterator->m_EventId == NETEVENTTYPE_DAMAGEINDEX)
 			{
 				m_Effects.DamageIndicator(EventsIterator->m_Pos, direction(EventsIterator->m_ExtraInfo / 256.0f), Alpha);
 			}

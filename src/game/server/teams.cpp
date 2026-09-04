@@ -950,7 +950,7 @@ void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestam
 
 	// Confetti
 	CCharacter *pChar = pPlayer->GetCharacter();
-	m_pGameContext->CreateFinishEffect(pChar->m_Pos, pChar->TeamMask());
+	m_pGameContext->CreateFinishEffect(pChar->m_Pos, ClientId, pChar->TeamMask());
 }
 
 CCharacter *CGameTeams::Character(int ClientId)
