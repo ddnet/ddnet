@@ -3,6 +3,10 @@
 
 #include "component.h"
 
+#include <game/editor/editor_binds.h>
+
+#include <memory>
+
 class CHoverTile
 {
 public:
@@ -20,6 +24,7 @@ class CLayerSelector : public CEditorComponent
 {
 	int m_SelectionOffset;
 	std::vector<CHoverTile> m_vHoverTiles;
+	std::shared_ptr<CEditorBind> m_pBindLayerSelector;
 
 public:
 	void OnInit(CEditor *pEditor) override;

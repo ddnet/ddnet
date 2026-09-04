@@ -94,7 +94,8 @@ TEST(Editor, QuickActionNames)
 	EXPECT_FALSE(IsValidEditorTooltip("hello world", aError, sizeof(aError)));
 	EXPECT_FALSE(IsValidEditorTooltip("hello world (Ctrl+H).", aError, sizeof(aError)));
 
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) AssertTooltip(description);
+	// We can't test binds here, as we can't mock IInput due to it's 20+ interfaces or create the Kernel interface
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, bind, description) AssertTooltip(description);
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 }

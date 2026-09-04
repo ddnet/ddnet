@@ -2781,6 +2781,8 @@ if(CLIENT)
     editor_action.h
     editor_actions.cpp
     editor_actions.h
+    editor_binds.cpp
+    editor_binds.h
     editor_history.cpp
     editor_history.h
     editor_object.cpp

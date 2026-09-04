@@ -9,6 +9,7 @@
 #include <engine/keys.h>
 
 #include <game/editor/editor_actions.h>
+#include <game/editor/editor_binds.h>
 
 #include <algorithm>
 
@@ -28,6 +29,19 @@ void CFontTyper::OnInit(CEditor *pEditor)
 	CEditorComponent::OnInit(pEditor);
 
 	m_CursorTextTexture = pEditor->Graphics()->LoadTexture("editor/cursor_text.png", IStorage::TYPE_ALL, 0);
+
+	m_pEditorBindActivation = pEditor->RegisterBind(false, true, false, KEY_T, "Enter font-typer mode.", EBindSection::FONT_TYPER);
+	m_pEditorBindPaste = pEditor->RegisterBind(false, true, false, KEY_V, "Paste clipboard.", EBindSection::FONT_TYPER);
+	m_pEditorBindHome = pEditor->RegisterBind(false, false, false, KEY_HOME, "Jump to the line start.", EBindSection::FONT_TYPER);
+	m_pEditorBindEnd = pEditor->RegisterBind(false, false, false, KEY_END, "Jump to the line end.", EBindSection::FONT_TYPER);
+	m_pEditorBindDelete = pEditor->RegisterBind(false, false, false, KEY_DELETE, "Delete character at current cursor position.", EBindSection::FONT_TYPER);
+
+	pEditor->RegisterBind(false, false, false, KEY_UP, "Move up.", EBindSection::FONT_TYPER);
+	pEditor->RegisterBind(false, false, false, KEY_DOWN, "Move down.", EBindSection::FONT_TYPER);
+	pEditor->RegisterBind(false, false, false, KEY_LEFT, "Move left.", EBindSection::FONT_TYPER);
+	pEditor->RegisterBind(false, false, false, KEY_RIGHT, "Move right.", EBindSection::FONT_TYPER);
+	pEditor->RegisterBind(true, false, false, KEY_LEFT, "Move to beginning of the current word.", EBindSection::FONT_TYPER);
+	pEditor->RegisterBind(true, false, false, KEY_RIGHT, "Move to the end of the current word.", EBindSection::FONT_TYPER);
 }
 
 void CFontTyper::SetTile(ivec2 Pos, unsigned char Index, const std::shared_ptr<CLayerTiles> &pLayer)
@@ -84,7 +98,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 
 	if(!State.m_Active)
 	{
-		if(Event.m_Key == KEY_T && Input()->ModifierIsPressed() && !Ui()->IsPopupOpen() && Editor()->m_Dialog == DIALOG_NONE)
+		if(m_pEditorBindActivation->KeyPress(Event, Input()) && !Ui()->IsPopupOpen() && Editor()->m_Dialog == DIALOG_NONE)
 		{
 			if(pLayer && pLayer->m_KnownTextModeLayer)
 			{
@@ -115,7 +129,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		return false;
 	}
 
-	if(Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_V))
+	if(m_pEditorBindPaste->KeyPress(Event, Input()))
 	{
 		std::string Clipboard = Input()->GetClipboardText();
 		if(!Clipboard.empty())
@@ -184,7 +198,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		State.m_TextIndex.x--;
 		SetTile(State.m_TextIndex, 0, pLayer);
 	}
-	else if(Event.m_Key == KEY_DELETE)
+	else if(m_pEditorBindDelete->KeyPress(Event, Input()))
 	{
 		if(State.m_TextIndex.x < pLayer->m_Width)
 			SetTile(State.m_TextIndex, 0, pLayer);
@@ -202,7 +216,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	}
 
 	// special key navigation
-	if(Event.m_Key == KEY_HOME)
+	if(m_pEditorBindHome->KeyPress(Event, Input()))
 	{
 		for(int StartIndex = State.m_LineStart.value_or(0); StartIndex < pLayer->m_Width; ++StartIndex)
 		{
@@ -214,7 +228,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		if(pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index == 0)
 			State.m_TextIndex.x = State.m_LineStart.value_or(0);
 	}
-	else if(Event.m_Key == KEY_END)
+	else if(m_pEditorBindEnd->KeyPress(Event, Input()))
 	{
 		int LastIndex = -1;
 		for(int EndIndex = State.m_LineStart.value_or(0); EndIndex < pLayer->m_Width; ++EndIndex)

@@ -1,7 +1,9 @@
 #include "prompt.h"
 
 #include "editor.h"
+#include "editor_binds.h"
 
+#include <engine/graphics.h>
 #include <engine/keys.h>
 
 #include <game/client/ui_listbox.h>
@@ -53,7 +55,7 @@ void CPrompt::SetInactive()
 
 bool CPrompt::OnInput(const IInput::CEvent &Event)
 {
-	if(Editor()->m_Dialog == DIALOG_NONE && Input()->ModifierIsPressed() && Input()->KeyPress(KEY_P))
+	if(Editor()->m_Dialog == DIALOG_NONE && m_pEditorBind->KeyPress(Input()))
 	{
 		SetActive();
 	}
@@ -64,9 +66,17 @@ void CPrompt::OnInit(CEditor *pEditor)
 {
 	CEditorComponent::OnInit(pEditor);
 
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) m_vQuickActions.emplace_back(&Editor()->m_QuickAction##name);
+	auto RegisterBind = [&](CQuickAction &QuickAction, bool Shift, bool Modifier, bool Alt, int Key, EBindSection Section, const char *pDescription) {
+		QuickAction.SetBind(pEditor->RegisterBind(Shift, Modifier, Alt, Key, pDescription, Section));
+	};
+
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, bind, description) \
+	m_vQuickActions.emplace_back(&Editor()->m_QuickAction##name); \
+	RegisterBind(Editor()->m_QuickAction##name, bind, description);
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
+
+	m_pEditorBind = pEditor->RegisterBind(false, true, false, KEY_P, "Open prompt menu.", EBindSection::GENERAL);
 }
 
 void CPrompt::Render()
@@ -129,7 +139,7 @@ void CPrompt::Render()
 	s_ListBox.SetActive(!Ui()->IsPopupOpen());
 	s_ListBox.DoStart(15.0f, m_vpFilteredPromptList.size(), 1, 5, m_PromptSelectedIndex, &Suggestions, false);
 
-	float LabelWidth = Overlay.w > 855.0f ? 200.0f : 100.0f;
+	float LabelWidth = 150.0f;
 
 	for(size_t i = 0; i < m_vpFilteredPromptList.size(); i++)
 	{
@@ -150,7 +160,14 @@ void CPrompt::Render()
 
 		Props.m_MaxWidth = DescColumn.w;
 		TextRender()->TextColor(TextRender()->DefaultTextColor().WithAlpha(Item.m_Selected ? 1.0f : 0.8f));
-		Ui()->DoLabel(&DescColumn, m_vpFilteredPromptList[i]->Description(), 10.0f, TEXTALIGN_MR, Props);
+		if(!m_vpFilteredPromptList[i]->Bind())
+			Ui()->DoLabel(&DescColumn, m_vpFilteredPromptList[i]->Description(), 10.0f, TEXTALIGN_MR, Props);
+		else
+		{
+			char aBuf[64 + 1 + 256];
+			str_format(aBuf, sizeof(aBuf), "%s %s", m_vpFilteredPromptList[i]->Bind()->KeyBindText(), m_vpFilteredPromptList[i]->Description());
+			Ui()->DoLabel(&DescColumn, aBuf, 10.0f, TEXTALIGN_MR, Props);
+		}
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 

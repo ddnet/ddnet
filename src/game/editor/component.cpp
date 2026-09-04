@@ -1,5 +1,7 @@
 #include "component.h"
 
+#include <game/editor/editor.h>
+
 void CEditorComponent::OnInit(CEditor *pEditor)
 {
 	CEditorObject::OnInit(pEditor);
