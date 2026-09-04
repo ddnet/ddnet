@@ -369,7 +369,7 @@ void CScore::LoadTeam(const char *pCode, int ClientId)
 	}
 	if(!pController->Teams().IsValidTeamNumber(Team) || (g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK))
 	{
-		GameServer()->SendChatTarget(ClientId, "You have to be in a team (from 1-63)");
+		GameServer()->SendChatTarget(ClientId, "You have to be in a team (from 1-127)");
 		return;
 	}
 	if(pController->Teams().GetTeamState(Team) != ETeamState::OPEN)

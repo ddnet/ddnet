@@ -637,7 +637,7 @@ bool CSaveTeam::HandleSaveError(ESaveResult Result, int ClientId, CGameContext *
 	case ESaveResult::SUCCESS:
 		return false;
 	case ESaveResult::TEAM_FLOCK:
-		pGameContext->SendChatTarget(ClientId, "You have to be in a team (from 1-63)");
+		pGameContext->SendChatTarget(ClientId, "You have to be in a team (from 1-127)");
 		break;
 	case ESaveResult::TEAM_NOT_FOUND:
 		pGameContext->SendChatTarget(ClientId, "Could not find your Team");
