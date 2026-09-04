@@ -98,26 +98,13 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 		Item.m_Credits = Writer.AddDataString(m_MapInfo.m_aCredits);
 		Item.m_License = Writer.AddDataString(m_MapInfo.m_aLicense);
 
-		Item.m_Settings = -1;
-		if(!m_vSettings.empty())
+		std::vector<const char *> vpSettings;
+		vpSettings.reserve(m_vSettings.size());
+		for(const CEditorMapSetting &Setting : m_vSettings)
 		{
-			int Size = 0;
-			for(const auto &Setting : m_vSettings)
-			{
-				Size += str_length(Setting.m_aCommand) + 1;
-			}
-
-			char *pSettings = (char *)malloc(std::max(Size, 1));
-			char *pNext = pSettings;
-			for(const auto &Setting : m_vSettings)
-			{
-				int Length = str_length(Setting.m_aCommand) + 1;
-				mem_copy(pNext, Setting.m_aCommand, Length);
-				pNext += Length;
-			}
-			Item.m_Settings = Writer.AddData(Size, pSettings);
-			free(pSettings);
+			vpSettings.push_back(Setting.m_aCommand);
 		}
+		Item.m_Settings = Writer.AddDataStringArray(vpSettings);
 
 		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Item), &Item);
 	}
@@ -511,14 +498,15 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			if(!(pItem->m_Settings > -1))
 				break;
 
-			const unsigned Size = pMap->GetDataSize(pItem->m_Settings);
-			char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
-			char *pNext = pSettings;
-			while(pNext < pSettings + Size)
+			const std::optional<std::vector<const char *>> vpSettings = pMap->GetDataStringArray(pItem->m_Settings);
+			if(!vpSettings.has_value())
 			{
-				int StrSize = str_length(pNext) + 1;
-				m_vSettings.emplace_back(pNext);
-				pNext += StrSize;
+				ErrorHandler("Error: Failed to read settings from map info.");
+				break;
+			}
+			for(const char *pSetting : vpSettings.value())
+			{
+				m_vSettings.emplace_back(pSetting);
 			}
 		}
 	}
