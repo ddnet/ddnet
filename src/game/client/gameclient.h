@@ -901,7 +901,9 @@ public:
 		IGraphics::CTextureHandle m_SpriteParticleSparkle;
 		IGraphics::CTextureHandle m_SpritePulley;
 		IGraphics::CTextureHandle m_SpriteHectagon;
-		IGraphics::CTextureHandle m_aSpriteParticles[4];
+		IGraphics::CTextureHandle m_SpriteParticleBulletTeleRed;
+		IGraphics::CTextureHandle m_SpriteParticleBulletTeleBlue;
+		IGraphics::CTextureHandle m_aSpriteParticles[6];
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;

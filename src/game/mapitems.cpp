@@ -62,6 +62,7 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELEINEVIL ||
 		Index == TILE_TELEINWEAPON ||
 		Index == TILE_TELEINHOOK ||
+		Index == TILE_TELEINENTITY ||
 		Index == TILE_TELEIN ||
 		Index == TILE_TELEOUT ||
 		Index == TILE_TELECHECK ||
@@ -99,6 +100,7 @@ bool IsValidSwitchTile(int Index)
 	return (
 		Index == TILE_JUMP ||
 		Index == TILE_FREEZE ||
+		Index == TILE_UNFREEZE ||
 		Index == TILE_DFREEZE ||
 		Index == TILE_DUNFREEZE ||
 		Index == TILE_LFREEZE ||
@@ -106,6 +108,7 @@ bool IsValidSwitchTile(int Index)
 		Index == TILE_HIT_ENABLE ||
 		Index == TILE_HIT_DISABLE ||
 		(Index >= TILE_SWITCHTIMEDOPEN && Index <= TILE_SWITCHCLOSE) ||
+		Index == TILE_CP ||
 		Index == TILE_ADD_TIME ||
 		Index == TILE_SUBTRACT_TIME ||
 		Index == TILE_ALLOW_TELE_GUN ||
@@ -116,6 +119,7 @@ bool IsValidSwitchTile(int Index)
 bool IsSwitchTileFlagsUsed(int Index)
 {
 	return Index != TILE_FREEZE &&
+	       Index != TILE_UNFREEZE &&
 	       Index != TILE_DFREEZE &&
 	       Index != TILE_DUNFREEZE;
 }
@@ -147,7 +151,8 @@ bool IsValidEntity(int Index)
 		(Index >= ENTITY_SPAWN && Index <= ENTITY_LASER_O_FAST) ||
 		(Index >= ENTITY_PLASMAE && Index <= ENTITY_ARMOR_LASER) ||
 		(Index >= ENTITY_DRAGGER_WEAK && Index <= ENTITY_DRAGGER_STRONG_NW) ||
-		Index == ENTITY_DOOR);
+		Index == ENTITY_DOOR ||
+		Index == ENTITY_BULLET_TELEPORT_CFROM);
 }
 
 bool IsRotatableTile(int Index)
@@ -163,7 +168,8 @@ bool IsRotatableTile(int Index)
 		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN_EX ||
 		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN ||
 		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_1 && Index - ENTITY_OFFSET <= ENTITY_WEAPON_LASER) ||
-		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_SHOTGUN && Index - ENTITY_OFFSET <= ENTITY_ARMOR_LASER));
+		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_SHOTGUN && Index - ENTITY_OFFSET <= ENTITY_ARMOR_LASER) ||
+		Index - ENTITY_OFFSET == ENTITY_BULLET_TELEPORT_CFROM);
 }
 
 bool IsCreditsTile(int TileIndex)

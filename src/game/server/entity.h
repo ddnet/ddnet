@@ -175,6 +175,8 @@ public: // TODO: Maybe make protected
 
 	// DDRace
 
+	bool TeleportToTile(vec2 PrevPos, vec2 Pos, bool Weapon = false);
+
 	bool GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2 *pOutPos);
 	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *pOutPos);
 

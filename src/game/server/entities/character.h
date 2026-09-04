@@ -227,6 +227,8 @@ public:
 	int m_StartTime;
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;
+	bool TeleToCheckpoint(bool Evil);
+	int m_TeleBulletTeleport;
 
 	int m_TimeCpBroadcastEndTick;
 	int m_LastTimeCp;

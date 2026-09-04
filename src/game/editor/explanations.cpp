@@ -121,7 +121,7 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 			return "FREEZE: Freezes tees for defined amount of seconds.";
 		break;
 	case TILE_UNFREEZE:
-		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "UNFREEZE: Unfreezes tees immediately.";
 		break;
 	case TILE_TELEINEVIL:
@@ -151,6 +151,10 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 	case TILE_TELEINHOOK:
 		if(Layer == LAYER_TELE)
 			return "HOOK TELEPORT: Teleports hooks entering into it to TELEPORT TO, where it comes out. Direction, angle and length are kept.";
+		break;
+	case TILE_TELEINENTITY:
+		if(Layer == LAYER_TELE)
+			return "ENTITY TELEPORT: Teleports entities like pickups, draggers, freeze lasers and turrets moving into it to TELEPORT TO. Direction is kept.";
 		break;
 	case TILE_WALLJUMP:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
@@ -255,6 +259,8 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 	case TILE_CP:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "SPEEDER: Causes weapons, SHIELD, HEART and SPINNING LASER to move slowly.";
+		if(Layer == LAYER_SWITCH)
+			return "SPEEDER: Causes weapons, SHIELD, HEART and SPINNING LASER to move. Adjust speed using delay (max = 32).";
 		break;
 	case TILE_CP_F:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
@@ -516,6 +522,10 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 	case ENTITY_OFFSET + ENTITY_DOOR:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "DOOR: Combined with LASER LENGTH creates doors. Doesn't allow to go through it (only with NINJA).";
+		break;
+	case ENTITY_OFFSET + ENTITY_BULLET_TELEPORT_CFROM:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
+			return "CHECKPOINT TELEPORT BULLET: Send tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are not reset if delay is 1.";
 		break;
 	case TILE_TELE_GUN_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)

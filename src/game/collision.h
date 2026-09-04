@@ -92,6 +92,7 @@ public:
 	bool IsCheckEvilTeleport(int Index) const;
 	int IsTeleportWeapon(int Index) const;
 	int IsTeleportHook(int Index) const;
+	int IsTeleportEntity(int Index) const;
 	int IsTeleCheckpoint(int Index) const;
 	bool IsSpeedup(int Index) const;
 	int IsTune(int Index) const;
