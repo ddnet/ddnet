@@ -23,22 +23,20 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
 	{
-		int Id;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &Id);
-		int ItemSize = pMap->GetItemSize(i);
-		if(!pItem || Id != 0)
+		int ItemId;
+		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &ItemId);
+		if(ItemId != 0)
 			continue;
-
-		if(ItemSize < (int)sizeof(CMapItemInfoSettings))
-			break;
-		if(!(pItem->m_Settings > -1))
-			break;
 
 		const std::optional<std::vector<const char *>> vpSettings = pMap->GetDataStringArray(pItem->m_Settings);
 		if(!vpSettings.has_value())
 		{
 			log_error(TOOL_NAME, "Failed to read settings from map '%s'", pMapName);
 			return;
+		}
+		if(vpSettings.value().empty())
+		{
+			break;
 		}
 
 		ConfigFound = true;
