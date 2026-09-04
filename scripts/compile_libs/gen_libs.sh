@@ -120,7 +120,8 @@ build_cmake_lib freetype https://gitlab.freedesktop.org/freetype/freetype "branc
 
 # SDL
 log_info_header "Building SDL..."
-build_cmake_lib sdl https://github.com/libsdl-org/SDL "branch" "release-3.4.14"
+# main snapshot, the 3.4 releases lack the per-device mice on macOS
+build_cmake_lib sdl https://github.com/libsdl-org/SDL "commit" "d4410b9a7ccbc05f6b235b411226b01ebb91fe51"
 
 # ogg, opus, opusfile
 log_info_header "Building ogg..."
