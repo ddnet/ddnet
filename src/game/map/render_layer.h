@@ -215,6 +215,8 @@ protected:
 	};
 
 	void UploadTileData(std::optional<CTileLayerVisuals> &VisualsOptional, int CurOverlay, bool AddAsSpeedup, bool IsGameLayer = false);
+	template<typename TTile>
+	void UploadTileDataImpl(CTileLayerVisuals &Visuals, int CurOverlay, bool AddAsSpeedup, bool IsGameLayer);
 
 	virtual void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
 	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
