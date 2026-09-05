@@ -198,7 +198,8 @@ void CGameControllerDDNet::OnPlayerConnect(CPlayer *pPlayer)
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1);
 
-		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
+		str_format(aBuf, sizeof(aBuf), "DDraceNetwork Mod. Version: %s", GAME_VERSION);
+		GameServer()->SendChatTarget(ClientId, aBuf);
 		GameServer()->SendChatTarget(ClientId, "please visit DDNet.org or say /info and make sure to read our /rules");
 	}
 }

@@ -19,13 +19,7 @@
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
-	log_info("chatresp", "DDraceNetwork Mod. Version: " GAME_VERSION);
-	if(GIT_SHORTREV_HASH)
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "Git revision hash: %s", GIT_SHORTREV_HASH);
-		log_info("chatresp", "%s", aBuf);
-	}
+	log_info("chatresp", "DDraceNetwork Mod. Version: %s", GAME_VERSION);
 	log_info("chatresp", "Official site: DDNet.org");
 	log_info("chatresp", "For more info: /cmdlist");
 	log_info("chatresp", "Or visit DDNet.org");

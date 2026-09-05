@@ -120,13 +120,6 @@ CGameContext::CGameContext(bool Resetting) :
 	m_LatestLog = 0;
 	mem_zero(&m_aLogs, sizeof(m_aLogs));
 
-	str_copy(m_aVersionString, GAME_VERSION);
-	if(GIT_SHORTREV_HASH != nullptr)
-	{
-		str_append(m_aVersionString, " ");
-		str_append(m_aVersionString, GIT_SHORTREV_HASH);
-	}
-
 	if(!Resetting)
 	{
 		m_pMap = CreateMap();
@@ -4243,18 +4236,9 @@ void CGameContext::OnInit(const void *pPersistentData)
 		}
 		m_pTeeHistorianFile = aio_new(THFile);
 
-		char aVersion[128];
-		if(GIT_SHORTREV_HASH)
-		{
-			str_format(aVersion, sizeof(aVersion), "%s (%s)", GAME_VERSION, GIT_SHORTREV_HASH);
-		}
-		else
-		{
-			str_copy(aVersion, GAME_VERSION);
-		}
 		CTeeHistorian::CGameInfo GameInfo;
 		GameInfo.m_GameUuid = m_GameUuid;
-		GameInfo.m_pServerVersion = aVersion;
+		GameInfo.m_pServerVersion = GAME_VERSION;
 		GameInfo.m_StartTime = time(nullptr);
 		GameInfo.m_pPrngDescription = m_Prng.Description();
 
@@ -4685,7 +4669,7 @@ const char *CGameContext::GameType() const
 	dbg_assert(m_pController->m_pGameType, "no gametype");
 	return m_pController->m_pGameType;
 }
-const char *CGameContext::Version() const { return m_aVersionString; }
+const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }

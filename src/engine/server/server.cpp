@@ -3408,7 +3408,8 @@ int CServer::Run()
 	{
 		m_RunServer = STOPPING;
 	}
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
+	str_format(aBuf, sizeof(aBuf), "version %s on %s %s", GAME_RELEASE_VERSION, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	if(GIT_SHORTREV_HASH)
 	{
 		str_format(aBuf, sizeof(aBuf), "git revision hash: %s", GIT_SHORTREV_HASH);

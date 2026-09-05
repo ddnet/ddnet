@@ -40,6 +40,9 @@ else()
   message(FATAL_ERROR "Couldn't parse version from src/game/version.h")
 endif()
 
+# Full version including any suffix like `-dev` or `-rc1`
+string(REGEX REPLACE "^[^\"]*\"([^\"]*)\".*$" "\\1" VERSION_FULL "${VERSION_LINE}")
+
 if(VERSION_PATCH STREQUAL "0")
   project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 else()
@@ -167,7 +170,7 @@ endif()
 
 # Set version if not explicitly set
 if(NOT VERSION)
-  set(VERSION ${PROJECT_VERSION})
+  set(VERSION ${VERSION_FULL})
 endif()
 
 set(OpenGL_GL_PREFERENCE LEGACY)
@@ -2164,7 +2167,8 @@ endif()
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
   COMMAND ${Python3_EXECUTABLE}
     scripts/git_revision.py
-    > ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+    ${VERSION}
+    ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   DEPENDS
     ${GIT_REVISION_EXTRA_DEPS}
@@ -4249,9 +4253,6 @@ foreach(target ${TARGETS_OWN})
     if(DISCORD_DYNAMIC)
       target_compile_definitions(${target} PRIVATE CONF_DISCORD_DYNAMIC)
     endif()
-  endif()
-  if(VERSION)
-    target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION_INTERNAL=${VERSION})
   endif()
   if(TARGET_OS STREQUAL "android")
     if(ANDROID_PACKAGE_NAME)

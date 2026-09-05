@@ -15,6 +15,7 @@
 #include <game/version.h>
 
 #include <algorithm>
+#include <string>
 
 IHttpRequest::IHttpRequest(const char *pUrl)
 {
@@ -209,7 +210,11 @@ static bool CalculateSha256(const char *pAbsoluteFilename, SHA256_DIGEST *pSha25
 	return true;
 }
 
-const char *const IHttpRequest::USER_AGENT_STRING = GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")";
+const char *IHttpRequest::UserAgent()
+{
+	static const std::string s_UserAgent = std::string(GAME_NAME " ") + GAME_RELEASE_VERSION + " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")";
+	return s_UserAgent.c_str();
+}
 
 const char *IHttpRequest::GetRequestType(REQUEST Type)
 {
