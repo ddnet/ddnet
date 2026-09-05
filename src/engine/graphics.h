@@ -59,15 +59,6 @@ public:
 	vec2 m_BottomLeft;
 };
 
-class CGraphicTileTextureCoords
-{
-public:
-	ubvec4 m_TexCoordTopLeft;
-	ubvec4 m_TexCoordTopRight;
-	ubvec4 m_TexCoordBottomRight;
-	ubvec4 m_TexCoordBottomLeft;
-};
-
 /*
 	Structure: CVideoMode
 */

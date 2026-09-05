@@ -1726,7 +1726,7 @@ protected:
 			RetBlock.m_HeapData = AllocatedMem;
 			RetBlock.m_UsedSize = RequiredSize;
 
-			if(RequiresMapping)
+			if(RequiresMapping && pBufferData != nullptr)
 				mem_copy(RetBlock.m_pMappedBuffer, pBufferData, RequiredSize);
 
 			return true;
@@ -1748,7 +1748,8 @@ protected:
 			{
 				if(vkMapMemory(m_VKDevice, TmpBufferMemory.m_Mem, 0, VK_WHOLE_SIZE, 0, &pMapData) != VK_SUCCESS)
 					return false;
-				mem_copy(pMapData, pBufferData, static_cast<size_t>(RequiredSize));
+				if(pBufferData != nullptr)
+					mem_copy(pMapData, pBufferData, static_cast<size_t>(RequiredSize));
 			}
 
 			RetBlock.m_Buffer = TmpBuffer;
@@ -1794,12 +1795,23 @@ protected:
 		m_vNonFlushedStagingBufferRange.push_back(UploadRange);
 	}
 
+	// Staging buffers too large for the cache have their own allocation. Uploading them right away instead of
+	// at the end of the frame keeps them from piling up in RAM while a map with several large layers is loaded.
+	template<size_t Id>
+	void UploadAndFreeLargeStagingMemBlock(SMemoryBlock<Id> &Block)
+	{
+		UploadStagingBuffers();
+		ExecuteMemoryCommandBuffer();
+		vkUnmapMemory(m_VKDevice, Block.m_BufferMem.m_Mem);
+		CleanBufferPair(m_CurImageIndex, Block.m_Buffer, Block.m_BufferMem);
+	}
+
 	void UploadAndFreeStagingMemBlock(SMemoryBlock<STAGING_BUFFER_CACHE_ID> &Block)
 	{
 		PrepareStagingMemRange(Block);
 		if(!Block.m_IsCached)
 		{
-			m_vvFrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, Block.m_pMappedBuffer});
+			UploadAndFreeLargeStagingMemBlock(Block);
 		}
 		else
 		{
@@ -1812,7 +1824,7 @@ protected:
 		PrepareStagingMemRange(Block);
 		if(!Block.m_IsCached)
 		{
-			m_vvFrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, Block.m_pMappedBuffer});
+			UploadAndFreeLargeStagingMemBlock(Block);
 		}
 		else
 		{
@@ -6527,13 +6539,28 @@ public:
 		return GetUniformBufferObjectImpl<IGraphics::SRenderSpriteInfo, 512, 128>(RenderThreadIndex, RequiresSharedStagesDescriptor, m_vStreamedUniformBuffers[RenderThreadIndex], DescrSet, pData, DataSize);
 	}
 
-	[[nodiscard]] bool CreateIndexBuffer(void *pData, size_t DataSize, VkBuffer &Buffer, SDeviceMemoryBlock &Memory)
+	// Creates an index buffer with the vertex indices of IndicesCount / 6 quads
+	[[nodiscard]] bool CreateIndexBuffer(size_t IndicesCount, VkBuffer &Buffer, SDeviceMemoryBlock &Memory)
 	{
-		VkDeviceSize BufferDataSize = DataSize;
+		dbg_assert(IndicesCount % 6 == 0, "Index count %" PRIzu " is not a multiple of 6", IndicesCount);
+		VkDeviceSize BufferDataSize = IndicesCount * sizeof(uint32_t);
 
+		// the indices are generated directly in the staging buffer to avoid a temporary copy
 		SMemoryBlock<STAGING_BUFFER_CACHE_ID> StagingBuffer;
-		if(!GetStagingBuffer(StagingBuffer, pData, DataSize))
+		if(!GetStagingBuffer(StagingBuffer, nullptr, BufferDataSize))
 			return false;
+		uint32_t *pIndices = static_cast<uint32_t *>(StagingBuffer.m_pMappedBuffer);
+		uint32_t Primq = 0;
+		for(size_t i = 0; i < IndicesCount; i += 6)
+		{
+			pIndices[i] = Primq;
+			pIndices[i + 1] = Primq + 1;
+			pIndices[i + 2] = Primq + 2;
+			pIndices[i + 3] = Primq;
+			pIndices[i + 4] = Primq + 2;
+			pIndices[i + 5] = Primq + 3;
+			Primq += 4;
+		}
 
 		SDeviceMemoryBlock VertexBufferMemory;
 		VkBuffer VertexBuffer;
@@ -6719,19 +6746,6 @@ public:
 			return false;
 		}
 
-		std::array<uint32_t, (size_t)CCommandBuffer::MAX_VERTICES / 4 * 6> aIndices;
-		int Primq = 0;
-		for(int i = 0; i < CCommandBuffer::MAX_VERTICES / 4 * 6; i += 6)
-		{
-			aIndices[i] = Primq;
-			aIndices[i + 1] = Primq + 1;
-			aIndices[i + 2] = Primq + 2;
-			aIndices[i + 3] = Primq;
-			aIndices[i + 4] = Primq + 2;
-			aIndices[i + 5] = Primq + 3;
-			Primq += 4;
-		}
-
 		if(!PrepareFrame())
 			return false;
 		if(m_HasError)
@@ -6740,12 +6754,13 @@ public:
 			return false;
 		}
 
-		if(!CreateIndexBuffer(aIndices.data(), sizeof(uint32_t) * aIndices.size(), m_IndexBuffer, m_IndexBufferMemory))
+		const size_t IndicesCount = (size_t)CCommandBuffer::MAX_VERTICES / 4 * 6;
+		if(!CreateIndexBuffer(IndicesCount, m_IndexBuffer, m_IndexBufferMemory))
 		{
 			*pCommand->m_pInitError = -2;
 			return false;
 		}
-		if(!CreateIndexBuffer(aIndices.data(), sizeof(uint32_t) * aIndices.size(), m_RenderIndexBuffer, m_RenderIndexBufferMemory))
+		if(!CreateIndexBuffer(IndicesCount, m_RenderIndexBuffer, m_RenderIndexBufferMemory))
 		{
 			*pCommand->m_pInitError = -2;
 			return false;
@@ -7170,19 +7185,7 @@ public:
 		if(m_CurRenderIndexPrimitiveCount < IndicesCount / 6)
 		{
 			m_vvFrameDelayedBufferCleanup[m_CurImageIndex].push_back({m_RenderIndexBuffer, m_RenderIndexBufferMemory});
-			std::vector<uint32_t> vIndices(IndicesCount);
-			uint32_t Primq = 0;
-			for(size_t i = 0; i < IndicesCount; i += 6)
-			{
-				vIndices[i] = Primq;
-				vIndices[i + 1] = Primq + 1;
-				vIndices[i + 2] = Primq + 2;
-				vIndices[i + 3] = Primq;
-				vIndices[i + 4] = Primq + 2;
-				vIndices[i + 5] = Primq + 3;
-				Primq += 4;
-			}
-			if(!CreateIndexBuffer(vIndices.data(), vIndices.size() * sizeof(uint32_t), m_RenderIndexBuffer, m_RenderIndexBufferMemory))
+			if(!CreateIndexBuffer(IndicesCount, m_RenderIndexBuffer, m_RenderIndexBufferMemory))
 				return false;
 			m_CurRenderIndexPrimitiveCount = IndicesCount / 6;
 		}
