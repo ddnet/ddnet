@@ -48,6 +48,16 @@ bool CDemoHeader::Valid() const
 
 CDemoRecorder::CDemoRecorder(CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 {
+	Init(pSnapshotDelta, NoMapData);
+}
+
+CDemoRecorder::~CDemoRecorder()
+{
+	dbg_assert(m_File == nullptr, "Demo recorder was not stopped");
+}
+
+void CDemoRecorder::Init(CSnapshotDelta *pSnapshotDelta, bool NoMapData)
+{
 	m_File = nullptr;
 	m_aCurrentFilename[0] = '\0';
 	m_pfnFilter = nullptr;
@@ -55,11 +65,6 @@ CDemoRecorder::CDemoRecorder(CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 	m_LastTickMarker = -1;
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_NoMapData = NoMapData;
-}
-
-CDemoRecorder::~CDemoRecorder()
-{
-	dbg_assert(m_File == nullptr, "Demo recorder was not stopped");
 }
 
 // Record

@@ -274,7 +274,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 
 CServerInfo2::operator CServerInfo() const
 {
-	CServerInfo Result = {0};
+	CServerInfo Result = {};
 	Result.m_MaxClients = m_MaxClients;
 	Result.m_NumClients = m_NumClients;
 	Result.m_MaxPlayers = m_MaxPlayers;
