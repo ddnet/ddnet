@@ -161,12 +161,95 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			Graphics()->SwitchWindowScreen(NewScreen, true);
 	}
 
+	// frame limiter
+	enum class EFrameLimiter
+	{
+		VSYNC,
+		POWER_SAVING,
+		OPTIMAL,
+		UNLIMITED,
+		CUSTOM,
+	};
+	class CFrameLimiterPreset
+	{
+	public:
+		int m_Vsync;
+		int m_RefreshRate; // for both rendering and updating, 0 = unlimited
+		int m_AsyncRender;
+	};
+	// SDL reports 0 Hz for some displays
+	const int ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate > 0 ? g_Config.m_GfxScreenRefreshRate : 60;
+	const CFrameLimiterPreset aPresets[] = {
+		{1, 1000, 1}, // V-Sync, the rate only caps updates since rendering is paced by the display
+		{0, 2 * ScreenRefreshRate, 1}, // Power saving
+		{0, 1000, 1}, // Optimal
+		{0, 0, 0}, // Unlimited, renders every update instead of skipping frames while the previous one is still being rendered
+	};
+	// the preset is not stored, it is whichever preset the settings currently match,
+	// except that choosing Custom keeps the individual settings visible
+	static bool s_CustomFrameLimiter = false;
+	EFrameLimiter OldFrameLimiter = EFrameLimiter::CUSTOM;
+	if(!s_CustomFrameLimiter)
+	{
+		for(size_t i = 0; i < std::size(aPresets); i++)
+		{
+			if(g_Config.m_GfxVsync == aPresets[i].m_Vsync && g_Config.m_GfxRefreshRate == aPresets[i].m_RefreshRate && g_Config.m_ClRefreshRate == aPresets[i].m_RefreshRate && g_Config.m_GfxAsyncRenderOld == aPresets[i].m_AsyncRender)
+			{
+				OldFrameLimiter = (EFrameLimiter)i;
+				break;
+			}
+		}
+	}
+
+	char aPowerSaving[64], aOptimal[64];
+	str_format(aPowerSaving, sizeof(aPowerSaving), "%s (%d %s)", Localize("Power saving"), aPresets[(int)EFrameLimiter::POWER_SAVING].m_RefreshRate, Localize("Hz", "Hertz"));
+	str_format(aOptimal, sizeof(aOptimal), "%s (%d %s)", Localize("Optimal"), aPresets[(int)EFrameLimiter::OPTIMAL].m_RefreshRate, Localize("Hz", "Hertz"));
+	const char *apFrameLimiters[] = {Localize("V-Sync"), aPowerSaving, aOptimal, Localize("Unlimited"), Localize("Custom")};
+
+	CUIRect FrameLimiterLabel, FrameLimiterDropDown;
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("V-Sync"), Localize("may cause delay"));
-	if(DoButton_CheckBox(&g_Config.m_GfxVsync, aBuf, g_Config.m_GfxVsync, &Button))
+	Button.VSplitMid(&FrameLimiterLabel, &FrameLimiterDropDown);
+	Ui()->DoLabel(&FrameLimiterLabel, Localize("Frame limiter"), 14.0f, TEXTALIGN_ML);
+	static CUi::SDropDownState s_FrameLimiterDropDownState;
+	static CScrollRegion s_FrameLimiterDropDownScrollRegion;
+	s_FrameLimiterDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_FrameLimiterDropDownScrollRegion;
+	const EFrameLimiter NewFrameLimiter = (EFrameLimiter)Ui()->DoDropDown(&FrameLimiterDropDown, (int)OldFrameLimiter, apFrameLimiters, std::size(apFrameLimiters), s_FrameLimiterDropDownState);
+	GameClient()->m_Tooltips.DoToolTip(&s_FrameLimiterDropDownState.m_ButtonContainer, &FrameLimiterDropDown, Localize("Limiting the number of frames calculated reduces power usage, but can slightly increase latency"));
+	if(NewFrameLimiter != OldFrameLimiter)
 	{
-		Graphics()->SetVSync(!g_Config.m_GfxVsync);
+		s_CustomFrameLimiter = NewFrameLimiter == EFrameLimiter::CUSTOM;
+		if(!s_CustomFrameLimiter)
+		{
+			const CFrameLimiterPreset &Preset = aPresets[(int)NewFrameLimiter];
+			if(g_Config.m_GfxVsync != Preset.m_Vsync)
+				Graphics()->SetVSync(Preset.m_Vsync);
+			g_Config.m_GfxRefreshRate = Preset.m_RefreshRate;
+			g_Config.m_ClRefreshRate = Preset.m_RefreshRate;
+			g_Config.m_GfxAsyncRenderOld = Preset.m_AsyncRender;
+		}
+	}
+
+	if(NewFrameLimiter == EFrameLimiter::CUSTOM)
+	{
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("V-Sync"), Localize("may cause delay"));
+		if(DoButton_CheckBox(&g_Config.m_GfxVsync, aBuf, g_Config.m_GfxVsync, &Button))
+		{
+			Graphics()->SetVSync(!g_Config.m_GfxVsync);
+		}
+
+		str_copy(aBuf, " ");
+		str_append(aBuf, Localize("Hz", "Hertz"));
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Ui()->DoScrollbarOption(&g_Config.m_GfxRefreshRate, &g_Config.m_GfxRefreshRate, &Button, Localize("Refresh Rate"), 10, 1000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE | CUi::SCROLLBAR_OPTION_NOCLAMPVALUE | CUi::SCROLLBAR_OPTION_DELAYUPDATE, aBuf);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Ui()->DoScrollbarOption(&g_Config.m_ClRefreshRate, &g_Config.m_ClRefreshRate, &Button, Localize("Update Rate"), 10, 1000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE | CUi::SCROLLBAR_OPTION_NOCLAMPVALUE | CUi::SCROLLBAR_OPTION_DELAYUPDATE, aBuf);
+
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_GfxAsyncRenderOld, Localize("Asynchronous rendering"), g_Config.m_GfxAsyncRenderOld, &Button))
+			g_Config.m_GfxAsyncRenderOld ^= 1;
+		GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxAsyncRenderOld, &Button, Localize("Keep updating the game while the previous frame is still being rendered"));
 	}
 
 	bool MultiSamplingChanged = false;
@@ -218,11 +301,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClShowfps, Localize("Show FPS"), g_Config.m_ClShowfps, &Button))
 		g_Config.m_ClShowfps ^= 1;
 	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowfps, &Button, Localize("Renders your frame rate in the top right"));
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	str_copy(aBuf, " ");
-	str_append(aBuf, Localize("Hz", "Hertz"));
-	Ui()->DoScrollbarOption(&g_Config.m_GfxRefreshRate, &g_Config.m_GfxRefreshRate, &Button, Localize("Refresh Rate"), 10, 1000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE | CUi::SCROLLBAR_OPTION_NOCLAMPVALUE | CUi::SCROLLBAR_OPTION_DELAYUPDATE, aBuf);
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
 	static CButtonContainer s_UiColorResetId;
