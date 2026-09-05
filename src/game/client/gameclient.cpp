@@ -2518,7 +2518,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 		// every tick while the tees move.
 		vec2 MinPos, MaxPos;
 		LocalMultiplayerBounds(MinPos, MaxPos);
-		const float Views = LocalMultiplayerSplit() ? NUM_DUMMIES : 1.0f;
+		const float Views = LocalMultiplayerSplit() ? NUM_DUMMIES : 1;
 		vec2 ViewSize;
 		Graphics()->CalcScreenParams(Graphics()->ScreenAspect() / Views, ShowDistanceZoom, &ViewSize.x, &ViewSize.y);
 		const vec2 Needed = (MaxPos - MinPos) * Views + ViewSize;
