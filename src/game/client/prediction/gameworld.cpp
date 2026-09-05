@@ -711,7 +711,11 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 				pCopy = new CPlasma(*((CPlasma *)pEnt));
 			if(pCopy)
 			{
+				// detach the previous copy, the entity links only track the latest copy
+				if(pEnt->m_pChild)
+					pEnt->m_pChild->m_pParent = nullptr;
 				pCopy->m_pParent = pEnt;
+				pCopy->m_pChild = nullptr;
 				pEnt->m_pChild = pCopy;
 				this->InsertEntity(pCopy);
 			}

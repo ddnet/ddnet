@@ -351,6 +351,18 @@ public:
 	 */
 	CCharacterCore m_PredictedChar;
 
+	/**
+	 * Set while the extra tick of `cl_fast_input` is part of the prediction.
+	 * The `NoFastInput` values are only valid then and hold the state from
+	 * before that tick, so that the input sent to the server stays the same
+	 * whether the setting is on or off.
+	 */
+	bool m_FastInputApplied = false;
+	CCharacterCore m_PredictedPrevCharNoFastInput;
+	CCharacterCore m_PredictedCharNoFastInput;
+	vec2 m_DummyPosNoFastInput;
+	vec2 m_LocalCharacterPosNoFastInput;
+
 	// snap pointers
 	class CSnapState
 	{
@@ -631,6 +643,7 @@ public:
 	void OnActivateEditor() override;
 	void OnDummySwap() override;
 	int OnSnapInput(int *pData, bool Dummy, bool Force) override;
+	bool CheckNewInput() override;
 	void OnShutdown() override;
 	void OnEnterGame() override;
 	void OnRconType(bool UsernameReq) override;
@@ -722,6 +735,7 @@ public:
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
+	CGameWorld m_FastInputWorld;
 
 	std::vector<SSwitchers> &Switchers() { return m_GameWorld.m_Core.m_vSwitchers; }
 	std::vector<SSwitchers> &PredSwitchers() { return m_PredictedWorld.m_Core.m_vSwitchers; }
