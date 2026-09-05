@@ -1,0 +1,31 @@
+{
+	"name": "menu-settings",
+	"args": "cl_show_welcome 0; player_name CI-Test; cl_menu_map \"\"",
+	"steps": [
+		{ "action": "shot", "name": "server-browser" },
+		{ "action": "click", "x": 1196, "y": 26 },
+		{ "action": "shot", "name": "settings-language" },
+		{ "action": "click", "x": 1197, "y": 171 },
+		{ "action": "shot", "name": "settings-general" },
+		{ "action": "click", "x": 1197, "y": 214 },
+		{ "action": "shot", "name": "settings-player" },
+		{ "action": "click", "x": 1196, "y": 258 },
+		{ "action": "shot", "name": "settings-tee", "compare": false },
+		{ "action": "click", "x": 1196, "y": 301 },
+		{ "action": "shot", "name": "settings-appearance" },
+		{ "action": "click", "x": 1196, "y": 344 },
+		{ "action": "shot", "name": "settings-controls" },
+		{ "action": "click", "x": 1196, "y": 387 },
+		{ "action": "shot", "name": "settings-graphics" },
+		{ "action": "click", "x": 1195, "y": 431 },
+		{ "action": "shot", "name": "settings-sound" },
+		{ "action": "click", "x": 1195, "y": 474 },
+		{ "action": "shot", "name": "settings-ddnet" },
+		{ "action": "click", "x": 1195, "y": 517 },
+		{ "action": "shot", "name": "settings-assets" },
+		{ "action": "click", "x": 31, "y": 26 },
+		{ "action": "shot", "name": "start-page" },
+		{ "action": "console", "cmd": "quit" },
+		{ "action": "waitlog", "pattern": "config: saved", "timeout": 15000 }
+	]
+}

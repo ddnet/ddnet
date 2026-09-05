@@ -456,6 +456,33 @@ jobs:
         mkdir artifacts
         mv build-emscripten-release/*-Emscripten.tar.xz artifacts
 
+    - name: Build websocket-enabled server for UI tests
+      run: |
+        export PATH=/home/runner/cmake/bin:$PATH
+        sudo apt-get update -y
+        sudo apt-get install -y libcurl4-openssl-dev libsqlite3-dev libwebsockets-dev
+        cmake -G "Unix Makefiles" -S . -B build-native-server -DCMAKE_BUILD_TYPE=Release -DCLIENT=OFF -DTOOLS=OFF -DVIDEORECORDER=OFF -DVULKAN=OFF -DWEBSOCKETS=ON
+        cmake --build build-native-server --target game-server -j$(nproc)
+
+    - name: Run Playwright UI tests
+      run: |
+        cd other/emscripten/playwright
+        npm install
+        npx playwright install --with-deps chromium
+        (cd ../../../build-emscripten-release && exec python3 ../other/emscripten/server.py 8000) &
+        (cd ../../.. && exec build-native-server/DDNet-Server "sv_register 0" "sv_map dm1" "sv_name UI-Test") &
+        sleep 3
+        node run-scenario.js scenarios/menu-settings.json
+        node run-scenario.js scenarios/gameplay-local-server.json
+
+    - name: Upload UI test screenshots
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddnet-ui-test-screenshots
+        path: other/emscripten/playwright/out
+        if-no-files-found: ignore
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v6
       with:
