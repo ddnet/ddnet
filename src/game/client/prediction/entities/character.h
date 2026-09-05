@@ -176,6 +176,7 @@ private:
 
 	static bool IsSwitchActiveCb(unsigned char Number, void *pUser);
 	void HandleTiles(int Index);
+	void HandleEnvelopeTriggerTiles(int MapIndex);
 	void HandleSkippableTiles(int Index);
 	void DDRaceTick();
 	void DDRacePostCoreTick();
@@ -187,6 +188,11 @@ private:
 	int m_LastTuneZoneTick;
 
 	bool m_Interfering;
+
+	// envelope animations
+	static constexpr int ENVELOPE_NONE = -1;
+	static constexpr int ENVELOPE_RESET = -2;
+	int m_LastEnvelopeTriggerZone;
 };
 
 #endif
