@@ -798,6 +798,26 @@ void CGameClient::UpdatePositions()
 	UpdateRenderedCharacters();
 }
 
+void CGameClient::RenderSplitViewSeparator()
+{
+	// the views only differ in what they show, so a line marks where one ends. Black
+	// around white keeps it visible whatever the views draw behind it.
+	const float Width = Graphics()->ScreenWidth();
+	const float Height = Graphics()->ScreenHeight();
+	Graphics()->MapScreenToSize(Width, Height);
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	const float Seam = std::floor(Width / 2.0f);
+	for(int Pixel = -1; Pixel <= 1; Pixel++)
+	{
+		const float Value = Pixel == 0 ? 1.0f : 0.0f;
+		Graphics()->SetColor(Value, Value, Value, 1.0f);
+		IGraphics::CQuadItem QuadItem(Seam + Pixel, 0.0f, 1.0f, Height);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	}
+	Graphics()->QuadsEnd();
+}
+
 void CGameClient::OnRender()
 {
 	const ColorRGBA ClearColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOverlayEntities ? g_Config.m_ClBackgroundEntitiesColor : g_Config.m_ClBackgroundColor));
@@ -875,6 +895,7 @@ void CGameClient::OnRender()
 			Graphics()->ViewEnd();
 		}
 		m_Camera.m_Center = Center;
+		RenderSplitViewSeparator();
 	}
 	else
 	{

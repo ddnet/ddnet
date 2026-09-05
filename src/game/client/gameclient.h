@@ -711,6 +711,7 @@ public:
 	bool LocalMultiplayer() const;
 	bool LocalMultiplayerShared() const { return LocalMultiplayer() && !g_Config.m_ClLocalMultiplayerSplit && m_Camera.ZoomAllowed(); }
 	bool LocalMultiplayerSplit() const { return LocalMultiplayer() && g_Config.m_ClLocalMultiplayerSplit; }
+	void RenderSplitViewSeparator();
 	bool LocalTeePosition(int Dummy, vec2 &Pos) const;
 	void EvolveCharacter(CNetObj_Character *pCharacter, int Tick);
 	void SnapCharacter(int ClientId, const CNetObj_Character *pCur, const CNetObj_Character *pPrev);
