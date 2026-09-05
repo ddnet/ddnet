@@ -15,8 +15,6 @@
 #include <game/localization.h>
 #include <game/mapitems.h>
 
-#include <limits>
-
 CCamera::CCamera()
 {
 	m_CamType = CAMTYPE_UNDEFINED;
@@ -72,7 +70,7 @@ void CCamera::ScaleZoom(float Factor)
 
 float CCamera::MaxZoomLevel()
 {
-	return (g_Config.m_ClLimitMaxZoomLevel) ? ((Graphics()->IsTileBufferingEnabled() ? 240 : 30)) : std::numeric_limits<float>::max();
+	return (g_Config.m_ClLimitMaxZoomLevel) ? ((Graphics()->IsTileBufferingEnabled() ? 240 : 30)) : 2000;
 }
 
 float CCamera::MinZoomLevel()

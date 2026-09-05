@@ -132,6 +132,13 @@ TEST(NetAddr, FromStrInvalid)
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::]:"));
 	EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1:1a"));
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::]:c"));
+
+	EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1:4294967376"));
+	EXPECT_TRUE(net_addr_from_str(&Addr, "4294967296.0.0.1:80"));
+	EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1:18446744073709551696"));
+	EXPECT_TRUE(net_addr_from_str(&Addr, "0177.0.0.1"));
+	EXPECT_TRUE(net_addr_from_str(&Addr, "010.0.0.1"));
+	EXPECT_TRUE(net_addr_from_str(&Addr, "127.0.0.1:0080"));
 }
 
 TEST(NetAddrDeathTest, StrInvalid1)
