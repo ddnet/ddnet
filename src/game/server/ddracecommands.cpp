@@ -6,7 +6,10 @@
 #include <base/time.h>
 
 #include <engine/antibot.h>
+#include <engine/server/authmanager.h>
 #include <engine/shared/config.h>
+
+#include <generated/protocol.h>
 
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -467,7 +470,27 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	int TeleTo = pResult->NumArguments() ? pResult->GetVictim(HasSource ? 1 : 0) : pResult->m_ClientId;
 	int AuthLevel = pSelf->Server()->GetAuthedState(pResult->m_ClientId);
 
-	if(Tele != pResult->m_ClientId && AuthLevel < g_Config.m_SvTeleOthersAuthLevel)
+	auto MinTeleLevel = CAuthManager::RoleNameToAuthLevel(g_Config.m_SvTeleOthersAuthLevel);
+	if(!MinTeleLevel.has_value())
+	{
+		// if it is not a valid role name like "helper"
+		// we fallback to backcompat numeric values
+		if(str_comp(g_Config.m_SvTeleOthersAuthLevel, "1") == 0)
+		{
+			MinTeleLevel = AUTHED_HELPER;
+		}
+		else if(str_comp(g_Config.m_SvTeleOthersAuthLevel, "2") == 0)
+		{
+			MinTeleLevel = AUTHED_MOD;
+		}
+		else if(str_comp(g_Config.m_SvTeleOthersAuthLevel, "3") == 0)
+		{
+			MinTeleLevel = AUTHED_ADMIN;
+		}
+	}
+	dbg_assert(MinTeleLevel.has_value(), "sv_tele_others_auth_level got unexpected value '%s'", g_Config.m_SvTeleOthersAuthLevel);
+
+	if(Tele != pResult->m_ClientId && AuthLevel < MinTeleLevel.value())
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tele", "you aren't allowed to tele others");
 		return;

@@ -6,6 +6,7 @@
 
 #include <generated/protocol.h>
 
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -70,6 +71,7 @@ private:
 
 public:
 	static const char *AuthLevelToRoleName(int AuthLevel);
+	static std::optional<int> RoleNameToAuthLevel(const char *pRoleName);
 
 	typedef void (*FListCallback)(const char *pIdent, const char *pRoleName, void *pUser);
 
