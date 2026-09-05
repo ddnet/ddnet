@@ -12,6 +12,7 @@
 
 #include <game/gamecore.h>
 #include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 CMap::CMap() = default;
 
@@ -38,6 +39,11 @@ void *CMap::GetDataSwapped(int Index)
 const char *CMap::GetDataString(int Index)
 {
 	return m_DataFile.GetDataString(Index);
+}
+
+std::optional<std::vector<const char *>> CMap::GetDataStringArray(int Index)
+{
+	return m_DataFile.GetDataStringArray(Index);
 }
 
 void CMap::UnloadData(int Index)
@@ -100,23 +106,32 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 		return false;
 	}
 
+	// Replace map items for old versions with items compatible with latest version to avoid version checks when using the map items.
+	if(!UpgradeAndValidateInfoItems(NewDataFile) ||
+		!UpgradeAndValidateImageItems(NewDataFile) ||
+		!ValidateSoundItems(NewDataFile) ||
+		!UpgradeAndValidateEnvelopeItems(NewDataFile) ||
+		!ValidateAutomapperConfigItems(NewDataFile))
+	{
+		return false;
+	}
+
 	int GroupsStart, GroupsNum, LayersStart, LayersNum;
 	NewDataFile.GetType(MAPITEMTYPE_GROUP, &GroupsStart, &GroupsNum);
 	NewDataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
 
-	// Replace map items for old versions with items compatible with latest version to avoid version checks when using the map items.
 	// Ensure that we have a game layer and game group.
 	const CMapItemLayerTilemap *pGameLayer = nullptr;
 	std::set<int> UsedLayerItemIndices;
 	for(int GroupIndex = 0; GroupIndex < GroupsNum; GroupIndex++)
 	{
-		const size_t GroupItemSize = NewDataFile.GetItemSize(GroupsStart + GroupIndex);
-		if(GroupItemSize < sizeof(CMapItemGroup_v1))
+		const int GroupItemIndex = GroupsStart + GroupIndex;
+		if(!UpgradeAndValidateGroupItem(NewDataFile, GroupIndex, GroupItemIndex))
 		{
-			log_error("map/load", "Group %d is truncated (size %" PRIzu ").", GroupIndex, GroupItemSize);
 			return false;
 		}
-		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + GroupIndex));
+		// The item may have been replaced, so the pointer must be determined afterwards.
+		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupItemIndex));
 		if(pGroup->m_StartLayer < 0 || pGroup->m_NumLayers < 0 ||
 			(int64_t)pGroup->m_StartLayer + pGroup->m_NumLayers > LayersNum)
 		{
@@ -160,7 +175,26 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 					pGameLayer = pLayerTilemap;
 				}
 			}
+			else if(pLayer->m_Type == LAYERTYPE_QUADS)
+			{
+				if(!UpgradeAndValidateQuadsLayerItem(NewDataFile, GroupIndex, LayerIndex, reinterpret_cast<CMapItemLayerQuads_v1 *>(pLayer), LayerItemIndex, LayerItemSize))
+				{
+					return false;
+				}
+			}
+			else if(pLayer->m_Type == LAYERTYPE_SOUNDS || pLayer->m_Type == LAYERTYPE_SOUNDS_DEPRECATED)
+			{
+				if(!ValidateSoundsLayerItem(GroupIndex, LayerIndex, reinterpret_cast<CMapItemLayerSounds *>(pLayer), LayerItemSize))
+				{
+					return false;
+				}
+			}
 		}
+	}
+	if((int)UsedLayerItemIndices.size() != LayersNum)
+	{
+		log_error("map/load", "%d layers are not used by any group.", LayersNum - (int)UsedLayerItemIndices.size());
+		return false;
 	}
 	if(pGameLayer == nullptr)
 	{
@@ -270,6 +304,214 @@ bool CMap::ValidateMapVersion(CDataFileReader &NewDataFile)
 	if(pVersionItem->m_Version != 1)
 	{
 		log_error("map/load", "Map version %d is not supported.", pVersionItem->m_Version);
+		return false;
+	}
+	return true;
+}
+
+bool CMap::UpgradeAndValidateInfoItems(CDataFileReader &NewDataFile)
+{
+	int InfoStart, InfoNum;
+	NewDataFile.GetType(MAPITEMTYPE_INFO, &InfoStart, &InfoNum);
+	for(int InfoIndex = 0; InfoIndex < InfoNum; InfoIndex++)
+	{
+		const int InfoItemIndex = InfoStart + InfoIndex;
+		const size_t InfoItemSize = NewDataFile.GetItemSize(InfoItemIndex);
+		if(InfoItemSize < sizeof(CMapItemInfo))
+		{
+			log_error("map/load", "Info item %d is truncated (size %" PRIzu ").", InfoIndex, InfoItemSize);
+			return false;
+		}
+		const CMapItemInfo *pInfo = static_cast<CMapItemInfo *>(NewDataFile.GetItem(InfoItemIndex));
+		if(pInfo->m_Version != 1)
+		{
+			log_error("map/load", "Info item %d has unsupported version %d.", InfoIndex, pInfo->m_Version);
+			return false;
+		}
+		if(InfoItemSize < sizeof(CMapItemInfoSettings))
+		{
+			// The settings data index was added without incrementing the version.
+			CMapItemInfoSettings UpgradedInfo;
+			mem_copy(&UpgradedInfo, pInfo, sizeof(CMapItemInfo));
+			UpgradedInfo.m_Settings = -1;
+			if(!NewDataFile.OverrideItemData(InfoItemIndex, &UpgradedInfo, sizeof(UpgradedInfo)))
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool CMap::UpgradeAndValidateImageItems(CDataFileReader &NewDataFile)
+{
+	int ImagesStart, ImagesNum;
+	NewDataFile.GetType(MAPITEMTYPE_IMAGE, &ImagesStart, &ImagesNum);
+	for(int ImageIndex = 0; ImageIndex < ImagesNum; ImageIndex++)
+	{
+		const int ImageItemIndex = ImagesStart + ImageIndex;
+		const size_t ImageItemSize = NewDataFile.GetItemSize(ImageItemIndex);
+		if(ImageItemSize < sizeof(CMapItemImage_v1))
+		{
+			log_error("map/load", "Image %d is truncated (size %" PRIzu ").", ImageIndex, ImageItemSize);
+			return false;
+		}
+		const CMapItemImage_v1 *pImage = static_cast<CMapItemImage_v1 *>(NewDataFile.GetItem(ImageItemIndex));
+		if(!in_range(pImage->m_Version, 1, 2))
+		{
+			log_error("map/load", "Image %d has unsupported version %d.", ImageIndex, pImage->m_Version);
+			return false;
+		}
+		if(pImage->m_Version == 1)
+		{
+			// Version 1 images are always RGBA, which version 2 denotes with the format value 1.
+			CMapItemImage_v2 UpgradedImage;
+			mem_copy(&UpgradedImage, pImage, sizeof(CMapItemImage_v1));
+			UpgradedImage.m_MustBe1 = 1;
+			if(!NewDataFile.OverrideItemData(ImageItemIndex, &UpgradedImage, sizeof(UpgradedImage)))
+			{
+				return false;
+			}
+		}
+		else if(ImageItemSize < sizeof(CMapItemImage_v2))
+		{
+			log_error("map/load", "Image %d is truncated (version %d, size %" PRIzu ").", ImageIndex, pImage->m_Version, ImageItemSize);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CMap::ValidateSoundItems(CDataFileReader &NewDataFile)
+{
+	int SoundsStart, SoundsNum;
+	NewDataFile.GetType(MAPITEMTYPE_SOUND, &SoundsStart, &SoundsNum);
+	for(int SoundIndex = 0; SoundIndex < SoundsNum; SoundIndex++)
+	{
+		const int SoundItemIndex = SoundsStart + SoundIndex;
+		const size_t SoundItemSize = NewDataFile.GetItemSize(SoundItemIndex);
+		if(SoundItemSize < sizeof(CMapItemSound))
+		{
+			log_error("map/load", "Sound %d is truncated (size %" PRIzu ").", SoundIndex, SoundItemSize);
+			return false;
+		}
+		const CMapItemSound *pSound = static_cast<CMapItemSound *>(NewDataFile.GetItem(SoundItemIndex));
+		if(pSound->m_Version != 1)
+		{
+			log_error("map/load", "Sound %d has unsupported version %d.", SoundIndex, pSound->m_Version);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CMap::UpgradeAndValidateEnvelopeItems(CDataFileReader &NewDataFile)
+{
+	int EnvelopesStart, EnvelopesNum;
+	NewDataFile.GetType(MAPITEMTYPE_ENVELOPE, &EnvelopesStart, &EnvelopesNum);
+	for(int EnvelopeIndex = 0; EnvelopeIndex < EnvelopesNum; EnvelopeIndex++)
+	{
+		const int EnvelopeItemIndex = EnvelopesStart + EnvelopeIndex;
+		const size_t EnvelopeItemSize = NewDataFile.GetItemSize(EnvelopeItemIndex);
+		if(EnvelopeItemSize < sizeof(CMapItemEnvelope_v1Legacy))
+		{
+			log_error("map/load", "Envelope %d is truncated (size %" PRIzu ").", EnvelopeIndex, EnvelopeItemSize);
+			return false;
+		}
+		const CMapItemEnvelope_v1Legacy *pEnvelopeLegacy = static_cast<CMapItemEnvelope_v1Legacy *>(NewDataFile.GetItem(EnvelopeItemIndex));
+		if(!in_range(pEnvelopeLegacy->m_Version, 1, CMapItemEnvelope::VERSION_TEEWORLDS_BEZIER))
+		{
+			log_error("map/load", "Envelope %d has unsupported version %d.", EnvelopeIndex, pEnvelopeLegacy->m_Version);
+			return false;
+		}
+		if(pEnvelopeLegacy->m_Version == 1)
+		{
+			CMapItemEnvelope UpgradedEnvelope;
+			if(EnvelopeItemSize < sizeof(CMapItemEnvelope_v1))
+			{
+				UpgradedEnvelope.m_Version = pEnvelopeLegacy->m_Version;
+				UpgradedEnvelope.m_Channels = pEnvelopeLegacy->m_Channels;
+				UpgradedEnvelope.m_StartPoint = pEnvelopeLegacy->m_StartPoint;
+				UpgradedEnvelope.m_NumPoints = pEnvelopeLegacy->m_NumPoints;
+				StrToInts(UpgradedEnvelope.m_aName, std::size(UpgradedEnvelope.m_aName), "");
+			}
+			else
+			{
+				mem_copy(&UpgradedEnvelope, pEnvelopeLegacy, sizeof(CMapItemEnvelope_v1));
+			}
+			UpgradedEnvelope.m_Synchronized = 0;
+			if(!NewDataFile.OverrideItemData(EnvelopeItemIndex, &UpgradedEnvelope, sizeof(UpgradedEnvelope)))
+			{
+				return false;
+			}
+		}
+		else if(EnvelopeItemSize < sizeof(CMapItemEnvelope_v2))
+		{
+			log_error("map/load", "Envelope %d is truncated (version %d, size %" PRIzu ").", EnvelopeIndex, pEnvelopeLegacy->m_Version, EnvelopeItemSize);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CMap::ValidateAutomapperConfigItems(CDataFileReader &NewDataFile)
+{
+	int AutomapperConfigsStart, AutomapperConfigsNum;
+	NewDataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &AutomapperConfigsStart, &AutomapperConfigsNum);
+	for(int AutomapperConfigIndex = 0; AutomapperConfigIndex < AutomapperConfigsNum; AutomapperConfigIndex++)
+	{
+		// The version is not checked because existing maps contain uninitialized versions.
+		const size_t AutomapperConfigItemSize = NewDataFile.GetItemSize(AutomapperConfigsStart + AutomapperConfigIndex);
+		if(AutomapperConfigItemSize < sizeof(CMapItemAutomapperConfig))
+		{
+			log_error("map/load", "Automapper config %d is truncated (size %" PRIzu ").", AutomapperConfigIndex, AutomapperConfigItemSize);
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CMap::UpgradeAndValidateGroupItem(CDataFileReader &NewDataFile, int GroupIndex, int GroupItemIndex)
+{
+	const size_t GroupItemSize = NewDataFile.GetItemSize(GroupItemIndex);
+	if(GroupItemSize < sizeof(CMapItemGroup_v1))
+	{
+		log_error("map/load", "Group %d is truncated (size %" PRIzu ").", GroupIndex, GroupItemSize);
+		return false;
+	}
+	const CMapItemGroup_v1 *pGroupBase = static_cast<CMapItemGroup_v1 *>(NewDataFile.GetItem(GroupItemIndex));
+	if(!in_range(pGroupBase->m_Version, 1, 3))
+	{
+		log_error("map/load", "Group %d has unsupported version %d.", GroupIndex, pGroupBase->m_Version);
+		return false;
+	}
+	if(pGroupBase->m_Version == 1)
+	{
+		CMapItemGroup UpgradedGroup;
+		mem_copy(&UpgradedGroup, pGroupBase, sizeof(CMapItemGroup_v1));
+		UpgradedGroup.m_UseClipping = 0;
+		UpgradedGroup.m_ClipX = 0;
+		UpgradedGroup.m_ClipY = 0;
+		UpgradedGroup.m_ClipW = 0;
+		UpgradedGroup.m_ClipH = 0;
+		StrToInts(UpgradedGroup.m_aName, std::size(UpgradedGroup.m_aName), "");
+		return NewDataFile.OverrideItemData(GroupItemIndex, &UpgradedGroup, sizeof(UpgradedGroup));
+	}
+	else if(GroupItemSize < sizeof(CMapItemGroup_v2))
+	{
+		log_error("map/load", "Group %d is truncated (version %d, size %" PRIzu ").", GroupIndex, pGroupBase->m_Version, GroupItemSize);
+		return false;
+	}
+	else if(pGroupBase->m_Version == 2)
+	{
+		CMapItemGroup UpgradedGroup;
+		mem_copy(&UpgradedGroup, pGroupBase, sizeof(CMapItemGroup_v2));
+		StrToInts(UpgradedGroup.m_aName, std::size(UpgradedGroup.m_aName), "");
+		return NewDataFile.OverrideItemData(GroupItemIndex, &UpgradedGroup, sizeof(UpgradedGroup));
+	}
+	else if(GroupItemSize < sizeof(CMapItemGroup))
+	{
+		log_error("map/load", "Group %d is truncated (version %d, size %" PRIzu ").", GroupIndex, pGroupBase->m_Version, GroupItemSize);
 		return false;
 	}
 	return true;
@@ -503,6 +745,8 @@ bool CMap::UpgradeAndValidateTilesLayerItem(
 		const CMapItemLayerTilemap_v2Legacy *pLayerTilemapLegacy = static_cast<const CMapItemLayerTilemap_v2Legacy *>(pLayerTilemapBase);
 		CMapItemLayerTilemap OverriddenLayerTilemap;
 		mem_copy(&OverriddenLayerTilemap, pLayerTilemapLegacy, sizeof(CMapItemLayerTilemap_v2));
+		// The upgraded item uses the version 3 layout, which the map tools write back.
+		OverriddenLayerTilemap.m_Version = 3;
 
 		// Version 2 items have no name. Default to empty string. We fix the name of physics layers later.
 		StrToInts(OverriddenLayerTilemap.m_aName, std::size(OverriddenLayerTilemap.m_aName), "");
@@ -563,6 +807,59 @@ bool CMap::UpgradeAndValidateTilesLayerItem(
 		}
 	}
 
+	return true;
+}
+
+bool CMap::UpgradeAndValidateQuadsLayerItem(
+	CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
+	const CMapItemLayerQuads_v1 *pLayerQuadsBase, int LayerItemIndex, size_t LayerItemSize)
+{
+	if(LayerItemSize < sizeof(CMapItemLayerQuads_v1))
+	{
+		log_error("map/load", "Quads layer %d in group %d is truncated (size %" PRIzu ").",
+			LayerIndex, GroupIndex, LayerItemSize);
+		return false;
+	}
+
+	if(!in_range(pLayerQuadsBase->m_Version, 1, 2))
+	{
+		log_error("map/load", "Quads layer %d in group %d has unsupported version %d.",
+			LayerIndex, GroupIndex, pLayerQuadsBase->m_Version);
+		return false;
+	}
+
+	if(pLayerQuadsBase->m_Version == 1)
+	{
+		// Version 1 items have no name. Default to empty string.
+		CMapItemLayerQuads UpgradedLayerQuads;
+		mem_copy(&UpgradedLayerQuads, pLayerQuadsBase, sizeof(CMapItemLayerQuads_v1));
+		StrToInts(UpgradedLayerQuads.m_aName, std::size(UpgradedLayerQuads.m_aName), "");
+		return NewDataFile.OverrideItemData(LayerItemIndex, &UpgradedLayerQuads, sizeof(UpgradedLayerQuads));
+	}
+	else if(LayerItemSize < sizeof(CMapItemLayerQuads))
+	{
+		log_error("map/load", "Quads layer %d in group %d is truncated (version %d, size %" PRIzu ").",
+			LayerIndex, GroupIndex, pLayerQuadsBase->m_Version, LayerItemSize);
+		return false;
+	}
+	return true;
+}
+
+bool CMap::ValidateSoundsLayerItem(int GroupIndex, int LayerIndex, const CMapItemLayerSounds *pLayerSounds, size_t LayerItemSize)
+{
+	if(LayerItemSize < sizeof(CMapItemLayerSounds))
+	{
+		log_error("map/load", "Sounds layer %d in group %d is truncated (size %" PRIzu ").",
+			LayerIndex, GroupIndex, LayerItemSize);
+		return false;
+	}
+
+	if(!in_range(pLayerSounds->m_Version, 1, 2))
+	{
+		log_error("map/load", "Sounds layer %d in group %d has unsupported version %d.",
+			LayerIndex, GroupIndex, pLayerSounds->m_Version);
+		return false;
+	}
 	return true;
 }
 

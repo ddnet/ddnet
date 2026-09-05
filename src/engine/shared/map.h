@@ -11,6 +11,8 @@
 
 #include <set>
 
+class CMapItemLayerQuads_v1;
+class CMapItemLayerSounds;
 class CMapItemLayerTilemap;
 class CMapItemLayerTilemap_v2;
 
@@ -26,6 +28,7 @@ public:
 	void *GetData(int Index) override;
 	void *GetDataSwapped(int Index) override;
 	const char *GetDataString(int Index) override;
+	std::optional<std::vector<const char *>> GetDataStringArray(int Index) override;
 	void UnloadData(int Index) override;
 	int NumData() const override;
 
@@ -51,9 +54,18 @@ public:
 
 private:
 	static bool ValidateMapVersion(CDataFileReader &NewDataFile);
+	static bool UpgradeAndValidateInfoItems(CDataFileReader &NewDataFile);
+	static bool UpgradeAndValidateImageItems(CDataFileReader &NewDataFile);
+	static bool ValidateSoundItems(CDataFileReader &NewDataFile);
+	static bool UpgradeAndValidateEnvelopeItems(CDataFileReader &NewDataFile);
+	static bool ValidateAutomapperConfigItems(CDataFileReader &NewDataFile);
+	static bool UpgradeAndValidateGroupItem(CDataFileReader &NewDataFile, int GroupIndex, int GroupItemIndex);
 	static bool ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
 	bool UpgradeAndValidateTilesLayerItem(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
 		CMapItemLayerTilemap_v2 *pLayerTilemapBase, int LayerItemIndex, size_t LayerItemSize);
+	static bool UpgradeAndValidateQuadsLayerItem(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
+		const CMapItemLayerQuads_v1 *pLayerQuadsBase, int LayerItemIndex, size_t LayerItemSize);
+	static bool ValidateSoundsLayerItem(int GroupIndex, int LayerIndex, const CMapItemLayerSounds *pLayerSounds, size_t LayerItemSize);
 	bool ValidateAndUnpackTilesLayerData(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex, const CMapItemLayerTilemap *pLayerTilemap,
 		const CMapItemLayerTilemap &GameLayer, std::set<int> &UsedDataIndices);
 };
