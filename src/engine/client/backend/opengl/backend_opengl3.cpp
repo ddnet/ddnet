@@ -19,7 +19,9 @@
 #include <engine/client/backend/glsl_shader_compiler.h>
 #include <engine/client/backend/opengl/opengl_sl.h>
 #include <engine/client/backend/opengl/opengl_sl_program.h>
+#ifndef BACKEND_NO_SDL
 #include <engine/client/backend_sdl.h>
+#endif
 #include <engine/gfx/image_manipulation.h>
 
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
