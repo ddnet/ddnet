@@ -495,6 +495,8 @@ void CGameClient::OnUpdate()
 	{
 		pComponent->OnUpdate();
 	}
+
+	m_LocalServer.Update();
 }
 
 void CGameClient::OnInput(const IInput::CEvent &Event)
