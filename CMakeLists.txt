@@ -3446,6 +3446,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     os_test.cpp
     packer_test.cpp
     prng_test.cpp
+    rconrole_test.cpp
     replace_words_test.cpp
     score_test.cpp
     secure_random_test.cpp
