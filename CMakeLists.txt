@@ -2451,6 +2451,17 @@ set_src(GAME_SHARED GLOB src/game
   voting.h
   # tidy-alphabetical-end
 )
+set_src(GAME_PHYSICS GLOB src/game/physics
+  # tidy-alphabetical-start
+  character.h
+  laser.h
+  pickup.h
+  plasma.h
+  projectile.h
+  world_config.h
+  # tidy-alphabetical-end
+)
+list(APPEND GAME_SHARED ${GAME_PHYSICS})
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version.h")
 
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff

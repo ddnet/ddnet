@@ -24,24 +24,9 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, const
 	int CurWeapon = std::clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 
 	// get positions
-	float Curvature = 0;
-	float Speed = 0;
 	const CTuningParams *pTuning = GameClient()->GetTuning(pCurrent->m_TuneZone);
-	if(CurWeapon == WEAPON_GRENADE)
-	{
-		Curvature = pTuning->m_GrenadeCurvature;
-		Speed = pTuning->m_GrenadeSpeed;
-	}
-	else if(CurWeapon == WEAPON_SHOTGUN)
-	{
-		Curvature = pTuning->m_ShotgunCurvature;
-		Speed = pTuning->m_ShotgunSpeed;
-	}
-	else if(CurWeapon == WEAPON_GUN)
-	{
-		Curvature = pTuning->m_GunCurvature;
-		Speed = pTuning->m_GunSpeed;
-	}
+	const float Curvature = pTuning->ProjectileCurvature(CurWeapon);
+	const float Speed = pTuning->ProjectileSpeed(CurWeapon);
 
 	bool LocalPlayerInGame = false;
 
@@ -712,25 +697,9 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 		return;
 
 	// get positions
-	float Curvature = 0;
-	float Speed = 0;
 	const CTuningParams *pTuning = GameClient()->GetTuning(pCurrent->m_TuneZone);
-
-	if(pCurrent->m_Type == WEAPON_GRENADE)
-	{
-		Curvature = pTuning->m_GrenadeCurvature;
-		Speed = pTuning->m_GrenadeSpeed;
-	}
-	else if(pCurrent->m_Type == WEAPON_SHOTGUN)
-	{
-		Curvature = pTuning->m_ShotgunCurvature;
-		Speed = pTuning->m_ShotgunSpeed;
-	}
-	else if(pCurrent->m_Type == WEAPON_GUN)
-	{
-		Curvature = pTuning->m_GunCurvature;
-		Speed = pTuning->m_GunSpeed;
-	}
+	const float Curvature = pTuning->ProjectileCurvature(pCurrent->m_Type);
+	const float Speed = pTuning->ProjectileSpeed(pCurrent->m_Type);
 
 	float Pt = ((float)(PredictionTick - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
 	if(Pt < 0)

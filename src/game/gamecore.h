@@ -66,6 +66,8 @@ public:
 	bool Get(const char *pName, float *pValue) const;
 	static const char *Name(int Index) { return ms_apNames[Index]; }
 	float GetWeaponFireDelay(int Weapon) const;
+	float ProjectileCurvature(int Weapon) const;
+	float ProjectileSpeed(int Weapon) const;
 
 	static const CTuningParams DEFAULT;
 };
@@ -107,6 +109,8 @@ inline T SaturatedAdd(T Min, T Max, T Current, T Modifier)
 }
 
 float VelocityRamp(float Value, float Start, float Range, float Curvature);
+
+bool IsCharacterGrounded(CCollision *pCollision, vec2 Pos, float ProximityRadius);
 
 // hooking stuff
 enum
@@ -233,6 +237,9 @@ public:
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr);
 	void SetCoreWorld(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
 	void Reset();
+	void ReleaseHook();
+	void ResetHook();
+	void HandleJumpRules();
 	void TickDeferred();
 	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();

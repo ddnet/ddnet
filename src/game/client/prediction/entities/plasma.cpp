@@ -6,8 +6,7 @@
 #include <game/client/laser_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
-
-const float PLASMA_ACCEL = 1.1f;
+#include <game/physics/plasma.h>
 
 CPlasma::CPlasma(CGameWorld *pGameWorld, int Id, const CLaserData *pData) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PLASMA)
@@ -58,74 +57,11 @@ void CPlasma::Reset()
 
 void CPlasma::Tick()
 {
-	// A plasma bullet has only a limited lifetime
-	if(m_LifeTime == 0)
-	{
-		Reset();
-		return;
-	}
-	CCharacter *pTarget = GameWorld()->GetCharacterById(m_ForClientId);
-	// Without a target, a plasma bullet has no reason to live
-	if(!pTarget)
-	{
-		Reset();
-		return;
-	}
-	m_LifeTime--;
-	Move();
-	HitCharacter(pTarget);
-	// Plasma bullets may explode twice if they would hit both a player and an obstacle in the next move step
-	HitObstacle(pTarget);
+	CPlasmaPhysics<CPlasma, CCharacter>::Tick(this);
 }
 
-void CPlasma::Move()
+void CPlasma::Explode(CCharacter *pTarget)
 {
-	m_Pos += m_Core;
-	m_Core *= PLASMA_ACCEL;
-}
-
-bool CPlasma::HitCharacter(CCharacter *pTarget)
-{
-	vec2 IntersectPos;
-	CCharacter *pHitPlayer = GameWorld()->IntersectCharacter(
-		m_Pos, m_Pos + m_Core, 0.0f, IntersectPos, nullptr, m_ForClientId);
-	if(!pHitPlayer)
-	{
-		return false;
-	}
-
-	// Super player should not be able to stop the plasma bullets
-	if(pHitPlayer->Team() == pHitPlayer->TeamsCore()->TeamSuper())
-	{
-		return false;
-	}
-
-	m_Freeze ? pHitPlayer->Freeze() : pHitPlayer->Unfreeze();
-	if(m_Explosive)
-	{
-		// Plasma Turrets are very precise weapons only one tee gets speed from it,
-		// other tees near the explosion remain unaffected
-		GameWorld()->CreateExplosion(
-			m_Pos, m_ForClientId, WEAPON_GRENADE, true, pTarget->Team(), CClientMask().set(), m_ForClientId);
-	}
-	Reset();
-	return true;
-}
-
-bool CPlasma::HitObstacle(CCharacter *pTarget)
-{
-	// Check if the plasma bullet is stopped by a solid block or a laser stopper
-	int HasIntersection = Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, nullptr, nullptr);
-	if(HasIntersection)
-	{
-		if(m_Explosive)
-		{
-			// Even in the case of an explosion due to a collision with obstacles, only one player is affected
-			GameWorld()->CreateExplosion(
-				m_Pos, m_ForClientId, WEAPON_GRENADE, true, pTarget->Team(), CClientMask().set(), m_ForClientId);
-		}
-		Reset();
-		return true;
-	}
-	return false;
+	GameWorld()->CreateExplosion(
+		m_Pos, m_ForClientId, WEAPON_GRENADE, true, pTarget->Team(), CClientMask().set(), m_ForClientId);
 }

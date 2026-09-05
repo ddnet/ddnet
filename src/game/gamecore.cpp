@@ -67,6 +67,29 @@ float CTuningParams::GetWeaponFireDelay(int Weapon) const
 	}
 }
 
+float CTuningParams::ProjectileCurvature(int Weapon) const
+{
+	switch(Weapon)
+	{
+	case WEAPON_GRENADE: return m_GrenadeCurvature;
+	case WEAPON_SHOTGUN: return m_ShotgunCurvature;
+	case WEAPON_GUN: return m_GunCurvature;
+	// other weapon types have no projectile trajectory tuning
+	default: return 0.0f;
+	}
+}
+
+float CTuningParams::ProjectileSpeed(int Weapon) const
+{
+	switch(Weapon)
+	{
+	case WEAPON_GRENADE: return m_GrenadeSpeed;
+	case WEAPON_SHOTGUN: return m_ShotgunSpeed;
+	case WEAPON_GUN: return m_GunSpeed;
+	default: return 0.0f;
+	}
+}
+
 static_assert(std::numeric_limits<char>::is_signed, "char must be signed for StrToInts to work correctly");
 
 void StrToInts(int *pInts, size_t NumInts, const char *pStr)
@@ -190,6 +213,59 @@ void CCharacterCore::Reset()
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
+}
+
+bool IsCharacterGrounded(CCollision *pCollision, vec2 Pos, float ProximityRadius)
+{
+	if(pCollision->IsOnGround(Pos, ProximityRadius))
+		return true;
+
+	int MoveRestrictionsBelow = pCollision->GetMoveRestrictions(Pos + vec2(0, ProximityRadius / 2 + 4), 0.0f);
+	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
+}
+
+void CCharacterCore::ReleaseHook()
+{
+	SetHookedPlayer(-1);
+	m_HookState = HOOK_RETRACTED;
+	m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+}
+
+void CCharacterCore::ResetHook()
+{
+	ReleaseHook();
+	m_HookPos = m_Pos;
+}
+
+void CCharacterCore::HandleJumpRules()
+{
+	// following jump rules can be overridden by tiles, like Refill Jumps, Stopper and Wall Jump
+	if(m_Jumps == -1)
+	{
+		// The player has only one ground jump, so their feet are always dark
+		m_Jumped |= 2;
+	}
+	else if(m_Jumps == 0)
+	{
+		// The player has no jumps at all, so their feet are always dark
+		m_Jumped |= 2;
+	}
+	else if(m_Jumps == 1 && m_Jumped > 0)
+	{
+		// If the player has only one jump, each jump is the last one
+		m_Jumped |= 2;
+	}
+	else if(m_JumpedTotal < m_Jumps - 1 && m_Jumped > 1)
+	{
+		// The player has not yet used up all their jumps, so their feet remain light
+		m_Jumped = 1;
+	}
+
+	if((m_Super || m_EndlessJump) && m_Jumped > 1)
+	{
+		// Super players and players with infinite jumps always have light feet
+		m_Jumped = 1;
+	}
 }
 
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)

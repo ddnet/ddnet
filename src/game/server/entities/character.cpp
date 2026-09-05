@@ -18,6 +18,7 @@
 #include <generated/server_data.h>
 
 #include <game/mapitems.h>
+#include <game/physics/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
@@ -243,54 +244,12 @@ void CCharacter::SetDeepFrozen(bool Active)
 
 bool CCharacter::IsGrounded()
 {
-	if(Collision()->IsOnGround(m_Pos, GetProximityRadius()))
-		return true;
-
-	int MoveRestrictionsBelow = Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() / 2 + 4), 0.0f);
-	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
+	return IsCharacterGrounded(Collision(), m_Pos, GetProximityRadius());
 }
 
 void CCharacter::HandleJetpack()
 {
-	if(m_Core.m_ActiveWeapon < 0)
-		return;
-
-	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
-
-	bool FullAuto = false;
-	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
-		FullAuto = true;
-	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
-		FullAuto = true;
-
-	// check if we gonna fire
-	bool WillFire = false;
-	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
-		WillFire = true;
-
-	if(FullAuto && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
-		WillFire = true;
-
-	if(!WillFire)
-		return;
-
-	// check for ammo
-	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo || m_FreezeTime)
-	{
-		return;
-	}
-
-	switch(m_Core.m_ActiveWeapon)
-	{
-	case WEAPON_GUN:
-	{
-		if(m_Core.m_Jetpack)
-		{
-			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
-			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
-		}
-	}
-	}
+	CCharacterPhysics<CCharacter>::HandleJetpack(this);
 }
 
 void CCharacter::HandleNinja()
@@ -395,61 +354,12 @@ void CCharacter::HandleNinja()
 
 void CCharacter::DoWeaponSwitch()
 {
-	// make sure we can switch
-	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1)
-		return;
-	if(m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
-		return;
-
-	// switch Weapon
-	SetWeapon(m_QueuedWeapon);
+	CCharacterPhysics<CCharacter>::DoWeaponSwitch(this);
 }
 
 void CCharacter::HandleWeaponSwitch()
 {
-	int WantedWeapon = m_Core.m_ActiveWeapon;
-	if(m_QueuedWeapon != -1)
-		WantedWeapon = m_QueuedWeapon;
-
-	bool Anything = false;
-	for(int i = 0; i < NUM_WEAPONS - 1; ++i)
-		if(m_Core.m_aWeapons[i].m_Got)
-			Anything = true;
-	if(!Anything)
-		return;
-	// select Weapon
-	int Next = CountInput(m_LatestPrevInput.m_NextWeapon, m_LatestInput.m_NextWeapon).m_Presses;
-	int Prev = CountInput(m_LatestPrevInput.m_PrevWeapon, m_LatestInput.m_PrevWeapon).m_Presses;
-
-	if(Next < 128) // make sure we only try sane stuff
-	{
-		while(Next) // Next Weapon selection
-		{
-			WantedWeapon = (WantedWeapon + 1) % NUM_WEAPONS;
-			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
-				Next--;
-		}
-	}
-
-	if(Prev < 128) // make sure we only try sane stuff
-	{
-		while(Prev) // Prev Weapon selection
-		{
-			WantedWeapon = (WantedWeapon - 1) < 0 ? NUM_WEAPONS - 1 : WantedWeapon - 1;
-			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
-				Prev--;
-		}
-	}
-
-	// Direct Weapon selection
-	if(m_LatestInput.m_WantedWeapon)
-		WantedWeapon = m_Input.m_WantedWeapon - 1;
-
-	// check for insane values
-	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_Core.m_aWeapons[WantedWeapon].m_Got)
-		m_QueuedWeapon = WantedWeapon;
-
-	DoWeaponSwitch();
+	CCharacterPhysics<CCharacter>::HandleWeaponSwitch(this);
 }
 
 void CCharacter::FireWeapon()
@@ -657,22 +567,7 @@ void CCharacter::FireWeapon()
 
 void CCharacter::HandleWeapons()
 {
-	//ninja
-	HandleNinja();
-	HandleJetpack();
-
-	if(m_PainSoundTimer > 0)
-		m_PainSoundTimer--;
-
-	// check reload timer
-	if(m_ReloadTimer)
-	{
-		m_ReloadTimer--;
-		return;
-	}
-
-	// fire Weapon, if wanted
-	FireWeapon();
+	CCharacterPhysics<CCharacter>::HandleWeapons(this);
 }
 
 void CCharacter::GiveNinja()
@@ -765,15 +660,12 @@ void CCharacter::OnDirectInput(const CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::ReleaseHook()
 {
-	m_Core.SetHookedPlayer(-1);
-	m_Core.m_HookState = HOOK_RETRACTED;
-	m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+	m_Core.ReleaseHook();
 }
 
 void CCharacter::ResetHook()
 {
-	ReleaseHook();
-	m_Core.m_HookPos = m_Core.m_Pos;
+	m_Core.ResetHook();
 }
 
 void CCharacter::ResetInput()
@@ -1511,87 +1403,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 	if(Index < 0)
 		return;
 
-	// handle speedup tiles
-	if(Collision()->IsSpeedup(Index))
-	{
-		vec2 Direction, TempVel = m_Core.m_Vel;
-		int Force, Type, MaxSpeed = 0;
-		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed, &Type);
-
-		if(Type == TILE_SPEED_BOOST_OLD)
-		{
-			float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
-			if(Force == 255 && MaxSpeed)
-			{
-				m_Core.m_Vel = Direction * (MaxSpeed / 5);
-			}
-			else
-			{
-				if(MaxSpeed > 0 && MaxSpeed < 5)
-					MaxSpeed = 5;
-				if(MaxSpeed > 0)
-				{
-					if(Direction.x > 0.0000001f)
-						SpeederAngle = -std::atan(Direction.y / Direction.x);
-					else if(Direction.x < 0.0000001f)
-						SpeederAngle = std::atan(Direction.y / Direction.x) + 2.0f * std::asin(1.0f);
-					else if(Direction.y > 0.0000001f)
-						SpeederAngle = std::asin(1.0f);
-					else
-						SpeederAngle = std::asin(-1.0f);
-
-					if(SpeederAngle < 0)
-						SpeederAngle = 4.0f * std::asin(1.0f) + SpeederAngle;
-
-					if(TempVel.x > 0.0000001f)
-						TeeAngle = -std::atan(TempVel.y / TempVel.x);
-					else if(TempVel.x < 0.0000001f)
-						TeeAngle = std::atan(TempVel.y / TempVel.x) + 2.0f * std::asin(1.0f);
-					else if(TempVel.y > 0.0000001f)
-						TeeAngle = std::asin(1.0f);
-					else
-						TeeAngle = std::asin(-1.0f);
-
-					if(TeeAngle < 0)
-						TeeAngle = 4.0f * std::asin(1.0f) + TeeAngle;
-
-					TeeSpeed = std::sqrt(std::pow(TempVel.x, 2) + std::pow(TempVel.y, 2));
-
-					DiffAngle = SpeederAngle - TeeAngle;
-					SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
-					if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
-						TempVel += Direction * Force;
-					else if(absolute((int)SpeedLeft) > Force)
-						TempVel += Direction * -Force;
-					else
-						TempVel += Direction * SpeedLeft;
-				}
-				else
-					TempVel += Direction * Force;
-
-				m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
-			}
-		}
-		else if(Type == TILE_SPEED_BOOST)
-		{
-			constexpr float MaxSpeedScale = 5.0f;
-			if(MaxSpeed == 0)
-			{
-				float MaxRampSpeed = GetTuning(m_TuneZone)->m_VelrampRange / (50 * log(std::max((float)GetTuning(m_TuneZone)->m_VelrampCurvature, 1.01f)));
-				MaxSpeed = std::max(MaxRampSpeed, GetTuning(m_TuneZone)->m_VelrampStart / 50) * MaxSpeedScale;
-			}
-
-			// (signed) length of projection
-			float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
-			float TempMaxSpeed = MaxSpeed / MaxSpeedScale;
-			if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
-				TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
-			else
-				TempVel += Direction * Force;
-
-			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
-		}
-	}
+	CCharacterPhysics<CCharacter>::HandleSpeedupTiles(this, Index);
 }
 
 bool CCharacter::IsSwitchActiveCb(unsigned char Number, void *pUser)
@@ -1657,302 +1469,13 @@ void CCharacter::HandleTiles(int Index)
 	if(!m_Alive)
 		return;
 
-	// freeze
-	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
-	{
-		Freeze();
-	}
-	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_Core.m_DeepFrozen)
-		Unfreeze();
+	CCharacterPhysics<CCharacter>::HandleTileFlags(this);
+	CCharacterPhysics<CCharacter>::HandleSwitchTiles(this, MapIndex);
 
-	// deep freeze
-	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
-		m_Core.m_DeepFrozen = true;
-	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && m_Core.m_DeepFrozen)
-		m_Core.m_DeepFrozen = false;
-
-	// live freeze
-	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
-	{
-		m_Core.m_LiveFrozen = true;
-	}
-	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
-	{
-		m_Core.m_LiveFrozen = false;
-	}
-
-	// endless hook
-	if(((m_TileIndex == TILE_EHOOK_ENABLE) || (m_TileFIndex == TILE_EHOOK_ENABLE)))
-	{
-		SetEndlessHook(true);
-	}
-	else if(((m_TileIndex == TILE_EHOOK_DISABLE) || (m_TileFIndex == TILE_EHOOK_DISABLE)))
-	{
-		SetEndlessHook(false);
-	}
-
-	// hit others
-	if(((m_TileIndex == TILE_HIT_DISABLE) || (m_TileFIndex == TILE_HIT_DISABLE)) && (!m_Core.m_HammerHitDisabled || !m_Core.m_ShotgunHitDisabled || !m_Core.m_GrenadeHitDisabled || !m_Core.m_LaserHitDisabled))
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hit others");
-		m_Core.m_HammerHitDisabled = true;
-		m_Core.m_ShotgunHitDisabled = true;
-		m_Core.m_GrenadeHitDisabled = true;
-		m_Core.m_LaserHitDisabled = true;
-	}
-	else if(((m_TileIndex == TILE_HIT_ENABLE) || (m_TileFIndex == TILE_HIT_ENABLE)) && (m_Core.m_HammerHitDisabled || m_Core.m_ShotgunHitDisabled || m_Core.m_GrenadeHitDisabled || m_Core.m_LaserHitDisabled))
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hit others");
-		m_Core.m_ShotgunHitDisabled = false;
-		m_Core.m_GrenadeHitDisabled = false;
-		m_Core.m_HammerHitDisabled = false;
-		m_Core.m_LaserHitDisabled = false;
-	}
-
-	// collide with others
-	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && !m_Core.m_CollisionDisabled)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't collide with others");
-		m_Core.m_CollisionDisabled = true;
-	}
-	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_CollisionDisabled)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can collide with others");
-		m_Core.m_CollisionDisabled = false;
-	}
-
-	// hook others
-	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && !m_Core.m_HookHitDisabled)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hook others");
-		m_Core.m_HookHitDisabled = true;
-	}
-	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_HookHitDisabled)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hook others");
-		m_Core.m_HookHitDisabled = false;
-	}
-
-	// unlimited air jumps
-	if(((m_TileIndex == TILE_UNLIMITED_JUMPS_ENABLE) || (m_TileFIndex == TILE_UNLIMITED_JUMPS_ENABLE)) && !m_Core.m_EndlessJump)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You have unlimited air jumps");
-		m_Core.m_EndlessJump = true;
-	}
-	else if(((m_TileIndex == TILE_UNLIMITED_JUMPS_DISABLE) || (m_TileFIndex == TILE_UNLIMITED_JUMPS_DISABLE)) && m_Core.m_EndlessJump)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You don't have unlimited air jumps");
-		m_Core.m_EndlessJump = false;
-	}
-
-	// walljump
-	if((m_TileIndex == TILE_WALLJUMP) || (m_TileFIndex == TILE_WALLJUMP))
-	{
-		if(m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_LeftWall)
-		{
-			m_Core.m_LeftWall = false;
-			m_Core.m_JumpedTotal = m_Core.m_Jumps >= 2 ? m_Core.m_Jumps - 2 : 0;
-			m_Core.m_Jumped = 1;
-		}
-	}
-
-	// jetpack gun
-	if(((m_TileIndex == TILE_JETPACK_ENABLE) || (m_TileFIndex == TILE_JETPACK_ENABLE)) && !m_Core.m_Jetpack)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You have a jetpack gun");
-		m_Core.m_Jetpack = true;
-	}
-	else if(((m_TileIndex == TILE_JETPACK_DISABLE) || (m_TileFIndex == TILE_JETPACK_DISABLE)) && m_Core.m_Jetpack)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You lost your jetpack gun");
-		m_Core.m_Jetpack = false;
-	}
-
-	// refill jumps
-	if(((m_TileIndex == TILE_REFILL_JUMPS) || (m_TileFIndex == TILE_REFILL_JUMPS)) && !m_LastRefillJumps)
-	{
-		m_Core.m_JumpedTotal = 0;
-		m_Core.m_Jumped = 0;
-		m_LastRefillJumps = true;
-	}
-	if((m_TileIndex != TILE_REFILL_JUMPS) && (m_TileFIndex != TILE_REFILL_JUMPS))
-	{
-		m_LastRefillJumps = false;
-	}
-
-	// Teleport gun
-	if(((m_TileIndex == TILE_TELE_GUN_ENABLE) || (m_TileFIndex == TILE_TELE_GUN_ENABLE)) && !m_Core.m_HasTelegunGun)
-	{
-		m_Core.m_HasTelegunGun = true;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport gun enabled");
-	}
-	else if(((m_TileIndex == TILE_TELE_GUN_DISABLE) || (m_TileFIndex == TILE_TELE_GUN_DISABLE)) && m_Core.m_HasTelegunGun)
-	{
-		m_Core.m_HasTelegunGun = false;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport gun disabled");
-	}
-
-	if(((m_TileIndex == TILE_TELE_GRENADE_ENABLE) || (m_TileFIndex == TILE_TELE_GRENADE_ENABLE)) && !m_Core.m_HasTelegunGrenade)
-	{
-		m_Core.m_HasTelegunGrenade = true;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport grenade enabled");
-	}
-	else if(((m_TileIndex == TILE_TELE_GRENADE_DISABLE) || (m_TileFIndex == TILE_TELE_GRENADE_DISABLE)) && m_Core.m_HasTelegunGrenade)
-	{
-		m_Core.m_HasTelegunGrenade = false;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport grenade disabled");
-	}
-
-	if(((m_TileIndex == TILE_TELE_LASER_ENABLE) || (m_TileFIndex == TILE_TELE_LASER_ENABLE)) && !m_Core.m_HasTelegunLaser)
-	{
-		m_Core.m_HasTelegunLaser = true;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport laser enabled");
-	}
-	else if(((m_TileIndex == TILE_TELE_LASER_DISABLE) || (m_TileFIndex == TILE_TELE_LASER_DISABLE)) && m_Core.m_HasTelegunLaser)
-	{
-		m_Core.m_HasTelegunLaser = false;
-
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport laser disabled");
-	}
-
-	// stopper
-	if(m_Core.m_Vel.y > 0 && (m_MoveRestrictions & CANTMOVE_DOWN))
-	{
-		m_Core.m_Jumped = 0;
-		m_Core.m_JumpedTotal = 0;
-	}
-	ApplyMoveRestrictions();
-
-	// handle switch tiles
 	const int SwitchType = Collision()->GetSwitchType(MapIndex);
 	const int SwitchNumber = Collision()->GetSwitchNumber(MapIndex);
 	const int SwitchDelay = Collision()->GetSwitchDelay(MapIndex);
-	if(SwitchType == TILE_SWITCHOPEN && Team() != TEAM_SUPER && SwitchNumber > 0)
-	{
-		Switchers()[SwitchNumber].m_aStatus[Team()] = true;
-		Switchers()[SwitchNumber].m_aEndTick[Team()] = 0;
-		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHOPEN;
-		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = Server()->Tick();
-	}
-	else if(SwitchType == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && SwitchNumber > 0)
-	{
-		Switchers()[SwitchNumber].m_aStatus[Team()] = true;
-		Switchers()[SwitchNumber].m_aEndTick[Team()] = Server()->Tick() + 1 + SwitchDelay * Server()->TickSpeed();
-		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHTIMEDOPEN;
-		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = Server()->Tick();
-	}
-	else if(SwitchType == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && SwitchNumber > 0)
-	{
-		Switchers()[SwitchNumber].m_aStatus[Team()] = false;
-		Switchers()[SwitchNumber].m_aEndTick[Team()] = Server()->Tick() + 1 + SwitchDelay * Server()->TickSpeed();
-		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHTIMEDCLOSE;
-		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = Server()->Tick();
-	}
-	else if(SwitchType == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && SwitchNumber > 0)
-	{
-		Switchers()[SwitchNumber].m_aStatus[Team()] = false;
-		Switchers()[SwitchNumber].m_aEndTick[Team()] = 0;
-		Switchers()[SwitchNumber].m_aType[Team()] = TILE_SWITCHCLOSE;
-		Switchers()[SwitchNumber].m_aLastUpdateTick[Team()] = Server()->Tick();
-	}
-	else if(SwitchType == TILE_FREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-		{
-			Freeze(SwitchDelay);
-		}
-	}
-	else if(SwitchType == TILE_DFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-			m_Core.m_DeepFrozen = true;
-	}
-	else if(SwitchType == TILE_DUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-			m_Core.m_DeepFrozen = false;
-	}
-	else if(SwitchType == TILE_LFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-		{
-			m_Core.m_LiveFrozen = true;
-		}
-	}
-	else if(SwitchType == TILE_LUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
-	{
-		if(SwitchNumber == 0 || Switchers()[SwitchNumber].m_aStatus[Team()])
-		{
-			m_Core.m_LiveFrozen = false;
-		}
-	}
-	else if(SwitchType == TILE_HIT_ENABLE && m_Core.m_HammerHitDisabled && SwitchDelay == WEAPON_HAMMER)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hammer hit others");
-		m_Core.m_HammerHitDisabled = false;
-	}
-	else if(SwitchType == TILE_HIT_DISABLE && !(m_Core.m_HammerHitDisabled) && SwitchDelay == WEAPON_HAMMER)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hammer hit others");
-		m_Core.m_HammerHitDisabled = true;
-	}
-	else if(SwitchType == TILE_HIT_ENABLE && m_Core.m_ShotgunHitDisabled && SwitchDelay == WEAPON_SHOTGUN)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with shotgun");
-		m_Core.m_ShotgunHitDisabled = false;
-	}
-	else if(SwitchType == TILE_HIT_DISABLE && !(m_Core.m_ShotgunHitDisabled) && SwitchDelay == WEAPON_SHOTGUN)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with shotgun");
-		m_Core.m_ShotgunHitDisabled = true;
-	}
-	else if(SwitchType == TILE_HIT_ENABLE && m_Core.m_GrenadeHitDisabled && SwitchDelay == WEAPON_GRENADE)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with grenade");
-		m_Core.m_GrenadeHitDisabled = false;
-	}
-	else if(SwitchType == TILE_HIT_DISABLE && !(m_Core.m_GrenadeHitDisabled) && SwitchDelay == WEAPON_GRENADE)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with grenade");
-		m_Core.m_GrenadeHitDisabled = true;
-	}
-	else if(SwitchType == TILE_HIT_ENABLE && m_Core.m_LaserHitDisabled && SwitchDelay == WEAPON_LASER)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with laser");
-		m_Core.m_LaserHitDisabled = false;
-	}
-	else if(SwitchType == TILE_HIT_DISABLE && !(m_Core.m_LaserHitDisabled) && SwitchDelay == WEAPON_LASER)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with laser");
-		m_Core.m_LaserHitDisabled = true;
-	}
-	else if(SwitchType == TILE_JUMP)
-	{
-		int NewJumps = SwitchDelay;
-		if(NewJumps == 255)
-		{
-			NewJumps = -1;
-		}
-
-		if(NewJumps != m_Core.m_Jumps)
-		{
-			char aBuf[256];
-			if(NewJumps == -1)
-				str_copy(aBuf, "You only have your ground jump now");
-			else if(NewJumps == 1)
-				str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
-			else
-				str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
-			GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
-			m_Core.m_Jumps = NewJumps;
-		}
-	}
-	else if(SwitchType == TILE_ADD_TIME && !m_LastPenalty)
+	if(SwitchType == TILE_ADD_TIME && !m_LastPenalty)
 	{
 		const int Minutes = SwitchDelay;
 		const int Seconds = SwitchNumber;
@@ -2183,6 +1706,33 @@ void CCharacter::SetTeams(CGameTeams *pTeams)
 	m_Core.SetTeamsCore(&m_pTeams->m_Core);
 }
 
+CTeamsCore *CCharacter::TeamsCore()
+{
+	return &m_pTeams->m_Core;
+}
+
+int CCharacter::GetCid() const
+{
+	return m_pPlayer->GetCid();
+}
+
+void CCharacter::SendTileChat(const char *pMessage)
+{
+	GameServer()->SendChatTarget(GetPlayer()->GetCid(), pMessage);
+}
+
+void CCharacter::SendJumpsChat(int NewJumps)
+{
+	char aBuf[256];
+	if(NewJumps == -1)
+		str_copy(aBuf, "You only have your ground jump now");
+	else if(NewJumps == 1)
+		str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
+	else
+		str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
+	GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
+}
+
 bool CCharacter::TrySetRescue(int RescueMode)
 {
 	bool Set = false;
@@ -2254,29 +1804,7 @@ void CCharacter::DDRaceTick()
 
 	HandleTuneLayer(); // need this before coretick
 
-	// check if the tee is in any type of freeze
-	int Index = Collision()->GetPureMapIndex(m_Pos);
-	const int aTiles[] = {
-		Collision()->GetTileIndex(Index),
-		Collision()->GetFrontTileIndex(Index),
-		Collision()->GetSwitchType(Index)};
-	m_Core.m_IsInFreeze = false;
-	for(const int Tile : aTiles)
-	{
-		if(Tile == TILE_FREEZE || Tile == TILE_DFREEZE || Tile == TILE_LFREEZE || Tile == TILE_DEATH)
-		{
-			m_Core.m_IsInFreeze = true;
-			break;
-		}
-	}
-	m_Core.m_IsInFreeze |= (Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-				Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
-				Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-				Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
-				Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-				Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
-				Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-				Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH);
+	CCharacterPhysics<CCharacter>::UpdateIsInFreeze(this);
 
 	// look for save position for rescue feature
 	// always update auto rescue
@@ -2297,33 +1825,7 @@ void CCharacter::DDRacePostCoreTick()
 	if(m_Core.m_DeepFrozen && !m_Core.m_Super && !m_Core.m_Invincible)
 		Freeze();
 
-	// following jump rules can be overridden by tiles, like Refill Jumps, Stopper and Wall Jump
-	if(m_Core.m_Jumps == -1)
-	{
-		// The player has only one ground jump, so their feet are always dark
-		m_Core.m_Jumped |= 2;
-	}
-	else if(m_Core.m_Jumps == 0)
-	{
-		// The player has no jumps at all, so their feet are always dark
-		m_Core.m_Jumped |= 2;
-	}
-	else if(m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
-	{
-		// If the player has only one jump, each jump is the last one
-		m_Core.m_Jumped |= 2;
-	}
-	else if(m_Core.m_JumpedTotal < m_Core.m_Jumps - 1 && m_Core.m_Jumped > 1)
-	{
-		// The player has not yet used up all their jumps, so their feet remain light
-		m_Core.m_Jumped = 1;
-	}
-
-	if((m_Core.m_Super || m_Core.m_EndlessJump) && m_Core.m_Jumped > 1)
-	{
-		// Super players and players with infinite jumps always have light feet
-		m_Core.m_Jumped = 1;
-	}
+	m_Core.HandleJumpRules();
 
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
 	HandleSkippableTiles(CurrentIndex);
@@ -2406,34 +1908,12 @@ void CCharacter::ResetJumps()
 
 void CCharacter::GiveWeapon(int Weapon, bool Remove)
 {
-	if(Weapon == WEAPON_NINJA)
-	{
-		if(Remove)
-			RemoveNinja();
-		else
-			GiveNinja();
-		return;
-	}
-
-	if(Remove)
-	{
-		if(GetActiveWeapon() == Weapon)
-			SetActiveWeapon(WEAPON_GUN);
-	}
-	else
-	{
-		m_Core.m_aWeapons[Weapon].m_Ammo = -1;
-	}
-
-	m_Core.m_aWeapons[Weapon].m_Got = !Remove;
+	CCharacterPhysics<CCharacter>::GiveWeapon(this, Weapon, Remove);
 }
 
 void CCharacter::GiveAllWeapons()
 {
-	for(int i = WEAPON_GUN; i < NUM_WEAPONS - 1; i++)
-	{
-		GiveWeapon(i);
-	}
+	CCharacterPhysics<CCharacter>::GiveAllWeapons(this);
 }
 
 void CCharacter::ResetPickups()

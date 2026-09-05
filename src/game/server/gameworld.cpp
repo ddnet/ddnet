@@ -295,6 +295,21 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
 }
 
+CCharacter *CGameWorld::GetCharacterById(int ClientId)
+{
+	return GameServer()->GetPlayerChar(ClientId);
+}
+
+int CGameWorld::GameTick()
+{
+	return Server()->Tick();
+}
+
+int CGameWorld::GameTickSpeed()
+{
+	return Server()->TickSpeed();
+}
+
 CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
 {
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;

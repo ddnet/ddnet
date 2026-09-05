@@ -6,6 +6,7 @@
 #include "save.h"
 
 #include <game/gamecore.h>
+#include <game/physics/world_config.h>
 
 #include <vector>
 
@@ -51,6 +52,13 @@ public:
 	bool m_ResetRequested;
 	bool m_Paused;
 	CWorldCore m_Core;
+	// The server always runs the full simulation, so this keeps the
+	// defaults. It exists so physics code shared with the client
+	// prediction can check the same config on both sides.
+	const CWorldConfig m_WorldConfig;
+
+	int GameTick();
+	int GameTickSpeed();
 
 	CGameWorld();
 	~CGameWorld();
@@ -93,6 +101,15 @@ public:
 	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
 	 */
 	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
+
+	/**
+	 * Finds the alive character of the player with the given client id.
+	 *
+	 * @param ClientId The client id to look up.
+	 *
+	 * @return Pointer to the character or `nullptr` if there is none.
+	 */
+	CCharacter *GetCharacterById(int ClientId);
 
 	/**
 	 * Finds the CEntity that intersects the line.

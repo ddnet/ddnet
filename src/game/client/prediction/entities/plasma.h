@@ -6,8 +6,13 @@
 
 class CLaserData;
 
+template<typename TPlasma, typename TCharacter>
+class CPlasmaPhysics;
+
 class CPlasma : public CEntity
 {
+	friend class CPlasmaPhysics<CPlasma, CCharacter>;
+
 	vec2 m_Core;
 	bool m_Freeze;
 	bool m_Explosive;
@@ -15,9 +20,7 @@ class CPlasma : public CEntity
 	int m_EvalTick;
 	int m_LifeTime;
 
-	void Move();
-	bool HitCharacter(CCharacter *pTarget);
-	bool HitObstacle(CCharacter *pTarget);
+	void Explode(CCharacter *pTarget);
 
 public:
 	CPlasma(CGameWorld *pGameWorld, int Id, const CLaserData *pData);

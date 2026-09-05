@@ -10,6 +10,7 @@
 #include <generated/protocol.h>
 
 #include <game/mapitems.h>
+#include <game/physics/laser.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/ddnet.h>
 #include <game/server/player.h>
@@ -44,7 +45,6 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 
 bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
-	static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
 	SyncInteractState();
 	vec2 At;
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
@@ -63,35 +63,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	m_Energy = -1;
 	if(m_Type == WEAPON_SHOTGUN)
 	{
-		float Strength = TuningList()[m_TuneZone].m_ShotgunStrength;
-		const vec2 &HitPos = pHit->Core()->m_Pos;
-		if(!g_Config.m_SvOldLaser)
-		{
-			if(m_PrevPos != HitPos)
-			{
-				pHit->AddVelocity(normalize(m_PrevPos - HitPos) * Strength);
-			}
-			else
-			{
-				pHit->SetRawVelocity(StackedLaserShotgunBugSpeed);
-			}
-		}
-		else if(g_Config.m_SvOldLaser && pOwnerChar)
-		{
-			if(pOwnerChar->Core()->m_Pos != HitPos)
-			{
-				pHit->AddVelocity(normalize(pOwnerChar->Core()->m_Pos - HitPos) * Strength);
-			}
-			else
-			{
-				pHit->SetRawVelocity(StackedLaserShotgunBugSpeed);
-			}
-		}
-		else
-		{
-			// Re-apply move restrictions as a part of 'shotgun bug' reproduction
-			pHit->ApplyMoveRestrictions();
-		}
+		CLaserPhysics<CLaser, CCharacter>::ShotgunKnockback(this, pHit, pOwnerChar);
 	}
 	else if(m_Type == WEAPON_LASER)
 	{
@@ -131,38 +103,7 @@ void CLaser::DoBounce()
 	{
 		if(!HitCharacter(m_Pos, To))
 		{
-			// intersected
-			m_From = m_Pos;
-			m_Pos = To;
-
-			vec2 TempPos = m_Pos;
-			vec2 TempDir = m_Dir * 4.0f;
-
-			int f = 0;
-			if(Res == -1)
-			{
-				f = GameServer()->Collision()->GetTile(round_to_int(Coltile.x), round_to_int(Coltile.y));
-				GameServer()->Collision()->SetCollisionAt(round_to_int(Coltile.x), round_to_int(Coltile.y), TILE_SOLID);
-			}
-			GameServer()->Collision()->MovePoint(&TempPos, &TempDir, 1.0f, nullptr);
-			if(Res == -1)
-			{
-				GameServer()->Collision()->SetCollisionAt(round_to_int(Coltile.x), round_to_int(Coltile.y), f);
-			}
-			m_Pos = TempPos;
-			m_Dir = normalize(TempDir);
-
-			const float Distance = distance(m_From, m_Pos);
-			// Prevent infinite bounces
-			if(Distance == 0.0f && m_ZeroEnergyBounceInLastTick)
-			{
-				m_Energy = -1;
-			}
-			else
-			{
-				m_Energy -= Distance + GameServer()->TuningList()[m_TuneZone].m_LaserBounceCost;
-			}
-			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
+			CLaserPhysics<CLaser, CCharacter>::Bounce(this, Res, Coltile, To);
 
 			if(Res == TILE_TELEINWEAPON && !GameServer()->Collision()->TeleOuts(z - 1).empty())
 			{
@@ -299,6 +240,11 @@ void CLaser::Snap(int SnappingClient)
 void CLaser::SwapClients(int Client1, int Client2)
 {
 	m_Owner = m_Owner == Client1 ? Client2 : (m_Owner == Client2 ? Client1 : m_Owner);
+}
+
+bool CLaser::OldLaser()
+{
+	return g_Config.m_SvOldLaser;
 }
 
 void CLaser::SyncInteractState()

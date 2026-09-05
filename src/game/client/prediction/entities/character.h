@@ -9,6 +9,9 @@
 #include <game/gamecore.h>
 #include <game/race_state.h>
 
+template<typename TCharacter>
+class CCharacterPhysics;
+
 enum
 {
 	FAKETUNE_FREEZE = 1 << 0,
@@ -23,6 +26,7 @@ enum
 class CCharacter : public CEntity
 {
 	friend class CGameWorld;
+	friend class CCharacterPhysics<CCharacter>;
 
 public:
 	~CCharacter() override;
@@ -63,6 +67,9 @@ public:
 	void ApplyMoveRestrictions();
 
 	bool m_IsLocal;
+
+	// The prediction only simulates alive characters
+	bool IsAlive() const { return true; }
 
 	CTeamsCore *TeamsCore();
 	bool Freeze(int Seconds);
@@ -187,6 +194,11 @@ private:
 	int m_LastTuneZoneTick;
 
 	bool m_Interfering;
+
+	CTuningParams *CurrentTuning() { return GetTuning(GetOverriddenTuneZone()); }
+	// Tile chat messages only exist on the server
+	void SendTileChat(const char *pMessage) {}
+	void SendJumpsChat(int NewJumps) {}
 };
 
 #endif
