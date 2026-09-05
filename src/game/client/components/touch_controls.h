@@ -325,6 +325,18 @@ public:
 		void OnDeactivate(bool ByFinger) override;
 	};
 
+	class CScoreboardTouchButtonBehavior : public CPredefinedTouchButtonBehavior
+	{
+	public:
+		static constexpr const char *const BEHAVIOR_ID = "scoreboard";
+
+		CScoreboardTouchButtonBehavior() :
+			CPredefinedTouchButtonBehavior(BEHAVIOR_ID) {}
+
+		CButtonLabel GetLabel() const override;
+		void OnDeactivate(bool ByFinger) override;
+	};
+
 	class CSwapActionTouchButtonBehavior : public CPredefinedTouchButtonBehavior
 	{
 	public:

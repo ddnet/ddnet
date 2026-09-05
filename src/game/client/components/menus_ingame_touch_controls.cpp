@@ -37,6 +37,7 @@ const CMenusIngameTouchControls::CBehaviorFactoryEditor CMenusIngameTouchControl
 	{CTouchControls::CExtraMenuTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CTouchControls::CExtraMenuTouchButtonBehavior>(0); }},
 	{CTouchControls::CEmoticonTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CTouchControls::CEmoticonTouchButtonBehavior>(); }},
 	{CTouchControls::CSpectateTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CTouchControls::CSpectateTouchButtonBehavior>(); }},
+	{CTouchControls::CScoreboardTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CTouchControls::CScoreboardTouchButtonBehavior>(); }},
 	{CTouchControls::CSwapActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CTouchControls::CSwapActionTouchButtonBehavior>(); }},
 	{CTouchControls::CUseActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CTouchControls::CUseActionTouchButtonBehavior>(); }},
 	{CTouchControls::CJoystickActionTouchButtonBehavior::BEHAVIOR_ID, []() { return std::make_unique<CTouchControls::CJoystickActionTouchButtonBehavior>(); }},
@@ -1547,18 +1548,19 @@ const char **CMenusIngameTouchControls::VisibilityNames() const
 
 const char **CMenusIngameTouchControls::PredefinedNames() const
 {
-	static const char *s_apPredefined[11];
+	static const char *s_apPredefined[12];
 	s_apPredefined[0] = Localize("Ingame Menu", "Predefined touch button behaviors");
 	s_apPredefined[1] = Localize("Extra Menu", "Predefined touch button behaviors");
 	s_apPredefined[2] = Localize("Emoticon", "Predefined touch button behaviors");
 	s_apPredefined[3] = Localize("Spectate", "Predefined touch button behaviors");
-	s_apPredefined[4] = Localize("Swap Action", "Predefined touch button behaviors");
-	s_apPredefined[5] = Localize("Use Action", "Predefined touch button behaviors");
-	s_apPredefined[6] = Localize("Joystick Action", "Predefined touch button behaviors");
-	s_apPredefined[7] = Localize("Joystick Aim", "Predefined touch button behaviors");
-	s_apPredefined[8] = Localize("Joystick Relative Aim", "Predefined touch button behaviors");
-	s_apPredefined[9] = Localize("Joystick Fire", "Predefined touch button behaviors");
-	s_apPredefined[10] = Localize("Joystick Hook", "Predefined touch button behaviors");
+	s_apPredefined[4] = Localize("Scoreboard", "Predefined touch button behaviors");
+	s_apPredefined[5] = Localize("Swap Action", "Predefined touch button behaviors");
+	s_apPredefined[6] = Localize("Use Action", "Predefined touch button behaviors");
+	s_apPredefined[7] = Localize("Joystick Action", "Predefined touch button behaviors");
+	s_apPredefined[8] = Localize("Joystick Aim", "Predefined touch button behaviors");
+	s_apPredefined[9] = Localize("Joystick Relative Aim", "Predefined touch button behaviors");
+	s_apPredefined[10] = Localize("Joystick Fire", "Predefined touch button behaviors");
+	s_apPredefined[11] = Localize("Joystick Hook", "Predefined touch button behaviors");
 	static_assert(std::size(s_apPredefined) == std::size(BEHAVIOR_FACTORIES_EDITOR), "Insufficient predefined names");
 	return s_apPredefined;
 }
@@ -1583,6 +1585,7 @@ const char *CMenusIngameTouchControls::HelpMessageForPredefinedType(EPredefinedT
 	case EPredefinedType::EXTRA_MENU: return Localize("The extra menu button which toggles visibility of buttons with \"Extra Menu\" visibilities. Also opens the ingame menu on long press."); break;
 	case EPredefinedType::EMOTICON: return Localize("Opens the emoticon selector (this does not work with binds)."); break;
 	case EPredefinedType::SPECTATE: return Localize("Opens the spectator menu (this does not work with binds)."); break;
+	case EPredefinedType::SCOREBOARD: return Localize("Opens the scoreboard with the cursor unlocked (this does not work with binds)."); break;
 	case EPredefinedType::SWAP_ACTION: return Localize("Swaps the active action (fire and hook) for direct touch input and virtual joysticks."); break;
 	case EPredefinedType::USE_ACTION: return Localize("Uses the active action with the current aiming position."); break;
 	case EPredefinedType::JOYSTICK_ACTION: return Localize("Virtual joystick which uses the active action."); break;
@@ -1592,7 +1595,7 @@ const char *CMenusIngameTouchControls::HelpMessageForPredefinedType(EPredefinedT
 	case EPredefinedType::JOYSTICK_HOOK: return Localize("Virtual joystick which always uses hook."); break;
 	default: dbg_assert_failed("Unknown behavior %d", (int)m_PredefinedBehaviorType);
 	}
-	static_assert((int)EPredefinedType::NUM_PREDEFINEDTYPES == 11, "Insufficient help messages");
+	static_assert((int)EPredefinedType::NUM_PREDEFINEDTYPES == 12, "Insufficient help messages");
 }
 
 const char *CMenusIngameTouchControls::HelpMessageForVisibilityType(CTouchControls::EButtonVisibility Type) const

@@ -41,6 +41,7 @@ class CScoreboard : public CComponent
 
 	std::optional<vec2> m_LastMousePos;
 	bool m_MouseUnlocked = false;
+	CUi::CTouchState m_TouchState;
 
 	void SetUiMousePos(vec2 Pos);
 	void LockMouse();
@@ -52,6 +53,7 @@ class CScoreboard : public CComponent
 		CButtonContainer m_FriendAction;
 		CButtonContainer m_MuteAction;
 		CButtonContainer m_EmoticonAction;
+		CButtonContainer m_BlockAction;
 
 		CButtonContainer m_SpectateButton;
 
@@ -111,6 +113,7 @@ public:
 	bool OnInput(const IInput::CEvent &Event) override;
 
 	bool IsActive() const;
+	bool IsMouseUnlocked() const { return m_MouseUnlocked; }
 };
 
 #endif
