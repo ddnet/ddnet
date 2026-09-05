@@ -1549,13 +1549,15 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		SetActiveWeapon(pChar->m_Weapon);
 	}
 
-	// reset all input except direction and hook for non-local players (as in vanilla prediction)
+	// reset all input except direction, hook, jump for non-local players (as in vanilla prediction)
 	if(!IsLocal)
 	{
 		mem_zero(&m_Input, sizeof(m_Input));
 		mem_zero(&m_SavedInput, sizeof(m_SavedInput));
 		m_Input.m_Direction = m_SavedInput.m_Direction = m_Core.m_Direction;
 		m_Input.m_Hook = m_SavedInput.m_Hook = (m_Core.m_HookState != HOOK_IDLE);
+		// jump key being held can't be reset since being set again on the next tick would count as an extra jump that never happened
+		m_Input.m_Jump = m_SavedInput.m_Jump = (m_Core.m_Jumped & 1) != 0;
 
 		if(pExtended && pExtended->m_TargetX != 0 && pExtended->m_TargetY != 0)
 		{
