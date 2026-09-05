@@ -122,6 +122,14 @@ function make_cmake() {
 			cmake_arguments+=("-DSDL_PTHREADS=ON")
 			cmake_arguments+=("-DSDL_THREADS=ON")
 		fi
+	elif [[ "${TARGET_LIBRARY}" == "wavpack" ]]; then
+		cmake_targets="--target wavpack"
+		cmake_arguments+=("-DWAVPACK_BUILD_PROGRAMS=OFF")
+		cmake_arguments+=("-DWAVPACK_ENABLE_THREADS=OFF")
+		cmake_arguments+=("-DWAVPACK_INSTALL_CMAKE_MODULE=OFF")
+		cmake_arguments+=("-DWAVPACK_INSTALL_DOCS=OFF")
+		cmake_arguments+=("-DWAVPACK_INSTALL_PKGCONFIG_MODULE=OFF")
+		cmake_arguments+=("-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
 	elif [[ "${TARGET_LIBRARY}" == "zlib" ]]; then
 		cmake_targets="--target zlibstatic"
 		cmake_arguments+=("-DZLIB_BUILD_SHARED=OFF")
