@@ -533,6 +533,8 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		return 0;
 	}
 
+	m_DummyInput.m_PlayerFlags &= ~PLAYERFLAG_SPEC_CAM;
+
 	if(!g_Config.m_ClDummyHammer)
 	{
 		if(m_DummyFire != 0)
