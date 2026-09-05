@@ -239,6 +239,7 @@ void CServer::CClient::Reset()
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
 	m_Rejoining = false;
+	m_ReloadingMap = false;
 
 	std::fill(std::begin(m_aIdMap), std::end(m_aIdMap), -1);
 	std::fill(std::begin(m_aReverseIdMap), std::end(m_aReverseIdMap), -1);
@@ -619,6 +620,7 @@ int CServer::Init()
 		Client.m_Sixup = false;
 		Client.m_RedirectDropTime = 0;
 		Client.m_Rejoining = false;
+		Client.m_ReloadingMap = false;
 	}
 
 	m_CurrentGameTick = MIN_TICK;
@@ -805,6 +807,11 @@ bool CServer::ClientSlotEmpty(int ClientId) const
 bool CServer::ClientIngame(int ClientId) const
 {
 	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME;
+}
+
+bool CServer::ClientReloadingMap(int ClientId) const
+{
+	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_ReloadingMap && Tick() < 5 * TickSpeed();
 }
 
 int CServer::Port() const
@@ -1357,6 +1364,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_Sixup = false;
 	pThis->m_aClients[ClientId].m_RedirectDropTime = 0;
 	pThis->m_aClients[ClientId].m_Rejoining = false;
+	pThis->m_aClients[ClientId].m_ReloadingMap = false;
 	pThis->m_aClients[ClientId].m_HasPersistentData = false;
 
 	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientId, pReason);
@@ -2171,6 +2179,7 @@ void CServer::OnNetMsgEnterGame(int ClientId)
 		ClientAddrString(ClientId, true),
 		IsSixup(ClientId));
 	m_aClients[ClientId].m_State = CClient::STATE_INGAME;
+	m_aClients[ClientId].m_ReloadingMap = false;
 	if(!IsSixup(ClientId))
 	{
 		SendServerInfo(ClientAddr(ClientId), -1, SERVERINFO_EXTENDED, false);
@@ -3479,6 +3488,7 @@ int CServer::Run()
 						bool HasPersistentData = m_aClients[ClientId].m_HasPersistentData;
 						m_aClients[ClientId].Reset();
 						m_aClients[ClientId].m_HasPersistentData = HasPersistentData;
+						m_aClients[ClientId].m_ReloadingMap = m_aClients[ClientId].m_State == CClient::STATE_INGAME;
 						m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
 					}
 

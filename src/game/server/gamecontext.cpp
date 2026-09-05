@@ -1312,6 +1312,12 @@ void CGameContext::OnTick()
 				int64_t Now = Server()->Tick();
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
+					if(!m_apPlayers[i] && Server()->ClientReloadingMap(i))
+					{
+						Total++;
+						continue;
+					}
+
 					if(!m_apPlayers[i] || aVoteChecked[i])
 						continue;
 
@@ -1328,7 +1334,7 @@ void CGameContext::OnTick()
 						continue;
 
 					// connecting clients with spoofed ips can clog slots without being ingame
-					if(!Server()->ClientIngame(i))
+					if(!Server()->ClientIngame(i) && !Server()->ClientReloadingMap(i))
 						continue;
 
 					// don't count votes by blacklisted clients
