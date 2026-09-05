@@ -1185,6 +1185,7 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser, bool Sixup, bool Va
 
 	if(pThis->m_aClients[ClientId].m_State != CClient::STATE_INGAME)
 	{
+		DelClientCallback(ClientId, "reconnect", pUser);
 		if(VanillaAuth)
 			return NewClientNoAuthCallback(ClientId, pUser);
 		return NewClientCallback(ClientId, pUser, Sixup);
