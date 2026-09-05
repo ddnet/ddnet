@@ -1282,7 +1282,7 @@ void CGameTeams::OnCharacterSpawn(int ClientId)
 	if(GetSaving(Team))
 		return;
 
-	if(!IsValidTeamNumber(Team) || !m_aTeamLocked[Team])
+	if(!IsValidTeamNumber(Team) || Team == TEAM_FLOCK || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
 			SetForceCharacterTeam(ClientId, TEAM_FLOCK);
