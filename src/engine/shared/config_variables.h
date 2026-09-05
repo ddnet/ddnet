@@ -258,6 +258,8 @@ MACRO_CONFIG_INT(ClDummyHammer, cl_dummy_hammer, 0, 0, 1, CFGFLAG_CLIENT | CFGFL
 MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_dummy_resetonswitch, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Whether dummy or player should stop pressing keys when you switch (0 = off, 1 = dummy, 2 = player)")
 MACRO_CONFIG_INT(ClDummyRestoreWeapon, cl_dummy_restore_weapon, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Whether dummy should switch to last weapon after hammerfly")
 MACRO_CONFIG_INT(ClDummyCopyMoves, cl_dummy_copy_moves, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your moves")
+MACRO_CONFIG_INT(ClLocalMultiplayer, cl_local_multiplayer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Second player on this computer controls the dummy with the secondary mouse and keyboard (inp_secondary_*)")
+MACRO_CONFIG_INT(ClLocalMultiplayerSplit, cl_local_multiplayer_split, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Split the screen between both local players instead of zooming out to show both")
 
 // more controllable dummy command
 MACRO_CONFIG_INT(ClDummyControl, cl_dummy_control, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether you can control dummy at the same time (cl_dummy_jump, cl_dummy_fire, cl_dummy_hook)")
@@ -440,10 +442,15 @@ MACRO_CONFIG_INT(GfxAsyncRenderOld, gfx_asyncrender_old, 1, 0, 1, CFGFLAG_SAVE |
 MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Render quads as triangles (fixes quad coloring on some GPUs)")
 
 MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 200, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Mouse sensitivity")
+MACRO_CONFIG_INT(InpSecondaryMouse, inp_secondary_mouse, 0, 0, 16, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Number of the mouse whose input is secondary input (0 = none)")
+MACRO_CONFIG_INT(InpSecondaryKeyboard, inp_secondary_keyboard, 0, 0, 16, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Number of the keyboard whose input is secondary input, only on systems that tell keyboards apart (0 = none)")
+MACRO_CONFIG_STR(InpSecondaryKeys, inp_secondary_keys, 256, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Keys whose input is secondary input on any keyboard, separated by spaces")
 MACRO_CONFIG_INT(InpTranslatedKeys, inp_translated_keys, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Translate keys before interpreting them, respects keyboard layouts")
 MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ignored keyboard modifier mask")
-#if defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_FAMILY_WINDOWS) // native IME doesn't work on Windows with exclusive fullscreen
 MACRO_CONFIG_INT(InpImeNativeUi, inp_ime_native_ui, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use native UI for IME (may cause IME to not work in fullscreen mode) (changing requires restart)")
+#else
+MACRO_CONFIG_INT(InpImeNativeUi, inp_ime_native_ui, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use native UI for IME (changing requires restart)")
 #endif
 
 MACRO_CONFIG_INT(InpControllerEnable, inp_controller_enable, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable controller")

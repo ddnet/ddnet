@@ -330,14 +330,21 @@ int CUi::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Nu
 		return CurSelection > -1 ? pStrs[CurSelection] : "";
 	};
 
+	// The button moves when the window is resized or the page scrolls, the popup has to follow
+	const bool Moved = IsPopupOpen(&State.m_SelectionPopupContext) &&
+			   (pRect->x != State.m_ButtonRect.x || pRect->y != State.m_ButtonRect.y || pRect->w != State.m_ButtonRect.w || pRect->h != State.m_ButtonRect.h);
+	if(Moved)
+		ClosePopupMenu(&State.m_SelectionPopupContext);
+
 	SMenuButtonProperties Props;
 	Props.m_HintRequiresStringCheck = true;
 	Props.m_HintCanChangePositionOrSize = true;
 	Props.m_ShowDropDownIcon = true;
 	if(IsPopupOpen(&State.m_SelectionPopupContext))
 		Props.m_Corners = IGraphics::CORNER_ALL & (~State.m_SelectionPopupContext.m_Props.m_Corners);
-	if(DoButton_Menu(State.m_UiElement, &State.m_ButtonContainer, LabelFunc, pRect, Props))
+	if(DoButton_Menu(State.m_UiElement, &State.m_ButtonContainer, LabelFunc, pRect, Props) || Moved)
 	{
+		State.m_ButtonRect = *pRect;
 		State.m_SelectionPopupContext.Reset();
 		State.m_SelectionPopupContext.m_Props.m_BorderColor = ColorRGBA(0.7f, 0.7f, 0.7f, 0.9f);
 		State.m_SelectionPopupContext.m_Props.m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);

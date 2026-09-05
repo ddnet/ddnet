@@ -138,6 +138,7 @@ void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
 	y = std::clamp(y, 0, ScreenHeight());
 	w = std::clamp(w, 0, ScreenWidth() - x);
 	h = std::clamp(h, 0, ScreenHeight() - y);
+	x += ScreenWidth() * m_ViewIndex;
 
 	m_State.m_ClipEnable = true;
 	m_State.m_ClipX = x;
@@ -148,7 +149,27 @@ void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
 
 void CGraphics_Threaded::ClipDisable()
 {
-	m_State.m_ClipEnable = false;
+	if(m_ViewCount > 1)
+		ClipEnable(0, 0, ScreenWidth(), ScreenHeight());
+	else
+		m_State.m_ClipEnable = false;
+}
+
+void CGraphics_Threaded::ViewBegin(int Index, int Count)
+{
+	dbg_assert(m_ViewCount == 1, "called Graphics()->ViewBegin twice");
+	dbg_assert(Index >= 0 && Index < Count, "invalid view %d of %d", Index, Count);
+	m_ViewIndex = Index;
+	m_ViewCount = Count;
+	ClipDisable();
+}
+
+void CGraphics_Threaded::ViewEnd()
+{
+	dbg_assert(m_ViewCount > 1, "called Graphics()->ViewEnd without begin");
+	m_ViewIndex = 0;
+	m_ViewCount = 1;
+	ClipDisable();
 }
 
 void CGraphics_Threaded::BlendNone()
@@ -203,13 +224,18 @@ const TTwGraphicsGpuList &CGraphics_Threaded::GetGpus() const
 
 void CGraphics_Threaded::MapScreen(const CScreenRect &ScreenRect)
 {
-	m_State.m_ScreenTL = ScreenRect.m_TopLeft;
-	m_State.m_ScreenBR = ScreenRect.m_BottomRight;
+	// A view covers only its share of the window, so stretch the mapping over all views
+	const float Width = ScreenRect.Width();
+	m_State.m_ScreenTL = vec2(ScreenRect.m_TopLeft.x - Width * m_ViewIndex, ScreenRect.m_TopLeft.y);
+	m_State.m_ScreenBR = vec2(m_State.m_ScreenTL.x + Width * m_ViewCount, ScreenRect.m_BottomRight.y);
 }
 
 CScreenRect CGraphics_Threaded::GetScreen() const
 {
-	return CScreenRect(m_State.m_ScreenTL, m_State.m_ScreenBR);
+	// the view's share of the mapping, see MapScreen
+	const float Width = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / m_ViewCount;
+	const float Left = m_State.m_ScreenTL.x + Width * m_ViewIndex;
+	return CScreenRect(vec2(Left, m_State.m_ScreenTL.y), vec2(Left + Width, m_State.m_ScreenBR.y));
 }
 
 void CGraphics_Threaded::LinesBegin()
@@ -1732,7 +1758,8 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 
 		WrapClamp();
 
-		CScreenRect ScreenRect = GetScreen();
+		// the mapping of the whole window, GetScreen only returns the view's part of it
+		const CScreenRect ScreenRect(m_State.m_ScreenTL, m_State.m_ScreenBR);
 		CScreenRect CommandScreenRect = ScreenRect.Move({-X, -Y});
 		CommandScreenRect.m_TopLeft /= vec2(ScaleX, ScaleY);
 		CommandScreenRect.m_BottomRight /= vec2(ScaleX, ScaleY);
@@ -2498,9 +2525,9 @@ int CGraphics_Threaded::GetNumScreens() const
 	return m_pBackend->GetNumScreens();
 }
 
-const char *CGraphics_Threaded::GetScreenName(int Screen) const
+const char *CGraphics_Threaded::GetScreenName(int Index) const
 {
-	return m_pBackend->GetScreenName(Screen);
+	return m_pBackend->GetScreenName(Index);
 }
 
 void CGraphics_Threaded::Minimize()
@@ -2523,8 +2550,8 @@ void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 
 	m_pBackend->SetWindowParams(g_Config.m_GfxFullscreen, g_Config.m_GfxBorderless);
 	CVideoMode CurMode;
-	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, g_Config.m_GfxScreen);
-	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
+	if(m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, g_Config.m_GfxScreen))
+		GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
 
 	for(auto &PropChangedListener : m_vPropChangeListeners)
 		PropChangedListener();
@@ -2568,13 +2595,14 @@ bool CGraphics_Threaded::SwitchWindowScreen(int Index, bool MoveToCenter)
 	if(!IsPurelyWindowed)
 	{
 		CVideoMode CurMode;
-		GetCurrentVideoMode(CurMode, Index);
+		if(GetCurrentVideoMode(CurMode, Index))
+		{
+			g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+			g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+			g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
 
-		g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
-		g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
-		g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
-
-		ResizeToScreen();
+			ResizeToScreen();
+		}
 	}
 
 	SetWindowParams(IsFullscreen, IsBorderless);
@@ -2650,6 +2678,15 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	m_DrawableWidth = m_ScreenWidth;
 	m_DrawableHeight = m_ScreenHeight;
 
+	// SDL sends a window resize and a pixel size change for the same resize, so this is
+	// called twice and the second call has nothing left to update.
+	if(PrevCanvasWidth == m_ScreenWidth && PrevCanvasHeight == m_ScreenHeight &&
+		w == g_Config.m_GfxScreenWidth && h == g_Config.m_GfxScreenHeight &&
+		RefreshRate == m_ScreenRefreshRate)
+	{
+		return;
+	}
+
 	AdjustViewport(false);
 
 	m_ScreenRefreshRate = RefreshRate;
@@ -2700,6 +2737,11 @@ void CGraphics_Threaded::AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC p
 int CGraphics_Threaded::GetWindowScreen()
 {
 	return m_pBackend->GetWindowScreen();
+}
+
+uint32_t CGraphics_Threaded::GetWindowId() const
+{
+	return m_pBackend->GetWindowId();
 }
 
 void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowId)
@@ -2936,7 +2978,7 @@ TGLBackendReadPresentedImageData &CGraphics_Threaded::GetReadPresentedImageDataF
 	return m_pBackend->GetReadPresentedImageDataFuncUnsafe();
 }
 
-int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)
+int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Index)
 {
 	if(g_Config.m_GfxDisplayAllVideoModes)
 	{
@@ -2946,13 +2988,13 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 	}
 
 	int NumModes = 0;
-	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, Screen);
+	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, Index);
 	return NumModes;
 }
 
-void CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &CurMode, int Screen)
+bool CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &CurMode, int Index)
 {
-	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, Screen);
+	return m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, Index);
 }
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded()

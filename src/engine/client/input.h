@@ -7,8 +7,8 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
-#include <SDL_events.h>
-#include <SDL_joystick.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_joystick.h>
 
 #include <string>
 #include <vector>
@@ -64,11 +64,15 @@ private:
 	IEngineGraphics *Graphics() const { return m_pGraphics; }
 	IConsole *Console() const { return m_pConsole; }
 
+	// Resolved on demand from the graphics backend, which owns the window: it destroys
+	// and recreates it, so a cached pointer goes stale and every SDL call on it fails.
+	SDL_Window *Window() const;
+
 	// joystick
 	std::vector<CJoystick> m_vJoysticks;
 	CJoystick *m_pActiveJoystick = nullptr;
 	void InitJoysticks();
-	bool OpenJoystick(int JoystickIndex);
+	bool OpenJoystick(int JoystickId);
 	void CloseJoysticks();
 	void UpdateActiveJoystick();
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -77,6 +81,21 @@ private:
 	bool m_InputGrabbed;
 
 	bool m_MouseFocus;
+	vec2 m_MouseMotion = vec2(0.0f, 0.0f);
+	vec2 m_SecondaryMouseMotion = vec2(0.0f, 0.0f);
+	SDL_MouseID m_SecondaryMouseId = 0;
+	SDL_KeyboardID m_SecondaryKeyboardId = 0;
+	bool m_aSecondaryKeys[KEY_LAST] = {};
+	std::vector<std::string> m_vMouseNames;
+	std::vector<std::string> m_vKeyboardNames;
+	// the config values the secondary devices were resolved from, the settings menu changes them without the console
+	int m_SecondaryMouseConfig = 0;
+	int m_SecondaryKeyboardConfig = 0;
+	std::string m_SecondaryKeysConfig;
+	bool IsSecondaryMouse(SDL_MouseID Id) const { return m_SecondaryMouseId != 0 && Id == m_SecondaryMouseId; }
+	bool IsSecondaryKeyboard(SDL_KeyboardID Id) const { return m_SecondaryKeyboardId != 0 && Id == m_SecondaryKeyboardId; }
+	bool TakeMouseMotion(vec2 &Motion, float *pX, float *pY);
+	void UpdateSecondaryDevices();
 
 	// IME support
 	std::string m_CompositionString;
@@ -88,7 +107,7 @@ private:
 	std::vector<CEvent> m_vInputEvents;
 	int64_t m_LastUpdate;
 	float m_UpdateTime;
-	void AddKeyEvent(int Key, int Flags);
+	void AddKeyEvent(int Key, int Flags, bool Secondary);
 	void AddTextEvent(const char *pText);
 
 	// quick access to input
@@ -108,10 +127,13 @@ private:
 	void HandleTouchUpEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTextEditingEvent(const char *pText, int Start, int Length);
+	int TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &Event);
+
+	// remainder of the scroll deltas that did not add up to a whole notch yet
+	float m_ResidualScrollX = 0.0f;
+	float m_ResidualScrollY = 0.0f;
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
-
-	void ProcessSystemMessage(SDL_SysWMmsg *pMsg);
 
 public:
 	CInput();
@@ -138,6 +160,10 @@ public:
 	void SetActiveJoystick(size_t Index) override;
 
 	bool MouseRelative(float *pX, float *pY) override;
+	bool SecondaryMouseRelative(float *pX, float *pY) override;
+	bool HasSecondaryMouse() const override { return m_SecondaryMouseId != 0; }
+	const std::vector<std::string> &MouseNames() const override { return m_vMouseNames; }
+	const std::vector<std::string> &KeyboardNames() const override { return m_vKeyboardNames; }
 	void MouseModeAbsolute() override;
 	void MouseModeRelative() override;
 	vec2 NativeMousePos() const override;
@@ -152,6 +178,7 @@ public:
 	void StartTextInput() override;
 	void StopTextInput() override;
 	void EnsureScreenKeyboardShown() override;
+	void ClearComposition() override;
 	const char *GetComposition() const override { return m_CompositionString.c_str(); }
 	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }

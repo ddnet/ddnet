@@ -114,6 +114,8 @@ void CMenusSettingsControls::OnInterfacesInit(CGameClient *pClient)
 	m_aBindGroupExpanded[(int)EBindOptionGroup::CUSTOM] = false;
 
 	m_JoystickDropDownState.m_SelectionPopupContext.m_pScrollRegion = &m_JoystickDropDownScrollRegion;
+	m_SecondaryMouseDropDownState.m_SelectionPopupContext.m_pScrollRegion = &m_SecondaryMouseDropDownScrollRegion;
+	m_SecondaryKeyboardDropDownState.m_SelectionPopupContext.m_pScrollRegion = &m_SecondaryKeyboardDropDownScrollRegion;
 }
 
 void CMenusSettingsControls::Render(CUIRect MainView)
@@ -184,6 +186,8 @@ void CMenusSettingsControls::Render(CUIRect MainView)
 		Localize("Mouse"), nullptr, nullptr, std::bind_front(&CMenusSettingsControls::RenderSettingsMouse, this));
 	RenderSettingsBlock(MeasureSettingsJoystickHeight(), &LeftColumn,
 		Localize("Controller"), nullptr, nullptr, std::bind_front(&CMenusSettingsControls::RenderSettingsJoystick, this));
+	RenderSettingsBlock(MeasureSettingsLocalMultiplayerHeight(), &LeftColumn,
+		Localize("Local multiplayer"), nullptr, nullptr, std::bind_front(&CMenusSettingsControls::RenderSettingsLocalMultiplayer, this));
 	RenderSettingsBindsBlock(EBindOptionGroup::MOVEMENT, &LeftColumn, Localize("Movement"));
 	RenderSettingsBindsBlock(EBindOptionGroup::WEAPON, &LeftColumn, Localize("Weapon"));
 
@@ -575,6 +579,79 @@ void CMenusSettingsControls::RenderSettingsMouse(CUIRect View)
 	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
 	Ui()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500,
 		&CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE | CUi::SCROLLBAR_OPTION_DELAYUPDATE);
+}
+
+float CMenusSettingsControls::MeasureSettingsLocalMultiplayerHeight() const
+{
+	return 5.0f * BUTTON_HEIGHT + 4.0f * BUTTON_SPACING;
+}
+
+void CMenusSettingsControls::RenderSettingsLocalMultiplayer(CUIRect View)
+{
+	CUIRect Button;
+	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+	if(GameClient()->m_Menus.DoButton_CheckBox(&g_Config.m_ClLocalMultiplayer, Localize("2nd player (controls dummy)"), g_Config.m_ClLocalMultiplayer, &Button))
+	{
+		g_Config.m_ClLocalMultiplayer ^= 1;
+	}
+
+	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+	if(GameClient()->m_Menus.DoButton_CheckBox(&g_Config.m_ClLocalMultiplayerSplit, Localize("Split screen"), g_Config.m_ClLocalMultiplayerSplit, &Button))
+	{
+		g_Config.m_ClLocalMultiplayerSplit ^= 1;
+	}
+
+	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+	RenderSecondaryDeviceDropDown(Button, Localize("Mouse"), Input()->MouseNames(), g_Config.m_InpSecondaryMouse, m_SecondaryMouseDropDownState);
+
+	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+	RenderSecondaryDeviceDropDown(Button, Localize("Keyboard"), Input()->KeyboardNames(), g_Config.m_InpSecondaryKeyboard, m_SecondaryKeyboardDropDownState);
+
+	CUIRect Label;
+	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+	Button.VSplitMid(&Label, &Button, MARGIN);
+	Ui()->DoLabel(&Label, Localize("Keys"), FONT_SIZE, TEXTALIGN_ML);
+	static CLineInput s_KeysInput(g_Config.m_InpSecondaryKeys, sizeof(g_Config.m_InpSecondaryKeys));
+	s_KeysInput.SetEmptyText(Localize("Key names separated by spaces"));
+	Ui()->DoEditBox(&s_KeysInput, &Button, FONT_SIZE);
+}
+
+void CMenusSettingsControls::RenderSecondaryDeviceDropDown(CUIRect Rect, const char *pLabel, const std::vector<std::string> &vNames, int &Config, CUi::SDropDownState &State)
+{
+	CUIRect Label;
+	Rect.VSplitMid(&Label, &Rect, MARGIN);
+	Ui()->DoLabel(&Label, pLabel, FONT_SIZE, TEXTALIGN_ML);
+	if(vNames.size() < 2)
+	{
+		Ui()->DoLabel(&Rect, Localize("2 required"), FONT_SIZE, TEXTALIGN_ML);
+		return;
+	}
+
+	std::vector<std::string> vEntries;
+	vEntries.reserve(vNames.size() + 1);
+	vEntries.emplace_back(Localize("None"));
+	for(size_t i = 0; i < vNames.size(); i++)
+	{
+		char aEntry[128];
+		str_format(aEntry, sizeof(aEntry), "%d: %s", (int)i + 1, vNames[i].c_str());
+		vEntries.emplace_back(aEntry);
+	}
+	std::vector<const char *> vpEntries;
+	vpEntries.reserve(vEntries.size());
+	for(const std::string &Entry : vEntries)
+	{
+		vpEntries.push_back(Entry.c_str());
+	}
+	const int Current = Config <= (int)vNames.size() ? Config : 0;
+	const int Selected = Ui()->DoDropDown(&Rect, Current, vpEntries.data(), vpEntries.size(), State);
+	if(Selected != Current)
+	{
+		Config = Selected;
+	}
 }
 
 float CMenusSettingsControls::MeasureSettingsJoystickHeight() const

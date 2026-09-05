@@ -247,6 +247,8 @@ protected:
 	int m_DrawableHeight;
 	int m_ScreenRefreshRate;
 	float m_ScreenHiDPIScale;
+	int m_ViewIndex = 0;
+	int m_ViewCount = 1;
 	ivec2 m_DesktopSize;
 
 public:
@@ -274,9 +276,11 @@ public:
 		void Invalidate() { m_Id = -1; }
 	};
 
-	int ScreenWidth() const { return m_ScreenWidth; }
+	// Inside a view (see ViewBegin) the screen is the view's share of the window
+	int ViewIndex() const { return m_ViewIndex; }
+	int ScreenWidth() const { return m_ScreenWidth / m_ViewCount; }
 	int ScreenHeight() const { return m_ScreenHeight; }
-	vec2 ScreenSize() const { return vec2(m_ScreenWidth, m_ScreenHeight); }
+	vec2 ScreenSize() const { return vec2(ScreenWidth(), ScreenHeight()); }
 	float ScreenAspect() const { return (float)ScreenWidth() / (float)ScreenHeight(); }
 	float ScreenHiDPIScale() const { return m_ScreenHiDPIScale; }
 	int WindowWidth() const { return m_ScreenWidth / m_ScreenHiDPIScale; }
@@ -324,6 +328,11 @@ public:
 
 	virtual void ClipEnable(int x, int y, int w, int h) = 0;
 	virtual void ClipDisable() = 0;
+
+	// Render into the Index-th of Count views laid out side by side: until ViewEnd, the
+	// screen size, mapping and clipping refer to the view as if it was the whole window
+	virtual void ViewBegin(int Index, int Count) = 0;
+	virtual void ViewEnd() = 0;
 
 	virtual void MapScreen(const CScreenRect &ScreenRect) = 0;
 
@@ -569,7 +578,7 @@ public:
 	virtual void TakeScreenshot(const char *pFilename) = 0;
 	virtual void TakeCustomScreenshot(const char *pFilename) = 0;
 	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) = 0;
-	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) = 0;
+	virtual bool GetCurrentVideoMode(CVideoMode &CurMode, int Screen) = 0;
 	virtual void Swap() = 0;
 	virtual int GetNumScreens() const = 0;
 	virtual const char *GetScreenName(int Screen) const = 0;
@@ -685,6 +694,11 @@ public:
 
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
+
+	/**
+	 * @return The id of the game window, or `0` if there is currently no window.
+	 */
+	virtual uint32_t GetWindowId() const = 0;
 };
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded();

@@ -90,6 +90,14 @@ private:
 	void RenderSettingsJoystick(CUIRect View);
 	void RenderJoystickAxisPicker(CUIRect View);
 	void RenderJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active);
+
+	CScrollRegion m_SecondaryMouseDropDownScrollRegion;
+	CUi::SDropDownState m_SecondaryMouseDropDownState;
+	CScrollRegion m_SecondaryKeyboardDropDownScrollRegion;
+	CUi::SDropDownState m_SecondaryKeyboardDropDownState;
+	float MeasureSettingsLocalMultiplayerHeight() const;
+	void RenderSettingsLocalMultiplayer(CUIRect View);
+	void RenderSecondaryDeviceDropDown(CUIRect Rect, const char *pLabel, const std::vector<std::string> &vNames, int &Config, CUi::SDropDownState &State);
 };
 
 #endif

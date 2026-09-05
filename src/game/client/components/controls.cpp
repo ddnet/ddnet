@@ -38,7 +38,7 @@ void CControls::OnReset()
 	for(int &AmmoCount : m_aAmmoCount)
 		AmmoCount = 0;
 
-	m_LastSendTime = 0;
+	std::fill(std::begin(m_aLastSendTime), std::end(m_aLastSendTime), 0);
 }
 
 void CControls::ResetInput(int Dummy)
@@ -234,7 +234,7 @@ int CControls::SnapInput(int *pData)
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
 
 		// send once a second just to be sure
-		Send = Send || time_get() > m_LastSendTime + time_freq();
+		Send = Send || time_get() > m_aLastSendTime[g_Config.m_ClDummy] + time_freq();
 	}
 	else
 	{
@@ -248,21 +248,12 @@ int CControls::SnapInput(int *pData)
 			m_aMousePosOnAction[g_Config.m_ClDummy] = vec2(0.0f, 0.0f);
 		}
 
-		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
-		{
-			m_aInputData[g_Config.m_ClDummy].m_TargetX = 1;
-			m_aMousePos[g_Config.m_ClDummy].x = 1;
-		}
+		FixCenterTarget(g_Config.m_ClDummy, m_aMousePos[g_Config.m_ClDummy]);
 
-		// set direction
-		m_aInputData[g_Config.m_ClDummy].m_Direction = 0;
-		if(m_aInputDirectionLeft[g_Config.m_ClDummy] && !m_aInputDirectionRight[g_Config.m_ClDummy])
-			m_aInputData[g_Config.m_ClDummy].m_Direction = -1;
-		if(!m_aInputDirectionLeft[g_Config.m_ClDummy] && m_aInputDirectionRight[g_Config.m_ClDummy])
-			m_aInputData[g_Config.m_ClDummy].m_Direction = 1;
+		UpdateDirectionInput(g_Config.m_ClDummy);
 
 		// dummy copy moves
-		if(g_Config.m_ClDummyCopyMoves)
+		if(g_Config.m_ClDummyCopyMoves && !GameClient()->LocalMultiplayer())
 		{
 			CNetObj_PlayerInput *pDummyInput = &GameClient()->m_DummyInput;
 
@@ -287,7 +278,7 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[!g_Config.m_ClDummy] = *pDummyInput;
 		}
 
-		if(g_Config.m_ClDummyControl)
+		if(g_Config.m_ClDummyControl && !GameClient()->LocalMultiplayer())
 		{
 			CNetObj_PlayerInput *pDummyInput = &GameClient()->m_DummyInput;
 			pDummyInput->m_Jump = g_Config.m_ClDummyJump;
@@ -317,15 +308,7 @@ int CControls::SnapInput(int *pData)
 		}
 
 		// check if we need to send input
-		Send = Send || m_aInputData[g_Config.m_ClDummy].m_Direction != m_aLastData[g_Config.m_ClDummy].m_Direction;
-		Send = Send || m_aInputData[g_Config.m_ClDummy].m_Jump != m_aLastData[g_Config.m_ClDummy].m_Jump;
-		Send = Send || m_aInputData[g_Config.m_ClDummy].m_Fire != m_aLastData[g_Config.m_ClDummy].m_Fire;
-		Send = Send || m_aInputData[g_Config.m_ClDummy].m_Hook != m_aLastData[g_Config.m_ClDummy].m_Hook;
-		Send = Send || m_aInputData[g_Config.m_ClDummy].m_WantedWeapon != m_aLastData[g_Config.m_ClDummy].m_WantedWeapon;
-		Send = Send || m_aInputData[g_Config.m_ClDummy].m_NextWeapon != m_aLastData[g_Config.m_ClDummy].m_NextWeapon;
-		Send = Send || m_aInputData[g_Config.m_ClDummy].m_PrevWeapon != m_aLastData[g_Config.m_ClDummy].m_PrevWeapon;
-		Send = Send || time_get() > m_LastSendTime + time_freq() / 25; // send at least 25 Hz
-		Send = Send || (GameClient()->m_Snap.m_pLocalCharacter && GameClient()->m_Snap.m_pLocalCharacter->m_Weapon == WEAPON_NINJA && (m_aInputData[g_Config.m_ClDummy].m_Direction || m_aInputData[g_Config.m_ClDummy].m_Jump || m_aInputData[g_Config.m_ClDummy].m_Hook));
+		Send = Send || NeedsSend(g_Config.m_ClDummy);
 	}
 
 	// copy and return size
@@ -334,9 +317,73 @@ int CControls::SnapInput(int *pData)
 	if(!Send)
 		return 0;
 
-	m_LastSendTime = time_get();
+	m_aLastSendTime[g_Config.m_ClDummy] = time_get();
 	mem_copy(pData, &m_aInputData[g_Config.m_ClDummy], sizeof(m_aInputData[0]));
 	return sizeof(m_aInputData[0]);
+}
+
+int CControls::SnapDummyInput(int *pData)
+{
+	const int Dummy = !g_Config.m_ClDummy;
+	CNetObj_PlayerInput &Input = m_aInputData[Dummy];
+	Input.m_PlayerFlags = PLAYERFLAG_PLAYING | PLAYERFLAG_INPUT_MANUAL;
+	if(Client()->ServerCapAnyPlayerFlag() && m_aShowHookColl[Dummy])
+		Input.m_PlayerFlags |= PLAYERFLAG_AIM;
+	Input.m_TargetX = (int)m_aMousePos[Dummy].x;
+	Input.m_TargetY = (int)m_aMousePos[Dummy].y;
+	FixCenterTarget(Dummy, m_aMousePos[Dummy]);
+	UpdateDirectionInput(Dummy);
+
+	const bool Send = Input.m_PlayerFlags != m_aLastData[Dummy].m_PlayerFlags || NeedsSend(Dummy);
+	// the dummy's weapon is drawn toward this target
+	GameClient()->m_DummyInput = Input;
+	m_aLastData[Dummy] = Input;
+	if(!Send)
+		return 0;
+
+	m_aLastSendTime[Dummy] = time_get();
+	mem_copy(pData, &Input, sizeof(Input));
+	return sizeof(Input);
+}
+
+void CControls::FixCenterTarget(int Dummy, vec2 &MousePos)
+{
+	if(!m_aInputData[Dummy].m_TargetX && !m_aInputData[Dummy].m_TargetY)
+	{
+		m_aInputData[Dummy].m_TargetX = 1;
+		MousePos.x = 1;
+	}
+}
+
+void CControls::UpdateDirectionInput(int Dummy)
+{
+	m_aInputData[Dummy].m_Direction = 0;
+	if(m_aInputDirectionLeft[Dummy] && !m_aInputDirectionRight[Dummy])
+		m_aInputData[Dummy].m_Direction = -1;
+	if(!m_aInputDirectionLeft[Dummy] && m_aInputDirectionRight[Dummy])
+		m_aInputData[Dummy].m_Direction = 1;
+}
+
+bool CControls::NeedsSend(int Dummy) const
+{
+	const CNetObj_PlayerInput &Input = m_aInputData[Dummy];
+	const CNetObj_PlayerInput &Last = m_aLastData[Dummy];
+	bool Send = Input.m_Direction != Last.m_Direction ||
+		    Input.m_Jump != Last.m_Jump ||
+		    Input.m_Fire != Last.m_Fire ||
+		    Input.m_Hook != Last.m_Hook ||
+		    Input.m_WantedWeapon != Last.m_WantedWeapon ||
+		    Input.m_NextWeapon != Last.m_NextWeapon ||
+		    Input.m_PrevWeapon != Last.m_PrevWeapon;
+	Send = Send || time_get() > m_aLastSendTime[Dummy] + time_freq() / 25; // send at least 25 Hz
+	// ninja does not keep moving without fresh input
+	const int ClientId = GameClient()->m_aLocalIds[Dummy];
+	if(ClientId >= 0)
+	{
+		const auto &Character = GameClient()->m_Snap.m_aCharacters[ClientId];
+		Send = Send || (Character.m_Active && Character.m_Cur.m_Weapon == WEAPON_NINJA && (Input.m_Direction || Input.m_Jump || Input.m_Hook));
+	}
+	return Send;
 }
 
 void CControls::OnRender()
@@ -390,17 +437,37 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	if(GameClient()->IsWorldPaused())
 		return false;
 
+	// in local multiplayer the primary devices always belong to the main player
+	const int Dummy = GameClient()->LocalMultiplayer() ? 0 : g_Config.m_ClDummy;
 	if(CursorType == IInput::CURSOR_JOYSTICK && g_Config.m_InpControllerAbsolute && GameClient()->m_Snap.m_pGameInfoObj && !GameClient()->m_Snap.m_SpecInfo.m_Active)
 	{
 		vec2 AbsoluteDirection;
 		if(Input()->GetActiveJoystick()->Absolute(&AbsoluteDirection.x, &AbsoluteDirection.y))
 		{
-			m_aMousePos[g_Config.m_ClDummy] = AbsoluteDirection * GetMaxMouseDistance();
-			GameClient()->m_Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::ABSOLUTE;
+			m_aMousePos[Dummy] = AbsoluteDirection * GetMaxMouseDistance();
+			GameClient()->m_Controls.m_aMouseInputType[Dummy] = CControls::EMouseInputType::ABSOLUTE;
 		}
 		return true;
 	}
 
+	m_aMousePos[Dummy] += vec2(x, y) * CursorFactor(CursorType);
+	GameClient()->m_Controls.m_aMouseInputType[Dummy] = CControls::EMouseInputType::RELATIVE;
+	ClampCursor(m_aMousePos[Dummy]);
+	return true;
+}
+
+void CControls::OnDummyCursorMove(float x, float y)
+{
+	if(GameClient()->IsWorldPaused())
+		return;
+
+	const int Dummy = 1;
+	m_aMousePos[Dummy] += vec2(x, y) * CursorFactor(IInput::CURSOR_MOUSE);
+	ClampMouseDistance(m_aMousePos[Dummy]);
+}
+
+float CControls::CursorFactor(IInput::ECursorType CursorType) const
+{
 	float Factor = 1.0f;
 	if(g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens)
 	{
@@ -417,44 +484,50 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 			Factor = g_Config.m_InpControllerSens / 100.0f;
 			break;
 		default:
-			dbg_assert_failed("CControls::OnCursorMove CursorType %d", (int)CursorType);
+			dbg_assert_failed("CControls::CursorFactor CursorType %d", (int)CursorType);
 		}
 	}
 
 	if(GameClient()->m_Snap.m_SpecInfo.m_Active && GameClient()->m_Snap.m_SpecInfo.m_SpectatorId < 0)
 		Factor *= GameClient()->m_Camera.m_Zoom;
-
-	m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
-	GameClient()->m_Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::RELATIVE;
-	ClampMousePos();
-	return true;
+	return Factor;
 }
 
 void CControls::ClampMousePos()
 {
+	ClampCursor(m_aMousePos[g_Config.m_ClDummy]);
+}
+
+void CControls::ClampCursor(vec2 &MousePos) const
+{
 	if(GameClient()->m_Snap.m_SpecInfo.m_Active && GameClient()->m_Snap.m_SpecInfo.m_SpectatorId < 0)
 	{
-		m_aMousePos[g_Config.m_ClDummy].x = std::clamp(m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (Collision()->GetWidth() + 201.0f) * 32.0f);
-		m_aMousePos[g_Config.m_ClDummy].y = std::clamp(m_aMousePos[g_Config.m_ClDummy].y, -201.0f * 32, (Collision()->GetHeight() + 201.0f) * 32.0f);
+		MousePos.x = std::clamp(MousePos.x, -201.0f * 32, (Collision()->GetWidth() + 201.0f) * 32.0f);
+		MousePos.y = std::clamp(MousePos.y, -201.0f * 32, (Collision()->GetHeight() + 201.0f) * 32.0f);
 	}
 	else
 	{
-		const float MouseMin = GetMinMouseDistance();
-		const float MouseMax = GetMaxMouseDistance();
-
-		float MouseDistance = length(m_aMousePos[g_Config.m_ClDummy]);
-		if(MouseDistance < 0.001f)
-		{
-			m_aMousePos[g_Config.m_ClDummy].x = 0.001f;
-			m_aMousePos[g_Config.m_ClDummy].y = 0;
-			MouseDistance = 0.001f;
-		}
-		if(MouseDistance < MouseMin)
-			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MouseDistance) * MouseMin;
-		MouseDistance = length(m_aMousePos[g_Config.m_ClDummy]);
-		if(MouseDistance > MouseMax)
-			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MouseDistance) * MouseMax;
+		ClampMouseDistance(MousePos);
 	}
+}
+
+void CControls::ClampMouseDistance(vec2 &MousePos) const
+{
+	const float MouseMin = GetMinMouseDistance();
+	const float MouseMax = GetMaxMouseDistance();
+
+	float MouseDistance = length(MousePos);
+	if(MouseDistance < 0.001f)
+	{
+		MousePos.x = 0.001f;
+		MousePos.y = 0;
+		MouseDistance = 0.001f;
+	}
+	if(MouseDistance < MouseMin)
+		MousePos = normalize_pre_length(MousePos, MouseDistance) * MouseMin;
+	MouseDistance = length(MousePos);
+	if(MouseDistance > MouseMax)
+		MousePos = normalize_pre_length(MousePos, MouseDistance) * MouseMax;
 }
 
 float CControls::GetMinMouseDistance() const

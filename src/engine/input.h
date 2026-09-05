@@ -25,6 +25,7 @@ public:
 		int m_Key;
 		uint32_t m_InputCount;
 		char m_aText[32]; // SDL_TEXTINPUTEVENT_TEXT_SIZE
+		bool m_Secondary = false; // from a device or key assigned to secondary input by inp_secondary_*
 	};
 
 	enum
@@ -116,6 +117,12 @@ public:
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual bool MouseRelative(float *pX, float *pY) = 0;
+	// Motion of the mouse assigned to secondary input by inp_secondary_mouse, which MouseRelative excludes
+	virtual bool SecondaryMouseRelative(float *pX, float *pY) = 0;
+	virtual bool HasSecondaryMouse() const = 0;
+	// Connected mice and keyboards in the order inp_secondary_mouse and inp_secondary_keyboard count them
+	virtual const std::vector<std::string> &MouseNames() const = 0;
+	virtual const std::vector<std::string> &KeyboardNames() const = 0;
 
 	// touch
 	/**
@@ -128,8 +135,8 @@ public:
 	{
 		friend class CInput;
 
-		int64_t m_DeviceId;
-		int64_t m_FingerId;
+		uint64_t m_DeviceId;
+		uint64_t m_FingerId;
 
 	public:
 		bool operator==(const CTouchFinger &Other) const { return m_DeviceId == Other.m_DeviceId && m_FingerId == Other.m_FingerId; }
@@ -185,6 +192,7 @@ public:
 	virtual void StartTextInput() = 0;
 	virtual void StopTextInput() = 0;
 	virtual void EnsureScreenKeyboardShown() = 0;
+	virtual void ClearComposition() = 0;
 	virtual const char *GetComposition() const = 0;
 	virtual bool HasComposition() const = 0;
 	virtual int GetCompositionCursor() const = 0;

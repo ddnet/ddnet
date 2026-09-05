@@ -687,17 +687,18 @@ public:
 
 	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
-	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
-	virtual void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
+	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) = 0;
+	virtual bool GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) = 0;
 
 	virtual int GetNumScreens() const = 0;
-	virtual const char *GetScreenName(int Screen) const = 0;
+	virtual const char *GetScreenName(int Index) const = 0;
 
 	virtual void Minimize() = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index, bool MoveToCenter, ivec2 *pDesktopSize) = 0;
 	virtual bool UpdateDisplayMode(int Index, ivec2 *pDesktopSize) = 0;
 	virtual int GetWindowScreen() = 0;
+	virtual uint32_t GetWindowId() const = 0;
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
 	virtual void SetWindowGrab(bool Grab) = 0;
@@ -908,6 +909,8 @@ public:
 
 	void ClipEnable(int x, int y, int w, int h) override;
 	void ClipDisable() override;
+	void ViewBegin(int Index, int Count) override;
+	void ViewEnd() override;
 
 	void BlendNone() override;
 	void BlendNormal() override;
@@ -1203,7 +1206,7 @@ public:
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
 	int GetNumScreens() const override;
-	const char *GetScreenName(int Screen) const override;
+	const char *GetScreenName(int Index) const override;
 
 	void Minimize() override;
 	void WarnPngliteIncompatibleImages(bool Warn) override;
@@ -1220,6 +1223,7 @@ public:
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc) override;
 	void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) override;
 	int GetWindowScreen() override;
+	uint32_t GetWindowId() const override;
 
 	void WindowDestroyNtf(uint32_t WindowId) override;
 	void WindowCreateNtf(uint32_t WindowId) override;
@@ -1240,8 +1244,8 @@ public:
 	bool SetVSync(bool State) override;
 	bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) override;
 
-	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
-	void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) override;
+	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Index) override;
+	bool GetCurrentVideoMode(CVideoMode &CurMode, int Index) override;
 
 	// synchronization
 	void InsertSignal(CSemaphore *pSemaphore) override;

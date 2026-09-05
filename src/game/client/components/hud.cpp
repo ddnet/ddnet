@@ -628,6 +628,28 @@ void CHud::RenderCursor()
 	CScreenRect ScreenRect = Graphics()->MapScreenToWorld(Center.x, Center.y, 100.0f, 100.0f, 100.0f, 0, 0, Graphics()->ScreenAspect(), 1.0f);
 	Graphics()->MapScreen(ScreenRect);
 
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && GameClient()->LocalMultiplayer())
+	{
+		// The camera is not centered on the tees, so place each cursor where its tee is drawn
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+		{
+			// each split screen view only shows the cursor of the player it follows
+			if(GameClient()->LocalMultiplayerSplit() && Dummy != Graphics()->ViewIndex())
+				continue;
+			const int ClientId = GameClient()->m_aLocalIds[Dummy];
+			if(!GameClient()->m_Snap.m_aCharacters[ClientId].m_Active)
+				continue;
+			const int Weapon = std::max(0, GameClient()->m_aClients[ClientId].m_Predicted.m_ActiveWeapon);
+			const vec2 CursorPos = Center + (GameClient()->m_aClients[ClientId].m_RenderPos - Center) / GameClient()->m_Camera.m_Zoom + GameClient()->m_Controls.m_aMousePos[Dummy];
+			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponCursors[Weapon]);
+			Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[Weapon], CursorPos.x, CursorPos.y);
+		}
+		// a spectating active player still gets the spectator cursor
+		if(GameClient()->m_Snap.m_pLocalCharacter)
+			return;
+	}
+
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && GameClient()->m_Snap.m_pLocalCharacter)
 	{
 		// Render local cursor
@@ -1744,7 +1766,9 @@ void CHud::OnRender()
 		if(g_Config.m_ClShowRecord)
 			RenderRecord();
 	}
-	RenderCursor();
+	// in split screen the cursors are rendered per view
+	if(!GameClient()->LocalMultiplayerSplit())
+		RenderCursor();
 }
 
 void CHud::OnMessage(int MsgType, void *pRawMsg)

@@ -33,7 +33,7 @@ public:
 
 	int m_aAmmoCount[NUM_WEAPONS];
 
-	int64_t m_LastSendTime;
+	int64_t m_aLastSendTime[NUM_DUMMIES];
 	CNetObj_PlayerInput m_aInputData[NUM_DUMMIES];
 	CNetObj_PlayerInput m_aLastData[NUM_DUMMIES];
 	int m_aInputDirectionLeft[NUM_DUMMIES];
@@ -47,10 +47,12 @@ public:
 	void OnRender() override;
 	void OnMessage(int MsgType, void *pRawMsg) override;
 	bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
+	void OnDummyCursorMove(float x, float y);
 	void OnConsoleInit() override;
 	virtual void OnPlayerDeath();
 
 	int SnapInput(int *pData);
+	int SnapDummyInput(int *pData);
 	void ClampMousePos();
 	void ResetInput(int Dummy);
 
@@ -59,5 +61,11 @@ private:
 	static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData);
 	static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData);
 	static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData);
+	float CursorFactor(IInput::ECursorType CursorType) const;
+	void ClampCursor(vec2 &MousePos) const;
+	void ClampMouseDistance(vec2 &MousePos) const;
+	void FixCenterTarget(int Dummy, vec2 &MousePos);
+	void UpdateDirectionInput(int Dummy);
+	bool NeedsSend(int Dummy) const;
 };
 #endif

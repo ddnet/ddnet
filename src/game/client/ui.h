@@ -835,6 +835,7 @@ public:
 		SSelectionPopupContext m_SelectionPopupContext;
 		CUIElement m_UiElement;
 		CButtonContainer m_ButtonContainer;
+		CUIRect m_ButtonRect; // where the popup was opened, it follows the button when that moves
 		bool m_Init = false;
 	};
 	int DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State);

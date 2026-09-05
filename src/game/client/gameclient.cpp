@@ -134,8 +134,10 @@ void CGameClient::OnConsoleInit()
 					      &m_Particles, // doesn't render anything, just updates all the particles
 					      &m_RaceDemo,
 					      &m_MapSounds,
-					      &m_Censor,
-					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
+					      &m_Censor});
+	// the world, which local multiplayer renders once per view
+	m_WorldRenderBegin = m_vpAll.size();
+	m_vpAll.insert(m_vpAll.end(), {&m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
 					      &m_MapLayersBackground, // first to render
 					      &m_Particles.m_RenderTrail,
 					      &m_Particles.m_RenderTrailExtra,
@@ -148,8 +150,9 @@ void CGameClient::OnConsoleInit()
 					      &m_Particles.m_RenderExtra,
 					      &m_Particles.m_RenderGeneral,
 					      &m_FreezeBars,
-					      &m_DamageInd,
-					      &m_Hud,
+					      &m_DamageInd});
+	m_WorldRenderEnd = m_vpAll.size();
+	m_vpAll.insert(m_vpAll.end(), {&m_Hud,
 					      &m_Spectator,
 					      &m_Emoticon,
 					      &m_InfoMessages,
@@ -456,6 +459,12 @@ void CGameClient::OnUpdate()
 {
 	HandleLanguageChanged();
 
+	if(m_LocalMultiplayerSwitchBack)
+	{
+		g_Config.m_ClDummy = 0;
+		m_LocalMultiplayerSwitchBack = false;
+	}
+
 	CUIElementBase::Init(Ui()); // update static pointer because game and editor use separate UI
 
 	// handle mouse movement
@@ -467,6 +476,23 @@ void CGameClient::OnUpdate()
 		{
 			if(pComponent->OnCursorMove(x, y, CursorType))
 				break;
+		}
+	}
+	if(Input()->SecondaryMouseRelative(&x, &y))
+	{
+		// only a second player takes the secondary mouse over, without one it stays
+		// another mouse of the same player
+		if(LocalMultiplayer())
+		{
+			m_Controls.OnDummyCursorMove(x, y);
+		}
+		else
+		{
+			for(auto &pComponent : m_vpInput)
+			{
+				if(pComponent->OnCursorMove(x, y, IInput::CURSOR_MOUSE))
+					break;
+			}
 		}
 	}
 
@@ -531,6 +557,11 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	if(m_aLocalIds[!g_Config.m_ClDummy] < 0)
 	{
 		return 0;
+	}
+
+	if(LocalMultiplayer())
+	{
+		return m_Controls.SnapDummyInput(pData);
 	}
 
 	if(!g_Config.m_ClDummyHammer)
@@ -703,7 +734,7 @@ void CGameClient::OnReset()
 
 	m_LastShowDistanceZoom = 0.0f;
 	m_LastZoom = 0.0f;
-	m_LastScreenAspect = 0.0f;
+	m_LastShowDistance = vec2(0.0f, 0.0f);
 	m_LastDeadzone = 0.0f;
 	m_LastFollowFactor = 0.0f;
 	m_LastDummyConnected = false;
@@ -767,6 +798,26 @@ void CGameClient::UpdatePositions()
 	UpdateRenderedCharacters();
 }
 
+void CGameClient::RenderSplitViewSeparator()
+{
+	// the views only differ in what they show, so a line marks where one ends. Black
+	// around white keeps it visible whatever the views draw behind it.
+	const float Width = Graphics()->ScreenWidth();
+	const float Height = Graphics()->ScreenHeight();
+	Graphics()->MapScreenToSize(Width, Height);
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	const float Seam = std::floor(Width / 2.0f);
+	for(int Pixel = -1; Pixel <= 1; Pixel++)
+	{
+		const float Value = Pixel == 0 ? 1.0f : 0.0f;
+		Graphics()->SetColor(Value, Value, Value, 1.0f);
+		IGraphics::CQuadItem QuadItem(Seam + Pixel, 0.0f, 1.0f, Height);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	}
+	Graphics()->QuadsEnd();
+}
+
 void CGameClient::OnRender()
 {
 	const ColorRGBA ClearColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOverlayEntities ? g_Config.m_ClBackgroundEntitiesColor : g_Config.m_ClBackgroundColor));
@@ -806,14 +857,53 @@ void CGameClient::OnRender()
 		}
 	}
 
+	// zoom out until both local players see as much around them as they would alone
+	if(LocalMultiplayerShared())
+	{
+		vec2 MinPos, MaxPos;
+		LocalMultiplayerBounds(MinPos, MaxPos);
+		vec2 ViewSize;
+		Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), 1.0f, &ViewSize.x, &ViewSize.y);
+		const vec2 Distance = MaxPos - MinPos;
+		const float Zoom = m_Camera.m_UserZoomTarget + std::max(Distance.x / ViewSize.x, Distance.y / ViewSize.y);
+		// zooming out may not lag behind the tees separating, only zooming back in is smoothed
+		m_Camera.SetZoom(Zoom, Zoom > m_Camera.m_Zoom ? 0 : g_Config.m_ClMultiViewZoomSmoothness, false);
+	}
+
 	// update camera data prior to CControls::OnRender to allow CControls::m_aTargetPos to compensate using camera data
 	m_Camera.UpdateCamera();
 
 	UpdateSpectatorCursor();
 
-	// render all systems
-	for(auto &pComponent : m_vpAll)
-		pComponent->OnRender();
+	// render all systems, the world once per view
+	for(size_t i = 0; i < m_WorldRenderBegin; i++)
+		m_vpAll[i]->OnRender();
+	if(LocalMultiplayerSplit())
+	{
+		const vec2 Center = m_Camera.m_Center;
+		for(int View = 0; View < NUM_DUMMIES; View++)
+		{
+			Graphics()->ViewBegin(View, NUM_DUMMIES);
+			// the active player keeps the camera, the other tee is followed directly
+			vec2 Pos;
+			m_Camera.m_Center = View != g_Config.m_ClDummy && LocalTeePosition(View, Pos) ? Pos : Center;
+			if(View > 0)
+				m_Effects.SkipAdditions();
+			for(size_t i = m_WorldRenderBegin; i < m_WorldRenderEnd; i++)
+				m_vpAll[i]->OnRender();
+			m_Hud.RenderCursor();
+			Graphics()->ViewEnd();
+		}
+		m_Camera.m_Center = Center;
+		RenderSplitViewSeparator();
+	}
+	else
+	{
+		for(size_t i = m_WorldRenderBegin; i < m_WorldRenderEnd; i++)
+			m_vpAll[i]->OnRender();
+	}
+	for(size_t i = m_WorldRenderEnd; i < m_vpAll.size(); i++)
+		m_vpAll[i]->OnRender();
 
 	// clear all events/input for this frame
 	Input()->Clear();
@@ -940,6 +1030,45 @@ int CGameClient::MaxTeamSize() const
 	return m_GameInfo.m_MaxTeamSize != 0 ? m_GameInfo.m_MaxTeamSize : Config()->m_SvMaxTeamSize;
 }
 
+bool CGameClient::LocalMultiplayer() const
+{
+	return g_Config.m_ClLocalMultiplayer && m_aLocalIds[0] >= 0 && m_aLocalIds[1] >= 0;
+}
+
+bool CGameClient::LocalTeePosition(int Dummy, vec2 &Pos) const
+{
+	const int ClientId = m_aLocalIds[Dummy];
+	if(m_Snap.m_aCharacters[ClientId].m_Active)
+	{
+		Pos = m_aClients[ClientId].m_RenderPos;
+		return true;
+	}
+	if(Dummy == g_Config.m_ClDummy)
+		return false;
+	// Out of the show distance of the active player, but its own connection always has it
+	const CNetObj_Character *pCharacter = static_cast<const CNetObj_Character *>(Client()->SnapFindItemConn(!g_Config.m_ClDummy, IClient::SNAP_CURRENT, NETOBJTYPE_CHARACTER, ClientId));
+	if(pCharacter == nullptr)
+		return false;
+	Pos = vec2(pCharacter->m_X, pCharacter->m_Y);
+	return true;
+}
+
+void CGameClient::LocalMultiplayerBounds(vec2 &MinPos, vec2 &MaxPos) const
+{
+	// the camera target is the fallback while neither tee is alive
+	MinPos = MaxPos = m_LocalCharacterPos;
+	bool First = true;
+	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+	{
+		vec2 Pos;
+		if(!LocalTeePosition(Dummy, Pos))
+			continue;
+		MinPos = First ? Pos : vec2(std::min(MinPos.x, Pos.x), std::min(MinPos.y, Pos.y));
+		MaxPos = First ? Pos : vec2(std::max(MaxPos.x, Pos.x), std::max(MaxPos.y, Pos.y));
+		First = false;
+	}
+}
+
 bool CGameClient::IsWorldPaused() const
 {
 	return m_Snap.m_pGameInfoObj &&
@@ -1015,7 +1144,8 @@ bool CGameClient::PredictDummy() const
 	       Client()->DummyConnected() &&
 	       m_Snap.m_LocalClientId >= 0 &&
 	       m_aLocalIds[!g_Config.m_ClDummy] >= 0 &&
-	       !m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Paused;
+	       !m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Paused &&
+	       !IsOtherTeamForPrediction(m_aLocalIds[!g_Config.m_ClDummy]);
 }
 
 ColorRGBA CGameClient::GetDDTeamColor(int DDTeam, float Lightness) const
@@ -1722,27 +1852,134 @@ void CGameClient::InvalidateSnapshot()
 	SnapCollectEntities();
 }
 
-void CGameClient::OnNewSnapshot(bool DummySwapped)
+void CGameClient::EvolveCharacter(CNetObj_Character *pCharacter, int Tick)
 {
-	auto &&Evolve = [this](CNetObj_Character *pCharacter, int Tick) {
-		CWorldCore TempWorld;
-		CCharacterCore TempCore = CCharacterCore();
-		CTeamsCore TempTeams = CTeamsCore();
-		TempCore.Init(&TempWorld, Collision(), &TempTeams);
-		TempCore.Read(pCharacter);
-		TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
+	CWorldCore TempWorld;
+	CCharacterCore TempCore = CCharacterCore();
+	CTeamsCore TempTeams = CTeamsCore();
+	TempCore.Init(&TempWorld, Collision(), &TempTeams);
+	TempCore.Read(pCharacter);
+	TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
 
-		while(pCharacter->m_Tick < Tick)
+	while(pCharacter->m_Tick < Tick)
+	{
+		pCharacter->m_Tick++;
+		TempCore.Tick(false);
+		TempCore.Move();
+		TempCore.Quantize();
+	}
+
+	TempCore.Write(pCharacter);
+}
+
+void CGameClient::SnapCharacter(int ClientId, const CNetObj_Character *pCur, const CNetObj_Character *pPrev)
+{
+	m_Snap.m_aCharacters[ClientId].m_Cur = *pCur;
+	if(pPrev)
+	{
+		m_Snap.m_aCharacters[ClientId].m_Active = true;
+		m_Snap.m_aCharacters[ClientId].m_Prev = *pPrev;
+
+		// limit evolving to 3 seconds
+		bool EvolvePrev = Client()->PrevGameTick(g_Config.m_ClDummy) - m_Snap.m_aCharacters[ClientId].m_Prev.m_Tick <= 3 * Client()->GameTickSpeed();
+		bool EvolveCur = Client()->GameTick(g_Config.m_ClDummy) - m_Snap.m_aCharacters[ClientId].m_Cur.m_Tick <= 3 * Client()->GameTickSpeed();
+
+		// reuse the result from the previous evolve if the snapped character didn't change since the previous snapshot
+		if(EvolveCur && m_aClients[ClientId].m_Evolved.m_Tick == Client()->PrevGameTick(g_Config.m_ClDummy))
 		{
-			pCharacter->m_Tick++;
-			TempCore.Tick(false);
-			TempCore.Move();
-			TempCore.Quantize();
+			if(mem_comp(&m_Snap.m_aCharacters[ClientId].m_Prev, &m_aClients[ClientId].m_Snapped, sizeof(CNetObj_Character)) == 0)
+				m_Snap.m_aCharacters[ClientId].m_Prev = m_aClients[ClientId].m_Evolved;
+			if(mem_comp(&m_Snap.m_aCharacters[ClientId].m_Cur, &m_aClients[ClientId].m_Snapped, sizeof(CNetObj_Character)) == 0)
+				m_Snap.m_aCharacters[ClientId].m_Cur = m_aClients[ClientId].m_Evolved;
 		}
 
-		TempCore.Write(pCharacter);
-	};
+		if(EvolvePrev && m_Snap.m_aCharacters[ClientId].m_Prev.m_Tick)
+			EvolveCharacter(&m_Snap.m_aCharacters[ClientId].m_Prev, Client()->PrevGameTick(g_Config.m_ClDummy));
+		if(EvolveCur && m_Snap.m_aCharacters[ClientId].m_Cur.m_Tick)
+			EvolveCharacter(&m_Snap.m_aCharacters[ClientId].m_Cur, Client()->GameTick(g_Config.m_ClDummy));
 
+		m_aClients[ClientId].m_Snapped = *pCur;
+		m_aClients[ClientId].m_Evolved = m_Snap.m_aCharacters[ClientId].m_Cur;
+	}
+	else
+	{
+		m_aClients[ClientId].m_Evolved.m_Tick = -1;
+	}
+}
+
+void CGameClient::SnapExtendedCharacter(int ClientId, const CNetObj_DDNetCharacter *pData, const CNetObj_DDNetCharacter *pPrev)
+{
+	m_Snap.m_aCharacters[ClientId].m_ExtendedData = *pData;
+	m_Snap.m_aCharacters[ClientId].m_pPrevExtendedData = pPrev;
+	m_Snap.m_aCharacters[ClientId].m_HasExtendedData = true;
+	m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo = false;
+	if(pData->m_JumpedTotal != -1)
+	{
+		m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo = true;
+	}
+	CClientData *pClient = &m_aClients[ClientId];
+	// Collision
+	pClient->m_Solo = pData->m_Flags & CHARACTERFLAG_SOLO;
+	pClient->m_Jetpack = pData->m_Flags & CHARACTERFLAG_JETPACK;
+	pClient->m_CollisionDisabled = pData->m_Flags & CHARACTERFLAG_COLLISION_DISABLED;
+	pClient->m_HammerHitDisabled = pData->m_Flags & CHARACTERFLAG_HAMMER_HIT_DISABLED;
+	pClient->m_GrenadeHitDisabled = pData->m_Flags & CHARACTERFLAG_GRENADE_HIT_DISABLED;
+	pClient->m_LaserHitDisabled = pData->m_Flags & CHARACTERFLAG_LASER_HIT_DISABLED;
+	pClient->m_ShotgunHitDisabled = pData->m_Flags & CHARACTERFLAG_SHOTGUN_HIT_DISABLED;
+	pClient->m_HookHitDisabled = pData->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
+	pClient->m_Super = pData->m_Flags & CHARACTERFLAG_SUPER;
+	pClient->m_Invincible = pData->m_Flags & CHARACTERFLAG_INVINCIBLE;
+
+	// Endless
+	pClient->m_EndlessHook = pData->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
+	pClient->m_EndlessJump = pData->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
+
+	// Freeze
+	pClient->m_FreezeEnd = pData->m_FreezeEnd;
+	pClient->m_DeepFrozen = pData->m_FreezeEnd == -1;
+	pClient->m_LiveFrozen = (pData->m_Flags & CHARACTERFLAG_MOVEMENTS_DISABLED) != 0;
+
+	// Telegun
+	pClient->m_HasTelegunGrenade = pData->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
+	pClient->m_HasTelegunGun = pData->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
+	pClient->m_HasTelegunLaser = pData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
+
+	pClient->m_Predicted.ReadDDNet(pData);
+
+	m_Teams.SetSolo(ClientId, pClient->m_Solo);
+}
+
+void CGameClient::SnapOtherLocalCharacter()
+{
+	if(!LocalMultiplayer())
+		return;
+	// The server hides characters in other teams and solo parts, but the other local player
+	// must stay visible, so take it from its own connection, where it is never hidden
+	const int Conn = !g_Config.m_ClDummy;
+	const int ClientId = m_aLocalIds[Conn];
+	if(m_Snap.m_aCharacters[ClientId].m_Active)
+		return;
+	const CNetObj_Character *pCur = static_cast<const CNetObj_Character *>(Client()->SnapFindItemConn(Conn, IClient::SNAP_CURRENT, NETOBJTYPE_CHARACTER, ClientId));
+	if(pCur == nullptr)
+		return;
+	SnapCharacter(ClientId, pCur, static_cast<const CNetObj_Character *>(Client()->SnapFindItemConn(Conn, IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, ClientId)));
+
+	const CNetObj_DDNetCharacter *pExtended = static_cast<const CNetObj_DDNetCharacter *>(Client()->SnapFindItemConn(Conn, IClient::SNAP_CURRENT, NETOBJTYPE_DDNETCHARACTER, ClientId));
+	if(pExtended == nullptr)
+		return;
+	// the other connection frees its old snapshots on its own schedule, so keep a copy
+	const CNetObj_DDNetCharacter *pPrevExtended = static_cast<const CNetObj_DDNetCharacter *>(Client()->SnapFindItemConn(Conn, IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTER, ClientId));
+	if(pPrevExtended != nullptr)
+	{
+		m_OtherLocalPrevExtendedData = *pPrevExtended;
+		pPrevExtended = &m_OtherLocalPrevExtendedData;
+	}
+	SnapExtendedCharacter(ClientId, pExtended, pPrevExtended);
+}
+
+void CGameClient::OnNewSnapshot(bool DummySwapped)
+{
+	const bool DummyIdKnown = m_aLocalIds[1] >= 0;
 	InvalidateSnapshot();
 
 	m_NewTick = true;
@@ -1882,84 +2119,14 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 			{
 				if(Item.m_Id < MAX_CLIENTS)
 				{
-					const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_Id);
-					m_Snap.m_aCharacters[Item.m_Id].m_Cur = *((const CNetObj_Character *)Item.m_pData);
-					if(pOld)
-					{
-						m_Snap.m_aCharacters[Item.m_Id].m_Active = true;
-						m_Snap.m_aCharacters[Item.m_Id].m_Prev = *((const CNetObj_Character *)pOld);
-
-						// limit evolving to 3 seconds
-						bool EvolvePrev = Client()->PrevGameTick(g_Config.m_ClDummy) - m_Snap.m_aCharacters[Item.m_Id].m_Prev.m_Tick <= 3 * Client()->GameTickSpeed();
-						bool EvolveCur = Client()->GameTick(g_Config.m_ClDummy) - m_Snap.m_aCharacters[Item.m_Id].m_Cur.m_Tick <= 3 * Client()->GameTickSpeed();
-
-						// reuse the result from the previous evolve if the snapped character didn't change since the previous snapshot
-						if(EvolveCur && m_aClients[Item.m_Id].m_Evolved.m_Tick == Client()->PrevGameTick(g_Config.m_ClDummy))
-						{
-							if(mem_comp(&m_Snap.m_aCharacters[Item.m_Id].m_Prev, &m_aClients[Item.m_Id].m_Snapped, sizeof(CNetObj_Character)) == 0)
-								m_Snap.m_aCharacters[Item.m_Id].m_Prev = m_aClients[Item.m_Id].m_Evolved;
-							if(mem_comp(&m_Snap.m_aCharacters[Item.m_Id].m_Cur, &m_aClients[Item.m_Id].m_Snapped, sizeof(CNetObj_Character)) == 0)
-								m_Snap.m_aCharacters[Item.m_Id].m_Cur = m_aClients[Item.m_Id].m_Evolved;
-						}
-
-						if(EvolvePrev && m_Snap.m_aCharacters[Item.m_Id].m_Prev.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_Id].m_Prev, Client()->PrevGameTick(g_Config.m_ClDummy));
-						if(EvolveCur && m_Snap.m_aCharacters[Item.m_Id].m_Cur.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_Id].m_Cur, Client()->GameTick(g_Config.m_ClDummy));
-
-						m_aClients[Item.m_Id].m_Snapped = *((const CNetObj_Character *)Item.m_pData);
-						m_aClients[Item.m_Id].m_Evolved = m_Snap.m_aCharacters[Item.m_Id].m_Cur;
-					}
-					else
-					{
-						m_aClients[Item.m_Id].m_Evolved.m_Tick = -1;
-					}
+					SnapCharacter(Item.m_Id, (const CNetObj_Character *)Item.m_pData, (const CNetObj_Character *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_Id));
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_DDNETCHARACTER)
 			{
-				const CNetObj_DDNetCharacter *pCharacterData = (const CNetObj_DDNetCharacter *)Item.m_pData;
-
 				if(Item.m_Id < MAX_CLIENTS)
 				{
-					m_Snap.m_aCharacters[Item.m_Id].m_ExtendedData = *pCharacterData;
-					m_Snap.m_aCharacters[Item.m_Id].m_pPrevExtendedData = (const CNetObj_DDNetCharacter *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTER, Item.m_Id);
-					m_Snap.m_aCharacters[Item.m_Id].m_HasExtendedData = true;
-					m_Snap.m_aCharacters[Item.m_Id].m_HasExtendedDisplayInfo = false;
-					if(pCharacterData->m_JumpedTotal != -1)
-					{
-						m_Snap.m_aCharacters[Item.m_Id].m_HasExtendedDisplayInfo = true;
-					}
-					CClientData *pClient = &m_aClients[Item.m_Id];
-					// Collision
-					pClient->m_Solo = pCharacterData->m_Flags & CHARACTERFLAG_SOLO;
-					pClient->m_Jetpack = pCharacterData->m_Flags & CHARACTERFLAG_JETPACK;
-					pClient->m_CollisionDisabled = pCharacterData->m_Flags & CHARACTERFLAG_COLLISION_DISABLED;
-					pClient->m_HammerHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_HAMMER_HIT_DISABLED;
-					pClient->m_GrenadeHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_GRENADE_HIT_DISABLED;
-					pClient->m_LaserHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_LASER_HIT_DISABLED;
-					pClient->m_ShotgunHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_SHOTGUN_HIT_DISABLED;
-					pClient->m_HookHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
-					pClient->m_Super = pCharacterData->m_Flags & CHARACTERFLAG_SUPER;
-					pClient->m_Invincible = pCharacterData->m_Flags & CHARACTERFLAG_INVINCIBLE;
-
-					// Endless
-					pClient->m_EndlessHook = pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
-					pClient->m_EndlessJump = pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
-
-					// Freeze
-					pClient->m_FreezeEnd = pCharacterData->m_FreezeEnd;
-					pClient->m_DeepFrozen = pCharacterData->m_FreezeEnd == -1;
-					pClient->m_LiveFrozen = (pCharacterData->m_Flags & CHARACTERFLAG_MOVEMENTS_DISABLED) != 0;
-
-					// Telegun
-					pClient->m_HasTelegunGrenade = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
-					pClient->m_HasTelegunGun = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
-					pClient->m_HasTelegunLaser = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
-
-					pClient->m_Predicted.ReadDDNet(pCharacterData);
-
-					m_Teams.SetSolo(Item.m_Id, pClient->m_Solo);
+					SnapExtendedCharacter(Item.m_Id, (const CNetObj_DDNetCharacter *)Item.m_pData, (const CNetObj_DDNetCharacter *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTER, Item.m_Id));
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECCHAR)
@@ -2135,6 +2302,8 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	{
 		Client.UpdateSkinInfo();
 	}
+
+	SnapOtherLocalCharacter();
 
 	// setup local pointers
 	if(m_Snap.m_LocalClientId >= 0)
@@ -2365,15 +2534,31 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 		FollowFactor = m_LastFollowFactor;
 	}
 
+	vec2 ShowDistance;
+	Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), ShowDistanceZoom, &ShowDistance.x, &ShowDistance.y);
+	if(LocalMultiplayer())
+	{
+		// The server only sends entities within the show distance around the own tee, so it has
+		// to reach around the other local player as well: the shared view is centered between
+		// the tees, a split view on the other tee. Rounded up to ten tiles so it is not resent
+		// every tick while the tees move.
+		vec2 MinPos, MaxPos;
+		LocalMultiplayerBounds(MinPos, MaxPos);
+		const float Views = LocalMultiplayerSplit() ? NUM_DUMMIES : 1;
+		vec2 ViewSize;
+		Graphics()->CalcScreenParams(Graphics()->ScreenAspect() / Views, ShowDistanceZoom, &ViewSize.x, &ViewSize.y);
+		const vec2 Needed = (MaxPos - MinPos) * Views + ViewSize;
+		ShowDistance.x = std::max(ShowDistance.x, std::ceil(Needed.x / 320.0f) * 320.0f);
+		ShowDistance.y = std::max(ShowDistance.y, std::ceil(Needed.y / 320.0f) * 320.0f);
+	}
+
 	// initialize dummy vital when first connected
 	if(Client()->DummyConnected() && !m_LastDummyConnected)
 	{
 		{
 			CNetMsg_Cl_ShowDistance Msg;
-			float x, y;
-			Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), ShowDistanceZoom, &x, &y);
-			Msg.m_X = x;
-			Msg.m_Y = y;
+			Msg.m_X = ShowDistance.x;
+			Msg.m_Y = ShowDistance.y;
 			CMsgPacker Packer(&Msg);
 			Msg.Pack(&Packer);
 			Client()->SendMsg(IClient::CONN_DUMMY, &Packer, MSGFLAG_VITAL);
@@ -2390,13 +2575,11 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	}
 
 	// send show distance
-	if(ShowDistanceZoom != m_LastShowDistanceZoom || Graphics()->ScreenAspect() != m_LastScreenAspect)
+	if(ShowDistance != m_LastShowDistance)
 	{
 		CNetMsg_Cl_ShowDistance Msg;
-		float x, y;
-		Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), ShowDistanceZoom, &x, &y);
-		Msg.m_X = x;
-		Msg.m_Y = y;
+		Msg.m_X = ShowDistance.x;
+		Msg.m_Y = ShowDistance.y;
 		Client()->ChecksumData()->m_Zoom = ShowDistanceZoom;
 		CMsgPacker Packer(&Msg);
 		Msg.Pack(&Packer);
@@ -2423,7 +2606,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 
 	m_LastShowDistanceZoom = ShowDistanceZoom;
 	m_LastZoom = Zoom;
-	m_LastScreenAspect = Graphics()->ScreenAspect();
+	m_LastShowDistance = ShowDistance;
 	m_LastDeadzone = Deadzone;
 	m_LastFollowFactor = FollowFactor;
 	m_LastDummyConnected = Client()->DummyConnected();
@@ -2506,6 +2689,12 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 	m_IsDummySwapping = 0;
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		UpdatePrediction();
+
+	// The client switches to the dummy on connect only so that its id gets known here,
+	// in local multiplayer the second player controls it and the first keeps the main player.
+	// The switch back is done in OnUpdate, where the client handles it like the dummy switch key.
+	if(g_Config.m_ClLocalMultiplayer && g_Config.m_ClDummy == 1 && !DummyIdKnown && m_aLocalIds[1] >= 0)
+		m_LocalMultiplayerSwitchBack = true;
 }
 
 std::function<bool(int, int, int, int)> CGameClient::GetScoreComparator(bool TimeScore, bool ReceivedMillisecondFinishTimes, bool Race7)
@@ -2649,14 +2838,14 @@ void CGameClient::OnPredict()
 	// don't predict inactive players, or entities from other teams
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
-			if((!m_Snap.m_aCharacters[i].m_Active && pChar->m_SnapTicks > 10) || IsOtherTeam(i))
+			if((!m_Snap.m_aCharacters[i].m_Active && pChar->m_SnapTicks > 10) || IsOtherTeamForPrediction(i))
 				pChar->Destroy();
 
 	CProjectile *pProjNext = nullptr;
 	for(CProjectile *pProj = (CProjectile *)m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = pProjNext)
 	{
 		pProjNext = (CProjectile *)pProj->TypeNext();
-		if(IsOtherTeam(pProj->GetOwner()))
+		if(IsOtherTeamForPrediction(pProj->GetOwner()))
 		{
 			pProj->Destroy();
 		}
@@ -3811,7 +4000,7 @@ void CGameClient::UpdateRenderedCharacters()
 		CCharacter *pChar = m_PredictedWorld.GetCharacterById(i);
 		const bool IsDummy = PredictDummy() && i == m_aLocalIds[!g_Config.m_ClDummy];
 		bool AntiPingPlayer = AntiPingPlayers() == 1 || (AntiPingPlayers() >= 2 && (IsDummy || (pChar && pChar->IsInterfering())));
-		if(Predict() && (i == m_Snap.m_LocalClientId || (AntiPingPlayer && !IsOtherTeam(i))) && pChar)
+		if(Predict() && (i == m_Snap.m_LocalClientId || (AntiPingPlayer && !IsOtherTeamForPrediction(i))) && pChar)
 		{
 			m_aClients[i].m_Predicted.Write(&m_aClients[i].m_RenderCur);
 			m_aClients[i].m_PrevPredicted.Write(&m_aClients[i].m_RenderPrev);
@@ -4008,6 +4197,14 @@ void CGameClient::Echo(const char *pString)
 }
 
 bool CGameClient::IsOtherTeam(int ClientId) const
+{
+	// the other local player is shown like a team mate, also in another team or a solo part
+	if(LocalMultiplayer() && ClientId == m_aLocalIds[!g_Config.m_ClDummy])
+		return false;
+	return IsOtherTeamForPrediction(ClientId);
+}
+
+bool CGameClient::IsOtherTeamForPrediction(int ClientId) const
 {
 	bool Local = m_Snap.m_LocalClientId == ClientId;
 
