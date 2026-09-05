@@ -4152,6 +4152,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		}
 
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupHealth);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupFreeze);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmor);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmorShotgun);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmorGrenade);
@@ -4280,6 +4281,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 
 		// pickups
 		m_GameSkin.m_SpritePickupHealth = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_HEALTH]);
+		m_GameSkin.m_SpritePickupFreeze = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_FREEZE]);
 		m_GameSkin.m_SpritePickupArmor = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR]);
 		m_GameSkin.m_SpritePickupHammer = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_HAMMER]);
 		m_GameSkin.m_SpritePickupGun = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_GUN]);

@@ -286,7 +286,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 	else if(Index == ENTITY_ARMOR_LASER)
 		Type = POWERUP_ARMOR_LASER;
 	else if(Index == ENTITY_HEALTH_1)
-		Type = POWERUP_HEALTH;
+		Type = POWERUP_FREEZE;
 	else if(Index == ENTITY_WEAPON_SHOTGUN)
 	{
 		Type = POWERUP_WEAPON;

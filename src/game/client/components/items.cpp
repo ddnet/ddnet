@@ -137,6 +137,11 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 		QuadOffset = m_PickupHealthOffset;
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupHealth);
 	}
+	else if(pCurrent->m_Type == POWERUP_FREEZE)
+	{
+		QuadOffset = m_PickupFreezeOffset;
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupFreeze);
+	}
 	else if(pCurrent->m_Type == POWERUP_ARMOR)
 	{
 		QuadOffset = m_PickupArmorOffset;
@@ -161,6 +166,10 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	{
 		QuadOffset = m_aPickupWeaponArmorOffset[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN];
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpritePickupWeaponArmor[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN]);
+	}
+	else
+	{
+		return;
 	}
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -653,6 +662,9 @@ void CItems::OnInit()
 	Graphics()->GetSpriteScale(SPRITE_PICKUP_ARMOR, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	m_PickupArmorOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+	Graphics()->GetSpriteScale(SPRITE_PICKUP_FREEZE, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_PickupFreezeOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{

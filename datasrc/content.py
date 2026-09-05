@@ -389,6 +389,7 @@ container.sprites.Add(Sprite("pickup_armor_shotgun", set_game, 15, 2, 2, 2))
 container.sprites.Add(Sprite("pickup_armor_grenade", set_game, 17, 2, 2, 2))
 container.sprites.Add(Sprite("pickup_armor_ninja", set_game, 10, 10, 2, 2))
 container.sprites.Add(Sprite("pickup_armor_laser", set_game, 19, 2, 2, 2))
+container.sprites.Add(Sprite("pickup_freeze", set_game, 6, 2, 2, 2))
 
 container.sprites.Add(Sprite("flag_blue", set_game, 12, 8, 4, 8))
 container.sprites.Add(Sprite("flag_red", set_game, 16, 8, 4, 8))

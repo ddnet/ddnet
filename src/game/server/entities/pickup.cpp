@@ -51,7 +51,7 @@ void CPickup::Tick()
 			// player picked us up, is someone was hooking us, let them go
 			switch(m_Type)
 			{
-			case POWERUP_HEALTH:
+			case POWERUP_FREEZE:
 				if(pChr->Freeze())
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->TeamMask());
 				break;

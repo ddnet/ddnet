@@ -2188,8 +2188,8 @@ bool CCharacter::TrySetRescue(int RescueMode)
 	bool Set = false;
 	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team() > TEAM_FLOCK) && Teams()->IsValidTeamNumber(Team())))
 	{
-		// check for nearby health pickups (also freeze)
-		bool InHealthPickup = false;
+		// check for nearby freeze pickups
+		bool InFreezePickup = false;
 		if(!m_Core.m_IsInFreeze)
 		{
 			CEntity *apEnts[9];
@@ -2197,19 +2197,19 @@ bool CCharacter::TrySetRescue(int RescueMode)
 			for(int i = 0; i < Num; ++i)
 			{
 				CPickup *pPickup = static_cast<CPickup *>(apEnts[i]);
-				if(pPickup->Type() == POWERUP_HEALTH)
+				if(pPickup->Type() == POWERUP_FREEZE)
 				{
-					// This uses a separate variable InHealthPickup instead of setting m_Core.m_IsInFreeze
+					// This uses a separate variable InFreezePickup instead of setting m_Core.m_IsInFreeze
 					// as the latter causes freezebars to flicker when standing in the freeze range of a
-					// health pickup. When the same code for client prediction is added, the freezebars
-					// still flicker, but only when standing at the edge of the health pickup's freeze range.
-					InHealthPickup = true;
+					// freeze pickup. When the same code for client prediction is added, the freezebars
+					// still flicker, but only when standing at the edge of the freeze pickup's freeze range.
+					InFreezePickup = true;
 					break;
 				}
 			}
 		}
 
-		if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup)
+		if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen && !InFreezePickup)
 		{
 			ForceSetRescue(RescueMode);
 			Set = true;

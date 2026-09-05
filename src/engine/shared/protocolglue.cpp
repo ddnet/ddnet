@@ -129,7 +129,9 @@ int PickupType_SixToSeven(int Type6, int SubType6)
 			dbg_assert_failed("invalid subtype %d", SubType6);
 		}
 	case POWERUP_NINJA: return protocol7::PICKUP_NINJA;
-	case POWERUP_HEALTH: return protocol7::PICKUP_HEALTH;
+	case POWERUP_HEALTH:
+	case POWERUP_FREEZE:
+		return protocol7::PICKUP_HEALTH;
 	case POWERUP_ARMOR:
 	case POWERUP_ARMOR_SHOTGUN:
 	case POWERUP_ARMOR_GRENADE:
