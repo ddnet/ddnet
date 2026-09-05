@@ -3492,11 +3492,13 @@ void CClient::Run()
 			// the next prediction tick to send its input without delay, unless the window is inactive or
 			// the loop is not rate limited at all.
 			if(RefreshRate)
+			{
 				WakeTime = NextUpdateTime;
-			if(IsRenderActive && GfxRefreshRate)
-				WakeTime = std::min(WakeTime, NextRenderTime);
-			if(State() == IClient::STATE_ONLINE && m_aPredTick[g_Config.m_ClDummy] > 0 && !Inactive && WakeTime != std::numeric_limits<int64_t>::max())
-				WakeTime = std::min(WakeTime, Now + (m_aPredTick[g_Config.m_ClDummy] * time_freq() / GameTickSpeed() - m_PredictedTime.Get(Now)));
+				if(IsRenderActive && GfxRefreshRate)
+					WakeTime = std::min(WakeTime, NextRenderTime);
+				if(State() == IClient::STATE_ONLINE && m_aPredTick[g_Config.m_ClDummy] > 0 && !Inactive)
+					WakeTime = std::min(WakeTime, Now + (m_aPredTick[g_Config.m_ClDummy] * time_freq() / GameTickSpeed() - m_PredictedTime.Get(Now)));
+			}
 		}
 
 		AutoScreenshot_Cleanup();
