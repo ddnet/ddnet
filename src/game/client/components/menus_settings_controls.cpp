@@ -583,18 +583,14 @@ void CMenusSettingsControls::RenderSettingsMouse(CUIRect View)
 
 float CMenusSettingsControls::MeasureSettingsLocalMultiplayerHeight() const
 {
-	return 6.0f * BUTTON_HEIGHT + 5.0f * BUTTON_SPACING;
+	return 5.0f * BUTTON_HEIGHT + 4.0f * BUTTON_SPACING;
 }
 
 void CMenusSettingsControls::RenderSettingsLocalMultiplayer(CUIRect View)
 {
 	CUIRect Button;
 	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
-	Ui()->DoLabel(&Button, Localize("2nd player controls dummy"), FONT_SIZE, TEXTALIGN_ML);
-
-	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
-	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
-	if(GameClient()->m_Menus.DoButton_CheckBox(&g_Config.m_ClLocalMultiplayer, Localize("2nd player"), g_Config.m_ClLocalMultiplayer, &Button))
+	if(GameClient()->m_Menus.DoButton_CheckBox(&g_Config.m_ClLocalMultiplayer, Localize("2nd player (controls dummy)"), g_Config.m_ClLocalMultiplayer, &Button))
 	{
 		g_Config.m_ClLocalMultiplayer ^= 1;
 	}
