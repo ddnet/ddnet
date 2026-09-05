@@ -46,9 +46,12 @@ with open("src/engine/keys.h", "w", encoding="utf-8") as f:
 				l = line.strip().split("=")
 				if len(l) == 2:
 					key = l[0].strip().replace("SDL_SCANCODE_", "KEY_")
-					value = int(l[1].split(",")[0].strip())
 					if key[0:2] == "/*":
 						continue
+					# SDL3 terminates the enum with two entries that are not keys
+					if key in ("KEY_RESERVED", "KEY_COUNT"):
+						continue
+					value = int(l[1].split(",")[0].strip())
 					print_key(key, key.replace("KEY_", "").lower(), value)
 
 	print(file=f)
@@ -92,6 +95,8 @@ with open("src/engine/keys.h", "w", encoding="utf-8") as f:
 	print(file=f)
 	print("#endif", file=f)
 
+key_name_length = max(len(name) for name in keynames) + 1
+
 # generate keynames.cpp file
 with open("src/engine/client/keynames.cpp", "w", encoding="utf-8") as f:
 	print("/* AUTO GENERATED! DO NOT EDIT MANUALLY! See scripts/gen_keys.py */", file=f)
@@ -101,7 +106,7 @@ with open("src/engine/client/keynames.cpp", "w", encoding="utf-8") as f:
 	print("/**", file=f)
 	print(" * Do not use directly! Use the @link IInput::KeyName @endlink function.", file=f)
 	print(" */", file=f)
-	print("extern const char g_aaKeyStrings[512][20] = {", file=f)
+	print(f"extern const char g_aaKeyStrings[512][{key_name_length}] = {{", file=f)
 	for n in keynames:
 		print(f'\t"{n}",', file=f)
 	print("};", file=f)
@@ -116,6 +121,6 @@ with open("src/engine/client/keynames.h", "w", encoding="utf-8") as f:
 	print("/**", file=f)
 	print(" * Do not use directly! Use the @link IInput::KeyName @endlink function.", file=f)
 	print(" */", file=f)
-	print("extern const char g_aaKeyStrings[512][20];", file=f)
+	print(f"extern const char g_aaKeyStrings[512][{key_name_length}];", file=f)
 	print(file=f)
 	print("#endif", file=f)

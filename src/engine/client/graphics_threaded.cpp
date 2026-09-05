@@ -2498,9 +2498,9 @@ int CGraphics_Threaded::GetNumScreens() const
 	return m_pBackend->GetNumScreens();
 }
 
-const char *CGraphics_Threaded::GetScreenName(int Screen) const
+const char *CGraphics_Threaded::GetScreenName(int Index) const
 {
-	return m_pBackend->GetScreenName(Screen);
+	return m_pBackend->GetScreenName(Index);
 }
 
 void CGraphics_Threaded::Minimize()
@@ -2523,8 +2523,8 @@ void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 
 	m_pBackend->SetWindowParams(g_Config.m_GfxFullscreen, g_Config.m_GfxBorderless);
 	CVideoMode CurMode;
-	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, g_Config.m_GfxScreen);
-	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
+	if(m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, g_Config.m_GfxScreen))
+		GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
 
 	for(auto &PropChangedListener : m_vPropChangeListeners)
 		PropChangedListener();
@@ -2568,13 +2568,14 @@ bool CGraphics_Threaded::SwitchWindowScreen(int Index, bool MoveToCenter)
 	if(!IsPurelyWindowed)
 	{
 		CVideoMode CurMode;
-		GetCurrentVideoMode(CurMode, Index);
+		if(GetCurrentVideoMode(CurMode, Index))
+		{
+			g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+			g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+			g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
 
-		g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
-		g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
-		g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
-
-		ResizeToScreen();
+			ResizeToScreen();
+		}
 	}
 
 	SetWindowParams(IsFullscreen, IsBorderless);
@@ -2650,6 +2651,15 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	m_DrawableWidth = m_ScreenWidth;
 	m_DrawableHeight = m_ScreenHeight;
 
+	// SDL sends a window resize and a pixel size change for the same resize, so this is
+	// called twice and the second call has nothing left to update.
+	if(PrevCanvasWidth == m_ScreenWidth && PrevCanvasHeight == m_ScreenHeight &&
+		w == g_Config.m_GfxScreenWidth && h == g_Config.m_GfxScreenHeight &&
+		RefreshRate == m_ScreenRefreshRate)
+	{
+		return;
+	}
+
 	AdjustViewport(false);
 
 	m_ScreenRefreshRate = RefreshRate;
@@ -2700,6 +2710,11 @@ void CGraphics_Threaded::AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC p
 int CGraphics_Threaded::GetWindowScreen()
 {
 	return m_pBackend->GetWindowScreen();
+}
+
+uint32_t CGraphics_Threaded::GetWindowId() const
+{
+	return m_pBackend->GetWindowId();
 }
 
 void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowId)
@@ -2936,7 +2951,7 @@ TGLBackendReadPresentedImageData &CGraphics_Threaded::GetReadPresentedImageDataF
 	return m_pBackend->GetReadPresentedImageDataFuncUnsafe();
 }
 
-int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)
+int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Index)
 {
 	if(g_Config.m_GfxDisplayAllVideoModes)
 	{
@@ -2946,13 +2961,13 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 	}
 
 	int NumModes = 0;
-	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, Screen);
+	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, Index);
 	return NumModes;
 }
 
-void CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &CurMode, int Screen)
+bool CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &CurMode, int Index)
 {
-	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, Screen);
+	return m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, m_DesktopSize.x, m_DesktopSize.y, Index);
 }
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded()

@@ -7,8 +7,8 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
-#include <SDL_events.h>
-#include <SDL_joystick.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_joystick.h>
 
 #include <string>
 #include <vector>
@@ -64,11 +64,15 @@ private:
 	IEngineGraphics *Graphics() const { return m_pGraphics; }
 	IConsole *Console() const { return m_pConsole; }
 
+	// Resolved on demand from the graphics backend, which owns the window: it destroys
+	// and recreates it, so a cached pointer goes stale and every SDL call on it fails.
+	SDL_Window *Window() const;
+
 	// joystick
 	std::vector<CJoystick> m_vJoysticks;
 	CJoystick *m_pActiveJoystick = nullptr;
 	void InitJoysticks();
-	bool OpenJoystick(int JoystickIndex);
+	bool OpenJoystick(int JoystickId);
 	void CloseJoysticks();
 	void UpdateActiveJoystick();
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -108,10 +112,13 @@ private:
 	void HandleTouchUpEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTextEditingEvent(const char *pText, int Start, int Length);
+	int TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &Event);
+
+	// remainder of the scroll deltas that did not add up to a whole notch yet
+	float m_ResidualScrollX = 0.0f;
+	float m_ResidualScrollY = 0.0f;
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
-
-	void ProcessSystemMessage(SDL_SysWMmsg *pMsg);
 
 public:
 	CInput();
@@ -152,6 +159,7 @@ public:
 	void StartTextInput() override;
 	void StopTextInput() override;
 	void EnsureScreenKeyboardShown() override;
+	void ClearComposition() override;
 	const char *GetComposition() const override { return m_CompositionString.c_str(); }
 	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }

@@ -14,6 +14,7 @@
 
 #include <cinttypes>
 #include <cstdio> // sscanf
+#include <memory>
 
 // Based on triple32inc from https://github.com/skeeto/hash-prospector/tree/79a6074062a84907df6e45b756134b74e2956760
 static uint32_t HashUInt32(uint32_t Num)
@@ -483,11 +484,13 @@ void CAutomapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 		bool IsFilterable = h == 0 && ReferenceId >= 0;
 
 		// don't make copy if it's requested
+		std::unique_ptr<CLayerTiles> pCopiedLayer;
 		CLayerTiles *pReadLayer;
 		CLayerTiles *pBuffer = IsFilterable ? pGameLayer : pLayer;
 		if(pRun->m_AutomapCopy)
 		{
-			pReadLayer = new CLayerTiles(pLayer->Map(), LayerWidth, LayerHeight);
+			pCopiedLayer = std::make_unique<CLayerTiles>(pLayer->Map(), LayerWidth, LayerHeight);
+			pReadLayer = pCopiedLayer.get();
 
 			int LoopWidth = IsFilterable ? std::min(pGameLayer->m_Width, LayerWidth) : LayerWidth;
 			int LoopHeight = IsFilterable ? std::min(pGameLayer->m_Height, LayerHeight) : LayerHeight;
@@ -604,9 +607,5 @@ void CAutomapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 				}
 			}
 		}
-
-		// clean-up
-		if(pRun->m_AutomapCopy && pReadLayer != pLayer)
-			delete pReadLayer;
 	}
 }

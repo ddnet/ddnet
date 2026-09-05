@@ -8,7 +8,6 @@
 #include <base/log.h>
 #include <base/str.h>
 #include <base/time.h>
-#include <base/windows.h>
 
 #include <engine/console.h>
 #include <engine/graphics.h>
@@ -16,29 +15,10 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #include <algorithm>
-
-// support older SDL version (pre 2.0.6)
-#ifndef SDL_JOYSTICK_AXIS_MIN
-#define SDL_JOYSTICK_AXIS_MIN (-32768)
-#endif
-#ifndef SDL_JOYSTICK_AXIS_MAX
-#define SDL_JOYSTICK_AXIS_MAX 32767
-#endif
-
-#if defined(CONF_FAMILY_WINDOWS)
-#include <windows.h>
-// windows.h must be included before imm.h, but clang-format requires includes to be sorted alphabetically, hence this comment.
-#include <imm.h>
-#endif
-
-// for platform specific features that aren't available or are broken in SDL
-#include <SDL_syswm.h>
-#ifdef KeyPress
-#undef KeyPress // Undo pollution from X11/Xlib.h included by SDL_syswm.h on Linux
-#endif
+#include <cmath>
 
 void CInput::AddKeyEvent(int Key, int Flags)
 {
@@ -96,14 +76,16 @@ CInput::CInput()
 
 void CInput::Init()
 {
-	StopTextInput();
-
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 
-	MouseModeRelative();
+#if !defined(CONF_HEADLESS_CLIENT)
+	dbg_assert(Window() != nullptr, "SDL Window not found");
 
+	StopTextInput();
+	MouseModeRelative();
+#endif
 	InitJoysticks();
 }
 
@@ -112,32 +94,55 @@ void CInput::Shutdown()
 	CloseJoysticks();
 }
 
+// SDL reports displays by opaque id, but screens are addressed by index.
+static int ScreenIndexFromDisplayId(SDL_DisplayID DisplayId)
+{
+	int NumDisplays = 0;
+	SDL_DisplayID *pDisplayIds = SDL_GetDisplays(&NumDisplays);
+	if(pDisplayIds == nullptr)
+		return -1;
+	const SDL_DisplayID *pFound = std::find(pDisplayIds, pDisplayIds + NumDisplays, DisplayId);
+	const int Index = pFound == pDisplayIds + NumDisplays ? -1 : (int)(pFound - pDisplayIds);
+	SDL_free(pDisplayIds);
+	return Index;
+}
+
+SDL_Window *CInput::Window() const
+{
+	return SDL_GetWindowFromID(Graphics()->GetWindowId());
+}
+
 void CInput::InitJoysticks()
 {
-	if(!SDL_WasInit(SDL_INIT_JOYSTICK))
+	if(!SDL_WasInit(SDL_INIT_JOYSTICK) && !SDL_InitSubSystem(SDL_INIT_JOYSTICK))
 	{
-		if(SDL_InitSubSystem(SDL_INIT_JOYSTICK) < 0)
-		{
-			log_error("joystick", "Unable to init SDL joystick system: %s", SDL_GetError());
-			return;
-		}
+		log_error("joystick", "Unable to init SDL joystick system: %s", SDL_GetError());
+		return;
 	}
 
-	const int NumJoysticks = SDL_NumJoysticks();
+	int NumJoysticks = 0;
+	SDL_JoystickID *pJoystickIds = SDL_GetJoysticks(&NumJoysticks);
+	if(!pJoystickIds)
+	{
+		log_error("joystick", "Unable to get joysticks: %s", SDL_GetError());
+		return;
+	}
+
 	log_info("joystick", "%d joystick(s) found", NumJoysticks);
 	for(int i = 0; i < NumJoysticks; i++)
-		OpenJoystick(i);
+		OpenJoystick(pJoystickIds[i]);
+	SDL_free(pJoystickIds);
 	UpdateActiveJoystick();
 
 	Console()->Chain("inp_controller_guid", ConchainJoystickGuidChanged, this);
 }
 
-bool CInput::OpenJoystick(int JoystickIndex)
+bool CInput::OpenJoystick(int JoystickId)
 {
-	SDL_Joystick *pJoystick = SDL_JoystickOpen(JoystickIndex);
+	SDL_Joystick *pJoystick = SDL_OpenJoystick(JoystickId);
 	if(!pJoystick)
 	{
-		log_error("joystick", "Could not open joystick %d: '%s'", JoystickIndex, SDL_GetError());
+		log_error("joystick", "Could not open joystick %d: '%s'", JoystickId, SDL_GetError());
 		return false;
 	}
 	if(std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [pJoystick](const CJoystick &Joystick) -> bool { return Joystick.m_pDelegate == pJoystick; }) != m_vJoysticks.end())
@@ -147,7 +152,7 @@ bool CInput::OpenJoystick(int JoystickIndex)
 	}
 	m_vJoysticks.emplace_back(this, m_vJoysticks.size(), pJoystick);
 	const CJoystick &Joystick = m_vJoysticks[m_vJoysticks.size() - 1];
-	log_info("joystick", "Opened joystick %d '%s' (%d axes, %d buttons, %d balls, %d hats)", JoystickIndex, Joystick.GetName(),
+	log_info("joystick", "Opened joystick %d '%s' (%d axes, %d buttons, %d balls, %d hats)", JoystickId, Joystick.GetName(),
 		Joystick.GetNumAxes(), Joystick.GetNumButtons(), Joystick.GetNumBalls(), Joystick.GetNumHats());
 	return true;
 }
@@ -189,13 +194,13 @@ CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
 	m_pInput = pInput;
 	m_Index = Index;
 	m_pDelegate = pDelegate;
-	m_NumAxes = SDL_JoystickNumAxes(pDelegate);
-	m_NumButtons = SDL_JoystickNumButtons(pDelegate);
-	m_NumBalls = SDL_JoystickNumBalls(pDelegate);
-	m_NumHats = SDL_JoystickNumHats(pDelegate);
-	str_copy(m_aName, SDL_JoystickName(pDelegate));
-	SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
-	m_InstanceId = SDL_JoystickInstanceID(pDelegate);
+	m_NumAxes = SDL_GetNumJoystickAxes(pDelegate);
+	m_NumButtons = SDL_GetNumJoystickButtons(pDelegate);
+	m_NumBalls = SDL_GetNumJoystickBalls(pDelegate);
+	m_NumHats = SDL_GetNumJoystickHats(pDelegate);
+	str_copy(m_aName, SDL_GetJoystickName(pDelegate));
+	SDL_GUIDToString(SDL_GetJoystickGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
+	m_InstanceId = SDL_GetJoystickID(pDelegate);
 }
 
 void CInput::CloseJoysticks()
@@ -215,7 +220,7 @@ void CInput::SetActiveJoystick(size_t Index)
 
 float CInput::CJoystick::GetAxisValue(int Axis)
 {
-	return (SDL_JoystickGetAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / (float)(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
+	return (SDL_GetJoystickAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / (float)(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
 }
 
 void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&aHatKeys)[2])
@@ -237,7 +242,7 @@ void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&aHatKeys
 
 void CInput::CJoystick::GetHatValue(int Hat, int (&aHatKeys)[2])
 {
-	GetJoystickHatKeys(Hat, SDL_JoystickGetHat(m_pDelegate, Hat), aHatKeys);
+	GetJoystickHatKeys(Hat, SDL_GetJoystickHat(m_pDelegate, Hat), aHatKeys);
 }
 
 bool CInput::CJoystick::Relative(float *pX, float *pY)
@@ -278,26 +283,21 @@ bool CInput::MouseRelative(float *pX, float *pY)
 {
 	if(!m_MouseFocus || !m_InputGrabbed)
 		return false;
-
-	ivec2 Relative;
-	SDL_GetRelativeMouseState(&Relative.x, &Relative.y);
-
-	*pX = Relative.x;
-	*pY = Relative.y;
+	SDL_GetRelativeMouseState(pX, pY);
 	return *pX != 0.0f || *pY != 0.0f;
 }
 
 void CInput::MouseModeAbsolute()
 {
 	m_InputGrabbed = false;
-	SDL_SetRelativeMouseMode(SDL_FALSE);
+	SDL_SetWindowRelativeMouseMode(Window(), false);
 	Graphics()->SetWindowGrab(false);
 }
 
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = true;
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_SetWindowRelativeMouseMode(Window(), true);
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(nullptr, nullptr);
@@ -305,15 +305,15 @@ void CInput::MouseModeRelative()
 
 vec2 CInput::NativeMousePos() const
 {
-	ivec2 Position;
+	vec2 Position;
 	SDL_GetMouseState(&Position.x, &Position.y);
-	return vec2(Position.x, Position.y);
+	return Position;
 }
 
 bool CInput::NativeMousePressed(int Index) const
 {
 	int i = SDL_GetMouseState(nullptr, nullptr);
-	return (i & SDL_BUTTON(Index)) != 0;
+	return (i & SDL_BUTTON_MASK(Index)) != 0;
 }
 
 const std::vector<IInput::CTouchFingerState> &CInput::TouchFingerStates() const
@@ -344,16 +344,12 @@ void CInput::SetClipboardText(const char *pText)
 
 void CInput::StartTextInput()
 {
-	// enable system messages for IME
-	SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
-	SDL_StartTextInput();
+	SDL_StartTextInput(Window());
 }
 
 void CInput::StopTextInput()
 {
-	SDL_StopTextInput();
-	// disable system messages for performance
-	SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
+	SDL_StopTextInput(Window());
 	m_CompositionString = "";
 	m_CompositionCursor = 0;
 	m_vCandidates.clear();
@@ -366,8 +362,19 @@ void CInput::EnsureScreenKeyboardShown()
 	{
 		return;
 	}
-	SDL_StopTextInput();
-	SDL_StartTextInput();
+	SDL_StopTextInput(Window());
+	SDL_StartTextInput(Window());
+}
+
+void CInput::ClearComposition()
+{
+	// SDL_ClearComposition only cancels the composition of the IME on Windows, on the
+	// other platforms our own composition state has to be cleared as well.
+	SDL_ClearComposition(Window());
+	m_CompositionString = "";
+	m_CompositionCursor = 0;
+	m_vCandidates.clear();
+	m_CandidateSelectedIndex = -1;
 }
 
 void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const
@@ -477,11 +484,11 @@ void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 
 	const int Key = Event.button + KEY_JOYSTICK_BUTTON_0;
 
-	if(Event.type == SDL_JOYBUTTONDOWN)
+	if(Event.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN)
 	{
 		AddKeyEvent(Key, IInput::FLAG_PRESS);
 	}
-	else if(Event.type == SDL_JOYBUTTONUP)
+	else if(Event.type == SDL_EVENT_JOYSTICK_BUTTON_UP)
 	{
 		AddKeyEvent(Key, IInput::FLAG_RELEASE);
 	}
@@ -561,8 +568,8 @@ vec2 CInput::TouchDeltaToViewport(vec2 Delta) const
 void CInput::HandleTouchDownEvent(const SDL_TouchFingerEvent &Event)
 {
 	CTouchFingerState TouchFingerState;
-	TouchFingerState.m_Finger.m_DeviceId = Event.touchId;
-	TouchFingerState.m_Finger.m_FingerId = Event.fingerId;
+	TouchFingerState.m_Finger.m_DeviceId = Event.touchID;
+	TouchFingerState.m_Finger.m_FingerId = Event.fingerID;
 	TouchFingerState.m_Position = TouchPositionToViewport(vec2(Event.x, Event.y));
 	TouchFingerState.m_Delta = TouchDeltaToViewport(vec2(Event.dx, Event.dy));
 	TouchFingerState.m_PressTime = time_get_nanoseconds();
@@ -572,7 +579,7 @@ void CInput::HandleTouchDownEvent(const SDL_TouchFingerEvent &Event)
 void CInput::HandleTouchUpEvent(const SDL_TouchFingerEvent &Event)
 {
 	auto FoundState = std::find_if(m_vTouchFingerStates.begin(), m_vTouchFingerStates.end(), [Event](const CTouchFingerState &State) {
-		return State.m_Finger.m_DeviceId == Event.touchId && State.m_Finger.m_FingerId == Event.fingerId;
+		return State.m_Finger.m_DeviceId == Event.touchID && State.m_Finger.m_FingerId == Event.fingerID;
 	});
 	if(FoundState != m_vTouchFingerStates.end())
 	{
@@ -583,7 +590,7 @@ void CInput::HandleTouchUpEvent(const SDL_TouchFingerEvent &Event)
 void CInput::HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event)
 {
 	auto FoundState = std::find_if(m_vTouchFingerStates.begin(), m_vTouchFingerStates.end(), [Event](const CTouchFingerState &State) {
-		return State.m_Finger.m_DeviceId == Event.touchId && State.m_Finger.m_FingerId == Event.fingerId;
+		return State.m_Finger.m_DeviceId == Event.touchID && State.m_Finger.m_FingerId == Event.fingerID;
 	});
 	if(FoundState != m_vTouchFingerStates.end())
 	{
@@ -619,7 +626,8 @@ void CInput::SetCompositionWindowPosition(float X, float Y, float H)
 	Rect.y = Y / m_pGraphics->ScreenHiDPIScale();
 	Rect.h = H / m_pGraphics->ScreenHiDPIScale();
 	Rect.w = 0;
-	SDL_SetTextInputRect(&Rect);
+	// Todo SDL: pass the cursor position instead of always using the start of the area
+	SDL_SetTextInputArea(Window(), &Rect, 0);
 }
 
 static int TranslateKeyEventKey(const SDL_KeyboardEvent &KeyEvent)
@@ -638,12 +646,12 @@ static int TranslateKeyEventKey(const SDL_KeyboardEvent &KeyEvent)
 	// CAPS   =  8192
 	// MODE   = 16384
 	// Sum if you want to ignore multiple modifiers.
-	if(KeyEvent.keysym.mod & g_Config.m_InpIgnoredModifiers)
+	if(KeyEvent.mod & g_Config.m_InpIgnoredModifiers)
 	{
 		return KEY_UNKNOWN;
 	}
 
-	int Key = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(KeyEvent.keysym.sym) : KeyEvent.keysym.scancode;
+	int Key = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(KeyEvent.key, nullptr) : KeyEvent.scancode;
 
 #if defined(CONF_PLATFORM_ANDROID)
 	// Translate the Android back-button to the escape-key so it can be used to open/close the menu, close popups etc.
@@ -683,21 +691,27 @@ static int TranslateMouseButtonEventKey(const SDL_MouseButtonEvent &MouseButtonE
 	}
 }
 
-static int TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &MouseWheelEvent)
+int CInput::TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &MouseWheelEvent)
 {
-	if(MouseWheelEvent.y > 0)
+	// x and y are the precise deltas in SDL3, so accumulate them to whole notches.
+	// One notch of a high resolution wheel or a trackpad would otherwise produce a
+	// burst of events. SDL only does this itself since 3.2.12, in integer_x/integer_y.
+	float WheelX, WheelY;
+	m_ResidualScrollX = std::modf(m_ResidualScrollX + MouseWheelEvent.x, &WheelX);
+	m_ResidualScrollY = std::modf(m_ResidualScrollY + MouseWheelEvent.y, &WheelY);
+	if(WheelY > 0)
 	{
 		return KEY_MOUSE_WHEEL_UP;
 	}
-	else if(MouseWheelEvent.y < 0)
+	else if(WheelY < 0)
 	{
 		return KEY_MOUSE_WHEEL_DOWN;
 	}
-	else if(MouseWheelEvent.x > 0)
+	else if(WheelX > 0)
 	{
 		return KEY_MOUSE_WHEEL_RIGHT;
 	}
-	else if(MouseWheelEvent.x < 0)
+	else if(WheelX < 0)
 	{
 		return KEY_MOUSE_WHEEL_LEFT;
 	}
@@ -753,211 +767,184 @@ int CInput::Update()
 	{
 		switch(Event.type)
 		{
-		case SDL_SYSWMEVENT:
-			ProcessSystemMessage(Event.syswm.msg);
-			break;
-
-		case SDL_TEXTEDITING:
+		case SDL_EVENT_TEXT_EDITING:
 			HandleTextEditingEvent(Event.edit.text, Event.edit.start, Event.edit.length);
 			break;
 
-#if SDL_VERSION_ATLEAST(2, 0, 22)
-		case SDL_TEXTEDITING_EXT:
-			HandleTextEditingEvent(Event.editExt.text, Event.editExt.start, Event.editExt.length);
-			SDL_free(Event.editExt.text);
-			break;
-#endif
-
-		case SDL_TEXTINPUT:
+		case SDL_EVENT_TEXT_INPUT:
 			m_CompositionString = "";
 			m_CompositionCursor = 0;
 			AddTextEvent(Event.text.text);
 			break;
 
+		case SDL_EVENT_TEXT_EDITING_CANDIDATES:
+			// TODO: handle Event.edit_candidates.horizontal
+			m_vCandidates.clear();
+			m_vCandidates.reserve(Event.edit_candidates.num_candidates);
+			for(auto i = 0; i < Event.edit_candidates.num_candidates; ++i)
+				m_vCandidates.emplace_back(Event.edit_candidates.candidates[i]);
+			// SDL's Windows backend only sends the current page of candidates but reports
+			// the absolute selection index, so from the second page onwards it points
+			// past the page or, for the variable page size of Chinese IMEs, at the wrong
+			// row. Show no selection when it is out of range.
+			m_CandidateSelectedIndex = Event.edit_candidates.selected_candidate;
+			if(m_CandidateSelectedIndex >= (int)m_vCandidates.size())
+				m_CandidateSelectedIndex = -1;
+			break;
+
 		// handle keys
-		case SDL_KEYDOWN:
+		case SDL_EVENT_KEY_DOWN:
 			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_PRESS | (Event.key.repeat != 0 ? FLAG_REPEAT : 0));
 			break;
 
-		case SDL_KEYUP:
+		case SDL_EVENT_KEY_UP:
 			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_RELEASE);
 			break;
 
 		// handle the joystick events
-		case SDL_JOYAXISMOTION:
+		case SDL_EVENT_JOYSTICK_AXIS_MOTION:
 			HandleJoystickAxisMotionEvent(Event.jaxis);
 			break;
 
-		case SDL_JOYBUTTONUP:
-		case SDL_JOYBUTTONDOWN:
+		case SDL_EVENT_JOYSTICK_BUTTON_UP:
+		case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
 			HandleJoystickButtonEvent(Event.jbutton);
 			break;
 
-		case SDL_JOYHATMOTION:
+		case SDL_EVENT_JOYSTICK_HAT_MOTION:
 			HandleJoystickHatMotionEvent(Event.jhat);
 			break;
 
-		case SDL_JOYDEVICEADDED:
+		case SDL_EVENT_JOYSTICK_ADDED:
 			HandleJoystickAddedEvent(Event.jdevice);
 			break;
 
-		case SDL_JOYDEVICEREMOVED:
+		case SDL_EVENT_JOYSTICK_REMOVED:
 			HandleJoystickRemovedEvent(Event.jdevice);
 			break;
 
 		// handle mouse buttons
-		case SDL_MOUSEBUTTONDOWN:
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_PRESS);
 			break;
 
-		case SDL_MOUSEBUTTONUP:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
 			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_RELEASE);
 			break;
 
-		case SDL_MOUSEWHEEL:
+		case SDL_EVENT_MOUSE_WHEEL:
 			AddKeyEventChecked(TranslateMouseWheelEventKey(Event.wheel), IInput::FLAG_PRESS | IInput::FLAG_RELEASE);
 			break;
 
-		case SDL_FINGERDOWN:
+		case SDL_EVENT_FINGER_DOWN:
 			HandleTouchDownEvent(Event.tfinger);
 			break;
 
-		case SDL_FINGERUP:
+		case SDL_EVENT_FINGER_UP:
+		case SDL_EVENT_FINGER_CANCELED:
 			HandleTouchUpEvent(Event.tfinger);
 			break;
 
-		case SDL_FINGERMOTION:
+		case SDL_EVENT_FINGER_MOTION:
 			HandleTouchMotionEvent(Event.tfinger);
 			break;
 
-		case SDL_WINDOWEVENT:
-			// Ignore keys following a focus gain as they may be part of global
-			// shortcuts
-			switch(Event.window.event)
-			{
-#if SDL_VERSION_ATLEAST(2, 0, 18)
-			case SDL_WINDOWEVENT_DISPLAY_CHANGED:
-				Graphics()->SwitchWindowScreen(Event.display.data1, false);
-				break;
-#endif
-			case SDL_WINDOWEVENT_MOVED:
-				Graphics()->Move(Event.window.data1, Event.window.data2);
-				break;
-			// listen to size changes, this includes our manual changes and the ones by the window manager
-			case SDL_WINDOWEVENT_SIZE_CHANGED:
-				Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
-				break;
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				if(m_InputGrabbed)
-				{
-#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL: https://github.com/libsdl-org/SDL/issues/13920
-					MouseModeAbsolute();
-#endif
-					MouseModeRelative();
-					// Clear pending relative mouse motion
-					SDL_GetRelativeMouseState(nullptr, nullptr);
-				}
-				m_MouseFocus = true;
-				IgnoreKeys = true;
-				break;
-			case SDL_WINDOWEVENT_FOCUS_LOST:
-				std::fill(std::begin(m_aCurrentKeyStates), std::end(m_aCurrentKeyStates), false);
-				m_MouseFocus = false;
-				IgnoreKeys = true;
-				if(m_InputGrabbed)
-				{
-					MouseModeAbsolute();
-					// Remember that we had relative mouse
-					m_InputGrabbed = true;
-				}
-				break;
-			case SDL_WINDOWEVENT_MINIMIZED:
-#if defined(CONF_PLATFORM_ANDROID) // Save the config when minimized on Android.
-				m_pConfigManager->Save();
-#endif
-				Graphics()->WindowDestroyNtf(Event.window.windowID);
-				break;
+		case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+		{
+			const int Index = ScreenIndexFromDisplayId(Event.window.data1);
+			if(Index >= 0)
+				Graphics()->SwitchWindowScreen(Index, false);
+			break;
+		}
 
-			case SDL_WINDOWEVENT_MAXIMIZED:
-#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL: https://github.com/libsdl-org/SDL/issues/13920
+		case SDL_EVENT_WINDOW_MOVED:
+			Graphics()->Move(Event.window.data1, Event.window.data2);
+			break;
+
+		// listen to size changes, this includes our manual changes and the ones by the window manager
+		case SDL_EVENT_WINDOW_RESIZED:
+			Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
+			break;
+
+		// A pure DPI change keeps the logical size but changes the pixel size, so the
+		// viewport and the HiDPI scale still have to be refreshed.
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		{
+			int Width, Height;
+			if(SDL_GetWindowSize(Window(), &Width, &Height))
+				Graphics()->GotResized(Width, Height, -1);
+			break;
+		}
+
+		// Ignore keys following a focus gain as they may be part of global
+		// shortcuts
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:
+			if(m_InputGrabbed)
+			{
+#if defined(CONF_PLATFORM_MACOS)
+				// Todo: remove this when fixed in SDL: https://github.com/libsdl-org/SDL/issues/13920
+				// Relative mouse mode requested before the application was activated never
+				// reaches the system, while SDL already considers it enabled, so asking for
+				// it again does nothing. Force a real off to on transition instead.
 				MouseModeAbsolute();
-				MouseModeRelative();
 #endif
-				[[fallthrough]];
-			case SDL_WINDOWEVENT_RESTORED:
-				Graphics()->WindowCreateNtf(Event.window.windowID);
-				break;
+				MouseModeRelative();
+				// Clear pending relative mouse motion
+				SDL_GetRelativeMouseState(nullptr, nullptr);
 			}
+			m_MouseFocus = true;
+			IgnoreKeys = true;
+			break;
+
+		case SDL_EVENT_WINDOW_FOCUS_LOST:
+			std::fill(std::begin(m_aCurrentKeyStates), std::end(m_aCurrentKeyStates), false);
+			m_MouseFocus = false;
+			IgnoreKeys = true;
+			if(m_InputGrabbed)
+			{
+				MouseModeAbsolute();
+				// Remember that we had relative mouse
+				m_InputGrabbed = true;
+			}
+			break;
+
+		case SDL_EVENT_WINDOW_MINIMIZED:
+#if defined(CONF_PLATFORM_ANDROID) // Save the config when minimized on Android.
+			m_pConfigManager->Save();
+#endif
+			Graphics()->WindowDestroyNtf(Event.window.windowID);
+			break;
+
+		case SDL_EVENT_WINDOW_MAXIMIZED:
+#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL: https://github.com/libsdl-org/SDL/issues/13920
+			MouseModeAbsolute();
+			MouseModeRelative();
+#endif
+			[[fallthrough]];
+		case SDL_EVENT_WINDOW_RESTORED:
+			Graphics()->WindowCreateNtf(Event.window.windowID);
 			break;
 
 #if defined(CONF_PLATFORM_IOS)
 		// Save the config before the app is suspended on iOS, it can be killed
 		// without any further notice afterwards.
-		case SDL_APP_WILLENTERBACKGROUND:
+		case SDL_EVENT_WILL_ENTER_BACKGROUND:
 			m_pConfigManager->Save();
 			break;
 #endif
 
 		// other messages
-		case SDL_QUIT:
+		case SDL_EVENT_QUIT:
 			return 1;
 
-		case SDL_DROPFILE:
-			str_copy(m_aDropFile, Event.drop.file);
-			SDL_free(Event.drop.file);
+		case SDL_EVENT_DROP_FILE:
+			if(Event.drop.data)
+				str_copy(m_aDropFile, Event.drop.data);
 			break;
 		}
 	}
 
 	return 0;
-}
-
-void CInput::ProcessSystemMessage(SDL_SysWMmsg *pMsg)
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	// Todo SDL: remove this after SDL2 supports IME candidates
-	if(pMsg->subsystem == SDL_SYSWM_WINDOWS && pMsg->msg.win.msg == WM_IME_NOTIFY)
-	{
-		switch(pMsg->msg.win.wParam)
-		{
-		case IMN_OPENCANDIDATE:
-		case IMN_CHANGECANDIDATE:
-		{
-			HWND WindowHandle = pMsg->msg.win.hwnd;
-			HIMC ImeContext = ImmGetContext(WindowHandle);
-			DWORD Size = ImmGetCandidateListW(ImeContext, 0, nullptr, 0);
-			LPCANDIDATELIST pCandidateList = nullptr;
-			if(Size > 0)
-			{
-				pCandidateList = (LPCANDIDATELIST)malloc(Size);
-				Size = ImmGetCandidateListW(ImeContext, 0, pCandidateList, Size);
-			}
-			m_vCandidates.clear();
-			if(pCandidateList && Size > 0)
-			{
-				m_vCandidates.reserve(std::min(pCandidateList->dwCount - pCandidateList->dwPageStart, pCandidateList->dwPageSize));
-				for(DWORD i = pCandidateList->dwPageStart; i < pCandidateList->dwCount && (int)m_vCandidates.size() < (int)pCandidateList->dwPageSize; i++)
-				{
-					LPCWSTR pCandidate = (LPCWSTR)((DWORD_PTR)pCandidateList + pCandidateList->dwOffset[i]);
-					m_vCandidates.push_back(windows_wide_to_utf8(pCandidate).value_or("<invalid candidate>"));
-				}
-				m_CandidateSelectedIndex = pCandidateList->dwSelection - pCandidateList->dwPageStart;
-			}
-			else
-			{
-				m_CandidateSelectedIndex = -1;
-			}
-			free(pCandidateList);
-			ImmReleaseContext(WindowHandle, ImeContext);
-			break;
-		}
-		case IMN_CLOSECANDIDATE:
-			m_vCandidates.clear();
-			m_CandidateSelectedIndex = -1;
-			break;
-		}
-	}
-#endif
 }
 
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
