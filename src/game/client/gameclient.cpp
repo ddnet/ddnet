@@ -798,6 +798,32 @@ void CGameClient::UpdatePositions()
 	UpdateRenderedCharacters();
 }
 
+void CGameClient::RenderSplitViewSeparator()
+{
+	if(g_Config.m_ClLocalMultiplayerSplitBorder == 0)
+		return;
+
+	// the views only differ in what they show, so a line marks where one ends. Black
+	// around white keeps it visible whatever the views draw behind it.
+	const float Border = g_Config.m_ClLocalMultiplayerSplitBorder;
+	const float Width = Graphics()->ScreenWidth();
+	const float Height = Graphics()->ScreenHeight();
+	Graphics()->MapScreenToSize(Width, Height);
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	const float Left = std::floor(Width / 2.0f) - std::floor(Border / 2.0f);
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+	IGraphics::CQuadItem Outline(Left, 0.0f, Border, Height);
+	Graphics()->QuadsDrawTL(&Outline, 1);
+	if(Border > 2.0f)
+	{
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		IGraphics::CQuadItem Inner(Left + 1.0f, 0.0f, Border - 2.0f, Height);
+		Graphics()->QuadsDrawTL(&Inner, 1);
+	}
+	Graphics()->QuadsEnd();
+}
+
 void CGameClient::OnRender()
 {
 	const ColorRGBA ClearColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOverlayEntities ? g_Config.m_ClBackgroundEntitiesColor : g_Config.m_ClBackgroundColor));
@@ -875,6 +901,7 @@ void CGameClient::OnRender()
 			Graphics()->ViewEnd();
 		}
 		m_Camera.m_Center = Center;
+		RenderSplitViewSeparator();
 	}
 	else
 	{

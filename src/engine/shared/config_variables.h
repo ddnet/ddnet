@@ -260,6 +260,7 @@ MACRO_CONFIG_INT(ClDummyRestoreWeapon, cl_dummy_restore_weapon, 1, 0, 1, CFGFLAG
 MACRO_CONFIG_INT(ClDummyCopyMoves, cl_dummy_copy_moves, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your moves")
 MACRO_CONFIG_INT(ClLocalMultiplayer, cl_local_multiplayer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Second player on this computer controls the dummy with the secondary mouse and keyboard (inp_secondary_*)")
 MACRO_CONFIG_INT(ClLocalMultiplayerSplit, cl_local_multiplayer_split, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Split the screen between both local players instead of zooming out to show both")
+MACRO_CONFIG_INT(ClLocalMultiplayerSplitBorder, cl_local_multiplayer_split_border, 3, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Width in pixels of the line between the split screen views (0 for none)")
 
 // more controllable dummy command
 MACRO_CONFIG_INT(ClDummyControl, cl_dummy_control, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether you can control dummy at the same time (cl_dummy_jump, cl_dummy_fire, cl_dummy_hook)")

@@ -583,7 +583,7 @@ void CMenusSettingsControls::RenderSettingsMouse(CUIRect View)
 
 float CMenusSettingsControls::MeasureSettingsLocalMultiplayerHeight() const
 {
-	return 5.0f * BUTTON_HEIGHT + 4.0f * BUTTON_SPACING;
+	return 6.0f * BUTTON_HEIGHT + 5.0f * BUTTON_SPACING;
 }
 
 void CMenusSettingsControls::RenderSettingsLocalMultiplayer(CUIRect View)
@@ -601,6 +601,10 @@ void CMenusSettingsControls::RenderSettingsLocalMultiplayer(CUIRect View)
 	{
 		g_Config.m_ClLocalMultiplayerSplit ^= 1;
 	}
+
+	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+	Ui()->DoScrollbarOption(&g_Config.m_ClLocalMultiplayerSplitBorder, &g_Config.m_ClLocalMultiplayerSplitBorder, &Button, Localize("Split screen border"), 0, 20);
 
 	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
 	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
