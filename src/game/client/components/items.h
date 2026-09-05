@@ -15,6 +15,7 @@ class CScreenRect;
 
 class CItems : public CComponent
 {
+	bool IsHiddenJetpackExhaust(const CProjectileData *pCurrent) const;
 	void RenderProjectile(const CProjectileData *pCurrent, int ItemId, const CScreenRect &ScreenRect);
 	void RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted, int Flags);
 	void RenderFlags();

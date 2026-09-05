@@ -19,8 +19,18 @@
 #include <game/client/projectile_data.h>
 #include <game/mapitems.h>
 
+// the jetpack shows exhaust instead of its bullets, unless the owner holds the telegun,
+// which the server checks live when the bullet lands
+bool CItems::IsHiddenJetpackExhaust(const CProjectileData *pCurrent) const
+{
+	return pCurrent->m_JetpackExhaust && !(in_range(pCurrent->m_Owner, MAX_CLIENTS - 1) && GameClient()->m_aClients[pCurrent->m_Owner].m_HasTelegunGun);
+}
+
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId, const CScreenRect &ScreenRect)
 {
+	if(IsHiddenJetpackExhaust(pCurrent))
+		return;
+
 	int CurWeapon = std::clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 
 	// get positions
@@ -699,6 +709,9 @@ void CItems::OnInit()
 
 void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick)
 {
+	if(IsHiddenJetpackExhaust(pCurrent))
+		return;
+
 	bool LocalPlayerInGame = false;
 
 	if(GameClient()->m_Snap.m_pLocalInfo)

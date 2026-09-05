@@ -1508,7 +1508,7 @@ void CGameClient::ProcessEvents()
 			if(!Config()->m_SndGame)
 				continue;
 
-			if(m_GameInfo.m_RaceSounds && ((pEvent->m_SoundId == SOUND_GUN_FIRE && !g_Config.m_SndGun) || (pEvent->m_SoundId == SOUND_PLAYER_PAIN_LONG && !g_Config.m_SndLongPain)))
+			if(m_GameInfo.m_RaceSounds && (((pEvent->m_SoundId == SOUND_GUN_FIRE || pEvent->m_SoundId == SOUND_JETPACK_FIRE) && !g_Config.m_SndGun) || (pEvent->m_SoundId == SOUND_PLAYER_PAIN_LONG && !g_Config.m_SndLongPain)))
 				continue;
 
 			vec2 SoundPos = vec2(pEvent->m_X, pEvent->m_Y);
@@ -3861,7 +3861,7 @@ void CGameClient::HandlePredictedEvents(const int Tick)
 		{
 			if(EventsIterator->m_EventId == NETEVENTTYPE_SOUNDWORLD)
 			{
-				if(m_GameInfo.m_RaceSounds && ((EventsIterator->m_ExtraInfo == SOUND_GUN_FIRE && !g_Config.m_SndGun) || (EventsIterator->m_ExtraInfo == SOUND_PLAYER_PAIN_LONG && !g_Config.m_SndLongPain)))
+				if(m_GameInfo.m_RaceSounds && (((EventsIterator->m_ExtraInfo == SOUND_GUN_FIRE || EventsIterator->m_ExtraInfo == SOUND_JETPACK_FIRE) && !g_Config.m_SndGun) || (EventsIterator->m_ExtraInfo == SOUND_PLAYER_PAIN_LONG && !g_Config.m_SndLongPain)))
 				{
 					EventsIterator = m_PredictedWorld.m_PredictedEvents.erase(EventsIterator);
 					continue;
@@ -4111,6 +4111,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGrenade);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinja);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponLaser);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteJetpack);
 
 		for(auto &SpriteWeapon : m_GameSkin.m_aSpriteWeapons)
 		{
@@ -4228,6 +4229,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		m_GameSkin.m_SpriteWeaponGrenade = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_GRENADE_BODY]);
 		m_GameSkin.m_SpriteWeaponNinja = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_NINJA_BODY]);
 		m_GameSkin.m_SpriteWeaponLaser = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_LASER_BODY]);
+		m_GameSkin.m_SpriteJetpack = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_JETPACK]);
 
 		m_GameSkin.m_aSpriteWeapons[0] = m_GameSkin.m_SpriteWeaponHammer;
 		m_GameSkin.m_aSpriteWeapons[1] = m_GameSkin.m_SpriteWeaponGun;

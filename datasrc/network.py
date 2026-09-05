@@ -33,6 +33,7 @@ LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 ]
 ProjectileFlags = [
 	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL",
+	"JETPACK_EXHAUST",
 ]
 LaserFlags = [
 	"NO_PREDICT",
