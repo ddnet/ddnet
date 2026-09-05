@@ -1,7 +1,5 @@
 #include "antibot.h"
 
-#include <antibot/antibot_interface.h>
-
 #include <base/dbg.h>
 #include <base/mem.h>
 #include <base/str.h>
@@ -14,8 +12,51 @@
 class IEngineAntibot;
 
 #ifdef CONF_ANTIBOT
+#if defined(CONF_FAMILY_WINDOWS)
+#include <base/windows.h>
+
+#include <windows.h>
+static void *ModuleOpen(const char *pName)
+{
+	void *pModule = LoadLibraryA(pName);
+	dbg_assert(pModule != nullptr, "failed to load antibot module '%s': %s", pName, windows_format_system_message(GetLastError()).c_str());
+	return pModule;
+}
+static void *ModuleSymbol(void *pModule, const char *pName)
+{
+	return (void *)GetProcAddress((HMODULE)pModule, pName);
+}
+static void ModuleClose(void *pModule)
+{
+	FreeLibrary((HMODULE)pModule);
+}
+#else
+#include <dlfcn.h>
+static void *ModuleOpen(const char *pName)
+{
+	void *pModule = dlopen(pName, RTLD_NOW);
+	dbg_assert(pModule != nullptr, "failed to load antibot module: %s", dlerror());
+	return pModule;
+}
+static void *ModuleSymbol(void *pModule, const char *pName)
+{
+	return dlsym(pModule, pName);
+}
+static void ModuleClose(void *pModule)
+{
+	dlclose(pModule);
+}
+#endif
+
+template<typename F>
+static void LoadSymbol(void *pModule, F &pfnSymbol, const char *pName)
+{
+	pfnSymbol = (F)ModuleSymbol(pModule, pName);
+	dbg_assert(pfnSymbol != nullptr, "antibot module is missing symbol '%s'", pName);
+}
+
 CAntibot::CAntibot() :
-	m_pServer(nullptr), m_pConsole(nullptr), m_pGameServer(nullptr), m_Initialized(false)
+	m_pServer(nullptr), m_pConsole(nullptr), m_pGameServer(nullptr)
 {
 }
 CAntibot::~CAntibot()
@@ -23,8 +64,11 @@ CAntibot::~CAntibot()
 	if(m_pGameServer)
 		free(m_RoundData.m_Map.m_pTiles);
 
-	if(m_Initialized)
-		AntibotDestroy();
+	if(m_pModule)
+	{
+		m_pfnDestroy();
+		ModuleClose(m_pModule);
+	}
 }
 void CAntibot::Kick(int ClientId, const char *pMessage, void *pUser)
 {
@@ -67,7 +111,15 @@ void CAntibot::Init()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	dbg_assert(m_pServer && m_pConsole, "antibot requires server and console");
-	dbg_assert(AntibotAbiVersion() == ANTIBOT_ABI_VERSION, "antibot abi version mismatch (antibot=%d server=%d)", AntibotAbiVersion(), ANTIBOT_ABI_VERSION);
+	LoadModule();
+}
+void CAntibot::LoadModule()
+{
+	m_pModule = ModuleOpen(ANTIBOT_LIBRARY);
+#define MACRO_ANTIBOT_FUNCTION(Name) LoadSymbol(m_pModule, m_pfn##Name, "Antibot" #Name);
+	ANTIBOT_FUNCTIONS(MACRO_ANTIBOT_FUNCTION)
+#undef MACRO_ANTIBOT_FUNCTION
+	dbg_assert(m_pfnAbiVersion() == ANTIBOT_ABI_VERSION, "antibot abi version mismatch (antibot=%d server=%d)", m_pfnAbiVersion(), ANTIBOT_ABI_VERSION);
 
 	mem_zero(&m_Data, sizeof(m_Data));
 	CAntibotVersion Version = ANTIBOT_VERSION;
@@ -81,29 +133,63 @@ void CAntibot::Init()
 	m_Data.m_pfnSend = Send;
 	m_Data.m_pfnTeehistorian = Teehistorian;
 	m_Data.m_pUser = this;
-	AntibotInit(&m_Data);
+	m_pfnInit(&m_Data);
+}
+void CAntibot::Reload()
+{
+	if(!m_pModule)
+	{
+		return;
+	}
+	if(!GameServer())
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "cannot reload antibot outside of a round");
+		return;
+	}
+	m_pfnRoundEnd();
+	m_pfnDestroy();
+	ModuleClose(m_pModule);
+	LoadModule();
 
-	m_Initialized = true;
+	// Replay the events the new module missed, in the order of a server start.
+	m_pfnRoundStart(&m_RoundData);
+	Update();
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		if(Server()->ClientSlotEmpty(ClientId))
+		{
+			continue;
+		}
+		m_pfnOnEngineClientJoin(ClientId);
+		if(GameServer()->PlayerExists(ClientId))
+		{
+			m_pfnOnPlayerInit(ClientId);
+			if(m_RoundData.m_aCharacters[ClientId].m_Alive)
+			{
+				m_pfnOnSpawn(ClientId);
+			}
+		}
+	}
 }
 void CAntibot::RoundStart(IGameServer *pGameServer)
 {
 	m_pGameServer = pGameServer;
 	mem_zero(&m_RoundData, sizeof(m_RoundData));
 	m_RoundData.m_Map.m_pTiles = nullptr;
-	AntibotRoundStart(&m_RoundData);
+	m_pfnRoundStart(&m_RoundData);
 	Update();
 }
 void CAntibot::RoundEnd()
 {
 	// Let the external module clean up first
-	AntibotRoundEnd();
+	m_pfnRoundEnd();
 
 	m_pGameServer = nullptr;
 	free(m_RoundData.m_Map.m_pTiles);
 }
 void CAntibot::ConsoleCommand(const char *pCommand)
 {
-	AntibotConsoleCommand(pCommand);
+	m_pfnConsoleCommand(pCommand);
 }
 void CAntibot::Update()
 {
@@ -114,70 +200,70 @@ void CAntibot::Update()
 	if(GameServer())
 	{
 		GameServer()->FillAntibot(&m_RoundData);
-		AntibotUpdateData();
+		m_pfnUpdateData();
 	}
 }
 
 void CAntibot::OnPlayerInit(int ClientId)
 {
 	Update();
-	AntibotOnPlayerInit(ClientId);
+	m_pfnOnPlayerInit(ClientId);
 }
 void CAntibot::OnPlayerDestroy(int ClientId)
 {
 	Update();
-	AntibotOnPlayerDestroy(ClientId);
+	m_pfnOnPlayerDestroy(ClientId);
 }
 void CAntibot::OnSpawn(int ClientId)
 {
 	Update();
-	AntibotOnSpawn(ClientId);
+	m_pfnOnSpawn(ClientId);
 }
 void CAntibot::OnHammerFireReloading(int ClientId)
 {
 	Update();
-	AntibotOnHammerFireReloading(ClientId);
+	m_pfnOnHammerFireReloading(ClientId);
 }
 void CAntibot::OnHammerFire(int ClientId)
 {
 	Update();
-	AntibotOnHammerFire(ClientId);
+	m_pfnOnHammerFire(ClientId);
 }
 void CAntibot::OnHammerHit(int ClientId, int TargetId)
 {
 	Update();
-	AntibotOnHammerHit(ClientId, TargetId);
+	m_pfnOnHammerHit(ClientId, TargetId);
 }
 void CAntibot::OnDirectInput(int ClientId)
 {
 	Update();
-	AntibotOnDirectInput(ClientId);
+	m_pfnOnDirectInput(ClientId);
 }
 void CAntibot::OnCharacterTick(int ClientId)
 {
 	Update();
-	AntibotOnCharacterTick(ClientId);
+	m_pfnOnCharacterTick(ClientId);
 }
 void CAntibot::OnHookAttach(int ClientId, bool Player)
 {
 	Update();
-	AntibotOnHookAttach(ClientId, Player);
+	m_pfnOnHookAttach(ClientId, Player);
 }
 
 void CAntibot::OnEngineTick()
 {
 	Update();
-	AntibotOnEngineTick();
+	m_pfnOnEngineTick();
 }
 void CAntibot::OnEngineClientJoin(int ClientId)
 {
 	Update();
-	AntibotOnEngineClientJoin(ClientId);
+	m_pfnOnEngineClientJoin(ClientId);
 }
 void CAntibot::OnEngineClientDrop(int ClientId, const char *pReason)
 {
 	Update();
-	AntibotOnEngineClientDrop(ClientId, pReason);
+	m_pfnOnEngineClientDrop(ClientId, pReason);
 }
 bool CAntibot::OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags)
 {
@@ -187,7 +273,7 @@ bool CAntibot::OnEngineClientMessage(int ClientId, const void *pData, int Size, 
 	{
 		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
 	}
-	return AntibotOnEngineClientMessage(ClientId, pData, Size, AntibotFlags);
+	return m_pfnOnEngineClientMessage(ClientId, pData, Size, AntibotFlags);
 }
 bool CAntibot::OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags)
 {
@@ -197,12 +283,12 @@ bool CAntibot::OnEngineServerMessage(int ClientId, const void *pData, int Size, 
 	{
 		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
 	}
-	return AntibotOnEngineServerMessage(ClientId, pData, Size, AntibotFlags);
+	return m_pfnOnEngineServerMessage(ClientId, pData, Size, AntibotFlags);
 }
 bool CAntibot::OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags)
 {
 	int AntibotFlags = 0;
-	bool Result = AntibotOnEngineSimulateClientMessage(pClientId, pBuffer, BufferSize, pOutSize, &AntibotFlags);
+	bool Result = m_pfnOnEngineSimulateClientMessage(pClientId, pBuffer, BufferSize, pOutSize, &AntibotFlags);
 	if(Result)
 	{
 		*pFlags = 0;
@@ -215,7 +301,7 @@ bool CAntibot::OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int 
 }
 #else
 CAntibot::CAntibot() :
-	m_pServer(nullptr), m_pConsole(nullptr), m_pGameServer(nullptr), m_Initialized(false)
+	m_pServer(nullptr), m_pConsole(nullptr), m_pGameServer(nullptr)
 {
 }
 CAntibot::~CAntibot() = default;
@@ -232,6 +318,14 @@ void CAntibot::RoundStart(IGameServer *pGameServer)
 void CAntibot::RoundEnd()
 {
 	m_pGameServer = nullptr;
+}
+void CAntibot::Reload()
+{
+	if(!m_pConsole)
+	{
+		return;
+	}
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "antibot support not compiled in");
 }
 void CAntibot::ConsoleCommand(const char *pCommand)
 {
