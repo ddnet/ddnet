@@ -837,12 +837,17 @@ void CGameClient::OnRender()
 		}
 	}
 
-	// zoom out until both local players are visible
+	// zoom out until both local players see as much around them as they would alone
 	if(LocalMultiplayerShared())
 	{
 		vec2 MinPos, MaxPos;
 		LocalMultiplayerBounds(MinPos, MaxPos);
-		m_Camera.SetZoom(CalculateMultiViewZoom(MinPos, MaxPos, 0.0f), g_Config.m_ClMultiViewZoomSmoothness, false);
+		vec2 ViewSize;
+		Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), 1.0f, &ViewSize.x, &ViewSize.y);
+		const vec2 Distance = MaxPos - MinPos;
+		const float Zoom = m_Camera.m_UserZoomTarget + std::max(Distance.x / ViewSize.x, Distance.y / ViewSize.y);
+		// zooming out may not lag behind the tees separating, only zooming back in is smoothed
+		m_Camera.SetZoom(Zoom, Zoom > m_Camera.m_Zoom ? 0 : g_Config.m_ClMultiViewZoomSmoothness, false);
 	}
 
 	// update camera data prior to CControls::OnRender to allow CControls::m_aTargetPos to compensate using camera data
