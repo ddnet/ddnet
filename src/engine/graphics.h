@@ -277,6 +277,7 @@ public:
 	};
 
 	// Inside a view (see ViewBegin) the screen is the view's share of the window
+	int ViewIndex() const { return m_ViewIndex; }
 	int ScreenWidth() const { return m_ScreenWidth / m_ViewCount; }
 	int ScreenHeight() const { return m_ScreenHeight; }
 	vec2 ScreenSize() const { return vec2(ScreenWidth(), ScreenHeight()); }

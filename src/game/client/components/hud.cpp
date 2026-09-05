@@ -634,6 +634,9 @@ void CHud::RenderCursor()
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 		{
+			// each split screen view only shows the cursor of the player it follows
+			if(GameClient()->LocalMultiplayerSplit() && Dummy != Graphics()->ViewIndex())
+				continue;
 			const int ClientId = GameClient()->m_aLocalIds[Dummy];
 			if(!GameClient()->m_Snap.m_aCharacters[ClientId].m_Active)
 				continue;
