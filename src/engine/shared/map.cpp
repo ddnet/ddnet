@@ -42,7 +42,15 @@ const char *CMap::GetDataString(int Index)
 
 void CMap::UnloadData(int Index)
 {
+	// Don't unload tile layer data shared with another item, its users keep raw pointers into it.
+	if(m_TileLayerDataPinned && m_TileLayerDataIndices.contains(Index))
+		return;
 	m_DataFile.UnloadData(Index);
+}
+
+void CMap::PinTileLayerData()
+{
+	m_TileLayerDataPinned = true;
 }
 
 int CMap::NumData() const
@@ -197,6 +205,8 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	// Replace existing datafile with new datafile
 	m_DataFile.Close();
 	m_DataFile = std::move(NewDataFile);
+	m_TileLayerDataIndices = std::move(UsedDataIndices);
+	m_TileLayerDataPinned = false;
 	return true;
 }
 
@@ -210,6 +220,8 @@ bool CMap::Load(IStorage *pStorage, const char *pPath, int StorageType)
 void CMap::Unload()
 {
 	m_DataFile.Close();
+	m_TileLayerDataIndices.clear();
+	m_TileLayerDataPinned = false;
 }
 
 bool CMap::IsLoaded() const
