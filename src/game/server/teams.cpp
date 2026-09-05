@@ -1445,7 +1445,7 @@ void CGameTeams::ResetSavedTeam(int ClientId, int Team)
 
 std::optional<int> CGameTeams::GetFirstEmptyTeam() const
 {
-	for(int i = 1; i < TEAM_SUPER; i++)
+	for(int i = 1; i < Server()->MaxClients(); i++)
 		if(m_aTeamState[i] == ETeamState::EMPTY)
 			return i;
 	return std::nullopt;
@@ -1549,5 +1549,5 @@ bool CGameTeams::IsPractice(int Team)
 
 bool CGameTeams::IsValidTeamNumber(int Team) const
 {
-	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS - 1; // no TEAM_SUPER
+	return Team >= TEAM_FLOCK && Team < Server()->MaxClients();
 }
