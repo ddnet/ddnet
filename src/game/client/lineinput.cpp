@@ -361,16 +361,18 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 								continue;
 							}
 							std::string Line = ClipboardText.substr(Begin, i - Begin + 1);
+							str_sanitize_cc(Line.data());
 							if(FirstLine)
 							{
-								str_sanitize_cc(Line.data());
 								SetRange(Line.c_str(), m_SelectionStart, m_SelectionEnd);
 								FirstLine = false;
-								Line = GetString();
+							}
+							else
+							{
+								Set(Line.c_str());
 							}
 							Begin = i + 1;
-							str_sanitize_cc(Line.data());
-							m_pfnClipboardLineCallback(Line.c_str());
+							m_pfnClipboardLineCallback(GetString());
 						}
 					}
 					std::string Line = ClipboardText.substr(Begin, i - Begin + 1);
