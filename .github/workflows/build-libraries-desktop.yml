@@ -1,0 +1,71 @@
+name: Build Linux and Windows libraries
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-libraries-linux:
+    runs-on: ubuntu-latest
+    container:
+      # Built in a container rather than on the runner, so the libraries do not pick
+      # up a newer glibc than the oldest distribution DDNet supports
+      image: debian:11-slim
+    steps:
+    - name: Prepare Linux
+      run: |
+        dpkg --add-architecture i386
+        apt-get update -y
+        apt-get install -y --no-install-recommends \
+          build-essential ca-certificates cmake ninja-build git wget unzip xz-utils \
+          autoconf automake libtool m4 gcc-multilib g++-multilib nasm pkg-config python3 \
+          libasound2-dev libpulse-dev libx11-dev libxext-dev libxrandr-dev \
+          libxcursor-dev libxi-dev libxss-dev libdbus-1-dev libudev-dev \
+          libgl1-mesa-dev libgles2-mesa-dev libwayland-dev libssl-dev zlib1g-dev \
+          libxtst-dev libxkbcommon-dev libxfixes-dev libdrm-dev libgbm-dev libibus-1.0-dev \
+          libssl-dev:i386 zlib1g-dev:i386 \
+          libx11-dev:i386 libxext-dev:i386 libxrandr-dev:i386 libxcursor-dev:i386 \
+          libxi-dev:i386 libxss-dev:i386 libxfixes-dev:i386 libxtst-dev:i386 \
+          libxkbcommon-dev:i386 libasound2-dev:i386 libpulse-dev:i386 libdbus-1-dev:i386 \
+          libudev-dev:i386 libdrm-dev:i386 libgbm-dev:i386 libibus-1.0-dev:i386 \
+          libgl1-mesa-dev:i386 libgles2-mesa-dev:i386
+
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Build Linux libraries
+      run: scripts/compile_libs/gen_libs.sh build-linux-libs linux
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v6
+      with:
+        name: ddnet-libs-linux
+        path: build-linux-libs/ddnet-libs
+
+  build-libraries-windows:
+    runs-on: ubuntu-latest
+    env:
+      LLVM_MINGW_VERSION: 20240619
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Prepare Linux
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y --no-install-recommends \
+          build-essential cmake ninja-build mingw-w64 mingw-w64-tools nasm pkg-config python3
+        # llvm-mingw for the arm64 lane, which mingw-w64 does not cover. It goes after
+        # /usr/bin on PATH so that x86 and x86_64 keep using the mingw-w64 gcc.
+        wget -q "https://github.com/mstorsjo/llvm-mingw/releases/download/${LLVM_MINGW_VERSION}/llvm-mingw-${LLVM_MINGW_VERSION}-ucrt-ubuntu-20.04-x86_64.tar.xz"
+        sudo tar xf "llvm-mingw-${LLVM_MINGW_VERSION}-ucrt-ubuntu-20.04-x86_64.tar.xz" -C /opt
+        echo "/opt/llvm-mingw-${LLVM_MINGW_VERSION}-ucrt-ubuntu-20.04-x86_64/bin" >> "$GITHUB_PATH"
+        rustup target add x86_64-pc-windows-gnu i686-pc-windows-gnu aarch64-pc-windows-gnullvm
+
+    - name: Build Windows libraries
+      run: scripts/compile_libs/gen_libs.sh build-windows-libs windows
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v6
+      with:
+        name: ddnet-libs-windows
+        path: build-windows-libs/ddnet-libs
