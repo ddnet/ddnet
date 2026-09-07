@@ -98,6 +98,13 @@ from
 [diskdev\_cmds](http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)
 to unlock the `package_dmg` target that outputs a macOS disk image.
 
+## Building the bundled libraries
+
+The libraries in the `ddnet-libs` submodule are only needed for the official builds.
+Instructions for rebuilding them are in
+[`docs/BUILDING-desktop-libs.md`](/docs/BUILDING-desktop-libs.md) for Linux, Windows
+and macOS, and in the per-platform guides below for Android, iOS and Emscripten.
+
 ## Cross-compiling on Linux/Windows to Android
 
 Detailed instructions can be found in [`docs/BUILDING-android.md`](/docs/BUILDING-android.md).

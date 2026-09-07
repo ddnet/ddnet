@@ -48,6 +48,11 @@ function make_sqlite3() {
 		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 			cc="${EMSCRIPTEN_CC}"
 			ar="${EMSCRIPTEN_AR}"
+		elif [[ "${TARGET_PLATFORM}" == "linux" || "${TARGET_PLATFORM}" == "windows" ]]; then
+			desktop_toolchain_for "${build_folder}"
+			cc="${DESKTOP_CC}"
+			ar="${DESKTOP_AR}"
+			build_extra_cflags="${build_extra_cflags} $(desktop_cflags_for "${build_folder}")"
 		fi
 
 		# Remove absolute build paths and compiler identification from binary
@@ -61,6 +66,11 @@ function make_sqlite3() {
 			build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${EMSDK}=EMSDK"
 		fi
 
+		local make_target="sqlite3.a"
+		if [[ "${TARGET_PLATFORM}" == "windows" ]]; then
+			make_target="sqlite3.dll"
+		fi
+
 		if [[ ! -f Makefile ]]; then
 			cat > Makefile << EOF
 CC=${cc}
@@ -70,12 +80,15 @@ CFLAGS=${build_extra_cflags} ${extra_arguments[*]}
 sqlite3.a: sqlite3.o
 	\$(AR) rvs sqlite3.a sqlite3.o
 
+sqlite3.dll: sqlite3.o
+	\$(CC) -shared -o sqlite3.dll sqlite3.o -Wl,--export-all-symbols -static-libgcc
+
 sqlite3.o: ../sqlite3.c
 	\$(CC) -c \$(CFLAGS) ../sqlite3.c -o sqlite3.o
 EOF
 		fi
 
-		make "${BUILD_FLAGS}"
+		make "${BUILD_FLAGS}" "${make_target}"
 	)
 }
 
@@ -91,6 +104,13 @@ function make_all_sqlite3() {
 		make_sqlite3 "${IOS_SIM_X64_BUILD_FOLDER}" "" "${IOS_COMMON_CFLAGS}" "iphonesimulator" "${IOS_SIM_X64_ARCH}"
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 		make_sqlite3 "${EMSCRIPTEN_WASM_BUILD_FOLDER}" "" "${EMSCRIPTEN_WASM_CFLAGS} ${EMSCRIPTEN_EXTRA_RELEASE_CFLAGS}"
+	elif [[ "${TARGET_PLATFORM}" == "linux" ]]; then
+		make_sqlite3 "${LINUX_X64_BUILD_FOLDER}" "" ""
+		make_sqlite3 "${LINUX_X86_BUILD_FOLDER}" "" ""
+	elif [[ "${TARGET_PLATFORM}" == "windows" ]]; then
+		make_sqlite3 "${WINDOWS_X64_BUILD_FOLDER}" "" ""
+		make_sqlite3 "${WINDOWS_X86_BUILD_FOLDER}" "" ""
+		make_sqlite3 "${WINDOWS_ARM64_BUILD_FOLDER}" "" ""
 	else
 		log_error "ERROR: Unsupported target platform: ${TARGET_PLATFORM}"
 		exit 1

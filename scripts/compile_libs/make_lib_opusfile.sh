@@ -67,6 +67,20 @@ function make_opusfile() {
 		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 			cc="${EMSCRIPTEN_CC}"
 			ar="${EMSCRIPTEN_AR}"
+		elif [[ "${TARGET_PLATFORM}" == "linux" || "${TARGET_PLATFORM}" == "windows" || "${TARGET_PLATFORM}" == "mac" ]]; then
+			desktop_toolchain_for "${build_folder}"
+			cc="${DESKTOP_CC}"
+			ar="${DESKTOP_AR}"
+			build_extra_cflags="${build_extra_cflags} $(desktop_cflags_for "${build_folder}")"
+		fi
+
+		local make_target="libopusfile.a"
+		local link_libs=""
+		if [[ "${TARGET_PLATFORM}" == "windows" ]]; then
+			make_target="libopusfile.dll"
+			# The DLL has to resolve the ogg and opus symbols it uses, and on
+			# Windows those are DLLs of their own
+			link_libs="-L${library_path}/opus/${build_folder} -L${library_path}/ogg/${build_folder} -lopus -logg"
 		fi
 
 		if [[ ! -f Makefile ]]; then
@@ -82,12 +96,15 @@ INCLUDES=-I${PWD}/../include \
 libopusfile.a: opusfile.o info.o stream.o internal.o
 	\$(AR) rvs libopusfile.a opusfile.o info.o stream.o internal.o
 
+libopusfile.dll: opusfile.o info.o stream.o internal.o
+	\$(CC) -shared -o libopusfile.dll opusfile.o info.o stream.o internal.o ${link_libs} -Wl,--export-all-symbols -static-libgcc
+
 opusfile.o info.o stream.o internal.o: %.o: ../src/%.c
 	\$(CC) -c \$(CFLAGS) \$(INCLUDES) \$< -o \$@
 EOF
 		fi
 
-		make "${BUILD_FLAGS}"
+		make "${BUILD_FLAGS}" "${make_target}"
 	)
 }
 
@@ -103,6 +120,16 @@ function make_all_opusfile() {
 		make_opusfile "${IOS_SIM_X64_BUILD_FOLDER}" "" "${IOS_COMMON_CFLAGS}" "iphonesimulator" "${IOS_SIM_X64_ARCH}"
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 		make_opusfile "${EMSCRIPTEN_WASM_BUILD_FOLDER}" "" "${EMSCRIPTEN_WASM_CFLAGS} ${EMSCRIPTEN_EXTRA_RELEASE_CFLAGS}"
+	elif [[ "${TARGET_PLATFORM}" == "linux" ]]; then
+		make_opusfile "${LINUX_X64_BUILD_FOLDER}" "" ""
+		make_opusfile "${LINUX_X86_BUILD_FOLDER}" "" ""
+	elif [[ "${TARGET_PLATFORM}" == "windows" ]]; then
+		make_opusfile "${WINDOWS_X64_BUILD_FOLDER}" "" ""
+		make_opusfile "${WINDOWS_X86_BUILD_FOLDER}" "" ""
+		make_opusfile "${WINDOWS_ARM64_BUILD_FOLDER}" "" ""
+	elif [[ "${TARGET_PLATFORM}" == "mac" ]]; then
+		make_opusfile "${MAC_X64_BUILD_FOLDER}" "" ""
+		make_opusfile "${MAC_ARM64_BUILD_FOLDER}" "" ""
 	else
 		log_error "ERROR: Unsupported target platform: ${TARGET_PLATFORM}"
 		exit 1
