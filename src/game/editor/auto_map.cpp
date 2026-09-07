@@ -425,6 +425,9 @@ void CAutomapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 			pOutLayer->m_Index = pInLayer->m_Index;
 			pOutLayer->m_Flags = pInLayer->m_Flags;
 
+			if(x >= pGameLayer->m_Width || y >= pGameLayer->m_Height)
+				continue;
+
 			const CTile *pInGame = &pGameLayer->m_pTiles[y * pGameLayer->m_Width + x];
 			CTile *pOutGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_Width + x - UpdateFromX];
 			pOutGame->m_Index = pInGame->m_Index;
@@ -444,6 +447,9 @@ void CAutomapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 			pOutLayer->m_Index = pInLayer->m_Index;
 			pOutLayer->m_Flags = pInLayer->m_Flags;
 			pLayer->RecordStateChange(x, y, PreviousLayer, *pOutLayer);
+
+			if(x >= pGameLayer->m_Width || y >= pGameLayer->m_Height)
+				continue;
 
 			const CTile *pInGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_Width + x - UpdateFromX];
 			CTile *pOutGame = &pGameLayer->m_pTiles[y * pGameLayer->m_Width + x];
