@@ -758,7 +758,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 	str_copy(pEntry->m_Info.m_aCommunityCountry, TmpInfo.m_aCommunityCountry);
 	str_copy(pEntry->m_Info.m_aCommunityType, TmpInfo.m_aCommunityType);
 	UpdateServerRank(&pEntry->m_Info);
-	pEntry->m_Info.m_GametypeColor = CServerInfo::GametypeColor(pEntry->m_Info.m_aGameType);
+	pEntry->m_Info.m_GametypeColor = m_pHttp->GametypeColor(pEntry->m_Info.m_aGameType);
 
 	if(pEntry->m_Info.m_ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
 	{
@@ -2451,41 +2451,6 @@ int CServerInfo::EstimateLatency(int Loc1, int Loc2)
 		return 199;
 	}
 	return 99;
-}
-
-ColorRGBA CServerInfo::GametypeColor(const char *pGametype)
-{
-	ColorHSLA HslaColor;
-	if(str_comp(pGametype, "DM") == 0 || str_comp(pGametype, "TDM") == 0 || str_comp(pGametype, "CTF") == 0 || str_comp(pGametype, "LMS") == 0 || str_comp(pGametype, "LTS") == 0)
-		HslaColor = ColorHSLA(0.33f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "catch"))
-		HslaColor = ColorHSLA(0.17f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "dm") || str_find_nocase(pGametype, "tdm") || str_find_nocase(pGametype, "ctf") || str_find_nocase(pGametype, "lms") || str_find_nocase(pGametype, "lts"))
-	{
-		if(pGametype[0] == 'i' || pGametype[0] == 'g')
-			HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
-		else
-			HslaColor = ColorHSLA(0.40f, 1.0f, 0.75f);
-	}
-	else if(str_find_nocase(pGametype, "s-ddracex"))
-		HslaColor = ColorHSLA(1.0f, 1.0f, 0.7f);
-	else if(str_find_nocase(pGametype, "f-ddrace") || str_find_nocase(pGametype, "freeze"))
-		HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "fng"))
-		HslaColor = ColorHSLA(0.83f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "gores"))
-		HslaColor = ColorHSLA(0.525f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "BW"))
-		HslaColor = ColorHSLA(0.05f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "ddracenet") || str_find_nocase(pGametype, "ddnet") || str_find_nocase(pGametype, "0xf"))
-		HslaColor = ColorHSLA(0.58f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "ddrace") || str_find_nocase(pGametype, "mkrace"))
-		HslaColor = ColorHSLA(0.75f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "race") || str_find_nocase(pGametype, "fastcap"))
-		HslaColor = ColorHSLA(0.46f, 1.0f, 0.75f);
-	else
-		HslaColor = ColorHSLA(1.0f, 1.0f, 1.0f);
-	return color_cast<ColorRGBA>(HslaColor);
 }
 
 bool CServerInfo::ParseLocation(int *pResult, const char *pString)
