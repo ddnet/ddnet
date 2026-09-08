@@ -91,7 +91,7 @@ void CAntibot::RoundStart(IGameServer *pGameServer)
 	mem_zero(&m_RoundData, sizeof(m_RoundData));
 	m_RoundData.m_Map.m_pTiles = nullptr;
 	AntibotRoundStart(&m_RoundData);
-	Update();
+	UpdateAll();
 }
 void CAntibot::RoundEnd()
 {
@@ -105,83 +105,104 @@ void CAntibot::ConsoleCommand(const char *pCommand)
 {
 	AntibotConsoleCommand(pCommand);
 }
-void CAntibot::Update()
+void CAntibot::Update(int ClientId)
 {
 	m_Data.m_Now = time_get();
 	m_Data.m_Freq = time_freq();
 
-	Server()->FillAntibot(&m_RoundData);
+	Server()->FillAntibot(&m_RoundData, ClientId);
 	if(GameServer())
 	{
-		GameServer()->FillAntibot(&m_RoundData);
+		GameServer()->FillAntibot(&m_RoundData, ClientId);
+		AntibotUpdateData();
+	}
+}
+void CAntibot::UpdateAll()
+{
+	m_Data.m_Now = time_get();
+	m_Data.m_Freq = time_freq();
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		Server()->FillAntibot(&m_RoundData, ClientId);
+		if(GameServer())
+		{
+			GameServer()->FillAntibot(&m_RoundData, ClientId);
+		}
+	}
+	if(GameServer())
+	{
 		AntibotUpdateData();
 	}
 }
 
 void CAntibot::OnPlayerInit(int ClientId)
 {
-	Update();
+	UpdateAll();
 	AntibotOnPlayerInit(ClientId);
 }
 void CAntibot::OnPlayerDestroy(int ClientId)
 {
-	Update();
+	UpdateAll();
 	AntibotOnPlayerDestroy(ClientId);
 }
 void CAntibot::OnSpawn(int ClientId)
 {
-	Update();
+	Update(ClientId);
 	AntibotOnSpawn(ClientId);
 }
 void CAntibot::OnHammerFireReloading(int ClientId)
 {
-	Update();
+	Update(ClientId);
 	AntibotOnHammerFireReloading(ClientId);
 }
 void CAntibot::OnHammerFire(int ClientId)
 {
-	Update();
+	Update(ClientId);
 	AntibotOnHammerFire(ClientId);
 }
 void CAntibot::OnHammerHit(int ClientId, int TargetId)
 {
-	Update();
+	// The module may inspect the target's data, so update it as well
+	Update(ClientId);
+	Update(TargetId);
 	AntibotOnHammerHit(ClientId, TargetId);
 }
 void CAntibot::OnDirectInput(int ClientId)
 {
-	Update();
+	Update(ClientId);
 	AntibotOnDirectInput(ClientId);
 }
 void CAntibot::OnCharacterTick(int ClientId)
 {
-	Update();
+	Update(ClientId);
 	AntibotOnCharacterTick(ClientId);
 }
 void CAntibot::OnHookAttach(int ClientId, bool Player)
 {
-	Update();
+	// The module may inspect the hooked player's data, so update all clients
+	UpdateAll();
 	AntibotOnHookAttach(ClientId, Player);
 }
 
 void CAntibot::OnEngineTick()
 {
-	Update();
+	UpdateAll();
 	AntibotOnEngineTick();
 }
 void CAntibot::OnEngineClientJoin(int ClientId)
 {
-	Update();
+	UpdateAll();
 	AntibotOnEngineClientJoin(ClientId);
 }
 void CAntibot::OnEngineClientDrop(int ClientId, const char *pReason)
 {
-	Update();
+	UpdateAll();
 	AntibotOnEngineClientDrop(ClientId, pReason);
 }
 bool CAntibot::OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags)
 {
-	Update();
+	Update(ClientId);
 	int AntibotFlags = 0;
 	if((Flags & MSGFLAG_VITAL) == 0)
 	{
@@ -191,7 +212,7 @@ bool CAntibot::OnEngineClientMessage(int ClientId, const void *pData, int Size, 
 }
 bool CAntibot::OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags)
 {
-	Update();
+	Update(ClientId);
 	int AntibotFlags = 0;
 	if((Flags & MSGFLAG_VITAL) == 0)
 	{
@@ -244,7 +265,10 @@ void CAntibot::ConsoleCommand(const char *pCommand)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "unknown command");
 	}
 }
-void CAntibot::Update()
+void CAntibot::Update(int ClientId)
+{
+}
+void CAntibot::UpdateAll()
 {
 }
 
