@@ -15,9 +15,15 @@
 
 #include <unordered_set>
 
-#if !defined(CONF_FAMILY_WINDOWS)
+#if !defined(CONF_FAMILY_WINDOWS) && !defined(CONF_PLATFORM_MACOS)
 #include <fcntl.h>
 #include <sys/stat.h>
+#endif
+
+#if defined(CONF_PLATFORM_MACOS)
+#include <base/process.h>
+
+#include <sys/wait.h>
 #endif
 
 class CUpdaterFetchTask : public IHttpRequest::IProgressCallback
@@ -43,12 +49,14 @@ static inline bool IsUnreserved(unsigned char c)
 	       c == '.' || c == '~' || c == '/';
 }
 
+#if !defined(CONF_PLATFORM_MACOS)
 static bool IsAllowedUpdaterPath(const char *pPath)
 {
 	return fs_is_relative_path(pPath) &&
 	       str_find(pPath, "..") == nullptr &&
 	       str_valid_filename(fs_filename(pPath));
 }
+#endif
 
 static void UrlEncodePath(const char *pIn, char *pOut, size_t OutSize)
 {
@@ -94,7 +102,18 @@ static void FormatUpdaterDestPath(char *pBuf, int BufSize, const char *pFile, co
 	str_format(pBuf, BufSize, "update/%s", pDestPath);
 }
 
-#if !defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_PLATFORM_MACOS)
+template<typename... TArguments>
+static bool RunExternalTool(const char *pFile, TArguments... Arguments)
+{
+	const char *apArguments[] = {Arguments...};
+	const PROCESS Pid = process_execute(pFile, EShellExecuteWindowState::BACKGROUND, apArguments, std::size(apArguments));
+	int Status;
+	return Pid != INVALID_PROCESS && waitpid(Pid, &Status, 0) != -1 && WIFEXITED(Status) && WEXITSTATUS(Status) == 0;
+}
+#endif
+
+#if !defined(CONF_FAMILY_WINDOWS) && !defined(CONF_PLATFORM_MACOS)
 static bool SetExecutableBit(const char *pPath)
 {
 	const int FileDescriptor = open(pPath, O_RDWR);
@@ -167,6 +186,14 @@ void CUpdater::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
+
+#if defined(CONF_PLATFORM_MACOS)
+	char aBundlePath[IO_MAX_PATH_LENGTH];
+	if(GetClientBundlePath(aBundlePath, sizeof(aBundlePath)))
+		RemoveOldBundle(aBundlePath);
+	if(GetServerBundlePath(aBundlePath, sizeof(aBundlePath)))
+		RemoveOldBundle(aBundlePath);
+#endif
 }
 
 void CUpdater::SetCurrentState(EUpdaterState NewState)
@@ -255,10 +282,85 @@ void CUpdater::AddFileJob(const char *pFile, bool Job)
 	m_FileJobs.emplace_front(pFile, Job);
 }
 
+#if defined(CONF_PLATFORM_MACOS)
+bool CUpdater::GetClientBundlePath(char *pPath, int PathSize)
+{
+	m_pStorage->GetBinaryPath("", pPath, PathSize);
+	fs_normalize_path(pPath);
+	return fs_parent_dir(pPath) == 0 && fs_parent_dir(pPath) == 0 && str_endswith(pPath, ".app") && str_find(pPath, "/AppTranslocation/") == nullptr;
+}
+
+bool CUpdater::GetServerBundlePath(char *pPath, int PathSize)
+{
+	if(!GetClientBundlePath(pPath, PathSize) || fs_parent_dir(pPath) != 0)
+		return false;
+	str_append(pPath, "/" SERVER_EXEC ".app", PathSize);
+	return true;
+}
+
+bool CUpdater::ExtractBundle(const char *pUpdateDir, const char *pExtractPath, const char *pTmpName, const char *pBundleOldPath)
+{
+	char aTarballPath[IO_MAX_PATH_LENGTH];
+	str_format(aTarballPath, sizeof(aTarballPath), "%s/%s", pUpdateDir, pTmpName);
+
+	if(!RunExternalTool("/bin/rm", "-rf", pBundleOldPath, pExtractPath) ||
+		!RunExternalTool("/usr/bin/tar", "-xf", aTarballPath, "-C", pUpdateDir) ||
+		!fs_is_dir(pExtractPath))
+	{
+		log_error("updater", "Failed to extract '%s'", aTarballPath);
+		return false;
+	}
+	(void)fs_remove(aTarballPath);
+	return true;
+}
+
+void CUpdater::RemoveOldBundle(const char *pBundlePath)
+{
+	char aBundleOldPath[IO_MAX_PATH_LENGTH];
+	str_format(aBundleOldPath, sizeof(aBundleOldPath), "%s.old", pBundlePath);
+	if(fs_is_dir(aBundleOldPath) && !RunExternalTool("/bin/rm", "-rf", aBundleOldPath))
+		log_error("updater", "Failed to remove '%s'", aBundleOldPath);
+}
+#endif
+
 bool CUpdater::ReplaceClient()
 {
-	log_debug("updater", "Replacing " PLAT_CLIENT_EXEC);
 	bool Success = true;
+#if defined(CONF_PLATFORM_MACOS)
+	log_debug("updater", "Replacing " CLIENT_EXEC ".app");
+
+	char aBundlePath[IO_MAX_PATH_LENGTH];
+	if(!GetClientBundlePath(aBundlePath, sizeof(aBundlePath)))
+	{
+		log_error("updater", "Cannot update app bundle '%s'", aBundlePath);
+		return false;
+	}
+
+	char aBundleOldPath[IO_MAX_PATH_LENGTH];
+	str_format(aBundleOldPath, sizeof(aBundleOldPath), "%s.old", aBundlePath);
+	char aUpdateDir[IO_MAX_PATH_LENGTH];
+	m_pStorage->GetBinaryPath("update", aUpdateDir, sizeof(aUpdateDir));
+	char aExtractPath[IO_MAX_PATH_LENGTH];
+	str_format(aExtractPath, sizeof(aExtractPath), "%s/" CLIENT_EXEC ".app", aUpdateDir);
+	if(!ExtractBundle(aUpdateDir, aExtractPath, m_aClientExecTmp, aBundleOldPath))
+		return false;
+
+	// Move the new bundle out of the running one first, so the swap below only renames within one folder
+	char aBundleNewPath[IO_MAX_PATH_LENGTH];
+	str_format(aBundleNewPath, sizeof(aBundleNewPath), "%s.new", aBundlePath);
+	if(!RunExternalTool("/bin/rm", "-rf", aBundleNewPath) || fs_rename(aExtractPath, aBundleNewPath) != 0)
+		return false;
+
+	// Replace running executable by renaming twice...
+	if(fs_rename(aBundlePath, aBundleOldPath) != 0)
+		return false;
+	if(fs_rename(aBundleNewPath, aBundlePath) != 0)
+	{
+		(void)fs_rename(aBundleOldPath, aBundlePath);
+		return false;
+	}
+#else
+	log_debug("updater", "Replacing " PLAT_CLIENT_EXEC);
 	char aPath[IO_MAX_PATH_LENGTH];
 
 	// Replace running executable by renaming twice...
@@ -270,13 +372,43 @@ bool CUpdater::ReplaceClient()
 	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof(aPath));
 	Success &= SetExecutableBit(aPath);
 #endif
+#endif
 	return Success;
 }
 
 bool CUpdater::ReplaceServer()
 {
-	log_debug("updater", "Replacing " PLAT_SERVER_EXEC);
 	bool Success = true;
+#if defined(CONF_PLATFORM_MACOS)
+	log_debug("updater", "Replacing " SERVER_EXEC ".app");
+
+	char aBundlePath[IO_MAX_PATH_LENGTH];
+	char aClientBundlePath[IO_MAX_PATH_LENGTH];
+	if(!GetServerBundlePath(aBundlePath, sizeof(aBundlePath)) || !GetClientBundlePath(aClientBundlePath, sizeof(aClientBundlePath)))
+	{
+		log_error("updater", "Cannot update app bundle '%s'", aBundlePath);
+		return false;
+	}
+
+	char aBundleOldPath[IO_MAX_PATH_LENGTH];
+	str_format(aBundleOldPath, sizeof(aBundleOldPath), "%s.old", aBundlePath);
+	// The update folder is inside the client bundle, which has already been renamed
+	char aUpdateDir[IO_MAX_PATH_LENGTH];
+	str_format(aUpdateDir, sizeof(aUpdateDir), "%s.old/Contents/MacOS/update", aClientBundlePath);
+	char aExtractPath[IO_MAX_PATH_LENGTH];
+	str_format(aExtractPath, sizeof(aExtractPath), "%s/" SERVER_EXEC ".app", aUpdateDir);
+	if(!ExtractBundle(aUpdateDir, aExtractPath, m_aServerExecTmp, aBundleOldPath))
+		return false;
+
+	if(fs_rename(aBundlePath, aBundleOldPath) != 0)
+		return false;
+	if(fs_rename(aExtractPath, aBundlePath) != 0)
+	{
+		(void)fs_rename(aBundleOldPath, aBundlePath);
+		return false;
+	}
+#else
+	log_debug("updater", "Replacing " PLAT_SERVER_EXEC);
 	char aPath[IO_MAX_PATH_LENGTH];
 
 	// Replace running executable by renaming twice...
@@ -287,6 +419,7 @@ bool CUpdater::ReplaceServer()
 #if !defined(CONF_FAMILY_WINDOWS)
 	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof(aPath));
 	Success &= SetExecutableBit(aPath);
+#endif
 #endif
 	return Success;
 }
@@ -308,8 +441,10 @@ void CUpdater::ParseUpdate()
 		return;
 	}
 
+#if !defined(CONF_PLATFORM_MACOS)
 	// if we're already downloading a file, or it's been deleted in the latest version, we skip it if it comes up again
 	std::unordered_set<std::string> SkipSet;
+#endif
 
 	for(int i = 0; i < json_array_length(pVersions); i++)
 	{
@@ -324,6 +459,12 @@ void CUpdater::ParseUpdate()
 		if(str_comp(pVersion, GAME_RELEASE_VERSION) == 0)
 			break;
 
+#if defined(CONF_PLATFORM_MACOS)
+		// The entire app bundle is replaced, so the client is always updated
+		m_ClientUpdate = true;
+		if(json_boolean_get(json_object_get(pCurrent, "server")))
+			m_ServerUpdate = true;
+#else
 		if(json_boolean_get(json_object_get(pCurrent, "client")))
 			m_ClientUpdate = true;
 		if(json_boolean_get(json_object_get(pCurrent, "server")))
@@ -366,8 +507,15 @@ void CUpdater::ParseUpdate()
 				}
 			}
 		}
+#endif
 	}
 	json_value_free(pVersions);
+
+#if defined(CONF_PLATFORM_MACOS)
+	char aServerBundlePath[IO_MAX_PATH_LENGTH];
+	// The server bundle is only updated when it's installed next to the client bundle, which must be updated first
+	m_ServerUpdate = m_ServerUpdate && m_ClientUpdate && GetServerBundlePath(aServerBundlePath, sizeof(aServerBundlePath)) && fs_is_dir(aServerBundlePath);
+#endif
 }
 
 void CUpdater::InitiateUpdate()
