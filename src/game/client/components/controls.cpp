@@ -4,6 +4,7 @@
 
 #include <base/dbg.h>
 #include <base/mem.h>
+#include <base/str.h>
 #include <base/time.h>
 #include <base/vmath.h>
 
@@ -11,6 +12,7 @@
 #include <engine/shared/config.h>
 
 #include <generated/protocol.h>
+#include <generated/protocol7.h>
 
 #include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
@@ -18,6 +20,7 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
+#include <game/localization.h>
 
 #include <algorithm>
 
@@ -170,6 +173,75 @@ void CControls::OnConsoleInit()
 		static CInputSet s_Set = {this, {&m_aInputData[0].m_PrevWeapon, &m_aInputData[1].m_PrevWeapon}, 0};
 		Console()->Register("+prevweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, &s_Set, "Switch to previous weapon");
 	}
+
+	Console()->Register("tp_dummy_to_cursor", "", CFGFLAG_CLIENT, ConTpDummyToCursor, this, "Practice: teleport the other tee to your cursor");
+}
+
+void CControls::ConTpDummyToCursor(IConsole::IResult *pResult, void *pUserData)
+{
+	((CControls *)pUserData)->TpDummyToCursor();
+}
+
+void CControls::TpDummyToCursor()
+{
+	if(Client()->State() != IClient::STATE_ONLINE)
+		return;
+
+	if(!Client()->DummyConnected())
+	{
+		GameClient()->Echo(Localize("Dummy is not connected"));
+		return;
+	}
+
+	// Practice check on the tee you are controlling. Do not require the other
+	// tee in the snap: with /showall off, far tees are network-clipped.
+	const int LocalId = GameClient()->m_Snap.m_LocalClientId;
+	const int OtherId = GameClient()->m_aLocalIds[!g_Config.m_ClDummy];
+	auto IsInPractice = [&](int ClientId) {
+		if(ClientId < 0 || !GameClient()->m_Snap.m_aCharacters[ClientId].m_Active)
+			return false;
+		const auto &Char = GameClient()->m_Snap.m_aCharacters[ClientId];
+		return Char.m_HasExtendedDisplayInfo && (Char.m_ExtendedData.m_Flags & CHARACTERFLAG_PRACTICE_MODE) != 0;
+	};
+	if(!IsInPractice(LocalId) && !IsInPractice(OtherId))
+	{
+		GameClient()->Echo(Localize("You are not in practice"));
+		return;
+	}
+
+	const vec2 TeePos = GameClient()->m_LocalCharacterPos;
+	const vec2 CursorTarget = m_aMousePos[g_Config.m_ClDummy];
+	// Match server /tc (ConvertTargetToWorld): aim offset is zoom-scaled.
+	vec2 TargetCameraOffset(0.0f, 0.0f);
+	const float CursorLength = length(CursorTarget);
+	if(CursorLength > 0.0001f)
+	{
+		const float OffsetAmount = std::max(CursorLength - (float)GameClient()->m_Camera.Deadzone(), 0.0f) * ((float)GameClient()->m_Camera.FollowFactor() / 100.0f);
+		TargetCameraOffset = normalize_pre_length(CursorTarget, CursorLength) * OffsetAmount;
+	}
+	const vec2 CursorPos = TeePos + (CursorTarget - TargetCameraOffset) * GameClient()->m_Camera.m_Zoom + TargetCameraOffset;
+
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "/tpxy %f %f", CursorPos.x / 32.0f, CursorPos.y / 32.0f);
+
+	// Send on the inactive connection so the other tee always teleports,
+	// same symmetry idea as cl_dummy_hammer.
+	const int OtherConn = g_Config.m_ClDummy ? IClient::CONN_MAIN : IClient::CONN_DUMMY;
+
+	if(Client()->IsSixup())
+	{
+		protocol7::CNetMsg_Cl_Say Msg7;
+		Msg7.m_Mode = protocol7::CHAT_ALL;
+		Msg7.m_Target = -1;
+		Msg7.m_pMessage = aBuf;
+		Client()->SendPackMsg(OtherConn, &Msg7, MSGFLAG_VITAL, true);
+		return;
+	}
+
+	CNetMsg_Cl_Say Msg;
+	Msg.m_Team = 0;
+	Msg.m_pMessage = aBuf;
+	Client()->SendPackMsg(OtherConn, &Msg, MSGFLAG_VITAL);
 }
 
 void CControls::OnMessage(int Msg, void *pRawMsg)
