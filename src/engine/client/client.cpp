@@ -2553,6 +2553,11 @@ static const TVersion gs_InvalidVersion = std::make_tuple(-1, -1, -1);
 
 static TVersion ToVersion(char *pStr)
 {
+	// Cut off suffixes like `-rc1`, `-20260816` and `-3977cdf82ec1dece`
+	const char *pSuffix = str_find(pStr, "-");
+	if(pSuffix != nullptr)
+		pStr[pSuffix - pStr] = '\0';
+
 	int aVersion[3] = {0, 0, 0};
 	const char *p = strtok(pStr, ".");
 
@@ -3289,10 +3294,11 @@ void CClient::Run()
 
 	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING, ColorRGBA(0.7f, 0.7f, 1.0f, 1.0f));
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "version %s on %s %s", GAME_RELEASE_VERSION, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(0.7f, 0.7f, 1.0f, 1.0f));
 	if(GIT_SHORTREV_HASH)
 	{
-		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "git revision hash: %s", GIT_SHORTREV_HASH);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(0.7f, 0.7f, 1.0f, 1.0f));
 	}
@@ -3467,7 +3473,6 @@ void CClient::Run()
 
 				if(m_BenchmarkFile)
 				{
-					char aBuf[64];
 					str_format(aBuf, sizeof(aBuf), "Frametime %d us\n", (int)(m_RenderFrameTime * 1000000));
 					io_write(m_BenchmarkFile, aBuf, str_length(aBuf));
 					if(time_get() > m_BenchmarkStopTime)
@@ -4352,7 +4357,7 @@ void CClient::InitChecksum()
 {
 	CChecksumData *pData = &m_Checksum.m_Data;
 	pData->m_SizeofData = sizeof(*pData);
-	str_copy(pData->m_aVersionStr, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
+	str_format(pData->m_aVersionStr, sizeof(pData->m_aVersionStr), "%s %s (%s; %s)", GAME_NAME, GAME_RELEASE_VERSION, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
 	pData->m_Start = time_get();
 	os_version_str(pData->m_aOsVersion, sizeof(pData->m_aOsVersion));
 	secure_random_fill(&pData->m_Random, sizeof(pData->m_Random));

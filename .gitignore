@@ -96,6 +96,7 @@ generated
 target
 
 /build*
+/git_revision
 /integration_test/*
 /source_date_epoch
 

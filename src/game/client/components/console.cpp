@@ -1629,7 +1629,7 @@ void CGameConsole::OnRender()
 		}
 
 		// render version
-		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
+		str_format(aBuf, sizeof(aBuf), "v%s on %s %s", GAME_VERSION, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
 		TextRender()->Text(ButtonBar.x + ButtonBar.w - TextRender()->TextWidth(FONT_SIZE, aBuf) - 10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
 	}
 }

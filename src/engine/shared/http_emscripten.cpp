@@ -65,7 +65,7 @@ bool CHttpRequestEmscripten::ConfigureAndRun()
 		return false;
 	}
 
-	HeaderString("User-Agent", USER_AGENT_STRING);
+	HeaderString("User-Agent", UserAgent());
 
 	if(m_Type == REQUEST::POST_JSON)
 	{

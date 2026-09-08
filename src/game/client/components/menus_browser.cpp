@@ -1235,7 +1235,13 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 		Ui()->DoLabel(&Row, Localize("Version"), FontSize, TEXTALIGN_ML);
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		Ui()->DoLabel(&Row, pSelectedServer->m_aVersion, FontSize, TEXTALIGN_ML);
+		const SLabelProperties VersionLabelProps = {.m_MaxWidth = Row.w, .m_EllipsisAtEnd = true, .m_EnableWidthCheck = false};
+		if(Ui()->DoLabel(&Row, pSelectedServer->m_aVersion, FontSize, TEXTALIGN_ML, VersionLabelProps).m_Truncated)
+		{
+			static char s_VersionTooltipButtonId;
+			Ui()->DoButtonLogic(&s_VersionTooltipButtonId, 0, &Row, BUTTONFLAG_NONE);
+			GameClient()->m_Tooltips.DoToolTip(&s_VersionTooltipButtonId, &Row, pSelectedServer->m_aVersion);
+		}
 
 		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
 		Ui()->DoLabel(&Row, Localize("Game type"), FontSize, TEXTALIGN_ML);
