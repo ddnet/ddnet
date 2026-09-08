@@ -5,6 +5,7 @@
 #include <base/str.h>
 #include <base/time.h>
 
+#include <engine/server/enums.h>
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
 #include <engine/shared/packer.h>
@@ -72,8 +73,7 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 	for(auto &PrevPlayer : m_aPrevPlayers)
 	{
 		PrevPlayer.m_Alive = false;
-		// zero means no id
-		PrevPlayer.m_UniqueClientId = 0;
+		PrevPlayer.m_UniqueClientId = UniqueClientId::UNSPECIFIED;
 		PrevPlayer.m_Team = 0;
 	}
 	for(auto &PrevTeam : m_aPrevTeams)
