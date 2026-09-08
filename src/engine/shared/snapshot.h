@@ -19,7 +19,7 @@ public:
 	int m_TypeAndId;
 
 	const int *Data() const { return (int *)(this + 1); }
-	int InternalType() const { return m_TypeAndId >> 16; }
+	int InternalType() const { return (m_TypeAndId >> 16) & 0xffff; }
 	int Id() const { return m_TypeAndId & 0xffff; }
 	int Key() const { return m_TypeAndId; }
 	void Invalidate() { m_TypeAndId = -1; }
@@ -43,7 +43,10 @@ public:
 	enum
 	{
 		OFFSET_UUID_TYPE = 0x4000,
-		MAX_TYPE = 0x7fff,
+		// The item type is the upper 16 bits of the item key, so any item key
+		// results in a valid item type. Earlier versions only used to support
+		// item type ids up to 0x7fff.
+		MAX_TYPE = 0xffff,
 		MAX_ID = 0xffff,
 		MAX_ITEMS = 1024,
 		MAX_PARTS = 64,
@@ -167,7 +170,7 @@ class CSnapshotBuilder
 		MAX_EXTENDED_ITEM_TYPES = 64,
 	};
 
-	char m_aData[CSnapshot::MAX_SIZE];
+	alignas(int32_t) char m_aData[CSnapshot::MAX_SIZE];
 	int m_DataSize;
 
 	int m_aOffsets[CSnapshot::MAX_ITEMS];
