@@ -522,6 +522,11 @@ void CGameClient::OnDummySwap()
 	m_IsDummySwapping = 1;
 }
 
+bool CGameClient::CheckNewInput()
+{
+	return m_Controls.CheckNewInput();
+}
+
 int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 {
 	if(!Dummy)
@@ -565,7 +570,11 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 			m_DummyInput.m_WantedWeapon = WEAPON_HAMMER + 1;
 		}
 
-		const vec2 Dir = m_LocalCharacterPos - m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
+		// fast input advances the rendered state one tick, use the positions from
+		// before that tick so that the sent target is not affected
+		const vec2 TargetPos = m_FastInputApplied ? m_LocalCharacterPosNoFastInput : m_LocalCharacterPos;
+		const vec2 HammerPos = m_FastInputApplied ? m_DummyPosNoFastInput : m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
+		const vec2 Dir = TargetPos - HammerPos;
 		m_HammerInput.m_TargetX = (int)Dir.x;
 		m_HammerInput.m_TargetY = (int)Dir.y;
 
@@ -652,6 +661,7 @@ void CGameClient::OnReset()
 
 	m_PredictedPrevChar.Reset();
 	m_PredictedChar.Reset();
+	m_FastInputApplied = false;
 
 	// m_Snap was cleared in InvalidateSnapshot
 
@@ -2611,6 +2621,8 @@ void CGameClient::ApplyPreInputs(int Tick, bool Direct, CGameWorld &GameWorld)
 
 void CGameClient::OnPredict()
 {
+	m_FastInputApplied = false;
+
 	// store the previous values so we can detect prediction errors
 	CCharacterCore BeforePrevChar = m_PredictedPrevChar;
 	CCharacterCore BeforeChar = m_PredictedChar;
@@ -2858,7 +2870,62 @@ void CGameClient::OnPredict()
 		}
 	}
 
-	if(g_Config.m_Debug && g_Config.m_ClPredict && m_PredictedTick == Client()->PredGameTick(g_Config.m_ClDummy))
+	// fast input: predict the own tees one tick further with the latest local input,
+	// so new inputs become visible before the next prediction tick
+	if(g_Config.m_ClFastInput && Predict() && !m_IsDummySwapping)
+	{
+		m_FastInputWorld.CopyWorld(&m_PredictedWorld);
+		// the extra tick is only used for rendering the own tees, don't let it feed
+		// events or entity destroy ticks back into the regular prediction
+		m_FastInputWorld.m_IsValidCopy = false;
+		m_FastInputWorld.m_WorldConfig.m_PredictEvents = false;
+		CCharacter *pFastLocalChar = m_FastInputWorld.GetCharacterById(m_Snap.m_LocalClientId);
+		CCharacter *pFastDummyChar = !pDummyChar ? nullptr : m_FastInputWorld.GetCharacterById(m_aLocalIds[!g_Config.m_ClDummy]);
+		if(pFastLocalChar)
+		{
+			const int FastTick = Client()->PredGameTick(g_Config.m_ClDummy) + 1;
+			CNetObj_PlayerInput *pInputData = &m_Controls.m_aFastInput[g_Config.m_ClDummy];
+			// the dummy repeats its last sent input for the extra tick
+			CNetObj_PlayerInput *pDummyInputData = !pFastDummyChar ? nullptr : (CNetObj_PlayerInput *)Client()->GetInput(FastTick, m_IsDummySwapping ^ 1);
+			bool DummyFirst = pDummyInputData && pFastDummyChar->GetCid() < pFastLocalChar->GetCid();
+
+			if(DummyFirst)
+				pFastDummyChar->OnDirectInput(pDummyInputData);
+			pFastLocalChar->OnDirectInput(pInputData);
+			if(pDummyInputData && !DummyFirst)
+				pFastDummyChar->OnDirectInput(pDummyInputData);
+
+			ApplyPreInputs(FastTick, true, m_FastInputWorld);
+
+			m_FastInputWorld.m_GameTick = FastTick;
+			pFastLocalChar->OnPredictedInput(pInputData);
+			if(pDummyInputData)
+				pFastDummyChar->OnPredictedInput(pDummyInputData);
+
+			ApplyPreInputs(FastTick, false, m_FastInputWorld);
+
+			m_FastInputWorld.Tick();
+
+			// the input sent to the server must not use the extra tick
+			m_PredictedPrevCharNoFastInput = m_aClients[m_Snap.m_LocalClientId].m_PrevPredicted;
+			m_PredictedCharNoFastInput = m_aClients[m_Snap.m_LocalClientId].m_Predicted;
+			if(m_aLocalIds[!g_Config.m_ClDummy] >= 0)
+				m_DummyPosNoFastInput = m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
+			m_FastInputApplied = true;
+
+			m_PredictedPrevChar = m_PredictedChar;
+			m_PredictedChar = pFastLocalChar->GetCore();
+			m_aClients[m_Snap.m_LocalClientId].m_PrevPredicted = m_aClients[m_Snap.m_LocalClientId].m_Predicted;
+			m_aClients[m_Snap.m_LocalClientId].m_Predicted = pFastLocalChar->GetCore();
+			if(pFastDummyChar)
+			{
+				m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_PrevPredicted = m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted;
+				m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted = pFastDummyChar->GetCore();
+			}
+		}
+	}
+
+	if(g_Config.m_Debug && g_Config.m_ClPredict && !g_Config.m_ClFastInput && m_PredictedTick == Client()->PredGameTick(g_Config.m_ClDummy))
 	{
 		CNetObj_CharacterCore Before = {0}, Now = {0}, BeforePrev = {0}, NowPrev = {0};
 		BeforeChar.Write(&Before);
@@ -3845,7 +3912,17 @@ void CGameClient::UpdateRenderedCharacters()
 		}
 		m_aClients[i].m_RenderPos = Pos;
 		if(Predict() && i == m_Snap.m_LocalClientId)
+		{
 			m_LocalCharacterPos = Pos;
+			m_LocalCharacterPosNoFastInput = Pos;
+			if(m_FastInputApplied)
+			{
+				CNetObj_CharacterCore Prev = {0}, Cur = {0};
+				m_PredictedPrevCharNoFastInput.Write(&Prev);
+				m_PredictedCharNoFastInput.Write(&Cur);
+				m_LocalCharacterPosNoFastInput = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Cur.m_X, Cur.m_Y), Client()->PredIntraGameTick(g_Config.m_ClDummy));
+			}
+		}
 	}
 }
 
