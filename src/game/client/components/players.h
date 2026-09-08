@@ -36,6 +36,9 @@ class CPlayers : public CComponent
 		int ClientId);
 	bool IsPlayerInfoAvailable(int ClientId) const;
 
+	// only the entries of players that are rendered this frame are filled
+	CTeeRenderInfo m_aRenderInfo[MAX_CLIENTS];
+
 	int m_WeaponEmoteQuadContainerIndex;
 	int m_aWeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
