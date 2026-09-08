@@ -147,6 +147,14 @@ inline constexpr auto NETTYPE_LINK_BROADCAST = 1 << 4;
 inline constexpr auto NETTYPE_TW7 = 1 << 5;
 
 /**
+ * TLS-secured websocket address (`wss`). This is a flag in addition to `NETTYPE_WEBSOCKET_IPV4`
+ * or `NETTYPE_WEBSOCKET_IPV6`, as TLS does not change the address itself.
+ *
+ * @ingroup Network-General
+ */
+inline constexpr auto NETTYPE_WEBSOCKET_TLS = 1 << 6;
+
+/**
  * @ingroup Network-General
  */
 inline constexpr auto NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6;
@@ -154,12 +162,17 @@ inline constexpr auto NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOC
 /**
  * @ingroup Network-General
  */
-inline constexpr auto NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST | NETTYPE_TW7;
+inline constexpr auto NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST | NETTYPE_TW7 | NETTYPE_WEBSOCKET_TLS;
 
 /**
  * @ingroup Network-Address
  */
 inline constexpr auto NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1; // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
+
+/**
+ * @ingroup Network-Address
+ */
+inline constexpr auto NETADDR_URL_MAXSTRSIZE = NETADDR_MAXSTRSIZE + 15; // longest scheme is "ddnet-20+wss://"
 
 /**
  * @ingroup Network-Address
