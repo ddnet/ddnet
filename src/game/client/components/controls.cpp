@@ -24,6 +24,7 @@
 CControls::CControls()
 {
 	mem_zero(&m_aLastData, sizeof(m_aLastData));
+	std::fill(std::begin(m_aMouseOnAction), std::end(m_aMouseOnAction), false);
 	std::fill(std::begin(m_aMousePos), std::end(m_aMousePos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aMousePosOnAction), std::end(m_aMousePosOnAction), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aTargetPos), std::end(m_aTargetPos), vec2(0.0f, 0.0f));
@@ -65,6 +66,7 @@ struct CInputState
 {
 	CControls *m_pControls;
 	int *m_apVariables[NUM_DUMMIES];
+	bool m_IsMouseAction;
 };
 
 void CControls::ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
@@ -74,7 +76,11 @@ void CControls::ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
 	if(pState->m_pControls->GameClient()->m_GameInfo.m_BugDDRaceInput && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 		return;
 
-	*pState->m_apVariables[g_Config.m_ClDummy] = pResult->GetInteger(0);
+	const int Stroke = pResult->GetInteger(0);
+	*pState->m_apVariables[g_Config.m_ClDummy] = Stroke;
+
+	if(Stroke != 0 && pState->m_IsMouseAction && g_Config.m_ClSubTickAiming && pState->m_pControls->GameClient()->m_Binds.m_HandlingNewBind)
+		pState->m_pControls->m_aMouseOnAction[g_Config.m_ClDummy] = true;
 }
 
 void CControls::ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
@@ -85,8 +91,13 @@ void CControls::ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	int *pVariable = pState->m_apVariables[g_Config.m_ClDummy];
-	if(((*pVariable) & 1) != pResult->GetInteger(0))
+	const int Stroke = pResult->GetInteger(0);
+	if(((*pVariable) & 1) != Stroke)
+	{
 		(*pVariable)++;
+		if(Stroke != 0 && pState->m_IsMouseAction && g_Config.m_ClSubTickAiming && pState->m_pControls->GameClient()->m_Binds.m_HandlingNewBind)
+			pState->m_pControls->m_aMouseOnAction[g_Config.m_ClDummy] = true;
+	}
 	*pVariable &= INPUT_STATE_MASK;
 }
 
@@ -117,27 +128,27 @@ void CControls::OnConsoleInit()
 {
 	// game commands
 	{
-		static CInputState s_State = {this, {&m_aInputDirectionLeft[0], &m_aInputDirectionLeft[1]}};
+		static CInputState s_State = {this, {&m_aInputDirectionLeft[0], &m_aInputDirectionLeft[1]}, false};
 		Console()->Register("+left", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Move left");
 	}
 	{
-		static CInputState s_State = {this, {&m_aInputDirectionRight[0], &m_aInputDirectionRight[1]}};
+		static CInputState s_State = {this, {&m_aInputDirectionRight[0], &m_aInputDirectionRight[1]}, false};
 		Console()->Register("+right", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Move right");
 	}
 	{
-		static CInputState s_State = {this, {&m_aInputData[0].m_Jump, &m_aInputData[1].m_Jump}};
+		static CInputState s_State = {this, {&m_aInputData[0].m_Jump, &m_aInputData[1].m_Jump}, false};
 		Console()->Register("+jump", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Jump");
 	}
 	{
-		static CInputState s_State = {this, {&m_aInputData[0].m_Hook, &m_aInputData[1].m_Hook}};
+		static CInputState s_State = {this, {&m_aInputData[0].m_Hook, &m_aInputData[1].m_Hook}, true};
 		Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Hook");
 	}
 	{
-		static CInputState s_State = {this, {&m_aInputData[0].m_Fire, &m_aInputData[1].m_Fire}};
+		static CInputState s_State = {this, {&m_aInputData[0].m_Fire, &m_aInputData[1].m_Fire}, true};
 		Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, &s_State, "Fire");
 	}
 	{
-		static CInputState s_State = {this, {&m_aShowHookColl[0], &m_aShowHookColl[1]}};
+		static CInputState s_State = {this, {&m_aShowHookColl[0], &m_aShowHookColl[1]}, false};
 		Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Show Hook Collision");
 	}
 

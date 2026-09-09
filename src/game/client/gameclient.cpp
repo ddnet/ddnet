@@ -480,15 +480,20 @@ void CGameClient::OnUpdate()
 		}
 	}
 
+	std::fill(std::begin(m_Controls.m_aMouseOnAction), std::end(m_Controls.m_aMouseOnAction), false);
+
 	// handle key presses
 	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		OnInput(Event);
 	});
 
-	if(g_Config.m_ClSubTickAiming && m_Binds.m_MouseOnAction)
+	if(g_Config.m_ClSubTickAiming)
 	{
-		m_Controls.m_aMousePosOnAction[g_Config.m_ClDummy] = m_Controls.m_aMousePos[g_Config.m_ClDummy];
-		m_Binds.m_MouseOnAction = false;
+		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+		{
+			if(m_Controls.m_aMouseOnAction[Dummy])
+				m_Controls.m_aMousePosOnAction[Dummy] = m_Controls.m_aMousePos[Dummy];
+		}
 	}
 
 	for(auto &pComponent : m_vpAll)

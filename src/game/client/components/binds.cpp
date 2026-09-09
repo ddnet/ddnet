@@ -37,6 +37,7 @@ CBinds::CBinds()
 {
 	mem_zero(m_aapKeyBindings, sizeof(m_aapKeyBindings));
 	m_SpecialBinds.m_pBinds = this;
+	m_HandlingNewBind = false;
 }
 
 CBinds::~CBinds()
@@ -132,16 +133,9 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 		});
 		if(ActiveBind == m_vActiveBinds.end())
 		{
+			m_HandlingNewBind = true;
 			const auto &&OnKeyPress = [&](int Mask) {
-				const char *pBind = m_aapKeyBindings[Mask][Event.m_Key];
-				if(g_Config.m_ClSubTickAiming)
-				{
-					if(str_comp("+fire", pBind) == 0 || str_comp("+hook", pBind) == 0)
-					{
-						m_MouseOnAction = true;
-					}
-				}
-				Console()->ExecuteLineStroked(1, pBind, IConsole::CLIENT_ID_UNSPECIFIED);
+				Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][Event.m_Key], IConsole::CLIENT_ID_UNSPECIFIED);
 				m_vActiveBinds.emplace_back(Event.m_Key, Mask);
 			};
 
@@ -157,6 +151,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 				OnKeyPress(KeyModifier::NONE);
 				Handled = true;
 			}
+			m_HandlingNewBind = false;
 		}
 		else
 		{
