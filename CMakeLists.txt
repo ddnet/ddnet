@@ -652,7 +652,7 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
 endif()
 
 set(VULKAN_SHADER_FILE_LIST "" CACHE STRING "Vulkan shader file list")
-if(CLIENT AND VULKAN)
+if((CLIENT OR TOOLS) AND VULKAN)
   find_package(Vulkan)
   include(cmake/BuildVulkanShaders.cmake)
 else()
@@ -721,7 +721,7 @@ if(WEBSOCKETS)
   show_dependency_status("Websockets" WEBSOCKETS)
 endif()
 
-if(CLIENT AND VULKAN)
+if((CLIENT OR TOOLS) AND VULKAN)
   show_dependency_status("Vulkan" VULKAN)
 endif()
 if(NOT(CURL_FOUND) AND NOT TARGET_OS STREQUAL "emscripten")
@@ -793,7 +793,7 @@ if(NOT(GTEST_FOUND))
   endif()
 endif()
 
-if(CLIENT AND VULKAN AND NOT(VULKAN_FOUND))
+if((CLIENT OR TOOLS) AND VULKAN AND NOT(VULKAN_FOUND))
   message(SEND_ERROR "You must install Vulkan libraries to compile the ${CMAKE_PROJECT_NAME} client")
 endif()
 
@@ -3334,7 +3334,7 @@ if(TOOLS)
     file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
     if(T MATCHES "\\.cpp$")
       string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
-      if(TOOL MATCHES "^map_render$" AND NOT EGL_FOUND)
+      if(TOOL MATCHES "^map_render$" AND NOT VULKAN)
         continue()
       endif()
       set(TOOL_DEPS ${DEPS})
@@ -3349,9 +3349,9 @@ if(TOOLS)
         list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
       endif()
       if(TOOL MATCHES "^map_render$")
-        list(APPEND TOOL_INCLUDE_DIRS ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
-        list(APPEND TOOL_DEPS $<TARGET_OBJECTS:engine-gfx> ${GLEW_DEP})
-        list(APPEND TOOL_LIBS ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES} ${GLEW_LIBRARIES} ${CMAKE_DL_LIBS} ${EGL_LIBRARY} ${OPENGL_gl_LIBRARY})
+        list(APPEND TOOL_INCLUDE_DIRS ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${VULKAN_INCLUDE_DIRS})
+        list(APPEND TOOL_DEPS $<TARGET_OBJECTS:engine-gfx>)
+        list(APPEND TOOL_LIBS ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES} ${CMAKE_DL_LIBS} ${VULKAN_LIBRARIES})
       endif()
       set(EXCLUDE_FROM_ALL)
       if(DEV)
@@ -3371,15 +3371,10 @@ if(TOOLS)
       if(TOOL MATCHES "^map_render$")
         target_sources(map_render PRIVATE
           src/engine/client/graphics_threaded.cpp
-          src/engine/client/backend_egl.cpp
-          src/engine/client/backend/opengl/backend_opengl.cpp
-          src/engine/client/backend/opengl/backend_opengl3.cpp
-          src/engine/client/backend/opengl/opengl_sl.cpp
-          src/engine/client/backend/opengl/opengl_sl_program.cpp
-          src/engine/client/backend/glsl_shader_compiler.cpp
+          src/engine/client/backend_headless.cpp
           src/engine/client/backend/backend_base.cpp
+          src/engine/client/backend/vulkan/backend_vulkan.cpp
           src/engine/client/backend_threaded.cpp
-          src/engine/client/blocklist_driver.cpp
           src/engine/client/warning.cpp
           src/game/map/map_renderer.cpp
           src/game/map/render_layer.cpp
@@ -3387,12 +3382,10 @@ if(TOOLS)
           src/game/map/render_component.cpp
           src/game/map/envelope_extrema.cpp
           ${PROJECT_BINARY_DIR}/src/generated/client_data.h
+          ${VULKAN_SHADER_OUTPUT_PATHS}
         )
         target_include_directories(map_render PRIVATE ${PROJECT_BINARY_DIR})
-        target_compile_definitions(map_render PRIVATE BACKEND_NO_SDL)
-        if(GLEW_BUNDLED)
-          target_compile_definitions(map_render PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
-        endif()
+        target_compile_definitions(map_render PRIVATE BACKEND_NO_SDL CONF_BACKEND_VULKAN)
       endif()
       list(APPEND TARGETS_TOOLS ${TOOL})
     endif()
@@ -3765,7 +3758,7 @@ if(TOOLS)
     map_extract
     # tidy-alphabetical-end
   )
-  if(EGL_FOUND)
+  if(VULKAN)
     list(APPEND TARGET_TOOLS map_render)
   endif()
 else()
