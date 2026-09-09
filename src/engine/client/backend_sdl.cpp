@@ -1249,6 +1249,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	CCommandBuffer CmdBuffer(1024, 512);
 	CCommandProcessorFragment_GLBase::SCommand_PreInit CmdPre;
 	CmdPre.m_pWindow = m_pWindow;
+	CmdPre.m_Headless = false;
 	CmdPre.m_Width = *pCurrentWidth;
 	CmdPre.m_Height = *pCurrentHeight;
 	CmdPre.m_pVendorString = m_aVendorString;

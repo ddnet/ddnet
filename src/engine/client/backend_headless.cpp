@@ -94,6 +94,7 @@ int CGraphicsBackend_Headless::Init(const char *pName, int *pScreen, int *pWidth
 	{
 		CCommandProcessorFragment_GLBase::SCommand_PreInit CmdPre;
 		CmdPre.m_pWindow = nullptr;
+		CmdPre.m_Headless = true;
 		CmdPre.m_Width = Width;
 		CmdPre.m_Height = Height;
 		CmdPre.m_pVendorString = m_aVendorString;

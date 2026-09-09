@@ -1047,9 +1047,7 @@ private:
 	VkSwapchainKHR m_VKSwapChain = VK_NULL_HANDLE;
 	std::vector<VkImage> m_vSwapChainImages;
 	uint32_t m_SwapChainImageCount = 0;
-#ifdef BACKEND_NO_SDL
 	std::vector<SMemoryImageBlock<IMAGE_BUFFER_CACHE_ID>> m_vSwapChainImageMemory;
-#endif
 
 	std::vector<SStreamMemory<SFrameBuffers>> m_vStreamedVertexBuffers;
 	std::vector<SStreamMemory<SFrameUniformBuffers>> m_vStreamedUniformBuffers;
@@ -1060,6 +1058,7 @@ private:
 	uint32_t m_CanvasHeight;
 
 	SDL_Window *m_pWindow;
+	bool m_Headless = false;
 
 	std::array<float, 4> m_aClearColor = {0, 0, 0, 0};
 
@@ -1486,10 +1485,13 @@ protected:
 
 			if(!ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL))
 				return false;
-#ifndef BACKEND_NO_SDL
-			if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL))
-				return false;
-#endif
+			// Headless swap chain images are kept in TRANSFER_SRC_OPTIMAL already, since they are
+			// never handed to a present queue.
+			if(!m_Headless)
+			{
+				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL))
+					return false;
+			}
 
 			// If source and destination support blit we'll blit as this also does automatic format conversion (e.g. from BGR to RGB)
 			if(m_OptimalSwapChainImageBlitting && m_LinearRGBAImageBlitting)
@@ -1537,10 +1539,11 @@ protected:
 
 			if(!ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL))
 				return false;
-#ifndef BACKEND_NO_SDL
-			if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR))
-				return false;
-#endif
+			if(!m_Headless)
+			{
+				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR))
+					return false;
+			}
 
 			vkEndCommandBuffer(CommandBuffer);
 			m_vUsedMemoryCommandBuffer[m_CurImageIndex] = false;
@@ -2358,17 +2361,18 @@ protected:
 
 		// The submit fence alone orders frames. The semaphores below additionally order the
 		// submit against the acquire and the present, which only exist with a swap chain.
-#ifndef BACKEND_NO_SDL
 		std::array<VkSemaphore, 1> aWaitSemaphores = {m_AcquireImageSemaphore};
 		std::array<VkPipelineStageFlags, 1> aWaitStages = {(VkPipelineStageFlags)VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-		SubmitInfo.waitSemaphoreCount = aWaitSemaphores.size();
-		SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
-		SubmitInfo.pWaitDstStageMask = aWaitStages.data();
-
 		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vQueueSubmitSemaphores[m_CurImageIndex]};
-		SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
-		SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
-#endif
+		if(!m_Headless)
+		{
+			SubmitInfo.waitSemaphoreCount = aWaitSemaphores.size();
+			SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
+			SubmitInfo.pWaitDstStageMask = aWaitStages.data();
+
+			SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
+			SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
+		}
 
 		vkResetFences(m_VKDevice, 1, &m_vQueueSubmitFences[m_CurImageIndex]);
 
@@ -2387,30 +2391,31 @@ protected:
 
 		m_LastPresentedSwapChainImageIndex = m_CurImageIndex;
 
-#ifndef BACKEND_NO_SDL
-		VkPresentInfoKHR PresentInfo{};
-		PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-		PresentInfo.waitSemaphoreCount = aSignalSemaphores.size();
-		PresentInfo.pWaitSemaphores = aSignalSemaphores.data();
-
-		std::array<VkSwapchainKHR, 1> aSwapChains = {m_VKSwapChain};
-		PresentInfo.swapchainCount = aSwapChains.size();
-		PresentInfo.pSwapchains = aSwapChains.data();
-
-		PresentInfo.pImageIndices = &m_CurImageIndex;
-
-		VkResult QueuePresentRes = vkQueuePresentKHR(m_VKPresentQueue, &PresentInfo);
-		if(QueuePresentRes != VK_SUCCESS && QueuePresentRes != VK_SUBOPTIMAL_KHR)
+		if(!m_Headless)
 		{
-			const char *pCritErrorMsg = CheckVulkanCriticalError(QueuePresentRes);
-			if(pCritErrorMsg != nullptr)
+			VkPresentInfoKHR PresentInfo{};
+			PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+			PresentInfo.waitSemaphoreCount = aSignalSemaphores.size();
+			PresentInfo.pWaitSemaphores = aSignalSemaphores.data();
+
+			std::array<VkSwapchainKHR, 1> aSwapChains = {m_VKSwapChain};
+			PresentInfo.swapchainCount = aSwapChains.size();
+			PresentInfo.pSwapchains = aSwapChains.data();
+
+			PresentInfo.pImageIndices = &m_CurImageIndex;
+
+			VkResult QueuePresentRes = vkQueuePresentKHR(m_VKPresentQueue, &PresentInfo);
+			if(QueuePresentRes != VK_SUCCESS && QueuePresentRes != VK_SUBOPTIMAL_KHR)
 			{
-				SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Presenting graphics queue failed.", pCritErrorMsg);
-				return false;
+				const char *pCritErrorMsg = CheckVulkanCriticalError(QueuePresentRes);
+				if(pCritErrorMsg != nullptr)
+				{
+					SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Presenting graphics queue failed.", pCritErrorMsg);
+					return false;
+				}
 			}
 		}
-#endif
 
 		return true;
 	}
@@ -2427,40 +2432,43 @@ protected:
 			RecreateSwapChain();
 		}
 
-#ifdef BACKEND_NO_SDL
-		// No swap chain to acquire from; the images are ours, so just round-robin them.
-		// The fence wait below is what makes reusing an in-flight image safe.
-		m_CurImageIndex = (uint32_t)(m_CurFrame % m_SwapChainImageCount);
-#else
-		auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_AcquireImageSemaphore, VK_NULL_HANDLE, &m_CurImageIndex);
-		if(AcqResult != VK_SUCCESS)
+		if(m_Headless)
 		{
-			if(AcqResult == VK_ERROR_OUT_OF_DATE_KHR || m_RecreateSwapChain)
+			// No swap chain to acquire from; the images are ours, so just round-robin them.
+			// The fence wait below is what makes reusing an in-flight image safe.
+			m_CurImageIndex = (uint32_t)(m_CurFrame % m_SwapChainImageCount);
+		}
+		else
+		{
+			auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_AcquireImageSemaphore, VK_NULL_HANDLE, &m_CurImageIndex);
+			if(AcqResult != VK_SUCCESS)
 			{
-				m_RecreateSwapChain = false;
-				if(IsVerbose())
+				if(AcqResult == VK_ERROR_OUT_OF_DATE_KHR || m_RecreateSwapChain)
 				{
-					log_debug("gfx/vulkan", "Recreating swap chain requested by acquire next image (prepare frame).");
+					m_RecreateSwapChain = false;
+					if(IsVerbose())
+					{
+						log_debug("gfx/vulkan", "Recreating swap chain requested by acquire next image (prepare frame).");
+					}
+					RecreateSwapChain();
+					return PrepareFrame();
 				}
-				RecreateSwapChain();
-				return PrepareFrame();
-			}
-			else
-			{
-				const char *pCritErrorMsg = CheckVulkanCriticalError(AcqResult);
-				if(pCritErrorMsg != nullptr)
+				else
 				{
-					SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Acquiring next image failed.", pCritErrorMsg);
-					return false;
-				}
-				else if(AcqResult == VK_ERROR_SURFACE_LOST_KHR)
-				{
-					m_RenderingPaused = true;
-					return true;
+					const char *pCritErrorMsg = CheckVulkanCriticalError(AcqResult);
+					if(pCritErrorMsg != nullptr)
+					{
+						SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Acquiring next image failed.", pCritErrorMsg);
+						return false;
+					}
+					else if(AcqResult == VK_ERROR_SURFACE_LOST_KHR)
+					{
+						m_RenderingPaused = true;
+						return true;
+					}
 				}
 			}
 		}
-#endif
 
 		vkWaitForFences(m_VKDevice, 1, &m_vQueueSubmitFences[m_CurImageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
@@ -3611,12 +3619,11 @@ public:
 		return OurLayers;
 	}
 
-	std::set<std::string> OurDeviceExtensions()
+	std::set<std::string> OurDeviceExtensions() const
 	{
 		std::set<std::string> OurExt;
-#ifndef BACKEND_NO_SDL
-		OurExt.emplace(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-#endif
+		if(!m_Headless)
+			OurExt.emplace(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 #ifdef VK_EXT_device_fault
 		// Only used when actually supported by the device (see device creation);
 		// enables detailed diagnostics after a VK_ERROR_DEVICE_LOST.
@@ -4130,9 +4137,10 @@ public:
 
 	void DestroySurface()
 	{
-#ifndef BACKEND_NO_SDL
-		vkDestroySurfaceKHR(m_VKInstance, m_VKPresentSurface, nullptr);
-#endif
+		// Headless never created a surface or enabled VK_KHR_surface, so destroying one would
+		// be invalid.
+		if(!m_Headless)
+			vkDestroySurfaceKHR(m_VKInstance, m_VKPresentSurface, nullptr);
 	}
 
 	[[nodiscard]] bool GetPresentationMode(VkPresentModeKHR &VKIOMode)
@@ -4307,23 +4315,22 @@ public:
 		return true;
 	}
 
-#ifdef BACKEND_NO_SDL
-	[[nodiscard]] bool CreateSwapChain(VkSwapchainKHR &)
-	{
-		m_VKSurfFormat.format = VK_FORMAT_R8G8B8A8_UNORM;
-		m_VKSurfFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-
-		// No surface to query capabilities from; the canvas size is the only input,
-		// same as GetSwapImageSize's fallback path for an undefined current extent.
-		VkSurfaceCapabilitiesKHR VKSurfCap{};
-		VKSurfCap.currentExtent = {m_CanvasWidth, m_CanvasHeight};
-		m_VKSwapImgAndViewportExtent = GetSwapImageSize(VKSurfCap);
-
-		return true;
-	}
-#else
 	[[nodiscard]] bool CreateSwapChain(VkSwapchainKHR &OldSwapChain)
 	{
+		if(m_Headless)
+		{
+			m_VKSurfFormat.format = VK_FORMAT_R8G8B8A8_UNORM;
+			m_VKSurfFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+
+			// No surface to query capabilities from; the canvas size is the only input,
+			// same as GetSwapImageSize's fallback path for an undefined current extent.
+			VkSurfaceCapabilitiesKHR VKSurfCap{};
+			VKSurfCap.currentExtent = {m_CanvasWidth, m_CanvasHeight};
+			m_VKSwapImgAndViewportExtent = GetSwapImageSize(VKSurfCap);
+
+			return true;
+		}
+
 		VkSurfaceCapabilitiesKHR VKSurfCap;
 		if(!GetSurfaceProperties(VKSurfCap))
 			return false;
@@ -4382,41 +4389,39 @@ public:
 
 		return true;
 	}
-#endif
 
 	void DestroySwapChain(bool ForceDestroy)
 	{
-#ifndef BACKEND_NO_SDL
-		if(ForceDestroy)
+		// Headless swap chain images are ours (see GetSwapChainImageHandles), not the
+		// swap chain's, so there is never a real swap chain object to destroy here.
+		if(!m_Headless && ForceDestroy)
 		{
 			vkDestroySwapchainKHR(m_VKDevice, m_VKSwapChain, nullptr);
 			m_VKSwapChain = VK_NULL_HANDLE;
 		}
-#endif
 	}
 
-#ifdef BACKEND_NO_SDL
 	[[nodiscard]] bool GetSwapChainImageHandles()
 	{
-		m_SwapChainImageCount = 2;
-
-		VkImageUsageFlags UsageFlags = 0;
-		for(const auto &ImgUsage : OurImageUsages())
-			UsageFlags |= ImgUsage;
-
-		m_vSwapChainImages.resize(m_SwapChainImageCount);
-		m_vSwapChainImageMemory.resize(m_SwapChainImageCount);
-		for(uint32_t i = 0; i < m_SwapChainImageCount; ++i)
+		if(m_Headless)
 		{
-			if(!CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_vSwapChainImages[i], m_vSwapChainImageMemory[i], UsageFlags))
-				return false;
+			m_SwapChainImageCount = 2;
+
+			VkImageUsageFlags UsageFlags = 0;
+			for(const auto &ImgUsage : OurImageUsages())
+				UsageFlags |= ImgUsage;
+
+			m_vSwapChainImages.resize(m_SwapChainImageCount);
+			m_vSwapChainImageMemory.resize(m_SwapChainImageCount);
+			for(uint32_t i = 0; i < m_SwapChainImageCount; ++i)
+			{
+				if(!CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_vSwapChainImages[i], m_vSwapChainImageMemory[i], UsageFlags))
+					return false;
+			}
+
+			return true;
 		}
 
-		return true;
-	}
-#else
-	[[nodiscard]] bool GetSwapChainImageHandles()
-	{
 		uint32_t ImgCount = 0;
 		if(vkGetSwapchainImagesKHR(m_VKDevice, m_VKSwapChain, &ImgCount, nullptr) != VK_SUCCESS)
 		{
@@ -4435,19 +4440,19 @@ public:
 
 		return true;
 	}
-#endif
 
 	void ClearSwapChainImageHandles()
 	{
-#ifdef BACKEND_NO_SDL
-		// The images are ours rather than the swap chain's, so they have to be freed here.
-		for(size_t i = 0; i < m_vSwapChainImages.size(); ++i)
+		if(m_Headless)
 		{
-			vkDestroyImage(m_VKDevice, m_vSwapChainImages[i], nullptr);
-			FreeImageMemBlock(m_vSwapChainImageMemory[i]);
+			// The images are ours rather than the swap chain's, so they have to be freed here.
+			for(size_t i = 0; i < m_vSwapChainImages.size(); ++i)
+			{
+				vkDestroyImage(m_VKDevice, m_vSwapChainImages[i], nullptr);
+				FreeImageMemBlock(m_vSwapChainImageMemory[i]);
+			}
+			m_vSwapChainImageMemory.clear();
 		}
-		m_vSwapChainImageMemory.clear();
-#endif
 		m_vSwapChainImages.clear();
 	}
 
@@ -4617,13 +4622,10 @@ public:
 		ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-#ifdef BACKEND_NO_SDL
-		// Nothing but the readback blit touches these images after the render pass, and that wants
-		// TRANSFER_SRC_OPTIMAL anyway; there is no swap chain to hand them to for presenting.
-		ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-#else
-		ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-#endif
+		// Nothing but the readback blit touches these images after the render pass in headless
+		// mode, and that wants TRANSFER_SRC_OPTIMAL anyway; there is no swap chain to hand them
+		// to for presenting.
+		ColorAttachment.finalLayout = m_Headless ? VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		VkAttachmentReference MultiSamplingColorAttachmentRef{};
 		MultiSamplingColorAttachmentRef.attachment = 0;
@@ -5755,18 +5757,17 @@ public:
 		}
 	}
 
-#ifdef BACKEND_NO_SDL
 	int RecreateSwapChain()
 	{
-		// There is no surface whose properties (extent, present mode) could have changed,
-		// so nothing here is ever out of date. Cmd_VSync and Cmd_MultiSampling still set
-		// m_RecreateSwapChain unconditionally, so this has to stay reachable as a no-op
-		// rather than relying on nothing calling it.
-		return 0;
-	}
-#else
-	int RecreateSwapChain()
-	{
+		if(m_Headless)
+		{
+			// There is no surface whose properties (extent, present mode) could have changed,
+			// so nothing here is ever out of date. Cmd_VSync and Cmd_MultiSampling still set
+			// m_RecreateSwapChain unconditionally, so this has to stay reachable as a no-op
+			// rather than relying on nothing calling it.
+			return 0;
+		}
+
 		int Ret = 0;
 		vkDeviceWaitIdle(m_VKDevice);
 
@@ -5809,10 +5810,12 @@ public:
 
 		return Ret;
 	}
-#endif
 
-	int InitVulkanSDL(SDL_Window *pWindow, uint32_t CanvasWidth, uint32_t CanvasHeight, char *pRendererString, char *pVendorString, char *pVersionString)
+	int InitVulkanSDL(SDL_Window *pWindow, bool Headless, uint32_t CanvasWidth, uint32_t CanvasHeight, char *pRendererString, char *pVendorString, char *pVersionString)
 	{
+		m_Headless = Headless;
+		dbg_assert(!m_Headless || pWindow == nullptr, "headless init got a window");
+
 		std::vector<std::string> vVKExtensions;
 		std::vector<std::string> vVKLayers;
 
@@ -7756,7 +7759,7 @@ public:
 	[[nodiscard]] bool Cmd_PreInit(const CCommandProcessorFragment_GLBase::SCommand_PreInit *pCommand)
 	{
 		m_pGpuList = pCommand->m_pGpuList;
-		if(InitVulkanSDL(pCommand->m_pWindow, pCommand->m_Width, pCommand->m_Height, pCommand->m_pRendererString, pCommand->m_pVendorString, pCommand->m_pVersionString) != 0)
+		if(InitVulkanSDL(pCommand->m_pWindow, pCommand->m_Headless, pCommand->m_Width, pCommand->m_Height, pCommand->m_pRendererString, pCommand->m_pVendorString, pCommand->m_pVersionString) != 0)
 		{
 			m_VKInstance = VK_NULL_HANDLE;
 		}
