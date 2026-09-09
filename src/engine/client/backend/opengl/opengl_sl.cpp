@@ -85,7 +85,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 
 	for(const CGLSLCompiler::SGLSLCompilerDefine &Define : pCompiler->m_vDefines)
 	{
-		vLines.push_back(std::string("#define ") + Define.m_DefineName + std::string(" ") + Define.m_DefineValue + std::string("\r\n"));
+		vLines.push_back(std::string("#define ") + Define.m_DefineName + " " + Define.m_DefineValue + "\r\n");
 	}
 
 	if(Type == GL_FRAGMENT_SHADER && !IsNewOpenGL && pCompiler->m_OpenGLVersionMajor <= 3 && pCompiler->m_HasTextureArray)
