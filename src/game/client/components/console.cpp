@@ -1564,7 +1564,7 @@ void CGameConsole::OnRender()
 				{
 					const size_t OffUTF8Start = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelStart);
 					const size_t OffUTF8End = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelEnd);
-					vSelectionFragments.push_back(std::string(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start));
+					vSelectionFragments.emplace_back(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start);
 				}
 				pConsole->m_HasSelection = true;
 			}
@@ -1597,11 +1597,11 @@ void CGameConsole::OnRender()
 		if(m_WantsSelectionCopy && !vSelectionFragments.empty())
 		{
 			std::string SelectionString;
-			for(auto it = vSelectionFragments.rbegin(); it != vSelectionFragments.rend(); ++it)
+			for(auto It = vSelectionFragments.rbegin(); It != vSelectionFragments.rend(); ++It)
 			{
 				if(!SelectionString.empty())
 					SelectionString += '\n';
-				SelectionString += *it;
+				SelectionString += *It;
 			}
 			pConsole->m_HasSelection = false;
 			pConsole->m_CurSelStart = -1;
