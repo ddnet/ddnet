@@ -138,8 +138,19 @@ class CGameConsole : public CComponent
 
 		bool IsInputHidden() const;
 		void UpdateCompletionSuggestions();
+		/**
+		 * Gets the command info of the currently highlighted command suggestion.
+		 *
+		 * @return the command info or `nullptr` when no command suggestion is highlighted
+		 */
+		const IConsole::ICommandInfo *HighlightedCommandInfo() const;
 
 	private:
+		/**
+		 * Whether the temporary rcon commands sent by the server should be
+		 * used instead of the commands registered by this client.
+		 */
+		bool UseTempCommands() const;
 		void SetSearching(bool Searching);
 		void ClearSearch();
 		void UpdateSearch();
@@ -173,6 +184,8 @@ class CGameConsole : public CComponent
 	static constexpr ColorRGBA ms_SearchSelectedColor = ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f);
 
 	int PossibleMaps(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr);
+
+	void RenderCommandInfo(CTextCursor *pCursor, const char *pName, const char *pHelp, const char *pParams);
 
 	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
