@@ -434,6 +434,7 @@ public:
 	void ChangeMap(const char *pMap) override;
 	void ReloadMap() override;
 	int LoadMap(const char *pMapName);
+	void WritePortFile();
 
 	void SaveDemo(int ClientId, float Time) override;
 	void StartRecord(int ClientId) override;

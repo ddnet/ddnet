@@ -3303,6 +3303,32 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 	m_PreviousDebugDummies = ForceDisconnect ? 0 : g_Config.m_DbgDummies;
 }
 
+void CServer::WritePortFile()
+{
+	const char *pPortFile = Config()->m_SvPortFile;
+	if(pPortFile[0] == '\0')
+	{
+		return;
+	}
+
+	char aPortFileTmp[IO_MAX_PATH_LENGTH];
+	IStorage::FormatTmpPath(aPortFileTmp, sizeof(aPortFileTmp), pPortFile);
+	IOHANDLE PortFile = Storage()->OpenFile(aPortFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(PortFile != nullptr)
+	{
+		char aPort[8];
+		const int Length = str_format(aPort, sizeof(aPort), "%d", m_NetServer.Address().port);
+		const bool Written = io_write(PortFile, aPort, Length) == (unsigned)Length;
+		if(io_close(PortFile) == 0 && Written &&
+			Storage()->RenameFile(aPortFileTmp, pPortFile, IStorage::TYPE_SAVE))
+		{
+			return;
+		}
+		Storage()->RemoveFile(aPortFileTmp, IStorage::TYPE_SAVE);
+	}
+	log_error("server", "Failed to write port file '%s'", pPortFile);
+}
+
 int CServer::Run()
 {
 	if(m_RunServer == UNINITIALIZED)
@@ -3388,6 +3414,8 @@ int CServer::Run()
 		log_error("server", "Failed to initialize the HTTP client.");
 		return -1;
 	}
+
+	WritePortFile();
 
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pRegister = CreateRegister(&g_Config, m_pConsole, m_pEngine, m_pHttp, g_Config.m_SvRegisterPort > 0 ? g_Config.m_SvRegisterPort : this->Port(), m_NetServer.GetGlobalToken());
