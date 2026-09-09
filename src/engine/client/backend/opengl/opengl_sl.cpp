@@ -40,7 +40,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 
 	EBackendType BackendType = pCompiler->m_IsOpenGLES ? BACKEND_TYPE_OPENGL_ES : BACKEND_TYPE_OPENGL;
 	bool IsNewOpenGL = (BackendType == BACKEND_TYPE_OPENGL ? (pCompiler->m_OpenGLVersionMajor >= 4 || (pCompiler->m_OpenGLVersionMajor == 3 && pCompiler->m_OpenGLVersionMinor == 3)) : pCompiler->m_OpenGLVersionMajor >= 3);
-		GLShaderStringPostfix = " es\r\n";
+	std::string GLShaderStringPostfix = std::string(" core\r\n");
 	if(BackendType == BACKEND_TYPE_OPENGL_ES)
 		GLShaderStringPostfix = std::string(" es\r\n");
 	//add compiler specific values
