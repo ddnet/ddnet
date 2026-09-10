@@ -10,11 +10,18 @@ license = "Zlib"
 crate-type = ["rlib", "staticlib"]
 path = "lib.rs"
 
+[features]
+default = ["zlib-rs"]
+# Provide zlib to the C++ part of our code. Disabled by the build system when a
+# system zlib is used instead.
+zlib-rs = ["dep:libz-rs-sys"]
+
 [dependencies]
 ddnet-base = { path = "../../base" }
 ddnet-engine = { path = ".." }
 
 cxx = { workspace = true }
+libz-rs-sys = { version = "=0.6.7", features = ["export-symbols"], optional = true }
 
 [dev-dependencies]
 ddnet-test = { path = "../../rust-bridge/test", features = ["link-test-libraries"] }

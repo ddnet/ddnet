@@ -14,6 +14,10 @@
 #[cfg(test)]
 extern crate ddnet_test;
 
+// Provides the zlib C API for the C++ part of our code.
+#[cfg(feature = "zlib-rs")]
+use libz_rs_sys as _;
+
 mod config;
 mod rust_version;
 
