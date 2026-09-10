@@ -9,7 +9,6 @@
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 
-#include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamemodes/ddnet.h>
 #include <game/server/teams.h>
@@ -1801,10 +1800,6 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 	{
 		float BaseX = 0.f, BaseY = 0.f;
 
-		CMapItemLayerTilemap *pGameLayer = pSelf->m_Layers.GameLayer();
-		constexpr float OuterKillTileBoundaryDistance = 201 * 32.f;
-		float MapWidth = (pGameLayer->m_Width * 32) + (OuterKillTileBoundaryDistance * 2.f), MapHeight = (pGameLayer->m_Height * 32) + (OuterKillTileBoundaryDistance * 2.f);
-
 		const auto DetermineCoordinateRelativity = [](const char *pInString, const float AbsoluteDefaultValue, float &OutFloat) -> bool {
 			// mode 0 = abs, 1 = sub, 2 = add
 
@@ -1837,15 +1832,10 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 
-		Pos = {std::clamp(BaseX, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapWidth - 1.f), std::clamp(BaseY, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapHeight - 1.f)};
+		Pos = {BaseX, BaseY};
 	}
 
-	// Teleport tee
-	pSelf->Teleport(pCallingCharacter, Pos);
-	pCallingCharacter->ResetJumps();
-	pCallingCharacter->Unfreeze();
-	pCallingCharacter->ResetVelocity();
-	pCallingPlayer->m_LastTeleTee.Save(pCallingCharacter);
+	pSelf->PracticeTeleport(pCallingCharacter, Pos);
 }
 
 void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)

@@ -18,6 +18,8 @@
 #include <game/server/save.h>
 #include <game/server/teams.h>
 
+#include <algorithm>
+
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -425,6 +427,22 @@ void CGameContext::Teleport(CCharacter *pChr, vec2 Pos)
 	pChr->m_Pos = Pos;
 	pChr->m_PrevPos = Pos;
 	pChr->m_DDRaceState = ERaceState::CHEATED;
+}
+
+void CGameContext::PracticeTeleport(CCharacter *pChr, vec2 Pos)
+{
+	CMapItemLayerTilemap *pGameLayer = m_Layers.GameLayer();
+	constexpr float OuterKillTileBoundaryDistance = 201 * 32.f;
+	const float MapWidth = (pGameLayer->m_Width * 32) + (OuterKillTileBoundaryDistance * 2.f);
+	const float MapHeight = (pGameLayer->m_Height * 32) + (OuterKillTileBoundaryDistance * 2.f);
+	Pos.x = std::clamp(Pos.x, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapWidth - 1.f);
+	Pos.y = std::clamp(Pos.y, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapHeight - 1.f);
+
+	Teleport(pChr, Pos);
+	pChr->ResetJumps();
+	pChr->Unfreeze();
+	pChr->ResetVelocity();
+	pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
 }
 
 void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
