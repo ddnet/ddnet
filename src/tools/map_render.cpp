@@ -5,6 +5,7 @@
 #include <base/os.h>
 #include <base/str.h>
 
+#include <engine/client/backend_headless.h>
 #include <engine/client/graphics_threaded.h>
 #include <engine/engine.h>
 #include <engine/gfx/image_loader.h>
@@ -300,6 +301,12 @@ int CGraphics_Threaded::QuadContainerAddSprite(int QuadContainerIndex, float X, 
 	(void)Width;
 	(void)Height;
 	return -1;
+}
+
+// map_render links graphics_threaded.cpp without backend_sdl.cpp, so it provides the backend factory.
+IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc)
+{
+	return new CGraphicsBackend_Headless(std::move(TranslateFunc));
 }
 
 static void PrintUsage(const char *pProgramName)

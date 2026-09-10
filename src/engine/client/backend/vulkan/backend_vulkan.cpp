@@ -16,10 +16,8 @@
 #include <engine/shared/localization.h>
 #include <engine/storage.h>
 
-#ifndef BACKEND_NO_SDL
 #include <SDL_video.h>
 #include <SDL_vulkan.h>
-#endif
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
 
@@ -3576,11 +3574,13 @@ public:
 
 	[[nodiscard]] bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions)
 	{
-#ifdef BACKEND_NO_SDL
 		// Rendering headlessly needs no surface, so no platform surface extension either.
-		vVKExtensions.clear();
-		return true;
-#else
+		if(m_Headless)
+		{
+			vVKExtensions.clear();
+			return true;
+		}
+
 		unsigned int ExtCount = 0;
 		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, nullptr))
 		{
@@ -3602,7 +3602,6 @@ public:
 		}
 
 		return true;
-#endif
 	}
 
 	std::set<std::string> OurVKLayers()
@@ -4113,7 +4112,6 @@ public:
 		return true;
 	}
 
-#ifndef BACKEND_NO_SDL
 	[[nodiscard]] bool CreateSurface(SDL_Window *pWindow)
 	{
 		if(!SDL_Vulkan_CreateSurface(pWindow, m_VKInstance, &m_VKPresentSurface))
@@ -4133,7 +4131,6 @@ public:
 
 		return true;
 	}
-#endif
 
 	void DestroySurface()
 	{
@@ -5849,10 +5846,8 @@ public:
 
 		GetDeviceQueue();
 
-#ifndef BACKEND_NO_SDL
-		if(!CreateSurface(pWindow))
+		if(!m_Headless && !CreateSurface(pWindow))
 			return -1;
-#endif
 
 		return 0;
 	}
@@ -7716,9 +7711,7 @@ public:
 		{
 			log_debug("gfx/vulkan", "Creating new surface.");
 		}
-#ifndef BACKEND_NO_SDL
 		m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowId);
-#endif
 		if(m_RenderingPaused)
 		{
 #ifdef CONF_PLATFORM_ANDROID

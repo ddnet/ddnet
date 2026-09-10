@@ -1,8 +1,6 @@
 #ifndef ENGINE_CLIENT_BACKEND_HEADLESS_H
 #define ENGINE_CLIENT_BACKEND_HEADLESS_H
 
-#ifdef BACKEND_NO_SDL
-
 #include <engine/client/backend/backend_base.h>
 #include <engine/client/backend_sdl.h>
 #include <engine/client/graphics_threaded.h>
@@ -108,7 +106,5 @@ public:
 
 	std::optional<int> ShowMessageBox(const IGraphics::CMessageBox &MessageBox) override;
 };
-
-#endif // BACKEND_NO_SDL
 
 #endif

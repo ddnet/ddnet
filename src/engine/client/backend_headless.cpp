@@ -1,4 +1,4 @@
-#ifdef BACKEND_NO_SDL
+#if defined(CONF_BACKEND_VULKAN)
 
 #include "backend_headless.h"
 
@@ -259,9 +259,4 @@ std::optional<int> CGraphicsBackend_Headless::ShowMessageBox(const IGraphics::CM
 	return std::nullopt;
 }
 
-IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc)
-{
-	return new CGraphicsBackend_Headless(std::move(TranslateFunc));
-}
-
-#endif // BACKEND_NO_SDL
+#endif
