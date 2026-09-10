@@ -136,6 +136,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ddnet-engine-server"
+version = "0.0.1"
+dependencies = [
+ "cxx",
+ "ddnet-base",
+ "ddnet-engine",
+ "ddnet-engine-shared",
+ "ddnet-test",
+]
+
+[[package]]
 name = "ddnet-engine-shared"
 version = "0.0.1"
 dependencies = [

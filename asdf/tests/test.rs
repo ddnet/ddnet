@@ -100,8 +100,8 @@ fn server() -> Connection {
 #[tokio::test]
 async fn test_server_smoke() {
     one_client().conversation(r#"
-> {"kind":"client_hello","protocol_version_min":1,"protocol_version_max":1}
-< {"kind":"server_hello","protocol_version":1}
+> {"kind":"client_hello","protocol_version":1}
+< {"kind":"server_hello"}
 > {"kind":"add_ban","net":"127.0.0.1/32","expiry":"2100-01-01T12:34:56Z","reason":"foobar"}
 > {"kind":"subscribe_bans"}
 < {"kind":"replace_bans","bans":[{"net":"127.0.0.1/32","expiry":"2100-01-01T12:34:56Z","reason":"foobar"}]}
@@ -132,8 +132,8 @@ async fn test_server_notjson() {
 #[tokio::test]
 async fn test_server_version_0_fails() {
     one_client().conversation(r#"
-> {"kind":"client_hello","protocol_version_min":0,"protocol_version_max":0}
-< {"kind":"close","error":"incompatible client version request"}
+> {"kind":"client_hello","protocol_version":0}
+< {"kind":"close","error":"invalid message read: invalid protocol version"}
 < EOF
 "#).await;
 }
@@ -141,40 +141,25 @@ async fn test_server_version_0_fails() {
 #[tokio::test]
 async fn test_server_version_1_works() {
     one_client().conversation(r#"
-> {"kind":"client_hello","protocol_version_min":1,"protocol_version_max":1}
-< {"kind":"server_hello","protocol_version":1}
+> {"kind":"client_hello","protocol_version":1}
+< {"kind":"server_hello"}
 "#).await;
 }
 
 #[tokio::test]
-async fn test_server_version_selection_works_below() {
+async fn test_server_version_9999_fails() {
     one_client().conversation(r#"
-> {"kind":"client_hello","protocol_version_min":0,"protocol_version_max":1}
-< {"kind":"server_hello","protocol_version":1}
-"#).await;
-}
-
-#[tokio::test]
-async fn test_server_version_selection_works_above() {
-    one_client().conversation(r#"
-> {"kind":"client_hello","protocol_version_min":1,"protocol_version_max":1000}
-< {"kind":"server_hello","protocol_version":1}
-"#).await;
-}
-
-#[tokio::test]
-async fn test_server_version_selection_works_around() {
-    one_client().conversation(r#"
-> {"kind":"client_hello","protocol_version_min":0,"protocol_version_max":1000}
-< {"kind":"server_hello","protocol_version":1}
+> {"kind":"client_hello","protocol_version":9999}
+< {"kind":"close","error":"invalid message read: invalid protocol version"}
+< EOF
 "#).await;
 }
 
 #[tokio::test]
 async fn test_client_smoke() {
     server().conversation(r#"
-< {"kind":"client_hello","protocol_version_min":1,"protocol_version_max":1}
-> {"kind":"server_hello","protocol_version":1}
+< {"kind":"client_hello","protocol_version":1}
+> {"kind":"server_hello"}
 < {"kind":"subscribe_bans"}
 > {"kind":"replace_bans","bans":[]}
 > {"kind":"close"}
@@ -187,7 +172,7 @@ async fn test_client_smoke() {
 #[tokio::test]
 async fn test_client_notjson() {
     server().conversation(r#"
-< {"kind":"client_hello","protocol_version_min":1,"protocol_version_max":1}
+< {"kind":"client_hello","protocol_version":1}
 > not json
 < {"kind":"close","error":"invalid message read: expected ident at line 1 column 2"}
 < EOF
