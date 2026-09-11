@@ -536,11 +536,6 @@ void CServer::Kick(int ClientId, const char *pReason)
 	m_NetServer.Drop(ClientId, pReason);
 }
 
-void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason)
-{
-	m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), Seconds, pReason, VerbatimReason);
-}
-
 void CServer::ReconnectClient(int ClientId)
 {
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
