@@ -695,7 +695,6 @@ const char *CSshClient::PromptStr()
 const char *CSshClient::PromptBarBottomStr()
 {
 	char aYellow[32] = "";
-	char aResetColor[16] = "";
 	if(m_Config.m_PromptBarBottomColors)
 	{
 		str_format(aYellow, sizeof(aYellow),
@@ -703,7 +702,6 @@ const char *CSshClient::PromptBarBottomStr()
 			255,
 			255,
 			0);
-		str_copy(aResetColor, "\x1b[0m");
 	}
 
 	if(m_pCurrentCmd)
@@ -711,12 +709,11 @@ const char *CSshClient::PromptBarBottomStr()
 		str_format(
 			m_aPromptBarBottom,
 			sizeof(m_aPromptBarBottom),
-			"%s%s %s - %s%s",
+			"%s%s %s - %s",
 			aYellow,
 			m_pCurrentCmd->Name(),
 			m_pCurrentCmd->Params(),
-			m_pCurrentCmd->Help(),
-			aResetColor);
+			m_pCurrentCmd->Help());
 	}
 	else
 	{
@@ -727,6 +724,20 @@ const char *CSshClient::PromptBarBottomStr()
 		// 	"%s placeholder %s",
 		// 	aYellow,
 		// 	aResetColor);
+	}
+
+	// the prompt bar should never line wrap it messes with
+	// all offsets so we force cut it to fit into the current terminal
+	//
+	// FIXME: this offset is totally wrong
+	//        it has to exclude the non printable color escape codes in the beginning
+	//        and support wide unicode characters
+	m_aPromptBarBottom[m_Term.m_Width] = '\0';
+
+	if(m_Config.m_PromptBarBottomColors)
+	{
+		// reset color
+		str_append(m_aPromptBarBottom, "\x1b[0m");
 	}
 
 	return m_aPromptBarBottom;
