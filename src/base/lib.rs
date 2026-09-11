@@ -14,8 +14,12 @@ extern crate ddnet_test;
 
 mod color;
 mod dbg;
+mod net;
 mod rust;
+mod types;
 
 pub use color::*;
 pub use dbg::*;
+pub use net::*;
 pub use rust::*;
+pub use types::*;

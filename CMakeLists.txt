@@ -1022,6 +1022,8 @@ set_src(RUST_BRIDGE_SHARED GLOB_RECURSE src/rust-bridge
   # tidy-alphabetical-start
   cpp/console.cpp
   cpp/console.h
+  cpp/net.cpp
+  cpp/net.h
   engine/shared/rust_version.cpp
   engine/shared/rust_version.h
   # tidy-alphabetical-end
