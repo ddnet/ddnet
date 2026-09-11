@@ -397,7 +397,7 @@ public:
 
 	void OnTerminalResize(int OldWidth, int OldHeight);
 
-	// called once on connect when we know the clients cursor positon
+	// called once on connect when we know the clients cursor position
 	// and can send things with the correct offsets
 	void OnTerminalReady();
 

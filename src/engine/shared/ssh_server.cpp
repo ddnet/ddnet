@@ -1265,13 +1265,13 @@ void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 		{
 			// The status line is always at the bottom of the terminal window
 			// so when we clear out on resize we want to navigate to
-			// OldHeight (terminal hight) and send a clear line
+			// OldHeight (terminal height) and send a clear line
 			// but it gets more tricky once the client sent and received
 			// so many prompt and log lines that it started to scroll
 			// because then before resize the prompt and status line are capped by the terminal width
 			// and after windows size increase old log lines show up again so the prompt and also the
 			// old status line get shifted to the cursor pos
-			// so we use which ever value is bigger and ther terminal emulator will cap us when we
+			// so we use which ever value is bigger and the terminal emulator will cap us when we
 			// go out ouf bounds anyways
 			int PrevStatusY = std::max(OldHeight, m_CursorPos.y + PromptHeight());
 
@@ -1308,7 +1308,7 @@ void CSshClient::OnTerminalReady()
 	//       but if we start typing our cursor will be inside of the banner
 	//       because it is longer than 3 lines
 	//       the proper fix for this is not to rely on the lazy cursor pos lookup
-	//       it was convienient to just log whatever we want and have the
+	//       it was convenient to just log whatever we want and have the
 	//       client be in any kind of previous scroll state on connect
 	//       and then just fetch the cursor pos
 	//       but for this small terminal size we need to properly track
@@ -1644,7 +1644,7 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 				// it will look glitched
 				// to avoid that we just clear out the entire prompt bar
 				// when pressing enter expecting it to be redrawn
-				// at the correct positon anyways
+				// at the correct position anyways
 
 				// cursor down, clear line, cursor up
 				ssh_channel_write(pClient->m_Channel, "\n\r\033[2K\x1B[A", 10);
