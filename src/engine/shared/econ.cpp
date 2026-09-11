@@ -48,10 +48,11 @@ void CEcon::ConLogout(IConsole::IResult *pResult, void *pUserData)
 		pThis->m_NetConsole.Drop(pThis->m_UserClientId, "Logout");
 }
 
-void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
+void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan, FIsBanned IsBanned)
 {
 	m_pConfig = pConfig;
 	m_pConsole = pConsole;
+	m_pNetBan = pNetBan;
 
 	for(auto &Client : m_aClients)
 		Client.m_State = CClient::STATE_EMPTY;
@@ -80,7 +81,7 @@ void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 		return;
 	}
 
-	if(m_NetConsole.Open(BindAddr, pNetBan))
+	if(m_NetConsole.Open(BindAddr, std::move(IsBanned)))
 	{
 		m_NetConsole.SetCallbacks(NewClientCallback, DelClientCallback, this);
 		m_Ready = true;
@@ -124,7 +125,7 @@ void CEcon::Update()
 				{
 					if(g_Config.m_EcBantime)
 					{
-						m_NetConsole.NetBan()->BanAddr(m_NetConsole.ClientAddr(ClientId), g_Config.m_EcBantime * 60, "Too many authentication tries", false);
+						m_pNetBan->BanAddr(m_NetConsole.ClientAddr(ClientId), g_Config.m_EcBantime * 60, "Too many authentication tries", false);
 					}
 					m_NetConsole.Drop(ClientId, "Too many authentication tries");
 				}

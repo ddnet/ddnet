@@ -42,7 +42,7 @@ const unsigned char g_aDummyMapData[] = {
 	0x60, 0x60, 0x60, 0x44, 0xC2, 0x00, 0x00, 0x38, 0x00, 0x05, 0x78, 0x9C,
 	0x63, 0x64, 0x60, 0x60, 0x60, 0x44, 0xC2, 0x00, 0x00, 0x38, 0x00, 0x05};
 
-bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp)
+bool CNetServer::Open(NETADDR BindAddr, FIsBanned IsBanned, int MaxClients, int MaxClientsPerIp)
 {
 	// zero out the whole structure
 	this->~CNetServer();
@@ -54,7 +54,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 		return false;
 
 	m_Address = BindAddr;
-	m_pNetBan = pNetBan;
+	m_IsBanned = std::move(IsBanned);
 
 	m_MaxClients = std::clamp(MaxClients, 1, (int)NET_MAX_CLIENTS);
 	m_MaxClientsPerIp = MaxClientsPerIp;
@@ -651,7 +651,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 
 		// check if we just should drop the packet
 		char aBuf[128];
-		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
+		if(m_IsBanned(&Addr, aBuf, sizeof(aBuf)))
 		{
 			// Banned, reply with a message. Rate limited, unlimited replies would
 			// make a banned flooder cost more to handle than an unbanned one.

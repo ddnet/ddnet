@@ -34,6 +34,7 @@ class CEcon
 
 	CConfig *m_pConfig;
 	IConsole *m_pConsole;
+	CNetBan *m_pNetBan;
 	CNetConsole m_NetConsole;
 
 	bool m_Ready;
@@ -50,7 +51,7 @@ public:
 	CEcon();
 	IConsole *Console() { return m_pConsole; }
 
-	void Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan);
+	void Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan, FIsBanned IsBanned);
 	void Update();
 	void Send(int ClientId, const char *pLine);
 	void Shutdown();

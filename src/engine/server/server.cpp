@@ -1746,7 +1746,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 		if(m_aClients[ClientId].m_Traffic > Limit)
 		{
-			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 600, "Stressing network", false);
+			m_ServerBan.CNetBan::BanAddr(&pPacket->m_Address, 600, "Stressing network", false);
 			return;
 		}
 		if(Diff > 100)
@@ -3362,7 +3362,11 @@ int CServer::Run()
 	BindAddr.type = Config()->m_SvIpv4Only ? (NETTYPE_IPV4 | NETTYPE_WEBSOCKET_IPV4) : NETTYPE_ALL;
 
 	int Port = Config()->m_SvPort;
-	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp); BindAddr.port++)
+	auto IsBanned = [this] (const NETADDR *pAddr, char *pBuffer, unsigned BufferSize)
+	{
+		return m_ServerBan.IsBanned(pAddr, pBuffer, BufferSize);
+	};
+	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, IsBanned, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp); BindAddr.port++)
 	{
 		if(Port != 0 || BindAddr.port >= 8310)
 		{
@@ -3389,7 +3393,7 @@ int CServer::Run()
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
-	m_Econ.Init(Config(), Console(), &m_ServerBan);
+	m_Econ.Init(Config(), Console(), &m_ServerBan, IsBanned);
 
 	m_Fifo.Init(Console(), Config()->m_SvInputFifo, CFGFLAG_SERVER);
 
@@ -3635,7 +3639,7 @@ int CServer::Run()
 
 								if(Config()->m_SvDnsblBan)
 								{
-									m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
+									m_ServerBan.CNetBan::BanAddr(ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
 								}
 							}
 						}
