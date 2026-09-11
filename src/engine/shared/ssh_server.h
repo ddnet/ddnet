@@ -489,6 +489,11 @@ public:
 	void Update();
 	void Shutdown();
 	bool GotActiveConnections();
+
+	// making this static in the class is just for namespacing purposes
+	// the same name already exists as a static single compilation unit function
+	// in ddnet and we need it accessible in the unit test too
+	static void StrCopyUntilSpaceOrEol(char *pDest, size_t DestSize, const char *pSrc);
 };
 
 #endif

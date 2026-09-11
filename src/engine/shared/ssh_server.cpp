@@ -140,6 +140,15 @@ static bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
 	return pHit;
 }
 
+void CSshServer::StrCopyUntilSpaceOrEol(char *pDest, size_t DestSize, const char *pSrc)
+{
+	const char *pSpace = str_find(pSrc, " ");
+	if(pSpace)
+		str_copy(pDest, pSrc, std::min(pSpace ? (size_t)(pSpace - pSrc + 1) : 1, DestSize));
+	else
+		str_copy(pDest, pSrc, DestSize);
+}
+
 // Get the amount of terminal columns this string will take up.
 // It supports multi byte utf-8 characters and also wide characters
 static int StringTerminalWidth(const char *pStr, unicode_width_state_t *pUnicodeWidthState)
@@ -2003,8 +2012,10 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 
 	char aCmd[IConsole::CMDLINE_LENGTH];
 	pClient->GetCommand(pClient->m_aInput, aCmd);
+	char aCmdName[IConsole::CMDLINE_LENGTH];
+	StrCopyUntilSpaceOrEol(aCmdName, sizeof(aCmdName), aCmd);
 	const IConsole::ICommandInfo *pPrevCmd = pClient->m_pCurrentCmd;
-	pClient->m_pCurrentCmd = Console()->GetCommandInfo(aCmd, CFGFLAG_SERVER, false);
+	pClient->m_pCurrentCmd = Console()->GetCommandInfo(aCmdName, CFGFLAG_SERVER, false);
 	if(pPrevCmd != pClient->m_pCurrentCmd)
 	{
 		pClient->ResendPrompt();

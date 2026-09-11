@@ -1,3 +1,4 @@
+#include <engine/console.h>
 #ifdef CONF_SSH
 
 #include <base/str.h>
@@ -8,6 +9,46 @@
 #include <game/client/components/censor.h>
 
 #include <gtest/gtest.h>
+
+TEST(Ssh, GetCommand)
+{
+	CSshClient Client(0, nullptr);
+
+	char aCmd[IConsole::CMDLINE_LENGTH];
+	char aCmdName[IConsole::CMDLINE_LENGTH];
+
+	Client.m_InputIdx = 0;
+	Client.GetCommand("kick", aCmd);
+	EXPECT_STREQ(aCmd, "kick");
+
+	Client.m_InputIdx = 3;
+	Client.GetCommand("kick", aCmd);
+	EXPECT_STREQ(aCmd, "kick");
+
+	Client.m_InputIdx = 4;
+	Client.GetCommand("kick   ", aCmd);
+	EXPECT_STREQ(aCmd, "kick   ");
+
+	Client.m_InputIdx = 5;
+	Client.GetCommand("kick   ", aCmd);
+	EXPECT_STREQ(aCmd, "kick   ");
+
+	Client.m_InputIdx = 5;
+	Client.GetCommand("kick;status", aCmd);
+	EXPECT_STREQ(aCmd, "status");
+
+	Client.m_InputIdx = 5;
+	Client.GetCommand("kick   ", aCmd);
+	EXPECT_STREQ(aCmd, "kick   ");
+	CSshServer::StrCopyUntilSpaceOrEol(aCmdName, sizeof(aCmdName), aCmd);
+	EXPECT_STREQ(aCmdName, "kick");
+
+	Client.m_InputIdx = 2;
+	Client.GetCommand("kick", aCmd);
+	EXPECT_STREQ(aCmd, "kick");
+	CSshServer::StrCopyUntilSpaceOrEol(aCmdName, sizeof(aCmdName), aCmd);
+	EXPECT_STREQ(aCmdName, "kick");
+}
 
 TEST(Ssh, History)
 {
