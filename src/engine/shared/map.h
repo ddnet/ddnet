@@ -18,6 +18,9 @@ class CMap : public IMap
 {
 	CDataFileReader m_DataFile;
 
+	std::set<int> m_LayerDataIndices;
+	bool m_LayerDataPinned = false;
+
 public:
 	CMap();
 	~CMap() override;
@@ -27,6 +30,7 @@ public:
 	void *GetDataSwapped(int Index) override;
 	const char *GetDataString(int Index) override;
 	void UnloadData(int Index) override;
+	void PinLayerData() override;
 	int NumData() const override;
 
 	int GetItemSize(int Index) override;

@@ -42,7 +42,15 @@ const char *CMap::GetDataString(int Index)
 
 void CMap::UnloadData(int Index)
 {
+	// Don't unload layer data shared with another item, its users keep raw pointers into it.
+	if(m_LayerDataPinned && m_LayerDataIndices.contains(Index))
+		return;
 	m_DataFile.UnloadData(Index);
+}
+
+void CMap::PinLayerData()
+{
+	m_LayerDataPinned = true;
 }
 
 int CMap::NumData() const
@@ -170,18 +178,30 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 
 	// Lazily validate data and replace compressed tile layers with uncompressed ones.
 	std::set<int> UsedDataIndices;
+	// The rendering keeps raw pointers into quads and sound layer data for the map's lifetime.
+	// Collected separately so they don't feed the tile layer data uniqueness check, merged in below.
+	std::set<int> OtherLayerDataIndices;
 	for(int GroupIndex = 0; GroupIndex < GroupsNum; GroupIndex++)
 	{
 		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + GroupIndex));
 		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
-			CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(NewDataFile.GetItem(LayersStart + pGroup->m_StartLayer + LayerIndex));
+			const int LayerItemIndex = LayersStart + pGroup->m_StartLayer + LayerIndex;
+			CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(NewDataFile.GetItem(LayerItemIndex));
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				if(!ValidateAndUnpackTilesLayerData(NewDataFile, GroupIndex, LayerIndex, reinterpret_cast<const CMapItemLayerTilemap *>(pLayer), *pGameLayer, UsedDataIndices))
 				{
 					return false;
 				}
+			}
+			else if(pLayer->m_Type == LAYERTYPE_QUADS && NewDataFile.GetItemSize(LayerItemIndex) >= (int)(offsetof(CMapItemLayerQuads, m_Data) + sizeof(CMapItemLayerQuads::m_Data)))
+			{
+				OtherLayerDataIndices.emplace(reinterpret_cast<const CMapItemLayerQuads *>(pLayer)->m_Data);
+			}
+			else if(pLayer->m_Type == LAYERTYPE_SOUNDS && NewDataFile.GetItemSize(LayerItemIndex) >= (int)(offsetof(CMapItemLayerSounds, m_Data) + sizeof(CMapItemLayerSounds::m_Data)))
+			{
+				OtherLayerDataIndices.emplace(reinterpret_cast<const CMapItemLayerSounds *>(pLayer)->m_Data);
 			}
 		}
 	}
@@ -197,6 +217,9 @@ bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, in
 	// Replace existing datafile with new datafile
 	m_DataFile.Close();
 	m_DataFile = std::move(NewDataFile);
+	UsedDataIndices.insert(OtherLayerDataIndices.begin(), OtherLayerDataIndices.end());
+	m_LayerDataIndices = std::move(UsedDataIndices);
+	m_LayerDataPinned = false;
 	return true;
 }
 
@@ -210,6 +233,8 @@ bool CMap::Load(IStorage *pStorage, const char *pPath, int StorageType)
 void CMap::Unload()
 {
 	m_DataFile.Close();
+	m_LayerDataIndices.clear();
+	m_LayerDataPinned = false;
 }
 
 bool CMap::IsLoaded() const
