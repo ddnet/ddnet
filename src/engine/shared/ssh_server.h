@@ -283,6 +283,9 @@ public:
 	// a popup or something like that
 	void ResendPrompt();
 
+	// Render the prompt bar below the input cursor
+	void SendPromptBarBottom();
+
 	const char *PromptStr();
 	const char *PromptBarBottomStr();
 	int PromptLength();

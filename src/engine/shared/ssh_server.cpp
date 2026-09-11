@@ -621,6 +621,8 @@ void CSshClient::ClearPrompt()
 	if(!m_Channel)
 		return;
 
+	SendPromptBarBottom();
+
 	ssh_channel_write(m_Channel, "\r\033[2K", 6);
 	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	SetCursorPosToPromptStart();
@@ -634,23 +636,9 @@ void CSshClient::NewPrompt()
 		return;
 
 	ssh_channel_write(m_Channel, "\r\n", 2);
-	if(m_Config.m_PromptBarBottom)
-	{
-		// we first go one row down draw the bottom bar
-		// then go back up and send the input prompt so the
-		// cursor is already aligned
+	SendPromptBarBottom();
 
-		// go below input prompt
-		ssh_channel_write(m_Channel, "\r\n", 2);
-
-		// send bottom bar
-		ssh_channel_write(m_Channel, PromptBarBottomStr(), str_length(PromptBarBottomStr()));
-
-		// move back up and align to line start and clear previous prompt bar
-		// to draw input prompt
-		ssh_channel_write(m_Channel, "\x1B[A\r\033[2K", 9);
-	}
-
+	ssh_channel_write(m_Channel, "\r\033[2K", 6);
 	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	m_CursorPos.y++;
 	SetCursorPosToPromptStart();
@@ -663,9 +651,26 @@ void CSshClient::ResendPrompt()
 	if(!m_Channel)
 		return;
 
+	SendPromptBarBottom();
+
 	ssh_channel_write(m_Channel, "\r\033[2K", 6);
 	ssh_channel_write(m_Channel, PromptStr(), str_length(PromptStr()));
 	ssh_channel_write(m_Channel, m_aInput, str_length(m_aInput));
+}
+
+void CSshClient::SendPromptBarBottom()
+{
+	if(!m_Config.m_PromptBarBottom)
+		return;
+
+	// go below input prompt
+	ssh_channel_write(m_Channel, "\r\n", 2);
+
+	// send bottom bar
+	ssh_channel_write(m_Channel, PromptBarBottomStr(), str_length(PromptBarBottomStr()));
+
+	// move back up
+	ssh_channel_write(m_Channel, "\x1B[A", 4);
 }
 
 const char *CSshClient::PromptStr()
@@ -1137,6 +1142,12 @@ void CSshClient::SendChannel(const char *pFormat, ...)
 
 void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 {
+	if(m_Mode == EClientMode::PROMPT && m_Config.m_PromptBarBottom)
+	{
+		// the bottom bar can get bugged without this
+		ResendPrompt();
+	}
+
 	if(m_Config.m_StatusLine)
 	{
 		// if we decrease the terminal window height
