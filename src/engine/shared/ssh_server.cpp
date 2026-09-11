@@ -1,3 +1,4 @@
+#include <game/client/components/console.h>
 #if defined(CONF_SSH)
 
 #include "ssh_server.h"
@@ -684,7 +685,10 @@ const char *CSshClient::PromptStr()
 
 const char *CSshClient::PromptBarBottomStr()
 {
-	str_copy(m_aPromptBarBottom, "(bottom bar)");
+	// could also regenerate the text here on demand if it got invalidated
+	// or was not generated in a long time or something like that
+	
+	// str_copy(m_aPromptBarBottom, "(bottom bar)");
 	return m_aPromptBarBottom;
 }
 
@@ -1928,6 +1932,11 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			i += LengthInBytes - 1;
 		}
 	}
+
+	// FIXME: i am here store pCommand in m_pCurrentCommand and then use it in the prompt str getter to build the preview
+
+	char aCmd[512] = "kick";
+	const IConsole::ICommandInfo *pCommand = Console()->GetCommandInfo(aCmd, CGameConsole::CONSOLETYPE_REMOTE, false);
 
 	// TODO: this should not be here
 	//       we also need to blacklist some commands during special modes

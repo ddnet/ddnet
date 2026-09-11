@@ -133,7 +133,7 @@ public:
 
 class CSshClient
 {
-	char m_aPromptBarBottom[2048] = "";
+	char m_aPromptBarBottom[2048] = "(bottom bar)";
 
 public:
 	const IConsole *Console() const;
@@ -285,6 +285,10 @@ public:
 
 	// Render the prompt bar below the input cursor
 	void SendPromptBarBottom();
+
+	// Refresh and regenerate the bottom bar text
+	// and also send it to the client
+	void UpdatePromptBarBottom();
 
 	const char *PromptStr();
 	const char *PromptBarBottomStr();
