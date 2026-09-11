@@ -1339,8 +1339,6 @@ void CSshClient::OnTerminalReady()
 		SendScrollRegion();
 	}
 
-	log_info("ssh", "cursor y before banner %d", m_CursorPos.y);
-
 	// send banner
 	SendChannel(
 		"%s",
@@ -1349,8 +1347,6 @@ void CSshClient::OnTerminalReady()
 		"#  welcome to the rcon console!  #\n"
 		"#                                #\n"
 		"##################################\n");
-
-	log_info("ssh", "cursor y after banner %d", m_CursorPos.y);
 
 	NewPrompt();
 	UpdateStatusLine();
@@ -1475,7 +1471,7 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 			pClient->m_CursorPos.x = Column;
 			pClient->m_CursorPos.y = Row;
 			pClient->m_WaitingForCursorPos = false;
-			log_info("ssh", "got cursor pos x=%d y=%d", Column, Row);
+			// log_info("ssh", "got cursor pos x=%d y=%d", Column, Row);
 
 			// yes we ask the client for the cursor position
 			// then we force the clients position to that position
@@ -1486,7 +1482,6 @@ int CSshServer::TryProcessEscapeSequence(CSshClient *pClient, const char *pBuf, 
 
 			if(!pClient->m_InitialCursorPos.has_value())
 			{
-				log_info("ssh", "got INITIAL cursor pos x=%d y=%d", Column, Row);
 				pClient->m_InitialCursorPos = pClient->m_CursorPos;
 				pClient->OnTerminalReady();
 			}
@@ -1715,16 +1710,16 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 					CLogScope Scope(&Logger);
 					LogRatelimitStatus();
 				}
-				else if(!str_comp(pCmd, "x")) // FIXME: remove debug
-				{
-					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
-					CLogScope Scope(&Logger);
-					// log_info("ssh", "debug command aaaaaaaaaaaaa aaaxxxxxxxxxxxT");
-					// log_info("ssh", "new\nline that would be long\nbuline breakslolxx");
-					// log_info("ssh", "hello world");
-					log_info("ssh", "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
-					pClient->RequestCursorPos();
-				}
+				// else if(!str_comp(pCmd, "x")) // FIXME: remove debug
+				// {
+				// 	CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
+				// 	CLogScope Scope(&Logger);
+				// 	// log_info("ssh", "debug command aaaaaaaaaaaaa aaaxxxxxxxxxxxT");
+				// 	// log_info("ssh", "new\nline that would be long\nbuline breakslolxx");
+				// 	// log_info("ssh", "hello world");
+				// 	log_info("ssh", "✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅");
+				// 	pClient->RequestCursorPos();
+				// }
 				else
 				{
 					CSshLogger Logger(this, pClient->m_ClientId, log_get_scope_logger());
@@ -2076,16 +2071,16 @@ void CSshServer::ReadNewInput(CSshClient *pClient)
 	pClient->m_Buffer.AddBytes(aBuf, n);
 	TryProcessCurrentInput(pClient);
 
-	if(!std::isprint(aBuf[0]))
-	{
-		log_info("ssh", "-----");
-		for(int i = 0; i < n; i++)
-		{
-			log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
-		}
-		log_info("ssh", "cursor x=%d y=%d term w=%d h=%d", pClient->m_CursorPos.x, pClient->m_CursorPos.y, pClient->m_Term.m_Width, pClient->m_Term.m_Height);
-		log_info("ssh", "input bufidx=%d '%s'", pClient->m_InputIdx, pClient->m_aInput);
-	}
+	// if(!std::isprint(aBuf[0]))
+	// {
+	// 	log_info("ssh", "-----");
+	// 	for(int i = 0; i < n; i++)
+	// 	{
+	// 		log_info("ssh", "debug input buf[%d/%d] = %d", i, n, aBuf[i]);
+	// 	}
+	// 	log_info("ssh", "cursor x=%d y=%d term w=%d h=%d", pClient->m_CursorPos.x, pClient->m_CursorPos.y, pClient->m_Term.m_Width, pClient->m_Term.m_Height);
+	// 	log_info("ssh", "input bufidx=%d '%s'", pClient->m_InputIdx, pClient->m_aInput);
+	// }
 }
 
 void CSshServer::GenerateHostKeyIfMissing()
@@ -2147,33 +2142,33 @@ void CSshServer::Init(CConfig *pConfig, IConsole *pConsole, IStorage *pStorage)
 
 	log_info("ssh", "listening on 0.0.0.0:%s", aPort);
 
-	// placeholder history for testing the search feature
-	// in the future we can load it from a file here
-	// so the history survives server restarts
-	// which is super handy for local development where
-	// the server restarts all the time
-	const char *apHistory[] = {
-		"yellow",
-		"antibot dump",
-		"status",
-		"broadcast hello world from ssh",
-		"broadcast yellow world",
-		"sv_port",
-		"sv_shutdown_when_empty 1",
-		"sv_this_config_does_not_exist 2",
-		"shutdown",
-		"access_level logout moderator",
-		"add_sqlserver xx",
-		"mapbug bong",
-		"sv_shutdown_when_empty 0",
-		"say foo bar baz",
-		"echo hello world",
-		"say foo;say bar;say baz"};
-	for(const char *pLine : apHistory)
-	{
-		auto &Entry = m_InputHistory.emplace_back();
-		str_copy(Entry.data(), pLine, Entry.size());
-	}
+	// // placeholder history for testing the search feature
+	// // in the future we can load it from a file here
+	// // so the history survives server restarts
+	// // which is super handy for local development where
+	// // the server restarts all the time
+	// const char *apHistory[] = {
+	// 	"yellow",
+	// 	"antibot dump",
+	// 	"status",
+	// 	"broadcast hello world from ssh",
+	// 	"broadcast yellow world",
+	// 	"sv_port",
+	// 	"sv_shutdown_when_empty 1",
+	// 	"sv_this_config_does_not_exist 2",
+	// 	"shutdown",
+	// 	"access_level logout moderator",
+	// 	"add_sqlserver xx",
+	// 	"mapbug bong",
+	// 	"sv_shutdown_when_empty 0",
+	// 	"say foo bar baz",
+	// 	"echo hello world",
+	// 	"say foo;say bar;say baz"};
+	// for(const char *pLine : apHistory)
+	// {
+	// 	auto &Entry = m_InputHistory.emplace_back();
+	// 	str_copy(Entry.data(), pLine, Entry.size());
+	// }
 }
 
 std::optional<int> CSshServer::FindFreeSlot()
