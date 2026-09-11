@@ -685,10 +685,19 @@ const char *CSshClient::PromptStr()
 
 const char *CSshClient::PromptBarBottomStr()
 {
-	// could also regenerate the text here on demand if it got invalidated
-	// or was not generated in a long time or something like that
-	
-	// str_copy(m_aPromptBarBottom, "(bottom bar)");
+	str_copy(m_aPromptBarBottom, "(bottom bar)");
+
+	if(m_pCurrentCmd)
+	{
+		str_format(
+			m_aPromptBarBottom,
+			sizeof(m_aPromptBarBottom),
+			"%s %s - %s",
+			m_pCurrentCmd->Name(),
+			m_pCurrentCmd->Params(),
+			m_pCurrentCmd->Help());
+	}
+
 	return m_aPromptBarBottom;
 }
 
@@ -1933,10 +1942,8 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 	}
 
-	// FIXME: i am here store pCommand in m_pCurrentCommand and then use it in the prompt str getter to build the preview
-
 	char aCmd[512] = "kick";
-	const IConsole::ICommandInfo *pCommand = Console()->GetCommandInfo(aCmd, CGameConsole::CONSOLETYPE_REMOTE, false);
+	pClient->m_pCurrentCmd = Console()->GetCommandInfo(aCmd, CFGFLAG_SERVER, false);
 
 	// TODO: this should not be here
 	//       we also need to blacklist some commands during special modes

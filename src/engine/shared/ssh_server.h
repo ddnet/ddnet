@@ -9,6 +9,7 @@
 #include <base/types.h>
 #include <base/vmath.h>
 
+#include <engine/console.h>
 #include <engine/external/unicode-width/unicode_width.h>
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
@@ -334,6 +335,10 @@ public:
 	int m_CompletionIndex = -1;
 	int m_CompletionEnumerationCount = -1;
 	const char *m_pCompletionPreview = nullptr;
+
+	// TODO: this might point to invalid memory
+	//       https://github.com/ddnet/ddnet/pull/12842
+	const IConsole::ICommandInfo *m_pCurrentCmd = nullptr;
 
 	static void CompletionCallback(int Index, const char *pCmd, void *pUser);
 	static void CompletionPreviewCallback(int Index, const char *pCmd, void *pUser);
