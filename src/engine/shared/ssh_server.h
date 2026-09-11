@@ -100,6 +100,9 @@ public:
 	// but it does scroll with the prompt and is attached to the prompt
 	// not to the bottom of the screen
 	bool m_PromptBarBottom = true;
+
+	// if the bottom bar should use colors or not
+	bool m_PromptBarBottomColors = true;
 };
 
 static constexpr size_t MAX_SSH_RATELIMIT_ENTRIES = 1024;
@@ -339,6 +342,20 @@ public:
 	// TODO: this might point to invalid memory
 	//       https://github.com/ddnet/ddnet/pull/12842
 	const IConsole::ICommandInfo *m_pCurrentCmd = nullptr;
+
+	/**
+	 * Gets the command at the current cursor including trailing spaces.
+	 * Commands are split by semicolons.
+	 *
+	 * So if the current console input is for example "hello; world ;foo"
+	 *                                                        ^
+	 *                   and the cursor is here  -------------/
+	 * The result would be "world "
+	 *
+	 * @param pInput the console input line
+	 * @param aCmd the command the cursor is at
+	 */
+	void GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH]);
 
 	static void CompletionCallback(int Index, const char *pCmd, void *pUser);
 	static void CompletionPreviewCallback(int Index, const char *pCmd, void *pUser);

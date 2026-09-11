@@ -664,8 +664,8 @@ void CSshClient::SendPromptBarBottom()
 	if(!m_Config.m_PromptBarBottom)
 		return;
 
-	// go below input prompt
-	ssh_channel_write(m_Channel, "\r\n", 2);
+	// go below input prompt and clear old bar
+	ssh_channel_write(m_Channel, "\r\n\033[2K", 7);
 
 	// send bottom bar
 	ssh_channel_write(m_Channel, PromptBarBottomStr(), str_length(PromptBarBottomStr()));
@@ -685,17 +685,39 @@ const char *CSshClient::PromptStr()
 
 const char *CSshClient::PromptBarBottomStr()
 {
-	str_copy(m_aPromptBarBottom, "(bottom bar)");
+	char aYellow[32] = "";
+	char aResetColor[16] = "";
+	if(m_Config.m_PromptBarBottomColors)
+	{
+		str_format(aYellow, sizeof(aYellow),
+			"\x1b[38;2;%d;%d;%dm",
+			255,
+			255,
+			0);
+		str_copy(aResetColor, "\x1b[0m");
+	}
 
 	if(m_pCurrentCmd)
 	{
 		str_format(
 			m_aPromptBarBottom,
 			sizeof(m_aPromptBarBottom),
-			"%s %s - %s",
+			"%s%s %s - %s%s",
+			aYellow,
 			m_pCurrentCmd->Name(),
 			m_pCurrentCmd->Params(),
-			m_pCurrentCmd->Help());
+			m_pCurrentCmd->Help(),
+			aResetColor);
+	}
+	else
+	{
+		m_aPromptBarBottom[0] = '\0';
+		// str_format(
+		// 	m_aPromptBarBottom,
+		// 	sizeof(m_aPromptBarBottom),
+		// 	"%s placeholder %s",
+		// 	aYellow,
+		// 	aResetColor);
 	}
 
 	return m_aPromptBarBottom;
@@ -1012,6 +1034,27 @@ void CSshClient::RenderHistorySearch()
 
 	ResendPrompt();
 	SendCursorPos(m_CursorPos);
+}
+
+void CSshClient::GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH])
+{
+	char aInput[IConsole::CMDLINE_LENGTH];
+	str_copy(aInput, pInput);
+	int CompletionCommandStart = 0;
+	int CompletionCommandEnd = 0;
+
+	char aaSeparators[][2] = {";", "\""};
+	for(auto *pSeparator : aaSeparators)
+	{
+		int Start, End;
+		str_delimiters_around_offset(aInput + CompletionCommandStart, pSeparator, m_InputIdx - CompletionCommandStart, &Start, &End);
+		CompletionCommandStart += Start;
+		CompletionCommandEnd = CompletionCommandStart + (End - Start);
+		aInput[CompletionCommandEnd] = '\0';
+	}
+	CompletionCommandStart = str_skip_whitespaces_const(aInput + CompletionCommandStart) - aInput;
+
+	str_copy(aCmd, aInput + CompletionCommandStart);
 }
 
 void CSshClient::CompleteCommands(bool IsReverse)
@@ -1958,8 +2001,14 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		}
 	}
 
-	char aCmd[512] = "kick";
+	char aCmd[IConsole::CMDLINE_LENGTH];
+	pClient->GetCommand(pClient->m_aInput, aCmd);
+	const IConsole::ICommandInfo *pPrevCmd = pClient->m_pCurrentCmd;
 	pClient->m_pCurrentCmd = Console()->GetCommandInfo(aCmd, CFGFLAG_SERVER, false);
+	if(pPrevCmd != pClient->m_pCurrentCmd)
+	{
+		pClient->ResendPrompt();
+	}
 
 	// TODO: this should not be here
 	//       we also need to blacklist some commands during special modes
