@@ -43,6 +43,9 @@ FLUSH PRIVILEGES;
 * **-DDEV=[ON|OFF]** <br>
 	Whether to optimize for development, speeding up the compilation process a little. If enabled, don't generate stuff necessary for packaging. Setting to ON will set CMAKE\_BUILD\_TYPE to Debug by default. Default value is OFF.
 
+* **-DNETWORKING_QUIC=[ON|OFF]** <br>
+    Whether to enable the new experimental quic networking backend. Do not use.
+
 * **-DUPNP=[ON|OFF]** <br>
 	Whether to enable UPnP support for the server.
 	You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.

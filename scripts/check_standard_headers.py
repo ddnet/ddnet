@@ -33,7 +33,9 @@ C_HEADER_SET = {
 }
 C_HEADER_INCLUDE_PATTERN = re.compile(rf"#include\s+<({'|'.join(C_HEADER_SET)})\.h>")
 
-IGNORE_FILES = []
+IGNORE_FILES = [
+	"src/net/net.h",
+]
 IGNORE_DIRS = [
 	"src/engine/external",
 	"src/masterping",

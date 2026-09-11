@@ -15,6 +15,10 @@
 
 class CHuffman;
 class CNetBan;
+#ifdef CONF_NETWORKING_QUIC
+typedef struct DdnetNet CNet;
+typedef struct DdnetNetEvent CNetEvent;
+#endif
 class CPacker;
 
 /*
@@ -398,6 +402,7 @@ public:
 	int Recv(char *pLine, int MaxLength);
 };
 
+#ifndef CONF_NETWORKING_QUIC
 /**
  * Accepts a non-control packet containing one or more chunks and unpacks each chunk individually.
  * After a packet has been fed into the unpacker by calling @link FeedPacket @endlink, all chunks have
@@ -421,10 +426,40 @@ private:
 	int m_ClientId;
 	CNetPacketConstruct m_Data;
 };
+#endif
 
 // server side
 class CNetServer
 {
+#ifdef CONF_NETWORKING_QUIC
+	struct CPeer
+	{
+		enum
+		{
+			STATE_NONE,
+			STATE_CONNECTED,
+			STATE_TIMEOUT,
+			STATE_TIMEOUT_CLEARED,
+		};
+
+		int m_State = STATE_NONE;
+		// Stores a mapping from client IDs to peer IDs of the network library.
+		// The opposite mapping is stored in the userdata of the library.
+		uint64_t m_Id = -1;
+		bool m_TimeoutProtected = false;
+		NETADDR m_Address = {0};
+		std::array<char, NETADDR_MAXSTRSIZE> m_aAddressStr = {};
+		std::array<char, NETADDR_MAXSTRSIZE> m_aAddressStrNoPort = {};
+
+		void Reset();
+		void SetAddress(const NETADDR &Addr);
+	};
+
+	// Next client ID to try.
+	int m_NextClientId = 0;
+
+	CPeer m_aPeers[NET_MAX_CLIENTS];
+#else // CONF_NETWORKING_QUIC
 	struct CSlot
 	{
 	public:
@@ -441,25 +476,33 @@ class CNetServer
 		int m_Conns;
 	};
 
-	NETADDR m_Address;
-	NETSOCKET m_Socket;
-	CNetBan *m_pNetBan;
+	NETSOCKET m_Socket = nullptr;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
+#endif
+
+	unsigned char m_aSecurityTokenSeed[16] = {0};
+#ifdef CONF_NETWORKING_QUIC
+	CNet *m_pNet = nullptr;
+	CNetEvent *m_pNetEvent = nullptr;
+	unsigned char m_aBuffer[2048] = {0};
+#endif
+
+	NETADDR m_Address = {0};
+	CNetBan *m_pNetBan = nullptr;
 	int m_MaxClients = NET_MAX_CLIENTS;
-	int m_MaxClientsPerIp;
+	int m_MaxClientsPerIp = NET_MAX_CLIENTS;
 
-	bool m_FlushBatch = false;
-	bool m_aFlushPending[NET_MAX_CLIENTS] = {};
+	NETFUNC_NEWCLIENT m_pfnNewClient = nullptr;
+	NETFUNC_NEWCLIENT_NOAUTH m_pfnNewClientNoAuth = nullptr;
+	NETFUNC_DELCLIENT m_pfnDelClient = nullptr;
+	NETFUNC_CLIENTREJOIN m_pfnClientRejoin = nullptr;
+	void *m_pUser = nullptr;
 
-	NETFUNC_NEWCLIENT m_pfnNewClient;
-	NETFUNC_NEWCLIENT_NOAUTH m_pfnNewClientNoAuth;
-	NETFUNC_DELCLIENT m_pfnDelClient;
-	NETFUNC_CLIENTREJOIN m_pfnClientRejoin;
-	void *m_pUser;
-
-	unsigned char m_aSecurityTokenSeed[16];
-
-	// vanilla connect flood detection
+#ifdef CONF_NETWORKING_QUIC
+	// TODO: persistent key
+	uint8_t m_aIdentity[32];
+#else // CONF_NETWORKING_QUIC
+      // vanilla connect flood detection
 	int64_t m_VConnFirst;
 	int m_VConnNum;
 
@@ -486,8 +529,19 @@ class CNetServer
 	int NumClientsWithAddr(NETADDR Addr);
 	bool Connlimit(NETADDR Addr);
 	void SendMsgs(NETADDR &Addr, const CPacker **ppMsgs, int Num);
+#endif
+
+	bool m_FlushBatch = false;
+	bool m_aFlushPending[NET_MAX_CLIENTS] = {};
+
+	void Flush(int ClientId);
 
 public:
+#ifdef CONF_NETWORKING_QUIC
+	CNetServer();
+	~CNetServer();
+#endif
+
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
@@ -499,6 +553,7 @@ public:
 	int Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken);
 	int Send(CNetChunk *pChunk);
 	void Update();
+	void Wait(uint64_t Microseconds);
 
 	// While a flush batch is open, sends requesting MSGFLAG_FLUSH only queue
 	// their chunk and mark the connection; EndFlushBatch() then flushes each
@@ -511,16 +566,17 @@ public:
 	void Drop(int ClientId, const char *pReason);
 
 	// status requests
-	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
-	const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrString(int ClientId, bool IncludePort) const { return m_aSlots[ClientId].m_Connection.PeerAddressString(IncludePort); }
-	bool HasSecurityToken(int ClientId) const { return m_aSlots[ClientId].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
 	NETADDR Address() const { return m_Address; }
-	NETSOCKET Socket() const { return m_Socket; }
 	CNetBan *NetBan() const { return m_pNetBan; }
-	int NetType() const { return net_socket_type(m_Socket); }
 	int MaxClients() const { return m_MaxClients; }
-
+	const NETADDR *ClientAddr(int ClientId) const;
+	const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrString(int ClientId, bool IncludePort) const;
+	bool HasSecurityToken(int ClientId) const;
+	NETSOCKET Socket() const;
+	int NetType() const;
+#ifndef CONF_NETWORKING_QUIC
 	void SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token);
+#endif
 
 	//
 	void SetMaxClientsPerIp(int Max);
@@ -533,8 +589,10 @@ public:
 
 	// anti spoof
 	SECURITY_TOKEN GetGlobalToken();
+#ifndef CONF_NETWORKING_QUIC
 	SECURITY_TOKEN GetToken(const NETADDR &Addr);
 	SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr);
+#endif
 };
 
 class CNetConsole
@@ -611,15 +669,33 @@ private:
 // client side
 class CNetClient
 {
+#ifdef CONF_NETWORKING_QUIC
+	CNet *m_pNet = nullptr;
+	CNetEvent *m_pNetEvent = nullptr;
+	unsigned char m_aBuffer[NET_MAX_PACKETSIZE] = {0};
+	int m_State = NETSTATE_OFFLINE;
+	int64_t m_PeerId = -1;
+	NETADDR m_ServerAddress = {0};
+	// Addresses passed to the last Connect(), reported back by ConnectAddresses().
+	NETADDR m_aConnectAddrs[16] = {{}};
+	int m_NumConnectAddrs = 0;
+	char m_aErrorString[256] = {0};
+#else
 	CNetConnection m_Connection;
 	CPacketChunkUnpacker m_PacketChunkUnpacker;
 	CNetPacketConstruct m_RecvBuffer;
 	CNetTokenCache m_TokenCache;
 
+	NETSOCKET m_Socket = nullptr;
+#endif
+
 	CStun *m_pStun = nullptr;
 
 public:
-	NETSOCKET m_Socket = nullptr;
+#ifdef CONF_NETWORKING_QUIC
+	~CNetClient();
+#endif
+
 	// openness
 	bool Open(NETADDR BindAddr);
 	void Close();
@@ -632,6 +708,8 @@ public:
 	// communication
 	int Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Sixup);
 	int Send(CNetChunk *pChunk);
+	// Block for at most `Microseconds`, returning early when a packet arrives.
+	void Wait(uint64_t Microseconds);
 
 	// pumping
 	void Update();
@@ -640,13 +718,13 @@ public:
 	void ResetErrorString();
 
 	// error and state
-	int NetType() const { return net_socket_type(m_Socket); }
-	bool SocketIsBroken() const { return m_Socket != nullptr && net_udp_is_broken(m_Socket); }
 	int State();
-	const NETADDR *ServerAddress() const { return m_Connection.PeerAddress(); }
-	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const { m_Connection.ConnectAddresses(ppAddrs, pNumAddrs); }
 	bool GotProblems(int64_t MaxLatency) const;
 	const char *ErrorString() const;
+	int NetType();
+	bool SocketIsBroken() const;
+	const NETADDR *ServerAddress() const;
+	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const;
 
 	// stun
 	void FeedStunServer(NETADDR StunServer);

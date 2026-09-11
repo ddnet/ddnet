@@ -59,7 +59,7 @@ int main(int argc, const char **argv)
 
 	using namespace std::chrono_literals;
 	const std::chrono::nanoseconds Timeout = std::chrono::nanoseconds(1s);
-	net_socket_read_wait(NetClient.m_Socket, Timeout);
+	NetClient.Wait(std::chrono::duration_cast<std::chrono::microseconds>(Timeout).count());
 
 	NetClient.Update();
 
