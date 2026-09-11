@@ -1576,6 +1576,22 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		char Byte = pBuf[i];
 		if(Byte == KEY_ENTER)
 		{
+			if(pClient->m_Config.m_PromptBarBottom)
+			{
+				// when the user presses enter a command might be executed
+				// that command might cause log lines to be printed
+				// they will draw over the bottom prompt bar
+				// but they will not clear the entire line first
+				// so if the log line is shorter than the prompt bar
+				// it will look glitched
+				// to avoid that we just clear out the entire prompt bar
+				// when pressing enter expecting it to be redrawn
+				// at the correct positon anyways
+
+				// cursor down, clear line, cursor up
+				ssh_channel_write(pClient->m_Channel, "\n\r\033[2K\x1B[A", 10);
+			}
+
 			// this if statement is a bit ugly move the mode somewhere else
 			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
 			{
