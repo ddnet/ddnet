@@ -971,6 +971,10 @@ private:
 		virtual void DestroySurface() = 0;
 		[[nodiscard]] virtual bool CreateImages(VkSwapchainKHR &OldSwapChain) = 0;
 		virtual void DestroyImages(bool ForceDestroy) = 0;
+		[[nodiscard]] virtual bool SupportsRecreate() const = 0;
+		[[nodiscard]] virtual VkResult AcquireNextImage(uint32_t &ImageIndex) = 0;
+		[[nodiscard]] virtual bool SubmitAndPresent(VkSubmitInfo &SubmitInfo) = 0;
+		virtual VkImageLayout PresentedImageLayout() const = 0;
 	};
 
 	class CSwapChainTarget final : public IPresentTarget
@@ -1010,6 +1014,66 @@ private:
 		{
 			m_Backend.ClearSwapChainImageHandles();
 			m_Backend.DestroySwapChain(ForceDestroy);
+		}
+
+		[[nodiscard]] bool SupportsRecreate() const override
+		{
+			return true;
+		}
+
+		[[nodiscard]] VkResult AcquireNextImage(uint32_t &ImageIndex) override
+		{
+			return vkAcquireNextImageKHR(m_Backend.m_VKDevice, m_Backend.m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_Backend.m_AcquireImageSemaphore, VK_NULL_HANDLE, &ImageIndex);
+		}
+
+		[[nodiscard]] bool SubmitAndPresent(VkSubmitInfo &SubmitInfo) override
+		{
+			std::array<VkSemaphore, 1> aWaitSemaphores = {m_Backend.m_AcquireImageSemaphore};
+			std::array<VkPipelineStageFlags, 1> aWaitStages = {(VkPipelineStageFlags)VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+			SubmitInfo.waitSemaphoreCount = aWaitSemaphores.size();
+			SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
+			SubmitInfo.pWaitDstStageMask = aWaitStages.data();
+
+			std::array<VkSemaphore, 1> aSignalSemaphores = {m_Backend.m_vQueueSubmitSemaphores[m_Backend.m_CurImageIndex]};
+			SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
+			SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
+
+			if(!m_Backend.QueueSubmitFrame(SubmitInfo))
+				return false;
+
+			std::swap(m_Backend.m_vBusyAcquireImageSemaphores[m_Backend.m_CurImageIndex], m_Backend.m_AcquireImageSemaphore);
+
+			m_Backend.m_LastPresentedSwapChainImageIndex = m_Backend.m_CurImageIndex;
+
+			VkPresentInfoKHR PresentInfo{};
+			PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+			PresentInfo.waitSemaphoreCount = aSignalSemaphores.size();
+			PresentInfo.pWaitSemaphores = aSignalSemaphores.data();
+
+			std::array<VkSwapchainKHR, 1> aSwapChains = {m_Backend.m_VKSwapChain};
+			PresentInfo.swapchainCount = aSwapChains.size();
+			PresentInfo.pSwapchains = aSwapChains.data();
+
+			PresentInfo.pImageIndices = &m_Backend.m_CurImageIndex;
+
+			VkResult QueuePresentRes = vkQueuePresentKHR(m_Backend.m_VKPresentQueue, &PresentInfo);
+			if(QueuePresentRes != VK_SUCCESS && QueuePresentRes != VK_SUBOPTIMAL_KHR)
+			{
+				const char *pCritErrorMsg = m_Backend.CheckVulkanCriticalError(QueuePresentRes);
+				if(pCritErrorMsg != nullptr)
+				{
+					m_Backend.SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Presenting graphics queue failed.", pCritErrorMsg);
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		VkImageLayout PresentedImageLayout() const override
+		{
+			return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		}
 
 	private:
@@ -1078,6 +1142,31 @@ private:
 			}
 			m_vImageMemory.clear();
 			m_Backend.ClearSwapChainImageHandles();
+		}
+
+		// Canvas resizes and V-Sync or multi-sampling changes are not applied to these images.
+		[[nodiscard]] bool SupportsRecreate() const override
+		{
+			return false;
+		}
+
+		[[nodiscard]] VkResult AcquireNextImage(uint32_t &ImageIndex) override
+		{
+			ImageIndex = (uint32_t)(m_Backend.m_CurFrame % m_Backend.m_SwapChainImageCount);
+			return VK_SUCCESS;
+		}
+
+		[[nodiscard]] bool SubmitAndPresent(VkSubmitInfo &SubmitInfo) override
+		{
+			if(!m_Backend.QueueSubmitFrame(SubmitInfo))
+				return false;
+			m_Backend.m_LastPresentedSwapChainImageIndex = m_Backend.m_CurImageIndex;
+			return true;
+		}
+
+		VkImageLayout PresentedImageLayout() const override
+		{
+			return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 		}
 
 	private:
@@ -1611,14 +1700,13 @@ protected:
 			VkCommandBuffer &CommandBuffer = *pCommandBuffer;
 
 			auto &SwapImg = m_vSwapChainImages[m_LastPresentedSwapChainImageIndex];
+			const VkImageLayout PresentedLayout = m_pPresentTarget->PresentedImageLayout();
 
 			if(!ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL))
 				return false;
-			// Headless swap chain images are kept in TRANSFER_SRC_OPTIMAL already, since they are
-			// never handed to a present queue.
-			if(!m_Capabilities.m_Headless)
+			if(PresentedLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
 			{
-				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL))
+				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, PresentedLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL))
 					return false;
 			}
 
@@ -1668,9 +1756,9 @@ protected:
 
 			if(!ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL))
 				return false;
-			if(!m_Capabilities.m_Headless)
+			if(PresentedLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
 			{
-				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR))
+				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, PresentedLayout))
 					return false;
 			}
 
@@ -2417,6 +2505,24 @@ protected:
 		ShrinkUnusedCaches();
 	}
 
+	[[nodiscard]] bool QueueSubmitFrame(const VkSubmitInfo &SubmitInfo)
+	{
+		vkResetFences(m_VKDevice, 1, &m_vQueueSubmitFences[m_CurImageIndex]);
+
+		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vQueueSubmitFences[m_CurImageIndex]);
+		if(QueueSubmitRes != VK_SUCCESS)
+		{
+			const char *pCritErrorMsg = CheckVulkanCriticalError(QueueSubmitRes);
+			if(pCritErrorMsg != nullptr)
+			{
+				SetError(EGfxErrorType::GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED, "Submitting to graphics queue failed.", pCritErrorMsg);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	[[nodiscard]] bool WaitFrame()
 	{
 		FinishRenderThreads();
@@ -2488,65 +2594,7 @@ protected:
 			m_vUsedMemoryCommandBuffer[m_CurImageIndex] = false;
 		}
 
-		// The submit fence alone orders frames. The semaphores below additionally order the
-		// submit against the acquire and the present, which only exist with a swap chain.
-		std::array<VkSemaphore, 1> aWaitSemaphores = {m_AcquireImageSemaphore};
-		std::array<VkPipelineStageFlags, 1> aWaitStages = {(VkPipelineStageFlags)VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vQueueSubmitSemaphores[m_CurImageIndex]};
-		if(!m_Capabilities.m_Headless)
-		{
-			SubmitInfo.waitSemaphoreCount = aWaitSemaphores.size();
-			SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
-			SubmitInfo.pWaitDstStageMask = aWaitStages.data();
-
-			SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
-			SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
-		}
-
-		vkResetFences(m_VKDevice, 1, &m_vQueueSubmitFences[m_CurImageIndex]);
-
-		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vQueueSubmitFences[m_CurImageIndex]);
-		if(QueueSubmitRes != VK_SUCCESS)
-		{
-			const char *pCritErrorMsg = CheckVulkanCriticalError(QueueSubmitRes);
-			if(pCritErrorMsg != nullptr)
-			{
-				SetError(EGfxErrorType::GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED, "Submitting to graphics queue failed.", pCritErrorMsg);
-				return false;
-			}
-		}
-
-		std::swap(m_vBusyAcquireImageSemaphores[m_CurImageIndex], m_AcquireImageSemaphore);
-
-		m_LastPresentedSwapChainImageIndex = m_CurImageIndex;
-
-		if(!m_Capabilities.m_Headless)
-		{
-			VkPresentInfoKHR PresentInfo{};
-			PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-			PresentInfo.waitSemaphoreCount = aSignalSemaphores.size();
-			PresentInfo.pWaitSemaphores = aSignalSemaphores.data();
-
-			std::array<VkSwapchainKHR, 1> aSwapChains = {m_VKSwapChain};
-			PresentInfo.swapchainCount = aSwapChains.size();
-			PresentInfo.pSwapchains = aSwapChains.data();
-
-			PresentInfo.pImageIndices = &m_CurImageIndex;
-
-			VkResult QueuePresentRes = vkQueuePresentKHR(m_VKPresentQueue, &PresentInfo);
-			if(QueuePresentRes != VK_SUCCESS && QueuePresentRes != VK_SUBOPTIMAL_KHR)
-			{
-				const char *pCritErrorMsg = CheckVulkanCriticalError(QueuePresentRes);
-				if(pCritErrorMsg != nullptr)
-				{
-					SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Presenting graphics queue failed.", pCritErrorMsg);
-					return false;
-				}
-			}
-		}
-
-		return true;
+		return m_pPresentTarget->SubmitAndPresent(SubmitInfo);
 	}
 
 	[[nodiscard]] bool PrepareFrame()
@@ -2561,40 +2609,31 @@ protected:
 			RecreateSwapChain();
 		}
 
-		if(m_Capabilities.m_Headless)
+		auto AcqResult = m_pPresentTarget->AcquireNextImage(m_CurImageIndex);
+		if(AcqResult != VK_SUCCESS)
 		{
-			// No swap chain to acquire from; the images are ours, so just round-robin them.
-			// The fence wait below is what makes reusing an in-flight image safe.
-			m_CurImageIndex = (uint32_t)(m_CurFrame % m_SwapChainImageCount);
-		}
-		else
-		{
-			auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_AcquireImageSemaphore, VK_NULL_HANDLE, &m_CurImageIndex);
-			if(AcqResult != VK_SUCCESS)
+			if(AcqResult == VK_ERROR_OUT_OF_DATE_KHR || m_RecreateSwapChain)
 			{
-				if(AcqResult == VK_ERROR_OUT_OF_DATE_KHR || m_RecreateSwapChain)
+				m_RecreateSwapChain = false;
+				if(IsVerbose())
 				{
-					m_RecreateSwapChain = false;
-					if(IsVerbose())
-					{
-						log_debug("gfx/vulkan", "Recreating swap chain requested by acquire next image (prepare frame).");
-					}
-					RecreateSwapChain();
-					return PrepareFrame();
+					log_debug("gfx/vulkan", "Recreating swap chain requested by acquire next image (prepare frame).");
 				}
-				else
+				RecreateSwapChain();
+				return PrepareFrame();
+			}
+			else
+			{
+				const char *pCritErrorMsg = CheckVulkanCriticalError(AcqResult);
+				if(pCritErrorMsg != nullptr)
 				{
-					const char *pCritErrorMsg = CheckVulkanCriticalError(AcqResult);
-					if(pCritErrorMsg != nullptr)
-					{
-						SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Acquiring next image failed.", pCritErrorMsg);
-						return false;
-					}
-					else if(AcqResult == VK_ERROR_SURFACE_LOST_KHR)
-					{
-						m_RenderingPaused = true;
-						return true;
-					}
+					SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Acquiring next image failed.", pCritErrorMsg);
+					return false;
+				}
+				else if(AcqResult == VK_ERROR_SURFACE_LOST_KHR)
+				{
+					m_RenderingPaused = true;
+					return true;
 				}
 			}
 		}
@@ -4696,10 +4735,7 @@ public:
 		ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		// Nothing but the readback blit touches these images after the render pass in headless
-		// mode, and that wants TRANSFER_SRC_OPTIMAL anyway; there is no swap chain to hand them
-		// to for presenting.
-		ColorAttachment.finalLayout = m_Capabilities.m_Headless ? VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		ColorAttachment.finalLayout = m_pPresentTarget->PresentedImageLayout();
 
 		VkAttachmentReference MultiSamplingColorAttachmentRef{};
 		MultiSamplingColorAttachmentRef.attachment = 0;
@@ -5831,14 +5867,8 @@ public:
 
 	int RecreateSwapChain()
 	{
-		if(m_Capabilities.m_Headless)
-		{
-			// There is no surface whose properties (extent, present mode) could have changed,
-			// so nothing here is ever out of date. Cmd_VSync and Cmd_MultiSampling still set
-			// m_RecreateSwapChain unconditionally, so this has to stay reachable as a no-op
-			// rather than relying on nothing calling it.
+		if(!m_pPresentTarget->SupportsRecreate())
 			return 0;
-		}
 
 		int Ret = 0;
 		vkDeviceWaitIdle(m_VKDevice);
