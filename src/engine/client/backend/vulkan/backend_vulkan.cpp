@@ -961,6 +961,137 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	std::vector<std::unique_ptr<SRenderThread>> m_vpRenderThreads;
 
 private:
+	class IPresentTarget
+	{
+	public:
+		virtual ~IPresentTarget() = default;
+		[[nodiscard]] virtual bool GetInstanceExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions) = 0;
+		virtual void AddDeviceExtensions(std::set<std::string> &OurExt) const = 0;
+		[[nodiscard]] virtual bool CreateSurface(SDL_Window *pWindow) = 0;
+		virtual void DestroySurface() = 0;
+		[[nodiscard]] virtual bool CreateImages(VkSwapchainKHR &OldSwapChain) = 0;
+		virtual void DestroyImages(bool ForceDestroy) = 0;
+	};
+
+	class CSwapChainTarget final : public IPresentTarget
+	{
+	public:
+		explicit CSwapChainTarget(CCommandProcessorFragment_Vulkan &Backend) :
+			m_Backend(Backend)
+		{
+		}
+
+		[[nodiscard]] bool GetInstanceExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions) override
+		{
+			return m_Backend.GetVulkanExtensions(pWindow, vVKExtensions);
+		}
+
+		void AddDeviceExtensions(std::set<std::string> &OurExt) const override
+		{
+			OurExt.emplace(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		}
+
+		[[nodiscard]] bool CreateSurface(SDL_Window *pWindow) override
+		{
+			return m_Backend.CreateSurface(pWindow);
+		}
+
+		void DestroySurface() override
+		{
+			m_Backend.DestroySurface();
+		}
+
+		[[nodiscard]] bool CreateImages(VkSwapchainKHR &OldSwapChain) override
+		{
+			return m_Backend.CreateSwapChain(OldSwapChain) && m_Backend.GetSwapChainImageHandles();
+		}
+
+		void DestroyImages(bool ForceDestroy) override
+		{
+			m_Backend.ClearSwapChainImageHandles();
+			m_Backend.DestroySwapChain(ForceDestroy);
+		}
+
+	private:
+		CCommandProcessorFragment_Vulkan &m_Backend;
+	};
+
+	class COffscreenTarget final : public IPresentTarget
+	{
+	public:
+		explicit COffscreenTarget(CCommandProcessorFragment_Vulkan &Backend) :
+			m_Backend(Backend)
+		{
+		}
+
+		[[nodiscard]] bool GetInstanceExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions) override
+		{
+			vVKExtensions.clear();
+			return true;
+		}
+
+		void AddDeviceExtensions(std::set<std::string> &OurExt) const override
+		{
+		}
+
+		[[nodiscard]] bool CreateSurface(SDL_Window *pWindow) override
+		{
+			return true;
+		}
+
+		void DestroySurface() override
+		{
+		}
+
+		[[nodiscard]] bool CreateImages(VkSwapchainKHR &OldSwapChain) override
+		{
+			m_Backend.m_VKSurfFormat.format = VK_FORMAT_R8G8B8A8_UNORM;
+			m_Backend.m_VKSurfFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+
+			VkSurfaceCapabilitiesKHR CanvasCapabilities{};
+			CanvasCapabilities.currentExtent = {m_Backend.m_CanvasWidth, m_Backend.m_CanvasHeight};
+			m_Backend.m_VKSwapImgAndViewportExtent = m_Backend.GetSwapImageSize(CanvasCapabilities);
+
+			m_Backend.m_SwapChainImageCount = 2;
+
+			VkImageUsageFlags UsageFlags = 0;
+			for(const auto &ImgUsage : m_Backend.OurImageUsages())
+				UsageFlags |= ImgUsage;
+
+			m_Backend.m_vSwapChainImages.resize(m_Backend.m_SwapChainImageCount);
+			m_vImageMemory.resize(m_Backend.m_SwapChainImageCount);
+			for(uint32_t i = 0; i < m_Backend.m_SwapChainImageCount; ++i)
+			{
+				if(!m_Backend.CreateImage(m_Backend.m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_Backend.m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_Backend.m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_Backend.m_vSwapChainImages[i], m_vImageMemory[i], UsageFlags))
+					return false;
+			}
+
+			return true;
+		}
+
+		void DestroyImages(bool ForceDestroy) override
+		{
+			for(size_t i = 0; i < m_Backend.m_vSwapChainImages.size(); ++i)
+			{
+				vkDestroyImage(m_Backend.m_VKDevice, m_Backend.m_vSwapChainImages[i], nullptr);
+				m_Backend.FreeImageMemBlock(m_vImageMemory[i]);
+			}
+			m_vImageMemory.clear();
+			m_Backend.ClearSwapChainImageHandles();
+		}
+
+	private:
+		CCommandProcessorFragment_Vulkan &m_Backend;
+		std::vector<SMemoryImageBlock<IMAGE_BUFFER_CACHE_ID>> m_vImageMemory;
+	};
+
+	static std::unique_ptr<IPresentTarget> CreatePresentTarget(CCommandProcessorFragment_Vulkan &Backend, const CVulkanCapabilities &Capabilities)
+	{
+		if(Capabilities.m_Headless)
+			return std::make_unique<COffscreenTarget>(Backend);
+		return std::make_unique<CSwapChainTarget>(Backend);
+	}
+
 	std::vector<VkImageView> m_vSwapChainImageViewList;
 	std::vector<SSwapChainMultiSampleImage> m_vSwapChainMultiSamplingImages;
 	std::vector<VkFramebuffer> m_vFramebufferList;
@@ -1045,7 +1176,6 @@ private:
 	VkSwapchainKHR m_VKSwapChain = VK_NULL_HANDLE;
 	std::vector<VkImage> m_vSwapChainImages;
 	uint32_t m_SwapChainImageCount = 0;
-	std::vector<SMemoryImageBlock<IMAGE_BUFFER_CACHE_ID>> m_vSwapChainImageMemory;
 
 	std::vector<SStreamMemory<SFrameBuffers>> m_vStreamedVertexBuffers;
 	std::vector<SStreamMemory<SFrameUniformBuffers>> m_vStreamedUniformBuffers;
@@ -1057,6 +1187,7 @@ private:
 
 	SDL_Window *m_pWindow;
 	const CVulkanCapabilities m_Capabilities;
+	const std::unique_ptr<IPresentTarget> m_pPresentTarget;
 
 	std::array<float, 4> m_aClearColor = {0, 0, 0, 0};
 
@@ -3564,7 +3695,8 @@ protected:
 
 public:
 	explicit CCommandProcessorFragment_Vulkan(const CVulkanCapabilities &Capabilities) :
-		m_Capabilities(Capabilities)
+		m_Capabilities(Capabilities),
+		m_pPresentTarget(CreatePresentTarget(*this, Capabilities))
 	{
 		m_vTextures.reserve(CCommandBuffer::MAX_TEXTURES);
 	}
@@ -3575,13 +3707,6 @@ public:
 
 	[[nodiscard]] bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions)
 	{
-		// Rendering headlessly needs no surface, so no platform surface extension either.
-		if(m_Capabilities.m_Headless)
-		{
-			vVKExtensions.clear();
-			return true;
-		}
-
 		unsigned int ExtCount = 0;
 		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, nullptr))
 		{
@@ -3619,11 +3744,10 @@ public:
 		return OurLayers;
 	}
 
-	std::set<std::string> OurDeviceExtensions() const
+	std::set<std::string> OurDeviceExtensions()
 	{
 		std::set<std::string> OurExt;
-		if(!m_Capabilities.m_Headless)
-			OurExt.emplace(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		m_pPresentTarget->AddDeviceExtensions(OurExt);
 #ifdef VK_EXT_device_fault
 		// Only used when actually supported by the device (see device creation);
 		// enables detailed diagnostics after a VK_ERROR_DEVICE_LOST.
@@ -4135,10 +4259,7 @@ public:
 
 	void DestroySurface()
 	{
-		// Headless never created a surface or enabled VK_KHR_surface, so destroying one would
-		// be invalid.
-		if(!m_Capabilities.m_Headless)
-			vkDestroySurfaceKHR(m_VKInstance, m_VKPresentSurface, nullptr);
+		vkDestroySurfaceKHR(m_VKInstance, m_VKPresentSurface, nullptr);
 	}
 
 	[[nodiscard]] bool GetPresentationMode(VkPresentModeKHR &VKIOMode)
@@ -4315,20 +4436,6 @@ public:
 
 	[[nodiscard]] bool CreateSwapChain(VkSwapchainKHR &OldSwapChain)
 	{
-		if(m_Capabilities.m_Headless)
-		{
-			m_VKSurfFormat.format = VK_FORMAT_R8G8B8A8_UNORM;
-			m_VKSurfFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-
-			// No surface to query capabilities from; the canvas size is the only input,
-			// same as GetSwapImageSize's fallback path for an undefined current extent.
-			VkSurfaceCapabilitiesKHR VKSurfCap{};
-			VKSurfCap.currentExtent = {m_CanvasWidth, m_CanvasHeight};
-			m_VKSwapImgAndViewportExtent = GetSwapImageSize(VKSurfCap);
-
-			return true;
-		}
-
 		VkSurfaceCapabilitiesKHR VKSurfCap;
 		if(!GetSurfaceProperties(VKSurfCap))
 			return false;
@@ -4390,9 +4497,7 @@ public:
 
 	void DestroySwapChain(bool ForceDestroy)
 	{
-		// Headless swap chain images are ours (see GetSwapChainImageHandles), not the
-		// swap chain's, so there is never a real swap chain object to destroy here.
-		if(!m_Capabilities.m_Headless && ForceDestroy)
+		if(ForceDestroy)
 		{
 			vkDestroySwapchainKHR(m_VKDevice, m_VKSwapChain, nullptr);
 			m_VKSwapChain = VK_NULL_HANDLE;
@@ -4401,25 +4506,6 @@ public:
 
 	[[nodiscard]] bool GetSwapChainImageHandles()
 	{
-		if(m_Capabilities.m_Headless)
-		{
-			m_SwapChainImageCount = 2;
-
-			VkImageUsageFlags UsageFlags = 0;
-			for(const auto &ImgUsage : OurImageUsages())
-				UsageFlags |= ImgUsage;
-
-			m_vSwapChainImages.resize(m_SwapChainImageCount);
-			m_vSwapChainImageMemory.resize(m_SwapChainImageCount);
-			for(uint32_t i = 0; i < m_SwapChainImageCount; ++i)
-			{
-				if(!CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_vSwapChainImages[i], m_vSwapChainImageMemory[i], UsageFlags))
-					return false;
-			}
-
-			return true;
-		}
-
 		uint32_t ImgCount = 0;
 		if(vkGetSwapchainImagesKHR(m_VKDevice, m_VKSwapChain, &ImgCount, nullptr) != VK_SUCCESS)
 		{
@@ -4441,16 +4527,6 @@ public:
 
 	void ClearSwapChainImageHandles()
 	{
-		if(m_Capabilities.m_Headless)
-		{
-			// The images are ours rather than the swap chain's, so they have to be freed here.
-			for(size_t i = 0; i < m_vSwapChainImages.size(); ++i)
-			{
-				vkDestroyImage(m_VKDevice, m_vSwapChainImages[i], nullptr);
-				FreeImageMemBlock(m_vSwapChainImageMemory[i]);
-			}
-			m_vSwapChainImageMemory.clear();
-		}
 		m_vSwapChainImages.clear();
 	}
 
@@ -5646,9 +5722,7 @@ public:
 		DestroyMultiSamplerImageAttachments();
 
 		DestroyImageViews();
-		ClearSwapChainImageHandles();
-
-		DestroySwapChain(ForceSwapChainDestruct);
+		m_pPresentTarget->DestroyImages(ForceSwapChainDestruct);
 
 		m_SwapchainCreated = false;
 	}
@@ -5743,7 +5817,7 @@ public:
 	{
 		if(m_VKInstance != VK_NULL_HANDLE)
 		{
-			DestroySurface();
+			m_pPresentTarget->DestroySurface();
 			vkDestroyDevice(m_VKDevice, nullptr);
 
 			if(g_Config.m_DbgGfx == DEBUG_GFX_MODE_MINIMUM || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL)
@@ -5819,7 +5893,7 @@ public:
 		m_CanvasWidth = CanvasWidth;
 		m_CanvasHeight = CanvasHeight;
 
-		if(!GetVulkanExtensions(pWindow, vVKExtensions))
+		if(!m_pPresentTarget->GetInstanceExtensions(pWindow, vVKExtensions))
 			return -1;
 
 		if(!GetVulkanLayers(vVKLayers))
@@ -5846,7 +5920,7 @@ public:
 
 		GetDeviceQueue();
 
-		if(!m_Capabilities.m_Headless && !CreateSurface(pWindow))
+		if(!m_pPresentTarget->CreateSurface(pWindow))
 			return -1;
 
 		return 0;
@@ -6255,10 +6329,7 @@ public:
 	int InitVulkanSwapChain(VkSwapchainKHR &OldSwapChain)
 	{
 		OldSwapChain = VK_NULL_HANDLE;
-		if(!CreateSwapChain(OldSwapChain))
-			return -1;
-
-		if(!GetSwapChainImageHandles())
+		if(!m_pPresentTarget->CreateImages(OldSwapChain))
 			return -1;
 
 		if(!CreateImageViews())
