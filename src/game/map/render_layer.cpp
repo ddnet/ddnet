@@ -162,7 +162,8 @@ bool CRenderLayerTile::CTileLayerVisuals::Init(unsigned int Width, unsigned int 
 		if(Width >= std::numeric_limits<std::ptrdiff_t>::max() || Height >= std::numeric_limits<std::ptrdiff_t>::max())
 			return false;
 
-	m_vTilesOfLayer.resize((size_t)Height * (size_t)Width);
+	// the tile positions are stored as uint32_t, bigger layers are rejected when the map is loaded
+	dbg_assert((uint64_t)Width * Height <= std::numeric_limits<uint32_t>::max(), "Tile layer is too big.");
 
 	m_vBorderTop.resize(Width);
 	m_vBorderBottom.resize(Width);
@@ -330,15 +331,10 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 			// render all visible rows directly, because their start and end are are not offscreen
 			if(X0 == 0 && X1 == (size_t)Visuals.m_Width)
 			{
-				size_t StartIndex = Y0 * Visuals.m_Width;
-				size_t EndIndex = Y1 * Visuals.m_Width - 1;
-				const auto &Start = Visuals.m_vTilesOfLayer[StartIndex];
-				const auto &End = Visuals.m_vTilesOfLayer[EndIndex];
-				unsigned int NumVertices = ((End.IndexBufferByteOffset() - Start.IndexBufferByteOffset()) / sizeof(unsigned int)) + (End.DoDraw() ? 6lu : 0lu);
-
-				if(NumVertices)
+				offset_ptr_size ByteOffset;
+				unsigned int NumVertices;
+				if(Visuals.TileRange(Y0 * Visuals.m_Width, Y1 * Visuals.m_Width - 1, &ByteOffset, &NumVertices))
 				{
-					offset_ptr_size ByteOffset = (offset_ptr_size)Start.IndexBufferByteOffset();
 					Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, &ByteOffset, &NumVertices, 1);
 				}
 			}
@@ -355,16 +351,11 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 				vDrawCounts.reserve(Reserve);
 				for(size_t RowIndex = Y0; RowIndex < Y1; ++RowIndex)
 				{
-					size_t StartIndex = RowIndex * Visuals.m_Width + X0;
-					size_t EndIndex = RowIndex * Visuals.m_Width + (X1 - 1);
-					const auto &Start = Visuals.m_vTilesOfLayer[StartIndex];
-					const auto &End = Visuals.m_vTilesOfLayer[EndIndex];
-					dbg_assert(End.IndexBufferByteOffset() >= Start.IndexBufferByteOffset(), "Tile offsets are not monotone.");
-					unsigned int NumVertices = ((End.IndexBufferByteOffset() - Start.IndexBufferByteOffset()) / sizeof(unsigned int)) + (End.DoDraw() ? 6lu : 0lu);
-
-					if(NumVertices)
+					offset_ptr_size ByteOffset;
+					unsigned int NumVertices;
+					if(Visuals.TileRange(RowIndex * Visuals.m_Width + X0, RowIndex * Visuals.m_Width + (X1 - 1), &ByteOffset, &NumVertices))
 					{
-						vpIndexOffsets.push_back((offset_ptr_size)Start.IndexBufferByteOffset());
+						vpIndexOffsets.push_back(ByteOffset);
 						vDrawCounts.push_back(NumVertices);
 					}
 				}
@@ -690,13 +681,9 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 			int AngleRotate = -1;
 			GetTileData(&Index, &Flags, &AngleRotate, x, y, CurOverlay);
 
-			// the amount of tiles handled before this tile
-			int TilesHandledCount = vTmpTiles.size();
-			Visuals.m_vTilesOfLayer[y * m_pLayerTilemap->m_Width + x].SetIndexBufferByteOffset((offset_ptr32)(TilesHandledCount));
-
 			if(AddTile(vTmpTiles, vTmpTileTexCoords, Index, Flags, x, y, DoTextureCoords, AddAsSpeedup, AngleRotate))
 			{
-				Visuals.m_vTilesOfLayer[y * m_pLayerTilemap->m_Width + x].Draw(true);
+				Visuals.m_vTilePositions.push_back(y * m_pLayerTilemap->m_Width + x);
 
 				// calculate clip region boundaries based on draws
 				DrawLeft = std::min(DrawLeft, x);

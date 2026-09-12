@@ -1,6 +1,7 @@
 #ifndef GAME_MAP_RENDER_LAYER_H
 #define GAME_MAP_RENDER_LAYER_H
 
+#include <algorithm>
 #include <cstdint>
 
 using offset_ptr_size = char *;
@@ -194,7 +195,18 @@ protected:
 			}
 		};
 
-		std::vector<CTileVisual> m_vTilesOfLayer;
+		// positions (y * width + x) of the drawn tiles, ascending, in vertex buffer order
+		std::vector<uint32_t> m_vTilePositions;
+
+		// byte offset and vertex count of the tiles drawn between two positions, false when there is none
+		bool TileRange(size_t StartPos, size_t EndPos, offset_ptr_size *pByteOffset, unsigned int *pNumVertices) const
+		{
+			const auto Begin = std::lower_bound(m_vTilePositions.begin(), m_vTilePositions.end(), (uint32_t)StartPos);
+			const auto End = std::upper_bound(Begin, m_vTilePositions.end(), (uint32_t)EndPos);
+			*pByteOffset = (offset_ptr_size)((Begin - m_vTilePositions.begin()) * 6 * sizeof(uint32_t));
+			*pNumVertices = (End - Begin) * 6;
+			return End != Begin;
+		}
 
 		CTileVisual m_BorderTopLeft;
 		CTileVisual m_BorderTopRight;
