@@ -87,9 +87,7 @@ CGameContext::CGameContext(bool Resetting) :
 	m_Resetting = false;
 	m_pServer = nullptr;
 
-	for(auto &pPlayer : m_apPlayers)
-		pPlayer = nullptr;
-
+	std::fill(std::begin(m_apPlayers), std::end(m_apPlayers), nullptr);
 	mem_zero(&m_aLastPlayerInput, sizeof(m_aLastPlayerInput));
 	std::fill(std::begin(m_aPlayerHasInput), std::end(m_aPlayerHasInput), false);
 
@@ -131,15 +129,9 @@ CGameContext::CGameContext(bool Resetting) :
 	if(!Resetting)
 	{
 		m_pMap = CreateMap();
-
-		for(auto &pSavedTee : m_apSavedTees)
-			pSavedTee = nullptr;
-
-		for(auto &pSavedTeam : m_apSavedTeams)
-			pSavedTeam = nullptr;
-
+		std::fill(std::begin(m_apSavedTees), std::end(m_apSavedTees), nullptr);
+		std::fill(std::begin(m_apSavedTeams), std::end(m_apSavedTeams), nullptr);
 		std::fill(std::begin(m_aTeamMapping), std::end(m_aTeamMapping), -1);
-
 		m_NonEmptySince = 0;
 		m_pVoteOptionHeap = new CHeap();
 	}

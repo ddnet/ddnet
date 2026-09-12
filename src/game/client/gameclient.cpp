@@ -3552,8 +3552,7 @@ void CGameClient::UpdatePrediction()
 		if(m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_HasExtendedData)
 		{
 			int aIds[MAX_CLIENTS];
-			for(int &Id : aIds)
-				Id = -1;
+			std::fill(std::begin(aIds), std::end(aIds), -1);
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_GameWorld.GetCharacterById(i))
 					aIds[pChar->GetStrongWeakId()] = i;
@@ -4375,8 +4374,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleAirJump);
 		Graphics()->UnloadTexture(&m_ParticlesSkin.m_SpriteParticleHit);
 
-		for(auto &SpriteParticle : m_ParticlesSkin.m_aSpriteParticles)
-			SpriteParticle = IGraphics::CTextureHandle();
+		std::fill(std::begin(m_ParticlesSkin.m_aSpriteParticles), std::end(m_ParticlesSkin.m_aSpriteParticles), IGraphics::CTextureHandle());
 
 		m_ParticlesSkinLoaded = false;
 	}
@@ -4518,8 +4516,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpritePulley);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteHectagon);
 
-		for(auto &SpriteParticle : m_ExtrasSkin.m_aSpriteParticles)
-			SpriteParticle = IGraphics::CTextureHandle();
+		std::fill(std::begin(m_ExtrasSkin.m_aSpriteParticles), std::end(m_ExtrasSkin.m_aSpriteParticles), IGraphics::CTextureHandle());
 
 		m_ExtrasSkinLoaded = false;
 	}

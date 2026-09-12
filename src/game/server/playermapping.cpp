@@ -569,8 +569,7 @@ void CPlayerMapping::CPlayerMap::DoSeeOthers()
 	if(m_NumSeeOthers == 0)
 	{
 		// Reset these for the next cycle so we can get the fresh page we had before
-		for(bool &WasSeeOthers : m_aWasSeeOthers)
-			WasSeeOthers = false;
+		std::fill(std::begin(m_aWasSeeOthers), std::end(m_aWasSeeOthers), false);
 		CycleSeeOthers();
 		ResetSeeOthers();
 	}
@@ -584,8 +583,7 @@ void CPlayerMapping::CPlayerMap::ResetSeeOthers()
 {
 	m_SeeOthersPage = -1;
 	m_NumSeeOthers = 0;
-	for(bool &WasSeeOthers : m_aWasSeeOthers)
-		WasSeeOthers = false;
+	std::fill(std::begin(m_aWasSeeOthers), std::end(m_aWasSeeOthers), false);
 	m_UpdateTeamsState = true;
 	UpdateSeeOthers();
 }

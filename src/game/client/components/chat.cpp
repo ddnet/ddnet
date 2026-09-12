@@ -149,9 +149,7 @@ void CChat::Reset()
 	m_aCurrentInputText[0] = '\0';
 	DisableMode();
 	m_vServerCommands.clear();
-
-	for(int64_t &LastSoundPlayed : m_aLastSoundPlayed)
-		LastSoundPlayed = 0;
+	std::fill(std::begin(m_aLastSoundPlayed), std::end(m_aLastSoundPlayed), 0);
 }
 
 void CChat::OnRelease()

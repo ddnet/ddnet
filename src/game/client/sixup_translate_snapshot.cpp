@@ -18,8 +18,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 	int GameTick = Client()->GameTick(g_Config.m_ClDummy);
 	CTranslationContext &TranslationContext = Client()->m_TranslationContext;
 
-	for(auto &PlayerInfosRace : TranslationContext.m_apPlayerInfosRace)
-		PlayerInfosRace = nullptr;
+	std::fill(std::begin(TranslationContext.m_apPlayerInfosRace), std::end(TranslationContext.m_apPlayerInfosRace), nullptr);
 
 	int SpectatorId = -3;
 

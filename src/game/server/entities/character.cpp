@@ -2489,8 +2489,7 @@ void CCharacter::DDRaceInit()
 	m_Paused = false;
 	m_DDRaceState = ERaceState::NONE;
 	m_PrevPos = m_Pos;
-	for(bool &Set : m_SetSavePos)
-		Set = false;
+	std::fill(std::begin(m_SetSavePos), std::end(m_SetSavePos), false);
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCid();
