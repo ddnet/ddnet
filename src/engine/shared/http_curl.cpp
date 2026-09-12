@@ -433,14 +433,15 @@ void CHttpCurl::RunLoop()
 		{
 			if(pMsg->msg == CURLMSG_DONE)
 			{
-				auto RequestIt = m_RunningRequests.find(pMsg->easy_handle);
+				CURL *pEasyHandle = pMsg->easy_handle;
+				auto RequestIt = m_RunningRequests.find(pEasyHandle);
 				dbg_assert(RequestIt != m_RunningRequests.end(), "Running handle not added to map");
 				auto pRequest = std::move(RequestIt->second);
 				m_RunningRequests.erase(RequestIt);
 
-				pRequest->OnCompletionInternal(pMsg->easy_handle, pMsg->data.result);
-				curl_multi_remove_handle(m_pMultiH, pMsg->easy_handle);
-				curl_easy_cleanup(pMsg->easy_handle);
+				pRequest->OnCompletionInternal(pEasyHandle, pMsg->data.result);
+				curl_multi_remove_handle(m_pMultiH, pEasyHandle);
+				curl_easy_cleanup(pEasyHandle);
 			}
 		}
 
