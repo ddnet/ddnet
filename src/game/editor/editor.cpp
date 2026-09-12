@@ -819,6 +819,17 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 		}
+
+		// Hide sounds button
+		{
+			ToolbarBottom.VSplitLeft(25.0f, &Button, &ToolbarBottom);
+			int Checked = m_QuickActionShowSoundArea.Disabled() ? -1 : (m_QuickActionShowSoundArea.Active() ? 1 : 0);
+			if(DoButton_FontIcon(&m_QuickActionShowSoundArea, FontIcon::MUSIC, Checked, &Button, BUTTONFLAG_LEFT, m_QuickActionShowSoundArea.Description(), IGraphics::CORNER_ALL))
+			{
+				m_QuickActionShowSoundArea.Call();
+			}
+			ToolbarBottom.VSplitLeft(5.0f, nullptr, &ToolbarBottom);
+		}
 	}
 }
 
@@ -3520,14 +3531,14 @@ void CEditor::RenderModebar(CUIRect View)
 
 		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_ImagesButton = 0;
-		if(DoButton_FontIcon(&s_ImagesButton, FontIcon::IMAGE, m_Mode == MODE_IMAGES, &ModeButton, BUTTONFLAG_LEFT, "Go to images management.", IGraphics::CORNER_NONE))
+		if(DoButton_FontIcon(&s_ImagesButton, FontIcon::FILE_IMAGE, m_Mode == MODE_IMAGES, &ModeButton, BUTTONFLAG_LEFT, "Go to images management.", IGraphics::CORNER_NONE))
 		{
 			m_Mode = MODE_IMAGES;
 		}
 
 		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_SoundsButton = 0;
-		if(DoButton_FontIcon(&s_SoundsButton, FontIcon::MUSIC, m_Mode == MODE_SOUNDS, &ModeButton, BUTTONFLAG_LEFT, "Go to sounds management.", IGraphics::CORNER_R))
+		if(DoButton_FontIcon(&s_SoundsButton, FontIcon::FILE_AUDIO, m_Mode == MODE_SOUNDS, &ModeButton, BUTTONFLAG_LEFT, "Go to sounds management.", IGraphics::CORNER_R))
 		{
 			m_Mode = MODE_SOUNDS;
 		}

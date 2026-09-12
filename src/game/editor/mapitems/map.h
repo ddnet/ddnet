@@ -272,6 +272,8 @@ public:
 	void SelectPreviousSound();
 	bool IsSoundUsed(int SoundIndex) const;
 	CSoundSource *SelectedSoundSource() const;
+	bool m_ShowSoundArea = true;
+	void ToggleSoundLayerVisibility();
 
 	void PlaceBorderTiles();
 
