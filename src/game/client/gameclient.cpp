@@ -1707,7 +1707,9 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Info.m_MinTeamSize = pInfoEx->m_MinTeamSize;
 		Info.m_MaxTeamSize = pInfoEx->m_MaxTeamSize;
 		if(pInfoEx->m_NumDDRaceTeams > 0)
-            Info.m_NumDDRaceTeams = pInfoEx->m_NumDDRaceTeams;
+		{
+			Info.m_NumDDRaceTeams = pInfoEx->m_NumDDRaceTeams;
+		}
 		Info.m_OldLaser = Flags2 & GAMEINFOFLAG2_OLD_LASER;
 	}
 
