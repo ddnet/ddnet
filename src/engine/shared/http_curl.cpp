@@ -482,7 +482,7 @@ void CHttpCurl::RunLoop()
 			{
 				curl_easy_cleanup(pEH);
 				str_copy(pRequest->m_aErr, "Failed to initialize request");
-				pRequest->OnCompletionInternal(nullptr, CURLE_ABORTED_BY_CALLBACK);
+				pRequest->OnCompletionInternal(nullptr, CURLE_FAILED_INIT);
 				NewRequests.pop_front();
 				continue;
 			}

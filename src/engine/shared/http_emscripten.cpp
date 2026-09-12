@@ -427,7 +427,7 @@ void CHttpEmscripten::RunLoop()
 
 			if(!pRequest->ConfigureAndRun())
 			{
-				pRequest->OnCompletionInternal(EHttpState::ABORTED, "Failed to initialize request");
+				pRequest->OnCompletionInternal(EHttpState::ERROR, "Failed to initialize request");
 				PendingRequests.pop_front();
 				continue;
 			}
