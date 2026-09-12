@@ -116,7 +116,6 @@ public:
 		SDL_Window *m_pWindow;
 		uint32_t m_Width;
 		uint32_t m_Height;
-		bool m_Headless;
 
 		char *m_pVendorString;
 		char *m_pVersionString;

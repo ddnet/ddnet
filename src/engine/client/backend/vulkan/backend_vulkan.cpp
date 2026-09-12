@@ -1056,7 +1056,7 @@ private:
 	uint32_t m_CanvasHeight;
 
 	SDL_Window *m_pWindow;
-	bool m_Headless = false;
+	const CVulkanCapabilities m_Capabilities;
 
 	std::array<float, 4> m_aClearColor = {0, 0, 0, 0};
 
@@ -1485,7 +1485,7 @@ protected:
 				return false;
 			// Headless swap chain images are kept in TRANSFER_SRC_OPTIMAL already, since they are
 			// never handed to a present queue.
-			if(!m_Headless)
+			if(!m_Capabilities.m_Headless)
 			{
 				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL))
 					return false;
@@ -1537,7 +1537,7 @@ protected:
 
 			if(!ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL))
 				return false;
-			if(!m_Headless)
+			if(!m_Capabilities.m_Headless)
 			{
 				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR))
 					return false;
@@ -2362,7 +2362,7 @@ protected:
 		std::array<VkSemaphore, 1> aWaitSemaphores = {m_AcquireImageSemaphore};
 		std::array<VkPipelineStageFlags, 1> aWaitStages = {(VkPipelineStageFlags)VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vQueueSubmitSemaphores[m_CurImageIndex]};
-		if(!m_Headless)
+		if(!m_Capabilities.m_Headless)
 		{
 			SubmitInfo.waitSemaphoreCount = aWaitSemaphores.size();
 			SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
@@ -2389,7 +2389,7 @@ protected:
 
 		m_LastPresentedSwapChainImageIndex = m_CurImageIndex;
 
-		if(!m_Headless)
+		if(!m_Capabilities.m_Headless)
 		{
 			VkPresentInfoKHR PresentInfo{};
 			PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -2430,7 +2430,7 @@ protected:
 			RecreateSwapChain();
 		}
 
-		if(m_Headless)
+		if(m_Capabilities.m_Headless)
 		{
 			// No swap chain to acquire from; the images are ours, so just round-robin them.
 			// The fence wait below is what makes reusing an in-flight image safe.
@@ -3563,7 +3563,8 @@ protected:
 	}
 
 public:
-	CCommandProcessorFragment_Vulkan()
+	explicit CCommandProcessorFragment_Vulkan(const CVulkanCapabilities &Capabilities) :
+		m_Capabilities(Capabilities)
 	{
 		m_vTextures.reserve(CCommandBuffer::MAX_TEXTURES);
 	}
@@ -3575,7 +3576,7 @@ public:
 	[[nodiscard]] bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions)
 	{
 		// Rendering headlessly needs no surface, so no platform surface extension either.
-		if(m_Headless)
+		if(m_Capabilities.m_Headless)
 		{
 			vVKExtensions.clear();
 			return true;
@@ -3621,7 +3622,7 @@ public:
 	std::set<std::string> OurDeviceExtensions() const
 	{
 		std::set<std::string> OurExt;
-		if(!m_Headless)
+		if(!m_Capabilities.m_Headless)
 			OurExt.emplace(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 #ifdef VK_EXT_device_fault
 		// Only used when actually supported by the device (see device creation);
@@ -4136,7 +4137,7 @@ public:
 	{
 		// Headless never created a surface or enabled VK_KHR_surface, so destroying one would
 		// be invalid.
-		if(!m_Headless)
+		if(!m_Capabilities.m_Headless)
 			vkDestroySurfaceKHR(m_VKInstance, m_VKPresentSurface, nullptr);
 	}
 
@@ -4314,7 +4315,7 @@ public:
 
 	[[nodiscard]] bool CreateSwapChain(VkSwapchainKHR &OldSwapChain)
 	{
-		if(m_Headless)
+		if(m_Capabilities.m_Headless)
 		{
 			m_VKSurfFormat.format = VK_FORMAT_R8G8B8A8_UNORM;
 			m_VKSurfFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
@@ -4391,7 +4392,7 @@ public:
 	{
 		// Headless swap chain images are ours (see GetSwapChainImageHandles), not the
 		// swap chain's, so there is never a real swap chain object to destroy here.
-		if(!m_Headless && ForceDestroy)
+		if(!m_Capabilities.m_Headless && ForceDestroy)
 		{
 			vkDestroySwapchainKHR(m_VKDevice, m_VKSwapChain, nullptr);
 			m_VKSwapChain = VK_NULL_HANDLE;
@@ -4400,7 +4401,7 @@ public:
 
 	[[nodiscard]] bool GetSwapChainImageHandles()
 	{
-		if(m_Headless)
+		if(m_Capabilities.m_Headless)
 		{
 			m_SwapChainImageCount = 2;
 
@@ -4440,7 +4441,7 @@ public:
 
 	void ClearSwapChainImageHandles()
 	{
-		if(m_Headless)
+		if(m_Capabilities.m_Headless)
 		{
 			// The images are ours rather than the swap chain's, so they have to be freed here.
 			for(size_t i = 0; i < m_vSwapChainImages.size(); ++i)
@@ -4622,7 +4623,7 @@ public:
 		// Nothing but the readback blit touches these images after the render pass in headless
 		// mode, and that wants TRANSFER_SRC_OPTIMAL anyway; there is no swap chain to hand them
 		// to for presenting.
-		ColorAttachment.finalLayout = m_Headless ? VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		ColorAttachment.finalLayout = m_Capabilities.m_Headless ? VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		VkAttachmentReference MultiSamplingColorAttachmentRef{};
 		MultiSamplingColorAttachmentRef.attachment = 0;
@@ -5756,7 +5757,7 @@ public:
 
 	int RecreateSwapChain()
 	{
-		if(m_Headless)
+		if(m_Capabilities.m_Headless)
 		{
 			// There is no surface whose properties (extent, present mode) could have changed,
 			// so nothing here is ever out of date. Cmd_VSync and Cmd_MultiSampling still set
@@ -5808,10 +5809,9 @@ public:
 		return Ret;
 	}
 
-	int InitVulkanSDL(SDL_Window *pWindow, bool Headless, uint32_t CanvasWidth, uint32_t CanvasHeight, char *pRendererString, char *pVendorString, char *pVersionString)
+	int InitVulkanSDL(SDL_Window *pWindow, uint32_t CanvasWidth, uint32_t CanvasHeight, char *pRendererString, char *pVendorString, char *pVersionString)
 	{
-		m_Headless = Headless;
-		dbg_assert(!m_Headless || pWindow == nullptr, "headless init got a window");
+		dbg_assert(!m_Capabilities.m_Headless || pWindow == nullptr, "headless init got a window");
 
 		std::vector<std::string> vVKExtensions;
 		std::vector<std::string> vVKLayers;
@@ -5846,7 +5846,7 @@ public:
 
 		GetDeviceQueue();
 
-		if(!m_Headless && !CreateSurface(pWindow))
+		if(!m_Capabilities.m_Headless && !CreateSurface(pWindow))
 			return -1;
 
 		return 0;
@@ -7752,7 +7752,7 @@ public:
 	[[nodiscard]] bool Cmd_PreInit(const CCommandProcessorFragment_GLBase::SCommand_PreInit *pCommand)
 	{
 		m_pGpuList = pCommand->m_pGpuList;
-		if(InitVulkanSDL(pCommand->m_pWindow, pCommand->m_Headless, pCommand->m_Width, pCommand->m_Height, pCommand->m_pRendererString, pCommand->m_pVendorString, pCommand->m_pVersionString) != 0)
+		if(InitVulkanSDL(pCommand->m_pWindow, pCommand->m_Width, pCommand->m_Height, pCommand->m_pRendererString, pCommand->m_pVendorString, pCommand->m_pVersionString) != 0)
 		{
 			m_VKInstance = VK_NULL_HANDLE;
 		}
@@ -7889,9 +7889,9 @@ public:
 	}
 };
 
-CCommandProcessorFragment_GLBase *CreateVulkanCommandProcessorFragment()
+CCommandProcessorFragment_GLBase *CreateVulkanCommandProcessorFragment(const CVulkanCapabilities &Capabilities)
 {
-	return new CCommandProcessorFragment_Vulkan();
+	return new CCommandProcessorFragment_Vulkan(Capabilities);
 }
 
 #endif
