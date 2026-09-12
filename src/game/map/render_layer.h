@@ -188,11 +188,6 @@ protected:
 			{
 				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x10000000);
 			}
-
-			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
-			{
-				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xEFFFFFFF) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x10000000);
-			}
 		};
 
 		// positions (y * width + x) of the drawn tiles, ascending, in vertex buffer order
