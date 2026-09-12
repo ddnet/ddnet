@@ -183,7 +183,7 @@ size_t CHttpRequestCurl::OnHeader(char *pHeader, size_t HeaderSize)
 	// `pHeader` is NOT null-terminated.
 	// `pHeader` has a trailing newline.
 
-	if(HeaderSize <= 1)
+	if(HeaderSize <= 1 || (HeaderSize == 2 && pHeader[0] == '\r' && pHeader[1] == '\n'))
 	{
 		m_ResponseHeadersEnded = true;
 		return HeaderSize;
