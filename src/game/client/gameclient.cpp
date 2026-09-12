@@ -580,7 +580,9 @@ void CGameClient::OnConnected()
 	const char *pLoadMapContent = Localize("Initializing map logic");
 	// render loading before skip is calculated
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0);
-	m_Layers.Init(Map(), false, true);
+	// The skip data only serves the renderer without tile buffering, and
+	// computing it decompresses every design layer of the map at once
+	m_Layers.Init(Map(), false, !Graphics()->IsTileBufferingEnabled());
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 	m_GameWorld.m_PredictedEvents.clear();

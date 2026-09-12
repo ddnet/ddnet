@@ -53,7 +53,6 @@ public:
 	float m_Zoom;
 	bool m_RenderText;
 	bool m_RenderInvalidTiles;
-	bool m_TileAndQuadBuffering;
 	bool m_RenderTileBorder;
 	bool m_DebugRenderGroupClips;
 	bool m_DebugRenderQuadClips;
@@ -65,7 +64,7 @@ class CRenderLayer : public CRenderComponent
 {
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
-	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional);
+	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, bool TileAndQuadBuffering, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -91,6 +90,7 @@ protected:
 	std::shared_ptr<CEnvelopeManager> m_pEnvelopeManager;
 	std::optional<FCallbackLayerInit> m_InitCallback;
 	std::optional<CClipRegion> m_LayerClip;
+	bool m_TileAndQuadBuffering = false;
 };
 
 class CRenderLayerGroup : public CRenderLayer
@@ -123,7 +123,7 @@ public:
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
 	void Init() override;
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, bool TileAndQuadBuffering, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
 
 	virtual int GetDataIndex() const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
@@ -232,7 +232,7 @@ class CRenderLayerQuads : public CRenderLayer
 {
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, bool TileAndQuadBuffering, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
 	void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
 	void Render(const CRenderLayerParams &Params) override;
