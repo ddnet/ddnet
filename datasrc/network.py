@@ -571,6 +571,10 @@ Messages = [
 		NetIntAny("m_FollowFactor"),
 	]),
 
+	NetMessageEx("Cl_ReportPlayer", "report-player@netmsg.ddnet.org", [
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
+	]),
+
 	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
 
 	NetMessageEx("Sv_DDRaceTime", "ddrace-time@netmsg.ddnet.tw", [

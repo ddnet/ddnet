@@ -89,6 +89,7 @@ namespace FontIcon
 	inline const char *const TRIANGLE_EXCLAMATION = "\uF071";
 	inline const char *const UNDO = "\uF2EA";
 	inline const char *const USER = "\uF007";
+	inline const char *const USER_SLASH = "\uF506";
 	inline const char *const VIDEO = "\uF03D";
 	inline const char *const XMARK = "\uF00D";
 }

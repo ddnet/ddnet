@@ -24,6 +24,7 @@ public:
 		EXTRA_MENU,
 		EMOTICON,
 		SPECTATE,
+		SCOREBOARD,
 		SWAP_ACTION,
 		USE_ACTION,
 		JOYSTICK_ACTION,
@@ -183,7 +184,7 @@ public:
 		std::function<std::unique_ptr<CTouchControls::CPredefinedTouchButtonBehavior>()> m_Factory;
 	};
 
-	static const CBehaviorFactoryEditor BEHAVIOR_FACTORIES_EDITOR[11];
+	static const CBehaviorFactoryEditor BEHAVIOR_FACTORIES_EDITOR[12];
 };
 
 #endif

@@ -139,6 +139,7 @@ protected:
 	int m_MenuPage;
 	int m_GamePage;
 	int m_Popup;
+	bool m_TermsAccepted = false;
 	bool m_ShowStart;
 	bool m_MenuActive;
 

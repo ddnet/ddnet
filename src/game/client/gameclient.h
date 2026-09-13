@@ -678,6 +678,7 @@ public:
 	void SendInfo(bool Start);
 	void SendDummyInfo(bool Start) override;
 	void SendKill() const;
+	void BlockPlayer(int ClientId, bool Block);
 	void SendReadyChange7(); // NOLINT(readability-make-member-function-const)
 
 	void ApplyPreInputs(int Tick, bool Direct, CGameWorld &GameWorld);

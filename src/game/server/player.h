@@ -97,6 +97,7 @@ public:
 	int m_LastChat;
 	int m_LastSetTeam;
 	int m_LastSetSpectatorMode;
+	int m_LastReport = 0;
 	int m_LastChangeInfo;
 	int m_LastEmote;
 	int m_LastEmoteGlobal;
