@@ -5,7 +5,7 @@ class CConfig;
 
 class CAsdf : public IAsdf
 {
-	rust::Box<CAsdfRust> m_pInner = CAsdfRust::New();
+	rust::Box<CAsdfImpl> m_pInner = CAsdfImpl::New();
 public:
 	bool HasChanged() override;
 	bool IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const override;

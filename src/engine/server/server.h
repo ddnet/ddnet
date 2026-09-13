@@ -34,13 +34,14 @@ class CHostLookup;
 class CLogMessage;
 class CMsgPacker;
 class CPacker;
+class CServer;
 class IEngine;
 class IEngineHttp;
 class ILogger;
 
 class CServerBan : public CNetBan
 {
-	class CServer *m_pServer;
+	CServer *m_pServer;
 
 	template<class T>
 	int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool VerbatimReason);
@@ -48,7 +49,7 @@ class CServerBan : public CNetBan
 public:
 	class CServer *Server() const { return m_pServer; }
 
-	void InitServerBan(class IConsole *pConsole, class IStorage *pStorage, class CServer *pServer);
+	void InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer);
 
 	int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason) override;
 	int BanRange(const CNetRange *pRange, int Seconds, const char *pReason) override;

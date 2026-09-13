@@ -1,4 +1,5 @@
 #pragma once
+#include "base/types.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -307,15 +308,15 @@ std::size_t align_of() {
 } // namespace cxxbridge1
 } // namespace rust
 
-struct CAsdfRust;
+struct CAsdfImpl;
 
-#ifndef CXXBRIDGE1_STRUCT_CAsdfRust
-#define CXXBRIDGE1_STRUCT_CAsdfRust
-struct CAsdfRust final : public ::rust::Opaque {
-  static ::rust::Box<::CAsdfRust> New() noexcept;
-  bool IsBanned(::rust::Str &reason) const noexcept;
+#ifndef CXXBRIDGE1_STRUCT_CAsdfImpl
+#define CXXBRIDGE1_STRUCT_CAsdfImpl
+struct CAsdfImpl final : public ::rust::Opaque {
+  static ::rust::Box<::CAsdfImpl> New() noexcept;
+  bool IsBanned(::NETADDR const &address, ::rust::Str &reason) const noexcept;
   bool HasChanged() noexcept;
-  ~CAsdfRust() = delete;
+  ~CAsdfImpl() = delete;
 
 private:
   friend ::rust::layout;
@@ -324,4 +325,4 @@ private:
     static ::std::size_t align() noexcept;
   };
 };
-#endif // CXXBRIDGE1_STRUCT_CAsdfRust
+#endif // CXXBRIDGE1_STRUCT_CAsdfImpl

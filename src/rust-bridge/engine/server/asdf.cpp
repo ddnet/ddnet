@@ -1,3 +1,4 @@
+#include "base/types.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -313,15 +314,15 @@ std::size_t align_of() {
 } // namespace cxxbridge1
 } // namespace rust
 
-struct CAsdfRust;
+struct CAsdfImpl;
 
-#ifndef CXXBRIDGE1_STRUCT_CAsdfRust
-#define CXXBRIDGE1_STRUCT_CAsdfRust
-struct CAsdfRust final : public ::rust::Opaque {
-  static ::rust::Box<::CAsdfRust> New() noexcept;
-  bool IsBanned(::rust::Str &reason) const noexcept;
+#ifndef CXXBRIDGE1_STRUCT_CAsdfImpl
+#define CXXBRIDGE1_STRUCT_CAsdfImpl
+struct CAsdfImpl final : public ::rust::Opaque {
+  static ::rust::Box<::CAsdfImpl> New() noexcept;
+  bool IsBanned(::NETADDR const &address, ::rust::Str &reason) const noexcept;
   bool HasChanged() noexcept;
-  ~CAsdfRust() = delete;
+  ~CAsdfImpl() = delete;
 
 private:
   friend ::rust::layout;
@@ -330,58 +331,58 @@ private:
     static ::std::size_t align() noexcept;
   };
 };
-#endif // CXXBRIDGE1_STRUCT_CAsdfRust
+#endif // CXXBRIDGE1_STRUCT_CAsdfImpl
 
 extern "C" {
-::std::size_t cxxbridge1$194$CAsdfRust$operator$sizeof() noexcept;
-::std::size_t cxxbridge1$194$CAsdfRust$operator$alignof() noexcept;
+::std::size_t cxxbridge1$194$CAsdfImpl$operator$sizeof() noexcept;
+::std::size_t cxxbridge1$194$CAsdfImpl$operator$alignof() noexcept;
 
-::CAsdfRust *cxxbridge1$194$CAsdfRust$New() noexcept;
+::CAsdfImpl *cxxbridge1$194$CAsdfImpl$New() noexcept;
 
-bool cxxbridge1$194$CAsdfRust$IsBanned(::CAsdfRust const &self, ::rust::Str &reason) noexcept;
+bool cxxbridge1$194$CAsdfImpl$IsBanned(::CAsdfImpl const &self, ::NETADDR const &address, ::rust::Str &reason) noexcept;
 
-bool cxxbridge1$194$CAsdfRust$HasChanged(::CAsdfRust &self) noexcept;
+bool cxxbridge1$194$CAsdfImpl$HasChanged(::CAsdfImpl &self) noexcept;
 } // extern "C"
 
-::std::size_t CAsdfRust::layout::size() noexcept {
-  return cxxbridge1$194$CAsdfRust$operator$sizeof();
+::std::size_t CAsdfImpl::layout::size() noexcept {
+  return cxxbridge1$194$CAsdfImpl$operator$sizeof();
 }
 
-::std::size_t CAsdfRust::layout::align() noexcept {
-  return cxxbridge1$194$CAsdfRust$operator$alignof();
+::std::size_t CAsdfImpl::layout::align() noexcept {
+  return cxxbridge1$194$CAsdfImpl$operator$alignof();
 }
 
-::rust::Box<::CAsdfRust> CAsdfRust::New() noexcept {
-  return ::rust::Box<::CAsdfRust>::from_raw(cxxbridge1$194$CAsdfRust$New());
+::rust::Box<::CAsdfImpl> CAsdfImpl::New() noexcept {
+  return ::rust::Box<::CAsdfImpl>::from_raw(cxxbridge1$194$CAsdfImpl$New());
 }
 
-bool CAsdfRust::IsBanned(::rust::Str &reason) const noexcept {
-  return cxxbridge1$194$CAsdfRust$IsBanned(*this, reason);
+bool CAsdfImpl::IsBanned(::NETADDR const &address, ::rust::Str &reason) const noexcept {
+  return cxxbridge1$194$CAsdfImpl$IsBanned(*this, address, reason);
 }
 
-bool CAsdfRust::HasChanged() noexcept {
-  return cxxbridge1$194$CAsdfRust$HasChanged(*this);
+bool CAsdfImpl::HasChanged() noexcept {
+  return cxxbridge1$194$CAsdfImpl$HasChanged(*this);
 }
 
 extern "C" {
-::CAsdfRust *cxxbridge1$box$CAsdfRust$alloc() noexcept;
-void cxxbridge1$box$CAsdfRust$dealloc(::CAsdfRust *) noexcept;
-void cxxbridge1$box$CAsdfRust$drop(::rust::Box<::CAsdfRust> *ptr) noexcept;
+::CAsdfImpl *cxxbridge1$box$CAsdfImpl$alloc() noexcept;
+void cxxbridge1$box$CAsdfImpl$dealloc(::CAsdfImpl *) noexcept;
+void cxxbridge1$box$CAsdfImpl$drop(::rust::Box<::CAsdfImpl> *ptr) noexcept;
 } // extern "C"
 
 namespace rust {
 inline namespace cxxbridge1 {
 template <>
-::CAsdfRust *Box<::CAsdfRust>::allocation::alloc() noexcept {
-  return cxxbridge1$box$CAsdfRust$alloc();
+::CAsdfImpl *Box<::CAsdfImpl>::allocation::alloc() noexcept {
+  return cxxbridge1$box$CAsdfImpl$alloc();
 }
 template <>
-void Box<::CAsdfRust>::allocation::dealloc(::CAsdfRust *ptr) noexcept {
-  cxxbridge1$box$CAsdfRust$dealloc(ptr);
+void Box<::CAsdfImpl>::allocation::dealloc(::CAsdfImpl *ptr) noexcept {
+  cxxbridge1$box$CAsdfImpl$dealloc(ptr);
 }
 template <>
-void Box<::CAsdfRust>::drop() noexcept {
-  cxxbridge1$box$CAsdfRust$drop(this);
+void Box<::CAsdfImpl>::drop() noexcept {
+  cxxbridge1$box$CAsdfImpl$drop(this);
 }
 } // namespace cxxbridge1
 } // namespace rust

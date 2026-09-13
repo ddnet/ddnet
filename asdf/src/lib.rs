@@ -26,6 +26,7 @@ use tokio::task::JoinError;
 // Reexports.
 use self::pool::TaskPool;
 use self::pool::TaskPoolHandle;
+use self::pool::task_pool_with_main_and_error;
 use self::time::Timestamp;
 
 mod io;
@@ -231,7 +232,7 @@ pub async fn handle_client_connection(
     let (reader, writer) = io::from(reader, writer);
     let writer = Arc::new(AsyncMutex::new(writer));
     let writer2 = writer.clone();
-    handle_task_pool(
+    task_pool_with_main_and_error(
         |handle| handle_client_connection_impl(handle, reader, writer2, state, backend),
         |close_message| async move {
             {
@@ -287,43 +288,6 @@ async fn handle_client_connection_impl(
     }
 }
 
-async fn handle_task_pool<M, E, MF, EF>(main: M, error: E) -> anyhow::Result<()> where 
-    M: FnOnce(TaskPoolHandle) -> MF,
-    E: FnOnce(protocol::CloseMessage) -> EF,
-    MF: Future<Output = anyhow::Result<()>> + Send + 'static,
-    EF: Future<Output = anyhow::Result<()>> + Send + 'static,
-{
-    let (mut task_pool, handle) = TaskPool::new();
-    handle.clone().spawn("main", main(handle)).await;
-    while let Some(task) = task_pool.next().await {
-        let result: Result<anyhow::Result<Infallible>, JoinError> = match task.result {
-            Ok(Ok(())) => {
-                if task.name == "main" {
-                    // The main task quit, let's quit as well.
-                    task_pool.close().await;
-                    return Ok(());
-                } else {
-                    // Another task quit, nothing to do.
-                    continue;
-                }
-            }
-            Ok(Err(err)) => Ok(Err(err)),
-            Err(err) => Err(err),
-        };
-        let close_message = error_close(task.name, &result);
-        let error_result = error(close_message).await;
-        task_pool.close().await;
-        let () = error_result
-            .with_context(|| format!("sending error failed while processing another error: {}", error_close(task.name, &result).error.unwrap()))?;
-        let infallible = result
-            .with_context(|| format!("task {} errored", task.name))?
-            .with_context(|| format!("task {} panicked", task.name))?;
-        match infallible {}
-    }
-    // main task has to quit or error before this.
-    unreachable!();
-}
-
 pub async fn handle_server_connection(
     reader: Pin<Box<dyn AsyncRead + Send + Sync>>,
     writer: Pin<Box<dyn AsyncWrite + Send + Sync>>,
@@ -332,7 +296,7 @@ pub async fn handle_server_connection(
     let (reader, writer) = io::from(reader, writer);
     let writer = Arc::new(AsyncMutex::new(writer));
     let writer2 = writer.clone();
-    handle_task_pool(
+    task_pool_with_main_and_error(
         |_| handle_server_connection_impl(reader, writer2, state),
         |close_message| async move {
             {
@@ -392,8 +356,92 @@ pub async fn bind() -> anyhow::Result<()> {
     }
 }
 
-pub async fn connect() -> anyhow::Result<()> {
-    let stream = TcpStream::connect("127.0.0.1:8300").await.context("failed to connect")?;
+pub struct Connect {
+    bans: watch::Receiver<Arc<Vec<Ban>>>,
+    asdf: Asdf,
+}
+
+pub fn connect_and_subscribe(address: &str) -> anyhow::Result<ConnectSubscribe> {
+    let (tx, rx) = watch::channel();
+    Connect {
+        bans: rx,
+        asdf: Asdf,
+    }
+}
+
+async fn connect_loop(address: &str, bans: watch::Sender<Arc<Vec<Ban>>>) {
+    // TODO: retry on disconnect
+    connect_impl(address, bans).await
+}
+
+async fn connect_impl(address: &str, bans: watch::Sender<Arc<Vec<Ban>>>)
+    -> anyhow::Result<!>
+{
+    let stream = TcpStream::connect(address).await.context("failed to connect")?;
+    let (reader, writer) = stream.into_split();
+    handle_connect(reader, writer, bans).await
+}
+
+async fn handle_connect(
+    reader: Pin<Box<dyn AsyncRead + Send + Sync>>,
+    writer: Pin<Box<dyn AsyncWrite + Send + Sync>>,
+    bans: watch::Sender<Arc<Vec<Ban>>>,
+) {
+    let (reader, writer) = io::from(reader, writer);
+    let writer = Arc::new(AsyncMutex::new(writer));
+    let writer2 = writer.clone();
+    task_pool_with_main_and_error(
+        |handle| handle_connect_impl(handle, reader, writer2, state, backend),
+        |close_message| async move {
+            {
+                let mut writer = writer.lock().await;
+                writer.write(&close_message.into()).await?;
+                writer.close().await?;
+            }
+            Ok(())
+        },
+    ).await
+}
+
+async fn handle_connect_impl(
+    reader: io::Reader<protocol::ServerMessage>,
+    writer: Arc<AsyncMutex<io::Writer<protocol::ClientMessage>>>,
+    tx: watch::Sender<Arc<Vec<Ban>>>,
+) -> anyhow::Result<!> {
+    let mut reader = reader;
+
+    {
+        let mut writer = writer.lock().await;
+        writer.write(&protocol::ClientHelloMessage::default().into()).await?;
+        let server_hello = reader.read().await?;
+        let protocol::ServerMessage::ServerHello(protocol::ServerHelloMessage) = server_hello else {
+            bail!("expected server hello, got {server_hello:?}");
+        };
+
+        writer.write(&protocol::SubscribeBansMessage.into()).await?;
+    }
+    loop {
+        use protocol::ServerMessage::*;
+        use protocol::*;
+        match reader.read().await? {
+            ServerHello(_) => bail!("second server hello received"),
+            Close(CloseMessage { error }) => bail!("unexpected server close"),
+
+            // TODO: exit cleanly if no one listens?
+            ReplaceBans(ReplaceBansMessage { bans }) => tx.send(bans).unwrap(),
+        }
+    }
+}
+
+pub struct Asdf(());
+
+impl Asdf {
+    pub async fn send_ban_message(&self, message: protocol::BanMessage) {
+    }
+}
+
+pub async fn connect(address: &str) -> anyhow::Result<()> {
+    let stream = TcpStream::connect(address).await.context("failed to connect")?;
     let (reader, writer) = stream.into_split();
     let (mut reader, mut writer) = io::from::<protocol::ServerMessage, protocol::ClientMessage>(Box::pin(reader), Box::pin(writer));
     writer.write(&protocol::ClientMessage::ClientHello(protocol::ClientHelloMessage::default())).await?;
