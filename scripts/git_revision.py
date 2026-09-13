@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 
+import sys
 import os
 import subprocess
+
+if len(sys.argv) > 1 and sys.argv[1] == "ls-files":
+    try:
+        files = subprocess.check_output(["git", "ls-files"], stderr=subprocess.DEVNULL).decode().strip()
+        print(files)
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        pass
+    sys.exit(0)
 
 git_hash = os.environ.get("DDNET_GIT_SHORTREV_HASH")
 try:

@@ -3518,252 +3518,29 @@ add_custom_target(run_rust_tests
 
 if(NOT PROJECT_GIT_DIR_ERROR)
   set(GIT_REVISION_EXTRA_DEPS
-    # tidy-alphabetical-start
-    ${PROJECT_BINARY_DIR}/src/generated/checksum.cpp
     ${PROJECT_GIT_DIR}/index
     ${PROJECT_GIT_DIR}/logs/HEAD
-    # tidy-alphabetical-end
-    # tidy-alphabetical-start
-    ${ANTIBOT_SRC}
-    ${BASE}
-    ${DEP_JSON_SRC}
-    ${DEP_MD5_SRC}
-    ${ENGINE_CLIENT}
-    ${ENGINE_GFX}
-    ${ENGINE_INTERFACE}
-    ${ENGINE_SERVER_WITHOUT_MAIN}
-    ${ENGINE_SHARED}
-    ${GAME_CLIENT}
-    ${GAME_EDITOR}
-    ${GAME_MAP}
-    ${GAME_SERVER}
-    ${GAME_SHARED}
-    ${RUST_BASE}
-    ${RUST_BRIDGE_SHARED}
-    ${RUST_ENGINE_INTERFACE}
-    ${RUST_ENGINE_SHARED}
-    ${RUST_MASTERSRV}
-    ${STEAMAPI_SRC}
-    ${TESTS_EXTRA}
-    ${TESTS}
-    ${TOOLS_SRC}
-    .cargo/config.toml
-    .clang-format
-    .clang-tidy
-    .clangd
-    .editorconfig
-    .gitattributes
-    .github/CODEOWNERS
-    .github/pull_request_template.md
-    .github/style-tools.sha256
-    .github/workflows/build-libraries-android.yml
-    .github/workflows/build-libraries-emscripten.yml
-    .github/workflows/build-libraries-ios.yml
-    .github/workflows/build.yml
-    .github/workflows/clang-sanitizer.yml
-    .github/workflows/clang-tidy.yml
-    .github/workflows/codeql-analysis.yml
-    .github/workflows/rust.yml
-    .github/workflows/spelling.yml
-    .github/workflows/style.yml
-    .gitignore
-    .gitlab-ci.yml
-    .gitlab/build.yml
-    .gitmodules
-    .mailmap
-    .typos.toml
-    CMakeLists.txt
-    Cargo.lock
-    Cargo.toml
-    Dockerfile
-    Doxyfile
-    README.md
-    cmake/BuildVulkanShaders.cmake
-    cmake/CheckAtomic.cmake
-    cmake/Download_GTest_CMakeLists.txt.in
-    cmake/FindAndroid.cmake
-    cmake/FindCrashdump.cmake
-    cmake/FindCrypto.cmake
-    cmake/FindCurl.cmake
-    cmake/FindDiscordSdk.cmake
-    cmake/FindFFMPEG.cmake
-    cmake/FindFreetype.cmake
-    cmake/FindGLEW.cmake
-    cmake/FindMiniupnpc.cmake
-    cmake/FindMySQL.cmake
-    cmake/FindNotify.cmake
-    cmake/FindOgg.cmake
-    cmake/FindOpus.cmake
-    cmake/FindOpusfile.cmake
-    cmake/FindPNG.cmake
-    cmake/FindRust.cmake
-    cmake/FindSDL2.cmake
-    cmake/FindSQLite3.cmake
-    cmake/FindSSP.cmake
-    cmake/FindVulkan.cmake
-    cmake/FindWavpack.cmake
-    cmake/FindWebsockets.cmake
-    cmake/FindZLIB.cmake
-    cmake/checksummed_extra.txt
-    cmake/toolchains/Emscripten.toolchain
-    cmake/toolchains/darwin-arm64.toolchain
-    cmake/toolchains/darwin-x86_64.toolchain
-    cmake/toolchains/mingw32.toolchain
-    cmake/toolchains/mingw64-aarch64-llvm.toolchain
-    cmake/toolchains/mingw64.toolchain
-    codecov.yml
-    datasrc/compile.py
-    datasrc/content.py
-    datasrc/crosscompile.py
-    datasrc/datatypes.py
-    datasrc/network.py
-    datasrc/seven/compile.py
-    datasrc/seven/content.py
-    datasrc/seven/datatypes.py
-    datasrc/seven/network.py
-    ddnet-libs
-    deny.toml
-    docs/BENCHMARKING.md
-    docs/BUILDING-android.md
-    docs/BUILDING-emscripten.md
-    docs/BUILDING-ios.md
-    docs/BUILDING.md
-    docs/CONTRIBUTING.md
-    docs/DATABASE.md
-    docs/DEBUGGING.md
-    formatting-revs.txt
-    license.txt
-    man/DDNet-Server.6
-    man/DDNet.6
-    man/DDNet.adoc
-    man/DDNetServer.adoc
-    man/generate.sh
-    memcheck.supp
-    other/bundle/client/Info.plist.in
-    other/bundle/client/PkgInfo
-    other/bundle/server/Info.plist.in
-    other/bundle/server/PkgInfo
-    other/config_directory.bat
-    other/config_directory.sh
-    other/ddnet.desktop
-    other/dmgbackground.png
-    other/dmgbackground_single.png
-    other/dmgsettings.py
-    other/emscripten/background.png
-    other/emscripten/index.html
-    other/emscripten/server.py
-    other/icons/DDNet-Server.icns
-    other/icons/DDNet-Server.ico
-    other/icons/DDNet-Server.rc
-    other/icons/DDNet-Server_16x16x32.png
-    other/icons/DDNet-Server_256x256x32.png
-    other/icons/DDNet-Server_32x32x32.png
-    other/icons/DDNet-Server_48x48x32.png
-    other/icons/DDNet.icns
-    other/icons/DDNet.ico
-    other/icons/DDNet.rc
-    other/icons/DDNet_16x16x32.png
-    other/icons/DDNet_256x256x32.png
-    other/icons/DDNet_32x32x32.png
-    other/icons/DDNet_48x48x32.png
-    other/icons/license.txt
-    other/manifest/client.manifest.in
-    other/manifest/client.rc
-    other/versioninfo/versioninfo.rc.in
-    other/vim/ftdetect/ddnet-cfg.vim
-    other/vim/syntax/ddnet-cfg.vim
-    other/vscode/README.md
-    other/vscode/ddnet-cmake-tools-kits.json
-    other/vscode/ddnet.code-workspace
-    other/vscode/lldbinit.py
-    ruff.toml
-    scripts/SDL_scancode.h
-    scripts/android/README.md
-    scripts/android/cmake_android.sh
-    scripts/android/download_android_sdk.sh
-    scripts/android/files/AndroidManifest.xml
-    scripts/android/files/build.gradle
-    scripts/android/files/build.sh
-    scripts/android/files/gradle.properties
-    scripts/android/files/gradle/wrapper/gradle-wrapper.jar
-    scripts/android/files/gradle/wrapper/gradle-wrapper.properties
-    scripts/android/files/gradlew
-    scripts/android/files/gradlew.bat
-    scripts/android/files/java/org/ddnet/client/ClientActivity.java
-    scripts/android/files/java/org/ddnet/client/ServerService.java
-    scripts/android/files/proguard-rules.pro
-    scripts/android/files/res/values-pt-rBR/strings.xml
-    scripts/android/files/res/values-pt-rPT/strings.xml
-    scripts/android/files/res/values-sv-rSE/strings.xml
-    scripts/android/files/res/values-tr-rTR/strings.xml
-    scripts/android/files/res/values-zh-rCN/strings.xml
-    scripts/android/files/res/values-zh-rTW/strings.xml
-    scripts/android/files/res/values/strings.xml
-    scripts/android/files/res/xml/shortcuts.xml
-    scripts/android/files/settings.gradle
-    scripts/android/generate_asset_integrity_index.py
-    scripts/check_config_variables.py
-    scripts/check_dilate.py
-    scripts/check_header_guards.py
-    scripts/check_identifiers.py
-    scripts/check_standard_headers.py
-    scripts/check_unused_header_files.py
-    scripts/checksum.py
-    scripts/compile_libs/_build_common.sh
-    scripts/compile_libs/cmake_lib_compile.sh
-    scripts/compile_libs/gen_libs.sh
-    scripts/compile_libs/make_lib_opusfile.sh
-    scripts/compile_libs/make_lib_sqlite3.sh
-    scripts/darwin_strip_rpath.py
-    scripts/export_settings_commands_table.py
-    scripts/extract_identifiers.py
-    scripts/fix_style.py
-    scripts/gen_keys.py
-    scripts/generate_community_token.py
-    scripts/generate_fake_curl.py
-    scripts/generate_rust_bridge.py
-    scripts/generate_unicode_confusables_data.py
-    scripts/generate_unicode_tolower.py
-    scripts/git_revision.py
-    scripts/hash_passwords.py
-    scripts/import_file_score.py
-    scripts/integration_test.py
-    scripts/ios/cmake_ios.sh
-    scripts/ios/files/Assets.xcassets/AppIcon.appiconset/AppIcon.png
-    scripts/ios/files/Assets.xcassets/AppIcon.appiconset/Contents.json
-    scripts/ios/files/Assets.xcassets/Contents.json
-    scripts/ios/files/Info.plist.in
-    scripts/languages/README.md
-    scripts/languages/analyze.py
-    scripts/languages/copy_fix.py
-    scripts/languages/find_unchanged.py
-    scripts/languages/from_csv.py
-    scripts/languages/to_csv.py
-    scripts/languages/twlang.py
-    scripts/languages/update_all.py
-    scripts/languages/validate.py
-    scripts/move_sqlite.py
-    scripts/parse_crashlog_drmingw.py
-    scripts/send_named_pipe.ps1
-    scripts/tidy_alphabetical.py
-    scripts/unicode.py
-    scripts/wordlist.py
-    storage.cfg
-    valgrind.supp
-    # tidy-alphabetical-end
   )
 endif()
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
   COMMAND ${Python3_EXECUTABLE}
     scripts/git_revision.py
-    > ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp.tmp
+    > ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+  # COMMAND ${Python3_EXECUTABLE}
+  #   scripts/git_revision.py ls-files
+  #   > ${PROJECT_BINARY_DIR}/git_tracked_files.txt
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  # DEPFILE ${PROJECT_BINARY_DIR}/git_tracked_files.txt
   DEPENDS
-    ${GIT_REVISION_EXTRA_DEPS}
-    scripts/git_revision.py
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp.tmp
-    ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+    Dockerfile
+  # DEPENDS
+  #   src/game/client/components/hud.cpp
+  # DEPENDS
+  #   ${GIT_REVISION_EXTRA_DEPS}
+  #   scripts/git_revision.py
+  # COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  #   ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp.tmp
+  #   ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
 )
 
 ########################################################################
