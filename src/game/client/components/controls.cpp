@@ -186,44 +186,11 @@ void CControls::ConTpDummyToCursor(IConsole::IResult *pResult, void *pUserData)
 	((CControls *)pUserData)->TpDummyToCursor();
 }
 
-bool CControls::IsInPractice(int ClientId) const
-{
-	if(ClientId < 0)
-		return false;
-
-	if(GameClient()->m_Snap.m_aCharacters[ClientId].m_Active)
-	{
-		const auto &Char = GameClient()->m_Snap.m_aCharacters[ClientId];
-		return Char.m_HasExtendedDisplayInfo && (Char.m_ExtendedData.m_Flags & CHARACTERFLAG_PRACTICE_MODE) != 0;
-	}
-
-	// Fall back to other tee's connection snap, as they might be missing from main tee's world snap.
-	const int OtherConn = !g_Config.m_ClDummy;
-	if(ClientId != GameClient()->m_aLocalIds[OtherConn])
-		return false;
-
-	const CNetObj_DDNetCharacter *pExtended = (const CNetObj_DDNetCharacter *)Client()->SnapFindItemConn(OtherConn, IClient::SNAP_CURRENT, NETOBJTYPE_DDNETCHARACTER, ClientId);
-	if(!pExtended || pExtended->m_JumpedTotal == -1)
-		return false;
-	return (pExtended->m_Flags & CHARACTERFLAG_PRACTICE_MODE) != 0;
-}
-
 vec2 CControls::CursorWorldPos() const
 {
-	// Equivalent to server-side /tc (CPlayer::CCameraInfo::ConvertTargetToWorld).
-	if(GameClient()->m_Snap.m_SpecInfo.m_Active)
-		return GameClient()->m_Camera.m_Center;
-
-	const vec2 TeePos = GameClient()->m_LocalCharacterPos;
-	const vec2 Target = m_aMousePos[g_Config.m_ClDummy];
-	vec2 TargetCameraOffset(0.0f, 0.0f);
-	const float TargetLength = length(Target);
-	if(TargetLength > 0.0001f)
-	{
-		const float OffsetAmount = std::max(TargetLength - (float)GameClient()->m_Camera.Deadzone(), 0.0f) * ((float)GameClient()->m_Camera.FollowFactor() / 100.0f);
-		TargetCameraOffset = normalize_pre_length(Target, TargetLength) * OffsetAmount;
-	}
-	return TeePos + (Target - TargetCameraOffset) * GameClient()->m_Camera.m_Zoom + TargetCameraOffset;
+	const vec2 Center = GameClient()->m_Camera.m_Center;
+	const vec2 TargetPos = m_aTargetPos[g_Config.m_ClDummy];
+	return Center + (TargetPos - Center) * GameClient()->m_Camera.m_Zoom;
 }
 
 void CControls::SendPracticeTeleportToCursor(int Conn)
@@ -240,12 +207,6 @@ void CControls::TpToCursor()
 	if(Client()->State() != IClient::STATE_ONLINE)
 		return;
 
-	if(!IsInPractice(GameClient()->m_Snap.m_LocalClientId))
-	{
-		GameClient()->Echo(Localize("You are not in practice"));
-		return;
-	}
-
 	SendPracticeTeleportToCursor(g_Config.m_ClDummy ? IClient::CONN_DUMMY : IClient::CONN_MAIN);
 }
 
@@ -257,13 +218,6 @@ void CControls::TpDummyToCursor()
 	if(!Client()->DummyConnected())
 	{
 		GameClient()->Echo(Localize("Dummy is not connected"));
-		return;
-	}
-
-	const int OtherId = GameClient()->m_aLocalIds[!g_Config.m_ClDummy];
-	if(!IsInPractice(OtherId))
-	{
-		GameClient()->Echo(Localize("Dummy is not in practice"));
 		return;
 	}
 

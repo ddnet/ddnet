@@ -63,7 +63,6 @@ private:
 	static void ConTpDummyToCursor(IConsole::IResult *pResult, void *pUserData);
 	void TpToCursor();
 	void TpDummyToCursor();
-	bool IsInPractice(int ClientId) const;
 	vec2 CursorWorldPos() const;
 	void SendPracticeTeleportToCursor(int Conn);
 };
