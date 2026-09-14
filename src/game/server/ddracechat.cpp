@@ -2262,6 +2262,36 @@ void CGameContext::ConPracticeToggleHitOthers(IConsole::IResult *pResult, void *
 		pChr->SetLaserHitDisabled(!pChr->LaserHitDisabled());
 }
 
+void CGameContext::ConPracticeToggleTelegunGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetTelegunGun(!pChr->HasTelegunGun());
+}
+
+void CGameContext::ConPracticeToggleTelegunGrenade(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetTelegunGrenade(!pChr->HasTelegunGrenade());
+}
+
+void CGameContext::ConPracticeToggleTelegunLaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetTelegunLaser(!pChr->HasTelegunLaser());
+}
+
 void CGameContext::ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

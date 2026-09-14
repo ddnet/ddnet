@@ -478,6 +478,9 @@ private:
 	static void ConUnJetpack(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnEndlessJump(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetSwitch(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleTelegunGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleTelegunGrenade(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleTelegunLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
@@ -583,6 +586,9 @@ private:
 	static void ConPracticeToggleCollision(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeToggleHookCollision(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeToggleHitOthers(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleTelegunGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleTelegunGrenade(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleTelegunLaser(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);

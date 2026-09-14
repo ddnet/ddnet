@@ -372,6 +372,36 @@ void CGameContext::ConSetSwitch(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Switchers()[Switch].m_aType[Team] = EndTick ? TILE_SWITCHTIMEDCLOSE : TILE_SWITCHCLOSE;
 }
 
+void CGameContext::ConToggleTelegunGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(!pChr)
+		return;
+
+	pChr->SetTelegunGun(!pChr->HasTelegunGun());
+}
+
+void CGameContext::ConToggleTelegunGrenade(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(!pChr)
+		return;
+
+	pChr->SetTelegunGrenade(!pChr->HasTelegunGrenade());
+}
+
+void CGameContext::ConToggleTelegunLaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(!pChr)
+		return;
+
+	pChr->SetTelegunLaser(!pChr->HasTelegunLaser());
+}
+
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
