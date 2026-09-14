@@ -12,6 +12,7 @@
 
 #include <engine/console.h>
 #include <engine/server.h>
+#include <engine/server/authmanager.h>
 
 #include <generated/protocol.h>
 
@@ -669,7 +670,8 @@ public:
 	void SendRecord(int ClientId);
 	void SendFinish(int ClientId, float Time, std::optional<float> PreviousBestTime);
 	void SendSaveCode(int Team, int TeamSize, int State, const char *pError, const char *pSaveRequester, const char *pServerName, const char *pGeneratedCode, const char *pCode);
-	void OnSetAuthed(int ClientId, int Level) override;
+	// WARNING: pRole can be nullptr during logout
+	void OnSetAuthed(int ClientId, CRconRole *pRole) override;
 	void ReinitPlayerMap(int ClientId, bool Timeout) override;
 	void OnClientRejoin(int ClientId) override;
 
