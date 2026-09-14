@@ -841,6 +841,12 @@ void CSshClient::ResetScrollRegion()
 	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 }
 
+// FIXME: i think this is deleting the previous prompt when running
+//        a command before completing it
+//        like typing in "ki" and getting "kick" preview
+//        then pressing enter shows "no such command: ki"
+//        but the prompt with the "ki" input gets cleared
+
 void CSshClient::ClearCompletionPreview()
 {
 	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
@@ -1290,7 +1296,18 @@ void CSshClient::OnTerminalResize(int OldWidth, int OldHeight)
 		UpdateStatusLine();
 	}
 
-	// TODO: handle too long input lines and wrapping
+	// Knowing the cursor position after resize is possible to compute
+	// but not easy! So I decided to just fetch the cursor pos after resize
+	// and keep it in sync this way.
+	//
+	// The tricky part is that LineWrapForSsh() computes additional cursor
+	// y pos offsets if there was a line wrapping. The thing is that any amount of
+	// older lines could unwrap client sided if the terminal size increases
+	// or wrap if it decreases and offset the y position by an unknown amount of lines.
+	// To compute that we need to recompute all wrapping and revert or apply it.
+	// Getting the old terminal size, the new size, all old visible log lines all
+	// new visible log lines and compute the amount of lines wrapping and so on.
+	RequestCursorPos();
 }
 
 void CSshClient::OnTerminalReady()
