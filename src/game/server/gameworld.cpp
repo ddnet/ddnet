@@ -26,8 +26,7 @@ CGameWorld::CGameWorld()
 
 	m_Paused = false;
 	m_ResetRequested = false;
-	for(auto &pFirstEntityType : m_apFirstEntityTypes)
-		pFirstEntityType = nullptr;
+	std::fill(std::begin(m_apFirstEntityTypes), std::end(m_apFirstEntityTypes), nullptr);
 }
 
 CGameWorld::~CGameWorld()

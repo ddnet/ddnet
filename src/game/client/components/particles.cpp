@@ -36,8 +36,7 @@ void CParticles::OnReset()
 	m_aParticles[MAX_PARTICLES - 1].m_NextPart = -1;
 	m_FirstFree = 0;
 
-	for(int &FirstPart : m_aFirstPart)
-		FirstPart = -1;
+	std::fill(std::begin(m_aFirstPart), std::end(m_aFirstPart), -1);
 }
 
 void CParticles::Add(int Group, CParticle *pPart, float TimePassed)
