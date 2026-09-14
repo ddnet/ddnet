@@ -841,12 +841,6 @@ void CSshClient::ResetScrollRegion()
 	ssh_channel_write(m_Channel, aBuf, str_length(aBuf));
 }
 
-// FIXME: i think this is deleting the previous prompt when running
-//        a command before completing it
-//        like typing in "ki" and getting "kick" preview
-//        then pressing enter shows "no such command: ki"
-//        but the prompt with the "ki" input gets cleared
-
 void CSshClient::ClearCompletionPreview()
 {
 	bool CursorAtEnd = m_aInput[m_InputIdx] == '\0';
@@ -1651,22 +1645,6 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 		char Byte = pBuf[i];
 		if(Byte == KEY_ENTER)
 		{
-			if(pClient->m_Config.m_PromptBarBottom)
-			{
-				// when the user presses enter a command might be executed
-				// that command might cause log lines to be printed
-				// they will draw over the bottom prompt bar
-				// but they will not clear the entire line first
-				// so if the log line is shorter than the prompt bar
-				// it will look glitched
-				// to avoid that we just clear out the entire prompt bar
-				// when pressing enter expecting it to be redrawn
-				// at the correct position anyways
-
-				// cursor down, clear line, cursor up
-				ssh_channel_write(pClient->m_Channel, "\n\r\033[2K\x1B[A", 10);
-			}
-
 			// this if statement is a bit ugly move the mode somewhere else
 			if(pClient->m_Mode == EClientMode::HISTORY_SEARCH)
 			{
@@ -1687,6 +1665,22 @@ void CSshServer::TryProcessCurrentInput(CSshClient *pClient)
 			}
 
 			pClient->ResetCompletion();
+
+			if(pClient->m_Config.m_PromptBarBottom)
+			{
+				// when the user presses enter a command might be executed
+				// that command might cause log lines to be printed
+				// they will draw over the bottom prompt bar
+				// but they will not clear the entire line first
+				// so if the log line is shorter than the prompt bar
+				// it will look glitched
+				// to avoid that we just clear out the entire prompt bar
+				// when pressing enter expecting it to be redrawn
+				// at the correct position anyways
+
+				// cursor down, clear line, cursor up
+				ssh_channel_write(pClient->m_Channel, "\n\r\033[2K\x1B[A", 10);
+			}
 
 			const char *pCmd = pClient->m_aInput;
 			if(pCmd[0])
