@@ -592,11 +592,15 @@ protected:
 
 	// found in menus_settings_player.cpp
 	void RenderSettingsPlayer(CUIRect MainView);
+	void RenderPopupCountry(CUIRect MainView);
+	void PopupConfirmPlayerCountry();
+	int m_PopupCountrySelection = -2; // -2 = unset, otherwise a country code
 
 	// found in menus_settings_sound.cpp
 	void RenderSettingsSound(CUIRect MainView);
 
 	// found in menus_settings_tee.cpp
+	void RenderSkinLoadingStatsDebug(CUIRect Rect);
 	void RenderSettingsTee(CUIRect MainView);
 	bool m_SkinListScrollToSelected = false;
 
@@ -706,7 +710,6 @@ public:
 		SETTINGS_LANGUAGE = 0,
 		SETTINGS_GENERAL,
 		SETTINGS_PLAYER,
-		SETTINGS_TEE,
 		SETTINGS_APPEARANCE,
 		SETTINGS_CONTROLS,
 		SETTINGS_GRAPHICS,
@@ -830,6 +833,7 @@ public:
 		POPUP_RESTART,
 		POPUP_WARNING,
 		POPUP_SAVE_SKIN,
+		POPUP_COUNTRY,
 	};
 
 	enum

@@ -35,13 +35,16 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	Buttons.VSplitLeft(220.0f, &QuickSearch, &Buttons);
 	Buttons.VSplitLeft(10.0f, nullptr, &Buttons);
 	Buttons.VSplitLeft(120.0f, &SaveDeleteButton, &Buttons);
+
+	// Keep the SkinPreview rect at 50px tall, but only use the top 20px of
+	// the left half for the Basic/Custom tabs (Player/Dummy moved to the
+	// outer player page).
 	MainView.HSplitTop(50.0f, &TabBars, &MainView);
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
 	TabBars.VSplitMid(&TabBars, &SkinPreview, 20.0f);
 
 	TabBars.HSplitTop(20.0f, &TabBar, &TabBars);
 	TabBar.VSplitMid(&LeftTab, &RightTab);
-	TabBars.HSplitTop(10.0f, nullptr, &TabBars);
 
 	SkinPreview.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 	SkinPreview.VMargin(10.0f, &SkinPreview);
@@ -51,21 +54,6 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	SkinPreview.VSplitRight(10.0f, &SkinPreview, nullptr);
 	SkinPreview.VSplitRight(50.0f, &SkinPreview, &NormalSkinPreview);
 	SkinPreview.VSplitRight(10.0f, &SkinPreview, nullptr);
-
-	static CButtonContainer s_PlayerTabButton;
-	if(DoButton_MenuTab(&s_PlayerTabButton, Localize("Player"), !m_Dummy, &LeftTab, IGraphics::CORNER_L, nullptr, nullptr, nullptr, nullptr, 4.0f))
-	{
-		m_Dummy = false;
-	}
-
-	static CButtonContainer s_DummyTabButton;
-	if(DoButton_MenuTab(&s_DummyTabButton, Localize("Dummy"), m_Dummy, &RightTab, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 4.0f))
-	{
-		m_Dummy = true;
-	}
-
-	TabBars.HSplitTop(20.0f, &TabBar, &TabBars);
-	TabBar.VSplitMid(&LeftTab, &RightTab);
 
 	static CButtonContainer s_BasicTabButton;
 	if(DoButton_MenuTab(&s_BasicTabButton, Localize("Basic"), !m_CustomSkinMenu, &LeftTab, IGraphics::CORNER_L, nullptr, nullptr, nullptr, nullptr, 4.0f))

@@ -24,46 +24,21 @@
 #include <algorithm>
 #include <vector>
 
+void CMenus::RenderSkinLoadingStatsDebug(CUIRect Rect)
+{
+	if(!g_Config.m_Debug)
+		return;
+
+	// Debug stats overlay in the top-right corner
+	const CSkins::CSkinLoadingStats Stats = GameClient()->m_Skins.LoadingStats();
+	char aStats[256];
+	str_format(aStats, sizeof(aStats), "unloaded: %" PRIzu ", pending: %" PRIzu ", loading: %" PRIzu ",\nloaded: %" PRIzu ", error: %" PRIzu ", notfound: %" PRIzu,
+		Stats.m_NumUnloaded, Stats.m_NumPending, Stats.m_NumLoading, Stats.m_NumLoaded, Stats.m_NumError, Stats.m_NumNotFound);
+	Ui()->DoLabel(&Rect, aStats, 9.0f, TEXTALIGN_MR);
+}
+
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect TabBar, PlayerTab, DummyTab, ChangeInfo;
-	MainView.HSplitTop(20.0f, &TabBar, &MainView);
-	TabBar.VSplitMid(&TabBar, &ChangeInfo, 20.f);
-	TabBar.VSplitMid(&PlayerTab, &DummyTab);
-	MainView.HSplitTop(10.0f, nullptr, &MainView);
-
-	static CButtonContainer s_PlayerTabButton;
-	if(DoButton_MenuTab(&s_PlayerTabButton, Localize("Player"), !m_Dummy, &PlayerTab, IGraphics::CORNER_L, nullptr, nullptr, nullptr, nullptr, 4.0f))
-	{
-		m_Dummy = false;
-		m_SkinListScrollToSelected = true;
-	}
-
-	static CButtonContainer s_DummyTabButton;
-	if(DoButton_MenuTab(&s_DummyTabButton, Localize("Dummy"), m_Dummy, &DummyTab, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 4.0f))
-	{
-		m_Dummy = true;
-		m_SkinListScrollToSelected = true;
-	}
-
-	if(Client()->State() == IClient::STATE_ONLINE &&
-		GameClient()->m_aNextChangeInfo[m_Dummy] > Client()->GameTick(m_Dummy))
-	{
-		char aChangeInfo[128], aTimeLeft[32];
-		str_format(aTimeLeft, sizeof(aTimeLeft), Localize("%ds left"), (GameClient()->m_aNextChangeInfo[m_Dummy] - Client()->GameTick(m_Dummy) + Client()->GameTickSpeed() - 1) / Client()->GameTickSpeed());
-		str_format(aChangeInfo, sizeof(aChangeInfo), "%s: %s", Localize("Player info change cooldown"), aTimeLeft);
-		Ui()->DoLabel(&ChangeInfo, aChangeInfo, 10.f, TEXTALIGN_ML);
-	}
-
-	if(g_Config.m_Debug)
-	{
-		const CSkins::CSkinLoadingStats Stats = GameClient()->m_Skins.LoadingStats();
-		char aStats[256];
-		str_format(aStats, sizeof(aStats), "unloaded: %" PRIzu ", pending: %" PRIzu ", loading: %" PRIzu ",\nloaded: %" PRIzu ", error: %" PRIzu ", notfound: %" PRIzu,
-			Stats.m_NumUnloaded, Stats.m_NumPending, Stats.m_NumLoading, Stats.m_NumLoaded, Stats.m_NumError, Stats.m_NumNotFound);
-		Ui()->DoLabel(&ChangeInfo, aStats, 9.0f, TEXTALIGN_MR);
-	}
-
 	char *pSkinName;
 	size_t SkinNameSize;
 	int *pUseCustomColor;

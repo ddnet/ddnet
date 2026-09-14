@@ -44,7 +44,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Language"),
 		Localize("General"),
 		Localize("Player"),
-		Client()->IsSixup() ? "Tee 0.7" : Localize("Tee"),
 		Localize("Appearance"),
 		Localize("Controls"),
 		Localize("Graphics"),
@@ -76,14 +75,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_PLAYER);
 		RenderSettingsPlayer(MainView);
-	}
-	else if(g_Config.m_UiSettingsPage == SETTINGS_TEE)
-	{
-		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_TEE);
-		if(Client()->IsSixup())
-			RenderSettingsTee7(MainView);
-		else
-			RenderSettingsTee(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_APPEARANCE)
 	{

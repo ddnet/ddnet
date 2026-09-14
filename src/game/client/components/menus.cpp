@@ -1271,6 +1271,10 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		pTitle = Localize("Save skin");
 		pExtraText = Localize("Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.");
 	}
+	else if(m_Popup == POPUP_COUNTRY)
+	{
+		pTitle = Localize("Country flag");
+	}
 
 	CUIRect Box, Part;
 	Box = Screen;
@@ -1298,7 +1302,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	}
 
 	// Extra text (optional)
-	if(m_Popup != POPUP_JOIN_TUTORIAL)
+	if(m_Popup != POPUP_JOIN_TUTORIAL && m_Popup != POPUP_COUNTRY)
 	{
 		CUIRect ExtraText;
 		Box.HSplitTop(24.0f, &ExtraText, &Box);
@@ -2045,6 +2049,17 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
 		Ui()->DoLabel(&Label, Localize("Name"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoClearableEditBox(&m_SkinNameInput, &TextBox, 12.0f);
+	}
+	else if(m_Popup == POPUP_COUNTRY)
+	{
+		Box.VMargin(20.0f, &Box);
+		RenderPopupCountry(Box);
+
+		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+		{
+			m_PopupCountrySelection = -2;
+			m_Popup = POPUP_NONE;
+		}
 	}
 	else
 	{
