@@ -46,6 +46,12 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override;
 
+	// TODO: it would also need a LineUnwrapForSsh() or something
+	//       if the server calculates client side line wrapping to
+	//       get the correct cursor y coordinate this
+	//       has to be properly "reverted"/"recalculated" when the
+	//       client increases the terminal width and causes the wrapping
+	//       to revert and the lines fully expanding again
 	static int LineWrapForSsh(const char *pServerLine, char *pSshLine, size_t SshLineSize, int TerminalWidth, unicode_width_state_t *pUnicodeWidthState);
 };
 
