@@ -112,6 +112,8 @@ void log_set_scope_logger(ILogger *logger)
 	in_logger = false;
 }
 
+extern "C" {
+
 void log_log_v(LEVEL level, const char *sys, const char *fmt, va_list args)
 {
 	log_log_impl(level, false, LOG_COLOR{0, 0, 0}, sys, fmt, args);
@@ -136,6 +138,8 @@ void log_log_color(LEVEL level, LOG_COLOR color, const char *sys, const char *fm
 	va_start(args, fmt);
 	log_log_impl(level, true, color, sys, fmt, args);
 	va_end(args);
+}
+
 }
 
 bool CLogFilter::Filters(const CLogMessage *pMessage)

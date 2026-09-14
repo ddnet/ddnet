@@ -14,6 +14,7 @@ extern crate ddnet_test;
 
 mod color;
 mod dbg;
+mod log;
 #[allow(missing_docs)]
 mod net;
 mod rust;
