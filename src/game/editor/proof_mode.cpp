@@ -252,6 +252,8 @@ const std::vector<vec2> &CProofMode::MenuBackgroundPositions() const
 
 vec2 CProofMode::CurrentMenuBackgroundPosition() const
 {
+	if(Map()->m_ProofModeState.m_vMenuBackgroundPositions.empty())
+		return vec2(0, 0);
 	return Map()->m_ProofModeState.m_vMenuBackgroundPositions[CurrentMenuProofIndex()];
 }
 
