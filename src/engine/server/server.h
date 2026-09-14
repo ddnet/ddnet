@@ -144,6 +144,10 @@ public:
 		int m_Latency;
 		int m_SnapRate;
 
+		// Rejoining session while a game slot exists already
+		bool m_IngameBeforeRejoin;
+		bool IsKnownToGame() const { return m_State == STATE_INGAME || m_IngameBeforeRejoin; }
+
 		double m_Traffic;
 		int64_t m_TrafficSince;
 
@@ -202,7 +206,6 @@ public:
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionId;
 		int64_t m_RedirectDropTime;
-		bool m_Rejoining;
 
 		int m_aIdMap[LEGACY_MAX_CLIENTS];
 		int m_aReverseIdMap[MAX_CLIENTS];
