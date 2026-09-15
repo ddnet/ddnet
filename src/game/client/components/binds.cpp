@@ -468,11 +468,11 @@ void CBinds::GetKeyBindName(int Key, int ModifierMask, char *pBuf, size_t BufSiz
 	{
 		if(ModifierMask & (1 << Modifier))
 		{
-			str_append(pBuf, GetModifierName(Modifier), BufSize);
+			str_append(pBuf, KeyNameHumanReadable(Modifier), BufSize);
 			str_append(pBuf, "+", BufSize);
 		}
 	}
-	str_append(pBuf, KeyName(Key), BufSize);
+	str_append(pBuf, KeyNameHumanReadable(Key), BufSize);
 }
 
 char *CBinds::GetKeyBindCommand(int ModifierCombination, int Key) const
