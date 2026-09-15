@@ -53,10 +53,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinjaCursor);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponLaserCursor);
 
-		for(auto &SpriteWeaponCursor : m_GameSkin.m_aSpriteWeaponCursors)
-		{
-			SpriteWeaponCursor = IGraphics::CTextureHandle();
-		}
+		std::fill(std::begin(m_GameSkin.m_aSpriteWeaponCursors), std::end(m_GameSkin.m_aSpriteWeaponCursors), IGraphics::CTextureHandle());
 
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteHookChain);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteHookHead);
@@ -67,10 +64,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinja);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponLaser);
 
-		for(auto &SpriteWeapon : m_GameSkin.m_aSpriteWeapons)
-		{
-			SpriteWeapon = IGraphics::CTextureHandle();
-		}
+		std::fill(std::begin(m_GameSkin.m_aSpriteWeapons), std::end(m_GameSkin.m_aSpriteWeapons), IGraphics::CTextureHandle());
 
 		for(auto &SpriteParticle : m_GameSkin.m_aSpriteParticles)
 		{
@@ -89,21 +83,17 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinjaProjectile);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponLaserProjectile);
 
-		for(auto &SpriteWeaponProjectile : m_GameSkin.m_aSpriteWeaponProjectiles)
-		{
-			SpriteWeaponProjectile = IGraphics::CTextureHandle();
-		}
+		std::fill(std::begin(m_GameSkin.m_aSpriteWeaponProjectiles), std::end(m_GameSkin.m_aSpriteWeaponProjectiles), IGraphics::CTextureHandle());
 
 		for(int i = 0; i < 3; ++i)
 		{
 			Graphics()->UnloadTexture(&m_GameSkin.m_aSpriteWeaponGunMuzzles[i]);
 			Graphics()->UnloadTexture(&m_GameSkin.m_aSpriteWeaponShotgunMuzzles[i]);
 			Graphics()->UnloadTexture(&m_GameSkin.m_aaSpriteWeaponNinjaMuzzles[i]);
-
-			for(auto &SpriteWeaponsMuzzle : m_GameSkin.m_aaSpriteWeaponsMuzzles)
-			{
-				SpriteWeaponsMuzzle[i] = IGraphics::CTextureHandle();
-			}
+		}
+		for(auto &aSpriteWeaponsMuzzles : m_GameSkin.m_aaSpriteWeaponsMuzzles)
+		{
+			std::fill(std::begin(aSpriteWeaponsMuzzles), std::end(aSpriteWeaponsMuzzles), IGraphics::CTextureHandle());
 		}
 
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupHealth);
@@ -120,15 +110,8 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupGun);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupHammer);
 
-		for(auto &SpritePickupWeapon : m_GameSkin.m_aSpritePickupWeapons)
-		{
-			SpritePickupWeapon = IGraphics::CTextureHandle();
-		}
-
-		for(auto &SpritePickupWeaponArmor : m_GameSkin.m_aSpritePickupWeaponArmor)
-		{
-			SpritePickupWeaponArmor = IGraphics::CTextureHandle();
-		}
+		std::fill(std::begin(m_GameSkin.m_aSpritePickupWeapons), std::end(m_GameSkin.m_aSpritePickupWeapons), IGraphics::CTextureHandle());
+		std::fill(std::begin(m_GameSkin.m_aSpritePickupWeaponArmor), std::end(m_GameSkin.m_aSpritePickupWeaponArmor), IGraphics::CTextureHandle());
 
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteFlagBlue);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteFlagRed);
