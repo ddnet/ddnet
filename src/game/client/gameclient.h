@@ -126,6 +126,9 @@ public:
 
 	bool m_OldLaser;
 
+	// jetpack shots are flagged as exhaust, older servers keep the gun visuals and sound
+	bool m_JetpackExhaust;
+
 	// zero if the server does not send them
 	int m_MinTeamSize;
 	int m_MaxTeamSize;
@@ -233,6 +236,8 @@ private:
 	CUi m_UI;
 	CRaceHelper m_RaceHelper;
 
+	int GunShooter(vec2 SoundPos) const;
+	int GunFireSound(int Shooter) const;
 	void ProcessEvents();
 	void UpdatePositions();
 
@@ -771,6 +776,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteWeaponGrenade;
 		IGraphics::CTextureHandle m_SpriteWeaponNinja;
 		IGraphics::CTextureHandle m_SpriteWeaponLaser;
+		IGraphics::CTextureHandle m_SpriteJetpack;
 
 		IGraphics::CTextureHandle m_aSpriteWeapons[6];
 

@@ -387,7 +387,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GUN:
 	{
-		if(!m_Core.m_Jetpack)
+		if(!m_Core.m_Jetpack || !m_NinjaJetpack || m_Core.m_HasTelegunGun)
 		{
 			int Lifetime = (int)(GameWorld()->GameTickSpeed() * GetTuning(GetOverriddenTuneZone())->m_GunLifetime);
 
@@ -1403,6 +1403,10 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			GiveNinja();
 		else if(!Ninja && m_Core.m_ActiveWeapon == WEAPON_NINJA)
 			RemoveNinja();
+		// ninja jetpack is drawn as the ninja while the weapon really is the gun, but only while the
+		// jetpack is held unfrozen and without telegun, other snapshots say nothing about it
+		if(m_Core.m_ActiveWeapon == WEAPON_GUN && (pExtended->m_Flags & CHARACTERFLAG_JETPACK) && !(pExtended->m_Flags & CHARACTERFLAG_TELEGUN_GUN) && pExtended->m_FreezeEnd == 0)
+			m_NinjaJetpack = pChar->m_Weapon == WEAPON_NINJA;
 
 		if(GameWorld()->m_WorldConfig.m_PredictFreeze && pExtended->m_FreezeEnd != 0)
 		{
