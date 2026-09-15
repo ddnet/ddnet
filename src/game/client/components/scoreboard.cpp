@@ -25,6 +25,7 @@
 
 // Horizontal spacing of the scoreboard contents, both to its edges and between columns
 static constexpr float MARGIN = 10.0f;
+static constexpr const char *SCOREBOARD_CURSOR_BIND_NAME = "toggle_scoreboard_cursor";
 
 CScoreboard::CScoreboard()
 {
@@ -101,7 +102,7 @@ void CScoreboard::ConToggleScoreboardCursor(IConsole::IResult *pResult, void *pU
 void CScoreboard::OnConsoleInit()
 {
 	Console()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard");
-	Console()->Register("toggle_scoreboard_cursor", "", CFGFLAG_CLIENT, ConToggleScoreboardCursor, this, "Toggle scoreboard cursor");
+	Console()->Register(SCOREBOARD_CURSOR_BIND_NAME, "", CFGFLAG_CLIENT, ConToggleScoreboardCursor, this, "Toggle scoreboard cursor");
 }
 
 void CScoreboard::OnInit()
@@ -318,7 +319,8 @@ void CScoreboard::RenderGoals(CUIRect Goals)
 
 void CScoreboard::RenderSpectators(CUIRect Spectators)
 {
-	Spectators.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 7.5f);
+	int Corners = m_MouseUnlocked ? IGraphics::CORNER_ALL : IGraphics::CORNER_T;
+	Spectators.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), Corners, 7.5f);
 	constexpr float SpectatorCut = 5.0f;
 	Spectators.Margin(SpectatorCut, &Spectators);
 
@@ -857,6 +859,22 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	}
 }
 
+void CScoreboard::RenderMouseHint(CUIRect MouseHint)
+{
+	char aKey[64];
+	GameClient()->m_Binds.GetKey(SCOREBOARD_CURSOR_BIND_NAME, aKey, sizeof(aKey));
+	MouseHint.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_B, 7.5f);
+	constexpr float HintCut = 5.0f;
+	constexpr float FontSize = 11.0f;
+	MouseHint.VMargin(HintCut, &MouseHint);
+	char aHint[128];
+	if(!aKey[0])
+		str_format(aHint, sizeof(aHint), Localize("'%s' not bound."), SCOREBOARD_CURSOR_BIND_NAME);
+	else
+		str_format(aHint, sizeof(aHint), Localize("Press '%s' to show cursor."), aKey);
+	Ui()->DoLabel(&MouseHint, aHint, FontSize, TEXTALIGN_ML);
+}
+
 void CScoreboard::RenderRecordingNotification(float x)
 {
 	char aBuf[512] = "";
@@ -1077,6 +1095,13 @@ void CScoreboard::OnRender()
 		RenderGoals(Goals);
 	}
 	RenderSpectators(Spectators);
+
+	if(!m_MouseUnlocked)
+	{
+		constexpr float MouseHintSize = 15.0f;
+		CUIRect MouseHint = {Spectators.x, Spectators.y + Spectators.h, ScoreboardSmallWidth, std::min(Screen.h - Scoreboard.y - Scoreboard.h, MouseHintSize)};
+		RenderMouseHint(MouseHint);
+	}
 
 	RenderRecordingNotification((Screen.w / 7) * 4 + 10);
 
