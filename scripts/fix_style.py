@@ -16,7 +16,9 @@ def recursive_file_list(path):
 	return result
 
 
-IGNORE_FILES = []
+IGNORE_FILES = [
+	"src/net/net.h",
+]
 IGNORE_DIRS = [
 	"src/game/generated",
 	"src/rust-bridge",

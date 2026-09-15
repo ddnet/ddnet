@@ -1,0 +1,31 @@
+[package]
+name = "net"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+arrayvec = "0.5.2"
+bstr = "1.0.1"
+boring = "4"
+boring-sys = "4"
+env_logger = "0.10.0"
+foreign-types-shared = "0.3.1"
+getrandom = { version = "0.2.8", features = ["std"] }
+hexdump = "0.1.2"
+log = "0.4.17"
+mio = { version = "0.8.4", features = ["net", "os-poll"] }
+octets = "0.2.0"
+openssl-probe = "0.1.5"
+# TODO: switch to cargo dependency when everything is implemented
+#       for easier iteration use git dependency.
+libtw2-net = { git = "https://github.com/heinrich5991/libtw2", rev = "060e4b6450fba9f5baa59e430dc22714f2757162" }
+libtw2-warn = { git = "https://github.com/heinrich5991/libtw2", rev = "060e4b6450fba9f5baa59e430dc22714f2757162" }
+quiche = { version = "0.20.0", features = ["boringssl-boring-crate"] }
+ring = "0.16.20"
+url = "2.3.1"
+uuid = "1.2.2"

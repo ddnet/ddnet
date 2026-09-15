@@ -132,6 +132,7 @@ option(DISCORD_DYNAMIC "Enable discovering Discord rich presence libraries at ru
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging, don't strip absolute paths from debug info, enable additional assertions" OFF)
 option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
+option(NETWORKING_QUIC "Use the Rust networking backend with QUIC support" OFF)
 
 option(EXCEPTION_HANDLING "Enable crashdumps (only works with Windows)" OFF)
 option(IPO "Enable interprocedural optimizations" OFF)
@@ -1198,6 +1199,59 @@ else()
       DEPENDS ${RUST_SRC}
     )
   endforeach()
+endif()
+
+if(NETWORKING_QUIC)
+  set_glob(RUST_NET_SRC GLOB_RECURSE "rs" src/net/src
+    # tidy-alphabetical-start
+    challenger.rs
+    error.rs
+    ffi.rs
+    key.rs
+    lib.rs
+    net.rs
+    quic.rs
+    tw06.rs
+    util.rs
+    # tidy-alphabetical-end
+  )
+  list(APPEND RUST_NET_SRC
+    "${PROJECT_SOURCE_DIR}/src/net/Cargo.lock"
+    "${PROJECT_SOURCE_DIR}/src/net/Cargo.toml"
+  )
+
+  # Run `cargo build` on the src/net crate
+  string(REPLACE
+    "${PROJECT_SOURCE_DIR}/Cargo.toml"
+    "${PROJECT_SOURCE_DIR}/src/net/Cargo.toml"
+    CARGO_BUILD_NET "${CARGO_BUILD}")
+  list(APPEND CARGO_BUILD_NET --lib)
+
+  set(NET_LIBRARY_NAME "${CMAKE_SHARED_LIBRARY_PREFIX}net${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  add_custom_command(
+    OUTPUT "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${NET_LIBRARY_NAME}"
+    COMMAND ${CARGO_BUILD_NET}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    USES_TERMINAL
+    DEPENDS ${RUST_NET_SRC}
+  )
+  # Copy the output library to other runtime dependencies
+  add_custom_command(
+    OUTPUT "${PROJECT_BINARY_DIR}/${NET_LIBRARY_NAME}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${NET_LIBRARY_NAME}"
+      "${PROJECT_BINARY_DIR}/${NET_LIBRARY_NAME}"
+    DEPENDS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${NET_LIBRARY_NAME}"
+  )
+  add_custom_target(rust_net_target DEPENDS "${PROJECT_BINARY_DIR}/${NET_LIBRARY_NAME}")
+  add_library(rust_net SHARED IMPORTED GLOBAL)
+  add_dependencies(rust_net rust_net_target)
+  set_target_properties(rust_net PROPERTIES
+    IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/${NET_LIBRARY_NAME}"
+  )
+  set(NETWORKING_QUIC_LIBRARIES rust_net)
+else()
+  set(NETWORKING_QUIC_LIBRARIES)
 endif()
 
 ########################################################################
@@ -2385,10 +2439,12 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   network.cpp
   network.h
   network_client.cpp
+  network_client_legacy.cpp
   network_conn.cpp
   network_console.cpp
   network_console_conn.cpp
   network_server.cpp
+  network_server_legacy.cpp
   network_stun.cpp
   packer.cpp
   packer.h
@@ -2507,6 +2563,7 @@ set(LIBS
   # Add Rust part of our code.
   rust_engine_shared
   ${PLATFORM_LIBS}
+  ${NETWORKING_QUIC_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
@@ -4258,6 +4315,9 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(VIDEORECORDER)
     target_compile_definitions(${target} PRIVATE CONF_VIDEORECORDER)
+  endif()
+  if(NETWORKING_QUIC)
+    target_compile_definitions(${target} PRIVATE CONF_NETWORKING_QUIC)
   endif()
   if(ANTIBOT)
     target_compile_definitions(${target} PRIVATE CONF_ANTIBOT)
