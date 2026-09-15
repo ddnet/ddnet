@@ -164,8 +164,10 @@ private:
 	bool m_Afk;
 
 	int m_DefEmote;
-	int m_OverrideEmote;
+	int m_OverrideEmote = EMOTE_NORMAL;
 	int m_OverrideEmoteReset;
+	int m_PreviousOverrideEmote = EMOTE_NORMAL;
+	int m_PreviousOverrideEmoteReset;
 	bool m_Halloween;
 
 public:
@@ -251,7 +253,7 @@ public:
 	int m_DDNetVersionKickTick;
 
 	int GetDefaultEmote() const;
-	void OverrideDefaultEmote(int Emote, int Tick);
+	void OverrideDefaultEmote(int Emote, int ResetTick);
 	bool CanOverrideDefaultEmote() const;
 
 	bool m_FirstPacket;
