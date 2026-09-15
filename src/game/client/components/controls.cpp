@@ -18,6 +18,7 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
+#include <game/localization.h>
 
 #include <algorithm>
 
@@ -168,6 +169,48 @@ void CControls::OnConsoleInit()
 		static CInputSet s_Set = {this, {&m_aInputData[0].m_PrevWeapon, &m_aInputData[1].m_PrevWeapon}, 0};
 		Console()->Register("+prevweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, &s_Set, "Switch to previous weapon");
 	}
+
+	Console()->Register("tp_to_cursor", "", CFGFLAG_CLIENT, ConTpToCursor, this, "Practice: teleport yourself to your cursor");
+	Console()->Register("tp_dummy_to_cursor", "", CFGFLAG_CLIENT, ConTpDummyToCursor, this, "Practice: teleport the other tee to your cursor");
+}
+
+void CControls::ConTpToCursor(IConsole::IResult *pResult, void *pUserData)
+{
+	CControls *pSelf = (CControls *)pUserData;
+	if(pSelf->Client()->State() != IClient::STATE_ONLINE)
+		return;
+
+	const vec2 Center = pSelf->GameClient()->m_Camera.m_Center;
+	const vec2 TargetPos = pSelf->m_aTargetPos[g_Config.m_ClDummy];
+	const vec2 CursorPos = Center + (TargetPos - Center) * pSelf->GameClient()->m_Camera.m_Zoom;
+
+	CNetMsg_Cl_PracticeTeleport Msg;
+	Msg.m_X = round_to_int(CursorPos.x);
+	Msg.m_Y = round_to_int(CursorPos.y);
+	pSelf->Client()->SendPackMsg(g_Config.m_ClDummy ? IClient::CONN_DUMMY : IClient::CONN_MAIN, &Msg, MSGFLAG_VITAL);
+}
+
+void CControls::ConTpDummyToCursor(IConsole::IResult *pResult, void *pUserData)
+{
+	CControls *pSelf = (CControls *)pUserData;
+	if(pSelf->Client()->State() != IClient::STATE_ONLINE)
+		return;
+
+	if(!pSelf->Client()->DummyConnected())
+	{
+		pSelf->GameClient()->Echo(Localize("Dummy is not connected"));
+		return;
+	}
+
+	const vec2 Center = pSelf->GameClient()->m_Camera.m_Center;
+	const vec2 TargetPos = pSelf->m_aTargetPos[g_Config.m_ClDummy];
+	const vec2 CursorPos = Center + (TargetPos - Center) * pSelf->GameClient()->m_Camera.m_Zoom;
+
+	// Send on the inactive connection; the server only teleports the sender.
+	CNetMsg_Cl_PracticeTeleport Msg;
+	Msg.m_X = round_to_int(CursorPos.x);
+	Msg.m_Y = round_to_int(CursorPos.y);
+	pSelf->Client()->SendPackMsg(g_Config.m_ClDummy ? IClient::CONN_MAIN : IClient::CONN_DUMMY, &Msg, MSGFLAG_VITAL);
 }
 
 void CControls::OnMessage(int Msg, void *pRawMsg)
