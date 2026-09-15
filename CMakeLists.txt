@@ -89,6 +89,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
 endif()
 
 include(CheckCCompilerFlag)
+include(CheckCSourceCompiles)
 include(CheckCXXCompilerFlag)
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
   include(CheckLinkerFlag)
@@ -265,7 +266,9 @@ function(add_linker_flag_if_supported VARIABLE FLAG)
   endif()
   string(REGEX REPLACE "[^A-Za-z0-9]" "_" CONFIG_VARIABLE "FLAG_SUPPORTED${CHECKED_FLAG}")
   if(CMAKE_VERSION VERSION_LESS 3.18)
-    set(${CONFIG_VARIABLE} OFF)
+    # check_linker_flag not supported, link a program with the flag
+    set(CMAKE_REQUIRED_FLAGS "${FLAG_CHECK_FLAGS} ${CHECKED_FLAG}")
+    check_c_source_compiles("int main() { return 0; }" ${CONFIG_VARIABLE})
   else()
     check_linker_flag(C "${CHECKED_FLAG}" ${CONFIG_VARIABLE})
   endif()
@@ -618,7 +621,7 @@ find_package(Opusfile)
 find_package(PNG)
 find_package(Python3)
 find_package(Rust)
-find_package(SDL2)
+find_package(SDL3)
 find_package(SQLite3)
 if(DISCORD)
   find_package(DiscordSdk)
@@ -709,7 +712,7 @@ show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
 show_dependency_status("PNG" PNG)
 show_dependency_status("Python3" Python3)
-show_dependency_status("SDL2" SDL2)
+show_dependency_status("SDL3" SDL3)
 show_dependency_status("SQLite3" SQLite3)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
@@ -773,8 +776,8 @@ endif()
 if(CLIENT AND NOT(OPUSFILE_FOUND))
   message(SEND_ERROR "You must install Opusfile to compile the ${CMAKE_PROJECT_NAME} client")
 endif()
-if(CLIENT AND NOT(SDL2_FOUND))
-  message(SEND_ERROR "You must install SDL2 to compile the ${CMAKE_PROJECT_NAME} client")
+if(CLIENT AND NOT(SDL3_FOUND))
+  message(SEND_ERROR "You must install SDL3 to compile the ${CMAKE_PROJECT_NAME} client")
 endif()
 if(TARGET_OS STREQUAL "android" AND NOT(CRYPTO_FOUND))
   message(SEND_ERROR "You must install BoringSSL to compile ${CMAKE_PROJECT_NAME} for Android")
@@ -831,13 +834,15 @@ elseif(TARGET_OS STREQUAL "mac")
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
 elseif(TARGET_OS STREQUAL "ios")
-  # Frameworks required by SDL2, see its CMakeLists.txt.
+  # Frameworks required by SDL3, see its CMakeLists.txt.
   find_library(AUDIOTOOLBOX AudioToolbox)
   find_library(AVFOUNDATION AVFoundation)
   find_library(COREBLUETOOTH CoreBluetooth)
   find_library(COREGRAPHICS CoreGraphics)
   find_library(COREHAPTICS CoreHaptics)
+  find_library(COREMEDIA CoreMedia)
   find_library(COREMOTION CoreMotion)
+  find_library(COREVIDEO CoreVideo)
   find_library(FOUNDATION Foundation)
   find_library(GAMECONTROLLER GameController)
   find_library(METAL Metal)
@@ -859,7 +864,9 @@ elseif(TARGET_OS STREQUAL "ios")
     ${COREFOUNDATION}
     ${COREGRAPHICS}
     ${COREHAPTICS}
+    ${COREMEDIA}
     ${COREMOTION}
+    ${COREVIDEO}
     ${FOUNDATION}
     ${GAMECONTROLLER}
     ${METAL}
@@ -2085,7 +2092,7 @@ set(COPY_FILES
   ${FREETYPE_COPY_FILES}
   ${OPUSFILE_COPY_FILES}
   ${PNG_COPY_FILES}
-  ${SDL2_COPY_FILES}
+  ${SDL3_COPY_FILES}
   ${SQLite3_COPY_FILES}
   ${SSP_COPY_FILES}
   ${VULKAN_COPY_FILES}
@@ -2100,7 +2107,7 @@ if(TARGET_OS STREQUAL "emscripten")
 endif()
 file(COPY ${COPY_FILES} DESTINATION .)
 
-set(COPY_DIRS ${SDL2_COPY_DIRS})
+set(COPY_DIRS ${SDL3_COPY_DIRS})
 file(COPY ${COPY_DIRS} DESTINATION .)
 
 ########################################################################
@@ -2924,7 +2931,7 @@ if(CLIENT)
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${PNG_LIBRARIES}
-    ${SDL2_LIBRARIES}
+    ${SDL3_LIBRARIES}
     ${VULKAN_LIBRARIES}
     ${WAVPACK_LIBRARIES}
     # tidy-alphabetical-end
@@ -3055,7 +3062,7 @@ if(CLIENT)
     ${OPUSFILE_INCLUDE_DIRS}
     ${OPUS_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
-    ${SDL2_INCLUDE_DIRS}
+    ${SDL3_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
     # tidy-alphabetical-end
 
@@ -3726,6 +3733,7 @@ set(CPACK_SOURCE_FILES
   datasrc/
   ddnet-libs/
   license.txt
+  lsan.supp
   memcheck.supp
   other/
   scripts/
@@ -3899,7 +3907,7 @@ if(CLIENT AND DMGBUILD_FOUND)
   if(MACOS_CODESIGN)
     set(CODESIGN_COMMANDS
         # tidy-alphabetical-start
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/SDL2.framework
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/SDL3.framework
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/discord_game_sdk.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libavcodec.61.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libavformat.61.dylib
@@ -3981,7 +3989,7 @@ if(CLIENT AND DMGBUILD_FOUND)
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${CLIENT_EXECUTABLE}.icns ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Resources/
     COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-client> ${TARGET_TOOLS_FILES} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/
-    COMMAND /bin/cp -a ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND /bin/cp -a ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL3.framework ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     # tidy-alphabetical-start
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
