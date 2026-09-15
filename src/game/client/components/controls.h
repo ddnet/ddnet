@@ -61,9 +61,5 @@ private:
 	static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConTpToCursor(IConsole::IResult *pResult, void *pUserData);
 	static void ConTpDummyToCursor(IConsole::IResult *pResult, void *pUserData);
-	void TpToCursor();
-	void TpDummyToCursor();
-	vec2 CursorWorldPos() const;
-	void SendPracticeTeleportToCursor(int Conn);
 };
 #endif

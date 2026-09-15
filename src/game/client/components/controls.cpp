@@ -178,52 +178,41 @@ void CControls::OnConsoleInit()
 
 void CControls::ConTpToCursor(IConsole::IResult *pResult, void *pUserData)
 {
-	((CControls *)pUserData)->TpToCursor();
+	CControls *pSelf = (CControls *)pUserData;
+	if(pSelf->Client()->State() != IClient::STATE_ONLINE)
+		return;
+
+	const vec2 Center = pSelf->GameClient()->m_Camera.m_Center;
+	const vec2 TargetPos = pSelf->m_aTargetPos[g_Config.m_ClDummy];
+	const vec2 CursorPos = Center + (TargetPos - Center) * pSelf->GameClient()->m_Camera.m_Zoom;
+
+	CNetMsg_Cl_PracticeTeleport Msg;
+	Msg.m_X = round_to_int(CursorPos.x);
+	Msg.m_Y = round_to_int(CursorPos.y);
+	pSelf->Client()->SendPackMsg(g_Config.m_ClDummy ? IClient::CONN_DUMMY : IClient::CONN_MAIN, &Msg, MSGFLAG_VITAL);
 }
 
 void CControls::ConTpDummyToCursor(IConsole::IResult *pResult, void *pUserData)
 {
-	((CControls *)pUserData)->TpDummyToCursor();
-}
-
-vec2 CControls::CursorWorldPos() const
-{
-	const vec2 Center = GameClient()->m_Camera.m_Center;
-	const vec2 TargetPos = m_aTargetPos[g_Config.m_ClDummy];
-	return Center + (TargetPos - Center) * GameClient()->m_Camera.m_Zoom;
-}
-
-void CControls::SendPracticeTeleportToCursor(int Conn)
-{
-	const vec2 CursorPos = CursorWorldPos();
-	CNetMsg_Cl_PracticeTeleport Msg;
-	Msg.m_X = round_to_int(CursorPos.x);
-	Msg.m_Y = round_to_int(CursorPos.y);
-	Client()->SendPackMsg(Conn, &Msg, MSGFLAG_VITAL);
-}
-
-void CControls::TpToCursor()
-{
-	if(Client()->State() != IClient::STATE_ONLINE)
+	CControls *pSelf = (CControls *)pUserData;
+	if(pSelf->Client()->State() != IClient::STATE_ONLINE)
 		return;
 
-	SendPracticeTeleportToCursor(g_Config.m_ClDummy ? IClient::CONN_DUMMY : IClient::CONN_MAIN);
-}
-
-void CControls::TpDummyToCursor()
-{
-	if(Client()->State() != IClient::STATE_ONLINE)
-		return;
-
-	if(!Client()->DummyConnected())
+	if(!pSelf->Client()->DummyConnected())
 	{
-		GameClient()->Echo(Localize("Dummy is not connected"));
+		pSelf->GameClient()->Echo(Localize("Dummy is not connected"));
 		return;
 	}
 
+	const vec2 Center = pSelf->GameClient()->m_Camera.m_Center;
+	const vec2 TargetPos = pSelf->m_aTargetPos[g_Config.m_ClDummy];
+	const vec2 CursorPos = Center + (TargetPos - Center) * pSelf->GameClient()->m_Camera.m_Zoom;
+
 	// Send on the inactive connection; the server only teleports the sender.
-	const int OtherConn = g_Config.m_ClDummy ? IClient::CONN_MAIN : IClient::CONN_DUMMY;
-	SendPracticeTeleportToCursor(OtherConn);
+	CNetMsg_Cl_PracticeTeleport Msg;
+	Msg.m_X = round_to_int(CursorPos.x);
+	Msg.m_Y = round_to_int(CursorPos.y);
+	pSelf->Client()->SendPackMsg(g_Config.m_ClDummy ? IClient::CONN_MAIN : IClient::CONN_DUMMY, &Msg, MSGFLAG_VITAL);
 }
 
 void CControls::OnMessage(int Msg, void *pRawMsg)
