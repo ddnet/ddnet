@@ -2318,8 +2318,8 @@ set_src(BASE GLOB_RECURSE src/base
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
   # tidy-alphabetical-start
-  asdf.h
   antibot.h
+  asdf.h
   client.h
   config.h
   console.h
@@ -3120,8 +3120,8 @@ if(SERVER)
   set_src(ENGINE_SERVER_WITHOUT_MAIN GLOB_RECURSE src/engine/server
     # tidy-alphabetical-start
     antibot.cpp
-    asdf.cpp
     antibot.h
+    asdf.cpp
     authmanager.cpp
     authmanager.h
     databases/connection.cpp
