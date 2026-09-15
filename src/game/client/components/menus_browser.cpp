@@ -3,6 +3,7 @@
 #include "menus.h"
 
 #include <base/dbg.h>
+#include <base/io.h>
 #include <base/log.h>
 #include <base/time.h>
 
@@ -1167,11 +1168,60 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 	const float RowHeight = 18.0f;
 	const float FontSize = (RowHeight - 4.0f) * CUi::ms_FontmodHeight; // based on DoButton_CheckBox
 
-	CUIRect ServerDetails, Scoreboard;
-	View.HSplitTop(4.0f * 15.0f + RowHeight + 2.0f * 5.0f + 2.0f * 2.0f, &ServerDetails, &Scoreboard);
+	// resolve map thumbnail of the selected server
+	char aThumbnailPath[IO_MAX_PATH_LENGTH] = "";
+	bool ThumbnailLoaded = false;
+	if(pSelectedServer && pSelectedServer->m_aMapSha256[0])
+	{
+		char aPathBuffer[IO_MAX_PATH_LENGTH];
+		char aThumbnailName[SHA256_MAXSTRSIZE + 1 + 128 + 12 + 1];
+
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "mapthumbnails", aPathBuffer, sizeof(aPathBuffer));
+		str_format(aThumbnailName, sizeof(aThumbnailName), "%s_%s_640x480.png", pSelectedServer->m_aMap, pSelectedServer->m_aMapSha256);
+		str_format(aThumbnailPath, sizeof(aThumbnailPath), "%s/%s", aPathBuffer, aThumbnailName);
+		if(Storage()->FindFile(aThumbnailName, "mapthumbnails", IStorage::TYPE_SAVE, aPathBuffer, sizeof(aPathBuffer)) && (!m_pThumbnailJob || (m_pThumbnailJob->Done() && m_pThumbnailJob->Finished())))
+		{
+			if(str_comp(m_aLoadedThumbnailPath, aThumbnailPath) != 0)
+			{
+				m_MapImage = Graphics()->LoadTexture(aThumbnailPath, IStorage::TYPE_ABSOLUTE);
+				str_copy(m_aLoadedThumbnailPath, aThumbnailPath, sizeof(m_aLoadedThumbnailPath));
+			}
+			ThumbnailLoaded = m_MapImage.IsValid();
+		}
+		// queue job that creates image
+		else if(!m_pThumbnailJob || str_comp(m_pThumbnailJob->ThumbnailPath(), aThumbnailPath) != 0)
+		{
+			m_MapImage.Invalidate();
+			m_aLoadedThumbnailPath[0] = '\0';
+			str_format(aPathBuffer, sizeof(aPathBuffer), "%s_%s.map", pSelectedServer->m_aMap, pSelectedServer->m_aMapSha256);
+			m_pThumbnailJob = std::make_shared<CMapThumbnailJob>(aPathBuffer, aThumbnailPath, Storage());
+			Engine()->AddJob(m_pThumbnailJob);
+		}
+	}
+
+	// reserve a 4:3 band above the server details if a thumbnail is available
+	const float DetailsHeight = 4.0f * 15.0f + RowHeight + 2.0f * 5.0f + 2.0f * 2.0f;
+	const float ThumbnailHeight = (View.w - 10.0f) * 3.0f / 4.0f;
+	CUIRect Thumbnail, ServerDetails, Scoreboard;
+	if(ThumbnailLoaded)
+		View.HSplitTop(ThumbnailHeight + 10.0f, &Thumbnail, &View);
+	View.HSplitTop(DetailsHeight, &ServerDetails, &Scoreboard);
 
 	if(pSelectedServer)
 	{
+		// draw map thumbnail
+		if(ThumbnailLoaded)
+		{
+			CUIRect Image = Thumbnail;
+			Image.VMargin(5.0f, &Image);
+			Graphics()->TextureSet(m_MapImage);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1, 1, 1, 1);
+			IGraphics::CQuadItem QuadItem(Image.x, Image.y, Image.w, Image.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+
 		ServerDetails.Margin(5.0f, &ServerDetails);
 
 		// copy info button

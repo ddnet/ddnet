@@ -8,6 +8,7 @@
 #include <base/types.h>
 #include <base/vmath.h>
 
+#include <engine/client/map_thumbnail.h>
 #include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
@@ -853,6 +854,9 @@ private:
 	CMenusSettingsControls m_MenusSettingsControls;
 	friend CMenusSettingsControls;
 	CMenusStart m_MenusStart;
+	std::shared_ptr<CMapThumbnailJob> m_pThumbnailJob;
+	IGraphics::CTextureHandle m_MapImage;
+	char m_aLoadedThumbnailPath[IO_MAX_PATH_LENGTH] = "";
 
 	static int GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
