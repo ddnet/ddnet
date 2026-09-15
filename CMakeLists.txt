@@ -997,7 +997,9 @@ set_glob(RUST_BASE GLOB_RECURSE "rs;toml" src/base
   dbg.rs
   lib.rs
   log.rs
+  net.rs
   rust.rs
+  types.rs
   # tidy-alphabetical-end
 )
 
