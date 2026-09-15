@@ -31,6 +31,7 @@
 #include <game/version.h>
 
 #include <iterator>
+#include <vector>
 
 static constexpr float FONT_SIZE = 10.0f;
 static constexpr float LINE_SPACING = 1.0f;
@@ -1469,7 +1470,7 @@ void CGameConsole::OnRender()
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
 		float OffsetY = 0.0f;
 
-		std::string SelectionString;
+		std::vector<std::string> vSelectionFragments;
 
 		if(pConsole->m_BacklogLastActiveLine < 0)
 			pConsole->m_BacklogLastActiveLine = pConsole->m_BacklogCurLine;
@@ -1567,10 +1568,9 @@ void CGameConsole::OnRender()
 			{
 				if(m_WantsSelectionCopy)
 				{
-					const bool HasNewLine = !SelectionString.empty();
 					const size_t OffUTF8Start = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelStart);
 					const size_t OffUTF8End = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelEnd);
-					SelectionString.insert(0, (std::string(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start) + (HasNewLine ? "\n" : "")));
+					vSelectionFragments.emplace_back(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start);
 				}
 				pConsole->m_HasSelection = true;
 			}
@@ -1600,8 +1600,15 @@ void CGameConsole::OnRender()
 
 		pConsole->m_BacklogLastActiveLine = pConsole->m_BacklogCurLine;
 
-		if(m_WantsSelectionCopy && !SelectionString.empty())
+		if(m_WantsSelectionCopy && !vSelectionFragments.empty())
 		{
+			std::string SelectionString;
+			for(auto It = vSelectionFragments.rbegin(); It != vSelectionFragments.rend(); ++It)
+			{
+				if(!SelectionString.empty())
+					SelectionString += '\n';
+				SelectionString += *It;
+			}
 			pConsole->m_HasSelection = false;
 			pConsole->m_CurSelStart = -1;
 			pConsole->m_CurSelEnd = -1;
