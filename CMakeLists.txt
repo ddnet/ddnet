@@ -122,6 +122,7 @@ option(VIDEORECORDER "Enable video recording support via FFmpeg" ON)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library (not provided, see src/antibot for interface if you want to implement your own)" OFF)
 option(HEADLESS_CLIENT "Build the client without graphics" OFF)
+option(SSH "Build the server with ssh remote console" OFF)
 option(CLIENT "Compile client" ON)
 option(SERVER "Compile server" ON)
 option(TOOLS "Compile tools" ON)
@@ -579,6 +580,10 @@ function(is_bundled VARIABLE PATH)
   endif()
 endfunction()
 
+if(SSH)
+  find_package(libssh)
+endif()
+
 if(NOT CMAKE_CROSSCOMPILING)
   # Check for PkgConfig once so all the other `find_package` calls can do it
   # quietly.
@@ -682,6 +687,9 @@ function(show_dependency_status OUTPUT_NAME NAME)
   endif()
 endfunction()
 
+if(SSH)
+  show_dependency_status("libssh" libssh)
+endif()
 if(NOT TARGET_OS STREQUAL "emscripten")
   show_dependency_status("Curl" CURL)
 endif()
@@ -722,6 +730,9 @@ endif()
 
 if(CLIENT AND VULKAN)
   show_dependency_status("Vulkan" VULKAN)
+endif()
+if(NOT(libssh_FOUND) AND SSH)
+  message(SEND_ERROR "You must install libssh to compile ${CMAKE_PROJECT_NAME}")
 endif()
 if(NOT(CURL_FOUND) AND NOT TARGET_OS STREQUAL "emscripten")
   message(SEND_ERROR "You must install Curl to compile ${CMAKE_PROJECT_NAME}")
@@ -986,9 +997,13 @@ add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
 set_src(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
 add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 
-list(APPEND TARGETS_DEP json md5)
+set_src(DEP_UNICODE_WIDTH_SRC GLOB src/engine/external/unicode-width unicode_width.c unicode_width.h)
+add_library(unicode_width EXCLUDE_FROM_ALL OBJECT ${DEP_UNICODE_WIDTH_SRC})
+
+list(APPEND TARGETS_DEP json md5 unicode_width)
 set(DEP_JSON $<TARGET_OBJECTS:json>)
 set(DEP_MD5)
+set(DEP_UNICODE_WIDTH $<TARGET_OBJECTS:unicode_width>)
 if(NOT CRYPTO_FOUND)
   set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 endif()
@@ -2406,6 +2421,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   sixup_translate_snapshot.cpp
   snapshot.cpp
   snapshot.h
+  ssh_server.cpp
+  ssh_server.h
   storage.cpp
   stun.cpp
   stun.h
@@ -2493,7 +2510,7 @@ set(GAME_GENERATED_SHARED
   src/generated/protocolglue.h
   # tidy-alphabetical-end
 )
-set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
+set(DEPS ${DEP_JSON} ${DEP_MD5} ${DEP_UNICODE_WIDTH} ${ZLIB_DEP})
 
 # Libraries
 set(LIBS
@@ -3482,6 +3499,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     serverbrowser_test.cpp
     serverinfo_test.cpp
     snapshot_test.cpp
+    ssh_test.cpp
     str_test.cpp
     swap_endian_test.cpp
     teehistorian_test.cpp
@@ -4140,6 +4158,9 @@ foreach(target ${TARGETS})
     endif()
   endif()
   if(OUR_FLAGS_LINK)
+    if(SSH)
+      set(OUR_FLAGS_LINK ${OUR_FLAGS_LINK} ssh)
+    endif()
     target_link_libraries(${target} ${OUR_FLAGS_LINK})
   endif()
   if(OUR_FLAGS)
@@ -4267,6 +4288,9 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(HEADLESS_CLIENT)
     target_compile_definitions(${target} PRIVATE CONF_HEADLESS_CLIENT)
+  endif()
+  if(SSH)
+    target_compile_definitions(${target} PRIVATE CONF_SSH)
   endif()
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_MYSQL)
