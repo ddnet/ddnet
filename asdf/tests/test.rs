@@ -1,11 +1,14 @@
 use asdf::Backend;
 use asdf::State;
 use std::pin::Pin;
+use std::sync::Arc;
 use tokio::io::AsyncBufReadExt as _;
 use tokio::io::AsyncRead;
 use tokio::io::AsyncWrite;
 use tokio::io::AsyncWriteExt as _;
 use tokio::io::BufReader;
+use tokio::sync::Mutex as AsyncMutex;
+use tokio::sync::mpsc;
 use tokio_util::io::simplex as tokio_util_simplex;
 
 fn simplex(capacity: usize) -> (tokio_util_simplex::Receiver, tokio_util_simplex::Sender) {
@@ -91,8 +94,14 @@ fn server() -> Connection {
     let (rx_client, tx) = simplex(4096);
     let connection = Connection::new(Box::pin(rx), Box::pin(tx));
 
+    let (_, rx_bans) = mpsc::channel(16);
     let _ = tokio::spawn(async move {
-        asdf::handle_server_connection(Box::pin(rx_client), Box::pin(tx_client), state).await.unwrap();
+        asdf::handle_server_connection(
+            Box::pin(rx_client),
+            Box::pin(tx_client),
+            state,
+            Arc::new(AsyncMutex::new(rx_bans)),
+        ).await.unwrap();
     });
     connection
 }
@@ -175,6 +184,17 @@ async fn test_client_notjson() {
 < {"kind":"client_hello","protocol_version":1}
 > not json
 < {"kind":"close","error":"invalid message read: expected ident at line 1 column 2"}
+< EOF
+"#).await;
+}
+
+#[tokio::test]
+async fn test_server_time_not_z() {
+    one_client().conversation(r#"
+> {"kind":"client_hello","protocol_version":1}
+< {"kind":"server_hello"}
+> {"kind":"add_ban","net":"127.0.0.1/32","expiry":"2100-01-01T00:00:00-01:00","reason":"foobar"}
+< {"kind":"close","error":"invalid message read: only the UTC offset Z is accepted"}
 < EOF
 "#).await;
 }

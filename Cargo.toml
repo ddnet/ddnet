@@ -6,6 +6,9 @@ members = [
   "src/engine/shared",
   "src/rust-bridge/test",
 ]
+exclude = [
+  "asdf",
+]
 
 resolver = "2"
 

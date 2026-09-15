@@ -29,6 +29,8 @@ pub enum ClientMessage {
     AddBan(AddBanMessage),
     SubscribeBans(SubscribeBansMessage),
     RemoveBan(RemoveBanMessage),
+
+    // TODO: allow unknown messages
 }
 
 #[derive(Debug, Deserialize, From, Serialize)]
@@ -72,6 +74,15 @@ pub struct SubscribeBansMessage;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ReplaceBansMessage {
     pub bans: Arc<Vec<Ban>>,
+}
+
+impl From<BanMessage> for ClientMessage {
+    fn from(msg: BanMessage) -> ClientMessage {
+        match msg {
+            BanMessage::AddBan(i) => ClientMessage::AddBan(i),
+            BanMessage::RemoveBan(i) => ClientMessage::RemoveBan(i),
+        }
+    }
 }
 
 mod serialization {

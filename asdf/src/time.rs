@@ -1,3 +1,4 @@
+use anyhow::bail;
 use serde_with::DeserializeFromStr;
 use serde_with::SerializeDisplay;
 use std::fmt;
@@ -20,6 +21,9 @@ impl fmt::Display for Timestamp {
 impl FromStr for Timestamp {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> anyhow::Result<Timestamp> {
+        if s.bytes().last() != Some(b'Z') {
+            bail!("only the UTC offset Z is accepted");
+        }
         // TODO: constrain formatting accepted by this parser
         Ok(Timestamp(jiff::Timestamp::from_str(s)?.as_second()))
     }

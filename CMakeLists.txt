@@ -1012,6 +1012,7 @@ set_glob(RUST_ENGINE_INTERFACE GLOB "rs;toml" src/engine
 set_glob(RUST_ENGINE_SERVER GLOB_RECURSE "rs;toml" src/engine/server
   # tidy-alphabetical-start
   Cargo.toml
+  asdf.rs
   lib.rs
   # tidy-alphabetical-end
 )
@@ -2315,6 +2316,7 @@ set_src(BASE GLOB_RECURSE src/base
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
   # tidy-alphabetical-start
+  asdf.h
   antibot.h
   client.h
   config.h
@@ -3116,6 +3118,7 @@ if(SERVER)
   set_src(ENGINE_SERVER_WITHOUT_MAIN GLOB_RECURSE src/engine/server
     # tidy-alphabetical-start
     antibot.cpp
+    asdf.cpp
     antibot.h
     authmanager.cpp
     authmanager.h

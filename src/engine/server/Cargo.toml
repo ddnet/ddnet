@@ -11,11 +11,13 @@ crate-type = ["rlib", "staticlib"]
 path = "lib.rs"
 
 [dependencies]
+asdf = { path = "../../../asdf" }
 ddnet-base = { path = "../../base" }
 ddnet-engine = { path = ".." }
 ddnet-engine-shared = { path = "../shared" }
 
 cxx = { workspace = true }
+tokio = { version = "1.53.1", features = ["sync"] }
 
 [dev-dependencies]
 ddnet-test = { path = "../../rust-bridge/test", features = ["link-test-libraries"] }

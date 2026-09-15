@@ -1,7 +1,10 @@
 #ifndef ENGINE_ASDF_H
 #define ENGINE_ASDF_H
 
+#include "kernel.h"
+
 class CConfig;
+struct NETADDR;
 
 class IAsdf : public IInterface
 {
@@ -9,10 +12,11 @@ class IAsdf : public IInterface
 public:
 	virtual ~IAsdf() = default;
 
-	virtual bool HasChanged() = 0;
+	virtual void Init() = 0;
+	virtual bool BansHaveChanged() = 0;
 	virtual bool IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const = 0;
 };
 
-IAsdf *CreateAsdf(CConfig *pConfig);
+IAsdf *CreateAsdf();
 
 #endif // ENGINE_ASDF_H

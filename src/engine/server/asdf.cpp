@@ -1,33 +1,35 @@
+#include <base/dbg.h>
 #include <engine/asdf.h>
 #include <engine/server/asdf.h>
+#include <engine/shared/config.h>
 
-class CConfig;
 
 class CAsdf : public IAsdf
 {
-	rust::Box<CAsdfImpl> m_pInner = CAsdfImpl::New();
+	std::optional<rust::Box<CAsdfImpl>> m_pInner = std::nullopt;
 public:
-	bool HasChanged() override;
+	void Init() override;
+	bool BansHaveChanged() override;
 	bool IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const override;
 };
 
-IAsdf *CreateAsdf(CConfig *pConfig)
+IAsdf *CreateAsdf()
 {
 	return new CAsdf();
 }
 
-bool CAsdf::HasChanged()
+void CAsdf::Init()
 {
-	return m_pInner->HasChanged();
+	dbg_assert(!m_pInner.has_value(), "can't be initialized twice");
+	m_pInner = CAsdfImpl::New(g_Config.m_SvAsdfServer);
+}
+
+bool CAsdf::BansHaveChanged()
+{
+	return m_pInner.value()->BansHaveChanged();
 }
 
 bool CAsdf::IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const
 {
-	rust::Str Reason;
-	if(!m_pInner->IsBanned(*pAddr, Reason))
-	{
-		return false;
-	}
-	str_copy(pBuf, Reason, BufferSize);
-	return true;
+	return m_pInner.value()->IsBanned(*pAddr, rust::Slice(pBuf, BufferSize));
 }

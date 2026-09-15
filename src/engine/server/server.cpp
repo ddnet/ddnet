@@ -13,6 +13,7 @@
 #include <base/logger.h>
 #include <base/secure.h>
 
+#include <engine/asdf.h>
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/engine.h>
@@ -56,15 +57,21 @@ using namespace std::chrono_literals;
 extern std::vector<std::string> FetchAndroidServerCommandQueue();
 #endif
 
-void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer)
+void CServerBan::InitServerBan(IAsdf *pAsdf, IConsole *pConsole, IStorage *pStorage, CServer *pServer)
 {
 	CNetBan::Init(pConsole, pStorage);
 
+	m_pAsdf = pAsdf;
 	m_pServer = pServer;
 
 	Console()->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanExt, this, "Ban player with ip/client id for x minutes for any reason");
 	Console()->Register("ban_region", "s[region] s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRegion, this, "Ban player in a region");
 	Console()->Register("ban_region_range", "s[region] s[first ip] s[last ip] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRegionRange, this, "Ban range in a region");
+}
+
+bool CServerBan::IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const
+{
+	return CNetBan::IsBanned(pAddr, pBuf, BufferSize) || m_pAsdf->IsBanned(pAddr, pBuf, BufferSize);
 }
 
 template<class T>
@@ -4658,6 +4665,7 @@ void CServer::RegisterCommands()
 	m_pHttp = Kernel()->RequestInterface<IEngineHttp>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
+	m_pAsdf = Kernel()->RequestInterface<IAsdf>();
 
 	// register console commands
 	Console()->Register("kick", "v[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
@@ -4715,7 +4723,7 @@ void CServer::RegisterCommands()
 #endif
 
 	// register console commands in sub parts
-	m_ServerBan.InitServerBan(Console(), Storage(), this);
+	m_ServerBan.InitServerBan(Asdf(), Console(), Storage(), this);
 	m_NameBans.InitConsole(Console());
 	m_pGameServer->OnConsoleInit();
 	Console()->SetCanUseCommandCallback(CanClientUseCommandCallback, this);

@@ -29,19 +29,25 @@
 #include "upnp.h"
 #endif
 
+// tidy-alphabetical-start
 class CConfig;
+class CDbConnectionPool;
 class CHostLookup;
 class CLogMessage;
 class CMsgPacker;
 class CPacker;
 class CServer;
+class IAsdf;
 class IEngine;
 class IEngineHttp;
 class ILogger;
+class IRegister;
+// tidy-alphabetical-end
 
 class CServerBan : public CNetBan
 {
 	CServer *m_pServer;
+	IAsdf *m_pAsdf;
 
 	template<class T>
 	int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool VerbatimReason);
@@ -49,8 +55,9 @@ class CServerBan : public CNetBan
 public:
 	class CServer *Server() const { return m_pServer; }
 
-	void InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer);
+	void InitServerBan(IAsdf *pAsdf, IConsole *pConsole, IStorage *pStorage, CServer *pServer);
 
+	bool IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const;
 	int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason) override;
 	int BanRange(const CNetRange *pRange, int Seconds, const char *pReason) override;
 
@@ -63,13 +70,14 @@ class CServer : public IServer
 {
 	friend class CServerLogger;
 
-	class IGameServer *m_pGameServer;
-	class CConfig *m_pConfig;
-	class IConsole *m_pConsole;
+	IGameServer *m_pGameServer;
+	CConfig *m_pConfig;
+	IAsdf *m_pAsdf;
+	IConsole *m_pConsole;
 	IEngineHttp *m_pHttp;
-	class IStorage *m_pStorage;
-	class IEngineAntibot *m_pAntibot;
-	class IRegister *m_pRegister;
+	IStorage *m_pStorage;
+	IEngineAntibot *m_pAntibot;
+	IRegister *m_pRegister;
 	IEngine *m_pEngine;
 
 #if defined(CONF_UPNP)
@@ -82,19 +90,20 @@ class CServer : public IServer
 	UNIXSOCKET m_ConnLoggingSocket;
 #endif
 
-	class CDbConnectionPool *m_pConnectionPool;
+	CDbConnectionPool *m_pConnectionPool;
 
 	int m_PreviousDebugDummies = 0;
 	void UpdateDebugDummies(bool ForceDisconnect);
 
 public:
-	class IGameServer *GameServer() { return m_pGameServer; }
-	class CConfig *Config() { return m_pConfig; }
-	const CConfig *Config() const { return m_pConfig; }
-	class IConsole *Console() { return m_pConsole; }
-	class IStorage *Storage() { return m_pStorage; }
-	class IEngineAntibot *Antibot() { return m_pAntibot; }
-	class CDbConnectionPool *DbPool() { return m_pConnectionPool; }
+	IGameServer *GameServer() { return m_pGameServer; }
+	CConfig *Config() { return m_pConfig; }
+	CConfig *Config() const { return m_pConfig; }
+	IAsdf *Asdf() { return m_pAsdf; }
+	IConsole *Console() { return m_pConsole; }
+	IStorage *Storage() { return m_pStorage; }
+	IEngineAntibot *Antibot() { return m_pAntibot; }
+	CDbConnectionPool *DbPool() { return m_pConnectionPool; }
 	IEngine *Engine() { return m_pEngine; }
 
 	enum

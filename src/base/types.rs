@@ -5,6 +5,10 @@ use std::ffi::CStr;
 use std::ffi::CString;
 use std::ffi::c_char;
 use std::fmt;
+use std::net::IpAddr;
+use std::net::Ipv4Addr;
+use std::net::Ipv6Addr;
+use std::net::SocketAddr;
 use std::str::FromStr;
 
 /// Network address.
@@ -55,6 +59,47 @@ pub const NETTYPE_WEBSOCKET_IPV4: u32 = 1 << 2;
 pub const NETTYPE_WEBSOCKET_IPV6: u32 = 1 << 3;
 pub const NETTYPE_LINK_BROADCAST: u32 = 1 << 4;
 pub const NETTYPE_TW7: u32 = 1 << 4;
+
+impl NETADDR {
+    pub fn assert_socket_addr(&self) -> SocketAddr {
+        let ip_addr: IpAddr = match self.type_ {
+            NETTYPE_IPV4 => {
+                let octets = [self.ip[0], self.ip[1], self.ip[2], self.ip[3]];
+                Ipv4Addr::from(octets).into()
+            },
+            NETTYPE_IPV6 => Ipv6Addr::from(self.ip).into(),
+            type_ => {
+                panic!("cannot convert NETADDR type {type_} into `SocketAddr`");
+            }
+        };
+        SocketAddr::new(ip_addr, self.port)
+    }
+}
+
+impl From<SocketAddr> for NETADDR {
+    fn from(addr: SocketAddr) -> NETADDR {
+        match addr {
+            SocketAddr::V4(v4) => NETADDR {
+                type_: NETTYPE_IPV4,
+                ip: [
+                    v4.ip().octets()[0],
+                    v4.ip().octets()[1],
+                    v4.ip().octets()[2],
+                    v4.ip().octets()[3],
+                    0, 0, 0, 0,
+                    0, 0, 0, 0,
+                    0, 0, 0, 0,
+                ],
+                port: addr.port(),
+            },
+            SocketAddr::V6(v6) => NETADDR {
+                type_: NETTYPE_IPV6,
+                ip: v6.ip().octets(),
+                port: addr.port(),
+            },
+        }
+    }
+}
 
 impl fmt::Display for NETADDR {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
