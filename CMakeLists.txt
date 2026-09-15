@@ -2165,21 +2165,6 @@ execute_process(COMMAND git rev-parse --git-dir
   OUTPUT_STRIP_TRAILING_WHITESPACE
   RESULT_VARIABLE PROJECT_GIT_DIR_ERROR
 )
-if(NOT PROJECT_GIT_DIR_ERROR)
-  set(GIT_REVISION_EXTRA_DEPS
-    ${PROJECT_GIT_DIR}/index
-    ${PROJECT_GIT_DIR}/logs/HEAD
-  )
-endif()
-add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
-  COMMAND ${Python3_EXECUTABLE}
-    scripts/git_revision.py
-    > ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  DEPENDS
-    ${GIT_REVISION_EXTRA_DEPS}
-    scripts/git_revision.py
-)
 # tidy-alphabetical-start
 generate_source("src/generated/client_data.cpp" "client_content_source")
 generate_source("src/generated/client_data.h" "client_content_header")
@@ -3590,6 +3575,37 @@ add_custom_target(run_rust_tests
   USES_TERMINAL
   DEPENDS rust_test
   VERBATIM
+)
+
+########################################################################
+# GIT REVISION
+########################################################################
+
+if(NOT PROJECT_GIT_DIR_ERROR)
+  set(GIT_REVISION_EXTRA_DEPS
+    ${PROJECT_GIT_DIR}/index
+    ${PROJECT_GIT_DIR}/logs/HEAD
+  )
+endif()
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+  COMMAND ${Python3_EXECUTABLE}
+    scripts/git_revision.py
+    > ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+  # COMMAND ${Python3_EXECUTABLE}
+  #   scripts/git_revision.py ls-files
+  #   > ${PROJECT_BINARY_DIR}/git_tracked_files.txt
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  # DEPFILE ${PROJECT_BINARY_DIR}/git_tracked_files.txt
+  DEPENDS
+    Dockerfile
+  # DEPENDS
+  #   src/game/client/components/hud.cpp
+  # DEPENDS
+  #   ${GIT_REVISION_EXTRA_DEPS}
+  #   scripts/git_revision.py
+  # COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  #   ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp.tmp
+  #   ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
 )
 
 ########################################################################
