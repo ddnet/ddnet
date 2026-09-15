@@ -54,6 +54,7 @@ impl Bans {
         self.bans.clear();
         for &Ban { net, expiry, ref reason } in self.sorted.iter() {
             if self.bans.insert(net, BanData { expiry, reason: reason.clone() }).is_some() {
+                // Roll back to previous known-good state.
                 self.on_replace_bans(protocol::ReplaceBansMessage { bans: old }).unwrap();
                 bail!("duplicate bans in replace bans message");
             }
@@ -355,6 +356,7 @@ pub async fn handle_client_connection(
     ).await
 }
 
+/// Main logic to handle connections from clients.
 async fn handle_client_connection_impl(
     handle: TaskPoolHandle,
     reader: io::Reader<protocol::ClientMessage>,
@@ -443,6 +445,7 @@ pub async fn handle_server_connection(
     ).await
 }
 
+/// Main logic to handle connection to servers.
 async fn handle_server_connection_impl(
     handle: TaskPoolHandle,
     reader: io::Reader<protocol::ServerMessage>,
