@@ -825,6 +825,33 @@ const char *CDataFileReader::GetDataString(int Index)
 	return pData;
 }
 
+std::optional<std::vector<const char *>> CDataFileReader::GetDataStringArray(int Index)
+{
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
+	std::vector<const char *> vpStrings;
+	if(Index == -1)
+	{
+		return vpStrings;
+	}
+
+	const char *pData = static_cast<const char *>(GetData(Index));
+	const int DataSize = GetDataSize(Index);
+	if(pData == nullptr || DataSize <= 0 || pData[DataSize - 1] != '\0')
+	{
+		return std::nullopt;
+	}
+	for(const char *pString = pData; pString < pData + DataSize; pString += str_length(pString) + 1)
+	{
+		if(!str_utf8_check(pString))
+		{
+			return std::nullopt;
+		}
+		vpStrings.push_back(pString);
+	}
+	return vpStrings;
+}
+
 void CDataFileReader::AddDataProcessor(int Index, FDataProcessor DataProcessor)
 {
 	dbg_assert(m_pDataFile != nullptr, "File not open");
@@ -1212,6 +1239,21 @@ int CDataFileWriter::AddDataString(const char *pStr)
 		return -1;
 	}
 	return AddData(str_length(pStr) + 1, pStr);
+}
+
+int CDataFileWriter::AddDataStringArray(const std::vector<const char *> &vpStrings)
+{
+	if(vpStrings.empty())
+	{
+		return -1;
+	}
+	std::vector<char> vData;
+	for(const char *pString : vpStrings)
+	{
+		dbg_assert(pString != nullptr, "Data missing");
+		vData.insert(vData.end(), pString, pString + str_length(pString) + 1);
+	}
+	return AddData(vData.size(), vData.data());
 }
 
 static int CompressionLevelToZlib(CDataFileWriter::ECompressionLevel CompressionLevel)
