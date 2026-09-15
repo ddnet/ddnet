@@ -27,6 +27,7 @@
 
 struct CAntibotRoundData;
 class IMap;
+class CRconRole;
 
 // When recording a demo on the server, the ClientId -1 is used
 enum
@@ -465,7 +466,7 @@ public:
 
 	virtual void OnClientRejoin(int ClientId) = 0;
 	virtual void ReinitPlayerMap(int ClientId, bool Timeout) = 0;
-	virtual void OnSetAuthed(int ClientId, int Level) = 0;
+	virtual void OnSetAuthed(int ClientId, CRconRole *pRole) = 0;
 	virtual bool PlayerExists(int ClientId) const = 0;
 
 	virtual void TeehistorianRecordAntibot(const void *pData, int DataSize) = 0;

@@ -2263,27 +2263,18 @@ void CServer::OnNetMsgRconAuth(int ClientId, const char *pName, const char *pPw,
 			}
 
 			const char *pIdent = m_AuthManager.KeyIdent(KeySlot);
-			switch(AuthLevel)
-			{
-			case AUTHED_ADMIN:
-			{
-				SendRconLine(ClientId, "Admin authentication successful. Full remote console access granted.");
-				log_info("server", "ClientId=%d authed with key='%s' (admin)", ClientId, pIdent);
-				break;
-			}
-			case AUTHED_MOD:
-			{
-				SendRconLine(ClientId, "Moderator authentication successful. Limited remote console access granted.");
-				log_info("server", "ClientId=%d authed with key='%s' (moderator)", ClientId, pIdent);
-				break;
-			}
-			case AUTHED_HELPER:
-			{
-				SendRconLine(ClientId, "Helper authentication successful. Limited remote console access granted.");
-				log_info("server", "ClientId=%d authed with key='%s' (helper)", ClientId, pIdent);
-				break;
-			}
-			}
+			CRconRole *pRole = m_AuthManager.FindRole(CAuthManager::AuthLevelToRoleName(AuthLevel));
+			dbg_assert(pRole != nullptr, "pRole is nullptr");
+
+			char aBuf[512];
+			str_format(
+				aBuf,
+				sizeof(aBuf),
+				"Successfully authenticated as %s. %s remote console access granted.",
+				pRole->Name(),
+				pRole->IsAdmin() ? "Full" : "Limited");
+			SendRconLine(ClientId, aBuf);
+			log_info("server", "ClientId=%d authed with key='%s' (%s)", ClientId, pIdent, pRole->Name());
 
 			if(!ClientSupportsServerMaxClients(ClientId))
 			{
@@ -2291,7 +2282,7 @@ void CServer::OnNetMsgRconAuth(int ClientId, const char *pName, const char *pPw,
 			}
 
 			// DDRace
-			GameServer()->OnSetAuthed(ClientId, AuthLevel);
+			GameServer()->OnSetAuthed(ClientId, pRole);
 		}
 	}
 	else if(Config()->m_SvRconMaxTries)
@@ -4484,7 +4475,7 @@ void CServer::LogoutClient(int ClientId, const char *pReason)
 
 	m_aClients[ClientId].m_AuthKey = -1;
 
-	GameServer()->OnSetAuthed(ClientId, AUTHED_NO);
+	GameServer()->OnSetAuthed(ClientId, nullptr);
 }
 
 void CServer::LogoutKey(int Key, const char *pReason)

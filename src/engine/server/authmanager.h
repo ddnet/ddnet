@@ -45,6 +45,9 @@ public:
 	// but not vice versa.
 	int Rank() const { return m_Rank; }
 
+	// admin is the strongest role with full access
+	bool IsAdmin() const { return m_Rank == RoleRank::ADMIN; }
+
 	CRconRole(const char *pName, int Rank) :
 		m_Rank(Rank)
 	{

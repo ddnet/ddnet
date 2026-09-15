@@ -4686,13 +4686,13 @@ const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 
-void CGameContext::OnSetAuthed(int ClientId, int Level)
+void CGameContext::OnSetAuthed(int ClientId, CRconRole *pRole)
 {
-	if(m_apPlayers[ClientId] && m_VoteCloseTime && Level != AUTHED_NO)
+	if(m_apPlayers[ClientId] && m_VoteCloseTime && pRole)
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", Server()->ClientAddrString(ClientId, false), g_Config.m_SvVoteKickBantime);
-		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || Level > Server()->GetAuthedState(m_VoteCreator)))
+		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || pRole->Rank() > Server()->GetAuthedState(m_VoteCreator)))
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 			log_info("game", "Vote aborted by authorized login.");
@@ -4701,11 +4701,11 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 
 	if(m_TeeHistorianActive)
 	{
-		if(Level != AUTHED_NO)
+		if(pRole)
 		{
 			m_TeeHistorian.RecordAuthLogin(
 				ClientId,
-				CAuthManager::AuthLevelToRoleName(Level),
+				pRole->Name(),
 				Server()->GetAuthName(ClientId));
 		}
 		else
