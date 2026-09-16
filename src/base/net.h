@@ -148,7 +148,8 @@ int net_addr_from_str(NETADDR *addr, const char *string);
  * @param addr The output address to write to.
  * @param types The type of IP that should be returned.
  *
- * @return `0` on success.
+ * @return `0` on success, `-1` if the hostname does not exist, `-2` if the
+ * lookup failed.
  */
 int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 
