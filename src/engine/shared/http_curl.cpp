@@ -113,7 +113,7 @@ bool CHttpRequestCurl::ConfigureHandle(CURL *pHandle)
 	}
 	curl_easy_setopt(pHandle, CURLOPT_URL, m_aUrl);
 	curl_easy_setopt(pHandle, CURLOPT_NOSIGNAL, 1L);
-	curl_easy_setopt(pHandle, CURLOPT_USERAGENT, USER_AGENT_STRING);
+	curl_easy_setopt(pHandle, CURLOPT_USERAGENT, UserAgent());
 	curl_easy_setopt(pHandle, CURLOPT_ACCEPT_ENCODING, ""); // Use any compression algorithm supported by libcurl.
 
 	curl_easy_setopt(pHandle, CURLOPT_HEADERDATA, this);

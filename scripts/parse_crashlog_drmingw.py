@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 
 # TODO: 2027 or later: remove backwards compatibility for parsing filename without version and architecture
-CRASH_FILENAME_PATTERN = re.compile(r"(DDNet|DDNet-Server)(_([0-9\.\-]+))?_((win32|win64)(-steam)?)(_([a-zA-Z0-9]+))?_crash_log_([0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})_([0-9]+)_([0-9A-Fa-f]*)")
+CRASH_FILENAME_PATTERN = re.compile(r"(DDNet|DDNet-Server)(_([0-9A-Za-z\.\-]+))?_((win32|win64)(-steam)?)(_([a-zA-Z0-9]+))?_crash_log_([0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})_([0-9]+)_([0-9A-Fa-f]*)")
 IMAGE_BASE_PATTERN = re.compile(r"^ImageBase\s+([0-9A-Fa-f]+)$", re.MULTILINE)
 DATE_TIME_PATTERN = re.compile(r"^Error occurred on (.+)\.$")
 ERROR_MESSAGE_PATTERN = re.compile(r"^.+?\.exe caused .+\.$")
