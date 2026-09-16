@@ -212,6 +212,8 @@ public:
 
 		// DNSBL
 		EDnsblState m_DnsblState;
+		int64_t m_DnsblRetryTime;
+		int m_DnsblRetryDelay;
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
 
 		bool m_Sixup;

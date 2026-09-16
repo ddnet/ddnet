@@ -602,15 +602,17 @@ static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 
 	struct addrinfo *result = nullptr;
 	int e = getaddrinfo(host, nullptr, &hints, &result);
-	if(!result)
+	if(e != 0 || !result)
 	{
-		return net_host_lookup_fallback(hostname, addr, types, port);
-	}
-
-	if(e != 0)
-	{
-		freeaddrinfo(result);
-		return net_host_lookup_fallback(hostname, addr, types, port);
+		if(result)
+		{
+			freeaddrinfo(result);
+		}
+		if(net_host_lookup_fallback(hostname, addr, types, port) == 0)
+		{
+			return 0;
+		}
+		return e == EAI_NONAME ? -1 : -2;
 	}
 
 	sockaddr_to_netaddr(result->ai_addr, result->ai_addrlen, addr);

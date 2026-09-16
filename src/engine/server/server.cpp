@@ -56,6 +56,9 @@ using namespace std::chrono_literals;
 extern std::vector<std::string> FetchAndroidServerCommandQueue();
 #endif
 
+static constexpr int DNSBL_RETRY_DELAY_MIN = 5;
+static constexpr int DNSBL_RETRY_DELAY_MAX = 5 * 60;
+
 void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer)
 {
 	CNetBan::Init(pConsole, pStorage);
@@ -1218,6 +1221,8 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	CServer *pThis = (CServer *)pUser;
 
 	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
+	pThis->m_aClients[ClientId].m_DnsblRetryTime = 0;
+	pThis->m_aClients[ClientId].m_DnsblRetryDelay = DNSBL_RETRY_DELAY_MIN;
 
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
@@ -1252,6 +1257,8 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	CServer *pThis = (CServer *)pUser;
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_PREAUTH;
 	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
+	pThis->m_aClients[ClientId].m_DnsblRetryTime = 0;
+	pThis->m_aClients[ClientId].m_DnsblRetryDelay = DNSBL_RETRY_DELAY_MIN;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
 	pThis->m_aClients[ClientId].m_Country = CountryCode::DEFAULT;
@@ -3605,7 +3612,7 @@ int CServer::Run()
 						if(m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
 							continue;
 
-						if(m_aClients[ClientId].m_DnsblState == EDnsblState::NONE)
+						if(m_aClients[ClientId].m_DnsblState == EDnsblState::NONE && time_get() >= m_aClients[ClientId].m_DnsblRetryTime)
 						{
 							// initiate dnsbl lookup
 							InitDnsbl(ClientId);
@@ -3613,7 +3620,8 @@ int CServer::Run()
 						else if(m_aClients[ClientId].m_DnsblState == EDnsblState::PENDING &&
 							m_aClients[ClientId].m_pDnsblLookup->State() == IJob::STATE_DONE)
 						{
-							if(m_aClients[ClientId].m_pDnsblLookup->Result() != 0)
+							const int Result = m_aClients[ClientId].m_pDnsblLookup->Result();
+							if(Result == -1)
 							{
 								// entry not found -> whitelisted
 								m_aClients[ClientId].m_DnsblState = EDnsblState::WHITELISTED;
@@ -3621,7 +3629,7 @@ int CServer::Run()
 								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s whitelisted", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
 								Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
 							}
-							else
+							else if(Result == 0)
 							{
 								// entry found -> blacklisted
 								m_aClients[ClientId].m_DnsblState = EDnsblState::BLACKLISTED;
@@ -3633,6 +3641,17 @@ int CServer::Run()
 								{
 									m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
 								}
+							}
+							else
+							{
+								m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
+								const int Delay = m_aClients[ClientId].m_DnsblRetryDelay;
+								const int Retry = Delay / 2 + secure_rand_below(Delay / 2 + 1);
+								m_aClients[ClientId].m_DnsblRetryTime = time_get() + Retry * time_freq();
+								m_aClients[ClientId].m_DnsblRetryDelay = std::min(Delay * 2, DNSBL_RETRY_DELAY_MAX);
+
+								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s lookup failed, retrying in %ds", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no", Retry);
+								Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
 							}
 						}
 					}
