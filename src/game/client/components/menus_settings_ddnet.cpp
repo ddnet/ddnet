@@ -354,8 +354,8 @@ CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect Vie
 	int MapIndex = 0;
 	for(auto &Map : pPopupContext->m_vMaps)
 	{
-		MapIndex++;
 		const CListboxItem Item = s_ListBox.DoNextItem(&Map, MapIndex == pPopupContext->m_Selection);
+		MapIndex++;
 		if(!Item.m_Visible)
 			continue;
 
