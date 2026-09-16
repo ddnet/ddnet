@@ -2,21 +2,8 @@ use std::collections::HashSet;
 use std::env;
 use std::ffi::OsStr;
 use std::path::Path;
-use std::process::Command;
 
 fn main() {
-    let rustc = env::var_os("RUSTC").expect("RUSTC");
-    let rustc_output = Command::new(rustc)
-        .arg("--version")
-        .output()
-        .expect("rustc --version");
-    if !rustc_output.status.success() {
-        panic!("rustc --version: exit status {}", rustc_output.status);
-    }
-    let rustc_version = &rustc_output.stdout[..];
-    let supports_whole_archive =
-        !rustc_version.starts_with(b"rustc ") || rustc_version >= &b"rustc 1.61.0"[..];
-
     println!("cargo:rerun-if-env-changed=DDNET_TEST_LIBRARIES");
     println!("cargo:rerun-if-env-changed=DDNET_TEST_NO_LINK");
     println!("cargo:rerun-if-env-changed=RA_RUSTC_WRAPPER");
@@ -33,13 +20,7 @@ fn main() {
             let kind = match extension {
                 Some("framework") => "framework=",
                 Some("so") => "dylib=",
-                Some("a") => {
-                    if supports_whole_archive {
-                        "static:-whole-archive="
-                    } else {
-                        ""
-                    }
-                }
+                Some("a") => "static:-whole-archive=",
                 _ => "",
             };
             let dir_kind = match extension {
