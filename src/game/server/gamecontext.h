@@ -413,7 +413,7 @@ public:
 	// DDRace
 	void OnPreTickTeehistorian() override;
 	bool OnClientDDNetVersionKnown(int ClientId);
-	void FillAntibot(CAntibotRoundData *pData) override;
+	void FillAntibot(CAntibotRoundData *pData, int ClientId) override;
 	bool ProcessSpamProtection(int ClientId, bool RespectChatInitialDelay = true);
 	int GetDDRaceTeam(int ClientId) const;
 	// Describes the time when the first player joined the server.
