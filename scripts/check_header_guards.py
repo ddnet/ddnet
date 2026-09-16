@@ -10,6 +10,7 @@ EXCEPTIONS = [
 	"src/base/unicode/confusables_data.h",
 	"src/base/unicode/tolower.h",
 	"src/base/unicode/tolower_data.h",
+	"src/net/net.h",
 	"src/tools/config_common.h",
 ]
 

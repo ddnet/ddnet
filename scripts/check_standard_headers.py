@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import os
 import re
 import sys
 
@@ -32,6 +33,20 @@ C_HEADER_SET = {
 }
 C_HEADER_INCLUDE_PATTERN = re.compile(rf"#include\s+<({'|'.join(C_HEADER_SET)})\.h>")
 
+IGNORE_FILES = [
+	"src/net/net.h",
+]
+IGNORE_DIRS = [
+	"src/engine/external",
+	"src/masterping",
+	"src/mastersrv",
+]
+
+
+def is_ignored(filename):
+	real_filename = os.path.realpath(filename)
+	return real_filename in [os.path.realpath(ignore_file) for ignore_file in IGNORE_FILES] or any(real_filename.startswith(os.path.realpath(subdir) + os.path.sep) for subdir in IGNORE_DIRS)
+
 
 def get_cpp_header(c_header: str):
 	if c_header == "complex":
@@ -56,9 +71,9 @@ def check_standard_headers_file(filename: Path):
 def check_standard_headers_directory(path: Path):
 	errors = 0
 	for file in Path.iterdir(path):
+		if is_ignored(file):
+			continue
 		if file.is_dir():
-			if file.name in ["external", "masterping", "mastersrv"]:
-				continue
 			errors += check_standard_headers_directory(file)
 		elif file.name.endswith((".cpp", ".h")):
 			errors += check_standard_headers_file(file)

@@ -3016,8 +3016,8 @@ void CServer::PumpNetwork()
 	// per recipient, flushed once all packets have been handled below.
 	m_NetServer.BeginFlushBatch();
 
-	// Receive unconditionally, `net_udp_recv()` can hold packets that
-	// `net_socket_read_wait()` does not see.
+	// Receive unconditionally, the network stack can hold packets that
+	// `Wait()` does not see.
 	{
 		// process packets
 		ResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
@@ -3051,6 +3051,7 @@ void CServer::PumpNetwork()
 					}
 					if(Type == SERVERINFO_VANILLA && ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && Config()->m_SvSixup)
 					{
+#ifndef CONF_NETWORKING_QUIC
 						CUnpacker Unpacker;
 						Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize - sizeof(SERVERBROWSE_GETINFO));
 						int SrvBrwsToken = Unpacker.GetInt();
@@ -3071,6 +3072,7 @@ void CServer::PumpNetwork()
 						Packer.AddInt(SrvBrwsToken);
 						GetServerInfoSixup(&Packer, SendClients.value());
 						CNetBase::SendPacketConnlessWithToken7(m_NetServer.Socket(), &Packet.m_Address, Packer.Data(), Packer.Size(), ResponseToken, m_NetServer.GetToken(Packet.m_Address));
+#endif // CONF_NETWORKING_QUIC
 					}
 					else if(Type != -1)
 					{
@@ -3689,7 +3691,7 @@ int CServer::Run()
 				!m_aDemoRecorder[RECORDER_MANUAL].IsRecording() &&
 				!m_aDemoRecorder[RECORDER_AUTO].IsRecording())
 			{
-				net_socket_read_wait(m_NetServer.Socket(), 1s);
+				m_NetServer.Wait(std::chrono::duration_cast<std::chrono::microseconds>(1s).count());
 			}
 			else
 			{
@@ -3697,7 +3699,7 @@ int CServer::Run()
 				LastTime = time_get();
 				const auto MicrosecondsToWait = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(TickStartTime(m_CurrentGameTick + 1) - LastTime)) + 1us;
 				if(MicrosecondsToWait > 0us)
-					net_socket_read_wait(m_NetServer.Socket(), MicrosecondsToWait);
+					m_NetServer.Wait(MicrosecondsToWait.count());
 			}
 			if(IsInterrupted())
 			{
