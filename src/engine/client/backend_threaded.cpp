@@ -14,13 +14,6 @@
 #include <engine/shared/video.h>
 #endif
 
-#if defined(CONF_PLATFORM_MACOS)
-#include <CoreFoundation/CFRunLoop.h>
-
-#include <chrono>
-#include <cstdlib>
-#endif
-
 class IStorage;
 
 // ------------ CGraphicsBackend_Threaded
@@ -43,9 +36,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 #if defined(CONF_PLATFORM_MACOS) || defined(CONF_PLATFORM_IOS)
 			CAutoreleasePool AutoreleasePool;
 #endif
-			Lock.unlock();
 			pSelf->m_pProcessor->RunBuffer(pSelf->m_pBuffer);
-			Lock.lock();
 
 			pSelf->m_pBuffer = nullptr;
 			pSelf->m_BufferInProcess.store(false, std::memory_order_relaxed);
@@ -152,16 +143,7 @@ void CGraphicsBackend_Threaded::WaitForIdle()
 {
 #if !defined(CONF_PLATFORM_EMSCRIPTEN)
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
-#if defined(CONF_PLATFORM_MACOS)
-	while(!m_BufferSwapCond.wait_for(Lock, std::chrono::milliseconds(1), [this]() { return m_pBuffer == nullptr; }))
-	{
-		Lock.unlock();
-		CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
-		Lock.lock();
-	}
-#else
 	m_BufferSwapCond.wait(Lock, [this]() { return m_pBuffer == nullptr; });
-#endif
 #endif
 }
 
