@@ -15,5 +15,5 @@ ddnet-base = { path = "../base" }
 cxx = { workspace = true }
 
 [dev-dependencies]
-ddnet-engine-shared = { path = "shared" }
+ddnet-engine-shared = { path = "shared", default-features = false }
 ddnet-test = { path = "../rust-bridge/test", features = ["link-test-libraries"] }
