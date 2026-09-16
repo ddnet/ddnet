@@ -240,6 +240,17 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, int
 	}
 
 	const bool Reconnect = Slot != -1;
+
+	if(Connlimit(Addr))
+	{
+		if(!Reconnect)
+		{
+			const char aMsg[] = "Too many connections in a short time";
+			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aMsg, sizeof(aMsg), SecurityToken, Sixup);
+		}
+		return -1; // failed to add client
+	}
+
 	if(Reconnect)
 	{
 		if(g_Config.m_Debug)
@@ -247,13 +258,6 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, int
 	}
 	else
 	{
-		if(Connlimit(Addr))
-		{
-			const char aMsg[] = "Too many connections in a short time";
-			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aMsg, sizeof(aMsg), SecurityToken, Sixup);
-			return -1; // failed to add client
-		}
-
 		// check for sv_max_clients_per_ip
 		if(NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIp)
 		{
