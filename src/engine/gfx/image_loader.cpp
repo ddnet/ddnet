@@ -358,23 +358,12 @@ bool CImageLoader::SavePng(CByteBufferWriter &Writer, const CImageInfo &Image)
 	png_set_IHDR(pPngStruct, pPngInfo, Image.m_Width, Image.m_Height, 8, PngColorTypeFromFormat(Image.m_Format), PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	png_write_info(pPngStruct, pPngInfo);
 
-	png_bytepp pRowPointers = new png_bytep[Image.m_Height];
 	const size_t WidthBytes = Image.m_Width * Image.PixelSize();
-	ptrdiff_t BufferOffset = 0;
 	for(size_t y = 0; y < Image.m_Height; ++y)
 	{
-		pRowPointers[y] = new png_byte[WidthBytes];
-		mem_copy(pRowPointers[y], Image.m_pData + BufferOffset, WidthBytes);
-		BufferOffset += (ptrdiff_t)WidthBytes;
+		png_write_row(pPngStruct, Image.m_pData + y * WidthBytes);
 	}
-	png_write_image(pPngStruct, pRowPointers);
 	png_write_end(pPngStruct, pPngInfo);
-
-	for(size_t y = 0; y < Image.m_Height; ++y)
-	{
-		delete[] pRowPointers[y];
-	}
-	delete[] pRowPointers;
 
 	png_destroy_info_struct(pPngStruct, &pPngInfo);
 	png_destroy_write_struct(&pPngStruct, nullptr);
