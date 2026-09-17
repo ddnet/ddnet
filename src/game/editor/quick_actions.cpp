@@ -260,7 +260,7 @@ void CEditor::TestMapLocally()
 		{
 			OnClose();
 			g_Config.m_ClEditor = 0;
-			Client()->Connect("localhost");
+			pGameClient->m_LocalServer.Connect();
 		}
 		else
 		{

@@ -229,14 +229,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				static CButtonContainer s_StartLocalServerButton;
 				if(DoButton_Menu(&s_StartLocalServerButton, Localize("Start and connect to local server"), 0, &Button))
 				{
-					if(GameClient()->m_LocalServer.IsServerRunning())
+					const bool WasRunning = GameClient()->m_LocalServer.IsServerRunning();
+					if(WasRunning)
 					{
 						RefreshBrowserTab(true);
-						Connect("localhost");
 					}
-					else if(GameClient()->m_LocalServer.RunServer({}))
+					if(WasRunning || GameClient()->m_LocalServer.RunServer({}))
 					{
-						Connect("localhost");
+						GameClient()->m_LocalServer.Connect();
 					}
 				}
 			}
@@ -658,6 +658,8 @@ void CMenus::Connect(const char *pAddress)
 {
 	if(Client()->State() == IClient::STATE_ONLINE && GameClient()->CurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 	{
+		// The popup is only rendered while the menus are active
+		SetActive(true);
 		str_copy(m_aNextServer, pAddress);
 		PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect and switch to a different server?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmSwitchServer);
 	}
