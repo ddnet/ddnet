@@ -151,9 +151,17 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 		return false;
 	}
 
-	png_infop pPngInfo = nullptr;
-	png_bytepp pRowPointers = nullptr;
-	size_t Height = 0; // ensure this is not undefined for the Cleanup function
+	png_infop pPngInfo = png_create_info_struct(pPngStruct);
+	if(pPngInfo == nullptr)
+	{
+		png_destroy_read_struct(&pPngStruct, nullptr, nullptr);
+		log_error("png", "libpng internal failure: png_create_info_struct failed.");
+		return false;
+	}
+
+	// Written after setjmp and read by Cleanup after longjmp, which is only defined for volatile locals
+	volatile png_bytepp pRowPointers = nullptr;
+	volatile size_t Height = 0;
 	const auto &&Cleanup = [&]() {
 		if(pRowPointers != nullptr)
 		{
@@ -163,23 +171,12 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 			}
 		}
 		delete[] pRowPointers;
-		if(pPngInfo != nullptr)
-		{
-			png_destroy_info_struct(pPngStruct, &pPngInfo);
-		}
+		png_destroy_info_struct(pPngStruct, &pPngInfo);
 		png_destroy_read_struct(&pPngStruct, nullptr, nullptr);
 	};
 	if(setjmp(UserErrorStruct.m_JmpBuf))
 	{
 		Cleanup();
-		return false;
-	}
-
-	pPngInfo = png_create_info_struct(pPngStruct);
-	if(pPngInfo == nullptr)
-	{
-		Cleanup();
-		log_error("png", "libpng internal failure: png_create_info_struct failed.");
 		return false;
 	}
 
