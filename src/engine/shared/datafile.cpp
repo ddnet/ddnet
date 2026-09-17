@@ -127,7 +127,6 @@ public:
 	int *m_pDataSizes;
 
 	char *m_pItemStart;
-	char *m_pDataStart;
 };
 
 class CDataProcessorWrapper
@@ -724,7 +723,6 @@ bool CDataFileReader::Open(const char *pFullName, IStorage *pStorage, const char
 		pTmpDataFile->m_Info.m_pDataSizes = nullptr;
 		pTmpDataFile->m_Info.m_pItemStart = (char *)&pTmpDataFile->m_Info.m_pDataOffsets[pTmpDataFile->m_Header.m_NumRawData];
 	}
-	pTmpDataFile->m_Info.m_pDataStart = pTmpDataFile->m_Info.m_pItemStart + pTmpDataFile->m_Header.m_ItemSize;
 
 	if(!pTmpDataFile->Validate())
 	{
