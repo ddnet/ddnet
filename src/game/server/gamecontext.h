@@ -418,6 +418,8 @@ public:
 	int GetDDRaceTeam(int ClientId) const;
 	// Describes the time when the first player joined the server.
 	int64_t m_NonEmptySince;
+	// Describes the time of the last map change while players were on the server, -1 if there was none.
+	int64_t m_MapChangeTick;
 	int64_t m_LastMapVote;
 	int GetClientVersion(int ClientId) const;
 	CClientMask ClientsMaskExcludeClientVersionAndHigher(int Version) const;
