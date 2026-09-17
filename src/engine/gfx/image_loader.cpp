@@ -4,6 +4,7 @@
 #include <base/io.h>
 #include <base/log.h>
 #include <base/mem.h>
+#include <base/str.h>
 
 #include <png.h>
 
@@ -152,11 +153,11 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 
 	png_infop pPngInfo = nullptr;
 	png_bytepp pRowPointers = nullptr;
-	int Height = 0; // ensure this is not undefined for the Cleanup function
+	size_t Height = 0; // ensure this is not undefined for the Cleanup function
 	const auto &&Cleanup = [&]() {
 		if(pRowPointers != nullptr)
 		{
-			for(int y = 0; y < Height; ++y)
+			for(size_t y = 0; y < Height; ++y)
 			{
 				delete[] pRowPointers[y];
 			}
@@ -202,14 +203,14 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 		return false;
 	}
 
-	const int Width = png_get_image_width(pPngStruct, pPngInfo);
+	const size_t Width = png_get_image_width(pPngStruct, pPngInfo);
 	Height = png_get_image_height(pPngStruct, pPngInfo);
 	const png_byte BitDepth = png_get_bit_depth(pPngStruct, pPngInfo);
 	const int ColorType = png_get_color_type(pPngStruct, pPngInfo);
 
 	if(Width == 0 || Height == 0)
 	{
-		log_error("png", "image has width (%d) or height (%d) of 0.", Width, Height);
+		log_error("png", "image has width (%" PRIzu ") or height (%" PRIzu ") of 0.", Width, Height);
 		Cleanup();
 		return false;
 	}
@@ -243,11 +244,11 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 	png_read_update_info(pPngStruct, pPngInfo);
 
 	const int ColorChannelCount = png_get_channels(pPngStruct, pPngInfo);
-	const int BytesInRow = png_get_rowbytes(pPngStruct, pPngInfo);
+	const size_t BytesInRow = png_get_rowbytes(pPngStruct, pPngInfo);
 	dbg_assert(BytesInRow == Width * ColorChannelCount, "bytes in row incorrect.");
 
 	pRowPointers = new png_bytep[Height];
-	for(int y = 0; y < Height; ++y)
+	for(size_t y = 0; y < Height; ++y)
 	{
 		pRowPointers[y] = new png_byte[BytesInRow];
 	}
@@ -260,7 +261,7 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 		Image.m_Height = Height;
 		Image.m_Format = ImageFormatFromChannelCount(ColorChannelCount);
 		Image.Allocate();
-		for(int y = 0; y < Height; ++y)
+		for(size_t y = 0; y < Height; ++y)
 		{
 			mem_copy(&Image.m_pData[y * BytesInRow], pRowPointers[y], BytesInRow);
 		}
