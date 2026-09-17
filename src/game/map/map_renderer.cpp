@@ -6,6 +6,7 @@
 #include <engine/graphics.h>
 
 #include <game/map/envelope_manager.h>
+#include <game/mapitems.h>
 
 const int LAYER_DEFAULT_TILESET = -1;
 
@@ -14,6 +15,39 @@ void CMapRenderer::Clear()
 	for(auto &pLayer : m_vpRenderLayers)
 		pLayer->Unload();
 	m_vpRenderLayers.clear();
+}
+
+void CMapRenderer::LoadExtendedItems(CLayers *pLayers)
+{
+	// load tile layer position envelopes
+	int PosEnvItemStart, PosEnvItemNum;
+	pLayers->Map()->GetType(MAPITEMTYPE_TILELAYER_POSITION_ENVELOPE, &PosEnvItemStart, &PosEnvItemNum);
+	int EnvelopeStart, EnvelopeNum;
+	pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &EnvelopeStart, &EnvelopeNum);
+	for(int PosEnvItemIndex = 0; PosEnvItemIndex < PosEnvItemNum; PosEnvItemIndex++)
+	{
+		CMapItemLayerPositionEnvelope *pItem = (CMapItemLayerPositionEnvelope *)pLayers->Map()->GetItem(PosEnvItemStart + PosEnvItemIndex);
+		if(pItem->m_GroupId >= 0 && pItem->m_GroupId < pLayers->NumGroups() && pItem->m_LayerId >= 0 &&
+			pItem->m_PosEnv >= 0 && pItem->m_PosEnv < EnvelopeNum)
+		{
+			// find the correct render layer
+			for(auto &pRenderLayer : m_vpRenderLayers)
+			{
+				if(pRenderLayer->GetGroup() > pItem->m_GroupId || (pRenderLayer->GetGroup() == pItem->m_GroupId && pRenderLayer->GetLayer() > pItem->m_LayerId))
+					break;
+
+				if(pRenderLayer->IsGroup() || pRenderLayer->GetGroup() != pItem->m_GroupId || pRenderLayer->GetLayer() != pItem->m_LayerId)
+					continue;
+
+				if(pRenderLayer->SupportsPositionEnvelopeItem())
+				{
+					CRenderLayerTile *pTileRenderlayer = dynamic_cast<CRenderLayerTile *>(pRenderLayer.get());
+					pTileRenderlayer->SetPositionEnvelope(pItem->m_PosEnv, pItem->m_PosEnvOffset);
+				}
+				break;
+			}
+		}
+	}
 }
 
 void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional)
@@ -54,7 +88,10 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 			if(Type == ERenderType::RENDERTYPE_BACKGROUND_FORCE || Type == ERenderType::RENDERTYPE_BACKGROUND)
 			{
 				if(PassedGameLayer)
+				{
+					LoadExtendedItems(pLayers);
 					return;
+				}
 			}
 			else if(Type == ERenderType::RENDERTYPE_FOREGROUND)
 			{
@@ -149,6 +186,7 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 			}
 		}
 	}
+	LoadExtendedItems(pLayers);
 }
 
 void CMapRenderer::Render(const CRenderLayerParams &Params)
