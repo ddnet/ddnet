@@ -268,6 +268,7 @@ class ICommunityCache
 public:
 	virtual ~ICommunityCache() = default;
 	virtual void Update(bool Force) = 0;
+	virtual const std::vector<const CCommunity *> &SortedCommunities() const = 0;
 	virtual const std::vector<const CCommunity *> &SelectedCommunities() const = 0;
 	virtual const std::vector<const CCommunityCountry *> &SelectableCountries() const = 0;
 	virtual const std::vector<const CCommunityType *> &SelectableTypes() const = 0;
