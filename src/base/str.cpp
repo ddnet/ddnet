@@ -1097,13 +1097,15 @@ void str_utf8_tolower(const char *input, char *output, size_t size)
 
 int str_utf8_isspace(int code)
 {
-	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x034F ||
-	       code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
+	// Includes Unicode Default_Ignorable_Code_Point since they render as nothing
+	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x00AD ||
+	       code == 0x034F || code == 0x061C || code == 0x115F || code == 0x1160 ||
+	       code == 0x1680 || (code >= 0x17B4 && code <= 0x17B5) || (code >= 0x180B && code <= 0x180F) ||
 	       (code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
-	       (code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
-	       code == 0x2800 || code == 0x3000 || code == 0x3164 ||
+	       (code >= 0x205F && code <= 0x206F) || code == 0x2800 || code == 0x3000 || code == 0x3164 ||
 	       (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF || code == 0xFFA0 ||
-	       (code >= 0xFFF9 && code <= 0xFFFC);
+	       (code >= 0xFFF0 && code <= 0xFFFC) || (code >= 0x1BCA0 && code <= 0x1BCA3) ||
+	       (code >= 0x1D173 && code <= 0x1D17A) || (code >= 0xE0000 && code <= 0xE0FFF);
 }
 
 int str_utf8_isstart(char c)
