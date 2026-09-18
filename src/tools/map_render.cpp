@@ -5,6 +5,7 @@
 #include <base/os.h>
 #include <base/str.h>
 
+#include <engine/client/backend_headless.h>
 #include <engine/client/graphics_threaded.h>
 #include <engine/engine.h>
 #include <engine/gfx/image_loader.h>
@@ -302,6 +303,12 @@ int CGraphics_Threaded::QuadContainerAddSprite(int QuadContainerIndex, float X, 
 	return -1;
 }
 
+// map_render links graphics_threaded.cpp without backend_sdl.cpp, so it provides the backend factory.
+IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc)
+{
+	return new CGraphicsBackend_Headless(std::move(TranslateFunc));
+}
+
 static void PrintUsage(const char *pProgramName)
 {
 	log_error(TOOL_NAME, "Usage: %s [-o <output>] [-w <width>] [-h <height>] [-z <zoom>] [-x <x-position>] [-y <y-position>] [-t <time>] <input.map>", pProgramName);
@@ -429,9 +436,9 @@ int main(int argc, const char **argv)
 
 	pKernel->RegisterInterface(pStorage.get(), false);
 
-	CGraphics_Threaded Graphics;
-	pKernel->RegisterInterface(&Graphics, false);
-	if(Graphics.Init() != 0)
+	std::unique_ptr<CGraphics_Threaded> pGraphics = std::make_unique<CGraphics_Threaded>();
+	pKernel->RegisterInterface(pGraphics.get(), false);
+	if(pGraphics->Init() != 0)
 	{
 		log_error_color(ErrorLogColor, TOOL_NAME, "Failed to initialize graphics");
 		return 1;
@@ -454,19 +461,19 @@ int main(int argc, const char **argv)
 	CLayers Layers;
 	Layers.Init(pMap.get(), false, true);
 
-	CToolMapImages MapImages(&Graphics, pMap.get());
+	CToolMapImages MapImages(pGraphics.get(), pMap.get());
 
 	CRenderMap RenderMap;
-	RenderMap.Init(&Graphics, nullptr);
+	RenderMap.Init(pGraphics.get(), nullptr);
 
 	CMapRenderer MapRenderer;
-	MapRenderer.OnInit(&Graphics, nullptr, &RenderMap);
+	MapRenderer.OnInit(pGraphics.get(), nullptr, &RenderMap);
 
 	CMapRenderEnvelopeEval EnvelopeEval(pMap.get(), TimeOffsetMillis);
 	MapRenderer.Load(RENDERTYPE_FULL_DESIGN, &Layers, &MapImages, &EnvelopeEval, std::nullopt);
 
 	// Override the forced viewport from AdjustViewport (which clamps aspect ratio)
-	Graphics.SetScreenSize(OutputWidth, OutputHeight);
+	pGraphics->SetScreenSize(OutputWidth, OutputHeight);
 
 	// Calculate center and zoom to fit the map
 	float MapWorldWidth = 0.0f, MapWorldHeight = 0.0f;
@@ -477,12 +484,12 @@ int main(int argc, const char **argv)
 	}
 	else
 	{
-		MapWorldWidth = Graphics.ScreenWidth();
-		MapWorldHeight = Graphics.ScreenHeight();
+		MapWorldWidth = pGraphics->ScreenWidth();
+		MapWorldHeight = pGraphics->ScreenHeight();
 	}
 
 	float Vw, Vh;
-	Graphics.CalcScreenParams(Graphics.ScreenAspect(), 1.0f, &Vw, &Vh);
+	pGraphics->CalcScreenParams(pGraphics->ScreenAspect(), 1.0f, &Vw, &Vh);
 	if(AutoZoom)
 		Zoom = std::max(MapWorldWidth / Vw, MapWorldHeight / Vh);
 
@@ -501,17 +508,17 @@ int main(int argc, const char **argv)
 	RenderParams.m_DebugRenderTileClips = false;
 
 	// Set up initial screen mapping
-	Graphics.MapScreen(CScreenRect(0, 0, OutputWidth, OutputHeight));
-	Graphics.Clear(0, 0, 0);
+	pGraphics->MapScreen(CScreenRect(0, 0, OutputWidth, OutputHeight));
+	pGraphics->Clear(0, 0, 0);
 
 	MapRenderer.Render(RenderParams);
 
 	// Read framebuffer pixels and save directly
 	CImageInfo Image;
-	Graphics.ReadFramebuffer(Image);
+	pGraphics->ReadFramebuffer(Image);
 
 	// Flush remaining commands
-	Graphics.Swap();
+	pGraphics->Swap();
 
 	int ReturnCode = 1;
 	if(Image.m_pData)
@@ -542,7 +549,7 @@ int main(int argc, const char **argv)
 		log_error_color(ErrorLogColor, TOOL_NAME, "The backend returned no image data");
 	}
 
-	Graphics.Shutdown();
+	pGraphics->Shutdown();
 	pEngine->ShutdownJobs();
 
 	return ReturnCode;
