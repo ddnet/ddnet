@@ -84,7 +84,6 @@ class CServer : public IServer
 	class CDbConnectionPool *m_pConnectionPool;
 
 	int m_PreviousDebugDummies = 0;
-	void UpdateDebugDummies(bool ForceDisconnect);
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
@@ -353,6 +352,8 @@ public:
 	static int DelClientCallback(int ClientId, const char *pReason, void *pUser);
 
 	static int ClientRejoinCallback(int ClientId, void *pUser, bool Sixup, bool VanillaAuth);
+
+	void UpdateDebugDummies(bool ForceDisconnect);
 
 	void SendRconType(int ClientId, bool UsernameReq);
 	void SendCapabilities(int ClientId);
