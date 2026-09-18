@@ -174,6 +174,24 @@ TEST_F(GameWorld, ClosestCharacter)
 	EXPECT_EQ(pClosest, pChr1);
 }
 
+TEST_F(GameWorld, HotReloadSavedTeamKeptWhenPlayerWithSameIdLeaves)
+{
+	g_Config.m_DbgDummies = 2;
+	m_pServer->UpdateDebugDummies(false);
+	const int StayingClient = m_pServer->MaxClients() - 1;
+	const int LeavingClient = m_pServer->MaxClients() - 2;
+	GameServer()->m_aTeamMapping[LeavingClient] = 7;
+	GameServer()->m_aTeamMapping[StayingClient] = LeavingClient;
+	GameServer()->m_apSavedTeams[7] = new CSaveTeam();
+	CSaveTeam *pStayingTeamSave = new CSaveTeam();
+	GameServer()->m_apSavedTeams[LeavingClient] = pStayingTeamSave;
+
+	g_Config.m_DbgDummies = 1;
+	m_pServer->UpdateDebugDummies(false);
+
+	EXPECT_EQ(GameServer()->m_apSavedTeams[LeavingClient], pStayingTeamSave);
+}
+
 TEST_F(GameWorld, IntersectEntity)
 {
 	CNetObj_PlayerInput Input = {};
