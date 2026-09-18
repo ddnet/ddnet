@@ -2249,6 +2249,9 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 		case NETMSGTYPE_CL_CAMERAINFO:
 			OnCameraInfoNetMessage(static_cast<CNetMsg_Cl_CameraInfo *>(pRawMsg), ClientId);
 			break;
+		case NETMSGTYPE_CL_PRACTICETELEPORT:
+			OnPracticeTeleportNetMessage(static_cast<CNetMsg_Cl_PracticeTeleport *>(pRawMsg), ClientId);
+			break;
 		case NETMSGTYPE_CL_SETSPECTATORMODE:
 			OnSetSpectatorModeNetMessage(static_cast<CNetMsg_Cl_SetSpectatorMode *>(pRawMsg), ClientId);
 			break;
@@ -2263,6 +2266,7 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 			break;
 		case NETMSGTYPE_CL_ENABLESPECTATORCOUNT:
 			OnEnableSpectatorCountNetMessage(static_cast<CNetMsg_Cl_EnableSpectatorCount *>(pRawMsg), ClientId);
+			break;
 		default:
 			break;
 		}
@@ -2790,6 +2794,25 @@ void CGameContext::OnCameraInfoNetMessage(const CNetMsg_Cl_CameraInfo *pMsg, int
 {
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 	pPlayer->m_CameraInfo.Write(pMsg);
+}
+
+void CGameContext::OnPracticeTeleportNetMessage(const CNetMsg_Cl_PracticeTeleport *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = m_pController->Teams();
+	if(!Teams.IsPractice(GetDDRaceTeam(ClientId)))
+	{
+		SendChatTarget(ClientId, "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	PracticeTeleport(pChr, vec2((float)pMsg->m_X, (float)pMsg->m_Y));
 }
 
 void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientId)

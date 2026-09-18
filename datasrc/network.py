@@ -571,6 +571,11 @@ Messages = [
 		NetIntAny("m_FollowFactor"),
 	]),
 
+	NetMessageEx("Cl_PracticeTeleport", "practice-teleport@netmsg.ddnet.org", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+	]),
+
 	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
 
 	NetMessageEx("Sv_DDRaceTime", "ddrace-time@netmsg.ddnet.tw", [
