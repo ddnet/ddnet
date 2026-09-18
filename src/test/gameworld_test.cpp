@@ -331,6 +331,50 @@ TEST_F(GameWorld, CharacterEmote)
 	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
 }
 
+static void CallKickVoteAgainstOtherTeam(GameWorld *pWorld)
+{
+	g_Config.m_SvMaxAfkTime = 0;
+	g_Config.m_DbgDummies = 2;
+	pWorld->m_pServer->UpdateDebugDummies(false);
+	pWorld->GameServer()->OnTick();
+	const int Caller = pWorld->m_pServer->MaxClients() - 1;
+	const int KickId = pWorld->m_pServer->MaxClients() - 2;
+
+	char aCommand[32];
+	str_format(aCommand, sizeof(aCommand), "set_team_ddr %d 1", Caller);
+	pWorld->GameServer()->Console()->ExecuteLine(aCommand, IConsole::CLIENT_ID_UNSPECIFIED);
+	ASSERT_NE(pWorld->GameServer()->GetDDRaceTeam(Caller), pWorld->GameServer()->GetDDRaceTeam(KickId));
+
+	char aKickId[8];
+	str_format(aKickId, sizeof(aKickId), "%d", KickId);
+	CNetMsg_Cl_CallVote Msg;
+	Msg.m_pType = "kick";
+	Msg.m_pValue = aKickId;
+	Msg.m_pReason = "";
+	pWorld->GameServer()->OnCallVoteNetMessage(&Msg, Caller);
+}
+
+TEST_F(GameWorld, VoteKickAgainstOtherTeamStartsMuteVote)
+{
+	g_Config.m_SvVoteKickMuteTime = 300;
+
+	CallKickVoteAgainstOtherTeam(this);
+
+	EXPECT_NE(GameServer()->m_VoteCloseTime, 0);
+	char aVoteCommand[64];
+	str_format(aVoteCommand, sizeof(aVoteCommand), "muteid %d 300 Muted by vote", m_pServer->MaxClients() - 2);
+	EXPECT_STREQ(GameServer()->m_aVoteCommand, aVoteCommand);
+}
+
+TEST_F(GameWorld, VoteKickAgainstOtherTeamRefusedWhenMuteTimeIsZero)
+{
+	g_Config.m_SvVoteKickMuteTime = 0;
+
+	CallKickVoteAgainstOtherTeam(this);
+
+	EXPECT_EQ(GameServer()->m_VoteCloseTime, 0);
+}
+
 TEST(Tunings, OutOfRangeBecomesIntMin)
 {
 	const float IntMin = std::numeric_limits<int>::min() / 100.0f;
