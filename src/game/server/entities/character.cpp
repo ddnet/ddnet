@@ -25,6 +25,8 @@
 #include <game/server/teams.h>
 #include <game/team_state.h>
 
+#include <limits>
+
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part
@@ -1559,9 +1561,13 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 					DiffAngle = SpeederAngle - TeeAngle;
 					SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
-					if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+					// A tee at rest takes its angle from atan(0/0), leaving SpeedLeft NaN, which
+					// converts to INT_MIN. That has no absolute value, so it does not exceed.
+					const int SpeedLeftInt = round_truncate(SpeedLeft);
+					const bool Exceeds = SpeedLeftInt != std::numeric_limits<int>::min() && absolute(SpeedLeftInt) > Force;
+					if(Exceeds && SpeedLeft > 0.0000001f)
 						TempVel += Direction * Force;
-					else if(absolute((int)SpeedLeft) > Force)
+					else if(Exceeds)
 						TempVel += Direction * -Force;
 					else
 						TempVel += Direction * SpeedLeft;
