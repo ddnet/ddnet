@@ -2611,6 +2611,8 @@ if(CLIENT)
     keyboard.h
     keynames.cpp
     keynames.h
+    keynames_readable.cpp
+    keynames_readable.h
     notifications.cpp
     notifications.h
     serverbrowser.cpp
@@ -3463,6 +3465,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     jobs_test.cpp
     json_test.cpp
     jsonwriter_test.cpp
+    keyboard_test.cpp
     linereader_test.cpp
     mapbugs_test.cpp
     mapitems_test.cpp
@@ -3501,6 +3504,12 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     # tidy-alphabetical-start
     src/engine/client/blocklist_driver.cpp
     src/engine/client/blocklist_driver.h
+    src/engine/client/keyboard.cpp
+    src/engine/client/keyboard.h
+    src/engine/client/keynames.cpp
+    src/engine/client/keynames.h
+    src/engine/client/keynames_readable.cpp
+    src/engine/client/keynames_readable.h
     src/engine/client/serverbrowser.cpp
     src/engine/client/serverbrowser.h
     src/engine/client/serverbrowser_http.cpp
