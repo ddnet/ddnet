@@ -159,10 +159,8 @@
 				"extra-menu"
 			],
 			"behavior": {
-				"type": "bind",
-				"label": "Scoreboard",
-				"label-type": "localized",
-				"command": "+scoreboard"
+				"type": "predefined",
+				"id": "scoreboard"
 			}
 		},
 		{

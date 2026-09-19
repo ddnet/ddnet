@@ -3305,6 +3305,22 @@ void CGameClient::SendDummyInfo(bool Start)
 	}
 }
 
+void CGameClient::BlockPlayer(int ClientId, bool Block)
+{
+	const CClientData &ClientData = m_aClients[ClientId];
+	if(Block)
+	{
+		Foes()->AddFriend(ClientData.m_aName, ClientData.m_aClan);
+		CNetMsg_Cl_ReportPlayer Msg;
+		Msg.m_ClientId = ClientId;
+		Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+	}
+	else
+	{
+		Foes()->RemoveFriend(ClientData.m_aName, ClientData.m_aClan);
+	}
+}
+
 void CGameClient::SendKill() const
 {
 	CNetMsg_Cl_Kill Msg;
