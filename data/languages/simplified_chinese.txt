@@ -2666,29 +2666,29 @@ Predict events (experimental)
 
 [Direct touch input]
 Relative aim
-== 
+== 相对瞄准
 
 [Predefined touch button behaviors]
 Joystick Relative Aim
-== 
+== 摇杆：相对瞄准
 
 Virtual joystick which only aims and moves the mouse pointer relatively.
-== 
+== 仅用于相对移动准星瞄准的虚拟摇杆。
 
 [AntiPing: predict other players]
 Off
-== 
+== 关闭
 
 [AntiPing: predict other players]
 All
-== 
+== 全体
 
 [AntiPing: predict other players]
 Interact
-== 
+== 交互玩家
 
 Always predict frozen players
-== 
+== 始终预测冻结玩家
 
 No country flags match your filter criteria
-== 
+== 没有旗帜满足设置的筛选条件

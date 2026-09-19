@@ -2677,11 +2677,11 @@ Virtual joystick which only aims and moves the mouse pointer relatively.
 
 [AntiPing: predict other players]
 Off
-== 
+== Выключен
 
 [AntiPing: predict other players]
 All
-== 
+== Все
 
 [AntiPing: predict other players]
 Interact

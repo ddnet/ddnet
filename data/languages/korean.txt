@@ -2666,29 +2666,29 @@ Predict events (experimental)
 
 [Direct touch input]
 Relative aim
-== 
+== 상대적 조준
 
 [Predefined touch button behaviors]
 Joystick Relative Aim
-== 
+== 조이스틱 상대적 조준
 
 Virtual joystick which only aims and moves the mouse pointer relatively.
-== 
+== 항상 상대적으로 조준점을 이동하고 조준하는 가상 조이스틱
 
 [AntiPing: predict other players]
 Off
-== 
+== 끄기
 
 [AntiPing: predict other players]
 All
-== 
+== 모두
 
 [AntiPing: predict other players]
 Interact
-== 
+== 상호 간
 
 Always predict frozen players
-== 
+== 항상 동결된 플레이어를 예측하기
 
 No country flags match your filter criteria
-== 
+== 필터에 일치하는 국기가 없음

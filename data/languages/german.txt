@@ -2666,29 +2666,29 @@ Predict events (experimental)
 
 [Direct touch input]
 Relative aim
-== 
+== Relatives Zielen
 
 [Predefined touch button behaviors]
 Joystick Relative Aim
-== 
+== Joystick relatives Zielen
 
 Virtual joystick which only aims and moves the mouse pointer relatively.
-== 
+== Virtueller Joystick, der den Mauszeiger nur relativ bewegt.
 
 [AntiPing: predict other players]
 Off
-== 
+== Aus
 
 [AntiPing: predict other players]
 All
-== 
+== Alle
 
 [AntiPing: predict other players]
 Interact
-== 
+== Interaktionen
 
 Always predict frozen players
-== 
+== Immer gefrorene Spieler vorhersagen
 
 No country flags match your filter criteria
-== 
+== Keine Länderflaggen stimmen mit dem Filter überein
