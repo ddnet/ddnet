@@ -286,6 +286,59 @@ TEST_F(GameWorld, BasicTick)
 	GameServer()->OnTick();
 }
 
+static void CallSpectateVote(CGameContext *pGameServer, int ClientId, int TargetId)
+{
+	char aTargetId[8];
+	str_format(aTargetId, sizeof(aTargetId), "%d", TargetId);
+	CNetMsg_Cl_CallVote Msg;
+	Msg.m_pType = "spectate";
+	Msg.m_pValue = aTargetId;
+	Msg.m_pReason = "";
+	pGameServer->OnCallVoteNetMessage(&Msg, ClientId);
+}
+
+TEST_F(GameWorld, SpectateVoteAbortedWhenTargetLeaves)
+{
+	g_Config.m_SvMaxAfkTime = 0;
+	g_Config.m_DbgDummies = 2;
+	m_pServer->UpdateDebugDummies(false);
+	GameServer()->OnTick();
+	const int Caller = m_pServer->MaxClients() - 1;
+	const int Target = m_pServer->MaxClients() - 2;
+	CallSpectateVote(GameServer(), Caller, Target);
+	ASSERT_NE(GameServer()->m_VoteCloseTime, 0);
+
+	g_Config.m_DbgDummies = 1;
+	m_pServer->UpdateDebugDummies(false);
+
+	EXPECT_EQ(GameServer()->m_VoteEnforce, CGameContext::VOTE_ENFORCE_ABORT);
+}
+
+TEST_F(GameWorld, SpectateVoteNotAppliedToPlayerTakingSlotOfLeftTarget)
+{
+	g_Config.m_SvMaxAfkTime = 0;
+	g_Config.m_DbgDummies = 4;
+	m_pServer->UpdateDebugDummies(false);
+	GameServer()->OnTick();
+	const int Caller = m_pServer->MaxClients() - 1;
+	const int Target = m_pServer->MaxClients() - 4;
+	CallSpectateVote(GameServer(), Caller, Target);
+	ASSERT_NE(GameServer()->m_VoteCloseTime, 0);
+
+	g_Config.m_DbgDummies = 3;
+	m_pServer->UpdateDebugDummies(false);
+	GameServer()->OnTick();
+	g_Config.m_DbgDummies = 4;
+	m_pServer->UpdateDebugDummies(false);
+	GameServer()->OnTick();
+	ASSERT_NE(GameServer()->GetPlayerChar(Target), nullptr);
+
+	GameServer()->ForceVote(true);
+	GameServer()->OnTick();
+
+	EXPECT_NE(GameServer()->GetPlayerChar(Target), nullptr);
+}
+
 TEST_F(GameWorld, CharacterEmote)
 {
 	int ClientId = 0;

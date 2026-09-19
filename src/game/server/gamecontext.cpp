@@ -1100,8 +1100,7 @@ void CGameContext::SendVoteStatus(int ClientId, int Total, int Yes, int No)
 
 void CGameContext::AbortVoteKickOnDisconnect(int ClientId)
 {
-	if(m_VoteCloseTime && ((str_startswith(m_aVoteCommand, "kick ") && str_toint(&m_aVoteCommand[5]) == ClientId) ||
-				      (str_startswith(m_aVoteCommand, "set_team ") && str_toint(&m_aVoteCommand[9]) == ClientId)))
+	if(m_VoteCloseTime != 0 && (IsKickVote() || IsSpecVote()) && m_VoteVictim == ClientId && !str_startswith(m_aVoteCommand, "ban "))
 		m_VoteEnforce = VOTE_ENFORCE_ABORT;
 }
 
