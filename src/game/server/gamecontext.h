@@ -12,10 +12,12 @@
 
 #include <engine/console.h>
 #include <engine/server.h>
+#include <engine/shared/protocol.h>
 
 #include <generated/protocol.h>
 
 #include <game/collision.h>
+#include <game/envelope_trigger.h>
 #include <game/layers.h>
 #include <game/mapbugs.h>
 #include <game/voting.h>
@@ -24,6 +26,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 /*
 	Tick
@@ -237,6 +240,12 @@ public:
 	CGameWorld m_World;
 	CPlayerMapping m_PlayerMapping;
 
+	// pending envelope trigger snap objects, keyed by envelope id (last write wins per tick)
+	std::unordered_map<int, CNetObj_EnvelopeTrigger> m_aEnvelopeTriggerSnaps[MAX_CLIENTS];
+
+	// trigger type applied to all envelopes when a player spawns
+	std::optional<EEnvelopeTriggerType> m_EnvelopeTriggerSpawn;
+
 	// helper functions
 	CCharacter *GetPlayerChar(int ClientId);
 	const CCharacter *GetPlayerChar(int ClientId) const;
@@ -246,6 +255,8 @@ public:
 	std::optional<int> FindClientIdByName(const char *pName) const;
 	bool EmulateBug(int Bug) const;
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
+
+	void QueueEnvelopeTriggerSnap(int EnvelopeId, EEnvelopeTriggerType Type, int ClientId, int Flags);
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc);
@@ -596,6 +607,10 @@ private:
 	static void ConUninvite(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConEnvelopeTrigger(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneZoneEnvelopeTrigger(IConsole::IResult *pResult, void *pUserData);
+	static void ConEnvelopeTriggerSpawn(IConsole::IResult *pResult, void *pUserData);
 
 	CCharacter *GetPracticeCharacter(IConsole::IResult *pResult);
 

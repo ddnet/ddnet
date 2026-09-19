@@ -413,14 +413,14 @@ void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientId)
 	OnModified();
 }
 
-void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
+void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal, bool IsDummy)
 {
 	if(IsLocalTeam(ObjId))
 	{
 		CCharacter *pChar;
 		if((pChar = (CCharacter *)GetEntity(ObjId, ENTTYPE_CHARACTER)))
 		{
-			pChar->Read(pCharObj, pExtended, IsLocal);
+			pChar->Read(pCharObj, pExtended, IsLocal, IsDummy);
 			pChar->Keep();
 		}
 		else
@@ -682,8 +682,14 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
 	m_PredictedEvents = pFrom->m_PredictedEvents;
-	// delete the previous entities
+
+	// delete the previous entities and envelope triggers
 	Clear();
+	m_EnvelopeTriggerList = pFrom->m_EnvelopeTriggerList;
+	for(int Dummy = 0; Dummy < 2; ++Dummy)
+		m_avEnvelopeTriggerstate[Dummy] = pFrom->m_avEnvelopeTriggerstate[Dummy];
+	m_TuneZoneToEnvelopeZone = pFrom->m_TuneZoneToEnvelopeZone;
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_apCharacters[i] = nullptr;
@@ -804,6 +810,12 @@ void CGameWorld::OnModified() const
 
 void CGameWorld::Clear()
 {
+	// remove envelope trigger zones
+	m_EnvelopeTriggerList.clear();
+	for(auto &vTriggerState : m_avEnvelopeTriggerstate)
+		vTriggerState.clear();
+	m_TuneZoneToEnvelopeZone.clear();
+
 	// delete all entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)

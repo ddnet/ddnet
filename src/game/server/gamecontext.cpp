@@ -3888,6 +3888,11 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("hot_reload", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConHotReload, this, "Reload the map while preserving the state of tees and teams");
 	Console()->Register("reload_censorlist", "", CFGFLAG_SERVER, ConReloadCensorlist, this, "Reload the censorlist");
 
+	// unused on server side, but set to remove logspam of unknown commands in the map
+	Console()->Register("envelope_trigger", "i[zone] s[trigger_type] i[envelope]", CFGFLAG_GAME, ConEnvelopeTrigger, this, "Set a trigger type for an envelope in a trigger zone");
+	Console()->Register("tune_zone_envelope_trigger", "i[zone] i[envelope_zone]", CFGFLAG_GAME, ConTuneZoneEnvelopeTrigger, this, "Make a tune zone activate an envelope zone");
+	Console()->Register("envelope_trigger_spawn", "s[trigger_type]", CFGFLAG_GAME, ConEnvelopeTriggerSpawn, this, "Set a trigger type for all envelopes on spawn");
+
 	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
 	Console()->Register("remove_vote", "r[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
 	Console()->Register("force_vote", "s[name] s[command] ?r[reason]", CFGFLAG_SERVER, ConForceVote, this, "Force a voting option");
@@ -3907,6 +3912,83 @@ void CGameContext::OnConsoleInit()
 
 	RegisterDDRaceCommands();
 	RegisterChatCommands();
+}
+
+void CGameContext::ConEnvelopeTrigger(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int TriggerZoneId = pResult->GetInteger(0);
+	const char *pTriggerName = pResult->GetString(1);
+	int EnvelopeId = pResult->GetInteger(2);
+
+	if(TriggerZoneId >= 0 && TriggerZoneId < 256 * 256)
+	{
+		if(!pSelf->m_World.EnvelopeTriggerList().contains(TriggerZoneId))
+		{
+			CEnvelopeTriggerZone Zone;
+			pSelf->m_World.EnvelopeTriggerList()[TriggerZoneId] = Zone;
+		}
+
+		CEnvelopeTriggerZone &TriggerZone = pSelf->m_World.EnvelopeTriggerList()[TriggerZoneId];
+
+		CEnvelopeTrigger EnvelopeTrigger;
+		EnvelopeTrigger.m_EnvelopeId = EnvelopeId;
+		EnvelopeTrigger.m_State = CEnvelopeTrigger::FromName(pTriggerName);
+
+		TriggerZone.m_vEnvelopeTriggers.emplace_back(EnvelopeTrigger);
+	}
+}
+
+void CGameContext::ConTuneZoneEnvelopeTrigger(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int TuneZoneId = pResult->GetInteger(0);
+	int EnvelopeZoneId = pResult->GetInteger(1);
+
+	if(TuneZoneId >= 0 && TuneZoneId < 256 && EnvelopeZoneId >= 0 && EnvelopeZoneId < 256 * 256)
+	{
+		pSelf->m_World.TuneZoneToEnvelopeZone()[TuneZoneId] = EnvelopeZoneId;
+	}
+}
+
+void CGameContext::ConEnvelopeTriggerSpawn(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pTriggerName = pResult->GetString(0);
+	pSelf->m_EnvelopeTriggerSpawn = CEnvelopeTrigger::FromName(pTriggerName);
+}
+
+void CGameContext::QueueEnvelopeTriggerSnap(int EnvelopeId, EEnvelopeTriggerType Type, int ClientId, int Flags)
+{
+	auto SnapEnvelopeTrigger = [&](int CurrentClientId) {
+		if(CurrentClientId < 0 || Server()->IsSixup(CurrentClientId) || GetClientVersion(CurrentClientId) < VERSION_DDNET_ENVELOPE_TRIGGER)
+			return;
+
+		CNetObj_EnvelopeTrigger Data;
+		Data.m_StartTick = Server()->Tick();
+		Data.m_Type = Type;
+		Data.m_ClientId = CurrentClientId;
+		Data.m_Flags = Flags;
+		// keyed by envelope id, so a duplicate trigger for the same envelope in the same tick overwrites
+		m_aEnvelopeTriggerSnaps[CurrentClientId][EnvelopeId] = Data;
+	};
+
+	if(Flags & TRIGGER_FLAG_TEAM)
+	{
+		int Team = GetDDRaceTeam(ClientId);
+		for(int MemberId = 0; MemberId < MAX_CLIENTS; MemberId++)
+		{
+			if(!m_apPlayers[MemberId])
+				continue;
+			if(GetDDRaceTeam(MemberId) != Team)
+				continue;
+			SnapEnvelopeTrigger(MemberId);
+		}
+	}
+	else
+	{
+		SnapEnvelopeTrigger(ClientId);
+	}
 }
 
 void CGameContext::RegisterDDRaceCommands()
@@ -4581,6 +4663,9 @@ void CGameContext::OnShutdown(void *pPersistentData)
 void CGameContext::LoadMapSettings()
 {
 	IMap *pMap = Map();
+	m_World.SetNumEnvelopes(0);
+	m_EnvelopeTriggerSpawn.reset();
+
 	int Start, Num;
 	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
@@ -4608,6 +4693,11 @@ void CGameContext::LoadMapSettings()
 		pMap->UnloadData(pItem->m_Settings);
 		break;
 	}
+
+	// count envelopes so the spawn trigger can report them all
+	int EnvStart, NumEnvs;
+	pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &NumEnvs);
+	m_World.SetNumEnvelopes(NumEnvs);
 
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map.cfg", g_Config.m_SvMap);
@@ -4641,6 +4731,15 @@ void CGameContext::OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo)
 		m_apPlayers[ClientId]->FakeSnap();
 
 	m_World.Snap(ClientId);
+
+	// envelope triggers are only sent to ddnet clients that support them
+	if(ClientId > -1 && !Server()->IsSixup(ClientId) && GetClientVersion(ClientId) >= VERSION_DDNET_ENVELOPE_TRIGGER)
+	{
+		for(const auto &[EnvelopeId, EnvelopeData] : m_aEnvelopeTriggerSnaps[ClientId])
+		{
+			Server()->SnapNewItem(EnvelopeId, EnvelopeData);
+		}
+	}
 
 	// events are only sent on global snapshots
 	if(GlobalSnap)

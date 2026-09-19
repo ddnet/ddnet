@@ -48,6 +48,9 @@ void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList)
 {
 	m_Core.InitSwitchers(pCollision->m_HighestSwitchNumber);
 	m_pTuningList = pTuningList;
+	m_EnvelopeTriggerList.clear();
+	m_TuneZoneToEnvelopeZone.clear();
+	m_NumEnvelopes = 0;
 }
 
 CEntity *CGameWorld::FindFirst(int Type)

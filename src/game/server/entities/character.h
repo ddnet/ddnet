@@ -175,6 +175,8 @@ private:
 	static bool IsSwitchActiveCb(unsigned char Number, void *pUser);
 	void SetTimeCheckpoint(int TimeCheckpoint);
 	void HandleTiles(int Index);
+	int m_LastEnvelopeTriggerZone = ENVELOPE_NONE;
+	void HandleEnvelopeTriggerTiles(int Index);
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
