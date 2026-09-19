@@ -1294,9 +1294,6 @@ Initializing map logic
 Sending initial client info
 == Sende initiale Client-Info
 
-Uploading map data to GPU
-== Lade Kartendaten zur GPU hoch
-
 Getting game info
 == Hole Spiel-Info
 
@@ -2692,3 +2689,22 @@ Always predict frozen players
 
 No country flags match your filter criteria
 == Keine Länderflaggen stimmen mit dem Filter überein
+
+[Important alert message]
+Tap to dismiss…
+== 
+
+Initializing layers
+== 
+
+Credits
+== 
+
+Join
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
+== 

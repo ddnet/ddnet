@@ -734,6 +734,10 @@ Personal best:
 == 
 
 [Important alert message]
+Tap to dismiss…
+== 
+
+[Important alert message]
 Press Esc or Tab to dismiss…
 == 
 
@@ -764,7 +768,7 @@ Some map images could not be loaded. Check the local console for details.
 Loading map
 == 
 
-Uploading map data to GPU
+Initializing layers
 == 
 
 Some map sounds could not be loaded. Check the local console for details.
@@ -1778,6 +1782,9 @@ DDNet
 Assets
 == 
 
+Credits
+== 
+
 DDNet Client needs to be restarted to complete update!
 == 
 
@@ -2549,6 +2556,9 @@ Tutorial
 Website
 == 
 
+Join
+== 
+
 Stop server
 == 
 
@@ -2586,6 +2596,12 @@ Super
 == 
 
 Team %d (%d/%d)
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Manual

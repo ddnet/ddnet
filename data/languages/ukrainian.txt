@@ -1898,9 +1898,6 @@ Update now
 Updating…
 == Оновлення…
 
-Uploading map data to GPU
-== Вивантаження даних мапи до відеокарти
-
 Use current map as background
 == Використовувати поточну мапу як тло
 
@@ -2692,3 +2689,22 @@ Always predict frozen players
 
 No country flags match your filter criteria
 == Немає прапорів країн, що відповідають вашим критеріям
+
+[Important alert message]
+Tap to dismiss…
+== 
+
+Initializing layers
+== 
+
+Credits
+== 
+
+Join
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
+== 
