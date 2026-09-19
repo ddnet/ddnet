@@ -1111,6 +1111,9 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
 	auto *pController = pSelf->m_pController;
 	const char *pName = pResult->GetString(0);
 
