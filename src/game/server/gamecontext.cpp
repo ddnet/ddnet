@@ -2529,9 +2529,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 			return;
 		}
 
-		int Authed = Server()->GetAuthedState(ClientId);
-		int KickedAuthed = Server()->GetAuthedState(KickId);
-		if(KickedAuthed > Authed)
+		if(!Server()->CanKick(ClientId, KickId))
 		{
 			SendChatTarget(ClientId, "You can't kick authorized players");
 			char aBufKick[128];
@@ -2613,9 +2611,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 			SendChatTarget(ClientId, "You can't move yourself to spectators");
 			return;
 		}
-		int Authed = Server()->GetAuthedState(ClientId);
-		int SpectateAuthed = Server()->GetAuthedState(SpectateId);
-		if(SpectateAuthed > Authed)
+		if(!Server()->CanKick(ClientId, SpectateId))
 		{
 			SendChatTarget(ClientId, "You can't move authorized players to spectators");
 			char aBufSpectate[128];
@@ -3828,33 +3824,6 @@ void CGameContext::ConchainPracticeByDefaultUpdate(IConsole::IResult *pResult, v
 	}
 }
 
-void CGameContext::ConchainTeleOthersAuthLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	const char *pValue = pResult->GetString(0);
-	if(pResult->NumArguments() && !CAuthManager::RoleNameToAuthLevel(pValue).has_value())
-	{
-		if(str_comp(pValue, "1") == 0)
-		{
-			log_warn("server", "got deprecated value %s for sv_tele_others_auth_level, please use \"helper\" instead", pValue);
-		}
-		else if(str_comp(pValue, "2") == 0)
-		{
-			log_warn("server", "got deprecated value %s for sv_tele_others_auth_level, please use \"moderator\" instead", pValue);
-		}
-		else if(str_comp(pValue, "3") == 0)
-		{
-			log_warn("server", "got deprecated value %s for sv_tele_others_auth_level, please use \"admin\" instead", pValue);
-		}
-		else
-		{
-			log_error("server", "Value can only be one of those: helper, moderator, admin");
-			return;
-		}
-	}
-
-	pfnCallback(pResult, pCallbackUserData);
-}
-
 void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -3983,7 +3952,6 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("dump_log", "?i[seconds]", CFGFLAG_SERVER, ConDumpLog, this, "Show logs of the last i seconds");
 
 	Console()->Chain("sv_practice_by_default", ConchainPracticeByDefaultUpdate, this);
-	Console()->Chain("sv_tele_others_auth_level", ConchainTeleOthersAuthLevel, this);
 }
 
 void CGameContext::RegisterChatCommands()
@@ -4694,7 +4662,11 @@ void CGameContext::OnSetAuthed(int ClientId, CRconRole *pRole)
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", Server()->ClientAddrString(ClientId, false), g_Config.m_SvVoteKickBantime);
-		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || pRole->Rank() > Server()->GetAuthedState(m_VoteCreator)))
+		CRconRole *pVoterRole = Server()->RoleOrNullptr(m_VoteCreator);
+		// if the vote creator left the server we will assume he was not authenticated
+		if(m_VoteCreator == -1)
+			pVoterRole = nullptr;
+		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (!pVoterRole || !pVoterRole->CanKick(pRole)))
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 			log_info("game", "Vote aborted by authorized login.");
