@@ -1260,9 +1260,6 @@ Angle:
 Some map images could not be loaded. Check the local console for details.
 == Nie można załadować niektórych obrazów mapy. Sprawdź konsolę, aby poznać szczegóły.
 
-Uploading map data to GPU
-== Wysyłanie danych mapy do GPU
-
 Some map sounds could not be loaded. Check the local console for details.
 == Nie można załadować niektórych dźwięków mapy. Sprawdź konsolę, aby poznać szczegóły.
 
@@ -1766,7 +1763,7 @@ Unable to save the skin with a reserved name
 == %d/%d KiB (%.1f KiB/s)
 
 No local servers found (ports %d-%d)
-== Nie znaleziono serwerów LAN (porty %d-%d)
+== Nie znaleziono serwerów lokalnych (porty %d-%d)
 
 Example of usage
 == Przykładowe użycie
@@ -2625,6 +2622,31 @@ Prediction margin
 Predict events (experimental)
 == Przewiduj wydarzenia (eksperymentalne)
 
+[AntiPing: predict other players]
+Off
+== Wyłączone
+
+[AntiPing: predict other players]
+All
+== Wszystkich
+
+[AntiPing: predict other players]
+Interact
+== Interakcja
+
+Always predict frozen players
+== Zawsze przewiduj zamrożonych graczy
+
+No country flags match your filter criteria
+== Żadna flaga nie odpowiada twoim kryteriom
+
+[Important alert message]
+Tap to dismiss…
+== 
+
+Initializing layers
+== 
+
 [Direct touch input]
 Relative aim
 == 
@@ -2675,20 +2697,14 @@ Virtual joystick which always uses hook.
 The extra menu with the given number is activated.
 == 
 
-[AntiPing: predict other players]
-Off
+Credits
 == 
 
-[AntiPing: predict other players]
-All
+Join
 == 
 
-[AntiPing: predict other players]
-Interact
+'%s' not bound.
 == 
 
-Always predict frozen players
-== 
-
-No country flags match your filter criteria
+Press '%s' to show cursor.
 == 

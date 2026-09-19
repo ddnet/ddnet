@@ -575,9 +575,6 @@ Server best:
 Personal best:
 == Асабісты рэкорд:
 
-Uploading map data to GPU
-== Загрузка дадзеных карты ў GPU
-
 Reset
 == Скід
 
@@ -2176,6 +2173,10 @@ Following %d: %s
 == 
 
 [Important alert message]
+Tap to dismiss…
+== 
+
+[Important alert message]
 Press Esc or Tab to dismiss…
 == 
 
@@ -2189,6 +2190,9 @@ Server could not be started
 == 
 
 Loading map
+== 
+
+Initializing layers
 == 
 
 Joining Tutorial server
@@ -2596,6 +2600,9 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Credits
+== 
+
 Censor profanity
 == 
 
@@ -2678,7 +2685,16 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
+Join
+== 
+
 Download
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Unmute
