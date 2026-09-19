@@ -12,6 +12,9 @@
 #include <gtest/gtest.h>
 #include <sqlite3.h>
 
+#include <iterator>
+#include <string>
+
 #if defined(CONF_TEST_MYSQL)
 int DummyMysqlInit = (MysqlInit(), 1);
 #endif
@@ -40,17 +43,19 @@ struct Score : public testing::TestWithParam<IDbConnection *> // NOLINT(readabil
 		ASSERT_TRUE(m_pConn->Connect(m_aError, sizeof(m_aError))) << m_aError;
 
 		// Delete all existing entries for persistent databases like MySQL
-		int NumInserted = 0;
-		ASSERT_TRUE(m_pConn->PrepareStatement("DELETE FROM record_race", m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->PrepareStatement("DELETE FROM record_teamrace", m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->PrepareStatement("DELETE FROM record_maps", m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->PrepareStatement("DELETE FROM record_points", m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->PrepareStatement("DELETE FROM record_saves", m_aError, sizeof(m_aError))) << m_aError;
-		ASSERT_TRUE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
+		const char *apTablesV1[] = {"record_race", "record_teamrace", "record_maps", "record_points", "record_saves"};
+		const char *apTablesV2[] = {"record_finish", "record_best", "record_team_player", "record_team", "record_player_points", "record_player", "record_save", "record_map"};
+		const bool V2 = m_pConn->SchemaVersion() >= 2;
+		const char **ppTables = V2 ? apTablesV2 : apTablesV1;
+		const int NumTables = V2 ? std::size(apTablesV2) : std::size(apTablesV1);
+		for(int i = 0; i < NumTables; i++)
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "DELETE FROM %s", ppTables[i]);
+			int NumInserted = 0;
+			ASSERT_TRUE(m_pConn->PrepareStatement(aBuf, m_aError, sizeof(m_aError))) << m_aError;
+			ASSERT_TRUE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
+		}
 	}
 
 	void LoadBestTime()
@@ -65,10 +70,20 @@ struct Score : public testing::TestWithParam<IDbConnection *> // NOLINT(readabil
 		char aTimestamp[32];
 		str_timestamp_format(aTimestamp, sizeof(aTimestamp), TimestampFormat::SPACE);
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf),
-			"%s into %s_maps(Map, Server, Mapper, Points, Stars, Timestamp) "
-			"VALUES (\"%s\", \"%s\", \"%s\", %d, %d, %s)",
-			m_pConn->InsertIgnore(), m_pConn->GetPrefix(), pName, pServer, pMapper, Points, Stars, m_pConn->InsertTimestampAsUtc());
+		if(m_pConn->SchemaVersion() >= 2)
+		{
+			str_format(aBuf, sizeof(aBuf),
+				"%s into %s_map(name, category, mapper, points, stars, released) "
+				"VALUES ('%s', '%s', '%s', %d, %d, %s)%s",
+				m_pConn->InsertIgnore(), m_pConn->GetPrefix(), pName, pServer, pMapper, Points, Stars, m_pConn->InsertTimestampAsUtc(1).c_str(), m_pConn->InsertIgnoreEnd());
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf),
+				"%s into %s_maps(Map, Server, Mapper, Points, Stars, Timestamp) "
+				"VALUES ('%s', '%s', '%s', %d, %d, %s)%s",
+				m_pConn->InsertIgnore(), m_pConn->GetPrefix(), pName, pServer, pMapper, Points, Stars, m_pConn->InsertTimestampAsUtc(1).c_str(), m_pConn->InsertIgnoreEnd());
+		}
 		ASSERT_TRUE(m_pConn->PrepareStatement(aBuf, m_aError, sizeof(m_aError))) << m_aError;
 		m_pConn->BindString(1, aTimestamp);
 		int NumInserted = 0;
@@ -655,6 +670,29 @@ TEST_P(Points, EqualPointsTop)
 			"-------------------------------"});
 }
 
+struct Transactions : public Points // NOLINT(readability-identifier-naming)
+{
+};
+
+TEST_P(Transactions, Commit)
+{
+	ASSERT_TRUE(m_pConn->BeginTransaction(m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(m_pConn->CommitTransaction(m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectLines(m_pPlayerResult, {"1. nameless tee Points: 2, requested by brainless tee"}, true);
+}
+
+TEST_P(Transactions, RollbackOnDisconnect)
+{
+	ASSERT_TRUE(m_pConn->BeginTransaction(m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError))) << m_aError;
+	m_pConn->Disconnect();
+	ASSERT_TRUE(m_pConn->Connect(m_aError, sizeof(m_aError))) << m_aError;
+	ASSERT_TRUE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectLines(m_pPlayerResult, {"nameless tee has not collected any points so far"});
+}
+
 struct RandomMap : public Score // NOLINT(readability-identifier-naming)
 {
 	std::shared_ptr<CScoreRandomMapResult> m_pRandomMapResult{std::make_shared<CScoreRandomMapResult>(0)};
@@ -727,7 +765,8 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "nameless tee has no more unfinished maps on this server!");
 }
 
-static auto g_pSqliteConn = CreateSqliteConnection(":memory:", true);
+static auto g_pSqliteConn = CreateSqliteConnection(":memory:", true, 1);
+static auto g_pSqliteConnV2 = CreateSqliteConnection(":memory:", true, 2);
 #if defined(CONF_TEST_MYSQL)
 CMysqlConfig gMysqlConfig{
 	"ddnet", // database
@@ -738,26 +777,83 @@ CMysqlConfig gMysqlConfig{
 	"", // bindaddr
 	3306, // port
 	true, // setup
+	1, // schema version
 };
 static auto g_pMysqlConn = CreateMysqlConnection(gMysqlConfig);
+CMysqlConfig gMysqlConfigV2{
+	"ddnet", // database
+	"record", // prefix
+	"ddnet", // user
+	"thebestpassword", // password
+	"localhost", // ip
+	"", // bindaddr
+	3306, // port
+	true, // setup
+	2, // schema version
+};
+static auto g_pMysqlConnV2 = CreateMysqlConnection(gMysqlConfigV2);
+#endif
+#if defined(CONF_TEST_POSTGRESQL)
+CPostgresqlConfig gPostgresqlConfig{
+	"ddnet", // database
+	"record", // prefix
+	"ddnet", // user
+	"thebestpassword", // password
+	"localhost", // ip
+	5432, // port
+	true, // setup
+	1, // schema version
+};
+auto g_pPostgresqlConn = CreatePostgresqlConnection(gPostgresqlConfig);
+CPostgresqlConfig gPostgresqlConfigV2{
+	"ddnet", // database
+	"record", // prefix
+	"ddnet", // user
+	"thebestpassword", // password
+	"localhost", // ip
+	5432, // port
+	true, // setup
+	2, // schema version
+};
+auto g_pPostgresqlConnV2 = CreatePostgresqlConnection(gPostgresqlConfigV2);
 #endif
 
 static auto g_TestValues{
 	testing::Values(
 #if defined(CONF_TEST_MYSQL)
 		g_pMysqlConn.get(),
+		g_pMysqlConnV2.get(),
 #endif
-		g_pSqliteConn.get())};
+#if defined(CONF_TEST_POSTGRESQL)
+		g_pPostgresqlConn.get(),
+		g_pPostgresqlConnV2.get(),
+#endif
+		g_pSqliteConn.get(),
+		g_pSqliteConnV2.get())};
+
+// Identify the backend from its `BinaryCollate()` (SQLite "BINARY", MySQL
+// "utf8mb4_bin", PostgreSQL "\"C\"") so the name is correct no matter which
+// backends are compiled in.
+static const char *SqlBackendName(IDbConnection *pConn)
+{
+	switch(pConn->BinaryCollate()[0])
+	{
+	case 'B': return "SQLite";
+	case 'u': return "MySQL";
+	case '"': return "PostgreSQL";
+	default: return "Unknown";
+	}
+}
+
+static std::string SqlTestName(IDbConnection *pConn)
+{
+	return std::string(SqlBackendName(pConn)) + (pConn->SchemaVersion() >= 2 ? "V2" : "");
+}
 
 #define INSTANTIATE(SUITE) \
 	INSTANTIATE_TEST_SUITE_P(Sql, SUITE, g_TestValues, \
 		[](const testing::TestParamInfo<Score::ParamType> &Info) { \
-			switch(Info.index) \
-			{ \
-			case 0: return "SQLite"; \
-			case 1: return "MySQL"; \
-			default: return "Unknown"; \
-			} \
+			return SqlTestName(Info.param); \
 		})
 
 INSTANTIATE(SingleScore);
@@ -766,4 +862,5 @@ INSTANTIATE(BigTeamScore);
 INSTANTIATE(MapInfo);
 INSTANTIATE(MapVote);
 INSTANTIATE(Points);
+INSTANTIATE(Transactions);
 INSTANTIATE(RandomMap);

@@ -116,6 +116,8 @@ endif()
 option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(TEST_MYSQL "Test mysql support in unit tests (also sets -DMYSQL=ON)" OFF)
+option(POSTGRESQL "Enable postgresql support" OFF)
+option(TEST_POSTGRESQL "Test postgresql support in unit tests (also sets -DPOSTGRESQL=ON)" OFF)
 option(AUTOUPDATE "Enable the autoupdater" OFF)
 option(INFORM_UPDATE "Inform about available updates" ON)
 option(VIDEORECORDER "Enable video recording support via FFmpeg" ON)
@@ -168,6 +170,10 @@ endif()
 
 if(TEST_MYSQL)
   set(MYSQL ON)
+endif()
+
+if(TEST_POSTGRESQL)
+  set(POSTGRESQL ON)
 endif()
 
 # Set version if not explicitly set
@@ -612,6 +618,11 @@ if(MYSQL)
 else()
   set(MYSQL_LIBRARIES)
 endif()
+if(POSTGRESQL)
+  find_package(PostgreSQL)
+else()
+  set(PostgreSQL_LIBRARIES)
+endif()
 find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
@@ -703,6 +714,9 @@ endif()
 if(MYSQL)
   show_dependency_status("MySQL" MYSQL)
 endif()
+if(POSTGRESQL)
+  show_dependency_status("PostgreSQL" PostgreSQL)
+endif()
 show_dependency_status("Ogg" OGG)
 show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
@@ -738,6 +752,10 @@ endif()
 
 if(MYSQL AND NOT(MYSQL_FOUND))
   message(SEND_ERROR "You must install MySQL to compile the ${CMAKE_PROJECT_NAME} server with MySQL support")
+endif()
+
+if(POSTGRESQL AND NOT(PostgreSQL_FOUND))
+  message(SEND_ERROR "You must install PostgreSQL (libpq) to compile the ${CMAKE_PROJECT_NAME} server with PostgreSQL support")
 endif()
 
 if(WEBSOCKETS AND NOT(WEBSOCKETS_FOUND))
@@ -3107,6 +3125,7 @@ if(SERVER)
     databases/connection_pool.cpp
     databases/connection_pool.h
     databases/mysql.cpp
+    databases/postgresql.cpp
     databases/sqlite.cpp
     main.cpp
     name_ban.cpp
@@ -3179,6 +3198,7 @@ if(SERVER)
     score.h
     scoreworker.cpp
     scoreworker.h
+    scoreworker_v2.cpp
     teams.cpp
     teams.h
     teehistorian.cpp
@@ -3217,6 +3237,7 @@ if(SERVER)
   set(LIBS_SERVER
     ${MINIUPNPC_LIBRARIES}
     ${MYSQL_LIBRARIES}
+    ${PostgreSQL_LIBRARIES}
     ${TARGET_ANTIBOT}
 
     ${LIBS}
@@ -4275,6 +4296,13 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(TEST_MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_TEST_MYSQL)
+  endif()
+  if(POSTGRESQL)
+    target_compile_definitions(${target} PRIVATE CONF_POSTGRESQL)
+    target_include_directories(${target} SYSTEM PRIVATE ${PostgreSQL_INCLUDE_DIRS})
+  endif()
+  if(TEST_POSTGRESQL)
+    target_compile_definitions(${target} PRIVATE CONF_TEST_POSTGRESQL)
   endif()
   if(AUTOUPDATE AND NOT STEAM)
     target_compile_definitions(${target} PRIVATE CONF_AUTOUPDATE)
