@@ -13,6 +13,7 @@
 #include <base/logger.h>
 #include <base/secure.h>
 
+#include <engine/asdf.h>
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/engine.h>
@@ -56,15 +57,21 @@ using namespace std::chrono_literals;
 extern std::vector<std::string> FetchAndroidServerCommandQueue();
 #endif
 
-void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer)
+void CServerBan::InitServerBan(IAsdf *pAsdf, IConsole *pConsole, IStorage *pStorage, CServer *pServer)
 {
 	CNetBan::Init(pConsole, pStorage);
 
+	m_pAsdf = pAsdf;
 	m_pServer = pServer;
 
 	Console()->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanExt, this, "Ban player with ip/client id for x minutes for any reason");
 	Console()->Register("ban_region", "s[region] s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRegion, this, "Ban player in a region");
 	Console()->Register("ban_region_range", "s[region] s[first ip] s[last ip] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRegionRange, this, "Ban range in a region");
+}
+
+bool CServerBan::IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const
+{
+	return CNetBan::IsBanned(pAddr, pBuf, BufferSize) || m_pAsdf->IsBanned(pAddr, pBuf, BufferSize);
 }
 
 template<class T>
@@ -534,11 +541,6 @@ void CServer::Kick(int ClientId, const char *pReason)
 	}
 
 	m_NetServer.Drop(ClientId, pReason);
-}
-
-void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason)
-{
-	m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), Seconds, pReason, VerbatimReason);
 }
 
 void CServer::ReconnectClient(int ClientId)
@@ -1753,7 +1755,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 		if(m_aClients[ClientId].m_Traffic > Limit)
 		{
-			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 600, "Stressing network", false);
+			m_ServerBan.CNetBan::BanAddr(&pPacket->m_Address, 600, "Stressing network", false);
 			return;
 		}
 		if(Diff > 100)
@@ -3384,7 +3386,11 @@ int CServer::Run()
 	BindAddr.type = Config()->m_SvIpv4Only ? (NETTYPE_IPV4 | NETTYPE_WEBSOCKET_IPV4) : NETTYPE_ALL;
 
 	int Port = Config()->m_SvPort;
-	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp); BindAddr.port++)
+	auto IsBanned = [this] (const NETADDR *pAddr, char *pBuffer, unsigned BufferSize)
+	{
+		return m_ServerBan.IsBanned(pAddr, pBuffer, BufferSize);
+	};
+	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, IsBanned, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp); BindAddr.port++)
 	{
 		if(Port != 0 || BindAddr.port >= 8310)
 		{
@@ -3413,7 +3419,7 @@ int CServer::Run()
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
-	m_Econ.Init(Config(), Console(), &m_ServerBan);
+	m_Econ.Init(Config(), Console(), &m_ServerBan, IsBanned);
 
 	m_Fifo.Init(Console(), Config()->m_SvInputFifo, CFGFLAG_SERVER);
 
@@ -3659,7 +3665,7 @@ int CServer::Run()
 
 								if(Config()->m_SvDnsblBan)
 								{
-									m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
+									m_ServerBan.CNetBan::BanAddr(ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
 								}
 							}
 						}
@@ -4678,6 +4684,7 @@ void CServer::RegisterCommands()
 	m_pHttp = Kernel()->RequestInterface<IEngineHttp>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
+	m_pAsdf = Kernel()->RequestInterface<IAsdf>();
 
 	// register console commands
 	Console()->Register("kick", "v[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
@@ -4735,7 +4742,7 @@ void CServer::RegisterCommands()
 #endif
 
 	// register console commands in sub parts
-	m_ServerBan.InitServerBan(Console(), Storage(), this);
+	m_ServerBan.InitServerBan(Asdf(), Console(), Storage(), this);
 	m_NameBans.InitConsole(Console());
 	m_pGameServer->OnConsoleInit();
 	Console()->SetCanUseCommandCallback(CanClientUseCommandCallback, this);

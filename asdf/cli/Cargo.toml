@@ -1,0 +1,21 @@
+[package]
+name = "asdf-cli"
+version = "0.0.0"
+authors = ["heinrich5991 <heinrich5991@gmail.com>"]
+edition = "2021"
+publish = false
+license = "Zlib"
+
+[[bin]]
+name = "asdf"
+path = "main.rs"
+
+[dependencies]
+anyhow = "1.0.66"
+asdf = { path = ".." }
+clap = { version = "2.34.0", default-features = false, features = [
+  "suggestions",
+  "wrap_help",
+] }
+env_logger = "0.8.3"
+tokio = { version = "1.43.0", features = ["macros", "rt"] }

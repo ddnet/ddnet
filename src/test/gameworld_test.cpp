@@ -122,7 +122,11 @@ public:
 			CServer::ClientRejoinCallback,
 			CServer::DelClientCallback, pServer);
 
-		pServer->m_Econ.Init(pServer->Config(), pServer->Console(), &pServer->m_ServerBan);
+		auto NoBans = [](const NETADDR *pAddr, char *pBuffer, unsigned BufferSize)
+		{
+			return false;
+		};
+		pServer->m_Econ.Init(pServer->Config(), pServer->Console(), &pServer->m_ServerBan, NoBans);
 
 		pServer->m_Fifo.Init(pServer->Console(), pServer->Config()->m_SvInputFifo, CFGFLAG_SERVER);
 		m_pServer->Antibot()->Init();
