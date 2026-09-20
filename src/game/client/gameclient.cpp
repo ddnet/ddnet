@@ -1628,6 +1628,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_NoSkinChangeForFrozen = false;
 	Info.m_DDRaceTeam = false;
 	Info.m_PredictEvents = Vanilla;
+	Info.m_PredictTeleport = false;
 	Info.m_MinTeamSize = 0;
 	Info.m_MaxTeamSize = 0;
 	Info.m_NumDDRaceTeams = 65; // `TEAM_SUPER + 1`, fallback for ddrace64 servers
@@ -1708,6 +1709,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		const int NumDDRaceTeams = pInfoEx->m_NumDDRaceTeams;
 		Info.m_NumDDRaceTeams = NumDDRaceTeams > TEAM_FLOCK + 1 && NumDDRaceTeams <= NUM_DDRACE_TEAMS ? NumDDRaceTeams : NUM_DDRACE_TEAMS;
 		Info.m_OldLaser = Flags2 & GAMEINFOFLAG2_OLD_LASER;
+	}
+	if(Version >= 13)
+	{
+		Info.m_PredictTeleport = Flags2 & GAMEINFOFLAG2_PREDICT_TELEPORT;
 	}
 
 	return Info;
@@ -2611,6 +2616,9 @@ void CGameClient::ApplyPreInputs(int Tick, bool Direct, CGameWorld &GameWorld)
 
 void CGameClient::OnPredict()
 {
+	for(CClientData &Client : m_aClients)
+		Client.m_PredictedTeleport = false;
+
 	// store the previous values so we can detect prediction errors
 	CCharacterCore BeforePrevChar = m_PredictedPrevChar;
 	CCharacterCore BeforeChar = m_PredictedChar;
@@ -2725,16 +2733,23 @@ void CGameClient::OnPredict()
 
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
+				{
 					m_aClients[i].m_Predicted = pChar->GetCore();
+					m_aClients[i].m_PredictedTeleport = pChar->m_Teleported;
+				}
 		}
 
 		if(Tick == Client()->PredGameTick(g_Config.m_ClDummy))
 		{
 			m_PredictedChar = pLocalChar->GetCore();
 			m_aClients[m_Snap.m_LocalClientId].m_Predicted = pLocalChar->GetCore();
+			m_aClients[m_Snap.m_LocalClientId].m_PredictedTeleport = pLocalChar->m_Teleported;
 
 			if(pDummyChar)
+			{
 				m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted = pDummyChar->GetCore();
+				m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_PredictedTeleport = pDummyChar->m_Teleported;
+			}
 		}
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3091,6 +3106,7 @@ void CGameClient::CClientData::Reset()
 	m_RenderPos = vec2(0.0f, 0.0f);
 	m_IsPredicted = false;
 	m_IsPredictedLocal = false;
+	m_PredictedTeleport = false;
 	std::fill(std::begin(m_aSmoothStart), std::end(m_aSmoothStart), 0);
 	std::fill(std::begin(m_aSmoothLen), std::end(m_aSmoothLen), 0);
 	std::fill(std::begin(m_aPredPos), std::end(m_aPredPos), vec2(0.0f, 0.0f));
@@ -3528,6 +3544,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_BugDDRaceInput = m_GameInfo.m_BugDDRaceInput;
 	m_GameWorld.m_WorldConfig.m_NoWeakHookAndBounce = m_GameInfo.m_NoWeakHookAndBounce;
 	m_GameWorld.m_WorldConfig.m_PredictEvents = m_GameInfo.m_PredictEvents;
+	m_GameWorld.m_WorldConfig.m_PredictTeleport = m_GameInfo.m_PredictTeleport;
 	m_GameWorld.m_WorldConfig.m_OldLaser = m_GameInfo.m_OldLaser;
 
 	if(!m_Snap.m_pLocalCharacter)
@@ -3817,6 +3834,15 @@ void CGameClient::UpdateRenderedCharacters()
 
 			m_aClients[i].m_IsPredicted = true;
 
+			if(m_aClients[i].m_PredictedTeleport)
+			{
+				m_aClients[i].m_RenderPrev.m_X = m_aClients[i].m_RenderCur.m_X;
+				m_aClients[i].m_RenderPrev.m_Y = m_aClients[i].m_RenderCur.m_Y;
+				m_aClients[i].m_RenderPrev.m_HookX = m_aClients[i].m_RenderCur.m_HookX;
+				m_aClients[i].m_RenderPrev.m_HookY = m_aClients[i].m_RenderCur.m_HookY;
+				std::fill(std::begin(m_aClients[i].m_aSmoothStart), std::end(m_aClients[i].m_aSmoothStart), 0);
+			}
+
 			Pos = mix(
 				vec2(m_aClients[i].m_RenderPrev.m_X, m_aClients[i].m_RenderPrev.m_Y),
 				vec2(m_aClients[i].m_RenderCur.m_X, m_aClients[i].m_RenderCur.m_Y),
@@ -3838,7 +3864,7 @@ void CGameClient::UpdateRenderedCharacters()
 				m_aClients[i].m_RenderPrev.m_Angle = m_Snap.m_aCharacters[i].m_Prev.m_Angle;
 				m_aClients[i].m_RenderCur.m_Angle = m_Snap.m_aCharacters[i].m_Cur.m_Angle;
 
-				if(g_Config.m_ClAntiPingSmooth)
+				if(g_Config.m_ClAntiPingSmooth && !m_aClients[i].m_PredictedTeleport)
 					Pos = GetSmoothPos(i);
 			}
 		}

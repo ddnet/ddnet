@@ -56,6 +56,8 @@ public:
 	void GiveNinja();
 	void RemoveNinja();
 
+	void Teleport(vec2 Pos);
+	void ResetPickups();
 	void ResetVelocity();
 	void SetVelocity(vec2 NewVelocity);
 	void SetRawVelocity(vec2 NewVelocity);
@@ -83,6 +85,8 @@ public:
 	int m_TileFIndex;
 
 	bool m_LastRefillJumps;
+
+	bool m_Teleported;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() const { return m_LastWeapon; }

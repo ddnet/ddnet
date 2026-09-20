@@ -1,5 +1,6 @@
 #include "test.h"
 
+#include <game/gamecore.h>
 #include <game/prng.h>
 
 #include <gtest/gtest.h>
@@ -78,4 +79,34 @@ TEST(Prng, Description)
 	EXPECT_STREQ(Prng.Description(), "pcg-xsh-rr:0123456789abcdef:fedcba9876543210");
 	Prng.Seed(aSeed2);
 	EXPECT_STREQ(Prng.Description(), "pcg-xsh-rr:0000000000000000:0000000000000000");
+}
+
+TEST(TeleOut, Stable)
+{
+	EXPECT_EQ(CWorldCore::TeleOutOr0(1000, 0, 1, 0), 0);
+	EXPECT_EQ(CWorldCore::TeleOutOr0(1000, 0, 1, 1), 0);
+	EXPECT_EQ(CWorldCore::TeleOutOr0(0, 0, 0, 2), 0);
+	EXPECT_EQ(CWorldCore::TeleOutOr0(1, 0, 1, 2), 1);
+	EXPECT_EQ(CWorldCore::TeleOutOr0(1000, 0, 1, 4), 3);
+	EXPECT_EQ(CWorldCore::TeleOutOr0(1000, 5, 1, 4), 0);
+	EXPECT_EQ(CWorldCore::TeleOutOr0(1000, 0, 7, 4), 0);
+	EXPECT_EQ(CWorldCore::TeleOutOr0(123456, 42, 255, 3), 0);
+	EXPECT_EQ(CWorldCore::TeleOutOr0(7, 1, 1, 8), 7);
+}
+
+TEST(TeleOut, EveryExitStaysInReach)
+{
+	constexpr int NumExits = 4;
+	int aCount[NumExits] = {};
+	for(int Tick = 0; Tick < 1000; Tick++)
+	{
+		const int Out = CWorldCore::TeleOutOr0(Tick, 0, 1, NumExits);
+		ASSERT_GE(Out, 0);
+		ASSERT_LT(Out, NumExits);
+		aCount[Out]++;
+	}
+	for(int Count : aCount)
+	{
+		EXPECT_GT(Count, 200);
+	}
 }

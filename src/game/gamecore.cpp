@@ -766,4 +766,20 @@ void CWorldCore::InitSwitchers(int HighestSwitchNumber)
 	}
 }
 
+int CWorldCore::TeleOutOr0(int Tick, int ClientId, int Number, int BelowThis)
+{
+	if(BelowThis <= 1)
+	{
+		return 0;
+	}
+	uint64_t x = (uint64_t)(unsigned)Tick << 32 | (uint64_t)(unsigned)ClientId << 16 | (unsigned)Number;
+	// See https://prng.di.unimi.it/splitmix64.c
+	x ^= x >> 30;
+	x *= 0xbf58476d1ce4e5b9u;
+	x ^= x >> 27;
+	x *= 0x94d049bb133111ebu;
+	x ^= x >> 31;
+	return x % BelowThis;
+}
+
 const CTuningParams CTuningParams::DEFAULT;

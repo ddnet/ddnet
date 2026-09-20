@@ -123,6 +123,7 @@ public:
 	bool m_DDRaceTeam;
 
 	bool m_PredictEvents;
+	bool m_PredictTeleport;
 
 	bool m_OldLaser;
 
@@ -496,6 +497,7 @@ public:
 
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
+		bool m_PredictedTeleport;
 
 		std::shared_ptr<CManagedTeeRenderInfo> m_pSkinInfo = nullptr; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
