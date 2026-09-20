@@ -57,6 +57,7 @@ public:
 	void RemoveNinja();
 
 	void Teleport(vec2 Pos);
+	void Die();
 	void ResetPickups();
 	void ResetVelocity();
 	void SetVelocity(vec2 NewVelocity);
@@ -87,6 +88,9 @@ public:
 	bool m_LastRefillJumps;
 
 	bool m_Teleported;
+
+	bool m_Dead;
+	bool m_PracticeMode;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() const { return m_LastWeapon; }
@@ -181,6 +185,7 @@ private:
 	static bool IsSwitchActiveCb(unsigned char Number, void *pUser);
 	void HandleTiles(int Index);
 	void HandleSkippableTiles(int Index);
+	void HandleDeath();
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleTuneLayer();

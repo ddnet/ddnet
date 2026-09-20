@@ -617,6 +617,7 @@ void CGameClient::OnReset()
 	m_EditorMovementDelay = 5;
 
 	m_PredictedTick = -1;
+	m_KillTick = 0;
 	std::fill(std::begin(m_aLastNewPredictedTick), std::end(m_aLastNewPredictedTick), -1);
 
 	m_LastRoundStartTick = -1;
@@ -1497,7 +1498,12 @@ void CGameClient::ProcessEvents()
 		else if(Item.m_Type == NETEVENTTYPE_DEATH)
 		{
 			const CNetEvent_Death *pEvent = (const CNetEvent_Death *)Item.m_pData;
-			m_Effects.PlayerDeath(vec2(pEvent->m_X, pEvent->m_Y), pEvent->m_ClientId, Alpha);
+
+			vec2 DeathPos = vec2(pEvent->m_X, pEvent->m_Y);
+			if(!m_PredictedWorld.CheckPredictedEventHandled(CGameWorld::CPredictedEvent(Item.m_Type, DeathPos, pEvent->m_ClientId, Client()->GameTick(g_Config.m_ClDummy), pEvent->m_ClientId)))
+			{
+				m_Effects.PlayerDeath(DeathPos, pEvent->m_ClientId, Alpha);
+			}
 		}
 		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLD)
 		{
@@ -2617,7 +2623,10 @@ void CGameClient::ApplyPreInputs(int Tick, bool Direct, CGameWorld &GameWorld)
 void CGameClient::OnPredict()
 {
 	for(CClientData &Client : m_aClients)
+	{
 		Client.m_PredictedTeleport = false;
+		Client.m_PredictedDead = false;
+	}
 
 	// store the previous values so we can detect prediction errors
 	CCharacterCore BeforePrevChar = m_PredictedPrevChar;
@@ -2724,6 +2733,9 @@ void CGameClient::OnPredict()
 
 		ApplyPreInputs(Tick, false, m_PredictedWorld);
 
+		if(Tick == m_KillTick && Client()->GameTick(g_Config.m_ClDummy) < m_KillTick)
+			pLocalChar->Die();
+
 		m_PredictedWorld.Tick();
 
 		// fetch the current characters
@@ -2736,6 +2748,7 @@ void CGameClient::OnPredict()
 				{
 					m_aClients[i].m_Predicted = pChar->GetCore();
 					m_aClients[i].m_PredictedTeleport = pChar->m_Teleported;
+					m_aClients[i].m_PredictedDead = pChar->m_Dead;
 				}
 		}
 
@@ -2744,11 +2757,13 @@ void CGameClient::OnPredict()
 			m_PredictedChar = pLocalChar->GetCore();
 			m_aClients[m_Snap.m_LocalClientId].m_Predicted = pLocalChar->GetCore();
 			m_aClients[m_Snap.m_LocalClientId].m_PredictedTeleport = pLocalChar->m_Teleported;
+			m_aClients[m_Snap.m_LocalClientId].m_PredictedDead = pLocalChar->m_Dead;
 
 			if(pDummyChar)
 			{
 				m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted = pDummyChar->GetCore();
 				m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_PredictedTeleport = pDummyChar->m_Teleported;
+				m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_PredictedDead = pDummyChar->m_Dead;
 			}
 		}
 
@@ -3107,6 +3122,7 @@ void CGameClient::CClientData::Reset()
 	m_IsPredicted = false;
 	m_IsPredictedLocal = false;
 	m_PredictedTeleport = false;
+	m_PredictedDead = false;
 	std::fill(std::begin(m_aSmoothStart), std::end(m_aSmoothStart), 0);
 	std::fill(std::begin(m_aSmoothLen), std::end(m_aSmoothLen), 0);
 	std::fill(std::begin(m_aPredPos), std::end(m_aPredPos), vec2(0.0f, 0.0f));
@@ -3321,10 +3337,13 @@ void CGameClient::SendDummyInfo(bool Start)
 	}
 }
 
-void CGameClient::SendKill() const
+void CGameClient::SendKill()
 {
 	CNetMsg_Cl_Kill Msg;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+
+	if(!m_KillTick || m_KillTick + Client()->GameTickSpeed() * g_Config.m_SvKillDelay <= Client()->PredGameTick(g_Config.m_ClDummy))
+		m_KillTick = Client()->PredGameTick(g_Config.m_ClDummy);
 
 	if(g_Config.m_ClDummyCopyMoves)
 	{
@@ -3810,6 +3829,15 @@ void CGameClient::UpdateSpectatorCursor()
 
 void CGameClient::UpdateRenderedCharacters()
 {
+	if(m_PredictedTick != Client()->PredGameTick(g_Config.m_ClDummy))
+	{
+		for(CClientData &Client : m_aClients)
+		{
+			Client.m_PredictedTeleport = false;
+			Client.m_PredictedDead = false;
+		}
+	}
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(!m_Snap.m_aCharacters[i].m_Active)
@@ -3892,6 +3920,10 @@ void CGameClient::HandlePredictedEvents(const int Tick)
 					continue;
 				}
 				m_Sounds.PlayAt(CSounds::CHN_WORLD, EventsIterator->m_ExtraInfo, 1.0f, EventsIterator->m_Pos);
+			}
+			else if(EventsIterator->m_EventId == NETEVENTTYPE_DEATH)
+			{
+				m_Effects.PlayerDeath(EventsIterator->m_Pos, EventsIterator->m_ExtraInfo, Alpha);
 			}
 			else if(EventsIterator->m_EventId == NETEVENTTYPE_EXPLOSION)
 			{
