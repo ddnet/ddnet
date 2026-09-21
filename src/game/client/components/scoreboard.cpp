@@ -181,9 +181,13 @@ bool CScoreboard::OnInput(const IInput::CEvent &Event)
 void CScoreboard::RenderTitle(CUIRect TitleLabel, int Team, const char *pTitle, float TitleFontSize)
 {
 	const bool IsMapTitle = !GameClient()->IsTeamPlay();
-	if(IsMapTitle && m_MouseUnlocked && GameClient()->m_aMapDescription[0] != '\0')
+	if(IsMapTitle && GameClient()->m_aMapDescription[0] != '\0')
 	{
-		const int ButtonResult = Ui()->DoButtonLogic(&m_MapTitleButtonId, 0, &TitleLabel, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
+		constexpr float InfoButtonSize = 20.0f;
+		CUIRect InfoButton;
+		TitleLabel.VSplitLeft(InfoButtonSize, &InfoButton, &TitleLabel);
+		InfoButton.HMargin((TitleLabel.h - InfoButtonSize) / 2.0f, &InfoButton);
+		const int ButtonResult = Ui()->DoButton_FontIcon(&m_MapInfoButtonContainer, FontIcon::INFO, m_MouseUnlocked ? 0 : -1, &InfoButton, BUTTONFLAG_LEFT);
 		if(ButtonResult != 0)
 		{
 			m_MapTitlePopupContext.m_pScoreboard = this;
@@ -199,10 +203,6 @@ void CScoreboard::RenderTitle(CUIRect TitleLabel, int Team, const char *pTitle, 
 			TextRender()->TextWidth(m_MapTitlePopupContext.m_FontSize, pDescription, -1, TextWidth, 0, TextSizeProps);
 
 			Ui()->DoPopupMenu(&m_MapTitlePopupContext, Ui()->MouseX(), Ui()->MouseY(), TextWidth + Margin * 2, TextHeight + Margin * 2, &m_MapTitlePopupContext, CMapTitlePopupContext::Render);
-		}
-		if(Ui()->HotItem() == &m_MapTitleButtonId)
-		{
-			TitleLabel.Draw(ColorRGBA(0.7f, 0.7f, 0.7f, 0.3f), IGraphics::CORNER_ALL, 5.0f);
 		}
 	}
 
