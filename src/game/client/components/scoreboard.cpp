@@ -789,7 +789,10 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				if(m_MouseUnlocked)
 				{
 					const CUIRect SkinRect = {TeeOffset, Row.y, TeeLength, Row.h};
-					GameClient()->m_Tooltips.DoToolTip(&m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId, &SkinRect, ClientData.m_aSkinName);
+					if(SkinRect.Inside(Ui()->MousePos()))
+					{
+						GameClient()->m_Tooltips.DoToolTip(&m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId, &SkinRect, ClientData.m_aSkinName);
+					}
 				}
 			}
 
@@ -839,6 +842,16 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			// country flag
 			GameClient()->m_CountryFlags.Render(ClientData.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
 				CountryOffset, Row.y + (Spacing + TeeSizeMod * 5.0f) / 2.0f, CountryLength, Row.h - Spacing - TeeSizeMod * 5.0f);
+
+			if(m_MouseUnlocked && in_range(ClientData.m_Country, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+			{
+				const CUIRect CountryRect = {CountryOffset, Row.y, CountryLength, Row.h};
+				if(CountryRect.Inside(Ui()->MousePos()))
+				{
+					const CCountryFlags::CCountryFlag &CountryFlag = GameClient()->m_CountryFlags.GetByCountryCode(ClientData.m_Country);
+					GameClient()->m_Tooltips.DoToolTip(&m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId, &CountryRect, CountryFlag.m_aCountryCodeString);
+				}
+			}
 
 			// ping
 			ColorRGBA PingColor = TextRender()->DefaultTextColor();
