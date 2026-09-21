@@ -4116,7 +4116,7 @@ source_group_tree(src)
 
 if(ANTIBOT)
   # Allow the antibot library to use functions from the server binary.
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
+  add_linker_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
   set_own_rpath(game-server)
 endif()
 
