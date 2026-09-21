@@ -367,70 +367,75 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 		}
 
 		CUIRect SpectatorRect, SpectatorRectLineBreak;
-		float Margin = 1.0f;
+		const float Margin = 1.0f;
 		SpectatorRect.x = Cursor.m_X - Margin;
 		SpectatorRect.y = Cursor.m_Y;
 
-		if(g_Config.m_ClShowIds)
-		{
-			char aClientId[16];
-			GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::NO_INDENT);
-			TextRender()->TextEx(&Cursor, aClientId);
-		}
-
+		// id, clan and name of the spectator, advanced through the given cursor
 		const CGameClient::CClientData &ClientData = GameClient()->m_aClients[pInfo->m_ClientId];
-		{
-			const char *pClanName = ClientData.m_aClan;
-			if(pClanName[0] != '\0')
+		auto RenderEntryText = [&](CTextCursor *pCursor) {
+			if(g_Config.m_ClShowIds)
 			{
-				if(GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 && str_comp(pClanName, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
-				{
-					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor)));
-				}
-				else
-				{
-					TextRender()->TextColor(ColorRGBA(0.7f, 0.7f, 0.7f));
-				}
-
-				TextRender()->TextEx(&Cursor, pClanName);
-				TextRender()->TextEx(&Cursor, " ");
-
-				TextRender()->TextColor(TextRender()->DefaultTextColor());
+				char aClientId[16];
+				GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::NO_INDENT);
+				TextRender()->TextEx(pCursor, aClientId);
 			}
-		}
 
-		if(GameClient()->m_aClients[pInfo->m_ClientId].m_AuthLevel)
-		{
-			TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor)));
-		}
+			{
+				const char *pClanName = ClientData.m_aClan;
+				if(pClanName[0] != '\0')
+				{
+					if(GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 && str_comp(pClanName, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
+					{
+						TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor)));
+					}
+					else
+					{
+						TextRender()->TextColor(ColorRGBA(0.7f, 0.7f, 0.7f));
+					}
 
-		TextRender()->TextEx(&Cursor, GameClient()->m_aClients[pInfo->m_ClientId].m_aName);
-		TextRender()->TextColor(TextRender()->DefaultTextColor());
+					TextRender()->TextEx(pCursor, pClanName);
+					TextRender()->TextEx(pCursor, " ");
 
-		CommaNeeded = true;
-		--RemainingSpectators;
+					TextRender()->TextColor(TextRender()->DefaultTextColor());
+				}
+			}
 
-		bool LineBreakDetected = false;
-		SpectatorRect.h = Cursor.m_FontSize;
+			if(ClientData.m_AuthLevel)
+			{
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor)));
+			}
 
-		// detect line breaks
-		if(Cursor.m_Y != SpectatorRect.y)
-		{
-			LineBreakDetected = true;
-			SpectatorRectLineBreak.x = Spectators.x - SpectatorCut;
-			SpectatorRectLineBreak.y = Cursor.m_Y;
-			SpectatorRectLineBreak.h = Cursor.m_FontSize;
-			SpectatorRectLineBreak.w = Cursor.m_X - Spectators.x + SpectatorCut + 2 * Margin;
-
-			SpectatorRect.w = Spectators.x + Spectators.w + SpectatorCut - SpectatorRect.x;
-		}
-		else
-		{
-			SpectatorRect.w = Cursor.m_X - SpectatorRect.x + 2 * Margin;
-		}
+			TextRender()->TextEx(pCursor, ClientData.m_aName);
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+		};
 
 		if(m_MouseUnlocked)
 		{
+			// measure the entry's extent without rendering, so the highlight can be drawn behind the text
+			CTextCursor MeasureCursor = Cursor;
+			MeasureCursor.m_Flags &= ~TEXTFLAG_RENDER;
+			RenderEntryText(&MeasureCursor);
+
+			bool LineBreakDetected = false;
+			SpectatorRect.h = Cursor.m_FontSize;
+
+			// detect line breaks
+			if(MeasureCursor.m_Y != SpectatorRect.y)
+			{
+				LineBreakDetected = true;
+				SpectatorRectLineBreak.x = Spectators.x - SpectatorCut;
+				SpectatorRectLineBreak.y = MeasureCursor.m_Y;
+				SpectatorRectLineBreak.h = Cursor.m_FontSize;
+				SpectatorRectLineBreak.w = MeasureCursor.m_X - Spectators.x + SpectatorCut + 2 * Margin;
+
+				SpectatorRect.w = Spectators.x + Spectators.w + SpectatorCut - SpectatorRect.x;
+			}
+			else
+			{
+				SpectatorRect.w = MeasureCursor.m_X - SpectatorRect.x + 2 * Margin;
+			}
+
 			int ButtonResult = Ui()->DoButtonLogic(&m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId, 0, &SpectatorRect, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
 
 			if(LineBreakDetected && ButtonResult == 0)
@@ -453,6 +458,7 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 				Ui()->HotItem() == &m_aPlayers[pInfo->m_ClientId].m_SpectatorSecondLineButtonId ||
 				(Ui()->IsPopupOpen(&m_ScoreboardPopupContext) && m_ScoreboardPopupContext.m_ClientId == pInfo->m_ClientId))
 			{
+				// draw the highlight behind the text
 				if(!LineBreakDetected)
 				{
 					SpectatorRect.Draw(TextRender()->DefaultTextSelectionColor(), IGraphics::CORNER_ALL, 2.5f);
@@ -464,6 +470,12 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 				}
 			}
 		}
+
+		// render the entry's text on top of the highlight
+		RenderEntryText(&Cursor);
+
+		CommaNeeded = true;
+		--RemainingSpectators;
 	}
 }
 
