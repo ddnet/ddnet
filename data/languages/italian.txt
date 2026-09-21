@@ -1058,9 +1058,6 @@ Multi-View
 Team %d
 == Squadra %d
 
-Uploading map data to GPU
-== Caricando dati mappa alla GPU
-
 Trying to determine UDP connectivity…
 == Provando a determinare l'UDP connectivity…
 
@@ -1462,6 +1459,10 @@ AUTO
 == 
 
 [Important alert message]
+Tap to dismiss…
+== 
+
+[Important alert message]
 Press Esc or Tab to dismiss…
 == 
 
@@ -1484,6 +1485,9 @@ Some map images could not be loaded. Check the local console for details.
 == 
 
 Loading map
+== 
+
+Initializing layers
 == 
 
 Some map sounds could not be loaded. Check the local console for details.
@@ -2257,6 +2261,9 @@ Tee
 Appearance
 == 
 
+Credits
+== 
+
 Name Plate
 == 
 
@@ -2625,6 +2632,9 @@ https://ddnet.org/discord
 Tutorial
 == 
 
+Join
+== 
+
 Download
 == 
 
@@ -2640,6 +2650,12 @@ Super
 == 
 
 Team %d (%d/%d)
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Unmute
