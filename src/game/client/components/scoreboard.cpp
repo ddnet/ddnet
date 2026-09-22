@@ -319,8 +319,7 @@ void CScoreboard::RenderGoals(CUIRect Goals)
 
 void CScoreboard::RenderSpectators(CUIRect Spectators)
 {
-	int Corners = m_MouseUnlocked ? IGraphics::CORNER_ALL : IGraphics::CORNER_T;
-	Spectators.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), Corners, 7.5f);
+	Spectators.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 7.5f);
 	constexpr float SpectatorCut = 5.0f;
 	Spectators.Margin(SpectatorCut, &Spectators);
 
@@ -873,18 +872,65 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 void CScoreboard::RenderMouseHint(CUIRect MouseHint)
 {
+	constexpr float FontSize = 11.0f;
+	constexpr float PillPaddingX = 8.0f;
+	constexpr float PillPaddingY = 5.0f;
+	constexpr float TextKeycapGap = 5.0f;
+	constexpr float KeycapPaddingX = 4.0f;
+	constexpr float KeycapPaddingY = 2.0f;
+	constexpr float KeycapRadius = 3.5f;
+
 	char aKey[64];
 	GameClient()->m_Binds.GetKey(SCOREBOARD_CURSOR_BIND_NAME, aKey, sizeof(aKey));
-	MouseHint.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_B, 7.5f);
-	constexpr float HintCut = 5.0f;
-	constexpr float FontSize = 11.0f;
-	MouseHint.VMargin(HintCut, &MouseHint);
+
 	char aHint[128];
 	if(!aKey[0])
-		str_format(aHint, sizeof(aHint), Localize("'%s' not bound."), SCOREBOARD_CURSOR_BIND_NAME);
+	{
+		str_copy(aHint, Localize("not bound"));
+	}
 	else
-		str_format(aHint, sizeof(aHint), Localize("Press '%s' to show cursor."), aKey);
-	Ui()->DoLabel(&MouseHint, aHint, FontSize, TEXTALIGN_ML);
+	{
+		str_copy(aHint, Localize("Show cursor"));
+	}
+
+	const bool HasKeycap = aKey[0] != '\0';
+	const char *pChipText = HasKeycap ? aKey : SCOREBOARD_CURSOR_BIND_NAME;
+	const float TextWidth = TextRender()->TextWidth(FontSize, aHint, -1);
+	const float ChipWidth = TextRender()->TextWidth(FontSize, pChipText, -1) + 2 * KeycapPaddingX;
+	const float ContentWidth = ChipWidth + TextKeycapGap + TextWidth;
+	const float PillHeight = FontSize + 2 * PillPaddingY;
+	const float PillWidth = std::min(ContentWidth + 2 * PillPaddingX, MouseHint.w);
+
+	// content-sized pill, top center in the available space
+	CUIRect Pill = {MouseHint.x + (MouseHint.w - PillWidth) / 2.0f, MouseHint.y, PillWidth, PillHeight};
+	Pill.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 7.5f);
+
+	CUIRect Content = Pill;
+	Content.x += (Pill.w - ContentWidth) / 2.0f;
+	Content.w = ContentWidth;
+
+	CUIRect Label, Chip;
+	if(HasKeycap)
+	{
+		// key behind the text: "Show cursor [key]"
+		Content.VSplitLeft(TextWidth, &Label, &Content);
+		Content.VSplitLeft(TextKeycapGap, nullptr, &Content);
+		Content.VSplitLeft(ChipWidth, &Chip, nullptr);
+	}
+	else
+	{
+		// bind name in front of the text: "[bind name] not bound"
+		Content.VSplitLeft(ChipWidth, &Chip, &Content);
+		Content.VSplitLeft(TextKeycapGap, nullptr, &Content);
+		Label = Content;
+	}
+
+	// floating chip, vertically centered in the pill
+	Chip.HMargin((Chip.h - (FontSize + 2 * KeycapPaddingY)) / 2.0f, &Chip);
+	Chip.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.15f), IGraphics::CORNER_ALL, KeycapRadius);
+
+	Ui()->DoLabel(&Label, aHint, FontSize, TEXTALIGN_ML);
+	Ui()->DoLabel(&Chip, pChipText, FontSize, TEXTALIGN_MC);
 }
 
 void CScoreboard::RenderRecordingNotification(float x)
@@ -948,6 +994,10 @@ void CScoreboard::OnRender()
 		Ui()->Update();
 	}
 
+	constexpr float TitleHeight = 30.0f;
+	constexpr float ScoreboardSmallWidth = 375.0f + 10.0f;
+	constexpr float ScoreboardSpacing = 5.0f;
+
 	// if the score board is active, then we should clear the motd message as well
 	if(GameClient()->m_Motd.IsActive())
 		GameClient()->m_Motd.Clear();
@@ -960,9 +1010,7 @@ void CScoreboard::OnRender()
 	const auto &aTeamSize = GameClient()->m_Snap.m_aTeamSize;
 	const int NumPlayers = Teams ? std::max(aTeamSize[TEAM_RED], aTeamSize[TEAM_BLUE]) : aTeamSize[TEAM_RED];
 
-	const float ScoreboardSmallWidth = 375.0f + 10.0f;
 	const float ScoreboardWidth = !Teams && NumPlayers <= 16 ? ScoreboardSmallWidth : 750.0f;
-	const float TitleHeight = 30.0f;
 
 	CUIRect Scoreboard = {(Screen.w - ScoreboardWidth) / 2.0f, 75.0f, ScoreboardWidth, 355.0f + TitleHeight};
 	CScoreboardRenderState RenderState{};
@@ -1103,15 +1151,15 @@ void CScoreboard::OnRender()
 	{
 		CUIRect Goals;
 		Spectators.HSplitTop(25.0f, &Goals, &Spectators);
-		Spectators.HSplitTop(5.0f, nullptr, &Spectators);
+		Spectators.HSplitTop(ScoreboardSpacing, nullptr, &Spectators);
 		RenderGoals(Goals);
 	}
 	RenderSpectators(Spectators);
 
 	if(!m_MouseUnlocked)
 	{
-		constexpr float MouseHintSize = 15.0f;
-		CUIRect MouseHint = {Spectators.x, Spectators.y + Spectators.h, ScoreboardSmallWidth, std::min(Screen.h - Scoreboard.y - Scoreboard.h, MouseHintSize)};
+		constexpr float MouseHintSize = 26.0f;
+		CUIRect MouseHint = {Spectators.x, Spectators.y + Spectators.h + ScoreboardSpacing, ScoreboardSmallWidth, MouseHintSize};
 		RenderMouseHint(MouseHint);
 	}
 
