@@ -3591,7 +3591,8 @@ public:
 #ifdef VK_EXT_device_fault
 		// Only used when actually supported by the device (see device creation);
 		// enables detailed diagnostics after a VK_ERROR_DEVICE_LOST.
-		OurExt.emplace(VK_EXT_DEVICE_FAULT_EXTENSION_NAME);
+		if(g_Config.m_DbgGfx != DEBUG_GFX_MODE_NONE)
+			OurExt.emplace(VK_EXT_DEVICE_FAULT_EXTENSION_NAME);
 #endif
 		return OurExt;
 	}
