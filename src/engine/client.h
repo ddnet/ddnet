@@ -128,15 +128,15 @@ public:
 		NUM_CONNS,
 	};
 
-	enum
+	enum class EConnectivity
 	{
-		CONNECTIVITY_UNKNOWN,
-		CONNECTIVITY_CHECKING,
-		CONNECTIVITY_UNREACHABLE,
-		CONNECTIVITY_REACHABLE,
+		UNKNOWN,
+		CHECKING,
+		UNREACHABLE,
+		REACHABLE,
 		// Different global IP address has been detected for UDP and
 		// TCP connections.
-		CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES,
+		DIFFERING_UDP_TCP_IP_ADDRESSES,
 	};
 
 	//
@@ -361,7 +361,7 @@ public:
 	virtual std::optional<SWarning> CurrentWarning() = 0;
 
 	virtual CChecksumData *ChecksumData() = 0;
-	virtual int UdpConnectivity(int NetType) = 0;
+	virtual EConnectivity UdpConnectivity(int NetType) = 0;
 
 	/**
 	 * Opens a link in the browser.
