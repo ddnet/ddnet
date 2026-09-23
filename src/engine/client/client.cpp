@@ -1233,7 +1233,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	SetState(IClient::STATE_LOADING);
 	SetLoadingStateDetail(IClient::ELoadingStateDetail::LOADING_MAP);
 	if((bool)m_LoadingCallback)
-		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_MAP);
+		m_LoadingCallback(IClient::ELoadingCallbackDetail::MAP);
 
 	// Stop demo recording before loading a new map.
 	for(int Recorder = 0; Recorder < RECORDER_MAX; Recorder++)
@@ -4084,7 +4084,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	SetState(IClient::STATE_LOADING);
 	SetLoadingStateDetail(IClient::ELoadingStateDetail::LOADING_DEMO);
 	if((bool)m_LoadingCallback)
-		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_DEMO);
+		m_LoadingCallback(IClient::ELoadingCallbackDetail::DEMO);
 
 	// try to start playback
 	m_DemoPlayer.SetListener(this);

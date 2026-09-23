@@ -75,10 +75,10 @@ public:
 		GETTING_READY,
 	};
 
-	enum ELoadingCallbackDetail
+	enum class ELoadingCallbackDetail
 	{
-		LOADING_CALLBACK_DETAIL_MAP,
-		LOADING_CALLBACK_DETAIL_DEMO,
+		MAP,
+		DEMO,
 	};
 	typedef std::function<void(ELoadingCallbackDetail Detail)> TLoadingCallback;
 	CTranslationContext m_TranslationContext;
