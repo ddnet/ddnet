@@ -79,6 +79,7 @@ class CScoreboard : public CComponent
 	public:
 		char m_PlayerButtonId;
 		char m_SpectatorSecondLineButtonId;
+		char m_TimeTooltip[32];
 
 		CCachedText m_Score;
 		CCachedText m_ScoreMillis;

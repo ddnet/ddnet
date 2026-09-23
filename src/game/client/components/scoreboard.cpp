@@ -739,15 +739,32 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			ScorePosition.y = Row.y;
 			ScorePosition.h = Row.h;
 
+			auto DoMillisecondTooltip = [&](const CUIRect *pRect, int64_t TimeInMillis) {
+				if(m_MouseUnlocked && pRect->Inside(Ui()->MousePos()))
+				{
+					str_time(TimeInMillis / 10, ETimeFormat::HOURS_CENTISECS, Player.m_TimeTooltip, sizeof(Player.m_TimeTooltip));
+					GameClient()->m_Tooltips.DoToolTip(&Player.m_PlayerButtonId, pRect, Player.m_TimeTooltip);
+				}
+			};
+			constexpr int SecondsPerHour = 60 * 60;
+
 			if(Race7)
 			{
 				Ui()->RenderTime(ScorePosition, FontSize, pInfo->m_Score / 1000, pInfo->m_Score == protocol7::FinishTime::NOT_FINISHED, pInfo->m_Score % 1000, true,
 					Player.m_Score, Player.m_ScoreMillis, TextColor);
+				if(pInfo->m_Score / 1000 >= SecondsPerHour)
+				{
+					DoMillisecondTooltip(&ScorePosition, time_milliseconds_from_seconds(pInfo->m_Score / 1000.0f));
+				}
 			}
 			else if(MillisecondScore)
 			{
 				Ui()->RenderTime(ScorePosition, FontSize, ClientData.m_FinishTimeSeconds, ClientData.m_FinishTimeSeconds == FinishTime::NOT_FINISHED_MILLIS, ClientData.m_FinishTimeMillis, TrueMilliseconds,
 					Player.m_Score, Player.m_ScoreMillis, TextColor);
+				if(ClientData.m_FinishTimeSeconds >= SecondsPerHour)
+				{
+					DoMillisecondTooltip(&ScorePosition, static_cast<int64_t>(ClientData.m_FinishTimeSeconds) * 1000 + ClientData.m_FinishTimeMillis);
+				}
 			}
 			else if(TimeScore)
 			{
@@ -800,7 +817,10 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				if(m_MouseUnlocked)
 				{
 					const CUIRect SkinRect = {TeeOffset, Row.y, TeeLength, Row.h};
-					GameClient()->m_Tooltips.DoToolTip(&m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId, &SkinRect, ClientData.m_aSkinName);
+					if(SkinRect.Inside(Ui()->MousePos()))
+					{
+						GameClient()->m_Tooltips.DoToolTip(&Player.m_PlayerButtonId, &SkinRect, ClientData.m_aSkinName);
+					}
 				}
 			}
 
