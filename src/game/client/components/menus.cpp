@@ -2179,19 +2179,19 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 		str_copy(aTitle, Localize("Connected"));
 		switch(Client()->LoadingStateDetail())
 		{
-		case IClient::LOADING_STATE_DETAIL_INITIAL:
+		case IClient::ELoadingStateDetail::INITIAL:
 			str_copy(aLabel1, Localize("Getting game info"));
 			break;
-		case IClient::LOADING_STATE_DETAIL_LOADING_MAP:
+		case IClient::ELoadingStateDetail::LOADING_MAP:
 			str_copy(aLabel1, Localize("Loading map file from storage"));
 			break;
-		case IClient::LOADING_STATE_DETAIL_LOADING_DEMO:
+		case IClient::ELoadingStateDetail::LOADING_DEMO:
 			str_copy(aLabel1, Localize("Loading demo file from storage"));
 			break;
-		case IClient::LOADING_STATE_DETAIL_SENDING_READY:
+		case IClient::ELoadingStateDetail::SENDING_READY:
 			str_copy(aLabel1, Localize("Requesting to join the game"));
 			break;
-		case IClient::LOADING_STATE_DETAIL_GETTING_READY:
+		case IClient::ELoadingStateDetail::GETTING_READY:
 			str_copy(aLabel1, Localize("Sending initial client info"));
 			break;
 		default:

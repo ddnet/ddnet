@@ -66,13 +66,13 @@ public:
 	 * More precise state for @see STATE_LOADING
 	 * Sets what is actually happening in the client right now
 	 */
-	enum ELoadingStateDetail
+	enum class ELoadingStateDetail
 	{
-		LOADING_STATE_DETAIL_INITIAL,
-		LOADING_STATE_DETAIL_LOADING_MAP,
-		LOADING_STATE_DETAIL_LOADING_DEMO,
-		LOADING_STATE_DETAIL_SENDING_READY,
-		LOADING_STATE_DETAIL_GETTING_READY,
+		INITIAL,
+		LOADING_MAP,
+		LOADING_DEMO,
+		SENDING_READY,
+		GETTING_READY,
 	};
 
 	enum ELoadingCallbackDetail
@@ -86,7 +86,7 @@ public:
 protected:
 	// quick access to state of the client
 	EClientState m_State = IClient::STATE_OFFLINE;
-	ELoadingStateDetail m_LoadingStateDetail = LOADING_STATE_DETAIL_INITIAL;
+	ELoadingStateDetail m_LoadingStateDetail = ELoadingStateDetail::INITIAL;
 	int64_t m_StateStartTime;
 
 	// quick access to time variables

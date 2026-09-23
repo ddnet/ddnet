@@ -1231,7 +1231,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	static char s_aErrorMsg[128];
 
 	SetState(IClient::STATE_LOADING);
-	SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_LOADING_MAP);
+	SetLoadingStateDetail(IClient::ELoadingStateDetail::LOADING_MAP);
 	if((bool)m_LoadingCallback)
 		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_MAP);
 
@@ -1764,7 +1764,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(LoadMapSearch(pMap, MapSha256, MapCrc) == nullptr)
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
-				SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_SENDING_READY);
+				SetLoadingStateDetail(IClient::ELoadingStateDetail::SENDING_READY);
 				SendReady(CONN_MAIN);
 			}
 			else
@@ -2714,7 +2714,7 @@ void CClient::PumpNetwork()
 			// we switched to online
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info", CLIENT_NETWORK_PRINT_COLOR);
 			SetState(IClient::STATE_LOADING);
-			SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_INITIAL);
+			SetLoadingStateDetail(IClient::ELoadingStateDetail::INITIAL);
 			SendInfo(CONN_MAIN);
 		}
 
@@ -4082,7 +4082,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_aNetClient[CONN_MAIN].ResetErrorString();
 
 	SetState(IClient::STATE_LOADING);
-	SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_LOADING_DEMO);
+	SetLoadingStateDetail(IClient::ELoadingStateDetail::LOADING_DEMO);
 	if((bool)m_LoadingCallback)
 		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_DEMO);
 
