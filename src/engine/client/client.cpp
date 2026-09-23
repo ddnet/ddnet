@@ -5448,7 +5448,8 @@ int CClient::UdpConnectivity(int NetType)
 		}
 		NETADDR GlobalUdpAddr;
 		int NewConnectivity;
-		switch(m_aNetClient[CONN_MAIN].GetConnectivity(PossibleNetType, &GlobalUdpAddr))
+		const CONNECTIVITY NetworkConnectivity = m_aNetClient[CONN_MAIN].GetConnectivity(PossibleNetType, &GlobalUdpAddr);
+		switch(NetworkConnectivity)
 		{
 		case CONNECTIVITY::UNKNOWN:
 			NewConnectivity = CONNECTIVITY_UNKNOWN;
@@ -5472,7 +5473,7 @@ int CClient::UdpConnectivity(int NetType)
 			NewConnectivity = CONNECTIVITY_REACHABLE;
 			break;
 		default:
-			dbg_assert(0, "invalid connectivity value");
+			dbg_assert_failed("Invalid connectivity value: %d", (int)NetworkConnectivity);
 			return CONNECTIVITY_UNKNOWN;
 		}
 		Connectivity = std::max(Connectivity, NewConnectivity);

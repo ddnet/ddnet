@@ -371,8 +371,7 @@ void CSqliteConnection::AssertNoError(int Result)
 	char aBuf[128];
 	if(FormatError(Result, aBuf, sizeof(aBuf)))
 	{
-		dbg_msg("sqlite", "unexpected sqlite error: %s", aBuf);
-		dbg_assert(0, "sqlite error");
+		dbg_assert_failed("Unexpected sqlite error: %s", aBuf);
 	}
 }
 
