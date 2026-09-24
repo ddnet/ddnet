@@ -2642,10 +2642,10 @@ No country flags match your filter criteria
 
 [Important alert message]
 Tap to dismiss…
-== 
+== Stuknij, aby odrzucić…
 
 Initializing layers
-== 
+== Wczytywanie warstw
 
 [Direct touch input]
 Relative aim
@@ -2701,10 +2701,10 @@ Credits
 == 
 
 Join
-== 
+== Dołącz
 
 '%s' not bound.
-== 
+== '%s% nie jest do niczego przypisany.
 
 Press '%s' to show cursor.
-== 
+== Naciśnij '%s' ,aby włączyć kursor.

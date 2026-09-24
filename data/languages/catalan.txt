@@ -1139,31 +1139,31 @@ Add friend
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Error durant la inicialització. Intenta canviar gfx_backend a OpenGL o Vulkan al fitxer settings_ddnet.cfg i torna-ho a provar.
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== S'ha exhaurit la VRAM. Prova d'establir 'cl_skins_loaded_max' a un valor inferior o elimina els elements personalitzats (skins, entities, etc.), especialment les d'alta resolució.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== S'ha produït un error durant el "command recording" . Intenta actualitzar els controladors de la GPU.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== S'ha produït un error amb al renderitzar. Intenta actualitzar els controladors de la GPU.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== L'enviament de les ordres de renderització ha fallat. Intenta actualitzar els controladors de la GPU.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== No s'han pogut intercanviar els framebuffers. Intenta actualitzar els controladors de la GPU.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Error desconegut. Intenta canviar gfx_backend per OpenGL o Vulkan a settings_ddnet.cfg i torna-ho a provar.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1177,31 +1177,31 @@ Could not resolve connect address '%s'. See local console for details.
 == 
 
 Connect address error
-== 
+== Error de connexió a l'adreça
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== Prem Ctrl+Maj+G per desactivar els gràfics de depuració.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== No s'ha pogut desar el mapa baixat. Intenta suprimir manualment aquest fitxer: %s
 
 Could not connect dummy
-== 
+== No s'ha pogut connectar el dummy
 
 Error playing demo
-== 
+== Error en reproduir la demo
 
 Failed saving the replay!
-== 
+== No s'ha pogut desar la repetició!
 
 Saving settings to '%s' failed
-== 
+== Ha fallat el desament de la configuració a '%s'
 
 Error saving settings
-== 
+== Error al guarda la configuració
 
 No demo with this filename exists
-== 
+== No existeix cap demo amb aquest nom
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == 
@@ -1210,37 +1210,37 @@ Preparing demo playback
 == 
 
 Connected
-== 
+== Conectat
 
 Loading map file from storage
-== 
+== S'està carregant el mapa
 
 Loading demo file from storage
-== 
+== S'està carregant la demo
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Algunes fonts no s'han pogut carregar. Comproba la consola.
 
 Initializing components
-== 
+== Inicialitzant components
 
 Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
-== 
+== Inicialitzant assets
 
 Initializing map logic
-== 
+== Inicialitzant llògica del mapa
 
 Sending initial client info
 == 
 
 Quitting. Please wait…
-== 
+== Sortint. Si us plau, espereu…
 
 Restarting. Please wait…
-== 
+== S'està reiniciant. Si us plau, espereu…
 
 Loading skin files
 == 

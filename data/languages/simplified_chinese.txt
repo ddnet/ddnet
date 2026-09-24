@@ -2692,19 +2692,19 @@ No country flags match your filter criteria
 
 [Important alert message]
 Tap to dismiss…
-== 
+== 轻触关闭…
 
 Initializing layers
-== 
+== 正在初始化图层
 
 Credits
-== 
+== 致谢
 
 Join
-== 
+== 加入
 
 '%s' not bound.
-== 
+== '%s' 未绑定按键。
 
 Press '%s' to show cursor.
-== 
+== 按下 '%s' 以显示光标。

@@ -2671,40 +2671,40 @@ All
 
 [Important alert message]
 Tap to dismiss…
-== 
+== Нажмите чтобы отклонить…
 
 Initializing layers
-== 
+== Подготовка слоёв
 
 [Direct touch input]
 Relative aim
-== 
+== Относительный прицел
 
 [Predefined touch button behaviors]
 Joystick Relative Aim
-== 
+== Прицеливание по относительному положению джойстика
 
 Virtual joystick which only aims and moves the mouse pointer relatively.
-== 
+== Виртуальный джойстик, который служит только для наведения и относительного перемещения указателя мыши.
 
 Credits
-== 
+== Благодарности
 
 [AntiPing: predict other players]
 Interact
-== 
+== Взаимодействовать
 
 Always predict frozen players
-== 
+== Всегда прогнозировать замороженных игроков
 
 No country flags match your filter criteria
-== 
+== Нет флагов, которые подходят под ваши критерии фильтрации.
 
 Join
-== 
+== Присоединиться
 
 '%s' not bound.
-== 
+== '%s' не определено.
 
 Press '%s' to show cursor.
-== 
+== Нажмите '%s' чтоб показать курсор.

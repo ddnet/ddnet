@@ -2692,19 +2692,19 @@ No country flags match your filter criteria
 
 [Important alert message]
 Tap to dismiss…
-== 
+== Toque para descartar…
 
 Initializing layers
-== 
+== Inicializando camadas
 
 Credits
-== 
+== Créditos
 
 Join
-== 
+== Entrar
 
 '%s' not bound.
-== 
+== "%s" não associado.
 
 Press '%s' to show cursor.
-== 
+== Pressione "%s" para mostrar o cursor.
