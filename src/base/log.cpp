@@ -176,7 +176,6 @@ std::unique_ptr<ILogger> log_logger_android()
 std::unique_ptr<ILogger> log_logger_android()
 {
 	dbg_assert_failed("Android logger on non-Android");
-	return nullptr;
 }
 #endif
 
@@ -488,7 +487,6 @@ std::unique_ptr<ILogger> log_logger_windows_debugger()
 std::unique_ptr<ILogger> log_logger_windows_debugger()
 {
 	dbg_assert_failed("Windows Debug logger on non-Windows");
-	return nullptr;
 }
 #endif
 

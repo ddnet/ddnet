@@ -431,7 +431,6 @@ bool net_addr_is_local(const NETADDR *addr)
 	}
 
 	dbg_assert_failed("unknown NETADDR type %d", addr->type);
-	return false;
 }
 
 int net_addr_from_str(NETADDR *addr, const char *string)
