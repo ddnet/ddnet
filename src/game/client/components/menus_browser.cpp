@@ -289,8 +289,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 	};
 
 	std::vector<CUIElement *> &vpServerBrowserUiElements = m_avpServerBrowserUiElements[ServerBrowser()->GetCurrentType()];
+	std::vector<char> &vServerbrowserElementId = m_ServerbrowserElementId[ServerBrowser()->GetCurrentType()];
 	if(vpServerBrowserUiElements.size() < (size_t)NumServers)
+	{
 		vpServerBrowserUiElements.resize(NumServers, nullptr);
+		vServerbrowserElementId.resize(NumServers);
+	}
 
 	for(int i = 0; i < NumServers; i++)
 	{
@@ -303,14 +307,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		}
 		CUIElement *pUiElement = vpServerBrowserUiElements[i];
 
-		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0);
+		const CListboxItem ListItem = s_ListBox.DoNextItem(&vServerbrowserElementId[i], str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0);
 		if(ListItem.m_Selected)
 			m_SelectedIndex = i;
 
 		if(!ListItem.m_Visible)
 		{
 			// reset active item, if not visible
-			if(Ui()->CheckActiveItem(pItem))
+			if(Ui()->CheckActiveItem(&vServerbrowserElementId[i]))
 				Ui()->SetActiveItem(nullptr);
 
 			// don't render invisible items
@@ -378,6 +382,20 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					});
 				if(!Printed)
 					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props);
+				if(Button.Inside(Ui()->MousePos()) &&
+					(pUiElement->Rect(UI_ELEM_NAME_1)->m_Cursor.m_Truncated ||
+						pUiElement->Rect(UI_ELEM_NAME_2)->m_Cursor.m_Truncated ||
+						pUiElement->Rect(UI_ELEM_NAME_3)->m_Cursor.m_Truncated))
+				{
+					CTooltip Tooltip{
+						&vServerbrowserElementId[i],
+						Button,
+						pItem->m_aName,
+						-1.0f,
+						FontSize,
+						true};
+					Ui()->DoToolTip(Tooltip);
+				}
 			}
 			else if(Id == COL_GAMETYPE)
 			{
@@ -391,6 +409,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				}
 				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_GAMETYPE), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_ML, Props);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
+				if(pUiElement->Rect(UI_ELEM_GAMETYPE)->m_Cursor.m_Truncated && Button.Inside(Ui()->MousePos()))
+				{
+					CTooltip Tooltip{
+						&vServerbrowserElementId[i],
+						Button,
+						pItem->m_aGameType,
+						-1.0f,
+						FontSize,
+						true};
+					Ui()->DoToolTip(Tooltip);
+				}
 			}
 			else if(Id == COL_MAP)
 			{
@@ -420,6 +449,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					});
 				if(!Printed)
 					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props);
+				if(pUiElement->Rect(UI_ELEM_MAP_1)->m_Cursor.m_Truncated && Button.Inside(Ui()->MousePos()))
+				{
+					CTooltip Tooltip{
+						&vServerbrowserElementId[i],
+						Button,
+						pItem->m_aMap,
+						-1.0f,
+						FontSize,
+						true};
+					Ui()->DoToolTip(Tooltip);
+				}
 			}
 			else if(Id == COL_FRIENDS)
 			{

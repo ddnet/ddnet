@@ -115,7 +115,8 @@ void CUi::Init(IKernel *pKernel)
 	CUIRect::Init(m_pGraphics);
 	CLineInput::Init(m_pClient, m_pGraphics, m_pInput, m_pTextRender);
 	CUIElementBase::Init(this);
-	m_Tooltips.Init(this, m_pTextRender);
+	m_pTooltips = std::make_unique<CTooltips>();
+	m_pTooltips->Init(this, m_pTextRender);
 }
 
 CUi::CUi()
@@ -822,6 +823,17 @@ CLabelResult CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, i
 	Cursor.m_vColorSplits = LabelProps.m_vColorSplits;
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	TextRender()->TextEx(&Cursor, pText, -1);
+	if(Cursor.m_Truncated && LabelProps.m_pTooltipId)
+	{
+		CTooltip Tooltip{
+			LabelProps.m_pTooltipId,
+			*pRect,
+			pText,
+			-1,
+			Size,
+			true};
+		DoToolTip(Tooltip);
+	}
 	return CLabelResult{.m_Truncated = Cursor.m_Truncated};
 }
 
@@ -1820,7 +1832,12 @@ void CUi::RenderBackButton()
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 }
 
-void CUi::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint)
+void CUi::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint) const
 {
-	m_Tooltips.DoToolTip(pId, pNearRect, pText, WidthHint);
+	m_pTooltips->DoToolTip(pId, pNearRect, pText, WidthHint);
+}
+
+void CUi::DoToolTip(CTooltip &Tooltip) const
+{
+	m_pTooltips->DoToolTip(Tooltip);
 }
