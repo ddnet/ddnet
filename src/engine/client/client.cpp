@@ -5474,7 +5474,6 @@ int CClient::UdpConnectivity(int NetType)
 			break;
 		default:
 			dbg_assert_failed("Invalid connectivity value: %d", (int)NetworkConnectivity);
-			return CONNECTIVITY_UNKNOWN;
 		}
 		Connectivity = std::max(Connectivity, NewConnectivity);
 	}
