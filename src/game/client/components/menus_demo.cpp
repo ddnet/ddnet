@@ -1327,6 +1327,7 @@ void CMenus::RenderDemoBrowserList(CUIRect ListView, bool &WasListboxItemActivat
 				Props.m_MaxWidth = Button.w;
 				Props.m_EllipsisAtEnd = true;
 				Props.m_EnableWidthCheck = false;
+				Props.m_pTooltipId = pItem;
 				Ui()->DoLabel(&Button, pItem->m_aName, 12.0f, TEXTALIGN_ML, Props);
 			}
 			else if(Col.m_Id == COL_MARKERS && !pItem->m_IsDir && pItem->m_Valid)
