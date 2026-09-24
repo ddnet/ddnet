@@ -510,7 +510,10 @@ void CMenusSettingsControls::RenderSettingsBinds(EBindOptionGroup Group, CUIRect
 		if(BindOption.m_Group != EBindOptionGroup::CUSTOM || LabelResult.m_Truncated)
 		{
 			Ui()->DoButtonLogic(&BindOption.m_TooltipButtonId, 0, &Label, BUTTONFLAG_NONE);
-			GameClient()->m_Tooltips.DoToolTip(&BindOption.m_TooltipButtonId, &Label, BindOption.m_Command.c_str());
+			if(BindOption.m_Group != EBindOptionGroup::CUSTOM)
+				GameClient()->m_Tooltips.DoToolTip(&BindOption.m_TooltipButtonId, &Label, BindOption.m_Command.c_str(), -1.0f);
+			else if(LabelResult.m_Truncated)
+				GameClient()->m_Tooltips.DoTruncationToolTip(&BindOption.m_TooltipButtonId, &Label, BindOption.m_Command.c_str(), LabelProps.m_MinimumFontSize);
 		}
 
 		for(CBindSlotUiElement &CurrentBind : BindOption.m_vCurrentBinds)

@@ -12,6 +12,7 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 
+#include <game/client/ui.h>
 #include <game/editor/editor.h>
 
 static constexpr const char *FILETYPE_EXTENSIONS[] = {
