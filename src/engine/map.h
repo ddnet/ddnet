@@ -7,6 +7,8 @@
 #include <base/types.h>
 
 #include <memory>
+#include <optional>
+#include <vector>
 
 class IStorage;
 struct CUuid;
@@ -25,6 +27,7 @@ public:
 	virtual void *GetData(int Index) = 0;
 	virtual void *GetDataSwapped(int Index) = 0;
 	virtual const char *GetDataString(int Index) = 0;
+	virtual std::optional<std::vector<const char *>> GetDataStringArray(int Index) = 0;
 	virtual void UnloadData(int Index) = 0;
 	virtual int NumData() const = 0;
 
