@@ -36,6 +36,9 @@ public:
 	CClientMask CanSeeMask(const CGameContext *pGameServer) const;
 	CClientMask CanHitMask(const CGameContext *pGameServer) const;
 	const CCharacter *OwnerCharacter(const CGameContext *pGameServer) const;
+	bool NoHitOthers() const { return m_NoHitOthers; }
+	bool NoHitSelf() const { return m_NoHitSelf; }
+	uint32_t UniqueOwnerId() const { return m_UniqueOwnerId; }
 };
 
 #endif
