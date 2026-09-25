@@ -481,6 +481,17 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"Run a local server with the current map and connect you to it.")
+REGISTER_QUICK_ACTION(
+	ShowSoundArea,
+	"Show sound layers",
+	[&]() { Map()->ToggleSoundLayerVisibility(); },
+	[&]() -> bool {
+		// not perfect, but we don't track the total number of existing sound sources
+		return Map()->m_vpSounds.empty();
+	},
+	[&]() -> bool { return Map()->m_ShowSoundArea; },
+	DEFAULT_BTN,
+	"Show sound layers.")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN
