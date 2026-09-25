@@ -63,6 +63,7 @@ public:
 	void ApplyMoveRestrictions();
 
 	bool m_IsLocal;
+	bool m_IsDummy;
 
 	CTeamsCore *TeamsCore();
 	bool Freeze(int Seconds);
@@ -114,7 +115,7 @@ public:
 	int GetStrongWeakId() const { return m_StrongWeakId; }
 
 	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = nullptr);
-	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
+	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal, bool IsDummy);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;
@@ -138,6 +139,9 @@ public:
 	// antiping
 	void AntiPingInterference(int ClientId, bool DisallowReset = false, bool HasToBeUnfrozen = false);
 	bool IsInterfering() const { return m_Interfering; }
+
+	// envelope animations
+	int m_LastEnvelopeTriggerZone;
 
 private:
 	// weapon info
@@ -176,6 +180,7 @@ private:
 
 	static bool IsSwitchActiveCb(unsigned char Number, void *pUser);
 	void HandleTiles(int Index);
+	void HandleEnvelopeTriggerTiles(int MapIndex);
 	void HandleSkippableTiles(int Index);
 	void DDRaceTick();
 	void DDRacePostCoreTick();

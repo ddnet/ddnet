@@ -12,7 +12,19 @@
 #include <game/collision.h>
 #include <game/mapitems.h>
 
+#include <chrono>
+
 // Character, "physical" player's part
+
+namespace
+{
+	// absolute trigger moment of an envelope in the same tick basis as EnvelopeEval
+	std::chrono::nanoseconds EnvelopeStartTime(int Tick, int RoundStartTick)
+	{
+		using namespace std::chrono_literals;
+		return (Tick - RoundStartTick) * (std::chrono::nanoseconds(1s) / SERVER_TICK_SPEED);
+	}
+}
 
 void CCharacter::SetWeapon(int Weapon)
 {
@@ -792,6 +804,8 @@ void CCharacter::HandleTiles(int Index)
 		return;
 	}
 
+	HandleEnvelopeTriggerTiles(MapIndex);
+
 	int TeleCheckpoint = Collision()->IsTeleCheckpoint(MapIndex);
 	if(TeleCheckpoint)
 		m_TeleCheckpoint = TeleCheckpoint;
@@ -1069,6 +1083,87 @@ void CCharacter::HandleTiles(int Index)
 	}
 }
 
+void CCharacter::HandleEnvelopeTriggerTiles(int MapIndex)
+{
+	if(MapIndex < 0)
+	{
+		m_LastEnvelopeTriggerZone = ENVELOPE_NONE;
+		return;
+	}
+
+	int TuneZone = Collision()->IsTune(MapIndex);
+	int SwitchType = Collision()->GetSwitchType(MapIndex);
+	bool IsEnvelopeTrigger = SwitchType >= TILE_ENV_TRIGGER_SOLO && SwitchType <= TILE_ENV_TRIGGER_TEAM;
+	bool IsSolo = SwitchType == TILE_ENV_TRIGGER_SOLO;
+
+	/**
+	 * Only predict your own solo animations. Solo animations are only for the local player.
+	 * Predict team animations for every player in the team
+	 * We can't predict the animations for everyone in the team, but the server will send a netobject starting the synchronization otherwise.
+	 */
+	// TODO we could predict the team tile as well, if we know the local team
+	if(!m_IsLocal)
+		return;
+
+	if(!IsEnvelopeTrigger && TuneZone <= 0)
+	{
+		m_LastEnvelopeTriggerZone = ENVELOPE_NONE;
+		return;
+	}
+
+	int TriggerZoneId;
+
+	if(!IsEnvelopeTrigger && TuneZone > 0)
+	{
+		TriggerZoneId = GameWorld()->TuneZoneToEnvelopeZone()[TuneZone];
+	}
+	else
+	{
+		int StartDelay = Collision()->GetSwitchDelay(MapIndex);
+		TriggerZoneId = Collision()->GetSwitchNumber(MapIndex);
+
+		// we are supporting 256^2 - 1 trigger zones
+		TriggerZoneId = TriggerZoneId + StartDelay * 256;
+	}
+
+	// do not repeatedly hit the same envelope trigger and reset it
+	if(!GameWorld()->EnvelopeTriggerList().contains(TriggerZoneId) || m_LastEnvelopeTriggerZone == TriggerZoneId)
+	{
+		return;
+	}
+
+	m_LastEnvelopeTriggerZone = TriggerZoneId;
+	const CEnvelopeTriggerZone &TriggerZone = GameWorld()->EnvelopeTriggerList()[TriggerZoneId];
+
+	auto UpdateEnvelopeTrigger = [&](const CEnvelopeTrigger &EnvelopeState, bool UpdateDummy) {
+		auto TriggerStates = GameWorld()->EnvelopeTriggerState(UpdateDummy);
+		auto LastStateIt = TriggerStates.find(EnvelopeState.m_EnvelopeId);
+		CEnvelopeTriggerState *pOldState = nullptr;
+		if(LastStateIt != TriggerStates.end())
+		{
+			pOldState = &LastStateIt->second;
+		}
+		const std::chrono::nanoseconds StartTime = EnvelopeStartTime(GameWorld()->GameTick(), GameWorld()->RoundStartTick());
+		CEnvelopeTriggerState State(EnvelopeState.m_State, pOldState, StartTime, StartTime);
+		State.SetPredicted(true);
+		TriggerStates[EnvelopeState.m_EnvelopeId] = State;
+	};
+
+	// copy state from zone so they are used by the rendering automatically
+	for(const auto &EnvelopeState : TriggerZone.m_vEnvelopeTriggers)
+	{
+		if(!IsSolo)
+		{
+			UpdateEnvelopeTrigger(EnvelopeState, false);
+			UpdateEnvelopeTrigger(EnvelopeState, true);
+		}
+		else
+		{
+			UpdateEnvelopeTrigger(EnvelopeState, m_IsDummy);
+		}
+	}
+}
+
 void CCharacter::HandleTuneLayer()
 {
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
@@ -1288,6 +1383,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 {
 	m_Id = Id;
 	m_IsLocal = false;
+	m_IsDummy = false;
 
 	m_LastWeapon = WEAPON_HAMMER;
 	m_LastSnapWeapon = -1;
@@ -1308,6 +1404,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_StrongWeakId = 0;
 	m_TuneZone = 0;
 	m_TuneZoneOverride = TuneZone::OVERRIDE_NONE;
+	m_LastEnvelopeTriggerZone = ENVELOPE_NONE;
 
 	mem_zero(&m_Input, sizeof(m_Input));
 	// never initialize both to zero
@@ -1317,7 +1414,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_LatestPrevInput = m_LatestInput = m_PrevInput = m_SavedInput = m_Input;
 
 	ResetPrediction();
-	Read(pChar, pExtended, false);
+	Read(pChar, pExtended, false, false);
 }
 
 void CCharacter::AntiPingInterference(int ClientId, bool DisallowReset, bool HasToBeUnfrozen)
@@ -1382,12 +1479,24 @@ void CCharacter::ResetPrediction()
 	m_LastWeaponSwitchTick = 0;
 	m_LastTuneZoneTick = 0;
 	m_Interfering = false;
+
+	// apply global envelope operations
+	if(m_pGameWorld->GetEnvelopeOnSpawn().has_value())
+	{
+		const std::chrono::nanoseconds StartTime = EnvelopeStartTime(GameWorld()->GameTick(), GameWorld()->RoundStartTick());
+		CEnvelopeTriggerState State(m_pGameWorld->GetEnvelopeOnSpawn().value(), nullptr, StartTime, StartTime);
+		for(int EnvelopeId = 0; EnvelopeId < GameWorld()->NumEnvelopes(); ++EnvelopeId)
+		{
+			GameWorld()->EnvelopeTriggerState(m_IsDummy)[EnvelopeId] = State;
+		}
+	}
 }
 
-void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
+void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal, bool IsDummy)
 {
 	m_Core.Read((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
+	m_IsDummy = IsDummy;
 
 	if(pExtended)
 	{
