@@ -11,41 +11,48 @@ static void AnimSeqEval(const CAnimSequence *pSeq, float Time, CAnimKeyframe *pF
 {
 	if(pSeq->m_NumFrames == 0)
 	{
-		pFrame->m_Time = 0;
-		pFrame->m_X = 0;
-		pFrame->m_Y = 0;
-		pFrame->m_Angle = 0;
+		*pFrame = {0, 0, 0, 0};
+		return;
 	}
-	else if(pSeq->m_NumFrames == 1)
+	if(pSeq->m_NumFrames == 1 || pSeq->m_aFrames[0].m_Time >= Time)
 	{
 		*pFrame = pSeq->m_aFrames[0];
+		return;
 	}
-	else
+	if(pSeq->m_aFrames[pSeq->m_NumFrames - 1].m_Time <= Time)
 	{
-		const CAnimKeyframe *pFrame1 = nullptr;
-		const CAnimKeyframe *pFrame2 = nullptr;
-		float Blend = 0.0f;
+		*pFrame = pSeq->m_aFrames[pSeq->m_NumFrames - 1];
+		return;
+	}
 
-		// TODO: make this smarter.. binary search
-		for(int i = 1; i < pSeq->m_NumFrames; i++)
+	int Low = 0;
+	int High = pSeq->m_NumFrames - 1;
+	int Index = 0;
+
+	while(Low <= High)
+	{
+		int Mid = Low + (High - Low) / 2;
+		if(pSeq->m_aFrames[Mid].m_Time <= Time)
 		{
-			if(pSeq->m_aFrames[i - 1].m_Time <= Time && pSeq->m_aFrames[i].m_Time >= Time)
-			{
-				pFrame1 = &pSeq->m_aFrames[i - 1];
-				pFrame2 = &pSeq->m_aFrames[i];
-				Blend = (Time - pFrame1->m_Time) / (pFrame2->m_Time - pFrame1->m_Time);
-				break;
-			}
+			Index = Mid;
+			Low = Mid + 1;
 		}
-
-		if(pFrame1 != nullptr && pFrame2 != nullptr)
+		else
 		{
-			pFrame->m_Time = Time;
-			pFrame->m_X = mix(pFrame1->m_X, pFrame2->m_X, Blend);
-			pFrame->m_Y = mix(pFrame1->m_Y, pFrame2->m_Y, Blend);
-			pFrame->m_Angle = mix(pFrame1->m_Angle, pFrame2->m_Angle, Blend);
+			High = Mid - 1;
 		}
 	}
+
+	const CAnimKeyframe *pFrame1 = &pSeq->m_aFrames[Index];
+	const CAnimKeyframe *pFrame2 = &pSeq->m_aFrames[Index + 1];
+
+	float Diff = pFrame2->m_Time - pFrame1->m_Time;
+	float Blend = (Diff > 0.0f) ? (Time - pFrame1->m_Time) / Diff : 0.0f;
+
+	pFrame->m_Time = Time;
+	pFrame->m_X = mix(pFrame1->m_X, pFrame2->m_X, Blend);
+	pFrame->m_Y = mix(pFrame1->m_Y, pFrame2->m_Y, Blend);
+	pFrame->m_Angle = mix(pFrame1->m_Angle, pFrame2->m_Angle, Blend);
 }
 
 static void AnimAddKeyframe(CAnimKeyframe *pSeq, const CAnimKeyframe *pAdded, float Amount)
