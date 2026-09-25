@@ -20,6 +20,7 @@ public:
 
 private:
 	int GetLayerType(const CMapItemLayer *pLayer) const;
+	void LoadExtendedItems(CLayers *pLayers);
 
 	std::vector<std::unique_ptr<CRenderLayer>> m_vpRenderLayers;
 };
