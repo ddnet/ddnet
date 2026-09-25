@@ -19,7 +19,8 @@ class CAntibot : public IEngineAntibot
 	CAntibotRoundData m_RoundData;
 	bool m_Initialized;
 
-	void Update();
+	void Update(int ClientId);
+	void UpdateAll();
 	static void Kick(int ClientId, const char *pMessage, void *pUser);
 	static void Log(const char *pMessage, void *pUser);
 	static void Report(int ClientId, const char *pMessage, void *pUser);
