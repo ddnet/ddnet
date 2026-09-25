@@ -23,6 +23,27 @@ void CFontTyper::CState::Reset()
 	m_TilesPlacedSinceActivate = 0;
 }
 
+void CFontTyper::CState::TextModeOn(const std::shared_ptr<CLayerTiles> &pLayer, const vec2 &StartPos)
+{
+	if(!pLayer)
+		return;
+	if(pLayer->m_Image == -1)
+		return;
+
+	m_TilesPlacedSinceActivate = 0;
+	m_Active = true;
+	m_TextIndex.x = std::clamp(static_cast<int>(std::round(StartPos.x / 32.0f)), 0, pLayer->m_Width);
+	m_TextIndex.y = std::clamp(static_cast<int>(std::round(StartPos.y / 32.0f)), 0, pLayer->m_Height - 1);
+	pLayer->m_KnownTextModeLayer = true;
+}
+
+void CFontTyper::CState::TextModeOff(CEditorMap *pMap)
+{
+	if(m_TilesPlacedSinceActivate)
+		pMap->m_EditorHistory.RecordAction(std::make_shared<CEditorBrushDrawAction>(pMap, pMap->m_SelectedGroup), "Font typer");
+	Reset();
+}
+
 void CFontTyper::OnInit(CEditor *pEditor)
 {
 	CEditorComponent::OnInit(pEditor);
@@ -73,17 +94,18 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	CState &State = Map()->m_FontTyperState;
 
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-	if(!pLayer)
+	if(!pLayer || pLayer->m_Image == -1)
 	{
 		if(State.m_Active)
 			TextModeOff();
 		return false;
 	}
-	if(pLayer->m_Image == -1)
-		return false;
 
 	if(!State.m_Active)
 	{
+		if(Editor()->m_Dialog == DIALOG_PSEUDO_FONT_TYPER)
+			Editor()->m_Dialog = DIALOG_NONE;
+
 		if(Event.m_Key == KEY_T && Input()->ModifierIsPressed() && !Ui()->IsPopupOpen() && Editor()->m_Dialog == DIALOG_NONE)
 		{
 			if(pLayer && pLayer->m_KnownTextModeLayer)
@@ -99,6 +121,11 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 			}
 		}
 		return false;
+	}
+	else if(Editor()->m_Dialog == DIALOG_NONE)
+	{
+		// block other dialogs
+		Editor()->m_Dialog = DIALOG_PSEUDO_FONT_TYPER;
 	}
 
 	// only handle key down and not also key up
@@ -265,28 +292,16 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 
 void CFontTyper::TextModeOn()
 {
-	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-	if(!pLayer)
-		return;
-	if(pLayer->m_Image == -1)
-		return;
-
-	SetCursor();
-	Map()->m_FontTyperState.m_TilesPlacedSinceActivate = 0;
-	Map()->m_FontTyperState.m_Active = true;
-	pLayer->m_KnownTextModeLayer = true;
-
-	// hack to not show picker when pressing space
 	Editor()->m_Dialog = DIALOG_PSEUDO_FONT_TYPER;
+	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
+	Map()->m_FontTyperState.TextModeOn(pLayer, Map()->m_MapViewState.m_MouseWorldPos);
+	SetCursor();
 }
 
 void CFontTyper::TextModeOff()
 {
-	if(Editor()->m_Dialog == DIALOG_PSEUDO_FONT_TYPER)
-		Editor()->m_Dialog = DIALOG_NONE;
-	if(Map()->m_FontTyperState.m_TilesPlacedSinceActivate)
-		Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup), "Font typer");
-	Map()->m_FontTyperState.Reset();
+	Editor()->m_Dialog = DIALOG_NONE;
+	Map()->m_FontTyperState.TextModeOff(Map());
 }
 
 void CFontTyper::SetCursor()
@@ -316,8 +331,12 @@ void CFontTyper::Render()
 	str_copy(Editor()->m_aTooltip, "Type on your keyboard to insert letters and numbers. Press Escape to end text mode.");
 
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-	if(!pLayer)
+	// exit selected layer
+	if(!pLayer || pLayer->m_Image == -1)
+	{
+		TextModeOff();
 		return;
+	}
 
 	// exit if selected layer changes
 	if(State.m_pLastLayer && State.m_pLastLayer != pLayer)
@@ -326,8 +345,8 @@ void CFontTyper::Render()
 		State.m_pLastLayer = pLayer;
 		return;
 	}
-	// exit if dialog or edit box pops up
-	if(Editor()->m_Dialog != DIALOG_PSEUDO_FONT_TYPER || CLineInput::GetActiveInput())
+	// edit box pops up
+	if(CLineInput::GetActiveInput())
 	{
 		TextModeOff();
 		return;
@@ -358,4 +377,11 @@ void CFontTyper::Render()
 bool CFontTyper::IsActive() const
 {
 	return Map()->m_FontTyperState.m_Active;
+}
+
+void CFontTyper::UpdateDialog()
+{
+	// We can only update this if the component is properly initialized
+	if(Editor())
+		Editor()->m_Dialog = Map()->m_FontTyperState.m_Active ? DIALOG_PSEUDO_FONT_TYPER : DIALOG_NONE;
 }

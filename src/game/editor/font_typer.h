@@ -30,6 +30,8 @@ public:
 		int m_TilesPlacedSinceActivate;
 
 		void Reset();
+		void TextModeOn(const std::shared_ptr<CLayerTiles> &pLayer, const vec2 &StartPos);
+		void TextModeOff(CEditorMap *pMap);
 	};
 
 	void OnInit(CEditor *pEditor) override;
@@ -37,6 +39,7 @@ public:
 	void Render();
 
 	bool IsActive() const;
+	void UpdateDialog();
 
 private:
 	enum
