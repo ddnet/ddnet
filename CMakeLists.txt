@@ -1003,7 +1003,10 @@ set_glob(RUST_BASE GLOB_RECURSE "rs;toml" src/base
   color.rs
   dbg.rs
   lib.rs
+  log.rs
+  net.rs
   rust.rs
+  types.rs
   # tidy-alphabetical-end
 )
 
@@ -1011,6 +1014,14 @@ set_glob(RUST_ENGINE_INTERFACE GLOB "rs;toml" src/engine
   # tidy-alphabetical-start
   Cargo.toml
   console.rs
+  lib.rs
+  # tidy-alphabetical-end
+)
+
+set_glob(RUST_ENGINE_SERVER GLOB_RECURSE "rs;toml" src/engine/server
+  # tidy-alphabetical-start
+  Cargo.toml
+  asdf.rs
   lib.rs
   # tidy-alphabetical-end
 )
@@ -1025,12 +1036,26 @@ set_glob(RUST_ENGINE_SHARED GLOB_RECURSE "rs;toml" src/engine/shared
   # tidy-alphabetical-end
 )
 
-set_src(RUST_BRIDGE_SHARED GLOB_RECURSE src/rust-bridge
+set_src(RUST_BRIDGE_CPP GLOB_RECURSE src/rust-bridge/cpp
   # tidy-alphabetical-start
-  cpp/console.cpp
-  cpp/console.h
-  engine/shared/rust_version.cpp
-  engine/shared/rust_version.h
+  console.cpp
+  console.h
+  net.cpp
+  net.h
+  # tidy-alphabetical-end
+)
+
+set_src(RUST_BRIDGE_ENGINE_SHARED GLOB_RECURSE src/rust-bridge/engine/shared
+  # tidy-alphabetical-start
+  rust_version.cpp
+  rust_version.h
+  # tidy-alphabetical-end
+)
+
+set_src(RUST_BRIDGE_SERVER GLOB src/rust-bridge/engine/server
+  # tidy-alphabetical-start
+  asdf.cpp
+  asdf.h
   # tidy-alphabetical-end
 )
 
@@ -1044,8 +1069,12 @@ set_glob(RUST_MASTERSRV GLOB "rs;toml" src/mastersrv/src
   # tidy-alphabetical-end
 )
 
+set(RUST_BRIDGE_SERVER ${RUST_BRIDGE_SERVER})
+set(RUST_BRIDGE_SHARED ${RUST_BRIDGE_CPP} ${RUST_BRIDGE_ENGINE_SHARED})
+
+add_library(rust-bridge-server EXCLUDE_FROM_ALL OBJECT ${RUST_BRIDGE_SERVER})
 add_library(rust-bridge-shared EXCLUDE_FROM_ALL OBJECT ${RUST_BRIDGE_SHARED})
-list(APPEND TARGETS_OWN rust-bridge-shared)
+list(APPEND TARGETS_OWN rust-bridge-server rust-bridge-shared)
 
 if(TARGET_OS STREQUAL "android")
   set(CARGO_BUILD_DIR "${CARGO_NDK_TARGET}/")
@@ -1135,11 +1164,12 @@ endif()
 set(RUST_SRC
       ${RUST_BASE}
       ${RUST_ENGINE_INTERFACE}
+      ${RUST_ENGINE_SERVER}
       ${RUST_ENGINE_SHARED}
       Cargo.toml
       Cargo.lock
 )
-set(RUST_TARGETS engine_shared)
+set(RUST_TARGETS engine_server engine_shared)
 if(NOT CMAKE_OSX_ARCHITECTURES OR TARGET_OS STREQUAL "ios")
   set(RUST_OUTPUTS)
   foreach(rust_target ${RUST_TARGETS})
@@ -2296,6 +2326,7 @@ set_src(BASE GLOB_RECURSE src/base
 set_src(ENGINE_INTERFACE GLOB src/engine
   # tidy-alphabetical-start
   antibot.h
+  asdf.h
   client.h
   config.h
   console.h
@@ -3100,6 +3131,7 @@ if(SERVER)
     # tidy-alphabetical-start
     antibot.cpp
     antibot.h
+    asdf.cpp
     authmanager.cpp
     authmanager.h
     databases/connection.cpp
@@ -3221,6 +3253,8 @@ if(SERVER)
 
     ${LIBS}
   )
+  list(REMOVE_ITEM LIBS_SERVER rust_engine_shared)
+  list(APPEND LIBS_SERVER rust_engine_server)
 
   add_library(game-server-without-main OBJECT
       ${DEPS}
@@ -3248,6 +3282,7 @@ if(SERVER)
       # tidy-alphabetical-sort
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:rust-bridge-server>
       $<TARGET_OBJECTS:rust-bridge-shared>
       # tidy-alphabetical-sort
     )
@@ -3261,6 +3296,7 @@ if(SERVER)
       # tidy-alphabetical-sort
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:rust-bridge-server>
       $<TARGET_OBJECTS:rust-bridge-shared>
       # tidy-alphabetical-sort
     )

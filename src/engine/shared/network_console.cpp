@@ -5,11 +5,11 @@
 
 #include <base/net.h>
 
-bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan)
+bool CNetConsole::Open(NETADDR BindAddr, FIsBanned IsBanned)
 {
 	// zero out the whole structure
 	*this = CNetConsole{};
-	m_pNetBan = pNetBan;
+	m_IsBanned = std::move(IsBanned);
 
 	m_Socket = net_tcp_create(BindAddr);
 	if(!m_Socket)
@@ -70,7 +70,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 
 	// check if address is banned
 	char aBanMessage[256];
-	if(NetBan() && NetBan()->IsBanned(pAddr, aBanMessage, sizeof(aBanMessage)))
+	if(m_IsBanned(pAddr, aBanMessage, sizeof(aBanMessage)))
 	{
 		DropClient(aBanMessage);
 		return -1;
