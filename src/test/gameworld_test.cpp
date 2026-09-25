@@ -331,6 +331,51 @@ TEST_F(GameWorld, CharacterEmote)
 	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
 }
 
+TEST_F(GameWorld, EyeEmoteOverride)
+{
+	const int ClientId = 0;
+	const bool Afk = true;
+	const int LastWhisperTo = -1;
+	GameServer()->CreatePlayer(ClientId, TEAM_GAME, Afk, LastWhisperTo);
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+
+	const int Tick = GameServer()->Server()->Tick();
+	const int TickSpeed = GameServer()->Server()->TickSpeed();
+	const int DefaultEmote = pPlayer->GetDefaultEmote();
+
+	// an emote that has run out falls back to the default one
+	pPlayer->OverrideDefaultEmote(EMOTE_ANGRY, Tick - 1);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), DefaultEmote);
+
+	// /emote angry 3600, as sent by the eye emote wheel
+	pPlayer->OverrideDefaultEmote(EMOTE_ANGRY, Tick + 3600 * TickSpeed);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), EMOTE_ANGRY);
+
+	// /emote happy 1 resumes the longer lasting emote once it has run out
+	pPlayer->OverrideDefaultEmote(EMOTE_HAPPY, Tick - 1);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), EMOTE_ANGRY);
+
+	// chaining emotes that have run out keeps the longer lasting one
+	pPlayer->OverrideDefaultEmote(EMOTE_PAIN, Tick - 1);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), EMOTE_ANGRY);
+
+	// an emote of medium length does not take over the longer lasting one
+	pPlayer->OverrideDefaultEmote(EMOTE_PAIN, Tick + 60 * TickSpeed);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), EMOTE_PAIN);
+	pPlayer->OverrideDefaultEmote(EMOTE_BLINK, Tick - 1);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), EMOTE_ANGRY);
+
+	// an emote outlasting the resumed one replaces it
+	pPlayer->OverrideDefaultEmote(EMOTE_SURPRISE, Tick + 7200 * TickSpeed);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), EMOTE_SURPRISE);
+	pPlayer->OverrideDefaultEmote(EMOTE_BLINK, Tick - 1);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), EMOTE_SURPRISE);
+
+	// an emote still running covers the longer lasting one
+	pPlayer->OverrideDefaultEmote(EMOTE_HAPPY, Tick + TickSpeed);
+	ASSERT_EQ(pPlayer->GetDefaultEmote(), EMOTE_HAPPY);
+}
+
 TEST(Tunings, OutOfRangeBecomesIntMin)
 {
 	const float IntMin = std::numeric_limits<int>::min() / 100.0f;
