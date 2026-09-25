@@ -23,6 +23,7 @@ public:
 	bool m_Explosive = false;
 	int m_Bouncing = 0;
 	bool m_Freeze = false;
+	bool m_JetpackExhaust = false;
 	int m_SwitchNumber;
 	// TuneZone is introduced locally
 	int m_TuneZone;

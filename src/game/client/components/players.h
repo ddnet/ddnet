@@ -39,6 +39,19 @@ class CPlayers : public CComponent
 	int m_WeaponEmoteQuadContainerIndex;
 	int m_aWeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
+	class CJetpackTrail
+	{
+	public:
+		static constexpr int MAX_POINTS = 32;
+		vec2 m_aaPos[MAX_POINTS][2];
+		vec2 m_aDir[MAX_POINTS];
+		float m_aTime[MAX_POINTS];
+		int m_First = 0;
+		int m_Count = 0;
+	};
+	CJetpackTrail m_aJetpackTrails[MAX_CLIENTS];
+	void RenderJetpackTrail(int ClientId, vec2 Position, vec2 Direction, vec2 Vel, bool Thrusting, float Alpha);
+
 	void CreateNinjaTeeRenderInfo();
 	void CreateSpectatorTeeRenderInfo();
 
