@@ -777,6 +777,7 @@ def smoke_test(test_env):
 			)
 		)
 	)
+	log_offset = len(server.full_stdout)
 	client1.command(
 		"; ".join(
 			l.strip()
@@ -787,11 +788,19 @@ def smoke_test(test_env):
 		rcon echo test
 		rcon muteid 1 900 spam
 		rcon unban_all
+		rcon this_command_does_not_exist
+		rcon sv_rcon_password
 		rcon say the end
 	""".strip().split("\n")
 		)
 	)
 	client1.wait_for_log_exact("chat/server: *** the end", timeout=15)
+
+	server.wait_for_log_exact("net_ban: unbanned all entries", timeout=15)
+	server.wait_for_log_exact("chat: *** the end", timeout=15)
+	for response in ("server: id=0 addr=", "chatresp: No such command", server.rcon_password):
+		if any(response in line for line in server.full_stdout[log_offset:]):
+			raise ValueError(f"rcon command response `{response}` was logged")
 
 	server.command("stoprecord")
 	client1.command("stoprecord")
