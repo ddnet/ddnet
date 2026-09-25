@@ -2018,7 +2018,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(z - 1).size());
+		int TeleOut = CWorldCore::TeleOutOr0(Server()->Tick(), GetPlayer()->GetCid(), z, Collision()->TeleOuts(z - 1).size());
 		m_Core.m_Pos = Collision()->TeleOuts(z - 1)[TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
@@ -2033,7 +2033,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(EvilTeleport - 1).size());
+		int TeleOut = CWorldCore::TeleOutOr0(Server()->Tick(), GetPlayer()->GetCid(), EvilTeleport, Collision()->TeleOuts(EvilTeleport - 1).size());
 		m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
@@ -2060,7 +2060,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!Collision()->TeleCheckOuts(k).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				int TeleOut = CWorldCore::TeleOutOr0(Server()->Tick(), GetPlayer()->GetCid(), k, Collision()->TeleCheckOuts(k).size());
 				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
 
@@ -2097,7 +2097,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!Collision()->TeleCheckOuts(k).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				int TeleOut = CWorldCore::TeleOutOr0(Server()->Tick(), GetPlayer()->GetCid(), k, Collision()->TeleCheckOuts(k).size());
 				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
 
 				if(!g_Config.m_SvTeleportHoldHook)

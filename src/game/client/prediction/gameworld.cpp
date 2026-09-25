@@ -866,6 +866,12 @@ void CGameWorld::CreatePredictedSound(vec2 Pos, int SoundId, int Id)
 	CreatePredictedEvent(Event);
 }
 
+void CGameWorld::CreatePredictedDeathEvent(vec2 Pos, int ClientId)
+{
+	CPredictedEvent Event(NETEVENTTYPE_DEATH, Pos, ClientId, GameTick(), ClientId);
+	CreatePredictedEvent(Event);
+}
+
 void CGameWorld::CreatePredictedExplosionEvent(vec2 Pos, int Id)
 {
 	CPredictedEvent Event(NETEVENTTYPE_EXPLOSION, Pos, Id, GameTick());

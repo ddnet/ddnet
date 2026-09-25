@@ -123,6 +123,7 @@ public:
 	bool m_DDRaceTeam;
 
 	bool m_PredictEvents;
+	bool m_PredictTeleport;
 
 	bool m_OldLaser;
 
@@ -240,6 +241,7 @@ private:
 	void UpdateEditorIngameMoved();
 
 	int m_PredictedTick;
+	int m_KillTick;
 	int m_aLastNewPredictedTick[NUM_DUMMIES];
 
 	int m_LastRoundStartTick;
@@ -496,6 +498,8 @@ public:
 
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
+		bool m_PredictedTeleport;
+		bool m_PredictedDead;
 
 		std::shared_ptr<CManagedTeeRenderInfo> m_pSkinInfo = nullptr; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
@@ -677,7 +681,7 @@ public:
 	bool GotWantedSkin7(bool Dummy);
 	void SendInfo(bool Start);
 	void SendDummyInfo(bool Start) override;
-	void SendKill() const;
+	void SendKill();
 	void SendReadyChange7(); // NOLINT(readability-make-member-function-const)
 
 	void ApplyPreInputs(int Tick, bool Direct, CGameWorld &GameWorld);

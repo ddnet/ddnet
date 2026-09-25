@@ -12,6 +12,9 @@
 #include <game/collision.h>
 #include <game/mapitems.h>
 
+#include <algorithm>
+#include <limits>
+
 // Character, "physical" player's part
 
 void CCharacter::SetWeapon(int Weapon)
@@ -535,6 +538,9 @@ void CCharacter::GiveNinja()
 
 void CCharacter::OnPredictedInput(const CNetObj_PlayerInput *pNewInput)
 {
+	if(m_Dead)
+		return;
+
 	// skip the input if chat is active
 	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
@@ -555,6 +561,9 @@ void CCharacter::OnPredictedInput(const CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::OnDirectInput(const CNetObj_PlayerInput *pNewInput)
 {
+	if(m_Dead)
+		return;
+
 	// skip the input if chat is active
 	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
@@ -609,6 +618,9 @@ void CCharacter::ResetInput()
 
 void CCharacter::PreTick()
 {
+	if(m_Dead)
+		return;
+
 	DDRaceTick();
 
 	m_Core.m_Input = m_Input;
@@ -617,6 +629,11 @@ void CCharacter::PreTick()
 
 void CCharacter::Tick()
 {
+	if(m_Dead)
+		return;
+
+	m_Teleported = false;
+
 	if(m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce)
 	{
 		m_Core.TickDeferred();
@@ -651,6 +668,9 @@ void CCharacter::Tick()
 
 void CCharacter::TickDeferred()
 {
+	if(m_Dead)
+		return;
+
 	m_Core.Move();
 	m_Core.Quantize();
 	m_Pos = m_Core.m_Pos;
@@ -682,7 +702,8 @@ int CCharacter::Team()
 
 void CCharacter::HandleSkippableTiles(int Index)
 {
-	if(Index < 0)
+	HandleDeath();
+	if(m_Dead || Index < 0)
 		return;
 
 	// handle speedup tiles
@@ -1067,6 +1088,152 @@ void CCharacter::HandleTiles(int Index)
 		if(NewJumps != m_Core.m_Jumps)
 			m_Core.m_Jumps = NewJumps;
 	}
+
+	if(!GameWorld()->m_WorldConfig.m_PredictTeleport)
+		return;
+
+	int z = Collision()->IsTeleport(MapIndex);
+	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !Collision()->TeleOuts(z - 1).empty())
+	{
+		if(m_Core.m_Super || m_Core.m_Invincible)
+			return;
+		int TeleOut = CWorldCore::TeleOutOr0(GameWorld()->GameTick(), GetCid(), z, Collision()->TeleOuts(z - 1).size());
+		Teleport(Collision()->TeleOuts(z - 1)[TeleOut]);
+		if(!g_Config.m_SvTeleportHoldHook)
+		{
+			ResetHook();
+		}
+		if(g_Config.m_SvTeleportLoseWeapons)
+			ResetPickups();
+		return;
+	}
+	const int EvilTeleport = Collision()->IsEvilTeleport(MapIndex);
+	if(EvilTeleport && !Collision()->TeleOuts(EvilTeleport - 1).empty())
+	{
+		if(m_Core.m_Super || m_Core.m_Invincible)
+			return;
+		int TeleOut = CWorldCore::TeleOutOr0(GameWorld()->GameTick(), GetCid(), EvilTeleport, Collision()->TeleOuts(EvilTeleport - 1).size());
+		Teleport(Collision()->TeleOuts(EvilTeleport - 1)[TeleOut]);
+		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
+		{
+			m_Core.m_Vel = vec2(0, 0);
+
+			if(!g_Config.m_SvTeleportHoldHook)
+			{
+				ResetHook();
+				GameWorld()->ReleaseHooked(GetCid());
+			}
+			if(g_Config.m_SvTeleportLoseWeapons)
+			{
+				ResetPickups();
+			}
+		}
+		return;
+	}
+	if(Collision()->IsCheckEvilTeleport(MapIndex))
+	{
+		if(m_Core.m_Super || m_Core.m_Invincible)
+			return;
+		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		{
+			if(!Collision()->TeleCheckOuts(k).empty())
+			{
+				int TeleOut = CWorldCore::TeleOutOr0(GameWorld()->GameTick(), GetCid(), k, Collision()->TeleCheckOuts(k).size());
+				Teleport(Collision()->TeleCheckOuts(k)[TeleOut]);
+				m_Core.m_Vel = vec2(0, 0);
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+					GameWorld()->ReleaseHooked(GetCid());
+				}
+
+				return;
+			}
+		}
+		return;
+	}
+	if(Collision()->IsCheckTeleport(MapIndex))
+	{
+		if(m_Core.m_Super || m_Core.m_Invincible)
+			return;
+		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		{
+			if(!Collision()->TeleCheckOuts(k).empty())
+			{
+				int TeleOut = CWorldCore::TeleOutOr0(GameWorld()->GameTick(), GetCid(), k, Collision()->TeleCheckOuts(k).size());
+				Teleport(Collision()->TeleCheckOuts(k)[TeleOut]);
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+				}
+
+				return;
+			}
+		}
+		return;
+	}
+}
+
+void CCharacter::HandleDeath()
+{
+	if(!GameWorld()->m_WorldConfig.m_PredictTiles)
+		return;
+
+	if(Team() != TEAM_FLOCK)
+		return;
+
+	if((Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
+		!m_Core.m_Super && !m_Core.m_Invincible)
+	{
+		if(m_PracticeMode)
+		{
+			Freeze();
+		}
+		else
+		{
+			Die();
+			return;
+		}
+	}
+
+	if(GameLayerClipped(m_Pos))
+	{
+		Die();
+	}
+}
+
+void CCharacter::Die()
+{
+	GameWorld()->CreatePredictedDeathEvent(m_Pos, GetCid());
+	GameWorld()->CreatePredictedSound(m_Pos, SOUND_PLAYER_DIE, GetCid());
+	m_Dead = true;
+}
+
+void CCharacter::Teleport(const vec2 Pos)
+{
+	m_Core.m_Pos = Pos;
+	m_Teleported = true;
+}
+
+void CCharacter::ResetPickups()
+{
+	for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
+	{
+		m_Core.m_aWeapons[i].m_Got = false;
+		if(m_Core.m_ActiveWeapon == i)
+			m_Core.m_ActiveWeapon = WEAPON_GUN;
+	}
 }
 
 void CCharacter::HandleTuneLayer()
@@ -1168,6 +1335,8 @@ void CCharacter::DDRacePostCoreTick()
 
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
 	HandleSkippableTiles(CurrentIndex);
+	if(m_Dead)
+		return;
 
 	// handle Anti-Skip tiles
 	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
@@ -1304,6 +1473,9 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
 	m_CanMoveInFreeze = false;
+	m_Teleported = false;
+	m_Dead = false;
+	m_PracticeMode = false;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakId = 0;
 	m_TuneZone = 0;
@@ -1388,14 +1560,16 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 {
 	m_Core.Read((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
+	m_Dead = false;
 
 	if(pExtended)
 	{
 		SetSolo(pExtended->m_Flags & CHARACTERFLAG_SOLO);
 		SetSuper(pExtended->m_Flags & CHARACTERFLAG_SUPER);
 
-		m_TeleCheckpoint = pExtended->m_TeleCheckpoint;
+		m_TeleCheckpoint = std::clamp<int>(pExtended->m_TeleCheckpoint, 0, std::numeric_limits<unsigned char>::max());
 		m_StrongWeakId = pExtended->m_StrongWeakId;
+		m_PracticeMode = (pExtended->m_Flags & CHARACTERFLAG_PRACTICE_MODE) != 0;
 		m_TuneZoneOverride = pExtended->m_TuneZoneOverride;
 
 		const bool Ninja = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
