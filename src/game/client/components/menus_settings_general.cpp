@@ -89,17 +89,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClSkipStartMenu, Localize("Skip the main menu"), g_Config.m_ClSkipStartMenu, &Button))
 			g_Config.m_ClSkipStartMenu ^= 1;
 
-		Left.HSplitTop(10.0f, nullptr, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		str_copy(aBuf, " ");
-		str_append(aBuf, Localize("Hz", "Hertz"));
-		Ui()->DoScrollbarOption(&g_Config.m_ClRefreshRate, &g_Config.m_ClRefreshRate, &Button, Localize("Update Rate"), 10, 1000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE | CUi::SCROLLBAR_OPTION_NOCLAMPVALUE | CUi::SCROLLBAR_OPTION_DELAYUPDATE, aBuf);
-		Left.HSplitTop(5.0f, nullptr, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		static int s_LowerRefreshRate;
-		if(DoButton_CheckBox(&s_LowerRefreshRate, Localize("Save power by lowering update rate (higher input latency)"), g_Config.m_ClRefreshRate <= 480 && g_Config.m_ClRefreshRate != 0, &Button))
-			g_Config.m_ClRefreshRate = g_Config.m_ClRefreshRate > 480 || g_Config.m_ClRefreshRate == 0 ? 480 : 0;
-
 		CUIRect SettingsButton;
 		Left.HSplitBottom(20.0f, &Left, &SettingsButton);
 		Left.HSplitBottom(5.0f, &Left, nullptr);
