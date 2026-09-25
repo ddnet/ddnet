@@ -1,5 +1,6 @@
 #include "serverbrowser_http.h"
 
+#include <base/color.h>
 #include <base/dbg.h>
 #include <base/io.h>
 #include <base/lock.h>
@@ -21,6 +22,7 @@
 
 #include <chrono>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 using namespace std::chrono_literals;
@@ -312,6 +314,31 @@ void CChooseMaster::CJob::Run()
 	m_pData->m_BestIndex.store(BestIndex);
 }
 
+class CGametypeString
+{
+public:
+	char m_aGametype[16];
+
+	CGametypeString(const char *pGametype)
+	{
+		str_copy(m_aGametype, pGametype);
+	}
+
+	bool operator==(const CGametypeString &Other) const
+	{
+		return str_comp(m_aGametype, Other.m_aGametype) == 0;
+	}
+
+	class CHash
+	{
+	public:
+		std::size_t operator()(const CGametypeString &String) const
+		{
+			return std::hash<std::string_view>{}(String.m_aGametype);
+		}
+	};
+};
+
 class CServerBrowserHttp : public IServerBrowserHttp
 {
 public:
@@ -328,9 +355,20 @@ public:
 	{
 		return m_vServers.size();
 	}
+
 	const CServerInfo &Server(int Index) const override
 	{
 		return m_vServers[Index];
+	}
+
+	ColorRGBA GametypeColor(const char *pGametype) const override
+	{
+		const auto GametypeColor = m_GametypeColors.find(CGametypeString(pGametype));
+		if(GametypeColor != m_GametypeColors.end())
+		{
+			return GametypeColor->second;
+		}
+		return ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 private:
@@ -343,7 +381,7 @@ private:
 	};
 
 	static bool Validate(json_value *pJson);
-	static bool Parse(json_value *pJson, std::vector<CServerInfo> *pvServers);
+	static bool Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::unordered_map<CGametypeString, ColorRGBA, CGametypeString::CHash> *pGametypeColors);
 
 	IHttp *m_pHttp;
 
@@ -352,6 +390,7 @@ private:
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
 	std::vector<CServerInfo> m_vServers;
+	std::unordered_map<CGametypeString, ColorRGBA, CGametypeString::CHash> m_GametypeColors;
 };
 
 CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
@@ -409,7 +448,7 @@ void CServerBrowserHttp::Update()
 		bool Success = true;
 		json_value *pJson = pGetServers->State() == EHttpState::DONE ? pGetServers->ResultJson() : nullptr;
 		Success = Success && pJson;
-		Success = Success && !Parse(pJson, &m_vServers);
+		Success = Success && !Parse(pJson, &m_vServers, &m_GametypeColors);
 		json_value_free(pJson);
 		if(!Success)
 		{
@@ -452,11 +491,13 @@ static bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {
 	std::vector<CServerInfo> vServers;
-	return Parse(pJson, &vServers);
+	std::unordered_map<CGametypeString, ColorRGBA, CGametypeString::CHash> GametypeColors;
+	return Parse(pJson, &vServers, &GametypeColors);
 }
-bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvServers)
+bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::unordered_map<CGametypeString, ColorRGBA, CGametypeString::CHash> *pGametypeColors)
 {
 	std::vector<CServerInfo> vServers;
+	std::unordered_map<CGametypeString, ColorRGBA, CGametypeString::CHash> GametypeColors;
 
 	const json_value &Json = *pJson;
 	const json_value &Servers = Json["servers"];
@@ -536,7 +577,39 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 			vServers.push_back(SetInfo);
 		}
 	}
+
+	const json_value &GametypeColorsObject = Json["gametype_colors"];
+	if(GametypeColorsObject.type == json_object)
+	{
+		for(unsigned int i = 0; i < GametypeColorsObject.u.object.length; i++)
+		{
+			const char *pColorValue = GametypeColorsObject.u.object.values[i].name;
+			const std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pColorValue);
+			if(!ParsedColor.has_value())
+			{
+				return true;
+			}
+			const json_value &GametypeEntries = *GametypeColorsObject.u.object.values[i].value;
+			if(GametypeEntries.type != json_array)
+			{
+				return true;
+			}
+			for(unsigned int a = 0; a < GametypeEntries.u.array.length; a++)
+			{
+				const json_value &GametypeEntry = GametypeEntries[a];
+				if(GametypeEntry.type != json_string)
+				{
+					return true;
+				}
+				// Duplicates are allowed because the masterserver allows longer
+				// gametypes that are truncated with `CGametypeString`.
+				GametypeColors.emplace(CGametypeString(GametypeEntry.u.string.ptr), ParsedColor.value());
+			}
+		}
+	}
+
 	*pvServers = vServers;
+	*pGametypeColors = GametypeColors;
 	return false;
 }
 
