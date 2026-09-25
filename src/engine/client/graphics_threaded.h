@@ -703,6 +703,7 @@ public:
 	virtual void SetWindowGrab(bool Grab) = 0;
 	// returns true, if the video mode changed
 	virtual bool ResizeWindow(int w, int h, int RefreshRate) = 0;
+	virtual void GetWindowSize(int &w, int &h) = 0;
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	// Insets of the drawable area which are covered by the cutout of the display,
 	// in pixels. Only determined on iOS, zero on all other platforms.
