@@ -4129,6 +4129,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 	m_PlayerMapping.Init(this);
+	m_MapChangeTick = Server()->ClientCount() > 0 ? Server()->Tick() : -1;
 
 	m_GameUuid = RandomUuid();
 	Console()->SetGetVictimsCommandCallback(ClientsForVictim, this);

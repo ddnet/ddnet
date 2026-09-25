@@ -141,6 +141,9 @@ void CPlayer::Reset()
 		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
 	else
 		m_FirstVoteTick = Now;
+	// After a map change, wait for the other players to finish loading it before allowing votes
+	if(GameServer()->m_MapChangeTick >= 0 && Server()->ClientCount() > 1)
+		m_FirstVoteTick = std::max(m_FirstVoteTick, GameServer()->m_MapChangeTick + 10 * TickSpeed);
 
 	m_NotEligibleForFinish = false;
 	m_EligibleForFinishCheck = 0;
