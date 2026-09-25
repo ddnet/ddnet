@@ -171,6 +171,7 @@ public:
 
 		static CFinishTime Unset() { return CFinishTime(FinishTime::UNSET); }
 		static CFinishTime NotFinished() { return CFinishTime(FinishTime::NOT_FINISHED_MILLIS); }
+		static CFinishTime Secret() { return CFinishTime(FinishTime::SECRET); }
 
 	private:
 		CFinishTime(int Type)

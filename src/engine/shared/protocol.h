@@ -166,6 +166,7 @@ enum
 	VERSION_DDNET_MAP_BESTTIME = 19070,
 	VERSION_DDNET_128_TEAMS = 20000,
 	VERSION_DDNET_PICKUP_FREEZE = 20010,
+	VERSION_DDNET_TIME_SECRET = 20010,
 };
 
 /**
@@ -189,6 +190,7 @@ namespace FinishTime
 	inline constexpr int NOT_FINISHED_TIMESCORE = -9999;
 	inline constexpr int NOT_FINISHED_MILLIS = -1;
 	inline constexpr int UNSET = -2;
+	inline constexpr int SECRET = -3;
 }
 
 typedef std::bitset<MAX_CLIENTS> CClientMask;
