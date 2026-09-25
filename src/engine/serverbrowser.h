@@ -128,6 +128,12 @@ public:
 	int m_NumFilteredPlayers;
 	bool m_RequiresLogin;
 
+	CServerInfo()
+	{
+		Reset();
+	}
+
+	void Reset();
 	static int EstimateLatency(int Loc1, int Loc2);
 	static bool ParseLocation(int *pResult, const char *pString);
 	static ColorRGBA GametypeColor(const char *pGametype);
