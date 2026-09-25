@@ -2,13 +2,17 @@
 
 #include "editor.h"
 
+#include <engine/keys.h>
 #include <engine/shared/config.h>
+
+#include <game/editor/editor_binds.h>
 
 void CLayerSelector::OnInit(CEditor *pEditor)
 {
 	CEditorComponent::OnInit(pEditor);
 
 	m_SelectionOffset = 0;
+	m_pBindLayerSelector = pEditor->RegisterBind(false, true, false, KEY_MOUSE_2, "Select a layer by clicking on a tile.", EBindSection::LAYERS);
 }
 
 bool CLayerSelector::SelectByTile()
@@ -16,7 +20,7 @@ bool CLayerSelector::SelectByTile()
 	// ctrl+right click a map index to select the layer that has a tile there
 	if(Ui()->HotItem() != Editor()->MapView())
 		return false;
-	if(!Input()->ModifierIsPressed() || !Ui()->MouseButtonClicked(1))
+	if(!m_pBindLayerSelector->KeyPress(Input()))
 		return false;
 	if(!g_Config.m_EdLayerSelector)
 		return false;

@@ -2808,6 +2808,8 @@ if(CLIENT)
     editor_action.h
     editor_actions.cpp
     editor_actions.h
+    editor_binds.cpp
+    editor_binds.h
     editor_history.cpp
     editor_history.h
     editor_object.cpp
@@ -3501,6 +3503,10 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     # tidy-alphabetical-start
     src/engine/client/blocklist_driver.cpp
     src/engine/client/blocklist_driver.h
+    src/engine/client/keyboard.cpp
+    src/engine/client/keyboard.h
+    src/engine/client/keynames.cpp
+    src/engine/client/keynames.h
     src/engine/client/serverbrowser.cpp
     src/engine/client/serverbrowser.h
     src/engine/client/serverbrowser_http.cpp
@@ -3510,6 +3516,8 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/sqlite.cpp
     src/game/client/components/censor.cpp
     src/game/client/components/censor.h
+    src/game/editor/editor_binds.cpp
+    src/game/editor/editor_binds.h
     # tidy-alphabetical-end
   )
 
