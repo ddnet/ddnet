@@ -16,12 +16,10 @@
 typedef std::function<void()> TUpdateIntraTimesFunc;
 
 class CSnapshotDelta;
-class IConsole;
 class IStorage;
 
 class CDemoRecorder : public IDemoRecorder
 {
-	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 
 	IOHANDLE m_File;
@@ -49,7 +47,7 @@ public:
 	CDemoRecorder() = default;
 	~CDemoRecorder() override;
 
-	int Start(IStorage *pStorage, IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
+	int Start(IStorage *pStorage, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
 	int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") override;
 
 	void AddDemoMarker();
@@ -117,7 +115,6 @@ private:
 		}
 	};
 
-	IConsole *m_pConsole;
 	IOHANDLE m_File;
 	int64_t m_MapOffset;
 	char m_aFilename[IO_MAX_PATH_LENGTH];
@@ -176,7 +173,7 @@ public:
 
 	void SetListener(IListener *pListener);
 
-	int Load(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType);
+	int Load(IStorage *pStorage, const char *pFilename, int StorageType);
 	unsigned char *GetMapData(IStorage *pStorage);
 	bool ExtractMap(IStorage *pStorage);
 	void Play();
@@ -192,7 +189,7 @@ public:
 	bool SetPos(int WantedTick) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
-	bool GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
+	bool GetDemoInfo(IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
 	const char *Filename() const { return m_aFilename; }
 	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
@@ -206,13 +203,12 @@ public:
 
 class CDemoEditor : public IDemoEditor
 {
-	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	CSnapshotDelta *m_pSnapshotDelta;
 	CSnapshotDelta *m_pSnapshotDeltaSixup;
 
 public:
-	virtual void Init(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, IConsole *pConsole, IStorage *pStorage);
+	virtual void Init(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, IStorage *pStorage);
 	bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) override;
 };
 
