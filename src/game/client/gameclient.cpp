@@ -513,9 +513,40 @@ void CGameClient::OnDummySwap()
 		m_Controls.ResetInput(PlayerOrDummy);
 		m_Controls.m_aInputData[PlayerOrDummy].m_Hook = 0;
 	}
-	const int PrevDummyFire = m_DummyInput.m_Fire;
+	CNetObj_PlayerInput OldDummyInput = g_Config.m_ClDummyHammer ? m_HammerInput : m_DummyInput;
+
 	m_DummyInput = m_Controls.m_aInputData[!g_Config.m_ClDummy];
-	m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = PrevDummyFire;
+
+	m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = OldDummyInput.m_Fire;
+
+	if((m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire & 1) != (m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Fire & 1))
+	{
+		m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire++;
+	}
+
+	if(g_Config.m_ClDummyHammer)
+	{
+		m_HammerInput.m_Fire = m_DummyInput.m_Fire;
+	}
+
+	if(g_Config.m_ClDummyCopyMoves && !g_Config.m_ClDummyHammer)
+	{
+		if((m_DummyInput.m_Fire & 1) != (m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire & 1))
+		{
+			m_DummyInput.m_Fire++;
+			m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Fire = m_DummyInput.m_Fire;
+		}
+	}
+
+	if(!g_Config.m_ClDummyHammer)
+	{
+		m_Controls.m_aInputData[g_Config.m_ClDummy].m_NextWeapon = OldDummyInput.m_NextWeapon;
+		m_Controls.m_aInputData[g_Config.m_ClDummy].m_PrevWeapon = OldDummyInput.m_PrevWeapon;
+	}
+
+	m_Controls.m_aLastData[g_Config.m_ClDummy] = m_Controls.m_aInputData[g_Config.m_ClDummy];
+	m_Controls.m_aLastData[!g_Config.m_ClDummy] = m_Controls.m_aInputData[!g_Config.m_ClDummy];
+
 	m_IsDummySwapping = 1;
 }
 
@@ -534,15 +565,17 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	{
 		if(m_DummyFire != 0)
 		{
-			m_DummyInput.m_Fire = (m_HammerInput.m_Fire + 1) & ~1;
+			int Parity = m_DummyInput.m_Fire & 1;
+			m_DummyInput.m_Fire = ((m_HammerInput.m_Fire + 1) & ~1) | Parity;
 			m_DummyFire = 0;
 		}
 
-		if(!Force && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
+		if(!Force && !m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook && m_DummyInput.m_Fire == m_Controls.m_aLastData[!g_Config.m_ClDummy].m_Fire)
 		{
 			return 0;
 		}
 
+		m_Controls.m_aLastData[!g_Config.m_ClDummy] = m_DummyInput;
 		mem_copy(pData, &m_DummyInput, sizeof(m_DummyInput));
 		return sizeof(m_DummyInput);
 	}
@@ -552,6 +585,10 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		{
 			m_DummyFire++;
 			return 0;
+		}
+		if(m_DummyFire == 0)
+		{
+			m_HammerInput.m_Fire = m_DummyInput.m_Fire;
 		}
 		m_DummyFire++;
 
@@ -566,6 +603,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		m_HammerInput.m_TargetX = (int)Dir.x;
 		m_HammerInput.m_TargetY = (int)Dir.y;
 
+		m_Controls.m_aLastData[!g_Config.m_ClDummy] = m_HammerInput;
 		mem_copy(pData, &m_HammerInput, sizeof(m_HammerInput));
 		return sizeof(m_HammerInput);
 	}
