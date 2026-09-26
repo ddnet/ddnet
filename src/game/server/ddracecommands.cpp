@@ -8,6 +8,7 @@
 #include <engine/antibot.h>
 #include <engine/server/authmanager.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 
 #include <generated/protocol.h>
 
@@ -365,9 +366,14 @@ void CGameContext::ConSetSwitch(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 	const bool State = pResult->NumArguments() == 1 ? !pSelf->Switchers()[Switch].m_aStatus[Team] : pResult->GetInteger(1) != 0;
-	const int EndTick = pResult->NumArguments() == 3 ? pSelf->Server()->Tick() + 1 + pResult->GetInteger(2) * pSelf->Server()->TickSpeed() : 0;
+	const int64_t EndTick = pResult->NumArguments() == 3 ? (int64_t)pSelf->Server()->Tick() + 1 + (int64_t)pResult->GetInteger(2) * pSelf->Server()->TickSpeed() : 0;
+	if(!in_range<int64_t>(EndTick, MIN_TICK, MAX_TICK))
+	{
+		log_info("chatresp", "Invalid switch duration");
+		return;
+	}
 	pSelf->Switchers()[Switch].m_aStatus[Team] = State;
-	pSelf->Switchers()[Switch].m_aEndTick[Team] = EndTick;
+	pSelf->Switchers()[Switch].m_aEndTick[Team] = (int)EndTick;
 	if(State)
 		pSelf->Switchers()[Switch].m_aType[Team] = EndTick ? TILE_SWITCHTIMEDOPEN : TILE_SWITCHOPEN;
 	else
