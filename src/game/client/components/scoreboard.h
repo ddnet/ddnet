@@ -72,7 +72,7 @@ class CScoreboard : public CComponent
 
 		static CUi::EPopupMenuFunctionResult Render(void *pContext, CUIRect View, bool Active);
 	} m_MapTitlePopupContext;
-	char m_MapTitleButtonId;
+	CButtonContainer m_MapInfoButtonContainer;
 
 	class CPlayerElement
 	{
