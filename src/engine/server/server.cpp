@@ -1896,11 +1896,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			m_aClients[ClientId].m_LastAckedSnapshot = LastAckedSnapshot;
 			if(m_aClients[ClientId].m_LastAckedSnapshot >= MIN_TICK)
 			{
-				m_aClients[ClientId].m_SnapRate = CClient::SNAPRATE_FULL;
-
 				int64_t TagTime;
 				if(m_aClients[ClientId].m_Snapshots.Get(m_aClients[ClientId].m_LastAckedSnapshot, &TagTime, nullptr, nullptr) >= 0)
 				{
+					m_aClients[ClientId].m_SnapRate = CClient::SNAPRATE_FULL;
 					m_aClients[ClientId].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
 				}
 			}
