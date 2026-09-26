@@ -22,6 +22,7 @@ public:
 		 */
 		int m_CountryCode;
 		char m_aCountryCodeString[8];
+		char m_aCountryName[64];
 		IGraphics::CTextureHandle m_Texture;
 
 		bool operator<(const CCountryFlag &Other) const;
