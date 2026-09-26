@@ -539,7 +539,7 @@ public:
 	std::vector<SWarning> &&QuittingWarnings() { return std::move(m_vQuittingWarnings); }
 
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
-	int UdpConnectivity(int NetType) override;
+	EConnectivity UdpConnectivity(int NetType) override;
 
 	bool ViewLink(const char *pLink) override;
 	bool ViewFile(const char *pFilename) override;

@@ -66,19 +66,19 @@ public:
 	 * More precise state for @see STATE_LOADING
 	 * Sets what is actually happening in the client right now
 	 */
-	enum ELoadingStateDetail
+	enum class ELoadingStateDetail
 	{
-		LOADING_STATE_DETAIL_INITIAL,
-		LOADING_STATE_DETAIL_LOADING_MAP,
-		LOADING_STATE_DETAIL_LOADING_DEMO,
-		LOADING_STATE_DETAIL_SENDING_READY,
-		LOADING_STATE_DETAIL_GETTING_READY,
+		INITIAL,
+		LOADING_MAP,
+		LOADING_DEMO,
+		SENDING_READY,
+		GETTING_READY,
 	};
 
-	enum ELoadingCallbackDetail
+	enum class ELoadingCallbackDetail
 	{
-		LOADING_CALLBACK_DETAIL_MAP,
-		LOADING_CALLBACK_DETAIL_DEMO,
+		MAP,
+		DEMO,
 	};
 	typedef std::function<void(ELoadingCallbackDetail Detail)> TLoadingCallback;
 	CTranslationContext m_TranslationContext;
@@ -86,7 +86,7 @@ public:
 protected:
 	// quick access to state of the client
 	EClientState m_State = IClient::STATE_OFFLINE;
-	ELoadingStateDetail m_LoadingStateDetail = LOADING_STATE_DETAIL_INITIAL;
+	ELoadingStateDetail m_LoadingStateDetail = ELoadingStateDetail::INITIAL;
 	int64_t m_StateStartTime;
 
 	// quick access to time variables
@@ -128,15 +128,15 @@ public:
 		NUM_CONNS,
 	};
 
-	enum
+	enum class EConnectivity
 	{
-		CONNECTIVITY_UNKNOWN,
-		CONNECTIVITY_CHECKING,
-		CONNECTIVITY_UNREACHABLE,
-		CONNECTIVITY_REACHABLE,
+		UNKNOWN,
+		CHECKING,
+		UNREACHABLE,
+		REACHABLE,
 		// Different global IP address has been detected for UDP and
 		// TCP connections.
-		CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES,
+		DIFFERING_UDP_TCP_IP_ADDRESSES,
 	};
 
 	//
@@ -361,7 +361,7 @@ public:
 	virtual std::optional<SWarning> CurrentWarning() = 0;
 
 	virtual CChecksumData *ChecksumData() = 0;
-	virtual int UdpConnectivity(int NetType) = 0;
+	virtual EConnectivity UdpConnectivity(int NetType) = 0;
 
 	/**
 	 * Opens a link in the browser.

@@ -2091,18 +2091,18 @@ void CMenus::RenderPopupConnecting(CUIRect Screen)
 		const char *pConnectivityLabel = "";
 		switch(Client()->UdpConnectivity(Client()->ConnectNetTypes()))
 		{
-		case IClient::CONNECTIVITY_UNKNOWN:
+		case IClient::EConnectivity::UNKNOWN:
 			break;
-		case IClient::CONNECTIVITY_CHECKING:
+		case IClient::EConnectivity::CHECKING:
 			pConnectivityLabel = Localize("Trying to determine UDP connectivity…");
 			break;
-		case IClient::CONNECTIVITY_UNREACHABLE:
+		case IClient::EConnectivity::UNREACHABLE:
 			pConnectivityLabel = Localize("UDP seems to be filtered.");
 			break;
-		case IClient::CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES:
+		case IClient::EConnectivity::DIFFERING_UDP_TCP_IP_ADDRESSES:
 			pConnectivityLabel = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
 			break;
-		case IClient::CONNECTIVITY_REACHABLE:
+		case IClient::EConnectivity::REACHABLE:
 			pConnectivityLabel = Localize("No answer from server yet.");
 			break;
 		}
@@ -2179,19 +2179,19 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 		str_copy(aTitle, Localize("Connected"));
 		switch(Client()->LoadingStateDetail())
 		{
-		case IClient::LOADING_STATE_DETAIL_INITIAL:
+		case IClient::ELoadingStateDetail::INITIAL:
 			str_copy(aLabel1, Localize("Getting game info"));
 			break;
-		case IClient::LOADING_STATE_DETAIL_LOADING_MAP:
+		case IClient::ELoadingStateDetail::LOADING_MAP:
 			str_copy(aLabel1, Localize("Loading map file from storage"));
 			break;
-		case IClient::LOADING_STATE_DETAIL_LOADING_DEMO:
+		case IClient::ELoadingStateDetail::LOADING_DEMO:
 			str_copy(aLabel1, Localize("Loading demo file from storage"));
 			break;
-		case IClient::LOADING_STATE_DETAIL_SENDING_READY:
+		case IClient::ELoadingStateDetail::SENDING_READY:
 			str_copy(aLabel1, Localize("Requesting to join the game"));
 			break;
-		case IClient::LOADING_STATE_DETAIL_GETTING_READY:
+		case IClient::ELoadingStateDetail::GETTING_READY:
 			str_copy(aLabel1, Localize("Sending initial client info"));
 			break;
 		default:

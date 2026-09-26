@@ -1231,9 +1231,9 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	static char s_aErrorMsg[128];
 
 	SetState(IClient::STATE_LOADING);
-	SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_LOADING_MAP);
+	SetLoadingStateDetail(IClient::ELoadingStateDetail::LOADING_MAP);
 	if((bool)m_LoadingCallback)
-		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_MAP);
+		m_LoadingCallback(IClient::ELoadingCallbackDetail::MAP);
 
 	// Stop demo recording before loading a new map.
 	for(int Recorder = 0; Recorder < RECORDER_MAX; Recorder++)
@@ -1764,7 +1764,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(LoadMapSearch(pMap, MapSha256, MapCrc) == nullptr)
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
-				SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_SENDING_READY);
+				SetLoadingStateDetail(IClient::ELoadingStateDetail::SENDING_READY);
 				SendReady(CONN_MAIN);
 			}
 			else
@@ -2714,7 +2714,7 @@ void CClient::PumpNetwork()
 			// we switched to online
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info", CLIENT_NETWORK_PRINT_COLOR);
 			SetState(IClient::STATE_LOADING);
-			SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_INITIAL);
+			SetLoadingStateDetail(IClient::ELoadingStateDetail::INITIAL);
 			SendInfo(CONN_MAIN);
 		}
 
@@ -4082,9 +4082,9 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_aNetClient[CONN_MAIN].ResetErrorString();
 
 	SetState(IClient::STATE_LOADING);
-	SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_LOADING_DEMO);
+	SetLoadingStateDetail(IClient::ELoadingStateDetail::LOADING_DEMO);
 	if((bool)m_LoadingCallback)
-		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_DEMO);
+		m_LoadingCallback(IClient::ELoadingCallbackDetail::DEMO);
 
 	// try to start playback
 	m_DemoPlayer.SetListener(this);
@@ -5436,10 +5436,10 @@ int CClient::PredictionMargin() const
 	return m_ServerCapabilities.m_SyncWeaponInput ? g_Config.m_ClPredictionMargin : 10;
 }
 
-int CClient::UdpConnectivity(int NetType)
+IClient::EConnectivity CClient::UdpConnectivity(int NetType)
 {
 	static const int NETTYPES[2] = {NETTYPE_IPV6, NETTYPE_IPV4};
-	int Connectivity = CONNECTIVITY_UNKNOWN;
+	EConnectivity Connectivity = EConnectivity::UNKNOWN;
 	for(int PossibleNetType : NETTYPES)
 	{
 		if((NetType & PossibleNetType) == 0)
@@ -5447,30 +5447,30 @@ int CClient::UdpConnectivity(int NetType)
 			continue;
 		}
 		NETADDR GlobalUdpAddr;
-		int NewConnectivity;
+		EConnectivity NewConnectivity;
 		const CONNECTIVITY NetworkConnectivity = m_aNetClient[CONN_MAIN].GetConnectivity(PossibleNetType, &GlobalUdpAddr);
 		switch(NetworkConnectivity)
 		{
 		case CONNECTIVITY::UNKNOWN:
-			NewConnectivity = CONNECTIVITY_UNKNOWN;
+			NewConnectivity = EConnectivity::UNKNOWN;
 			break;
 		case CONNECTIVITY::CHECKING:
-			NewConnectivity = CONNECTIVITY_CHECKING;
+			NewConnectivity = EConnectivity::CHECKING;
 			break;
 		case CONNECTIVITY::UNREACHABLE:
-			NewConnectivity = CONNECTIVITY_UNREACHABLE;
+			NewConnectivity = EConnectivity::UNREACHABLE;
 			break;
 		case CONNECTIVITY::REACHABLE:
-			NewConnectivity = CONNECTIVITY_REACHABLE;
+			NewConnectivity = EConnectivity::REACHABLE;
 			break;
 		case CONNECTIVITY::ADDRESS_KNOWN:
 			GlobalUdpAddr.port = 0;
 			if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
 			{
-				NewConnectivity = CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
+				NewConnectivity = EConnectivity::DIFFERING_UDP_TCP_IP_ADDRESSES;
 				break;
 			}
-			NewConnectivity = CONNECTIVITY_REACHABLE;
+			NewConnectivity = EConnectivity::REACHABLE;
 			break;
 		default:
 			dbg_assert_failed("Invalid connectivity value: %d", (int)NetworkConnectivity);

@@ -300,7 +300,7 @@ void CGameClient::OnInit()
 
 	Client()->SetLoadingCallback([this](IClient::ELoadingCallbackDetail Detail) {
 		const char *pTitle;
-		if(Detail == IClient::LOADING_CALLBACK_DETAIL_DEMO || DemoPlayer()->IsPlaying())
+		if(Detail == IClient::ELoadingCallbackDetail::DEMO || DemoPlayer()->IsPlaying())
 		{
 			pTitle = Localize("Preparing demo playback");
 		}
@@ -312,10 +312,10 @@ void CGameClient::OnInit()
 		const char *pMessage;
 		switch(Detail)
 		{
-		case IClient::LOADING_CALLBACK_DETAIL_MAP:
+		case IClient::ELoadingCallbackDetail::MAP:
 			pMessage = Localize("Loading map file from storage");
 			break;
-		case IClient::LOADING_CALLBACK_DETAIL_DEMO:
+		case IClient::ELoadingCallbackDetail::DEMO:
 			pMessage = Localize("Loading demo file from storage");
 			break;
 		default:
@@ -596,7 +596,7 @@ void CGameClient::OnConnected()
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		Client()->SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_GETTING_READY);
+		Client()->SetLoadingStateDetail(IClient::ELoadingStateDetail::GETTING_READY);
 		m_Menus.RenderLoading(pConnectCaption, Localize("Sending initial client info"), 0);
 
 		// send the initial info
