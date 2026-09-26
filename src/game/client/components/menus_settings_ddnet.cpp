@@ -99,7 +99,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	// gameplay
 	CUIRect Gameplay;
-	MainView.HSplitTop(190.0f, &Gameplay, &MainView);
+	MainView.HSplitTop(210.0f, &Gameplay, &MainView);
 	Gameplay.HSplitTop(30.0f, &Label, &Gameplay);
 	Ui()->DoLabel(&Label, Localize("Gameplay"), 20.0f, TEXTALIGN_ML);
 	Gameplay.HSplitTop(5.0f, nullptr, &Gameplay);
@@ -156,6 +156,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClPredictEvents ^= 1;
 	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClFastInput, Localize("Fast input"), g_Config.m_ClFastInput, &Button))
+	{
+		g_Config.m_ClFastInput ^= 1;
+	}
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClFastInput, &Button, Localize("Predict own inputs one tick early for more responsive controls, at the cost of small mispredictions"));
 
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
