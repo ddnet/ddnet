@@ -317,6 +317,7 @@ class CCachedText
 	int m_CursorFlags = 0;
 	STextBoundingBox m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
 	float m_MaxCharacterHeight = 0.0f;
+	float m_AlignedFontSize = 0.0f;
 
 public:
 	CCachedText() = default;
@@ -330,6 +331,7 @@ public:
 
 	float Width() const { return m_BoundingBox.m_W; }
 	float MaxCharacterHeight() const { return m_MaxCharacterHeight; }
+	float AlignedFontSize() const { return m_AlignedFontSize; }
 };
 
 class CUi

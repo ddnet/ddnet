@@ -1615,6 +1615,7 @@ void CCachedText::Update(ITextRender *pTextRender, const char *pText, float Font
 
 	m_BoundingBox = Cursor.BoundingBox();
 	m_MaxCharacterHeight = Cursor.m_MaxCharacterHeight;
+	m_AlignedFontSize = Cursor.m_AlignedFontSize;
 }
 
 void CCachedText::Render(ITextRender *pTextRender, vec2 Pos, ColorRGBA Color) const
@@ -1658,24 +1659,27 @@ void CUi::RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFini
 		constexpr float GoldenRatio = 0.61803398875f;
 		const float CentisecondFontSize = FontSize * GoldenRatio;
 
-		// format 2 or 3 digits
-		char aMillis[4];
+		// format dot plus 2 or 3 digits
+		char aMillis[5];
 		Millis %= 1000;
 		if(!TrueMilliseconds)
-			str_format(aMillis, sizeof(aMillis), "%02d", (int)std::round(Millis / 10));
+			str_format(aMillis, sizeof(aMillis), ".%02d", (int)std::round(Millis / 10));
 		else
-			str_format(aMillis, sizeof(aMillis), "%03d", Millis);
+			str_format(aMillis, sizeof(aMillis), ".%03d", Millis);
 		MillisText.Update(TextRender(), aMillis, CentisecondFontSize);
 
 		const float MillisWidth = MillisText.Width();
 
-		// make space for millis, but put them 1/6th of a char tighter together
-		Cursor.x -= MillisWidth - (TrueMilliseconds ? MillisWidth / (3 * 6) : MillisWidth / (2 * 6));
+		// pull the fractional block (dot + digits) slightly closer to the seconds
+		constexpr float FractionKern = 0.25f;
+		const float Kern = CentisecondFontSize * FractionKern;
+		Cursor.x -= MillisWidth - Kern;
 
 		vec2 CursorMillis = TimeRect.TopLeft();
 		CursorMillis.x += TimeRect.w - MillisWidth; // align right
-		CursorMillis.y += ((TimeRect.h - MillisText.MaxCharacterHeight()) / 2.0f - (CentisecondFontSize - MillisText.MaxCharacterHeight()));
-		CursorMillis.y -= (CursorMillis.y - Cursor.y) * GoldenRatio;
+
+		// Align the bottom of the fractional text with the bottom of the seconds.
+		CursorMillis.y = Cursor.y + (SecondsText.AlignedFontSize() - MillisText.AlignedFontSize());
 
 		SecondsText.Render(TextRender(), Cursor, Color);
 		MillisText.Render(TextRender(), CursorMillis, Color);
