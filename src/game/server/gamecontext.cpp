@@ -2553,7 +2553,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 		if(GetDDRaceTeam(ClientId) != GetDDRaceTeam(KickId))
 		{
-			if(!g_Config.m_SvVoteKickMuteTime)
+			if(g_Config.m_SvVoteKickMuteTime != 0)
 			{
 				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to mute '%s' (%s)", Server()->ClientName(ClientId), Server()->ClientName(KickId), aReason);
 				str_format(aSixupDesc, sizeof(aSixupDesc), "%2d: %s", KickId, Server()->ClientName(KickId));
