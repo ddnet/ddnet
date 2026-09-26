@@ -72,6 +72,8 @@ jobs:
       run: |
         mkdir clang-tidy
         cd clang-tidy
+        TIDY_FLAGS="-Werror"
+        export CXXFLAGS="$TIDY_FLAGS"
         cmake -G Ninja \
           -DCMAKE_CXX_COMPILER=clang++-20 \
           -DCMAKE_C_COMPILER=clang-20 \
