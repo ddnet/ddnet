@@ -2677,7 +2677,7 @@ Joystick Relative Aim
 == Oyun Kolu Göreceli Aimi
 
 Virtual joystick which only aims and moves the mouse pointer relatively.
-== 
+== Yalnızca nişan alan ve fare imlecini göreceli olarak hareket ettiren sanal joystick.
 
 Credits
 == Emeği geçenler

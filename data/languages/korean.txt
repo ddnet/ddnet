@@ -2692,19 +2692,19 @@ No country flags match your filter criteria
 
 [Important alert message]
 Tap to dismiss…
-== 
+== 눌러서 닫기…
 
 Initializing layers
-== 
+== 레이어 초기화 중
 
 Credits
-== 
+== 기여
 
 Join
-== 
+== 참가
 
 '%s' not bound.
-== 
+== '%s'의 키 할당이 없습니다.
 
 Press '%s' to show cursor.
-== 
+== '%s'을(를) 눌러 커서를 표시합니다.
