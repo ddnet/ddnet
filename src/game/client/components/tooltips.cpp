@@ -1,8 +1,11 @@
 #include "tooltips.h"
 
+#include <base/dbg.h>
 #include <base/time.h>
 
 #include <game/client/ui.h>
+
+#include <limits>
 
 CTooltips::CTooltips()
 {
@@ -27,7 +30,18 @@ inline void CTooltips::ClearActiveTooltip()
 	m_PreviousTooltip.reset();
 }
 
+void CTooltips::DoTruncationToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float FontSize, float WidthHint)
+{
+	DoToolTipImpl(pId, pNearRect, pText, FontSize, WidthHint, true);
+}
+
 void CTooltips::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint)
+{
+	constexpr float DefaultFontSize = 14.0f;
+	DoToolTipImpl(pId, pNearRect, pText, DefaultFontSize, WidthHint, false);
+}
+
+void CTooltips::DoToolTipImpl(const void *pId, const CUIRect *pNearRect, const char *pText, float FontSize, float WidthHint, bool Truncated)
 {
 	uintptr_t Id = reinterpret_cast<uintptr_t>(pId);
 	const auto &[Entry, WasInserted] = m_Tooltips.emplace(Id, CTooltip{
@@ -35,9 +49,9 @@ void CTooltips::DoToolTip(const void *pId, const CUIRect *pNearRect, const char 
 									  *pNearRect,
 									  pText,
 									  WidthHint,
-									  false});
+									  FontSize,
+									  Truncated});
 	CTooltip &Tooltip = Entry->second;
-
 	if(!WasInserted)
 	{
 		Tooltip.m_Rect = *pNearRect; // update in case of window resize
@@ -82,21 +96,48 @@ void CTooltips::OnRender()
 		constexpr float SecondsFadeIn = 0.25f;
 		const float AlphaFactor = SecondsSinceActivation < SecondsBeforeFadeIn + SecondsFadeIn ? (SecondsSinceActivation - SecondsBeforeFadeIn) / SecondsFadeIn : 1.0f;
 
-		constexpr float FontSize = 14.0f;
 		constexpr float Margin = 5.0f;
 		constexpr float Padding = 5.0f;
 
-		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, Tooltip.m_pText, -1, Tooltip.m_WidthHint);
+		const CUIRect *pScreen = Ui()->Screen();
+		// The x-bearing might not be applied without a width, causing 1 px offset
+		const float LineWidth = Tooltip.m_Truncated && Tooltip.m_WidthHint <= 0.0f ? pScreen->w - 4 * Margin : Tooltip.m_WidthHint;
+
+		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(Tooltip.m_FontSize, Tooltip.m_pText, -1, LineWidth);
 		CUIRect Rect;
 		Rect.w = BoundingBox.m_W + 2 * Padding;
 		Rect.h = BoundingBox.m_H + 2 * Padding;
 
-		const CUIRect *pScreen = Ui()->Screen();
 		Rect.w = std::min(Rect.w, pScreen->w - 2 * Margin);
 		Rect.h = std::min(Rect.h, pScreen->h - 2 * Margin);
 
+		// On top of the current Rect
+		if(Tooltip.m_Truncated && Tooltip.m_Rect.x + Rect.w < pScreen->w && Tooltip.m_Rect.y + Rect.h < pScreen->h)
+		{
+			Rect.x = Tooltip.m_Rect.x;
+			Rect.y = Tooltip.m_Rect.y;
+
+			// try to overlay perfectly
+			Rect.y += (Tooltip.m_Rect.h - Rect.h) / 2.0f;
+			Rect.x -= Margin;
+		}
+		else if(Tooltip.m_Truncated)
+		{
+			// the tooltip wants to go offscreen, move it to the left until it matches
+			float OffscreenRight = std::max(Tooltip.m_Rect.x + Rect.w - pScreen->w, 0.0f);
+			float OffscreenBottom = std::max(Tooltip.m_Rect.y + Rect.h - pScreen->h, 0.0f);
+
+			Rect.x = Tooltip.m_Rect.x;
+			Rect.y = Tooltip.m_Rect.y;
+
+			Rect.y += (Tooltip.m_Rect.h - Rect.h) / 2.0f;
+			Rect.x -= Margin;
+
+			Rect.x = std::max(0.0f, Rect.x - OffscreenRight);
+			Rect.y = std::max(0.0f, Rect.y - OffscreenBottom);
+		}
 		// Try the top side.
-		if(Tooltip.m_Rect.y - Rect.h - Margin > pScreen->y)
+		else if(Tooltip.m_Rect.y - Rect.h - Margin > pScreen->y)
 		{
 			Rect.x = std::clamp(Ui()->MouseX() - Rect.w / 2.0f, Margin, pScreen->w - Rect.w - Margin);
 			Rect.y = Tooltip.m_Rect.y - Rect.h - Margin;
@@ -125,8 +166,8 @@ void CTooltips::OnRender()
 
 		CTextCursor Cursor;
 		Cursor.SetPosition(Rect.TopLeft());
-		Cursor.m_FontSize = FontSize;
-		Cursor.m_LineWidth = Tooltip.m_WidthHint;
+		Cursor.m_FontSize = Tooltip.m_FontSize;
+		Cursor.m_LineWidth = LineWidth;
 
 		STextContainerIndex TextContainerIndex;
 		const unsigned OldRenderFlags = TextRender()->GetRenderFlags();

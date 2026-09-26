@@ -520,6 +520,7 @@ protected:
 	int m_SelectedIndex;
 	bool m_ServerBrowserShouldRevealSelection;
 	std::vector<CUIElement *> m_avpServerBrowserUiElements[IServerBrowser::NUM_TYPES];
+	std::vector<char> m_ServerbrowserElementId[IServerBrowser::NUM_TYPES];
 	void RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemActivated);
 	void RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItemActivated);
 	void PopupConfirmSwitchServer();

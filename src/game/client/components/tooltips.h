@@ -9,12 +9,18 @@
 #include <optional>
 #include <unordered_map>
 
-struct CTooltip
+class CTooltip
 {
+public:
+	CTooltip(const void *pId, const CUIRect &Rect, const char *pText, float WidthHint, float FontSize, bool Truncated) :
+		m_pId(pId), m_Rect(Rect), m_pText(pText), m_WidthHint(WidthHint), m_FontSize(FontSize), m_Truncated(Truncated), m_OnScreen(false) {}
+
 	const void *m_pId;
 	CUIRect m_Rect;
 	const char *m_pText;
 	float m_WidthHint;
+	float m_FontSize;
+	bool m_Truncated;
 	bool m_OnScreen; // used to know if the tooltip should be rendered.
 };
 
@@ -36,6 +42,7 @@ class CTooltips : public CComponent
 	void SetActiveTooltip(CTooltip &Tooltip);
 
 	inline void ClearActiveTooltip();
+	void DoToolTipImpl(const void *pId, const CUIRect *pNearRect, const char *pText, float FontSize, float WidthHint, bool Truncated);
 
 public:
 	CTooltips();
@@ -53,6 +60,7 @@ public:
 	 * @param WidthHint The maximum width of the tooltip, or -1.0f for unlimited.
 	 */
 	void DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
+	void DoTruncationToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float FontSize, float WidthHint = -1.0f);
 
 	void OnReset() override;
 	void OnRender() override;
