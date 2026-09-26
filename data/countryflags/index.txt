@@ -1,3 +1,7 @@
+# Format for each country entry:
+# 1. country code (ISO 3166-1 alpha-2, an ISO 3166-2 subdivision, or "default")
+# 2. country code (ISO 3166-1 numeric)
+# 3. name
 
 ##### country codes #####
 
@@ -5,777 +9,1034 @@
 
 default
 == -1
+== default
 
 ##### ISO 3166-2 subdivisions #####
 
 GB-ENG
 == 901
+== England
 
 GB-NIR
 == 902
+== Northern Ireland
 
 GB-SCT
 == 903
+== Scotland
 
 GB-WLS
 == 904
+== Wales
 
 ES-CT
 == 906
+== Catalonia
 
 ES-GA
 == 907
+== Galicia
 
 ##### ISO 3166/MA exceptional reservations #####
 
 EU
 == 905
+== European Union
 
 ##### ISO 3166-1 based #####
 
 AF
 == 4
+== Afghanistan
 
 AX
 == 248
+== Åland Islands
 
 AL
 == 8
+== Albania
 
 DZ
 == 12
+== Algeria
 
 AS
 == 16
+== American Samoa
 
 AD
 == 20
+== Andorra
 
 AO
 == 24
+== Angola
 
 AI
 == 660
+== Anguilla
 
 AQ
 == 10
+== Antarctica
 
 AG
 == 28
+== Antigua & Barbuda
 
 AR
 == 32
+== Argentina
 
 AM
 == 51
+== Armenia
 
 AW
 == 533
+== Aruba
 
 AU
 == 36
+== Australia
 
 AT
 == 40
+== Austria
 
 AZ
 == 31
+== Azerbaijan
 
 BS
 == 44
+== Bahamas
 
 BH
 == 48
+== Bahrain
 
 BD
 == 50
+== Bangladesh
 
 BB
 == 52
+== Barbados
 
 BY
 == 112
+== Belarus
 
 BE
 == 56
+== Belgium
 
 BZ
 == 84
+== Belize
 
 BJ
 == 204
+== Benin
 
 BM
 == 60
+== Bermuda
 
 BT
 == 64
+== Bhutan
 
 BO
 == 68
+== Bolivia
 
 #BQ
 #== 535
+#== Caribbean Netherlands
 
 BA
 == 70
+== Bosnia & Herzegovina
 
 BW
 == 72
+== Botswana
 
 #BV
 #== 74
+#== Bouvet Island
 
 BR
 == 76
+== Brazil
 
 IO
 == 86
+== British Indian Ocean Territory
 
 BN
 == 96
+== Brunei
 
 BG
 == 100
+== Bulgaria
 
 BF
 == 854
+== Burkina Faso
 
 BI
 == 108
+== Burundi
 
 KH
 == 116
+== Cambodia
 
 CM
 == 120
+== Cameroon
 
 CA
 == 124
+== Canada
 
 CV
 == 132
+== Cape Verde
 
 KY
 == 136
+== Cayman Islands
 
 CF
 == 140
+== Central African Republic
 
 TD
 == 148
+== Chad
 
 CL
 == 152
+== Chile
 
 CN
 == 156
+== China
 
 CX
 == 162
+== Christmas Island
 
 CC
 == 166
+== Cocos (Keeling) Islands
 
 CO
 == 170
+== Colombia
 
 KM
 == 174
+== Comoros
 
 CG
 == 178
+== Congo - Brazzaville
 
 CD
 == 180
+== Congo - Kinshasa
 
 CK
 == 184
+== Cook Islands
 
 CR
 == 188
+== Costa Rica
 
 CI
 == 384
+== Côte d’Ivoire
 
 HR
 == 191
+== Croatia
 
 CU
 == 192
+== Cuba
 
 CW
 == 531
+== Curaçao
 
 CY
 == 196
+== Cyprus
 
 CZ
 == 203
+== Czechia
 
 DK
 == 208
+== Denmark
 
 DJ
 == 262
+== Djibouti
 
 DM
 == 212
+== Dominica
 
 DO
 == 214
+== Dominican Republic
 
 EC
 == 218
+== Ecuador
 
 EG
 == 818
+== Egypt
 
 SV
 == 222
+== El Salvador
 
 GQ
 == 226
+== Equatorial Guinea
 
 ER
 == 232
+== Eritrea
 
 EE
 == 233
+== Estonia
 
 ET
 == 231
+== Ethiopia
 
 FK
 == 238
+== Falkland Islands
 
 FO
 == 234
+== Faroe Islands
 
 FJ
 == 242
+== Fiji
 
 FI
 == 246
+== Finland
 
 FR
 == 250
+== France
 
 GF
 == 254
+== French Guiana
 
 PF
 == 258
+== French Polynesia
 
 TF
 == 260
+== French Southern Territories
 
 GA
 == 266
+== Gabon
 
 GM
 == 270
+== Gambia
 
 GE
 == 268
+== Georgia
 
 DE
 == 276
+== Germany
 
 GH
 == 288
+== Ghana
 
 GI
 == 292
+== Gibraltar
 
 GR
 == 300
+== Greece
 
 GL
 == 304
+== Greenland
 
 GD
 == 308
+== Grenada
 
 GP
 == 312
+== Guadeloupe
 
 GU
 == 316
+== Guam
 
 GT
 == 320
+== Guatemala
 
 GG
 == 831
+== Guernsey
 
 GN
 == 324
+== Guinea
 
 GW
 == 624
+== Guinea-Bissau
 
 GY
 == 328
+== Guyana
 
 HT
 == 332
+== Haiti
 
 #HM
 #== 334
+#== Heard & McDonald Islands
 
 VA
 == 336
+== Vatican City
 
 HN
 == 340
+== Honduras
 
 HK
 == 344
+== Hong Kong SAR China
 
 HU
 == 348
+== Hungary
 
 IS
 == 352
+== Iceland
 
 IN
 == 356
+== India
 
 ID
 == 360
+== Indonesia
 
 IR
 == 364
+== Iran
 
 IQ
 == 368
+== Iraq
 
 IE
 == 372
+== Ireland
 
 IM
 == 833
+== Isle of Man
 
 IL
 == 376
+== Israel
 
 IT
 == 380
+== Italy
 
 JM
 == 388
+== Jamaica
 
 JP
 == 392
+== Japan
 
 JE
 == 832
+== Jersey
 
 JO
 == 400
+== Jordan
 
 KZ
 == 398
+== Kazakhstan
 
 KE
 == 404
+== Kenya
 
 KI
 == 296
+== Kiribati
 
 KP
 == 408
+== North Korea
 
 KR
 == 410
+== South Korea
 
 KW
 == 414
+== Kuwait
 
 KG
 == 417
+== Kyrgyzstan
 
 LA
 == 418
+== Laos
 
 LV
 == 428
+== Latvia
 
 LB
 == 422
+== Lebanon
 
 LS
 == 426
+== Lesotho
 
 LR
 == 430
+== Liberia
 
 LY
 == 434
+== Libya
 
 LI
 == 438
+== Liechtenstein
 
 LT
 == 440
+== Lithuania
 
 LU
 == 442
+== Luxembourg
 
 MO
 == 446
+== Macao SAR China
 
 MK
 == 807
+== North Macedonia
 
 MG
 == 450
+== Madagascar
 
 MW
 == 454
+== Malawi
 
 MY
 == 458
+== Malaysia
 
 MV
 == 462
+== Maldives
 
 ML
 == 466
+== Mali
 
 MT
 == 470
+== Malta
 
 MH
 == 584
+== Marshall Islands
 
 MQ
 == 474
+== Martinique
 
 MR
 == 478
+== Mauritania
 
 MU
 == 480
+== Mauritius
 
 #YT
 #== 175
+#== Mayotte
 
 MX
 == 484
+== Mexico
 
 FM
 == 583
+== Micronesia
 
 MD
 == 498
+== Moldova
 
 MC
 == 492
+== Monaco
 
 MN
 == 496
+== Mongolia
 
 ME
 == 499
+== Montenegro
 
 MS
 == 500
+== Montserrat
 
 MA
 == 504
+== Morocco
 
 MZ
 == 508
+== Mozambique
 
 MM
 == 104
+== Myanmar (Burma)
 
 NA
 == 516
+== Namibia
 
 NR
 == 520
+== Nauru
 
 NP
 == 524
+== Nepal
 
 NL
 == 528
+== Netherlands
 
 NC
 == 540
+== New Caledonia
 
 NZ
 == 554
+== New Zealand
 
 NI
 == 558
+== Nicaragua
 
 NE
 == 562
+== Niger
 
 NG
 == 566
+== Nigeria
 
 NU
 == 570
+== Niue
 
 NF
 == 574
+== Norfolk Island
 
 MP
 == 580
+== Northern Mariana Islands
 
 NO
 == 578
+== Norway
 
 OM
 == 512
+== Oman
 
 PK
 == 586
+== Pakistan
 
 PW
 == 585
+== Palau
 
 PA
 == 591
+== Panama
 
 PG
 == 598
+== Papua New Guinea
 
 PY
 == 600
+== Paraguay
 
 PE
 == 604
+== Peru
 
 PH
 == 608
+== Philippines
 
 PN
 == 612
+== Pitcairn Islands
 
 PL
 == 616
+== Poland
 
 PT
 == 620
+== Portugal
 
 PR
 == 630
+== Puerto Rico
 
 PS
 == 275
+== Palestinian Territories
 
 QA
 == 634
+== Qatar
 
 RE
 == 638
+== Réunion
 
 RO
 == 642
+== Romania
 
 RU
 == 643
+== Russia
 
 RW
 == 646
+== Rwanda
 
 BL
 == 652
+== St. Barthélemy
 
 SH
 == 654
+== St. Helena
 
 KN
 == 659
+== St. Kitts & Nevis
 
 LC
 == 662
+== St. Lucia
 
 MF
 == 663
+== St. Martin
 
 PM
 == 666
+== St. Pierre & Miquelon
 
 VC
 == 670
+== St. Vincent & Grenadines
 
 WS
 == 882
+== Samoa
 
 SM
 == 674
+== San Marino
 
 ST
 == 678
+== São Tomé & Príncipe
 
 SA
 == 682
+== Saudi Arabia
 
 SN
 == 686
+== Senegal
 
 RS
 == 688
+== Serbia
 
 SC
 == 690
+== Seychelles
 
 SL
 == 694
+== Sierra Leone
 
 SG
 == 702
+== Singapore
 
 SX
 == 534
+== Sint Maarten
 
 SK
 == 703
+== Slovakia
 
 SI
 == 705
+== Slovenia
 
 SB
 == 90
+== Solomon Islands
 
 SO
 == 706
+== Somalia
 
 SS
 == 737
+== South Sudan
 
 ZA
 == 710
+== South Africa
 
 GS
 == 239
+== South Georgia & South Sandwich Islands
 
 ES
 == 724
+== Spain
 
 LK
 == 144
+== Sri Lanka
 
 SD
 == 736
+== Sudan
 
 SR
 == 740
+== Suriname
 
 #SJ
 #== 744
+#== Svalbard & Jan Mayen
 
 SZ
 == 748
+== Eswatini
 
 SE
 == 752
+== Sweden
 
 CH
 == 756
+== Switzerland
 
 SY
 == 760
+== Syria
 
 TW
 == 158
+== Taiwan
 
 TJ
 == 762
+== Tajikistan
 
 TZ
 == 834
+== Tanzania
 
 TH
 == 764
+== Thailand
 
 TL
 == 626
+== Timor-Leste
 
 TG
 == 768
+== Togo
 
 TK
 == 772
+== Tokelau
 
 TO
 == 776
+== Tonga
 
 TT
 == 780
+== Trinidad & Tobago
 
 TN
 == 788
+== Tunisia
 
 TR
 == 792
+== Türkiye
 
 TM
 == 795
+== Turkmenistan
 
 TC
 == 796
+== Turks & Caicos Islands
 
 TV
 == 798
+== Tuvalu
 
 UG
 == 800
+== Uganda
 
 UA
 == 804
+== Ukraine
 
 AE
 == 784
+== United Arab Emirates
 
 GB
 == 826
+== United Kingdom
 
 US
 == 840
+== United States
 
 #UM
 #== 581
+#== U.S. Outlying Islands
 
 UY
 == 858
+== Uruguay
 
 UZ
 == 860
+== Uzbekistan
 
 VU
 == 548
+== Vanuatu
 
 VE
 == 862
+== Venezuela
 
 VN
 == 704
+== Vietnam
 
 VG
 == 92
+== British Virgin Islands
 
 VI
 == 850
+== U.S. Virgin Islands
 
 WF
 == 876
+== Wallis & Futuna
 
 EH
 == 732
+== Western Sahara
 
 YE
 == 887
+== Yemen
 
 ZM
 == 894
+== Zambia
 
 ZW
 == 716
+== Zimbabwe
