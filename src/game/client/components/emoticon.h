@@ -18,6 +18,9 @@ class CEmoticon : public CComponent
 	int m_SelectedEmote;
 	int m_SelectedEyeEmote;
 
+	int m_LastEmote;
+	float m_LastEmoteTime;
+
 	CUi::CTouchState m_TouchState;
 	bool m_TouchPressedOutside;
 
