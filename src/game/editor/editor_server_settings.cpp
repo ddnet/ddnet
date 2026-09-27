@@ -2026,7 +2026,7 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 
 		// The result is either REPLACE when we found a collision, or ADD
 		Result = Error ? ECollisionCheckResult::REPLACE : ECollisionCheckResult::ADD;
-		return CollidingLineIndex;
+		return Error ? CollidingLineIndex : -1;
 	}
 
 	return -1;
