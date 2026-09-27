@@ -13,6 +13,7 @@
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/sound.h>
 #include <game/editor/references.h>
+#include <game/mapitems.h>
 
 void CEditorMap::CMapInfo::Reset()
 {
@@ -1038,6 +1039,20 @@ CSoundSource *CEditorMap::SelectedSoundSource() const
 	if(m_SelectedSoundSource >= 0 && m_SelectedSoundSource < (int)pSounds->m_vSources.size())
 		return &pSounds->m_vSources[m_SelectedSoundSource];
 	return nullptr;
+}
+
+void CEditorMap::ToggleSoundLayerVisibility()
+{
+	m_ShowSoundArea = !m_ShowSoundArea;
+	for(const auto &pGroup : m_vpGroups)
+	{
+		for(const auto &pLayer : pGroup->m_vpLayers)
+		{
+			if(pLayer->m_Type != LAYERTYPE_SOUNDS && pLayer->m_Type != LAYERTYPE_SOUNDS_DEPRECATED)
+				continue;
+			pLayer->m_Visible = m_ShowSoundArea;
+		}
+	}
 }
 
 void CEditorMap::PlaceBorderTiles()
