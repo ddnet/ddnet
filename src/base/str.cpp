@@ -104,29 +104,29 @@ bool str_isnum(char c)
 	return c >= '0' && c <= '9';
 }
 
-int str_isallnum(const char *str)
+bool str_isallnum(const char *str)
 {
 	while(*str)
 	{
 		if(!str_isnum(*str))
-			return 0;
+			return false;
 		str++;
 	}
-	return 1;
+	return true;
 }
 
-int str_isallnum_hex(const char *str)
+bool str_isallnum_hex(const char *str)
 {
 	while(*str)
 	{
 		if(!str_isnum(*str) && !(*str >= 'a' && *str <= 'f') && !(*str >= 'A' && *str <= 'F'))
-			return 0;
+			return false;
 		str++;
 	}
-	return 1;
+	return true;
 }
 
-int str_isspace(char c)
+bool str_isspace(char c)
 {
 	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }
@@ -517,7 +517,7 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, siz
 	return tok + len;
 }
 
-int str_in_list(const char *list, const char *delim, const char *needle)
+bool str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
 	size_t len = 0, notfound = 1, needlelen = str_length(needle);
@@ -1095,7 +1095,7 @@ void str_utf8_tolower(const char *input, char *output, size_t size)
 	output[out_pos] = '\0';
 }
 
-int str_utf8_isspace(int code)
+bool str_utf8_isspace(int code)
 {
 	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x034F ||
 	       code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
@@ -1106,11 +1106,11 @@ int str_utf8_isspace(int code)
 	       (code >= 0xFFF9 && code <= 0xFFFC);
 }
 
-int str_utf8_isstart(char c)
+bool str_utf8_isstart(char c)
 {
 	if((c & 0xC0) == 0x80) /* 10xxxxxx */
-		return 0;
-	return 1;
+		return false;
+	return true;
 }
 
 int str_utf8_rewind(const char *str, int cursor)
@@ -1221,17 +1221,17 @@ int str_utf8_forward(const char *str, int cursor)
 	return ptr - str;
 }
 
-int str_utf8_check(const char *str)
+bool str_utf8_check(const char *str)
 {
 	int codepoint;
 	while((codepoint = str_utf8_decode(&str)))
 	{
 		if(codepoint == -1)
 		{
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 void str_utf8_copy_num(char *dst, const char *src, int dst_size, int num)

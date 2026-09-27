@@ -89,18 +89,18 @@ TEST(Str, StrIsNum)
 
 TEST(Str, StrIsAllNum)
 {
-	EXPECT_EQ(str_isallnum("/"), 0);
-	EXPECT_EQ(str_isallnum("0"), 1);
-	EXPECT_EQ(str_isallnum("1"), 1);
-	EXPECT_EQ(str_isallnum("2"), 1);
-	EXPECT_EQ(str_isallnum("8"), 1);
-	EXPECT_EQ(str_isallnum("9"), 1);
-	EXPECT_EQ(str_isallnum(":"), 0);
-	EXPECT_EQ(str_isallnum(" "), 0);
+	EXPECT_FALSE(str_isallnum("/"));
+	EXPECT_TRUE(str_isallnum("0"));
+	EXPECT_TRUE(str_isallnum("1"));
+	EXPECT_TRUE(str_isallnum("2"));
+	EXPECT_TRUE(str_isallnum("8"));
+	EXPECT_TRUE(str_isallnum("9"));
+	EXPECT_FALSE(str_isallnum(":"));
+	EXPECT_FALSE(str_isallnum(" "));
 
-	EXPECT_EQ(str_isallnum("123"), 1);
-	EXPECT_EQ(str_isallnum("123/"), 0);
-	EXPECT_EQ(str_isallnum("123:"), 0);
+	EXPECT_TRUE(str_isallnum("123"));
+	EXPECT_FALSE(str_isallnum("123/"));
+	EXPECT_FALSE(str_isallnum("123:"));
 }
 
 TEST(Str, Dist)
