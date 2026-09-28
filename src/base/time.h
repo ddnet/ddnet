@@ -228,6 +228,20 @@ enum class ETimeFormat
 int64_t time_milliseconds_from_seconds(float seconds);
 
 /**
+ * Returns the number of even centiseconds from a time float.
+ *
+ * It takes care of rounding, and rounds to the nearest time in ticks.
+ * Size the server runs at 50Hz, each tick is 0.02 seconds, so the centisecond time must be even
+ *
+ * @ingroup Timestamp
+ *
+ * @param seconds Time in seconds.
+ *
+ * @return Number of centiseconds.
+ */
+int64_t time_even_centiseconds_from_seconds(float seconds);
+
+/**
  * Formats a time string.
  *
  * @ingroup Timestamp

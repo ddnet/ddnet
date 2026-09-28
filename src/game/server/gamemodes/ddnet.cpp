@@ -133,7 +133,7 @@ int CGameControllerDDNet::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
 			return protocol7::FinishTime::NOT_FINISHED;
 
 		// Times are in milliseconds for 0.7
-		return Score.value() * 1000.0f;
+		return static_cast<int>(time_milliseconds_from_seconds(Score.value()));
 	}
 
 	// This is the time sent to the player while ingame (do not confuse to the one reported to the master server).
@@ -158,11 +158,9 @@ IGameController::CFinishTime CGameControllerDDNet::SnapPlayerTime(int SnappingCl
 	std::optional<float> BestTime = GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime;
 	if(BestTime.has_value() && (!g_Config.m_SvHideScore || SnappingClient == pPlayer->GetCid()))
 	{
-		// same as in str_time_float
-		int64_t TimeMilliseconds = time_milliseconds_from_seconds(BestTime.value());
-		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
-		int Millis = static_cast<int>(TimeMilliseconds % 1000);
-		return CFinishTime(Seconds, Millis);
+		// don't make the clients believe, we support times in milliseconds.
+		int64_t TimeCentiseconds = time_even_centiseconds_from_seconds(BestTime.value());
+		return CFinishTime(static_cast<int>(TimeCentiseconds / 100), static_cast<int>(TimeCentiseconds % 100) * 10);
 	}
 	return CFinishTime::NotFinished();
 }
@@ -171,11 +169,9 @@ IGameController::CFinishTime CGameControllerDDNet::SnapMapBestTime(int SnappingC
 {
 	if(m_CurrentRecord.has_value() && !g_Config.m_SvHideScore)
 	{
-		// same as in str_time_float
-		int64_t TimeMilliseconds = time_milliseconds_from_seconds(m_CurrentRecord.value());
-		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
-		int Millis = static_cast<int>(TimeMilliseconds % 1000);
-		return CFinishTime(Seconds, Millis);
+		// don't make the clients believe, we support times in milliseconds.
+		int64_t TimeCentiseconds = time_even_centiseconds_from_seconds(m_CurrentRecord.value());
+		return CFinishTime(static_cast<int>(TimeCentiseconds / 100), static_cast<int>(TimeCentiseconds % 100) * 10);
 	}
 	return CFinishTime::NotFinished();
 }
