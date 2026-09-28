@@ -204,9 +204,9 @@ char str_uppercase(char c);
 
 bool str_isnum(char c);
 
-int str_isallnum(const char *str);
+bool str_isallnum(const char *str);
 
-int str_isallnum_hex(const char *str);
+bool str_isallnum_hex(const char *str);
 
 /**
  * Determines whether a character is whitespace.
@@ -215,11 +215,11 @@ int str_isallnum_hex(const char *str);
  *
  * @param c the character to check.
  *
- * @return `1` if the character is whitespace, `0` otherwise.
+ * @return `true` if the character is whitespace, `false` otherwise.
  *
  * @remark The following characters are considered whitespace: ` `, `\n`, `\r`, `\t`.
  */
-int str_isspace(char c);
+bool str_isspace(char c);
 
 /**
  * Trims specific number of words at the start of a string.
@@ -549,7 +549,7 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, siz
  *
  * @remark The strings are treated as null-terminated strings.
  */
-int str_in_list(const char *list, const char *delim, const char *needle);
+bool str_in_list(const char *list, const char *delim, const char *needle);
 
 /**
  * @ingroup Strings
@@ -791,7 +791,7 @@ void str_utf8_tolower(const char *input, char *output, size_t size);
  *
  * @return Whether the codepoint is a space.
  */
-int str_utf8_isspace(int code);
+bool str_utf8_isspace(int code);
 
 /**
  * Checks whether a given byte is the start of a UTF-8 character.
@@ -802,7 +802,7 @@ int str_utf8_isspace(int code);
  *
  * @return Whether the char starts a UTF-8 character.
  */
-int str_utf8_isstart(char c);
+bool str_utf8_isstart(char c);
 
 /**
  * Moves a cursor backwards in an UTF-8 string,
@@ -900,11 +900,11 @@ int str_utf8_forward(const char *str, int cursor);
  *
  * @param str Pointer to a possible UTF-8 string.
  *
- * @return `0` if invalid characters were found, `1` if only valid characters were found.
+ * @return `false` if invalid characters were found, `true` if only valid characters were found.
  *
  * @remark The string is treated as null-terminated UTF-8 string.
  */
-int str_utf8_check(const char *str);
+bool str_utf8_check(const char *str);
 
 /**
  * Copies a number of UTF-8 characters from one string to another.
