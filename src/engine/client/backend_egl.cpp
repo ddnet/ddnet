@@ -71,8 +71,6 @@ bool CCommandProcessorFragment_EGL::RunCommand(const CCommandBuffer::SCommand *p
 
 CCommandProcessor_EGL_GL::CCommandProcessor_EGL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch)
 {
-	m_BackendType = BackendType;
-
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
 		if(GLMajor < 2)
