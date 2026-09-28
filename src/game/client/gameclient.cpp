@@ -1869,7 +1869,8 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 
 					if(m_aClients[Item.m_Id].m_FinishTimeSeconds == FinishTime::UNSET)
 						HasUnsetDDNetFinishTimes = true;
-					else if(m_aClients[Item.m_Id].m_FinishTimeMillis % 10 != 0)
+					// Sub-second precision is only rendered for times under an hour in the scoreboard
+					else if(m_aClients[Item.m_Id].m_FinishTimeSeconds < 60 * 60 && m_aClients[Item.m_Id].m_FinishTimeMillis % 10 != 0)
 						HasTrueMillisecondFinishTimes = true;
 
 					if(Item.m_Id == m_Snap.m_LocalClientId && (m_aClients[Item.m_Id].m_Paused || m_aClients[Item.m_Id].m_Spec))
