@@ -13,7 +13,6 @@
 #include <game/client/race.h>
 #include <game/localization.h>
 
-#include <cctype>
 #include <chrono>
 
 using namespace std::chrono_literals;
@@ -223,7 +222,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	const char *pTime = Item.m_aName + MapLen + 1;
 	const char *pTEnd = pTime;
-	while(isdigit(*pTEnd) || *pTEnd == ' ' || *pTEnd == '.' || *pTEnd == ',')
+	while(str_isnum(*pTEnd) || *pTEnd == ' ' || *pTEnd == '.' || *pTEnd == ',')
 		pTEnd++;
 
 	if(g_Config.m_ClDemoName)
