@@ -405,7 +405,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			DemoPlayer()->SetSpeedIndex(DEMO_SPEED_INDEX_DEFAULT);
 			UpdateLastSpeedChange();
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_LiveButtonId, &LiveButton,
+		Ui()->DoToolTip(&s_LiveButtonId, &LiveButton,
 			pInfo->m_LivePlayback ? Localize("Live", "Demo playback") : Localize("Go to Live", "Demo playback"));
 	}
 
@@ -528,7 +528,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			const int HoveredTick = (int)(std::clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (SeekBar.w - 2 * Rounding), 0.0f, 1.0f) * TotalTicks);
 			static char s_aHoveredTime[32];
 			str_time((int64_t)HoveredTick / Client()->GameTickSpeed() * 100, ETimeFormat::HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
-			GameClient()->m_Tooltips.DoToolTip(&s_SeekBarId, &SeekBar, s_aHoveredTime);
+			Ui()->DoToolTip(&s_SeekBarId, &SeekBar, s_aHoveredTime);
 		}
 	}
 
@@ -552,7 +552,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 		UpdateLastPauseChange();
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_PlayPauseButton, &Button, pInfo->m_Paused ? Localize("Play the current demo") : Localize("Pause the current demo"));
+	Ui()->DoToolTip(&s_PlayPauseButton, &Button, pInfo->m_Paused ? Localize("Play the current demo") : Localize("Pause the current demo"));
 
 	// stop button
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
@@ -563,7 +563,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		DemoPlayer()->Pause();
 		PositionToSeek = 0.0f;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_ResetButton, &Button, Localize("Stop the current demo"));
+	Ui()->DoToolTip(&s_ResetButton, &Button, Localize("Stop the current demo"));
 
 	// skip time back
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
@@ -573,7 +573,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		TimeToSeek = -SKIP_DURATIONS_SECONDS[m_SkipDurationIndex];
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_TimeBackButton, &Button, Localize("Go back the specified duration"));
+	Ui()->DoToolTip(&s_TimeBackButton, &Button, Localize("Go back the specified duration"));
 
 	// skip time dropdown
 	if(NumDurationLabels >= 2)
@@ -601,7 +601,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		static CScrollRegion s_SkipDurationDropDownScrollRegion;
 		s_SkipDurationDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_SkipDurationDropDownScrollRegion;
 		m_SkipDurationIndex = Ui()->DoDropDown(&Button, m_SkipDurationIndex, s_vpDurationNames.data(), NumDurationLabels, s_SkipDurationDropDownState);
-		GameClient()->m_Tooltips.DoToolTip(&s_SkipDurationDropDownState.m_ButtonContainer, &Button, Localize("Change the skip duration"));
+		Ui()->DoToolTip(&s_SkipDurationDropDownState.m_ButtonContainer, &Button, Localize("Change the skip duration"));
 	}
 
 	// skip time forward
@@ -612,7 +612,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		TimeToSeek = SKIP_DURATIONS_SECONDS[m_SkipDurationIndex];
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_TimeForwardButton, &Button, Localize("Go forward the specified duration"));
+	Ui()->DoToolTip(&s_TimeForwardButton, &Button, Localize("Go forward the specified duration"));
 
 	// one tick back
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
@@ -622,7 +622,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		DemoSeekTick(IDemoPlayer::TICK_PREVIOUS);
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_OneTickBackButton, &Button, Localize("Go back one tick"));
+	Ui()->DoToolTip(&s_OneTickBackButton, &Button, Localize("Go back one tick"));
 
 	// one tick forward
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
@@ -632,7 +632,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		DemoSeekTick(IDemoPlayer::TICK_NEXT);
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_OneTickForwardButton, &Button, Localize("Go forward one tick"));
+	Ui()->DoToolTip(&s_OneTickForwardButton, &Button, Localize("Go forward one tick"));
 
 	// one marker back
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
@@ -642,7 +642,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		PositionToSeek = FindPreviousMarkerPosition();
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
+	Ui()->DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
 
 	// one marker forward
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
@@ -652,7 +652,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		PositionToSeek = FindNextMarkerPosition();
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
+	Ui()->DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
 
 	// slowdown
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
@@ -660,7 +660,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SlowDownButton;
 	if(Ui()->DoButton_FontIcon(&s_SlowDownButton, FontIcon::CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT))
 		DecreaseDemoSpeed = true;
-	GameClient()->m_Tooltips.DoToolTip(&s_SlowDownButton, &Button, Localize("Slow down the demo"));
+	Ui()->DoToolTip(&s_SlowDownButton, &Button, Localize("Slow down the demo"));
 
 	// fastforward
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
@@ -668,7 +668,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SpeedUpButton;
 	if(Ui()->DoButton_FontIcon(&s_SpeedUpButton, FontIcon::CHEVRON_UP, 0, &Button, BUTTONFLAG_LEFT))
 		IncreaseDemoSpeed = true;
-	GameClient()->m_Tooltips.DoToolTip(&s_SpeedUpButton, &Button, Localize("Speed up the demo"));
+	Ui()->DoToolTip(&s_SpeedUpButton, &Button, Localize("Speed up the demo"));
 
 	// speed meter
 	ButtonBar.VSplitLeft(Margins * 12, &SpeedBar, &ButtonBar);
@@ -690,7 +690,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		g_Config.m_ClDemoSliceBegin = -1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Mark the beginning of a cut (right click to reset)"));
+	Ui()->DoToolTip(&s_SliceBeginButton, &Button, Localize("Mark the beginning of a cut (right click to reset)"));
 
 	// slice end button
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
@@ -707,7 +707,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		g_Config.m_ClDemoSliceEnd = -1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Mark the end of a cut (right click to reset)"));
+	Ui()->DoToolTip(&s_SliceEndButton, &Button, Localize("Mark the end of a cut (right click to reset)"));
 
 	// slice save button
 #if defined(CONF_VIDEORECORDER)
@@ -726,7 +726,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		Ui()->SetActiveItem(&m_DemoSliceInput);
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a separate demo"));
+	Ui()->DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a separate demo"));
 
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
@@ -737,7 +737,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		SetMenuPage(PAGE_DEMOS);
 		DemolistOnUpdate(false);
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_ExitButton, &Button, Localize("Close the demo player"));
+	Ui()->DoToolTip(&s_ExitButton, &Button, Localize("Close the demo player"));
 
 	// toggle keyboard shortcuts button
 	ButtonBar.VSplitRight(Margins, &ButtonBar, nullptr);
@@ -747,7 +747,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		g_Config.m_ClDemoKeyboardShortcuts ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_KeyboardShortcutsButton, &Button, Localize("Toggle keyboard shortcuts"));
+	Ui()->DoToolTip(&s_KeyboardShortcutsButton, &Button, Localize("Toggle keyboard shortcuts"));
 
 	// auto camera button (only available when it is possible to use)
 	if(GameClient()->m_Camera.CanUseAutoSpecCamera())
@@ -759,7 +759,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			GameClient()->m_Camera.m_AutoSpecCamera = !GameClient()->m_Camera.m_AutoSpecCamera;
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_AutoCameraButton, &Button, Localize("Toggle auto camera"));
+		Ui()->DoToolTip(&s_AutoCameraButton, &Button, Localize("Toggle auto camera"));
 	}
 
 	// demo name
@@ -1248,7 +1248,7 @@ void CMenus::RenderDemoBrowserList(CUIRect ListView, bool &WasListboxItemActivat
 			const int ButtonPressed = DoButton_GridHeader(&Col.m_Id, Col.m_FontIcon ? Col.m_pCaption : Localize(Col.m_pCaption), g_Config.m_BrDemoSort == Col.m_Sort, &Col.m_Rect, Col.m_FontIcon ? TEXTALIGN_MC : TEXTALIGN_ML);
 			if(Col.m_pTooltip != nullptr)
 			{
-				GameClient()->m_Tooltips.DoToolTip(&Col.m_Id, &Col.m_Rect, Localize(Col.m_pTooltip));
+				Ui()->DoToolTip(&Col.m_Id, &Col.m_Rect, Localize(Col.m_pTooltip));
 			}
 			if(Col.m_FontIcon)
 			{
@@ -1531,7 +1531,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 			DemolistOnUpdate(false);
 		}
 		SetIconMode(false);
-		GameClient()->m_Tooltips.DoToolTip(&s_RefreshButton, &RefreshButton, Localize("Refresh the demo list"));
+		Ui()->DoToolTip(&s_RefreshButton, &RefreshButton, Localize("Refresh the demo list"));
 	}
 
 	// fetch info checkbox
@@ -1560,7 +1560,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 			Storage()->GetCompletePath(m_DemolistSelectedIndex >= 0 ? m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_aCurrentDemoFolder[0] == '\0' ? "demos" : m_aCurrentDemoFolder, aBuf, sizeof(aBuf));
 			Client()->ViewFile(aBuf);
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_DemosDirectoryButton, &DemosDirectoryButton, Localize("Open the directory that contains the demo files"));
+		Ui()->DoToolTip(&s_DemosDirectoryButton, &DemosDirectoryButton, Localize("Open the directory that contains the demo files"));
 	}
 
 	// play/open button
@@ -1576,7 +1576,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 						  (Input()->KeyPress(KEY_P) && !GameClient()->m_GameConsole.IsActive() && !m_DemoSearchInput.IsActive());
 		SetIconMode(false);
 		const char *pPlayTooltip = m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Open the selected folder") : Localize("Play the selected demo");
-		GameClient()->m_Tooltips.DoToolTip(&s_PlayButton, &PlayButton, pPlayTooltip);
+		Ui()->DoToolTip(&s_PlayButton, &PlayButton, pPlayTooltip);
 
 		if(ActivateSelectedItem)
 		{
@@ -1655,7 +1655,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 					return;
 				}
 				const char *pRenameTooltip = m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Rename folder") : Localize("Rename demo");
-				GameClient()->m_Tooltips.DoToolTip(&s_RenameButton, &RenameButton, pRenameTooltip);
+				Ui()->DoToolTip(&s_RenameButton, &RenameButton, pRenameTooltip);
 
 				// delete button
 				static CButtonContainer s_DeleteButton;
@@ -1671,7 +1671,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 					return;
 				}
 				const char *pDeleteTooltip = m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Delete folder") : Localize("Delete demo");
-				GameClient()->m_Tooltips.DoToolTip(&s_DeleteButton, &DeleteButton, pDeleteTooltip);
+				Ui()->DoToolTip(&s_DeleteButton, &DeleteButton, pDeleteTooltip);
 				SetIconMode(false);
 			}
 
@@ -1696,7 +1696,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 					return;
 				}
 				SetIconMode(false);
-				GameClient()->m_Tooltips.DoToolTip(&s_RenderButton, &RenderButton, Localize("Render demo"));
+				Ui()->DoToolTip(&s_RenderButton, &RenderButton, Localize("Render demo"));
 			}
 #endif
 		}

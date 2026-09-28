@@ -15,7 +15,6 @@
 
 #include <game/client/components/background.h>
 #include <game/client/components/mapimages.h>
-#include <game/client/components/tooltips.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
@@ -69,7 +68,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClRaceGhost ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time"));
+	Ui()->DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time"));
 
 	if(g_Config.m_ClRaceGhost)
 	{
@@ -128,7 +127,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Ui()->DoScrollbarOption(&g_Config.m_ClShowOthersAlpha, &g_Config.m_ClShowOthersAlpha, &Button, Localize("Opacity"), 0, 100, &CUi::ms_LinearScrollbarScale, 0u, "%");
 
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowOthersAlpha, &Button, Localize("Adjust the opacity of entities belonging to other teams, such as tees and name plates"));
+	Ui()->DoToolTip(&g_Config.m_ClShowOthersAlpha, &Button, Localize("Adjust the opacity of entities belonging to other teams, such as tees and name plates"));
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	static int s_ShowOwnTeamId = 0;
@@ -142,7 +141,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClShowQuads ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowQuads, &Button, Localize("Quads are used for background decoration"));
+	Ui()->DoToolTip(&g_Config.m_ClShowQuads, &Button, Localize("Quads are used for background decoration"));
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(Ui()->DoScrollbarOption(&g_Config.m_ClDefaultZoom, &g_Config.m_ClDefaultZoom, &Button, Localize("Default zoom"), 0, 20))
@@ -162,7 +161,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClAntiPing ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency"));
+	Ui()->DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency"));
 
 	if(g_Config.m_ClAntiPing)
 	{

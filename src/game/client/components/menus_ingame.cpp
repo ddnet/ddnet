@@ -94,12 +94,12 @@ void CMenus::RenderGame(CUIRect MainView)
 	if(!Client()->DummyAllowed())
 	{
 		DoButton_Menu(&s_DummyButton, Localize("Connect Dummy"), 1, &Button);
-		GameClient()->m_Tooltips.DoToolTip(&s_DummyButton, &Button, Localize("Dummy is not allowed on this server"));
+		Ui()->DoToolTip(&s_DummyButton, &Button, Localize("Dummy is not allowed on this server"));
 	}
 	else if(Client()->DummyConnectingDelayed())
 	{
 		DoButton_Menu(&s_DummyButton, Localize("Connect Dummy"), 1, &Button);
-		GameClient()->m_Tooltips.DoToolTip(&s_DummyButton, &Button, Localize("Please wait…"));
+		Ui()->DoToolTip(&s_DummyButton, &Button, Localize("Please wait…"));
 	}
 	else if(Client()->DummyConnecting())
 	{
@@ -247,7 +247,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			GameClient()->m_Camera.ToggleAutoSpecCamera();
 		}
 		GameClient()->m_Camera.UpdateAutoSpecCameraTooltip();
-		GameClient()->m_Tooltips.DoToolTip(&s_AutoCameraButton, &Button, GameClient()->m_Camera.AutoSpecCameraTooltip());
+		Ui()->DoToolTip(&s_AutoCameraButton, &Button, GameClient()->m_Camera.AutoSpecCameraTooltip());
 	}
 
 	if(g_Config.m_ClTouchControls)
@@ -572,7 +572,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		vec2 TeeRenderPos(Button.x + Button.h / 2, Button.y + Button.h / 2 + OffsetToMid.y);
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 		Ui()->DoButtonLogic(&s_aPlayerIds[Index][3], 0, &Button, BUTTONFLAG_NONE);
-		GameClient()->m_Tooltips.DoToolTip(&s_aPlayerIds[Index][3], &Button, CurrentClient.m_aSkinName);
+		Ui()->DoToolTip(&s_aPlayerIds[Index][3], &Button, CurrentClient.m_aSkinName);
 
 		Player.HSplitTop(1.5f, nullptr, &Player);
 		Player.VSplitMid(&Player, &Button);
@@ -683,7 +683,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			m_CommunityIcons.Render(pIcon, Label, true);
 			static char s_CommunityTooltipButtonId;
 			Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Label, BUTTONFLAG_NONE);
-			GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Label, pCommunity->Name());
+			Ui()->DoToolTip(&s_CommunityTooltipButtonId, &Label, pCommunity->Name());
 		}
 	}
 
@@ -1174,7 +1174,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	{
 		NewPage = PAGE_INTERNET;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_InternetButton, &Button, Localize("Internet"));
+	Ui()->DoToolTip(&s_InternetButton, &Button, Localize("Internet"));
 
 	TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 	static CButtonContainer s_LanButton;
@@ -1182,7 +1182,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	{
 		NewPage = PAGE_LAN;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_LanButton, &Button, Localize("LAN"));
+	Ui()->DoToolTip(&s_LanButton, &Button, Localize("LAN"));
 
 	TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 	static CButtonContainer s_FavoritesButton;
@@ -1190,7 +1190,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	{
 		NewPage = PAGE_FAVORITES;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
+	Ui()->DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
 
 	const int MaxPage = PAGE_FAVORITES + ServerBrowser()->FavoriteCommunities().size();
 	if(
@@ -1224,7 +1224,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 		{
 			NewPage = Page;
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], &Button, pCommunity->Name());
+		Ui()->DoToolTip(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], &Button, pCommunity->Name());
 
 		++FavoriteCommunityIndex;
 		if(FavoriteCommunityIndex >= std::size(s_aFavoriteCommunityButtons))

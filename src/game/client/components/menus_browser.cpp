@@ -357,7 +357,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 						Button.Margin(2.0f, &CommunityIcon);
 						m_CommunityIcons.Render(pIcon, CommunityIcon, true);
 						Ui()->DoButtonLogic(&pItem->m_aCommunityId, 0, &CommunityIcon, BUTTONFLAG_NONE);
-						GameClient()->m_Tooltips.DoToolTip(&pItem->m_aCommunityId, &CommunityIcon, pCommunity->Name());
+						Ui()->DoToolTip(&pItem->m_aCommunityId, &CommunityIcon, pCommunity->Name());
 					}
 				}
 			}
@@ -540,7 +540,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 		static CLineInput s_FilterInput(g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString));
 		static char s_aTooltipText[64];
 		str_format(s_aTooltipText, sizeof(s_aTooltipText), "%s: \"solo; nameless tee; kobra 2\"", Localize("Example of usage"));
-		GameClient()->m_Tooltips.DoToolTip(&s_FilterInput, &QuickSearch, s_aTooltipText);
+		Ui()->DoToolTip(&s_FilterInput, &QuickSearch, s_aTooltipText);
 		if(!Ui()->IsPopupOpen() && Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
 			Ui()->SetActiveItem(&s_FilterInput);
@@ -569,7 +569,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 		static CLineInput s_ExcludeInput(g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString));
 		static char s_aTooltipText[64];
 		str_format(s_aTooltipText, sizeof(s_aTooltipText), "%s: \"CHN; [A]\"", Localize("Example of usage"));
-		GameClient()->m_Tooltips.DoToolTip(&s_ExcludeInput, &QuickSearch, s_aTooltipText);
+		Ui()->DoToolTip(&s_ExcludeInput, &QuickSearch, s_aTooltipText);
 		if(!Ui()->IsPopupOpen() && Input()->KeyPress(KEY_X) && Input()->ShiftIsPressed() && Input()->ModifierIsPressed())
 		{
 			Ui()->SetActiveItem(&s_ExcludeInput);
@@ -1057,7 +1057,7 @@ void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 				ServerBrowser()->FavoriteCommunitiesFilter().Add(pItemName);
 			}
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_vFavoriteButtonIds[ItemIndex], &FavoriteButton,
+		Ui()->DoToolTip(&s_vFavoriteButtonIds[ItemIndex], &FavoriteButton,
 			Favorite ? Localize("Click to remove this community from your favorites.") : Localize("Click to add this community to your favorites."));
 	};
 
@@ -1350,7 +1350,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 			const vec2 TeeRenderPos = vec2(Skin.x + TeeInfo.m_Size / 2.0f, Skin.y + Skin.h / 2.0f + OffsetToMid.y);
 			RenderTools()->RenderTee(pIdleState, &TeeInfo, CurrentClient.m_Afk ? EMOTE_BLINK : EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 			Ui()->DoButtonLogic(&CurrentClient.m_aSkin, 0, &Skin, BUTTONFLAG_NONE);
-			GameClient()->m_Tooltips.DoToolTip(&CurrentClient.m_aSkin, &Skin, CurrentClient.m_aSkin);
+			Ui()->DoToolTip(&CurrentClient.m_aSkin, &Skin, CurrentClient.m_aSkin);
 		}
 		else if(CurrentClient.m_aaSkin7[protocol7::SKINPART_BODY][0] != '\0')
 		{
@@ -1541,7 +1541,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 				if(Friend.ServerInfo())
 				{
-					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
+					Ui()->DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
 				}
 
 				// Compare unsorted server id of the friend with the unsorted id of the currently selected server
@@ -1574,7 +1574,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					const vec2 TeeRenderPos = vec2(Skin.x + Skin.w / 2.0f, Skin.y + Skin.h * 0.55f + OffsetToMid.y);
 					RenderTools()->RenderTee(pIdleState, &TeeInfo, Friend.IsAfk() ? EMOTE_BLINK : EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 					Ui()->DoButtonLogic(Friend.SkinTooltipId(), 0, &Skin, BUTTONFLAG_NONE);
-					GameClient()->m_Tooltips.DoToolTip(Friend.SkinTooltipId(), &Skin, Friend.Skin());
+					Ui()->DoToolTip(Friend.SkinTooltipId(), &Skin, Friend.Skin());
 				}
 				else if(Friend.Skin7(protocol7::SKINPART_BODY)[0] != '\0')
 				{
@@ -1614,7 +1614,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 							InfoLabel.VSplitLeft(2.0f, nullptr, &InfoLabel);
 							m_CommunityIcons.Render(pIcon, CommunityIcon, true);
 							Ui()->DoButtonLogic(Friend.CommunityTooltipId(), 0, &CommunityIcon, BUTTONFLAG_NONE);
-							GameClient()->m_Tooltips.DoToolTip(Friend.CommunityTooltipId(), &CommunityIcon, pCommunity->Name());
+							Ui()->DoToolTip(Friend.CommunityTooltipId(), &CommunityIcon, pCommunity->Name());
 						}
 					}
 
@@ -1643,7 +1643,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 						m_pRemoveFriend = &Friend;
 						ButtonResult = 0;
 					}
-					GameClient()->m_Tooltips.DoToolTip(Friend.RemoveButtonId(), &RemoveButton, Friend.FriendState() == IFriends::FRIEND_PLAYER ? Localize("Click to remove this player from your friends list.") : Localize("Click to remove this clan from your friends list."));
+					Ui()->DoToolTip(Friend.RemoveButtonId(), &RemoveButton, Friend.FriendState() == IFriends::FRIEND_PLAYER ? Localize("Click to remove this player from your friends list.") : Localize("Click to remove this clan from your friends list."));
 				}
 
 				// handle click and double click on item
@@ -1775,21 +1775,21 @@ void CMenus::RenderServerbrowserTabBar(CUIRect TabBar)
 	{
 		g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_FILTERS;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_FilterTabButton, &FilterTabButton, Localize("Server filter"));
+	Ui()->DoToolTip(&s_FilterTabButton, &FilterTabButton, Localize("Server filter"));
 
 	static CButtonContainer s_InfoTabButton;
 	if(DoButton_MenuTab(&s_InfoTabButton, FontIcon::INFO, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO, &InfoTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_INFO], &ColorInactive, &ColorActive))
 	{
 		g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_INFO;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_InfoTabButton, &InfoTabButton, Localize("Server info"));
+	Ui()->DoToolTip(&s_InfoTabButton, &InfoTabButton, Localize("Server info"));
 
 	static CButtonContainer s_FriendsTabButton;
 	if(DoButton_MenuTab(&s_FriendsTabButton, FontIcon::HEART, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_FRIENDS, &FriendsTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_FRIENDS], &ColorInactive, &ColorActive))
 	{
 		g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_FRIENDS;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_FriendsTabButton, &FriendsTabButton, Localize("Friends"));
+	Ui()->DoToolTip(&s_FriendsTabButton, &FriendsTabButton, Localize("Friends"));
 
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);

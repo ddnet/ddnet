@@ -115,6 +115,7 @@ void CUi::Init(IKernel *pKernel)
 	CUIRect::Init(m_pGraphics);
 	CLineInput::Init(m_pClient, m_pGraphics, m_pInput, m_pTextRender);
 	CUIElementBase::Init(this);
+	m_Tooltips.Init(this, m_pTextRender);
 }
 
 CUi::CUi()
@@ -1817,4 +1818,9 @@ void CUi::RenderBackButton()
 	DoLabel(&m_BackButtonRect, FontIcon::CHEVRON_LEFT, m_BackButtonRect.w * 0.5f, TEXTALIGN_MC);
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+}
+
+void CUi::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint)
+{
+	m_Tooltips.DoToolTip(pId, pNearRect, pText, WidthHint);
 }
