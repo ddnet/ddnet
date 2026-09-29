@@ -1616,17 +1616,15 @@ void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
 				if(Server()->IsSixup(m_pPlayer->GetCid()))
 				{
 					protocol7::CNetMsg_Sv_Checkpoint Msg;
-					float Diff = (m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp]) * 1000;
-					Msg.m_Diff = (int)Diff;
+					Msg.m_Diff = static_cast<int>(time_milliseconds_from_seconds(m_aCurrentTimeCp[m_LastTimeCp]) - time_milliseconds_from_seconds(pData->m_aBestTimeCp[m_LastTimeCp]));
 					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCid());
 				}
 				else
 				{
 					CNetMsg_Sv_DDRaceTime Msg;
-					Msg.m_Time = (int)(m_Time * 100.0f);
+					Msg.m_Time = static_cast<int>(time_even_centiseconds_from_seconds(m_Time));
 					Msg.m_Finish = 0;
-					float Diff = (m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp]) * 100;
-					Msg.m_Check = (int)Diff;
+					Msg.m_Check = static_cast<int>(time_even_centiseconds_from_seconds(m_aCurrentTimeCp[m_LastTimeCp]) - time_even_centiseconds_from_seconds(pData->m_aBestTimeCp[m_LastTimeCp]));
 					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCid());
 				}
 			}
