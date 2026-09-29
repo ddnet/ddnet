@@ -10,6 +10,7 @@
 
 #include <engine/console.h>
 #include <engine/shared/linereader.h>
+#include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
 const char *Localize(const char *pStr, const char *pContext)
@@ -71,6 +72,19 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 		}
 		char aCountryCode[128];
 		str_copy(aCountryCode, pLine + 3);
+		int CountryCode;
+		if(!str_toint(aCountryCode, &CountryCode))
+		{
+			log_error("localization", "Country code '%s' for language '%s' is not a number", aCountryCode, aEnglishName);
+			(void)LineReader.Get();
+			continue;
+		}
+		if(!in_range(CountryCode, CountryCode::MINIMUM, CountryCode::MAXIMUM))
+		{
+			log_error("localization", "Country code '%d' for language '%s' is not within valid code range [%d..%d]", CountryCode, aEnglishName, CountryCode::MINIMUM, CountryCode::MAXIMUM);
+			(void)LineReader.Get();
+			continue;
+		}
 
 		pLine = LineReader.Get();
 		if(!pLine)
@@ -101,7 +115,7 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "languages/%s.txt", aEnglishName);
-		m_vLanguages.emplace_back(aNativeName, aFilename, str_toint(aCountryCode), vLanguageCodes);
+		m_vLanguages.emplace_back(aNativeName, aFilename, CountryCode, vLanguageCodes);
 	}
 
 	std::sort(m_vLanguages.begin(), m_vLanguages.end());
