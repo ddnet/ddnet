@@ -15,6 +15,7 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 
 #include <game/localization.h>
 
@@ -1643,11 +1644,23 @@ void CUi::RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFini
 		return;
 
 	char aBuf[128];
+	vec2 Cursor = TimeRect.TopLeft();
+
+	if(Seconds == FinishTime::SECRET)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s", Localize("Secret"));
+
+		float TextWidth = std::min(TextRender()->TextWidth(FontSize, aBuf), TimeRect.w);
+		Cursor.x += TimeRect.w - TextWidth; // align right
+		Cursor.y += ((TimeRect.h - SecondsText.MaxCharacterHeight()) / 2.0f - (FontSize - SecondsText.MaxCharacterHeight()));
+		TextRender()->Text(Cursor.x, Cursor.y, FontSize, aBuf);
+		return;
+	}
+
 	str_time(absolute(static_cast<int64_t>(Seconds)) * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
 	SecondsText.Update(TextRender(), aBuf, FontSize);
 
 	// align in vertical middle
-	vec2 Cursor = TimeRect.TopLeft();
 	const float SecondsWidth = std::min(SecondsText.Width(), TimeRect.w);
 	Cursor.x += TimeRect.w - SecondsWidth; // align right
 	Cursor.y += ((TimeRect.h - SecondsText.MaxCharacterHeight()) / 2.0f - (FontSize - SecondsText.MaxCharacterHeight()));
