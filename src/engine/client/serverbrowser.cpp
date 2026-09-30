@@ -61,12 +61,7 @@ static NETADDR CommunityAddressKey(const NETADDR &Addr)
 	return AddressKey;
 }
 
-// The browser refresh button and F5 both end up in CServerBrowser::Refresh.
-// See the comment there.
 static constexpr int REFRESH_COOLDOWN_MS = 1000;
-
-// Far more servers than any real LAN hosts.
-static constexpr size_t MAX_LAN_SERVERS = 256;
 
 CServerBrowser::CServerBrowser() :
 	m_CommunityCache(this),
@@ -979,13 +974,6 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 
 		if(!pEntry)
 		{
-			// A host on the LAN that saw our broadcast can answer from
-			// arbitrary source addresses, and every answer costs a server
-			// entry plus a full re-sort of the list. Bound it.
-			if(m_vpServerlist.size() >= MAX_LAN_SERVERS)
-			{
-				return;
-			}
 			pEntry = Add(&Addr, 1);
 		}
 	}
@@ -1037,17 +1025,12 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 
 void CServerBrowser::Refresh(int Type, bool Force)
 {
-	// Pressing the refresh button or F5 can be repeated as fast as the key
-	// repeat rate, and every call wipes the cached server info below, so the
-	// whole list gets re-pinged. Throttle repeats of the list that is already
-	// shown. A forced refresh means CCommunityCache detected an actual change,
-	// and switching to a different list changes Type, so both still work.
-	const int64_t Now = time_get_impl() * 1000 / time_freq();
-	if(!Force && m_ServerlistType == Type && m_LastRefreshTime != 0 && Now - m_LastRefreshTime < REFRESH_COOLDOWN_MS)
+	const int64_t CurrentRefreshTime = time_get_impl() * 1000 / time_freq();
+	if(!Force && m_ServerlistType == Type && m_LastRefreshTime != 0 && CurrentRefreshTime - m_LastRefreshTime < REFRESH_COOLDOWN_MS)
 	{
 		return;
 	}
-	m_LastRefreshTime = Now;
+	m_LastRefreshTime = CurrentRefreshTime;
 
 	bool ServerListTypeChanged = Force || m_ServerlistType != Type;
 	int OldServerListType = m_ServerlistType;
