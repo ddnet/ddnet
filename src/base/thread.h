@@ -64,15 +64,4 @@ void thread_request_precise_wakeups();
  */
 void thread_detach(void *thread);
 
-/**
- * Creates a new thread and detaches it.
- *
- * @ingroup Threads
- *
- * @param threadfunc Entry point for the new thread.
- * @param user Pointer to pass to the thread.
- * @param name Name describing the use of the thread.
- */
-void thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
-
 #endif

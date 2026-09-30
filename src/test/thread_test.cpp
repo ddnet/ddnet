@@ -96,3 +96,15 @@ TEST(Thread, Lock)
 	Lock.unlock();
 	thread_wait(pThread);
 }
+
+static void RequestPreciseWakeupsThread(void *pUser)
+{
+	(void)pUser;
+	thread_request_precise_wakeups();
+}
+
+TEST(Thread, RequestPreciseWakeups)
+{
+	void *pThread = thread_init(RequestPreciseWakeupsThread, nullptr, "wakeups");
+	thread_wait(pThread);
+}
