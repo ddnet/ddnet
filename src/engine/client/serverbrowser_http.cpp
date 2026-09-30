@@ -35,6 +35,17 @@ static int SanitizeAge(std::optional<int64_t> Age)
 	return *Age;
 }
 
+// The browser refresh button, page switches and filter changes all end up in
+// CServerBrowserHttp::Refresh, so without a limit a single user can make the
+// master serve the full server list as fast as the connection allows. One
+// second is far below the 15 seconds after which a server list is considered
+// stale, see ClassifyAge.
+static constexpr int REFRESH_COOLDOWN_MS = 1000;
+
+// Real server lists are a few megabytes. Refuse to buffer more than this, so
+// that a hostile master cannot exhaust the client's memory.
+static constexpr int64_t MAX_SERVERLIST_SIZE = 16 * 1024 * 1024;
+
 // Classify HTTP responses into buckets, treat 15 seconds as fresh, 1 minute as
 // less fresh, etc. This ensures that differences in the order of seconds do
 // not affect master choice.
@@ -248,6 +259,7 @@ void CChooseMaster::CJob::Run()
 		std::shared_ptr<IHttpRequest> pGet = HttpGet(pUrl);
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
+		pGet->MaxResponseSize(MAX_SERVERLIST_SIZE);
 		{
 			const CLockScope LockScope(m_Lock);
 			m_pGet = pGet;
@@ -348,6 +360,7 @@ private:
 	IHttp *m_pHttp;
 
 	int m_State = STATE_WANTREFRESH;
+	int64_t m_LastRefreshTime = 0;
 	std::shared_ptr<IHttpRequest> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
@@ -393,6 +406,7 @@ void CServerBrowserHttp::Update()
 		m_pGetServers = HttpGet(pBestUrl);
 		// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
 		m_pGetServers->Timeout(CTimeout{10000, 0, 8000, 10});
+		m_pGetServers->MaxResponseSize(MAX_SERVERLIST_SIZE);
 		m_pHttp->Run(m_pGetServers);
 		m_State = STATE_REFRESHING;
 	}
@@ -432,6 +446,12 @@ void CServerBrowserHttp::Update()
 }
 void CServerBrowserHttp::Refresh()
 {
+	const int64_t Now = time_get_impl() * 1000 / time_freq();
+	if(m_LastRefreshTime != 0 && Now - m_LastRefreshTime < REFRESH_COOLDOWN_MS)
+	{
+		return;
+	}
+	m_LastRefreshTime = Now;
 	if(m_State == STATE_WANTREFRESH || m_State == STATE_REFRESHING || m_State == STATE_NO_MASTER)
 	{
 		if(m_State == STATE_NO_MASTER)
