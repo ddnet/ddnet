@@ -170,9 +170,3 @@ void thread_detach(void *thread)
 #error not implemented
 #endif
 }
-
-void thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
-{
-	void *thread = thread_init(threadfunc, u, name);
-	thread_detach(thread);
-}
