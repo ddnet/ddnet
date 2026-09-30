@@ -111,10 +111,6 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 
 void CServerBrowser::OnInit()
 {
-	// The ping cache is only ever appended to at runtime, so reading the whole
-	// table once is enough. Doing it per refresh meant a full table scan and
-	// re-parse on every press of the refresh button.
-	m_pPingCache->Load();
 	m_pHttp = CreateServerBrowserHttp(m_pEngine, m_pStorage, m_pHttpClient, g_Config.m_BrCachedBestServerinfoUrl);
 }
 
