@@ -3481,7 +3481,6 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     score_test.cpp
     secure_random_test.cpp
     server_test.cpp
-    serverbrowser_http_test.cpp
     serverbrowser_test.cpp
     serverinfo_test.cpp
     snapshot_test.cpp
