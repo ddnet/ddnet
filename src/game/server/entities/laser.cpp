@@ -311,7 +311,7 @@ void CLaser::SyncInteractState()
 	// as soon as the owner disconnects keep that state
 	if(pOwnerPlayer)
 	{
-		bool NoHitOthers = g_Config.m_SvHit;
+		bool NoHitOthers = g_Config.m_SvHit == 0;
 		if(pOwnerChar)
 			NoHitOthers = (m_Type == WEAPON_LASER && pOwnerChar->LaserHitDisabled()) || (m_Type == WEAPON_SHOTGUN && pOwnerChar->ShotgunHitDisabled());
 		bool NoHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
