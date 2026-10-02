@@ -24,7 +24,8 @@ GameInfoFlags = [
 ]
 GameInfoFlags2 = [
 	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO",
-	"HUD_DDRACE", "NO_WEAK_HOOK", "NO_SKIN_CHANGE_FOR_FROZEN", "DDRACE_TEAM", "PREDICT_EVENTS", "OLD_LASER"
+	"HUD_DDRACE", "NO_WEAK_HOOK", "NO_SKIN_CHANGE_FOR_FROZEN", "DDRACE_TEAM", "PREDICT_EVENTS", "OLD_LASER",
+	"JETPACK_EXHAUST"
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
@@ -33,6 +34,7 @@ LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 ]
 ProjectileFlags = [
 	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL",
+	"JETPACK_EXHAUST",
 ]
 LaserFlags = [
 	"NO_PREDICT",
@@ -77,7 +79,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=12,
+	GAMEINFO_CURVERSION=13,
 };
 '''
 

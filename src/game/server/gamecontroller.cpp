@@ -636,7 +636,8 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_RACE;
 	GameInfoEx.m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE |
 			      GAMEINFOFLAG2_DDRACE_TEAM |
-			      GAMEINFOFLAG2_PREDICT_EVENTS;
+			      GAMEINFOFLAG2_PREDICT_EVENTS |
+			      GAMEINFOFLAG2_JETPACK_EXHAUST;
 	if(g_Config.m_SvNoWeakHook)
 		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	if(g_Config.m_SvOldLaser)
