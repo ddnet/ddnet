@@ -183,6 +183,9 @@
 			}
 			var loadOnLaunch = { file: null, path: null, link: null };
 			var Module = {
+				websocket: {
+					url: location.protocol === "https:" ? "wss://" : "ws://",
+				},
 				noInitialRun: true,
 				arguments: [],
 				print: function(text) {

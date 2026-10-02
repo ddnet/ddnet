@@ -5,7 +5,8 @@ endif()
 
 set_extra_dirs_lib(WEBSOCKETS websockets)
 find_library(WEBSOCKETS_LIBRARY
-  NAMES websockets websockets.17
+  NAMES websockets websockets.19
+  NAMES_PER_DIR
   HINTS ${HINTS_WEBSOCKETS_LIBDIR} ${PC_WEBSOCKETS_LIBDIR} ${PC_WEBSOCKETS_LIBRARY_DIRS}
   PATHS ${PATHS_WEBSOCKETS_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
@@ -28,6 +29,14 @@ if(WEBSOCKETS_FOUND)
   set(WEBSOCKETS_INCLUDE_DIRS ${WEBSOCKETS_INCLUDEDIR})
 
   is_bundled(WEBSOCKETS_BUNDLED "${WEBSOCKETS_LIBRARY}")
+  if(WEBSOCKETS_BUNDLED AND TARGET_OS STREQUAL "linux" AND EXISTS "${WEBSOCKETS_INCLUDEDIR}/lws_config.h")
+    # The bundled Linux libwebsockets.a is built against the system OpenSSL,
+    # which a static library cannot link on its own
+    file(STRINGS "${WEBSOCKETS_INCLUDEDIR}/lws_config.h" WEBSOCKETS_WITH_TLS REGEX "^#define LWS_WITH_TLS$")
+    if(WEBSOCKETS_WITH_TLS)
+      list(APPEND WEBSOCKETS_LIBRARIES ssl crypto)
+    endif()
+  endif()
   set(WEBSOCKETS_COPY_FILES)
   if(WEBSOCKETS_BUNDLED)
     if(TARGET_OS STREQUAL "windows")
