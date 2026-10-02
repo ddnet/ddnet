@@ -1446,11 +1446,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 		NumActivated = 0;
 		for(const CGhostItem &Ghost : m_vGhosts)
 		{
-			if(Ghost.m_Failed)
+			if(Ghost.m_Failed || !Ghost.HasFile())
 			{
 				NumFailed++;
 			}
-			if(Ghost.Active())
+			else if(Ghost.Active())
 			{
 				NumActivated++;
 			}
@@ -1565,22 +1565,28 @@ void CMenus::RenderGhost(CUIRect MainView)
 			for(int i = 0; i < NumGhosts; i++)
 			{
 				CGhostItem *pGhost = &m_vGhosts[i];
-				if(pGhost->m_Failed || (ActivateAll && pGhost->m_Slot != -1))
+				if(pGhost->m_Failed || !pGhost->HasFile())
 					continue;
 
 				if(ActivateAll)
 				{
-					if(!GameClient()->m_Ghost.FreeSlots())
-						break;
+					if(!pGhost->Active())
+					{
+						if(!GameClient()->m_Ghost.FreeSlots())
+							break;
 
-					pGhost->m_Slot = GameClient()->m_Ghost.Load(pGhost->m_aFilename);
-					if(pGhost->m_Slot == -1)
-						pGhost->m_Failed = true;
+						pGhost->m_Slot = GameClient()->m_Ghost.Load(pGhost->m_aFilename);
+						if(pGhost->m_Slot == -1)
+							pGhost->m_Failed = true;
+					}
 				}
 				else
 				{
-					GameClient()->m_Ghost.UnloadAll();
-					pGhost->m_Slot = -1;
+					if(pGhost->Active())
+					{
+						GameClient()->m_Ghost.Unload(pGhost->m_Slot);
+						pGhost->m_Slot = -1;
+					}
 				}
 			}
 		}
