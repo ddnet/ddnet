@@ -1284,7 +1284,7 @@ void CMenus::GhostlistPopulate()
 	for(auto &Ghost : m_vGhosts)
 	{
 		Ghost.m_Failed = false;
-		if(str_comp(Ghost.m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || Ghost < *pOwnGhost))
+		if(str_comp(Ghost.m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || Ghost.m_Time < pOwnGhost->m_Time))
 			pOwnGhost = &Ghost;
 	}
 
@@ -1333,7 +1333,7 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 
 	Item.m_Date = std::time(nullptr);
 	Item.m_Failed = false;
-	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
+	m_vGhosts.push_back(Item);
 	SortGhostlist();
 }
 
