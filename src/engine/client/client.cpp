@@ -748,7 +748,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_DemoPlayer.Stop();
 	for(int Recorder = 0; Recorder < RECORDER_MAX; Recorder++)
 	{
-		DemoRecorder(Recorder)->Stop(Recorder == RECORDER_REPLAYS ? IDemoRecorder::EStopMode::REMOVE_FILE : IDemoRecorder::EStopMode::KEEP_FILE);
+		DemoRecorder_Stop(Recorder);
 	}
 
 	m_aRconAuthed[0] = 0;
@@ -4188,6 +4188,22 @@ void CClient::Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->m_DemoPlayer.SetSpeed(pResult->GetFloat(0));
+}
+
+void CClient::DemoRecorder_Stop(int Recorder)
+{
+	if(Recorder == RECORDER_AUTO && DemoRecorder(RECORDER_AUTO)->HasMarkers())
+	{
+		char aFilename[IO_MAX_PATH_LENGTH];
+		char aTimestamp[20];
+		str_timestamp(aTimestamp, sizeof(aTimestamp));
+		str_format(aFilename, sizeof(aFilename), "demos/auto/markered/%s_%s.demo", GameClient()->Map()->BaseName(), aTimestamp);
+		DemoRecorder(Recorder)->Stop(IDemoRecorder::EStopMode::KEEP_FILE, aFilename);
+	}
+	else if(Recorder == RECORDER_REPLAYS)
+		DemoRecorder(Recorder)->Stop(IDemoRecorder::EStopMode::REMOVE_FILE);
+	else 
+		DemoRecorder(Recorder)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 }
 
 void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder)
