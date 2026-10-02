@@ -120,6 +120,7 @@ public:
 	ColorRGBA m_GametypeColor;
 	char m_aName[64];
 	char m_aMap[MAX_MAP_LENGTH];
+	char m_aMapSha256[SHA256_MAXSTRSIZE];
 	int m_MapCrc;
 	int m_MapSize;
 	char m_aVersion[32];

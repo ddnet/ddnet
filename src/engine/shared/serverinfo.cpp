@@ -73,6 +73,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	const json_value &GameType = ServerInfo["game_type"];
 	const json_value &Name = ServerInfo["name"];
 	const json_value &MapName = ServerInfo["map"]["name"];
+	const json_value &MapSha265 = ServerInfo["map"]["sha256"];
 	const json_value &Version = ServerInfo["version"];
 	const json_value &Clients = ServerInfo["clients"];
 	const json_value &RequiresLogin = ServerInfo["requires_login"];
@@ -112,6 +113,14 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	str_copy(pOut->m_aName, Name);
 	str_copy(pOut->m_aMapName, MapName);
 	str_copy(pOut->m_aVersion, Version);
+	if(MapSha265.type == json_string)
+	{
+		str_copy(pOut->m_aMapSha256, MapSha265);
+	}
+	else
+	{
+		pOut->m_aMapSha256[0] = '\0';
+	}
 
 	pOut->m_NumClients = 0;
 	pOut->m_NumPlayers = 0;
@@ -285,6 +294,7 @@ CServerInfo2::operator CServerInfo() const
 	str_copy(Result.m_aGameType, m_aGameType);
 	str_copy(Result.m_aName, m_aName);
 	str_copy(Result.m_aMap, m_aMapName);
+	str_copy(Result.m_aMapSha256, m_aMapSha256);
 	str_copy(Result.m_aVersion, m_aVersion);
 
 	Result.m_vClients.resize(std::min(m_NumClients, (int)SERVERINFO_MAX_CLIENTS));

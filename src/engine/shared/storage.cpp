@@ -87,6 +87,7 @@ public:
 				"mapres",
 				"maps",
 				"maps/auto",
+				"mapthumbnails",
 				"screenshots",
 				"screenshots/auto",
 				"screenshots/auto/stats",

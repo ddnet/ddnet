@@ -1399,6 +1399,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(*pFrom);
 
 	CServerInfo Info = {0};
+
 	int SavedType = SavedServerInfoType(RawType);
 	if(SavedType == SERVERINFO_EXTENDED && pEntry && pEntry->m_GotInfo && SavedType == pEntry->m_Info.m_Type)
 	{
