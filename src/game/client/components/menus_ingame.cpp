@@ -1611,7 +1611,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 			GameClient()->m_Ghost.Unload(pGhost->m_Slot);
 		DeleteGhostItem(s_SelectedIndex);
 		s_SelectedIndex = std::min(s_SelectedIndex, (int)m_vGhosts.size() - 1);
-		return;
+		if(s_SelectedIndex == -1)
+		{
+			return;
+		}
+		pGhost = &m_vGhosts[s_SelectedIndex];
 	}
 
 	Status.VSplitRight(5.0f, &Status, nullptr);
