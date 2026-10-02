@@ -59,7 +59,7 @@ public:
 	bool IsRecording() const override { return m_File != nullptr; }
 	const char *CurrentFilename() const override { return m_aCurrentFilename; }
 
-	bool HasMarkers() const override { return m_NumTimelineMarkers > 0;}
+	bool HasMarkers() const override { return m_NumTimelineMarkers > 0; }
 
 	int Length() const override { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; }
 };

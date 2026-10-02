@@ -4202,7 +4202,7 @@ void CClient::DemoRecorder_Stop(int Recorder)
 	}
 	else if(Recorder == RECORDER_REPLAYS)
 		DemoRecorder(Recorder)->Stop(IDemoRecorder::EStopMode::REMOVE_FILE);
-	else 
+	else
 		DemoRecorder(Recorder)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 }
 
