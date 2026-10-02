@@ -8,6 +8,7 @@
 #include <engine/graphics.h>
 
 #include <game/client/ui.h>
+#include <game/editor/editor_binds.h>
 
 #include <chrono>
 #include <memory>
@@ -47,6 +48,12 @@ private:
 	std::chrono::nanoseconds m_CursorRenderTime;
 	IGraphics::CTextureHandle m_CursorTextTexture;
 	CUi::SConfirmPopupContext m_ConfirmActivatePopupContext;
+
+	std::shared_ptr<CEditorBind> m_pEditorBindActivation;
+	std::shared_ptr<CEditorBind> m_pEditorBindPaste;
+	std::shared_ptr<CEditorBind> m_pEditorBindHome;
+	std::shared_ptr<CEditorBind> m_pEditorBindEnd;
+	std::shared_ptr<CEditorBind> m_pEditorBindDelete;
 
 	void SetCursor();
 	void TextModeOff();

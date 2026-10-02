@@ -5,6 +5,9 @@
 
 #include <game/client/lineinput.h>
 #include <game/client/ui_rect.h>
+#include <game/editor/editor_binds.h>
+
+#include <memory>
 
 class CQuickAction;
 
@@ -17,6 +20,8 @@ class CPrompt : public CEditorComponent
 	std::vector<CQuickAction *> m_vpFilteredPromptList;
 	std::vector<CQuickAction *> m_vQuickActions;
 	CLineInputBuffered<512> m_PromptInput;
+
+	std::shared_ptr<CEditorBind> m_pEditorBind;
 
 public:
 	void OnInit(CEditor *pEditor) override;

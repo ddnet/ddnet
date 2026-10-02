@@ -1,7 +1,11 @@
 #ifndef GAME_EDITOR_QUICK_ACTION_H
 #define GAME_EDITOR_QUICK_ACTION_H
 
+#include <game/editor/editor_binds.h>
+
+#include <cstddef>
 #include <functional>
+#include <memory>
 #include <utility>
 
 typedef std::function<void()> FButtonClickCallback;
@@ -14,6 +18,7 @@ class CQuickAction
 private:
 	const char *m_pLabel;
 	const char *m_pDescription;
+	std::shared_ptr<CEditorBind> m_pBind;
 
 	FButtonClickCallback m_pfnCallback;
 	FButtonDisabledCallback m_pfnDisabledCallback;
@@ -66,6 +71,8 @@ public:
 	}
 
 	const char *Description() const { return m_pDescription; }
+	const std::shared_ptr<CEditorBind> &Bind() const { return m_pBind; }
+	void SetBind(const std::shared_ptr<CEditorBind> &pBind) { m_pBind = pBind; }
 
 	const void *ActionButtonId() const { return &m_ActionButtonId; }
 };

@@ -1,5 +1,7 @@
 #include <base/str.h>
 
+#include <game/editor/editor_binds.h>
+
 #include <gtest/gtest.h>
 
 static bool IsLetter(char c)
@@ -94,7 +96,14 @@ TEST(Editor, QuickActionNames)
 	EXPECT_FALSE(IsValidEditorTooltip("hello world", aError, sizeof(aError)));
 	EXPECT_FALSE(IsValidEditorTooltip("hello world (Ctrl+H).", aError, sizeof(aError)));
 
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) AssertTooltip(description);
+	auto CheckEditorBind = [&](bool Shift, bool Modifier, bool Alt, int Key, EBindSection Section, const char *pDescription) {
+		char aBuf[64 + 1 + 256];
+		CEditorBind Bind(Shift, Modifier, Alt, Key, pDescription, Section);
+		str_format(aBuf, sizeof(aBuf), "%s %s", Bind.KeyBindText(), Bind.Description());
+		AssertTooltip(aBuf);
+	};
+
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, bind, description) CheckEditorBind(bind, description);
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 }
