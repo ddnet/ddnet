@@ -3963,6 +3963,9 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("endless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessHook, this, "Gives you endless hook");
 	Console()->Register("unendless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnEndlessHook, this, "Removes endless hook from you");
 	Console()->Register("setswitch", "i[switch] ?i['0'|'1'] ?i[seconds]", CFGFLAG_SERVER | CMDFLAG_TEST, ConSetSwitch, this, "Toggle or set the switch on or off for the specified time (or indefinitely by default)");
+	Console()->Register("telegun", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConToggleTelegunGun, this, "Toggles tele gun");
+	Console()->Register("telegrenade", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConToggleTelegunGrenade, this, "Toggles tele grenade");
+	Console()->Register("telelaser", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConToggleTelegunLaser, this, "Toggles tele laser");
 	Console()->Register("solo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSolo, this, "Puts you into solo part");
 	Console()->Register("unsolo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnSolo, this, "Puts you out of solo part");
 	Console()->Register("freeze", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConFreeze, this, "Puts you into freeze");
@@ -4111,6 +4114,9 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("collision", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleCollision, this, "Toggles collision");
 	Console()->Register("hookcollision", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleHookCollision, this, "Toggles hook collision");
 	Console()->Register("hitothers", "?s['all'|'hammer'|'shotgun'|'grenade'|'laser']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleHitOthers, this, "Toggles hit others");
+	Console()->Register("telegun", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleTelegunGun, this, "Toggles tele gun");
+	Console()->Register("telegrenade", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleTelegunGrenade, this, "Toggles tele grenade");
+	Console()->Register("telelaser", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleTelegunLaser, this, "Toggles tele laser");
 
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 }
