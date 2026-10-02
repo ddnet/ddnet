@@ -184,6 +184,8 @@ public:
 	CColor m_Color;
 	int m_ColorEnv;
 	int m_ColorEnvOffset;
+	int m_PosEnv;
+	int m_PosEnvOffset;
 	CTile *m_pTiles;
 
 	// DDRace

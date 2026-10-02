@@ -36,5 +36,15 @@ public:
 	int m_Flags;
 };
 
+class CMapItemLayerPositionEnvelope
+{
+public:
+	int m_Version;
+	int m_PosEnv;
+	int m_PosEnvOffset;
+	int m_GroupId;
+	int m_LayerId;
+};
+
 void RegisterMapItemTypeUuids(class CUuidManager *pManager);
 #endif // GAME_MAPITEMS_EX_H
