@@ -1,5 +1,5 @@
 [package]
-name = "ddnet-engine-shared"
+name = "ddnet-engine-server"
 version = "0.0.1"
 edition = "2021"
 rust-version = "1.85"
@@ -11,12 +11,13 @@ crate-type = ["rlib", "staticlib"]
 path = "lib.rs"
 
 [dependencies]
+asdf = { path = "../../../asdf" }
 ddnet-base = { path = "../../base" }
 ddnet-engine = { path = ".." }
+ddnet-engine-shared = { path = "../shared" }
 
 cxx = { workspace = true }
-tokio = { version = "1.53.1", features = ["rt"] }
+tokio = { version = "1.53.1", features = ["sync"] }
 
 [dev-dependencies]
 ddnet-test = { path = "../../rust-bridge/test", features = ["link-test-libraries"] }
-tokio = { version = "1.53.1", features = ["sync", "time"] }

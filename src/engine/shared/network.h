@@ -14,8 +14,9 @@
 #include <vector>
 
 class CHuffman;
-class CNetBan;
 class CPacker;
+
+typedef std::function<bool(const NETADDR *pAddr, char *pBuf, unsigned BufferSize)> FIsBanned;
 
 /*
 
@@ -443,7 +444,7 @@ class CNetServer
 
 	NETADDR m_Address;
 	NETSOCKET m_Socket;
-	CNetBan *m_pNetBan;
+	FIsBanned m_IsBanned;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
 	int m_MaxClients = NET_MAX_CLIENTS;
 	int m_MaxClientsPerIp;
@@ -492,7 +493,7 @@ public:
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp);
+	bool Open(NETADDR BindAddr, FIsBanned IsBanned, int MaxClients, int MaxClientsPerIp);
 	void Close();
 
 	//
@@ -516,7 +517,6 @@ public:
 	bool HasSecurityToken(int ClientId) const { return m_aSlots[ClientId].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
 	NETADDR Address() const { return m_Address; }
 	NETSOCKET Socket() const { return m_Socket; }
-	CNetBan *NetBan() const { return m_pNetBan; }
 	int NetType() const { return net_socket_type(m_Socket); }
 	int MaxClients() const { return m_MaxClients; }
 
@@ -545,7 +545,7 @@ class CNetConsole
 	};
 
 	NETSOCKET m_Socket;
-	CNetBan *m_pNetBan;
+	FIsBanned m_IsBanned;
 	CSlot m_aSlots[NET_MAX_CONSOLE_CLIENTS];
 
 	NETFUNC_NEWCLIENT_CON m_pfnNewClient;
@@ -556,7 +556,7 @@ public:
 	void SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, CNetBan *pNetBan);
+	bool Open(NETADDR BindAddr, FIsBanned IsBanned);
 	void Close();
 
 	//
@@ -571,7 +571,6 @@ public:
 	// status requests
 	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
 	const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrString(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddressString(); }
-	CNetBan *NetBan() const { return m_pNetBan; }
 };
 
 class CNetTokenCache

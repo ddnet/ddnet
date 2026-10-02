@@ -33,8 +33,17 @@ def find_cxxbridge(version):
 
 
 FILES = {
+	# Bindings used from C++
+	# tidy-alphabetical-start
+	"src/engine/server/asdf.rs": "src/rust-bridge/engine/server/asdf",
 	"src/engine/shared/rust_version.rs": "src/rust-bridge/engine/shared/rust_version",
+	# tidy-alphabetical-end
+	#
+	# Glue code only
+	# tidy-alphabetical-start
+	"src/base/net.rs": "src/rust-bridge/cpp/net",
 	"src/engine/console.rs": "src/rust-bridge/cpp/console",
+	# tidy-alphabetical-end
 }
 
 
