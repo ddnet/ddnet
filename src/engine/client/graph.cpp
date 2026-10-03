@@ -115,7 +115,7 @@ void CGraph::Scale(int64_t WantedTotalTime)
 		{
 			m_MaxValue = Value;
 		}
-		else if(Value < m_MinValue)
+		if(Value < m_MinValue)
 		{
 			m_MinValue = Value;
 		}
