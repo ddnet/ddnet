@@ -463,7 +463,7 @@ int main(int argc, const char **argv)
 	MapRenderer.OnInit(&Graphics, nullptr, &RenderMap);
 
 	CMapRenderEnvelopeEval EnvelopeEval(pMap.get(), TimeOffsetMillis);
-	MapRenderer.Load(RENDERTYPE_FULL_DESIGN, &Layers, &MapImages, &EnvelopeEval, std::nullopt);
+	MapRenderer.Load(RENDERTYPE_FULL_DESIGN, &Layers, &MapImages, &EnvelopeEval, false, std::nullopt);
 
 	// Override the forced viewport from AdjustViewport (which clamps aspect ratio)
 	Graphics.SetScreenSize(OutputWidth, OutputHeight);
@@ -493,7 +493,6 @@ int main(int argc, const char **argv)
 	RenderParams.m_Zoom = Zoom;
 	RenderParams.m_RenderText = false;
 	RenderParams.m_RenderInvalidTiles = false;
-	RenderParams.m_TileAndQuadBuffering = false;
 	RenderParams.m_RenderTileBorder = true;
 	RenderParams.m_DebugRenderGroupClips = false;
 	RenderParams.m_DebugRenderQuadClips = false;
