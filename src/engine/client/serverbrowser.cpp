@@ -61,6 +61,8 @@ static NETADDR CommunityAddressKey(const NETADDR &Addr)
 	return AddressKey;
 }
 
+static constexpr int REFRESH_COOLDOWN_MS = 1000;
+
 CServerBrowser::CServerBrowser() :
 	m_CommunityCache(this),
 	m_CountriesFilter(&m_CommunityCache),
@@ -967,7 +969,9 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 		}
 
 		if(!pEntry)
+		{
 			pEntry = Add(&Addr, 1);
+		}
 	}
 	else
 	{
@@ -1017,6 +1021,13 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 
 void CServerBrowser::Refresh(int Type, bool Force)
 {
+	const int64_t CurrentRefreshTime = time_get_impl() * 1000 / time_freq();
+	if(!Force && m_ServerlistType == Type && m_LastRefreshTime != 0 && CurrentRefreshTime - m_LastRefreshTime < REFRESH_COOLDOWN_MS)
+	{
+		return;
+	}
+	m_LastRefreshTime = CurrentRefreshTime;
+
 	bool ServerListTypeChanged = Force || m_ServerlistType != Type;
 	int OldServerListType = m_ServerlistType;
 	m_ServerlistType = Type;
@@ -1073,7 +1084,6 @@ void CServerBrowser::Refresh(int Type, bool Force)
 	else
 	{
 		m_pHttp->Refresh();
-		m_pPingCache->Load();
 		m_RefreshingHttp = true;
 
 		if(ServerListTypeChanged && m_pHttp->NumServers() > 0)
