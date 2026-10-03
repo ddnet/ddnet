@@ -9,12 +9,18 @@
 #include <optional>
 #include <unordered_map>
 
-struct CTooltip
+class CTooltip
 {
+public:
+	CTooltip(const void *pId, const CUIRect &Rect, const char *pText, float WidthHint, float FontSize, bool Truncated) :
+		m_pId(pId), m_Rect(Rect), m_pText(pText), m_WidthHint(WidthHint), m_FontSize(FontSize), m_Truncated(Truncated), m_OnScreen(false) {}
+
 	const void *m_pId;
 	CUIRect m_Rect;
 	const char *m_pText;
 	float m_WidthHint;
+	float m_FontSize;
+	bool m_Truncated;
 	bool m_OnScreen; // used to know if the tooltip should be rendered.
 };
 
@@ -60,6 +66,7 @@ public:
 	 * @param WidthHint The maximum width of the tooltip, or -1.0f for unlimited.
 	 */
 	void DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
+	void DoToolTip(CTooltip &Tooltip);
 
 	void OnReset();
 	void OnRender();

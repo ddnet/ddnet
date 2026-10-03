@@ -11,6 +11,7 @@
 #include <engine/textrender.h>
 
 #include <chrono>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,7 @@ class CScrollRegion;
 class IClient;
 class IGraphics;
 class IKernel;
+class CTooltip;
 
 enum class EEditState
 {
@@ -217,6 +219,7 @@ struct SLabelProperties
 	bool m_EnableWidthCheck = true;
 	float m_MinimumFontSize = 5.0f;
 	std::vector<STextColorSplit> m_vColorSplits;
+	void *m_pTooltipId = nullptr;
 
 	void SetColor(const ColorRGBA &Color);
 };
@@ -491,7 +494,7 @@ private:
 
 	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUi class
 	std::vector<CUIElement *> m_vpUIElements;
-	CTooltips m_Tooltips;
+	std::unique_ptr<CTooltips> m_pTooltips;
 
 public:
 	static const CLinearScrollbarScale ms_LinearScrollbarScale;
@@ -842,9 +845,10 @@ public:
 	int DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State);
 
 	// tooltips
-	void DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
-	void OnRenderTooltip() { m_Tooltips.OnRender(); }
-	void OnReset() { m_Tooltips.OnReset(); }
+	void DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f) const;
+	void DoToolTip(CTooltip &Tooltip) const;
+	void OnRenderTooltip() const { m_pTooltips->OnRender(); }
+	void OnReset() const { m_pTooltips->OnReset(); }
 };
 
 #endif
