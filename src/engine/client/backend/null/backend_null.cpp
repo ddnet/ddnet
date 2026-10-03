@@ -6,12 +6,31 @@
 #include <emscripten/emscripten.h>
 #endif
 
+bool CCommandProcessorFragment_Null::GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData)
+{
+	if(m_CanvasWidth == 0 || m_CanvasHeight == 0)
+	{
+		return false;
+	}
+	else
+	{
+		Width = m_CanvasWidth;
+		Height = m_CanvasHeight;
+		Format = CImageInfo::FORMAT_RGBA;
+		vDstData.resize((size_t)Width * Height * CImageInfo::PixelSize(Format), 0x00);
+		return true;
+	}
+}
+
 ERunCommandReturnTypes CCommandProcessorFragment_Null::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)
 	{
 	case CCommandProcessorFragment_Null::CMD_INIT:
 		Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand));
+		break;
+	case CCommandBuffer::CMD_UPDATE_VIEWPORT:
+		Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand));
 		break;
 	case CCommandBuffer::CMD_TEXTURE_CREATE:
 		Cmd_Texture_Create(static_cast<const CCommandBuffer::SCommand_Texture_Create *>(pBaseCommand));
@@ -31,6 +50,10 @@ ERunCommandReturnTypes CCommandProcessorFragment_Null::RunCommand(const CCommand
 
 bool CCommandProcessorFragment_Null::Cmd_Init(const SCommand_Init *pCommand)
 {
+	*pCommand->m_pReadPresentedImageDataFunc = [this](uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) {
+		return GetPresentedImageData(Width, Height, Format, vDstData);
+	};
+
 	pCommand->m_pCapabilities->m_TileBuffering = false;
 	pCommand->m_pCapabilities->m_QuadBuffering = false;
 	pCommand->m_pCapabilities->m_TextBuffering = false;
@@ -49,6 +72,15 @@ bool CCommandProcessorFragment_Null::Cmd_Init(const SCommand_Init *pCommand)
 	pCommand->m_pCapabilities->m_ContextMinor = 0;
 	pCommand->m_pCapabilities->m_ContextPatch = 0;
 	return false;
+}
+
+void CCommandProcessorFragment_Null::Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand)
+{
+	if(pCommand->m_ByResize)
+	{
+		m_CanvasWidth = (uint32_t)pCommand->m_Width;
+		m_CanvasHeight = (uint32_t)pCommand->m_Height;
+	}
 }
 
 void CCommandProcessorFragment_Null::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
