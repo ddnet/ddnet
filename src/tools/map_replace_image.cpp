@@ -8,6 +8,7 @@
 #include <base/str.h>
 
 #include <engine/gfx/image_loader.h>
+#include <engine/map.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
@@ -17,17 +18,15 @@
 
 static constexpr const char *const TOOL_NAME = "map_replace_image";
 
-static CDataFileReader g_DataReader;
-
 // global new image data (set by ReplaceImageItem)
 static int g_NewNameId = -1;
 static char g_aNewName[128];
 static int g_NewDataId = -1;
 static CImageInfo g_NewImageInfo;
 
-static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
+static void *ReplaceImageItem(IMap *pMap, int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
 {
-	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
+	const char *pName = pMap->GetDataString(pImgItem->m_ImageName);
 	if(pName == nullptr || pName[0] == '\0')
 	{
 		log_error(TOOL_NAME, "failed to load name of image %d", Index);
@@ -90,7 +89,8 @@ int main(int argc, const char **argv)
 	const char *pImageName = argv[3];
 	const char *pImageFile = argv[4];
 
-	if(!g_DataReader.Open(pStorage.get(), pSourceFilename, IStorage::TYPE_ALL))
+	std::shared_ptr<IMap> pMap = CreateMap();
+	if(!pMap->Load(pStorage.get(), pSourceFilename, IStorage::TYPE_ALL))
 	{
 		log_error(TOOL_NAME, "failed to open source map. filename='%s'", pSourceFilename);
 		return -1;
@@ -104,11 +104,11 @@ int main(int argc, const char **argv)
 	}
 
 	// add all items
-	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
+	for(int Index = 0; Index < pMap->NumItems(); Index++)
 	{
 		int Type, Id;
 		CUuid Uuid;
-		void *pItem = g_DataReader.GetItem(Index, &Type, &Id, &Uuid);
+		void *pItem = pMap->GetItem(Index, &Type, &Id, &Uuid);
 
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
@@ -116,12 +116,12 @@ int main(int argc, const char **argv)
 			continue;
 		}
 
-		int Size = g_DataReader.GetItemSize(Index);
+		int Size = pMap->GetItemSize(Index);
 
 		CMapItemImage NewImageItem;
 		if(Type == MAPITEMTYPE_IMAGE)
 		{
-			pItem = ReplaceImageItem(Index, (CMapItemImage *)pItem, pImageName, pImageFile, &NewImageItem);
+			pItem = ReplaceImageItem(pMap.get(), Index, (CMapItemImage *)pItem, pImageName, pImageFile, &NewImageItem);
 			if(!pItem)
 				return -1;
 			Size = sizeof(CMapItemImage);
@@ -138,7 +138,7 @@ int main(int argc, const char **argv)
 	}
 
 	// add all data
-	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
+	for(int Index = 0; Index < pMap->NumData(); Index++)
 	{
 		void *pData;
 		int Size;
@@ -154,14 +154,14 @@ int main(int argc, const char **argv)
 		}
 		else
 		{
-			pData = g_DataReader.GetData(Index);
-			Size = g_DataReader.GetDataSize(Index);
+			pData = pMap->GetData(Index);
+			Size = pMap->GetDataSize(Index);
 		}
 
 		Writer.AddData(Size, pData);
 	}
 
-	g_DataReader.Close();
+	pMap->Unload();
 	Writer.Finish();
 
 	log_info(TOOL_NAME, "image '%s' replaced", pImageName);
