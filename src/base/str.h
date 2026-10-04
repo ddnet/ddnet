@@ -688,6 +688,15 @@ int str_base64_decode(void *dst, int dst_size, const char *data);
  */
 void str_escape(char **dst, const char *src, const char *end);
 
+/**
+ * Replaces pairs of `\` and `n` characters in a string with newline character `\n`.
+ *
+ * @param str String to unescape in place.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+void str_unescape_newlines(char *str);
+
 int str_toint(const char *str);
 bool str_toint(const char *str, int *out);
 int str_toint_base(const char *str, int base);

@@ -846,6 +846,24 @@ void str_escape(char **dst, const char *src, const char *end)
 	**dst = 0;
 }
 
+void str_unescape_newlines(char *str)
+{
+	int i, j;
+	for(i = 0, j = 0; str[i]; i++, j++)
+	{
+		if(str[i] == '\\' && str[i + 1] == 'n')
+		{
+			str[j] = '\n';
+			i++;
+		}
+		else if(i != j)
+		{
+			str[j] = str[i];
+		}
+	}
+	str[j] = '\0';
+}
+
 int str_toint(const char *str)
 {
 	return str_toint_base(str, 10);

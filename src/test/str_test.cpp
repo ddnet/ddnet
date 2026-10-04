@@ -677,6 +677,26 @@ TEST(Str, Base64DecodeError)
 	EXPECT_LT(str_base64_decode(aBuf, 4, "cGxlYXN1cmUu"), 0);
 }
 
+static void TestUnescapeNewlines(const char *pInput, const char *pExpectedOutput)
+{
+	char aOutput[256];
+	str_copy(aOutput, pInput);
+	str_unescape_newlines(aOutput);
+	EXPECT_STREQ(aOutput, pExpectedOutput);
+}
+
+TEST(Str, UnescapeNewlines)
+{
+	TestUnescapeNewlines("", "");
+	TestUnescapeNewlines("\n", "\n");
+	TestUnescapeNewlines("\\n", "\n");
+	TestUnescapeNewlines("\\\n", "\\\n");
+	TestUnescapeNewlines("\\\\n", "\\\n");
+	TestUnescapeNewlines("\\n\\n\\n", "\n\n\n");
+	TestUnescapeNewlines("a\\nb", "a\nb");
+	TestUnescapeNewlines("\na\\nbb\\nccc\\ndddd\\n", "\na\nbb\nccc\ndddd\n");
+}
+
 TEST(Str, Tokenize)
 {
 	char aTest[] = "GER,RUS,ZAF,BRA,CAN";
