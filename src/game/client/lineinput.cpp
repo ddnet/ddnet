@@ -189,7 +189,7 @@ size_t CLineInput::OffsetFromActualToDisplay(size_t ActualOffset)
 size_t CLineInput::OffsetFromDisplayToActual(size_t DisplayOffset)
 {
 	if(IsHidden() || (m_pfnCalculateOffsetCallback && m_pfnCalculateOffsetCallback()))
-		return str_utf8_offset_bytes_to_chars(m_pStr, DisplayOffset);
+		return str_utf8_offset_chars_to_bytes(m_pStr, DisplayOffset);
 	return DisplayOffset;
 }
 
