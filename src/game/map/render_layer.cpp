@@ -231,7 +231,7 @@ bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params)
 	if(!g_Config.m_GfxNoclip || Params.m_RenderType == ERenderType::RENDERTYPE_FULL_DESIGN)
 	{
 		Graphics()->ClipDisable();
-		if(m_pGroup->m_Version >= 2 && m_pGroup->m_UseClipping)
+		if(m_pGroup->m_UseClipping)
 		{
 			// set clipping
 			Graphics()->MapScreenToInterface(Params.m_Center.x, Params.m_Center.y, Params.m_Zoom);

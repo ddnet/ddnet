@@ -98,26 +98,13 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 		Item.m_Credits = Writer.AddDataString(m_MapInfo.m_aCredits);
 		Item.m_License = Writer.AddDataString(m_MapInfo.m_aLicense);
 
-		Item.m_Settings = -1;
-		if(!m_vSettings.empty())
+		std::vector<const char *> vpSettings;
+		vpSettings.reserve(m_vSettings.size());
+		for(const CEditorMapSetting &Setting : m_vSettings)
 		{
-			int Size = 0;
-			for(const auto &Setting : m_vSettings)
-			{
-				Size += str_length(Setting.m_aCommand) + 1;
-			}
-
-			char *pSettings = (char *)malloc(std::max(Size, 1));
-			char *pNext = pSettings;
-			for(const auto &Setting : m_vSettings)
-			{
-				int Length = str_length(Setting.m_aCommand) + 1;
-				mem_copy(pNext, Setting.m_aCommand, Length);
-				pNext += Length;
-			}
-			Item.m_Settings = Writer.AddData(Size, pSettings);
-			free(pSettings);
+			vpSettings.push_back(Setting.m_aCommand);
 		}
+		Item.m_Settings = Writer.AddDataStringArray(vpSettings);
 
 		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Item), &Item);
 	}
@@ -479,7 +466,6 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 		pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 		for(int i = Start; i < Start + Num; i++)
 		{
-			int ItemSize = pMap->GetItemSize(i);
 			int ItemId;
 			CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &ItemId);
 			if(!pItem || ItemId != 0)
@@ -505,20 +491,15 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			ReadStringInfo(pItem->m_Credits, m_MapInfo.m_aCredits, sizeof(m_MapInfo.m_aCredits), "credits");
 			ReadStringInfo(pItem->m_License, m_MapInfo.m_aLicense, sizeof(m_MapInfo.m_aLicense), "license");
 
-			if(pItem->m_Version != 1 || ItemSize < (int)sizeof(CMapItemInfoSettings))
-				break;
-
-			if(!(pItem->m_Settings > -1))
-				break;
-
-			const unsigned Size = pMap->GetDataSize(pItem->m_Settings);
-			char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
-			char *pNext = pSettings;
-			while(pNext < pSettings + Size)
+			const std::optional<std::vector<const char *>> vpSettings = pMap->GetDataStringArray(pItem->m_Settings);
+			if(!vpSettings.has_value())
 			{
-				int StrSize = str_length(pNext) + 1;
-				m_vSettings.emplace_back(pNext);
-				pNext += StrSize;
+				ErrorHandler("Error: Failed to read settings from map info.");
+				break;
+			}
+			for(const char *pSetting : vpSettings.value())
+			{
+				m_vSettings.emplace_back(pSetting);
 			}
 		}
 	}
@@ -545,14 +526,14 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			else
 				str_copy(pImg->m_aName, pName);
 
-			if(pItem->m_Version > 1 && pItem->m_MustBe1 != 1)
+			if(pItem->m_MustBe1 != 1)
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "Error: Unsupported image type of image %d '%s'.", i, pImg->m_aName);
 				ErrorHandler(aBuf);
 			}
 
-			if(pImg->m_External || (pItem->m_Version > 1 && pItem->m_MustBe1 != 1))
+			if(pImg->m_External || pItem->m_MustBe1 != 1)
 			{
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pImg->m_aName);
@@ -679,27 +660,19 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 		{
 			CMapItemGroup *pGItem = (CMapItemGroup *)pMap->GetItem(Start + g);
 
-			if(pGItem->m_Version < 1 || pGItem->m_Version > 3)
-				continue;
-
 			std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 			pGroup->m_ParallaxX = pGItem->m_ParallaxX;
 			pGroup->m_ParallaxY = pGItem->m_ParallaxY;
 			pGroup->m_OffsetX = pGItem->m_OffsetX;
 			pGroup->m_OffsetY = pGItem->m_OffsetY;
-
-			if(pGItem->m_Version >= 2)
-			{
-				pGroup->m_UseClipping = pGItem->m_UseClipping;
-				pGroup->m_ClipX = pGItem->m_ClipX;
-				pGroup->m_ClipY = pGItem->m_ClipY;
-				pGroup->m_ClipW = pGItem->m_ClipW;
-				pGroup->m_ClipH = pGItem->m_ClipH;
-			}
+			pGroup->m_UseClipping = pGItem->m_UseClipping;
+			pGroup->m_ClipX = pGItem->m_ClipX;
+			pGroup->m_ClipY = pGItem->m_ClipY;
+			pGroup->m_ClipW = pGItem->m_ClipW;
+			pGroup->m_ClipH = pGItem->m_ClipH;
 
 			// load group name
-			if(pGItem->m_Version >= 3)
-				IntsToStr(pGItem->m_aName, std::size(pGItem->m_aName), pGroup->m_aName, std::size(pGroup->m_aName));
+			IntsToStr(pGItem->m_aName, std::size(pGItem->m_aName), pGroup->m_aName, std::size(pGroup->m_aName));
 
 			for(int l = 0; l < pGItem->m_NumLayers; l++)
 			{
@@ -877,8 +850,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 					}
 
 					// load layer name
-					if(pQuadsItem->m_Version >= 2)
-						IntsToStr(pQuadsItem->m_aName, std::size(pQuadsItem->m_aName), pQuads->m_aName, std::size(pQuads->m_aName));
+					IntsToStr(pQuadsItem->m_aName, std::size(pQuadsItem->m_aName), pQuads->m_aName, std::size(pQuads->m_aName));
 
 					if(pQuadsItem->m_NumQuads > 0)
 					{
@@ -902,8 +874,6 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
 				{
 					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
-						continue;
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(this);
 					pSounds->m_Flags = pLayerItem->m_Flags;
@@ -942,8 +912,6 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				{
 					// compatibility with old sound layers
 					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
-						continue;
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(this);
 					pSounds->m_Flags = pLayerItem->m_Flags;
@@ -1035,11 +1003,9 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				if(pPointBezier != nullptr)
 					mem_copy(&pEnvelope->m_vPoints[PointIndex].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
 			}
-			if(pItem->m_aName[0] != -1) // compatibility with old maps
-				IntsToStr(pItem->m_aName, std::size(pItem->m_aName), pEnvelope->m_aName, std::size(pEnvelope->m_aName));
+			IntsToStr(pItem->m_aName, std::size(pItem->m_aName), pEnvelope->m_aName, std::size(pEnvelope->m_aName));
+			pEnvelope->m_Synchronized = pItem->m_Synchronized;
 			m_vpEnvelopes.push_back(pEnvelope);
-			if(pItem->m_Version >= 2)
-				pEnvelope->m_Synchronized = pItem->m_Synchronized;
 		}
 	}
 
