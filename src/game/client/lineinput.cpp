@@ -81,7 +81,7 @@ void CLineInput::SetRange(const char *pString, size_t Begin, size_t End)
 		{
 			if(AddedCharSize)
 				mem_copy(m_pStr + Begin, pString, AddedCharSize);
-			mem_move(m_pStr + Begin + AddedCharSize, m_pStr + Begin + RemovedCharSize, m_Len - Begin - AddedCharSize);
+			mem_move(m_pStr + Begin + AddedCharSize, m_pStr + Begin + RemovedCharSize, m_Len - Begin - RemovedCharSize);
 		}
 		else if(AddedCharSize > RemovedCharSize)
 			mem_move(m_pStr + End + AddedCharSize - RemovedCharSize, m_pStr + End, m_Len - End);
