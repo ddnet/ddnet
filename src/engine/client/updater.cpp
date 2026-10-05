@@ -18,6 +18,7 @@
 #if !defined(CONF_FAMILY_WINDOWS)
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <unistd.h> // close
 #endif
 
 class CUpdaterFetchTask : public IHttpRequest::IProgressCallback
@@ -107,13 +108,16 @@ static bool SetExecutableBit(const char *pPath)
 	if(fstat(FileDescriptor, &FileStats) != 0)
 	{
 		log_error("updater", "Failed to determine file stats to set executable bit of '%s'", pPath);
+		close(FileDescriptor);
 		return false;
 	}
 	if(fchmod(FileDescriptor, FileStats.st_mode | S_IXUSR | S_IXGRP | S_IXOTH) != 0)
 	{
 		log_error("updater", "Failed to set executable bit of '%s'", pPath);
+		close(FileDescriptor);
 		return false;
 	}
+	close(FileDescriptor);
 	return true;
 }
 #endif
