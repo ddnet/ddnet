@@ -393,21 +393,76 @@ void CEffects::Explosion(vec2 Pos, float Alpha)
 
 void CEffects::HammerHit(vec2 Pos, float Alpha, float Volume)
 {
-	// add the explosion
-	CParticle p;
-	p.SetDefault();
-	p.m_Spr = SPRITE_PART_HIT01;
-	p.m_Pos = Pos;
-	p.m_LifeSpan = 0.3f;
-	p.m_StartSize = 120.0f;
-	p.m_EndSize = 0.0f;
-	p.m_Rot = random_angle();
-	p.m_Color.a = Alpha;
-	p.m_StartAlpha = Alpha;
-	GameClient()->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
+	// Эффект "Черной молнии" (в стиле аниме "Магическая битва" / Jujutsu Kaisen)
+	// Вместо стандартного взрыва генерируем композицию из резких темных разрядов, 
+	// контрастных искр и остаточного мрачного дыма.
+
+	// 1. Основные черные разряды (ядро молнии)
+	for(int i = 0; i < 16; i++)
+	{
+		CParticle p;
+		p.SetDefault();
+		// SPRITE_PART_SLICE лучше всего имитирует резкие, ломаные линии молнии
+		p.m_Spr = SPRITE_PART_SLICE;
+		p.m_Pos = Pos;
+		// Высокая начальная скорость в случайном направлении для эффекта резкого пробоя
+		p.m_Vel = random_direction() * random_float(400.0f, 900.0f);
+		p.m_LifeSpan = random_float(0.1f, 0.25f); // Очень короткая жизнь, как у реальной молнии
+		p.m_StartSize = random_float(15.0f, 35.0f);
+		p.m_EndSize = 0.0f;
+		p.m_Rot = random_angle();
+		p.m_Rotspeed = random_float(-15.0f, 15.0f); // Быстрое хаотичное вращение
+		p.m_Friction = 0.85f; // Резкое торможение
+		p.m_Gravity = 0.0f; // Молния не подчиняется гравитации
+		// Глубокий черный цвет с едва заметным фиолетовым оттенком (проклятая энергия)
+		p.m_Color = ColorRGBA(0.05f, 0.05f, 0.08f, Alpha);
+		p.m_StartAlpha = Alpha;
+		GameClient()->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
+	}
+
+	// 2. Контрастные искры по краям (чтобы молния не сливалась с темным фоном)
+	for(int i = 0; i < 10; i++)
+	{
+		CParticle p;
+		p.SetDefault();
+		p.m_Spr = SPRITE_PART_SPARKLE;
+		p.m_Pos = Pos + random_direction() * random_float(10.0f, 30.0f);
+		p.m_Vel = random_direction() * random_float(200.0f, 600.0f);
+		p.m_LifeSpan = random_float(0.15f, 0.3f);
+		p.m_StartSize = random_float(5.0f, 15.0f);
+		p.m_EndSize = 0.0f;
+		p.m_Friction = 0.9f;
+		// Светло-фиолетовый/белый оттенок для имитации электрического свечения
+		p.m_Color = ColorRGBA(0.8f, 0.6f, 1.0f, Alpha * 0.8f);
+		p.m_StartAlpha = Alpha * 0.8f;
+		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+	}
+
+	// 3. Остаточный темный дым (атмосферный шлейф после удара)
+	for(int i = 0; i < 8; i++)
+	{
+		CParticle p;
+		p.SetDefault();
+		p.m_Spr = SPRITE_PART_SMOKE;
+		p.m_Pos = Pos + random_direction() * random_float(15.0f);
+		p.m_Vel = random_direction() * random_float(50.0f, 150.0f);
+		p.m_LifeSpan = random_float(0.4f, 0.7f);
+		p.m_StartSize = random_float(20.0f, 40.0f);
+		p.m_EndSize = 0.0f;
+		p.m_Friction = 0.7f;
+		p.m_Gravity = -100.0f; // Медленно поднимается вверх, рассеиваясь
+		// Темно-серый полупрозрачный дым
+		p.m_Color = ColorRGBA(0.15f, 0.15f, 0.15f, Alpha * 0.6f);
+		p.m_StartAlpha = Alpha * 0.6f;
+		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+	}
+
+	// Воспроизведение звука удара
+	// Примечание: если в sounds.h есть SOUND_EXPLODE или кастомный звук грома, 
+	// его можно подставить сюда вместо SOUND_HAMMER_HIT для большего эффекта.
 	if(g_Config.m_SndGame)
 		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, Volume, Pos);
-}
+} 
 
 void CEffects::OnRender()
 {
