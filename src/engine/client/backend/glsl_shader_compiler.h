@@ -4,17 +4,17 @@
 #include <string>
 #include <vector>
 
-enum EGLSLShaderCompilerType
-{
-	GLSL_SHADER_COMPILER_TYPE_VERTEX = 0,
-	GLSL_SHADER_COMPILER_TYPE_FRAGMENT,
-};
-
 class CGLSLCompiler
 {
 	friend class CGLSL;
 
 public:
+	enum class EShaderType
+	{
+		VERTEX,
+		FRAGMENT,
+	};
+
 	enum class ETextureReplaceType
 	{
 		TEXTURE_2D,
@@ -29,10 +29,10 @@ public:
 	void AddDefine(const char *pDefineName, const char *pDefineValue);
 	void ClearDefines();
 
-	void ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
+	void ParseLine(std::string &Line, const char *pReadLine, EShaderType Type) const;
 
 private:
-	void ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
+	void ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EShaderType Type) const;
 	void ParseLineGLES(std::string &Line, const char *pReadLine) const;
 
 	class CDefine

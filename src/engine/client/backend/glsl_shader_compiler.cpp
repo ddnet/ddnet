@@ -29,7 +29,7 @@ void CGLSLCompiler::ClearDefines()
 	m_vDefines.clear();
 }
 
-void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const
+void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EShaderType Type) const
 {
 	const bool IsNewOpenGL = !m_IsOpenGLES ?
 					 m_OpenGLVersionMajor >= 4 || (m_OpenGLVersionMajor == 3 && m_OpenGLVersionMinor == 3) :
@@ -48,7 +48,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 	}
 }
 
-void CGLSLCompiler::ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const
+void CGLSLCompiler::ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EShaderType Type) const
 {
 	const char *pBuff = pReadLine;
 	char aTmpStr[1024];
@@ -121,7 +121,7 @@ void CGLSLCompiler::ParseLineOldOpenGL(std::string &Line, const char *pReadLine,
 			}
 			else if(str_comp(aTmpStr, "out") == 0 || str_comp(aTmpStr, "in") == 0)
 			{
-				if(Type == GLSL_SHADER_COMPILER_TYPE_FRAGMENT && str_comp(aTmpStr, "out") == 0)
+				if(Type == EShaderType::FRAGMENT && str_comp(aTmpStr, "out") == 0)
 					return;
 				Line.append("varying");
 				Line.append(pBuff);
