@@ -19,14 +19,9 @@ CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int
 	m_TextureReplaceType = 0;
 }
 
-void CGLSLCompiler::AddDefine(const std::string &DefineName, const std::string &DefineValue)
-{
-	m_vDefines.emplace_back(DefineName, DefineValue);
-}
-
 void CGLSLCompiler::AddDefine(const char *pDefineName, const char *pDefineValue)
 {
-	AddDefine(std::string(pDefineName), std::string(pDefineValue));
+	m_vDefines.emplace_back(pDefineName, pDefineValue);
 }
 
 void CGLSLCompiler::ClearDefines()

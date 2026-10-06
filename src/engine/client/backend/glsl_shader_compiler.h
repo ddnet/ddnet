@@ -19,7 +19,6 @@ public:
 	void SetHasTextureArray(bool TextureArray) { m_HasTextureArray = TextureArray; }
 	void SetTextureReplaceType(int TextureReplaceType) { m_TextureReplaceType = TextureReplaceType; }
 
-	void AddDefine(const std::string &DefineName, const std::string &DefineValue);
 	void AddDefine(const char *pDefineName, const char *pDefineValue);
 	void ClearDefines();
 
@@ -39,10 +38,10 @@ private:
 	class CDefine
 	{
 	public:
-		CDefine(const std::string &DefineName, const std::string &DefineValue)
+		CDefine(const char *pDefineName, const char *pDefineValue)
 		{
-			m_DefineName = DefineName;
-			m_DefineValue = DefineValue;
+			m_DefineName = pDefineName;
+			m_DefineValue = pDefineValue;
 		}
 		std::string m_DefineName;
 		std::string m_DefineValue;
