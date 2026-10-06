@@ -95,7 +95,7 @@ void CMutes::UnmuteAddr(const NETADDR *pAddr)
 	auto It = m_Mutes.find(KeyAddr);
 	if(It == m_Mutes.end())
 	{
-		log_info(m_pSystemName, "No mutes for this IP address found: %s", aAddrString);
+		log_info(m_pSystemName, "No mutes for this IP address found: <{%s}>", aAddrString);
 		return;
 	}
 	if(It->second.m_NameKnown)
