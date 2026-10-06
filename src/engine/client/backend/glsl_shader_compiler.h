@@ -36,9 +36,10 @@ private:
 	void ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
 	void ParseLineGLES(std::string &Line, const char *pReadLine) const;
 
-	struct SGLSLCompilerDefine
+	class CDefine
 	{
-		SGLSLCompilerDefine(const std::string &DefineName, const std::string &DefineValue)
+	public:
+		CDefine(const std::string &DefineName, const std::string &DefineValue)
 		{
 			m_DefineName = DefineName;
 			m_DefineValue = DefineValue;
@@ -47,7 +48,7 @@ private:
 		std::string m_DefineValue;
 	};
 
-	std::vector<SGLSLCompilerDefine> m_vDefines;
+	std::vector<CDefine> m_vDefines;
 
 	int m_OpenGLVersionMajor;
 	int m_OpenGLVersionMinor;

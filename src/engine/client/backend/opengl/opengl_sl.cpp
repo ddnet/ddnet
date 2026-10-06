@@ -83,7 +83,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		}
 	}
 
-	for(const CGLSLCompiler::SGLSLCompilerDefine &Define : pCompiler->m_vDefines)
+	for(const CGLSLCompiler::CDefine &Define : pCompiler->m_vDefines)
 	{
 		vLines.push_back(std::string("#define ") + Define.m_DefineName + std::string(" ") + Define.m_DefineValue + std::string("\r\n"));
 	}
