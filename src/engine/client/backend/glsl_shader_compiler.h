@@ -12,8 +12,29 @@ enum EGLSLShaderCompilerType
 
 class CGLSLCompiler
 {
-private:
 	friend class CGLSL;
+
+public:
+	CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias);
+	void SetHasTextureArray(bool TextureArray) { m_HasTextureArray = TextureArray; }
+	void SetTextureReplaceType(int TextureReplaceType) { m_TextureReplaceType = TextureReplaceType; }
+
+	void AddDefine(const std::string &DefineName, const std::string &DefineValue);
+	void AddDefine(const char *pDefineName, const char *pDefineValue);
+	void ClearDefines();
+
+	void ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
+
+	enum EGLSLCompilerTextureReplaceType
+	{
+		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D = 0,
+		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D,
+		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY,
+	};
+
+private:
+	void ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
+	void ParseLineGLES(std::string &Line, const char *pReadLine) const;
 
 	struct SGLSLCompilerDefine
 	{
@@ -38,27 +59,6 @@ private:
 
 	bool m_HasTextureArray;
 	int m_TextureReplaceType; // @see EGLSLCompilerTextureReplaceType
-public:
-	CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias);
-	void SetHasTextureArray(bool TextureArray) { m_HasTextureArray = TextureArray; }
-	void SetTextureReplaceType(int TextureReplaceType) { m_TextureReplaceType = TextureReplaceType; }
-
-	void AddDefine(const std::string &DefineName, const std::string &DefineValue);
-	void AddDefine(const char *pDefineName, const char *pDefineValue);
-	void ClearDefines();
-
-	void ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
-
-	enum EGLSLCompilerTextureReplaceType
-	{
-		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D = 0,
-		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D,
-		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY,
-	};
-
-private:
-	void ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
-	void ParseLineGLES(std::string &Line, const char *pReadLine) const;
 };
 
 #endif
