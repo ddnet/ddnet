@@ -15,21 +15,21 @@ class CGLSLCompiler
 	friend class CGLSL;
 
 public:
+	enum class ETextureReplaceType
+	{
+		TEXTURE_2D,
+		TEXTURE_3D,
+		TEXTURE_2D_ARRAY,
+	};
+
 	CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias);
 	void SetHasTextureArray(bool TextureArray) { m_HasTextureArray = TextureArray; }
-	void SetTextureReplaceType(int TextureReplaceType) { m_TextureReplaceType = TextureReplaceType; }
+	void SetTextureReplaceType(ETextureReplaceType TextureReplaceType) { m_TextureReplaceType = TextureReplaceType; }
 
 	void AddDefine(const char *pDefineName, const char *pDefineValue);
 	void ClearDefines();
 
 	void ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
-
-	enum EGLSLCompilerTextureReplaceType
-	{
-		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D = 0,
-		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D,
-		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY,
-	};
 
 private:
 	void ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
@@ -58,7 +58,7 @@ private:
 	float m_TextureLODBias;
 
 	bool m_HasTextureArray;
-	int m_TextureReplaceType; // @see EGLSLCompilerTextureReplaceType
+	ETextureReplaceType m_TextureReplaceType;
 };
 
 #endif

@@ -1646,9 +1646,9 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 			ShaderCompiler.SetHasTextureArray(pCommand->m_pCapabilities->m_2DArrayTextures);
 
 			if(pCommand->m_pCapabilities->m_2DArrayTextures)
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY);
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::ETextureReplaceType::TEXTURE_2D_ARRAY);
 			else
-				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D);
+				ShaderCompiler.SetTextureReplaceType(CGLSLCompiler::ETextureReplaceType::TEXTURE_3D);
 
 			{
 				CGLSL PrimitiveVertexShader;

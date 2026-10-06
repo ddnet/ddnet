@@ -16,7 +16,7 @@ CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int
 	m_TextureLODBias = TextureLODBias;
 
 	m_HasTextureArray = false;
-	m_TextureReplaceType = 0;
+	m_TextureReplaceType = ETextureReplaceType::TEXTURE_2D;
 }
 
 void CGLSLCompiler::AddDefine(const char *pDefineName, const char *pDefineValue)
@@ -135,11 +135,11 @@ void CGLSLCompiler::ParseLineOldOpenGL(std::string &Line, const char *pReadLine,
 			}
 			else if(str_comp(aTmpStr, "texture") == 0)
 			{
-				if(m_TextureReplaceType == GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D)
+				if(m_TextureReplaceType == ETextureReplaceType::TEXTURE_2D)
 					Line.append("texture2D");
-				else if(m_TextureReplaceType == GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D)
+				else if(m_TextureReplaceType == ETextureReplaceType::TEXTURE_3D)
 					Line.append("texture3D");
-				else if(m_TextureReplaceType == GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY)
+				else if(m_TextureReplaceType == ETextureReplaceType::TEXTURE_2D_ARRAY)
 					Line.append("texture2DArray");
 				std::string RestLine;
 				ParseLine(RestLine, pBuff, Type);
