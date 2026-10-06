@@ -47,7 +47,7 @@ public:
 	void AddDefine(const char *pDefineName, const char *pDefineValue);
 	void ClearDefines();
 
-	void ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type);
+	void ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
 
 	enum EGLSLCompilerTextureReplaceType
 	{
@@ -55,6 +55,10 @@ public:
 		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_3D,
 		GLSL_COMPILER_TEXTURE_REPLACE_TYPE_2D_ARRAY,
 	};
+
+private:
+	void ParseLineOldOpenGL(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type) const;
+	void ParseLineGLES(std::string &Line, const char *pReadLine) const;
 };
 
 #endif
