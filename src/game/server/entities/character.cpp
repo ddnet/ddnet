@@ -731,8 +731,18 @@ void CCharacter::OnPredictedInput(const CNetObj_PlayerInput *pNewInput)
 	if(mem_comp(&m_SavedInput, pNewInput, sizeof(CNetObj_PlayerInput)) != 0)
 		m_LastAction = Server()->Tick();
 
+	const int PrevTargetX = m_Input.m_TargetX;
+	const int PrevTargetY = m_Input.m_TargetY;
+
 	// copy new input
 	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
+
+	// reset target due to spectator mode input not being in aim space
+	if(pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM)
+	{
+		m_Input.m_TargetX = PrevTargetX;
+		m_Input.m_TargetY = PrevTargetY;
+	}
 
 	// it is not allowed to aim in the center
 	if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
@@ -746,6 +756,13 @@ void CCharacter::OnDirectInput(const CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
 	m_NumInputs++;
+
+	// reset target due to spectator mode input not being in aim space
+	if(pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM)
+	{
+		m_LatestInput.m_TargetX = m_LatestPrevInput.m_TargetX;
+		m_LatestInput.m_TargetY = m_LatestPrevInput.m_TargetY;
+	}
 
 	// it is not allowed to aim in the center
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
