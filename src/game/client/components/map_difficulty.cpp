@@ -2,16 +2,17 @@
 
 #include "map_difficulty.h"
 
+#include <base/str.h>
+
 #include <engine/http.h>
 #include <engine/kernel.h>
 #include <engine/shared/json.h>
-#include <base/str.h>
 
 #include <memory>
 #include <string>
 
-
-CMapDifficulty::CMapDifficulty(): m_RunningRequests(0){
+CMapDifficulty::CMapDifficulty() : m_RunningRequests(0)
+{
 }
 
 int CMapDifficulty::Sizeof() const
@@ -90,17 +91,18 @@ void CMapDifficulty::OnUpdate()
 							const int Difficulty = json_int_get(pDifficulty);
 
 							if(Difficulty > 0)
-                                FoundDifficulty = Difficulty;
+								FoundDifficulty = Difficulty;
 						}
 					}
 
 					json_value_free(pJson);
 				}
 			}
-            m_Cache[MapName] = FoundDifficulty;
+			m_Cache[MapName] = FoundDifficulty;
 		}
-		else{
-            m_Cache[MapName] = -1;
+		else
+		{
+			m_Cache[MapName] = -1;
 		}
 
 		m_Pending.erase(MapName);

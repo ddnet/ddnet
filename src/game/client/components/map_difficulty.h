@@ -21,8 +21,9 @@ public:
 	int Get(const char *pMapName);
 	void Request(const char *pMapName);
 
-	virtual void OnUpdate() override;
-	virtual int Sizeof() const override;
+	void OnUpdate() override;
+	int Sizeof() const override;
+
 private:
 	struct CHttpRequest
 	{
