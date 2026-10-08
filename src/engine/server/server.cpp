@@ -1695,12 +1695,13 @@ bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 	}
 
 	// "^([^:]*):(.*)$"
-	char aName[sizeof(Config()->m_Password)];
-	const char *pInnerPassword = str_next_token(pPassword, ":", aName, sizeof(aName));
-	if(!pInnerPassword)
+	const char *pInnerPassword = str_find(pPassword, ":");
+	if(pInnerPassword == nullptr)
 	{
 		return false;
 	}
+	char aName[sizeof(Config()->m_Password)];
+	str_truncate(aName, sizeof(aName), pPassword, pInnerPassword - pPassword);
 	int Slot = m_AuthManager.FindKey(aName);
 	const char *pMinAuthLevel = Config()->m_SvReservedSlotsAuthLevel;
 	std::optional<int> MinAuthLevel = CAuthManager::RoleNameToAuthLevel(pMinAuthLevel);
