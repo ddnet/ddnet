@@ -161,6 +161,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Scoreboard,
 					      &m_Statboard,
 					      &m_Motd,
+					      &m_MapDifficulty,
 					      &m_Menus,
 					      &m_KeyBinder,
 					      &m_GameConsole,

@@ -95,6 +95,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		COL_NAME,
 		COL_GAMETYPE,
 		COL_MAP,
+		COL_STARS,
 		COL_FRIENDS,
 		COL_PLAYERS,
 		COL_PING,
@@ -129,6 +130,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		{COL_NAME, IServerBrowser::SORT_NAME, Localizable("Name"), 0, 50.0f, {0}},
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, Localizable("Type"), 1, 50.0f, {0}},
 		{COL_MAP, IServerBrowser::SORT_MAP, Localizable("Map"), 1, 120.0f + (Headers.w - 480) / 8, {0}},
+		{COL_STARS, IServerBrowser::SORT_STARS, "Stars", 1, 12.0f*5, {0}},
 		{COL_FRIENDS, IServerBrowser::SORT_NUMFRIENDS, "", 1, ClickableIconSpace, {0}},
 		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, Localizable("Players"), 1, 60.0f, {0}},
 		{-1, -1, "", 1, 4.0f, {0}},
@@ -435,6 +437,38 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
 					}
 				}
+			}
+            else if(Id == COL_STARS)
+			{
+				// Requesting map difficulty dynamically via new function
+			    const char *pMapName = pItem->m_aMap;
+                int Difficulty = GameClient()->m_MapDifficulty.Get(pMapName);
+
+                if(Difficulty > 0)
+                {
+                    SLabelProperties Props;
+                    Props.m_MaxWidth = Button.w;
+                    Props.m_StopAtEnd = true;
+                    Props.m_EnableWidthCheck = false;
+
+                    // Build the star text layout based on the numeric value returned
+                    char aStarsBuf[32] = {0};
+                    for(int s = 0; s < std::clamp(Difficulty, 0, 5); ++s)
+                    {
+                        str_append(aStarsBuf, "★", sizeof(aStarsBuf));
+                    }
+                    for(int s = Difficulty; s < 5; ++s)
+                    {
+                        str_append(aStarsBuf, "✰", sizeof(aStarsBuf));
+                    }
+
+                    Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_GAMETYPE), &Button, aStarsBuf, FontSize, TEXTALIGN_ML, Props);
+                    TextRender()->TextColor(TextRender()->DefaultTextColor());
+                }
+                else
+                {
+                    GameClient()->m_MapDifficulty.Request(pMapName);
+                }
 			}
 			else if(Id == COL_PLAYERS)
 			{
