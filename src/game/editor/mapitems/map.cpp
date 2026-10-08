@@ -82,6 +82,7 @@ CEditorMap::CEditorMap(CEditor *pEditor) :
 	DeselectQuads();
 	DeselectQuadPoints();
 	m_SelectedQuadEnvelope = -1;
+	m_SelectedQuadEnvelopePoint = -1;
 	m_CurrentQuadIndex = -1;
 	m_SelectedEnvelope = 0;
 	m_UpdateEnvPointInfo = false;
