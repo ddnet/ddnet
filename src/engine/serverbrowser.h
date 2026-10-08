@@ -130,7 +130,6 @@ public:
 
 	static int EstimateLatency(int Loc1, int Loc2);
 	static bool ParseLocation(int *pResult, const char *pString);
-	static ColorRGBA GametypeColor(const char *pGametype);
 };
 
 class CCommunityCountryServer
