@@ -641,7 +641,7 @@ void CPlayer::OnPredictedInput(const CNetObj_PlayerInput *pNewInput)
 
 	m_NumInputs++;
 
-	if(m_pCharacter && !m_Paused && !(pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
+	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnPredictedInput(pNewInput);
 
 	// Magic number when we can hope that client has successfully identified itself
@@ -686,7 +686,7 @@ void CPlayer::OnPredictedEarlyInput(const CNetObj_PlayerInput *pNewInput)
 	if(m_PlayerFlags & PLAYERFLAG_CHATTING)
 		return;
 
-	if(m_pCharacter && !m_Paused && !(m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
+	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnDirectInput(pNewInput);
 }
 
