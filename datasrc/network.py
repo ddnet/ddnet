@@ -557,8 +557,8 @@ Messages = [
 	]),
 
 	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
-		NetIntAny("m_X"),
-		NetIntAny("m_Y"),
+		NetIntAny("m_ScreenWidth"),
+		NetIntAny("m_ScreenHeight"),
 	]),
 
 	NetMessageEx("Cl_ShowOthers", "showothers@netmsg.ddnet.tw", [
