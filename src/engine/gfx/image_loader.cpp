@@ -204,6 +204,7 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 	Height = png_get_image_height(pPngStruct, pPngInfo);
 	const png_byte BitDepth = png_get_bit_depth(pPngStruct, pPngInfo);
 	const int ColorType = png_get_color_type(pPngStruct, pPngInfo);
+	const int Incompatible = PngliteIncompatibility(pPngStruct, pPngInfo);
 
 	if(Width == 0 || Height == 0)
 	{
@@ -262,7 +263,7 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 		{
 			mem_copy(&Image.m_pData[y * BytesInRow], pRowPointers[y], BytesInRow);
 		}
-		PngliteIncompatible = PngliteIncompatibility(pPngStruct, pPngInfo);
+		PngliteIncompatible = Incompatible;
 	}
 
 	Cleanup();
