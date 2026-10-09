@@ -200,6 +200,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 				std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 				pLayerTiles->PrepareForSave();
 
+				CMapItemLayerPositionEnvelope PosEnvItem;
 				CMapItemLayerTilemap Item;
 				Item.m_Version = 3;
 
@@ -210,6 +211,12 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 				Item.m_Color = pLayerTiles->m_Color;
 				Item.m_ColorEnv = pLayerTiles->m_ColorEnv;
 				Item.m_ColorEnvOffset = pLayerTiles->m_ColorEnvOffset;
+
+				PosEnvItem.m_Version = 1;
+				PosEnvItem.m_PosEnv = pLayerTiles->m_PosEnv;
+				PosEnvItem.m_PosEnvOffset = pLayerTiles->m_PosEnvOffset;
+				PosEnvItem.m_GroupId = GroupCount;
+				PosEnvItem.m_LayerId = GItem.m_NumLayers;
 
 				Item.m_Width = pLayerTiles->m_Width;
 				Item.m_Height = pLayerTiles->m_Height;
@@ -263,6 +270,10 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 
 				// save item
 				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
+				if(PosEnvItem.m_PosEnv >= 0)
+				{
+					Writer.AddItem(MAPITEMTYPE_TILELAYER_POSITION_ENVELOPE, LayerCount, sizeof(PosEnvItem), &PosEnvItem);
+				}
 
 				// save auto mapper of each tile layer (not physics layer)
 				if(!Item.m_Flags)
@@ -1003,10 +1014,11 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 	}
 
 	// load envelopes
+	int EnvelopeNum;
 	{
 		const CMapBasedEnvelopePointAccess EnvelopePoints(pMap.get());
 
-		int EnvelopeStart, EnvelopeNum;
+		int EnvelopeStart;
 		pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvelopeStart, &EnvelopeNum);
 		for(int EnvelopeIndex = 0; EnvelopeIndex < EnvelopeNum; EnvelopeIndex++)
 		{
@@ -1067,6 +1079,33 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 							pTiles->m_Seed = pItem->m_AutomapperSeed;
 							pTiles->m_AutoAutomapper = !!(pItem->m_Flags & CMapItemAutomapperConfig::FLAG_AUTOMATIC);
 						}
+					}
+				}
+			}
+		}
+	}
+
+	// load tile layer position envelopes
+	{
+		int PosEnvItemStart, PosEnvItemNum;
+		pMap->GetType(MAPITEMTYPE_TILELAYER_POSITION_ENVELOPE, &PosEnvItemStart, &PosEnvItemNum);
+		for(int PosEnvItemIndex = 0; PosEnvItemIndex < PosEnvItemNum; PosEnvItemIndex++)
+		{
+			CMapItemLayerPositionEnvelope *pItem = (CMapItemLayerPositionEnvelope *)pMap->GetItem(PosEnvItemStart + PosEnvItemIndex);
+			if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&
+				pItem->m_LayerId >= 0 && (size_t)pItem->m_LayerId < m_vpGroups[pItem->m_GroupId]->m_vpLayers.size() &&
+				pItem->m_PosEnv >= 0 && pItem->m_PosEnv < EnvelopeNum)
+			{
+				std::shared_ptr<CLayer> pLayer = m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId];
+				if(pLayer->m_Type == LAYERTYPE_TILES)
+				{
+					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId]);
+					// only load position envelopes for tile layers (not physics layers)
+					if(!(pTiles->m_HasGame || pTiles->m_HasTele || pTiles->m_HasSpeedup ||
+						   pTiles->m_HasFront || pTiles->m_HasSwitch || pTiles->m_HasTune))
+					{
+						pTiles->m_PosEnv = pItem->m_PosEnv;
+						pTiles->m_PosEnvOffset = pItem->m_PosEnvOffset;
 					}
 				}
 			}
