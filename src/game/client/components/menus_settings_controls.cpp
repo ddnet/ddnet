@@ -181,6 +181,8 @@ void CMenusSettingsControls::Render(CUIRect MainView)
 	MainView.VSplitMid(&LeftColumn, &RightColumn, MARGIN);
 
 	// Left column
+	RenderSettingsBlock(MeasureSettingsGeneralHeight(), &LeftColumn,
+		Localize("General"), nullptr, nullptr, std::bind_front(&CMenusSettingsControls::RenderSettingsGeneral, this));
 	RenderSettingsBlock(MeasureSettingsMouseHeight(), &LeftColumn,
 		Localize("Mouse"), nullptr, nullptr, std::bind_front(&CMenusSettingsControls::RenderSettingsMouse, this));
 	RenderSettingsBlock(MeasureSettingsJoystickHeight(), &LeftColumn,
@@ -556,6 +558,31 @@ void CMenusSettingsControls::RenderSettingsBinds(EBindOptionGroup Group, CUIRect
 		{
 			BindOption.m_AddNewBind = true;
 			BindOption.m_AddNewBindActivate = true;
+		}
+	}
+}
+
+float CMenusSettingsControls::MeasureSettingsGeneralHeight() const
+{
+	return 2.0f * BUTTON_HEIGHT + BUTTON_SPACING;
+}
+
+void CMenusSettingsControls::RenderSettingsGeneral(CUIRect View)
+{
+	CUIRect Button;
+	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+	constexpr int SuperKeysMask = 1024 + 2048;
+	bool SuperEnabled = (g_Config.m_InpIgnoredModifiers & SuperKeysMask) == 0;
+	if(GameClient()->m_Menus.DoButton_CheckBox(&g_Config.m_InpIgnoredModifiers, Localize("Enable super key for keybinds"), SuperEnabled, &Button))
+	{
+		// only toggle specific super modifier bits
+		if(SuperEnabled)
+		{
+			g_Config.m_InpIgnoredModifiers = g_Config.m_InpIgnoredModifiers & ~(SuperKeysMask);
+		}
+		else
+		{
+			g_Config.m_InpIgnoredModifiers |= SuperKeysMask;
 		}
 	}
 }
