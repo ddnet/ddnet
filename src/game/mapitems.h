@@ -404,7 +404,8 @@ public:
 	int m_NumLayers;
 };
 
-class CMapItemGroup : public CMapItemGroup_v1
+// Clipping was added to group items in version 2.
+class CMapItemGroup_v2 : public CMapItemGroup_v1
 {
 public:
 	int m_UseClipping;
@@ -412,9 +413,20 @@ public:
 	int m_ClipY;
 	int m_ClipW;
 	int m_ClipH;
+};
 
+// Names were added to group items in version 3.
+class CMapItemGroup : public CMapItemGroup_v2
+{
+public:
 	int m_aName[3];
 };
+
+// The group items are cast from the raw map file data, so the base classes
+// must not add any padding to the derived classes.
+static_assert(sizeof(CMapItemGroup_v1) == 28);
+static_assert(sizeof(CMapItemGroup_v2) == 48);
+static_assert(sizeof(CMapItemGroup) == 60);
 
 class CMapItemLayer
 {
@@ -481,7 +493,7 @@ static_assert(sizeof(CMapItemLayerTilemap_v2Legacy) == 80);
 static_assert(sizeof(CMapItemLayerTilemap_v3Teeworlds) == 72);
 static_assert(sizeof(CMapItemLayerTilemap) == 92);
 
-class CMapItemLayerQuads
+class CMapItemLayerQuads_v1
 {
 public:
 	CMapItemLayer m_Layer;
@@ -490,9 +502,19 @@ public:
 	int m_NumQuads;
 	int m_Data;
 	int m_Image;
+};
 
+// Names were added to quads layer items in version 2.
+class CMapItemLayerQuads : public CMapItemLayerQuads_v1
+{
+public:
 	int m_aName[3];
 };
+
+// The quads layer items are cast from the raw map file data, so the base class
+// must not add any padding to the derived class.
+static_assert(sizeof(CMapItemLayerQuads_v1) == 28);
+static_assert(sizeof(CMapItemLayerQuads) == 40);
 
 class CMapItemVersion
 {
@@ -546,6 +568,18 @@ class CEnvPoint_runtime : public CEnvPoint
 {
 public:
 	CEnvPointBezier m_Bezier;
+};
+
+// Version 1 envelope items of very old Teeworlds versions contain a single integer,
+// which is always -1 in existing maps, instead of the name.
+class CMapItemEnvelope_v1Legacy
+{
+public:
+	int m_Version;
+	int m_Channels;
+	int m_StartPoint;
+	int m_NumPoints;
+	int m_Name;
 };
 
 class CMapItemEnvelope_v1

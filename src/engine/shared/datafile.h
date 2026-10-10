@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <functional>
 #include <map>
+#include <optional>
 #include <vector>
 
 enum
@@ -51,6 +52,13 @@ public:
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
 	const char *GetDataString(int Index);
+	/**
+	 * Returns the strings that the data at the given index consists of. The data must consist
+	 * of zero-terminated UTF-8 strings. The index `-1` denotes an empty array.
+	 *
+	 * @return The strings, or `std::nullopt` if the data is invalid.
+	 */
+	std::optional<std::vector<const char *>> GetDataStringArray(int Index);
 	void AddDataProcessor(int Index, FDataProcessor DataProcessor);
 	void UnloadData(int Index);
 	int NumData() const;
@@ -145,6 +153,7 @@ public:
 	int AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel = COMPRESSION_DEFAULT);
 	int AddDataSwapped(size_t Size, const void *pData);
 	int AddDataString(const char *pStr);
+	int AddDataStringArray(const std::vector<const char *> &vpStrings);
 	void Finish();
 };
 

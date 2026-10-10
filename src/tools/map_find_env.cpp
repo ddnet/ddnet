@@ -3,7 +3,7 @@
 #include <base/os.h>
 #include <base/str.h>
 
-#include <engine/shared/datafile.h>
+#include <engine/map.h>
 #include <engine/storage.h>
 
 #include <game/mapitems.h>
@@ -17,31 +17,14 @@ public:
 	int m_TilePosY;
 };
 
-static bool OpenMap(const char pMapName[64], CDataFileReader &InputMap)
-{
-	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
-	if(!pStorage)
-	{
-		log_error("map_find_env", "Error creating local storage");
-		return false;
-	}
-
-	if(!InputMap.Open(pStorage.get(), pMapName, IStorage::TYPE_ABSOLUTE))
-	{
-		dbg_msg("map_find_env", "ERROR: unable to open map '%s'", pMapName);
-		return false;
-	}
-	return true;
-}
-
-static bool GetLayerGroupIds(CDataFileReader &InputMap, const int LayerNumber, int &GroupId, int &LayerRelativeId)
+static bool GetLayerGroupIds(IMap *pMap, const int LayerNumber, int &GroupId, int &LayerRelativeId)
 {
 	int Start, Num;
-	InputMap.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
+	pMap->GetType(MAPITEMTYPE_GROUP, &Start, &Num);
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemGroup *pItem = (CMapItemGroup *)InputMap.GetItem(Start + i);
+		CMapItemGroup *pItem = (CMapItemGroup *)pMap->GetItem(Start + i);
 		if(LayerNumber >= pItem->m_StartLayer && LayerNumber <= pItem->m_StartLayer + pItem->m_NumLayers)
 		{
 			GroupId = i;
@@ -93,27 +76,43 @@ static void PrintEnvelopedQuads(const CEnvelopedQuad pEnvQuads[1024], const int 
 
 static bool FindEnv(const char aFilename[64], const int EnvId)
 {
-	CDataFileReader InputMap;
-	if(!OpenMap(aFilename, InputMap))
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
+	if(!pStorage)
+	{
+		log_error("map_find_env", "Error creating local storage");
 		return false;
+	}
+
+	std::unique_ptr<IMap> pMap = CreateMap();
+	if(!pMap->Load(pStorage.get(), aFilename, IStorage::TYPE_ABSOLUTE))
+	{
+		dbg_msg("map_find_env", "ERROR: unable to open map '%s'", aFilename);
+		return false;
+	}
 
 	int LayersStart, LayersCount, QuadsCounter = 0;
-	InputMap.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersCount);
+	pMap->GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersCount);
 	CEnvelopedQuad pEnvQuads[1024];
 
 	for(int i = 0; i < LayersCount; i++)
 	{
 		CMapItemLayer *pItem;
-		pItem = (CMapItemLayer *)InputMap.GetItem(LayersStart + i);
+		pItem = (CMapItemLayer *)pMap->GetItem(LayersStart + i);
 
 		if(pItem->m_Type != LAYERTYPE_QUADS)
 			continue;
 
 		CMapItemLayerQuads *pQuadLayer = (CMapItemLayerQuads *)pItem;
-		CQuad *pQuads = (CQuad *)InputMap.GetDataSwapped(pQuadLayer->m_Data);
+		CQuad *pQuads = (CQuad *)pMap->GetDataSwapped(pQuadLayer->m_Data);
+		if(pQuads == nullptr || pQuadLayer->m_NumQuads < 0 ||
+			pQuadLayer->m_NumQuads > pMap->GetDataSize(pQuadLayer->m_Data) / (int)sizeof(CQuad))
+		{
+			log_error("map_find_env", "Quads of layer %d are invalid", i);
+			return false;
+		}
 
 		int GroupId = 0, LayerRelativeId = 0;
-		if(!GetLayerGroupIds(InputMap, i + 1, GroupId, LayerRelativeId))
+		if(!GetLayerGroupIds(pMap.get(), i + 1, GroupId, LayerRelativeId))
 			return false;
 
 		GetEnvelopedQuads(pQuads, pQuadLayer->m_NumQuads, EnvId, GroupId, LayerRelativeId, QuadsCounter, pEnvQuads);
