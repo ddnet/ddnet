@@ -169,6 +169,8 @@ public:
 		return m_pPrng->RandomBits() % BelowThis;
 	}
 
+	static int TeleOutOr0(int Tick, int ClientId, int Number, int BelowThis);
+
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
 
