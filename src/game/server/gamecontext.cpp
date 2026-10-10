@@ -3838,23 +3838,8 @@ void CGameContext::ConchainTeleOthersAuthLevel(IConsole::IResult *pResult, void 
 	const char *pValue = pResult->GetString(0);
 	if(pResult->NumArguments() && !CAuthManager::RoleNameToAuthLevel(pValue).has_value())
 	{
-		if(str_comp(pValue, "1") == 0)
-		{
-			log_warn("server", "got deprecated value %s for sv_tele_others_auth_level, please use \"helper\" instead", pValue);
-		}
-		else if(str_comp(pValue, "2") == 0)
-		{
-			log_warn("server", "got deprecated value %s for sv_tele_others_auth_level, please use \"moderator\" instead", pValue);
-		}
-		else if(str_comp(pValue, "3") == 0)
-		{
-			log_warn("server", "got deprecated value %s for sv_tele_others_auth_level, please use \"admin\" instead", pValue);
-		}
-		else
-		{
-			log_error("server", "Value can only be one of those: helper, moderator, admin");
-			return;
-		}
+		log_error("server", "Value can only be one of those: helper, moderator, admin");
+		return;
 	}
 
 	pfnCallback(pResult, pCallbackUserData);

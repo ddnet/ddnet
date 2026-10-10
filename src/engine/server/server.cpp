@@ -1685,10 +1685,6 @@ bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 		return true;
 	}
 
-	if(!str_comp(Config()->m_SvReservedSlotsAuthLevel, "4"))
-	{
-		return false;
-	}
 	if(Config()->m_SvReservedSlotsAuthLevel[0] == '\0')
 	{
 		return false;
@@ -1705,21 +1701,6 @@ bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 	int Slot = m_AuthManager.FindKey(aName);
 	const char *pMinAuthLevel = Config()->m_SvReservedSlotsAuthLevel;
 	std::optional<int> MinAuthLevel = CAuthManager::RoleNameToAuthLevel(pMinAuthLevel);
-	if(!MinAuthLevel.has_value())
-	{
-		if(str_comp(pMinAuthLevel, "1") == 0)
-		{
-			MinAuthLevel = AUTHED_HELPER;
-		}
-		else if(str_comp(pMinAuthLevel, "2") == 0)
-		{
-			MinAuthLevel = AUTHED_MOD;
-		}
-		else if(str_comp(pMinAuthLevel, "3") == 0)
-		{
-			MinAuthLevel = AUTHED_ADMIN;
-		}
-	}
 	if(!MinAuthLevel.has_value())
 	{
 		return false;
