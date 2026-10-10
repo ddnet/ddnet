@@ -6,7 +6,9 @@
 #include "save.h"
 
 #include <game/gamecore.h>
+#include <game/envelope_trigger.h>
 
+#include <unordered_map>
 #include <vector>
 
 class CCollision;
@@ -200,6 +202,16 @@ public:
 	CTuningParams *TuningList() { return m_pTuningList; }
 	const CTuningParams *GetTuning(int i) const { return &TuningList()[i]; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
+
+	std::unordered_map<int, CEnvelopeTriggerZone> &EnvelopeTriggerList() { return m_EnvelopeTriggerList; }
+	std::unordered_map<int, int> &TuneZoneToEnvelopeZone() { return m_TuneZoneToEnvelopeZone; }
+	void SetNumEnvelopes(int NumEnvelopes) { m_NumEnvelopes = NumEnvelopes; }
+	int NumEnvelopes() const { return m_NumEnvelopes; }
+
+private:
+	std::unordered_map<int, CEnvelopeTriggerZone> m_EnvelopeTriggerList;
+	std::unordered_map<int, int> m_TuneZoneToEnvelopeZone;
+	int m_NumEnvelopes = 0;
 };
 
 #endif

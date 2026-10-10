@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_PREDICTION_GAMEWORLD_H
 #define GAME_CLIENT_PREDICTION_GAMEWORLD_H
 
+#include <game/client/components/envelope_state.h>
 #include <game/gamecore.h>
 #include <game/teamscore.h>
 
@@ -38,6 +39,7 @@ public:
 	CGameWorld();
 	~CGameWorld();
 	void Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs);
+	void SetNumEnvelopes(int NumEnvelopes) { m_NumEnvelopes = NumEnvelopes; }
 
 	CEntity *FindFirst(int Type);
 	CEntity *FindLast(int Type);
@@ -58,6 +60,8 @@ public:
 	// getter for server variables
 	int GameTick() const { return m_GameTick; }
 	int GameTickSpeed() const { return SERVER_TICK_SPEED; }
+	int RoundStartTick() const { return m_RoundStartTick; }
+	void SetRoundStartTick(int RoundStartTick) { m_RoundStartTick = RoundStartTick; }
 	const CCollision *Collision() const { return m_pCollision; }
 	CCollision *Collision() { return m_pCollision; }
 	CTeamsCore *Teams() { return &m_Teams; }
@@ -96,7 +100,7 @@ public:
 	bool IsLocalTeam(int OwnerId) const;
 	void OnModified() const;
 	void NetObjBegin(CTeamsCore Teams, int LocalClientId);
-	void NetCharAdd(int ObjId, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal);
+	void NetCharAdd(int ObjId, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal, bool IsDummy);
 	void NetObjAdd(int ObjId, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx);
 	void ResetDoorCollision();
 	void NetObjEnd();
@@ -141,6 +145,13 @@ public:
 	void CreatePredictedHammerHitEvent(vec2 Pos, int Id = -1);
 	void CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount, int Id = -1);
 
+	std::unordered_map<int, CEnvelopeTriggerZone> &EnvelopeTriggerList() { return m_EnvelopeTriggerList; }
+	std::unordered_map<int, CEnvelopeTriggerState> &EnvelopeTriggerState(bool Dummy) { return m_avEnvelopeTriggerstate[static_cast<int>(Dummy)]; }
+	std::unordered_map<int, int> &TuneZoneToEnvelopeZone() { return m_TuneZoneToEnvelopeZone; }
+	void SetEnvelopeOnSpawn(EEnvelopeTriggerType EnvelopeTriggerType) { m_EnvelopeTriggerSpawn = EnvelopeTriggerType; }
+	const std::optional<EEnvelopeTriggerType> &GetEnvelopeOnSpawn() { return m_EnvelopeTriggerSpawn; }
+	int NumEnvelopes() const { return m_NumEnvelopes; }
+
 private:
 	void RemoveEntities();
 
@@ -152,6 +163,16 @@ private:
 	CCollision *m_pCollision;
 	CTuningParams *m_pTuningList;
 	const CMapBugs *m_pMapBugs;
+
+	// give up on an array datatype, this is sparse or used to infinity
+	std::unordered_map<int, CEnvelopeTriggerZone> m_EnvelopeTriggerList;
+	std::unordered_map<int, int> m_TuneZoneToEnvelopeZone;
+
+	// states for player and dummy
+	std::unordered_map<int, CEnvelopeTriggerState> m_avEnvelopeTriggerstate[2];
+	std::optional<EEnvelopeTriggerType> m_EnvelopeTriggerSpawn;
+	int m_NumEnvelopes = 0;
+	int m_RoundStartTick = 0;
 };
 
 class CCharOrder
