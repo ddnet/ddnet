@@ -1721,6 +1721,14 @@ public:
 					{
 						if(StartNewLine())
 						{
+							// Count the newline as a decoded character, so that m_GlyphCount stays
+							// in sync with the decoded character offsets used for text selection
+							// and cursor positioning (see CTextCursor::m_SelectionStart). Otherwise
+							// copying multi-line text would be shifted by the number of preceding
+							// newlines and trailing characters could not be selected at all.
+							// (A newline that is truncated because of m_MaxLines is not counted,
+							// consistent with other truncated content.)
+							pCursor->m_GlyphCount++;
 							pLastGlyph = nullptr;
 							continue;
 						}
