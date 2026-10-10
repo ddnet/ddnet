@@ -111,6 +111,7 @@ int CDemoRecorder::Start(IStorage *pStorage, const char *pFilename, const char *
 		if(!MapFile)
 		{
 			log_error_color(DEMO_PRINT_COLOR, "demo_recorder", "Unable to open mapfile '%s'", pMap);
+			io_close(DemoFile);
 			return -1;
 		}
 
