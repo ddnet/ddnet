@@ -33,6 +33,8 @@ CHud::CHud()
 	m_DDRaceEffectsTextContainerIndex.Reset();
 	m_PlayerAngleTextContainerIndex.Reset();
 	m_PlayerPrevAngle = -INFINITY;
+	m_PlayerCheckpointTextContainerIndex.Reset();
+	m_PlayerPrevCheckpoint = -1;
 
 	for(int i = 0; i < 2; i++)
 	{
@@ -59,6 +61,8 @@ void CHud::ResetHudContainers()
 	TextRender()->DeleteTextContainer(m_DDRaceEffectsTextContainerIndex);
 	TextRender()->DeleteTextContainer(m_PlayerAngleTextContainerIndex);
 	m_PlayerPrevAngle = -INFINITY;
+	TextRender()->DeleteTextContainer(m_PlayerCheckpointTextContainerIndex);
+	m_PlayerPrevCheckpoint = -1;
 	for(int i = 0; i < 2; i++)
 	{
 		TextRender()->DeleteTextContainer(m_aPlayerSpeedTextContainers[i]);
@@ -1309,7 +1313,7 @@ void CHud::RenderSpectatorCount()
 
 	float StartX = m_Width - BoxWidth;
 	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
-	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle || g_Config.m_ClShowhudPlayerCheckpoint)
 	{
 		StartY -= 4;
 	}
@@ -1348,7 +1352,7 @@ void CHud::RenderDummyActions()
 
 	float StartX = m_Width - BoxWidth;
 	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
-	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle || g_Config.m_ClShowhudPlayerCheckpoint)
 	{
 		StartY -= 4;
 	}
@@ -1402,8 +1406,8 @@ inline float CHud::GetMovementInformationBoxHeight()
 {
 	if(GameClient()->m_Snap.m_SpecInfo.m_Active && (GameClient()->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW || GameClient()->m_aClients[GameClient()->m_Snap.m_SpecInfo.m_SpectatorId].m_SpecCharPresent))
 		return g_Config.m_ClShowhudPlayerPosition ? 3.0f * MOVEMENT_INFORMATION_LINE_HEIGHT + 2.0f : 0.0f;
-	float BoxHeight = 3.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * g_Config.m_ClShowhudPlayerAngle;
-	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	float BoxHeight = 3.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerAngle + g_Config.m_ClShowhudPlayerCheckpoint);
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle || g_Config.m_ClShowhudPlayerCheckpoint)
 	{
 		BoxHeight += 2.0f;
 	}
@@ -1419,6 +1423,20 @@ void CHud::UpdateMovementInformationTextContainer(STextContainerIndex &TextConta
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%.2f", Value);
+
+	CTextCursor Cursor;
+	Cursor.m_FontSize = FontSize;
+	TextRender()->RecreateTextContainer(TextContainer, &Cursor, aBuf);
+}
+
+void CHud::UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, int Value, int &PrevValue)
+{
+	if(TextContainer.Valid() && PrevValue == Value)
+		return;
+	PrevValue = Value;
+
+	char aBuf[16];
+	str_format(aBuf, sizeof(aBuf), "%d", Value);
 
 	CTextCursor Cursor;
 	Cursor.m_FontSize = FontSize;
@@ -1488,9 +1506,9 @@ void CHud::RenderMovementInformation()
 {
 	const int ClientId = GameClient()->m_Snap.m_SpecInfo.m_Active ? GameClient()->m_Snap.m_SpecInfo.m_SpectatorId : GameClient()->m_Snap.m_LocalClientId;
 	const bool PosOnly = ClientId == SPEC_FREEVIEW || (GameClient()->m_aClients[ClientId].m_SpecCharPresent);
-	// Draw the information depending on settings: Position, speed and target angle
+	// Draw the information depending on settings: Position, speed, target angle and last checkpoint
 	// This display is only to present the available information from the last snapshot, not to interpolate or predict
-	if(!g_Config.m_ClShowhudPlayerPosition && (PosOnly || (!g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle)))
+	if(!g_Config.m_ClShowhudPlayerPosition && (PosOnly || (!g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle && !g_Config.m_ClShowhudPlayerCheckpoint)))
 	{
 		return;
 	}
@@ -1563,6 +1581,22 @@ void CHud::RenderMovementInformation()
 
 		UpdateMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, Fontsize, Info.m_Angle, m_PlayerPrevAngle);
 		RenderMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, TextRender()->DefaultTextColor(), RightX, y);
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
+	}
+
+	if(g_Config.m_ClShowhudPlayerCheckpoint)
+	{
+		TextRender()->Text(LeftX, y, Fontsize, Localize("Checkpoint:"), -1.0f);
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
+
+		// The predicted world is not updated while spectating, so the checkpoint comes from the snapshot.
+		int Checkpoint = -1;
+		if(ClientId >= 0 && GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedData)
+			Checkpoint = GameClient()->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_TeleCheckpoint;
+		else if(const CCharacter *pCharacter = GameClient()->m_GameWorld.GetCharacterById(ClientId))
+			Checkpoint = pCharacter->m_TeleCheckpoint;
+		UpdateMovementInformationTextContainer(m_PlayerCheckpointTextContainerIndex, Fontsize, Checkpoint, m_PlayerPrevCheckpoint);
+		RenderMovementInformationTextContainer(m_PlayerCheckpointTextContainerIndex, TextRender()->DefaultTextColor(), RightX, y);
 	}
 }
 
