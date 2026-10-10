@@ -510,7 +510,19 @@ void CMenusSettingsControls::RenderSettingsBinds(EBindOptionGroup Group, CUIRect
 		if(BindOption.m_Group != EBindOptionGroup::CUSTOM || LabelResult.m_Truncated)
 		{
 			Ui()->DoButtonLogic(&BindOption.m_TooltipButtonId, 0, &Label, BUTTONFLAG_NONE);
-			Ui()->DoToolTip(&BindOption.m_TooltipButtonId, &Label, BindOption.m_Command.c_str());
+			if(BindOption.m_Group != EBindOptionGroup::CUSTOM)
+				Ui()->DoToolTip(&BindOption.m_TooltipButtonId, &Label, BindOption.m_Command.c_str(), -1.0f);
+			else if(LabelResult.m_Truncated)
+			{
+				CTooltip Tooltip{
+					&BindOption.m_TooltipButtonId,
+					Label,
+					BindOption.m_Command.c_str(),
+					-1.0f,
+					LabelProps.m_MinimumFontSize,
+					true};
+				Ui()->DoToolTip(Tooltip);
+			}
 		}
 
 		for(CBindSlotUiElement &CurrentBind : BindOption.m_vCurrentBinds)
