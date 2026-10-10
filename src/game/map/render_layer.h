@@ -1,6 +1,7 @@
 #ifndef GAME_MAP_RENDER_LAYER_H
 #define GAME_MAP_RENDER_LAYER_H
 
+#include <algorithm>
 #include <cstdint>
 
 using offset_ptr_size = char *;
@@ -53,7 +54,6 @@ public:
 	float m_Zoom;
 	bool m_RenderText;
 	bool m_RenderInvalidTiles;
-	bool m_TileAndQuadBuffering;
 	bool m_RenderTileBorder;
 	bool m_DebugRenderGroupClips;
 	bool m_DebugRenderQuadClips;
@@ -65,7 +65,7 @@ class CRenderLayer : public CRenderComponent
 {
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
-	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional);
+	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, bool TileAndQuadBuffering, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -91,6 +91,7 @@ protected:
 	std::shared_ptr<CEnvelopeManager> m_pEnvelopeManager;
 	std::optional<FCallbackLayerInit> m_InitCallback;
 	std::optional<CClipRegion> m_LayerClip;
+	bool m_TileAndQuadBuffering = false;
 };
 
 class CRenderLayerGroup : public CRenderLayer
@@ -123,7 +124,7 @@ public:
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
 	void Init() override;
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, bool TileAndQuadBuffering, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
 
 	virtual int GetDataIndex() const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
@@ -187,14 +188,20 @@ protected:
 			{
 				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x10000000);
 			}
-
-			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
-			{
-				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xEFFFFFFF) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x10000000);
-			}
 		};
 
-		std::vector<CTileVisual> m_vTilesOfLayer;
+		// positions (y * width + x) of the drawn tiles, ascending, in vertex buffer order
+		std::vector<uint32_t> m_vTilePositions;
+
+		// byte offset and vertex count of the tiles drawn between two positions, false when there is none
+		bool TileRange(size_t StartPos, size_t EndPos, offset_ptr_size *pByteOffset, unsigned int *pNumVertices) const
+		{
+			const auto Begin = std::lower_bound(m_vTilePositions.begin(), m_vTilePositions.end(), (uint32_t)StartPos);
+			const auto End = std::upper_bound(Begin, m_vTilePositions.end(), (uint32_t)EndPos);
+			*pByteOffset = (offset_ptr_size)((Begin - m_vTilePositions.begin()) * 6 * sizeof(uint32_t));
+			*pNumVertices = (End - Begin) * 6;
+			return End != Begin;
+		}
 
 		CTileVisual m_BorderTopLeft;
 		CTileVisual m_BorderTopRight;
@@ -232,7 +239,7 @@ class CRenderLayerQuads : public CRenderLayer
 {
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, bool TileAndQuadBuffering, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
 	void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
 	void Render(const CRenderLayerParams &Params) override;
