@@ -1308,9 +1308,6 @@ AUTO
 Some map images could not be loaded. Check the local console for details.
 == Sommige kaartafbeeldingen konden niet worden geladen. Controleer de lokale console voor details.
 
-Uploading map data to GPU
-== Kaartgegevens uploaden naar GPU
-
 Some map sounds could not be loaded. Check the local console for details.
 == Sommige kaartgeluiden konden niet worden geladen. Controleer de lokale console voor details.
 
@@ -2139,6 +2136,10 @@ Following %d: %s
 == 
 
 [Important alert message]
+Tap to dismiss…
+== 
+
+[Important alert message]
 Press Esc or Tab to dismiss…
 == 
 
@@ -2152,6 +2153,9 @@ Server could not be started
 == 
 
 Loading map
+== 
+
+Initializing layers
 == 
 
 Joining Tutorial server
@@ -2543,6 +2547,9 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Credits
+== 
+
 Show number of spectators
 == 
 
@@ -2678,7 +2685,16 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
+Join
+== 
+
 Download
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Unmute

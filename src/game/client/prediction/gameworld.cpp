@@ -29,10 +29,8 @@
 //////////////////////////////////////////////////
 CGameWorld::CGameWorld()
 {
-	for(auto &pFirstEntityType : m_apFirstEntityTypes)
-		pFirstEntityType = nullptr;
-	for(auto &pCharacter : m_apCharacters)
-		pCharacter = nullptr;
+	std::fill(std::begin(m_apFirstEntityTypes), std::end(m_apFirstEntityTypes), nullptr);
+	std::fill(std::begin(m_apCharacters), std::end(m_apCharacters), nullptr);
 	m_pCollision = nullptr;
 	m_GameTick = 0;
 	m_pParent = nullptr;

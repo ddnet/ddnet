@@ -1306,9 +1306,6 @@ Initializing map logic
 Sending initial client info
 == Envoi des informations initiales du client
 
-Uploading map data to GPU
-== Transfert des données de la map vers le GPU
-
 Loading menu images
 == Chargement des images de menu
 
@@ -2051,6 +2048,10 @@ AUTO
 == 
 
 [Important alert message]
+Tap to dismiss…
+== 
+
+[Important alert message]
 Press Esc or Tab to dismiss…
 == 
 
@@ -2067,6 +2068,9 @@ Server could not be started
 == 
 
 Loading map
+== 
+
+Initializing layers
 == 
 
 Joining Tutorial server
@@ -2513,6 +2517,9 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Credits
+== 
+
 Show spectator cursor
 == 
 
@@ -2678,7 +2685,16 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
+Join
+== 
+
 Download
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Unmute

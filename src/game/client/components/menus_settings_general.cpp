@@ -8,7 +8,6 @@
 #include <engine/storage.h>
 
 #include <game/client/components/menu_background.h>
-#include <game/client/components/tooltips.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
@@ -109,7 +108,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, CONFIG_FILE, aBuf, sizeof(aBuf));
 			Client()->ViewFile(aBuf);
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_SettingsButtonId, &SettingsButton, Localize("Open the settings file"));
+		Ui()->DoToolTip(&s_SettingsButtonId, &SettingsButton, Localize("Open the settings file"));
 
 		CUIRect SavesButton;
 		Left.HSplitBottom(20.0f, &Left, &SavesButton);
@@ -120,7 +119,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, SAVES_FILE, aBuf, sizeof(aBuf));
 			Client()->ViewFile(aBuf);
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_SavesButtonId, &SavesButton, Localize("Open the saves file"));
+		Ui()->DoToolTip(&s_SavesButtonId, &SavesButton, Localize("Open the saves file"));
 
 		CUIRect ConfigButton;
 		Left.HSplitBottom(20.0f, &Left, &ConfigButton);
@@ -131,7 +130,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aBuf, sizeof(aBuf));
 			Client()->ViewFile(aBuf);
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_ConfigButtonId, &ConfigButton, Localize("Open the directory that contains the configuration and user files"));
+		Ui()->DoToolTip(&s_ConfigButtonId, &ConfigButton, Localize("Open the directory that contains the configuration and user files"));
 
 		CUIRect DirectoryButton;
 		Left.HSplitBottom(20.0f, &Left, &DirectoryButton);
@@ -143,7 +142,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
 			Client()->ViewFile(aBuf);
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_ThemesButtonId, &DirectoryButton, Localize("Open the directory to add custom themes"));
+		Ui()->DoToolTip(&s_ThemesButtonId, &DirectoryButton, Localize("Open the directory to add custom themes"));
 
 		Left.HSplitTop(20.0f, nullptr, &Left);
 		RenderThemeSelection(Left);

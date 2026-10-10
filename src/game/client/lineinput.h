@@ -12,6 +12,8 @@
 
 #include <game/client/ui_rect.h>
 
+#include <string>
+
 enum class EInputPriority
 {
 	NONE = 0,
@@ -53,8 +55,6 @@ private:
 	static vec2 ms_CompositionWindowPosition;
 	static float ms_CompositionLineHeight;
 
-	static char ms_aStars[128];
-
 	char *m_pStr = nullptr; // explicitly set to nullptr outside of constructor, so SetBuffer works in this case
 	size_t m_MaxSize;
 	size_t m_MaxChars;
@@ -72,6 +72,7 @@ private:
 	size_t m_LastCompositionCursorPos;
 
 	bool m_Hidden;
+	std::string m_StarsBuffer;
 	const char *m_pEmptyText;
 	FClipboardLineCallback m_pfnClipboardLineCallback;
 	FDisplayTextCallback m_pfnDisplayTextCallback;

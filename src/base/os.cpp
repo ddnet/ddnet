@@ -269,7 +269,7 @@ void os_locale_str(char *locale, size_t length)
 	// Ensure RFC 3066 format:
 	// - use hyphens instead of underscores
 	// - truncate locale string after first non-standard letter
-	for(int i = 0; i < str_length(locale); ++i)
+	for(int i = 0; locale[i] != '\0'; ++i)
 	{
 		if(locale[i] == '_')
 		{

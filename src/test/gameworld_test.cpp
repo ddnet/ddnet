@@ -17,6 +17,7 @@
 #include <generated/protocol.h>
 
 #include <game/server/entities/character.h>
+#include <game/server/entities/laser.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
@@ -49,6 +50,7 @@ public:
 	std::unique_ptr<IKernel> m_pKernel;
 	CTestInfo m_TestInfo;
 	std::unique_ptr<IStorage> m_pStorage;
+	CConfig m_ConfigBackup;
 
 	CGameContext *GameServer() // NOLINT(readability-make-member-function-const)
 	{
@@ -57,6 +59,8 @@ public:
 
 	GameWorld()
 	{
+		m_ConfigBackup = g_Config;
+
 		CServer *pServer = CreateServer();
 		m_pServer = pServer;
 
@@ -134,8 +138,27 @@ public:
 		m_pServer->m_Fifo.Shutdown();
 		m_pGameServer->OnShutdown(nullptr);
 		m_pServer->DbPool()->OnShutdown();
+
+		g_Config = m_ConfigBackup;
 	}
 };
+
+TEST_F(GameWorld, DebugDummiesConnectAndDrop)
+{
+	g_Config.m_DbgDummies = 2;
+	m_pServer->UpdateDebugDummies(false);
+
+	const int FirstDummy = m_pServer->MaxClients() - 1;
+	const int SecondDummy = m_pServer->MaxClients() - 2;
+	EXPECT_TRUE(m_pServer->ClientIngame(FirstDummy));
+	EXPECT_TRUE(m_pServer->ClientIngame(SecondDummy));
+
+	g_Config.m_DbgDummies = 1;
+	m_pServer->UpdateDebugDummies(false);
+
+	EXPECT_TRUE(m_pServer->ClientIngame(FirstDummy));
+	EXPECT_FALSE(m_pServer->ClientIngame(SecondDummy));
+}
 
 TEST_F(GameWorld, ClosestCharacter)
 {
@@ -251,6 +274,57 @@ TEST_F(GameWorld, IntersectEntity)
 		-1, // CollideWith
 		nullptr /* pThisOnly */);
 	EXPECT_EQ(pIntersectedChar, pChrRight);
+}
+
+static bool FindFreeHorizontalSegment(const CCollision *pCollision, float Length, vec2 &OutFrom)
+{
+	for(int y = 2; y < pCollision->GetHeight() - 2; y++)
+	{
+		for(int x = 2; x < pCollision->GetWidth() - 2; x++)
+		{
+			const vec2 From((x + 0.5f) * 32.0f, (y + 0.5f) * 32.0f);
+			if(pCollision->IntersectLine(From, From + vec2(Length, 0.0f), nullptr, nullptr) != 0)
+				continue;
+			bool Free = true;
+			for(float Offset = 0.0f; Offset <= Length && Free; Offset += 16.0f)
+			{
+				const int Index = pCollision->GetPureMapIndex(From + vec2(Offset, 0.0f));
+				Free = pCollision->GetTileIndex(Index) == 0 && pCollision->GetFrontTileIndex(Index) == 0 &&
+				       pCollision->IsTeleport(Index) == 0 && pCollision->IsTeleportWeapon(Index) == 0;
+			}
+			if(Free)
+			{
+				OutFrom = From;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+TEST_F(GameWorld, LaserOfPlayerWithoutCharacterHitsOthers)
+{
+	vec2 From;
+	ASSERT_TRUE(FindFreeHorizontalSegment(GameServer()->Collision(), 200.0f, From));
+	g_Config.m_SvHit = 1;
+
+	g_Config.m_DbgDummies = 1;
+	m_pServer->UpdateDebugDummies(false);
+	GameServer()->OnTick();
+	CCharacter *pTarget = GameServer()->GetPlayerChar(m_pServer->MaxClients() - 1);
+	ASSERT_NE(pTarget, nullptr);
+	pTarget->m_Pos = From + vec2(150.0f, 0.0f);
+	pTarget->Freeze(10);
+	ASSERT_NE(pTarget->m_FreezeTime, 0);
+
+	g_Config.m_DbgDummies = 2;
+	m_pServer->UpdateDebugDummies(false);
+	const int OwnerId = m_pServer->MaxClients() - 2;
+	ASSERT_EQ(GameServer()->GetPlayerChar(OwnerId), nullptr);
+
+	new CLaser(&GameServer()->m_World, From, vec2(1.0f, 0.0f), 800.0f, OwnerId, WEAPON_LASER);
+
+	EXPECT_EQ(pTarget->m_FreezeTime, 0); // NOLINT(clang-analyzer-unix.Malloc)
 }
 
 TEST_F(GameWorld, BasicTick)

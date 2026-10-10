@@ -12,6 +12,7 @@
 #include <base/str.h>
 #include <base/time.h>
 
+#include <engine/client/keyboard.h>
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/font_icons.h>
@@ -176,7 +177,7 @@ static int PossibleKeys(const char *pStr, IInput *pInput, IConsole::FPossibleCal
 			continue;
 		}
 		// Ignore unnamed keys starting with '&'
-		const char *pKeyName = pInput->KeyName(Key);
+		const char *pKeyName = KeyName(Key);
 		if(pKeyName[0] != '&' && str_find_nocase(pKeyName, pStr))
 		{
 			pfnCallback(Index, pKeyName, pUser);

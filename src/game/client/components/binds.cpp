@@ -7,6 +7,7 @@
 #include <base/mem.h>
 #include <base/str.h>
 
+#include <engine/client/keyboard.h>
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
@@ -471,7 +472,7 @@ void CBinds::GetKeyBindName(int Key, int ModifierMask, char *pBuf, size_t BufSiz
 			str_append(pBuf, "+", BufSize);
 		}
 	}
-	str_append(pBuf, Input()->KeyName(Key), BufSize);
+	str_append(pBuf, KeyName(Key), BufSize);
 }
 
 char *CBinds::GetKeyBindCommand(int ModifierCombination, int Key) const

@@ -4,6 +4,7 @@
 #define GAME_CLIENT_UI_H
 
 #include "lineinput.h"
+#include "tooltips.h"
 #include "ui_rect.h"
 
 #include <engine/input.h>
@@ -490,6 +491,7 @@ private:
 
 	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUi class
 	std::vector<CUIElement *> m_vpUIElements;
+	CTooltips m_Tooltips;
 
 public:
 	static const CLinearScrollbarScale ms_LinearScrollbarScale;
@@ -838,6 +840,11 @@ public:
 		bool m_Init = false;
 	};
 	int DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State);
+
+	// tooltips
+	void DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
+	void OnRenderTooltip() { m_Tooltips.OnRender(); }
+	void OnReset() { m_Tooltips.OnReset(); }
 };
 
 #endif

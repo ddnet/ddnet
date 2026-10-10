@@ -14,7 +14,6 @@
 #include <game/client/components/console.h>
 #include <game/client/components/emoticon.h>
 #include <game/client/components/skins.h>
-#include <game/client/components/tooltips.h>
 #include <game/client/gameclient.h>
 #include <game/client/skin.h>
 #include <game/client/ui.h>
@@ -251,7 +250,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			{
 				pErrorTooltip = Localize("Skin could not be found.");
 			}
-			GameClient()->m_Tooltips.DoToolTip(pStatusTooltipId, &StatusIcon, pErrorTooltip);
+			Ui()->DoToolTip(pStatusTooltipId, &StatusIcon, pErrorTooltip);
 		}
 	};
 	static char s_StatusTooltipId;
@@ -283,7 +282,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-	GameClient()->m_Tooltips.DoToolTip(&s_RandomSkinButton, &RandomSkinButton, Localize("Create a random skin"));
+	Ui()->DoToolTip(&s_RandomSkinButton, &RandomSkinButton, Localize("Create a random skin"));
 
 	// Custom colors button
 	if(DoButton_CheckBox(pUseCustomColor, Localize("Custom colors"), *pUseCustomColor, &CustomColorsButton))
@@ -319,7 +318,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				if((int)m_Dummy == g_Config.m_ClDummy)
 					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
 			}
-			GameClient()->m_Tooltips.DoToolTip(&s_aEyeButtons[CurrentEyeEmote], &Button, Localize("Choose default eyes when joining a server"));
+			Ui()->DoToolTip(&s_aEyeButtons[CurrentEyeEmote], &Button, Localize("Choose default eyes when joining a server"));
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &EyeSkinInfo, CurrentEyeEmote, vec2(1.0f, 0.0f), vec2(Button.x + Button.w / 2.0f, Button.y + Button.h / 2.0f + OffsetToMid.y));
 		}
 	}
@@ -485,7 +484,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
 		Client()->ViewFile(aBuf);
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButton, &DirectoryButton, Localize("Open the directory to add custom skins"));
+	Ui()->DoToolTip(&s_DirectoryButton, &DirectoryButton, Localize("Open the directory to add custom skins"));
 
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);

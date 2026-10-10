@@ -1040,9 +1040,6 @@ Speed:
 Angle:
 == Угао:
 
-Uploading map data to GPU
-== Слање података мапе Г.Ј.О.~у (GPU)
-
 Trying to determine UDP connectivity…
 == Покушавам да одредим К.Д.П.(UDP) повезаност
 
@@ -1508,6 +1505,10 @@ AUTO
 == 
 
 [Important alert message]
+Tap to dismiss…
+== 
+
+[Important alert message]
 Press Esc or Tab to dismiss…
 == 
 
@@ -1530,6 +1531,9 @@ Some map images could not be loaded. Check the local console for details.
 == 
 
 Loading map
+== 
+
+Initializing layers
 == 
 
 Some map sounds could not be loaded. Check the local console for details.
@@ -2309,6 +2313,9 @@ The extra menu with the given number is activated.
 Tee
 == 
 
+Credits
+== 
+
 Info Messages
 == 
 
@@ -2628,6 +2635,9 @@ Delete skin
 Unable to delete skin
 == 
 
+Join
+== 
+
 Download
 == 
 
@@ -2640,6 +2650,12 @@ Download
 == 
 
 Team %d (%d/%d)
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Unmute

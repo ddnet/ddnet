@@ -651,9 +651,6 @@ Team %d
 Some map images could not be loaded. Check the local console for details.
 == Niektoré obrázky mapy sa nepodarilo načítať. Podrobnosti nájdete v miestnej konzole.
 
-Uploading map data to GPU
-== Nahrávanie dát máp do GPU
-
 Some map sounds could not be loaded. Check the local console for details.
 == Niektoré zvuky mapy nemožno načítať. Podrobnosti nájdete v miestnej konzole.
 
@@ -2489,6 +2486,13 @@ Team successfully saved by %s. The database connection failed, using generated s
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
 == 
 
+[Important alert message]
+Tap to dismiss…
+== 
+
+Initializing layers
+== 
+
 There's an unsaved change in the touch controls editor, you might want to save it.
 == 
 
@@ -2626,6 +2630,9 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Credits
+== 
+
 Colors of the hook collision line:
 == 
 
@@ -2679,6 +2686,15 @@ Save power by lowering update rate (higher input latency)
 == 
 
 No country flags match your filter criteria
+== 
+
+Join
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Unmute

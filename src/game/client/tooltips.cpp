@@ -2,10 +2,14 @@
 
 #include <base/time.h>
 
+#include <engine/textrender.h>
+
 #include <game/client/ui.h>
 
-CTooltips::CTooltips()
+void CTooltips::Init(CUi *pUi, ITextRender *pTextRender)
 {
+	m_pUi = pUi;
+	m_pTextRender = pTextRender;
 	CTooltips::OnReset();
 }
 

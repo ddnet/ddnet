@@ -1779,6 +1779,10 @@ Auto-sync player camera
 Match %d of %d
 == 
 
+[Important alert message]
+Tap to dismiss…
+== 
+
 Moderator alert
 == 
 
@@ -1791,7 +1795,7 @@ Server executable not found, can't run server
 Some map images could not be loaded. Check the local console for details.
 == 
 
-Uploading map data to GPU
+Initializing layers
 == 
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
@@ -2265,6 +2269,9 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Credits
+== 
+
 HUD
 == 
 
@@ -2666,10 +2673,19 @@ No skins match your filter criteria
 Basic
 == 
 
+Join
+== 
+
 Loading race demo files
 == 
 
 Super
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Auto

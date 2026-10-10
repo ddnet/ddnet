@@ -53,6 +53,7 @@ static int TestMap(const char *pMapPath, bool CalcHashes, IStorage *pStorage)
 		}
 	}
 
+	bool Success = true;
 	for(int Index = 0; Index < pMap->NumData(); Index++)
 	{
 		log_info(TOOL_NAME, "Data %d:", Index);
@@ -64,7 +65,8 @@ static int TestMap(const char *pMapPath, bool CalcHashes, IStorage *pStorage)
 
 		if(pData == nullptr)
 		{
-			log_info(TOOL_NAME, "  Data erroneous");
+			log_error(TOOL_NAME, "  Data erroneous");
+			Success = false;
 		}
 		else if(CalcHashes)
 		{
@@ -77,6 +79,11 @@ static int TestMap(const char *pMapPath, bool CalcHashes, IStorage *pStorage)
 	}
 
 	pMap->Unload();
+	if(!Success)
+	{
+		log_error(TOOL_NAME, "Tested map '%s' has errors", pMapPath);
+		return -1;
+	}
 	log_info(TOOL_NAME, "Tested map '%s' successfully", pMapPath);
 	return 0;
 }

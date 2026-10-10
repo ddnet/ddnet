@@ -84,7 +84,6 @@ class CServer : public IServer
 	class CDbConnectionPool *m_pConnectionPool;
 
 	int m_PreviousDebugDummies = 0;
-	void UpdateDebugDummies(bool ForceDisconnect);
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
@@ -144,6 +143,10 @@ public:
 		int m_Latency;
 		int m_SnapRate;
 
+		// Rejoining session while a game slot exists already
+		bool m_IngameBeforeRejoin;
+		bool IsKnownToGame() const { return m_State == STATE_INGAME || m_IngameBeforeRejoin; }
+
 		double m_Traffic;
 		int64_t m_TrafficSince;
 
@@ -202,7 +205,6 @@ public:
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionId;
 		int64_t m_RedirectDropTime;
-		bool m_Rejoining;
 
 		int m_aIdMap[LEGACY_MAX_CLIENTS];
 		int m_aReverseIdMap[MAX_CLIENTS];
@@ -351,6 +353,8 @@ public:
 
 	static int ClientRejoinCallback(int ClientId, void *pUser, bool Sixup, bool VanillaAuth);
 
+	void UpdateDebugDummies(bool ForceDisconnect);
+
 	void SendRconType(int ClientId, bool UsernameReq);
 	void SendCapabilities(int ClientId);
 	void SendMap(int ClientId);
@@ -437,6 +441,7 @@ public:
 	void ChangeMap(const char *pMap) override;
 	void ReloadMap() override;
 	int LoadMap(const char *pMapName);
+	void WritePortFile();
 
 	void SaveDemo(int ClientId, float Time) override;
 	void StartRecord(int ClientId) override;
@@ -482,6 +487,7 @@ public:
 	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainReservedSlotsAuthLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRegisterCommunityTokenRedact(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

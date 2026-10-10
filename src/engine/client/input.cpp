@@ -2,14 +2,13 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "input.h"
 
-#include "keynames.h"
-
 #include <base/dbg.h>
 #include <base/log.h>
 #include <base/str.h>
 #include <base/time.h>
 #include <base/windows.h>
 
+#include <engine/client/keyboard.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
@@ -404,12 +403,6 @@ bool CInput::KeyPress(int Key) const
 {
 	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	return m_aFrameKeyStates[Key];
-}
-
-const char *CInput::KeyName(int Key) const
-{
-	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
-	return g_aaKeyStrings[Key];
 }
 
 int CInput::FindKeyByName(const char *pKeyName) const

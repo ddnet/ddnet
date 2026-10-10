@@ -23,8 +23,6 @@ EInputPriority CLineInput::ms_ActiveInputPriority = EInputPriority::NONE;
 vec2 CLineInput::ms_CompositionWindowPosition = vec2(0.0f, 0.0f);
 float CLineInput::ms_CompositionLineHeight = 0.0f;
 
-char CLineInput::ms_aStars[128] = "";
-
 void CLineInput::SetBuffer(char *pStr, size_t MaxSize, size_t MaxChars)
 {
 	if(m_pStr && m_pStr == pStr)
@@ -81,7 +79,7 @@ void CLineInput::SetRange(const char *pString, size_t Begin, size_t End)
 		{
 			if(AddedCharSize)
 				mem_copy(m_pStr + Begin, pString, AddedCharSize);
-			mem_move(m_pStr + Begin + AddedCharSize, m_pStr + Begin + RemovedCharSize, m_Len - Begin - AddedCharSize);
+			mem_move(m_pStr + Begin + AddedCharSize, m_pStr + Begin + RemovedCharSize, m_Len - Begin - RemovedCharSize);
 		}
 		else if(AddedCharSize > RemovedCharSize)
 			mem_move(m_pStr + End + AddedCharSize - RemovedCharSize, m_pStr + End, m_Len - End);
@@ -126,11 +124,8 @@ const char *CLineInput::GetDisplayedString()
 	if(!IsHidden())
 		return m_pStr;
 
-	const size_t NumStars = std::min(GetNumChars(), sizeof(ms_aStars) - 1);
-	for(size_t i = 0; i < NumStars; ++i)
-		ms_aStars[i] = '*';
-	ms_aStars[NumStars] = '\0';
-	return ms_aStars;
+	m_StarsBuffer.resize(GetNumChars(), '*');
+	return m_StarsBuffer.c_str();
 }
 
 void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char *pStr, size_t MaxSize, size_t *pCursorPos)
@@ -189,7 +184,7 @@ size_t CLineInput::OffsetFromActualToDisplay(size_t ActualOffset)
 size_t CLineInput::OffsetFromDisplayToActual(size_t DisplayOffset)
 {
 	if(IsHidden() || (m_pfnCalculateOffsetCallback && m_pfnCalculateOffsetCallback()))
-		return str_utf8_offset_bytes_to_chars(m_pStr, DisplayOffset);
+		return str_utf8_offset_chars_to_bytes(m_pStr, DisplayOffset);
 	return DisplayOffset;
 }
 

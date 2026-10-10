@@ -183,7 +183,7 @@ jobs:
     - name: Test debug
       run: |
         cd debug
-        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests_verbose
 
     - name: Run debug server
       run: |
@@ -201,7 +201,7 @@ jobs:
     - name: Test release
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests_verbose
 
     - name: Run release server
       run: |
@@ -230,13 +230,13 @@ jobs:
       if: ${{ !contains(matrix.os, 'ubuntu') }}
       run: |
         cd headless
-        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests_verbose
 
     - name: Test headless client (unit tests) with code coverage
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
         cd headless
-        ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" RUSTDOCFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests
+        ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" RUSTDOCFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests_verbose
 
     - name: Upload Codecov report (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
@@ -257,7 +257,7 @@ jobs:
       if: contains(matrix.name, 'fancy')
       run: |
         cd fancy
-        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests_verbose
 
     - name: Run fancy server
       if: contains(matrix.name, 'fancy')

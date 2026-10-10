@@ -54,6 +54,7 @@ class CHeap;
 class CPlayer;
 class CScore;
 class CUnpacker;
+class CRconRole;
 class IAntibot;
 class IGameController;
 class IMap;
@@ -368,6 +369,7 @@ public:
 	void OnShowOthersNetMessage(const CNetMsg_Cl_ShowOthers *pMsg, int ClientId);
 	void OnShowDistanceNetMessage(const CNetMsg_Cl_ShowDistance *pMsg, int ClientId);
 	void OnCameraInfoNetMessage(const CNetMsg_Cl_CameraInfo *pMsg, int ClientId);
+	void OnPracticeTeleportNetMessage(const CNetMsg_Cl_PracticeTeleport *pMsg, int ClientId);
 	void OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientId);
 	void OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId);
 	void OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientId);
@@ -493,6 +495,7 @@ private:
 	static void ConToTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
 	void Teleport(CCharacter *pChr, vec2 Pos);
+	void PracticeTeleport(CCharacter *pChr, vec2 Pos);
 	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConInfo(IConsole::IResult *pResult, void *pUserData);
@@ -669,7 +672,8 @@ public:
 	void SendRecord(int ClientId);
 	void SendFinish(int ClientId, float Time, std::optional<float> PreviousBestTime);
 	void SendSaveCode(int Team, int TeamSize, int State, const char *pError, const char *pSaveRequester, const char *pServerName, const char *pGeneratedCode, const char *pCode);
-	void OnSetAuthed(int ClientId, int Level) override;
+	// `pRole` being `nullptr` signifies logout.
+	void OnSetAuthed(int ClientId, CRconRole *pRole) override;
 	void ReinitPlayerMap(int ClientId, bool Timeout) override;
 	void OnClientRejoin(int ClientId) override;
 

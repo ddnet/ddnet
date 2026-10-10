@@ -45,14 +45,12 @@ void CScorePlayerResult::SetVariant(Variant v)
 	case PLAYER_INFO:
 		m_Data.m_Info.m_Birthday = 0;
 		m_Data.m_Info.m_Time.reset();
-		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
-			TimeCp = 0;
+		std::fill(std::begin(m_Data.m_Info.m_aTimeCp), std::end(m_Data.m_Info.m_aTimeCp), 0.0f);
 		break;
 	case PLAYER_TIMECP:
 		m_Data.m_Info.m_aRequestedPlayer[0] = '\0';
 		m_Data.m_Info.m_Time.reset();
-		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
-			TimeCp = 0;
+		std::fill(std::begin(m_Data.m_Info.m_aTimeCp), std::end(m_Data.m_Info.m_aTimeCp), 0.0f);
 		break;
 	}
 }

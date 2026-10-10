@@ -148,6 +148,8 @@ void CScore::LoadPlayerData(int ClientId, const char *pName)
 
 void CScore::LoadPlayerTimeCp(int ClientId, const char *pName)
 {
+	if(RateLimitPlayer(ClientId))
+		return;
 	ExecPlayerThread(CScoreWorker::LoadPlayerTimeCp, "load player timecp", ClientId, pName, 0);
 }
 

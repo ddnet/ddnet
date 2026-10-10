@@ -77,30 +77,63 @@ TEST(Str, StrDelim)
 
 TEST(Str, StrIsNum)
 {
-	EXPECT_EQ(str_isnum('/'), false);
-	EXPECT_EQ(str_isnum('0'), true);
-	EXPECT_EQ(str_isnum('1'), true);
-	EXPECT_EQ(str_isnum('2'), true);
-	EXPECT_EQ(str_isnum('8'), true);
-	EXPECT_EQ(str_isnum('9'), true);
-	EXPECT_EQ(str_isnum(':'), false);
-	EXPECT_EQ(str_isnum(' '), false);
+	EXPECT_FALSE(str_isnum('/'));
+	for(char c = '0'; c <= '9'; c++)
+	{
+		EXPECT_TRUE(str_isnum(c));
+	}
+	for(char c = 'a'; c <= 'z'; c++)
+	{
+		EXPECT_FALSE(str_isnum(c));
+	}
+	EXPECT_FALSE(str_isnum(':'));
+	EXPECT_FALSE(str_isnum(' '));
 }
 
 TEST(Str, StrIsAllNum)
 {
-	EXPECT_EQ(str_isallnum("/"), 0);
-	EXPECT_EQ(str_isallnum("0"), 1);
-	EXPECT_EQ(str_isallnum("1"), 1);
-	EXPECT_EQ(str_isallnum("2"), 1);
-	EXPECT_EQ(str_isallnum("8"), 1);
-	EXPECT_EQ(str_isallnum("9"), 1);
-	EXPECT_EQ(str_isallnum(":"), 0);
-	EXPECT_EQ(str_isallnum(" "), 0);
+	EXPECT_FALSE(str_isallnum("/"));
+	EXPECT_TRUE(str_isallnum("0"));
+	EXPECT_TRUE(str_isallnum("1"));
+	EXPECT_TRUE(str_isallnum("2"));
+	EXPECT_TRUE(str_isallnum("8"));
+	EXPECT_TRUE(str_isallnum("9"));
+	EXPECT_FALSE(str_isallnum(":"));
+	EXPECT_FALSE(str_isallnum(" "));
 
-	EXPECT_EQ(str_isallnum("123"), 1);
-	EXPECT_EQ(str_isallnum("123/"), 0);
-	EXPECT_EQ(str_isallnum("123:"), 0);
+	EXPECT_TRUE(str_isallnum("123"));
+	EXPECT_FALSE(str_isallnum("123/"));
+	EXPECT_FALSE(str_isallnum("123:"));
+
+	EXPECT_TRUE(str_isallnum("0123456789"));
+	EXPECT_FALSE(str_isallnum("abcdef"));
+	EXPECT_FALSE(str_isallnum("ABCDEF"));
+	EXPECT_FALSE(str_isallnum("0123456789AbCdEf"));
+	EXPECT_FALSE(str_isallnum("z"));
+	EXPECT_FALSE(str_isallnum("Z"));
+}
+
+TEST(Str, StrIsAllNumHex)
+{
+	EXPECT_FALSE(str_isallnum_hex("/"));
+	EXPECT_TRUE(str_isallnum_hex("0"));
+	EXPECT_TRUE(str_isallnum_hex("1"));
+	EXPECT_TRUE(str_isallnum_hex("2"));
+	EXPECT_TRUE(str_isallnum_hex("8"));
+	EXPECT_TRUE(str_isallnum_hex("9"));
+	EXPECT_FALSE(str_isallnum_hex(":"));
+	EXPECT_FALSE(str_isallnum_hex(" "));
+
+	EXPECT_TRUE(str_isallnum_hex("123"));
+	EXPECT_FALSE(str_isallnum_hex("123/"));
+	EXPECT_FALSE(str_isallnum_hex("123:"));
+
+	EXPECT_TRUE(str_isallnum_hex("0123456789"));
+	EXPECT_TRUE(str_isallnum_hex("abcdef"));
+	EXPECT_TRUE(str_isallnum_hex("ABCDEF"));
+	EXPECT_TRUE(str_isallnum_hex("0123456789AbCdEf"));
+	EXPECT_FALSE(str_isallnum_hex("z"));
+	EXPECT_FALSE(str_isallnum_hex("Z"));
 }
 
 TEST(Str, Dist)
@@ -642,6 +675,26 @@ TEST(Str, Base64DecodeError)
 	EXPECT_LT(str_base64_decode(aBuf, 2, "cGxlYXN1cmUu"), 0);
 	EXPECT_LT(str_base64_decode(aBuf, 3, "cGxlYXN1cmUu"), 0);
 	EXPECT_LT(str_base64_decode(aBuf, 4, "cGxlYXN1cmUu"), 0);
+}
+
+static void TestUnescapeNewlines(const char *pInput, const char *pExpectedOutput)
+{
+	char aOutput[256];
+	str_copy(aOutput, pInput);
+	str_unescape_newlines(aOutput);
+	EXPECT_STREQ(aOutput, pExpectedOutput);
+}
+
+TEST(Str, UnescapeNewlines)
+{
+	TestUnescapeNewlines("", "");
+	TestUnescapeNewlines("\n", "\n");
+	TestUnescapeNewlines("\\n", "\n");
+	TestUnescapeNewlines("\\\n", "\\\n");
+	TestUnescapeNewlines("\\\\n", "\\\n");
+	TestUnescapeNewlines("\\n\\n\\n", "\n\n\n");
+	TestUnescapeNewlines("a\\nb", "a\nb");
+	TestUnescapeNewlines("\na\\nbb\\nccc\\ndddd\\n", "\na\nbb\nccc\ndddd\n");
 }
 
 TEST(Str, Tokenize)

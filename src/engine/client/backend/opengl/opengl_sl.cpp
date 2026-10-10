@@ -83,7 +83,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		}
 	}
 
-	for(const CGLSLCompiler::SGLSLCompilerDefine &Define : pCompiler->m_vDefines)
+	for(const CGLSLCompiler::CDefine &Define : pCompiler->m_vDefines)
 	{
 		vLines.push_back(std::string("#define ") + Define.m_DefineName + std::string(" ") + Define.m_DefineValue + std::string("\r\n"));
 	}
@@ -96,7 +96,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 	while(const char *pReadLine = LineReader.Get())
 	{
 		std::string Line;
-		pCompiler->ParseLine(Line, pReadLine, Type == GL_FRAGMENT_SHADER ? GLSL_SHADER_COMPILER_TYPE_FRAGMENT : GLSL_SHADER_COMPILER_TYPE_VERTEX);
+		pCompiler->ParseLine(Line, pReadLine, Type == GL_FRAGMENT_SHADER ? CGLSLCompiler::EShaderType::FRAGMENT : CGLSLCompiler::EShaderType::VERTEX);
 		Line.append("\r\n");
 		vLines.push_back(Line);
 	}

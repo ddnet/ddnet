@@ -61,6 +61,10 @@ void CEnvelope::Resort()
 
 std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 {
+	if(m_vPoints.empty() || (ChannelMask & ((1 << GetChannels()) - 1)) == 0)
+	{
+		return {0.0f, 1.0f};
+	}
 	float Top = -std::numeric_limits<float>::infinity();
 	float Bottom = std::numeric_limits<float>::infinity();
 	for(size_t PointIndex = 0; PointIndex < m_vPoints.size(); ++PointIndex)

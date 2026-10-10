@@ -129,7 +129,6 @@ public:
 	bool AltIsPressed() const override { return KeyIsPressed(KEY_LALT) || KeyIsPressed(KEY_RALT); }
 	bool KeyIsPressed(int Key) const override;
 	bool KeyPress(int Key) const override;
-	const char *KeyName(int Key) const override;
 	int FindKeyByName(const char *pKeyName) const override;
 
 	size_t NumJoysticks() const override { return m_vJoysticks.size(); }

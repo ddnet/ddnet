@@ -32,9 +32,18 @@ public:
 
 	void OnReset() override;
 	void Render(CUIRect View);
+	bool IsPointOperationActive() const;
 
 private:
 	void RenderColorBar(CUIRect ColorBar, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderPointTimeTooltip(CUIRect View, int PointIndex, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderPointValueTooltip(CUIRect View, int PointIndex, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTangentInTooltip(CUIRect View, int PointIndex, int Channel, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTangentOutTooltip(CUIRect View, int PointIndex, int Channel, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTangentTooltip(CUIRect View, int PointIndex, int Channel, CFixedTime Time, int Value, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderScaleTooltip(CUIRect View, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTimebarTooltip(CUIRect View, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void RenderTooltip(CUIRect *pTooltipRect, CUIRect Boundary);
 
 	void UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels);
 
@@ -70,6 +79,7 @@ private:
 	const char m_NextEnvelopeButtonId = 0;
 	const char m_aChannelButtonIds[CEnvPoint::MAX_CHANNELS] = {0};
 	const char m_EnvelopeEditorId = 0;
+	const char m_ScaleOperationId = 0;
 	CLineInput m_NameInput;
 	int m_EnvelopeEditorButtonUsed;
 	EEnvelopeEditorOp m_Operation;

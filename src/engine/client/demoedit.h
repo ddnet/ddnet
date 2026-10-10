@@ -1,6 +1,8 @@
 #ifndef ENGINE_CLIENT_DEMOEDIT_H
 #define ENGINE_CLIENT_DEMOEDIT_H
 
+#include <base/types.h>
+
 #include <engine/shared/demo.h>
 #include <engine/shared/jobs.h>
 #include <engine/shared/snapshot.h>
@@ -15,8 +17,8 @@ class CDemoEdit : public IJob
 
 	CDemoEditor m_DemoEditor;
 
-	char m_aDemo[256];
-	char m_aDst[256];
+	char m_aDemo[IO_MAX_PATH_LENGTH];
+	char m_aDst[IO_MAX_PATH_LENGTH];
 	int m_StartTick;
 	int m_EndTick;
 	bool m_Success;

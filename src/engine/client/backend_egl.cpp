@@ -71,8 +71,6 @@ bool CCommandProcessorFragment_EGL::RunCommand(const CCommandBuffer::SCommand *p
 
 CCommandProcessor_EGL_GL::CCommandProcessor_EGL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch)
 {
-	m_BackendType = BackendType;
-
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
 		if(GLMajor < 2)
@@ -89,7 +87,6 @@ CCommandProcessor_EGL_GL::CCommandProcessor_EGL_GL(EBackendType BackendType, int
 	else
 	{
 		dbg_assert_failed("Unsupported backend type for EGL: %d", (int)BackendType);
-		m_pGLBackend = nullptr;
 	}
 }
 

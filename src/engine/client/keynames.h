@@ -4,7 +4,7 @@
 #define ENGINE_CLIENT_KEYNAMES_H
 
 /**
- * Do not use directly! Use the @link IInput::KeyName @endlink function.
+ * Do not use directly! Use the @link KeyName @endlink function.
  */
 extern const char g_aaKeyStrings[512][20];
 

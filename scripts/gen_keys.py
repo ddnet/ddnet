@@ -99,7 +99,7 @@ with open("src/engine/client/keynames.cpp", "w", encoding="utf-8") as f:
 	print('#include "keynames.h"', file=f)
 	print(file=f)
 	print("/**", file=f)
-	print(" * Do not use directly! Use the @link IInput::KeyName @endlink function.", file=f)
+	print(" * Do not use directly! Use the @link KeyName @endlink function.", file=f)
 	print(" */", file=f)
 	print("extern const char g_aaKeyStrings[512][20] = {", file=f)
 	for n in keynames:
@@ -114,7 +114,7 @@ with open("src/engine/client/keynames.h", "w", encoding="utf-8") as f:
 	print("#define ENGINE_CLIENT_KEYNAMES_H", file=f)
 	print(file=f)
 	print("/**", file=f)
-	print(" * Do not use directly! Use the @link IInput::KeyName @endlink function.", file=f)
+	print(" * Do not use directly! Use the @link KeyName @endlink function.", file=f)
 	print(" */", file=f)
 	print("extern const char g_aaKeyStrings[512][20];", file=f)
 	print(file=f)

@@ -1165,9 +1165,6 @@ Team %d
 Some map images could not be loaded. Check the local console for details.
 == Některé obrázky mapy se nepodařilo načíst. Podrobnosti najdete v místní konzoli.
 
-Uploading map data to GPU
-== Nahrávání dat map do GPU
-
 Some map sounds could not be loaded. Check the local console for details.
 == Některé zvuky mapy nelze načíst. Podrobnosti najdete v místní konzoli.
 
@@ -2468,6 +2465,10 @@ Save failed!
 == 
 
 [Important alert message]
+Tap to dismiss…
+== 
+
+[Important alert message]
 Press Esc or Tab to dismiss…
 == 
 
@@ -2475,6 +2476,9 @@ Server alert
 == 
 
 Moderator alert
+== 
+
+Initializing layers
 == 
 
 Joining Tutorial server
@@ -2626,6 +2630,9 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Credits
+== 
+
 Colors of the hook collision line:
 == 
 
@@ -2679,6 +2686,15 @@ Save power by lowering update rate (higher input latency)
 == 
 
 No country flags match your filter criteria
+== 
+
+Join
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Unmute

@@ -1279,9 +1279,6 @@ Initializing map logic
 Sending initial client info
 == 正在发送初始客户端信息
 
-Uploading map data to GPU
-== 正在将地图数据传输至显卡
-
 Getting game info
 == 正在获取游戏信息
 
@@ -2666,29 +2663,48 @@ Predict events (experimental)
 
 [Direct touch input]
 Relative aim
-== 
+== 相对瞄准
 
 [Predefined touch button behaviors]
 Joystick Relative Aim
-== 
+== 摇杆：相对瞄准
 
 Virtual joystick which only aims and moves the mouse pointer relatively.
-== 
+== 仅用于相对移动准星瞄准的虚拟摇杆。
 
 [AntiPing: predict other players]
 Off
-== 
+== 关闭
 
 [AntiPing: predict other players]
 All
-== 
+== 全体
 
 [AntiPing: predict other players]
 Interact
-== 
+== 交互玩家
 
 Always predict frozen players
-== 
+== 始终预测冻结玩家
 
 No country flags match your filter criteria
+== 没有旗帜满足设置的筛选条件
+
+[Important alert message]
+Tap to dismiss…
+== 
+
+Initializing layers
+== 
+
+Credits
+== 
+
+Join
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 

@@ -1217,9 +1217,6 @@ Team %d
 Some map images could not be loaded. Check the local console for details.
 == Nogle banebilleder kunne ikke indlæses. Tjek den lokale konsol for detaljer.
 
-Uploading map data to GPU
-== Uploader banedata til GPU
-
 Some map sounds could not be loaded. Check the local console for details.
 == Nogle banelyde kunne ikke indlæses. Tjek den lokale konsol for detaljer.
 
@@ -2120,6 +2117,10 @@ Following %d: %s
 == 
 
 [Important alert message]
+Tap to dismiss…
+== 
+
+[Important alert message]
 Press Esc or Tab to dismiss…
 == 
 
@@ -2133,6 +2134,9 @@ Server could not be started
 == 
 
 Loading map
+== 
+
+Initializing layers
 == 
 
 Joining Tutorial server
@@ -2543,6 +2547,9 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Credits
+== 
+
 Show number of spectators
 == 
 
@@ -2678,7 +2685,16 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
+Join
+== 
+
 Download
+== 
+
+'%s' not bound.
+== 
+
+Press '%s' to show cursor.
 == 
 
 Unmute

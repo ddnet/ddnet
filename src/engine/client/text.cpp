@@ -1041,25 +1041,25 @@ class CTextRender : public IEngineTextRender
 
 	bool LoadFontCollection(const char *pFontName, const FT_Byte *pFontData, FT_Long FontDataSize)
 	{
-		FT_Face FtFace;
-		FT_Error CollectionLoadError = FT_New_Memory_Face(m_FTLibrary, pFontData, FontDataSize, -1, &FtFace);
+		FT_Face FtFaceCollection;
+		FT_Error CollectionLoadError = FT_New_Memory_Face(m_FTLibrary, pFontData, FontDataSize, -1, &FtFaceCollection);
 		if(CollectionLoadError)
 		{
 			log_error("textrender", "Failed to load font file '%s': %s", pFontName, FT_Error_String(CollectionLoadError));
 			return false;
 		}
 
-		const FT_Long NumFaces = FtFace->num_faces;
-		FT_Done_Face(FtFace);
+		const FT_Long NumFaces = FtFaceCollection->num_faces;
+		FT_Done_Face(FtFaceCollection);
 
 		bool LoadedAny = false;
 		for(FT_Long FaceIndex = 0; FaceIndex < NumFaces; ++FaceIndex)
 		{
+			FT_Face FtFace;
 			FT_Error FaceLoadError = FT_New_Memory_Face(m_FTLibrary, pFontData, FontDataSize, FaceIndex, &FtFace);
 			if(FaceLoadError)
 			{
 				log_error("textrender", "Failed to load font face %ld from font file '%s': %s", FaceIndex, pFontName, FT_Error_String(FaceLoadError));
-				FT_Done_Face(FtFace);
 				continue;
 			}
 
@@ -1572,27 +1572,36 @@ public:
 		int SelectionStartChar = -1;
 		int SelectionEndChar = -1;
 
-		const auto &&CheckInsideChar = [&](bool CheckOuter, vec2 CursorPos, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
-			return (LastCharX - LastCharWidth / 2 <= CursorPos.x &&
-				       CharX + CharWidth / 2 > CursorPos.x &&
-				       CursorPos.y >= CharY - pCursor->m_AlignedFontSize &&
-				       CursorPos.y < CharY + pCursor->m_AlignedLineSpacing) ||
+		const auto &&CheckChar = [&](vec2 CursorPos, float CharX, float CharWidth, float CharY) -> bool {
+			float AlignedCharTop = CharY - pCursor->m_AlignedFontSize;
+			float AlignedCharBottom = CharY + pCursor->m_AlignedLineSpacing;
+			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT) == 0)
+			{
+				AlignedCharTop = round_to_int(AlignedCharTop * FakeToScreen.y) / FakeToScreen.y;
+				AlignedCharBottom = round_to_int(AlignedCharBottom * FakeToScreen.y) / FakeToScreen.y;
+			}
+			return (CharX + CharWidth / 2.0f > CursorPos.x &&
+				       CursorPos.y >= AlignedCharTop &&
+				       CursorPos.y < AlignedCharBottom) ||
+			       (CursorPos.x >= pCursor->m_X &&
+				       CursorPos.y < AlignedCharTop);
+		};
+		const auto &&CheckInsideChar = [&](bool CheckOuter, vec2 CursorPos, float CharX, float CharWidth, float CharY) -> bool {
+			return CheckChar(CursorPos, CharX, CharWidth, CharY) ||
 			       (CheckOuter &&
 				       CursorPos.y <= CharY - pCursor->m_AlignedFontSize);
 		};
-		const auto &&CheckSelectionStart = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
+		const auto &&CheckSelectionStart = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase &&
-				CheckInsideChar(CheckOuter, CursorPos, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
+				CheckInsideChar(CheckOuter, CursorPos, CharX, CharWidth, CharY))
 			{
 				SelectionChar = pCursor->m_GlyphCount;
-				SelectionStarted = !SelectionStarted;
+				SelectionStarted = true;
 				SelectionUsedCase = true;
 			}
 		};
 		const auto &&CheckOutsideChar = [&](bool CheckOuter, vec2 CursorPos, float CharX, float CharWidth, float CharY) -> bool {
-			return (CharX + CharWidth / 2 > CursorPos.x &&
-				       CursorPos.y >= CharY - pCursor->m_AlignedFontSize &&
-				       CursorPos.y < CharY + pCursor->m_AlignedLineSpacing) ||
+			return CheckChar(CursorPos, CharX, CharWidth, CharY) ||
 			       (CheckOuter &&
 				       CursorPos.y >= CharY + pCursor->m_AlignedLineSpacing);
 		};
@@ -1601,7 +1610,7 @@ public:
 				CheckOutsideChar(CheckOuter, CursorPos, CharX, CharWidth, CharY))
 			{
 				SelectionChar = pCursor->m_GlyphCount;
-				SelectionStarted = !SelectionStarted;
+				SelectionStarted = false;
 				SelectionUsedCase = true;
 			}
 		};
@@ -1883,7 +1892,7 @@ public:
 
 					if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
 					{
-						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(pCursor->m_GlyphCount == 0, pCursor->m_ReleaseMouse, pCursor->m_GlyphCount == 0 ? std::numeric_limits<float>::lowest() : LastCharX, LastCharWidth, CharX, CharWidth, TmpY))
+						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(pCursor->m_GlyphCount == 0, pCursor->m_ReleaseMouse, CharX, CharWidth, TmpY))
 						{
 							pCursor->m_CursorCharacter = pCursor->m_GlyphCount;
 						}
@@ -1891,15 +1900,9 @@ public:
 
 					if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 					{
-						if(pCursor->m_GlyphCount == 0)
-						{
-							CheckSelectionStart(true, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
-							CheckSelectionStart(true, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
-						}
-
 						// if selection didn't start and the mouse pos is at least on 50% of the right side of the character start
-						CheckSelectionStart(false, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
-						CheckSelectionStart(false, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
+						CheckSelectionStart(pCursor->m_GlyphCount == 0, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, CharX, CharWidth, TmpY);
+						CheckSelectionStart(pCursor->m_GlyphCount == 0, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, CharX, CharWidth, TmpY);
 						CheckSelectionEnd(false, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, CharX, CharWidth, TmpY);
 						CheckSelectionEnd(false, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, CharX, CharWidth, TmpY);
 					}

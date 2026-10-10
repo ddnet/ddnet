@@ -187,8 +187,8 @@ private:
 	void SendZoneMsgs();
 	IAntibot *Antibot();
 
-	bool m_SetSavePos[NUM_RESCUEMODES];
-	CSaveTee m_RescueTee[NUM_RESCUEMODES];
+	bool m_aSetSavePos[NUM_RESCUEMODES];
+	CSaveTee m_aRescueTee[NUM_RESCUEMODES];
 
 	enum EUntranslatedMap
 	{
@@ -287,7 +287,7 @@ public:
 
 	bool IsSuper() const { return m_Core.m_Super; }
 
-	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
+	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_aRescueTee[Mode]; }
 	CTuningParams *GetTuning(int Zone) { return &TuningList()[Zone]; }
 };
 
