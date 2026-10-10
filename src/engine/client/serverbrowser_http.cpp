@@ -35,6 +35,8 @@ static int SanitizeAge(std::optional<int64_t> Age)
 	return *Age;
 }
 
+static constexpr int REFRESH_COOLDOWN_MS = 1000;
+
 // Classify HTTP responses into buckets, treat 15 seconds as fresh, 1 minute as
 // less fresh, etc. This ensures that differences in the order of seconds do
 // not affect master choice.
@@ -348,6 +350,7 @@ private:
 	IHttp *m_pHttp;
 
 	int m_State = STATE_WANTREFRESH;
+	int64_t m_LastRefreshTime = 0;
 	std::shared_ptr<IHttpRequest> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
@@ -432,6 +435,12 @@ void CServerBrowserHttp::Update()
 }
 void CServerBrowserHttp::Refresh()
 {
+	const int64_t CurrentRefreshTime = time_get_impl() * 1000 / time_freq();
+	if(m_LastRefreshTime != 0 && CurrentRefreshTime - m_LastRefreshTime < REFRESH_COOLDOWN_MS)
+	{
+		return;
+	}
+	m_LastRefreshTime = CurrentRefreshTime;
 	if(m_State == STATE_WANTREFRESH || m_State == STATE_REFRESHING || m_State == STATE_NO_MASTER)
 	{
 		if(m_State == STATE_NO_MASTER)
