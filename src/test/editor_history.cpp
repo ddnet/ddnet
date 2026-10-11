@@ -1505,3 +1505,179 @@ TEST(EditorDocumentExport, CacheObservationPinsImmutableSourcesAndMatchesFreshUn
 	Worker.join();
 	EXPECT_EQ(ObservedBytes, Fresh.Bytes());
 }
+
+TEST(EditorRenderSpans, SparseRowsMatchScalarCellsIncludingPartialChunksAndRestoredPlanes)
+{
+	constexpr int Width = 137, Height = 69;
+	CEditorTilePlane<CTileValues> Plane(Width, Height);
+	std::vector<CTile> vScalar(Width * Height);
+	std::minstd_rand Random(719);
+	for(int Index = 0; Index < Width * Height; ++Index)
+	{
+		if(Random() % 19 == 0)
+		{
+			vScalar[Index] = {static_cast<unsigned char>(Random() % 255 + 1), static_cast<unsigned char>(Random() & (TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE)), 0, 0};
+			Plane.Set(Index, vScalar[Index]);
+		}
+	}
+	const auto Original = Plane;
+	const auto Check = [&](const auto &Cells, const auto &vExpected) {
+		CRenderTileSource<CTile> Source(Cells);
+		CTileChunkCursor Cursor;
+		std::array<CTile, 13> aBuffer; // Force spans smaller than a chunk too.
+		for(int Y = 0; Y < Cells.Height(); ++Y)
+			for(const int StartX : {0, 1, 31, 32, 63, 128})
+				for(std::size_t X = StartX; X < static_cast<std::size_t>(Cells.Width());)
+				{
+					const auto Row = Source.ReadRow(X, Y, Cells.Width(), aBuffer, &Cursor);
+					ASSERT_GT(Row.m_Length, 0u);
+					ASSERT_LE(Row.m_Length, Cells.Width() - X);
+					for(std::size_t Offset = 0; Offset < Row.m_Length; ++Offset)
+					{
+						const CTile Actual = Row.m_Cells.empty() ? CTile{} : Row.m_Cells[Offset];
+						const auto Expected = vExpected[Y * Width + X + Offset];
+						EXPECT_EQ(Actual.m_Index, Expected.m_Index);
+						EXPECT_EQ(Actual.m_Flags, Expected.m_Flags);
+						EXPECT_EQ(Actual.m_Skip, 0);
+						EXPECT_EQ(Actual.m_MustBe0, 0);
+					}
+					X += Row.m_Length;
+				}
+		EXPECT_LE(Cursor.m_TreeLookups, 15u);
+	};
+	Check(Plane, vScalar);
+	Plane.Set(32 * Width + 31, CTile{99, TILEFLAG_ROTATE, 0, 0});
+	Check(Original, vScalar);
+	Plane = Original;
+	ASSERT_TRUE(Plane.Resize(130, 65));
+	Check(Plane, vScalar);
+}
+
+TEST(EditorRenderSpans, EmptySubtreesSkipGrowingDimensionsWithoutAllocations)
+{
+	for(const int Edge : {1000, 10000, 100000})
+	{
+		CEditorTilePlane<CTileValues> Plane(Edge, Edge);
+		const auto Empty = Plane.ReadRow(1, Edge / 2, Edge);
+		EXPECT_TRUE(Empty.m_Cells.empty());
+		EXPECT_EQ(Empty.m_Length, Edge - 1u);
+		editor_history::CStorageUsage EmptyUsage;
+		Plane.Account(EmptyUsage);
+		EXPECT_EQ(EmptyUsage.Bytes(), 0u);
+		Plane.Set(static_cast<std::size_t>(Edge / 2) * Edge + Edge - 1, CTile{1, 0, 0, 0});
+		editor_history::CStorageUsage Before;
+		Plane.Account(Before);
+		std::size_t Spans = 0, Cells = 0;
+		for(std::size_t X = 0; X < static_cast<std::size_t>(Edge);)
+		{
+			const auto Row = Plane.ReadRow(X, Edge / 2, Edge);
+			++Spans;
+			Cells += Row.m_Cells.size();
+			X += Row.m_Length;
+		}
+		EXPECT_LE(Spans, 16u * (Plane.Plane().TreeDepth() + 1));
+		EXPECT_LE(Cells, 32u);
+		editor_history::CStorageUsage After;
+		Plane.Account(After);
+		EXPECT_EQ(After.Bytes(), Before.Bytes());
+	}
+}
+
+TEST(EditorRenderSpans, BoundedCursorReusesChunksAndHandlesCollisions)
+{
+	CEditorTilePlane<CTileValues> Plane(1024, 32);
+	for(int X = 0; X < Plane.Width(); X += 32)
+		Plane.Set(X, CTile{static_cast<unsigned char>(X / 32 + 1), TILEFLAG_ROTATE, 0, 0});
+	CTileChunkCursor Cursor;
+	for(int Y = 0; Y < Plane.Height(); ++Y)
+		for(int X = 0; X < Plane.Width(); X += 32)
+		{
+			const auto Row = Plane.ReadRowCached(X, Y, Plane.Width(), Cursor);
+			ASSERT_EQ(Row.m_Cells.size(), 32u);
+			EXPECT_EQ(Row.m_Cells[0].m_Index, Y == 0 ? X / 32 + 1 : 0);
+			EXPECT_EQ(Row.m_Cells[0].m_Flags, Y == 0 ? TILEFLAG_ROTATE : 0);
+		}
+	EXPECT_EQ(Cursor.m_TreeLookups, 32u);
+	EXPECT_LE(sizeof(Cursor), 1600u);
+
+	// Direct-map collisions must replace both populated and empty entries.
+	CEditorTilePlane<CTileValues> Colliding(4128, 1);
+	Colliding.Set(0, CTile{19, TILEFLAG_ROTATE, 0, 0});
+	Colliding.Set(2048, CTile{27, TILEFLAG_XFLIP, 0, 0});
+	CTileChunkCursor CollisionCursor;
+	for(const int X : {0, 2048, 0, 4096, 2048})
+	{
+		const auto Row = Colliding.ReadRowCached(X, 0, Colliding.Width(), CollisionCursor);
+		const auto Scalar = Colliding[X];
+		const CTile Actual = Row.m_Cells.empty() ? CTile{} : static_cast<CTile>(Row.m_Cells[0]);
+		EXPECT_EQ(Actual.m_Index, Scalar.m_Index);
+		EXPECT_EQ(Actual.m_Flags, Scalar.m_Flags);
+	}
+	EXPECT_EQ(CollisionCursor.m_TreeLookups, 5u);
+}
+
+TEST(EditorRenderSpans, DerivedFlagsCanOnlyAddOpacity)
+{
+	CEditorTilePlane<CTileValues> Plane(8, 1);
+	std::array<unsigned char, 256> aFlags;
+	aFlags.fill(255);
+	for(int Index = 0; Index < 8; ++Index)
+		Plane.Set(Index, CTile{17, static_cast<unsigned char>((Index & 3) | (Index & 4 ? TILEFLAG_ROTATE : 0)), 0, 0});
+	CRenderTileSource<CTile> Source(Plane, aFlags.data());
+	std::array<CTile, 32> aBuffer;
+	const auto Row = Source.ReadRow(0, 0, 8, aBuffer);
+	ASSERT_EQ(Row.m_Cells.size(), 8u);
+	for(int Index = 0; Index < 8; ++Index)
+	{
+		const auto Expected = (Index & 3) | (Index & 4 ? TILEFLAG_ROTATE : 0) | TILEFLAG_OPAQUE;
+		EXPECT_EQ(Row.m_Cells[Index].m_Flags, Expected);
+		EXPECT_EQ(Source[Index].m_Flags, Expected);
+	}
+}
+
+TEST(EditorRenderSpans, SpecialPlanesPreserveNativeFieldsAcrossChunkRows)
+{
+	const auto Check = []<typename TValue, typename TNative>(TValue, TNative Native) {
+		constexpr int Width = 65, Height = 33;
+		CEditorTilePlane<TValue> Plane(Width, Height);
+		for(const std::size_t Index : {0u, 31u, 32u, 64u, 32u * Width + 64u})
+			Plane.Set(Index, Native);
+		CRenderTileSource<TNative> Source(Plane);
+		CTileChunkCursor Cursor;
+		std::array<TNative, 32> aBuffer;
+		for(int Y = 0; Y < Height; ++Y)
+			for(std::size_t X = 0; X < Width;)
+			{
+				const auto Row = Source.ReadRow(X, Y, Width, aBuffer, &Cursor);
+				ASSERT_GT(Row.m_Length, 0u);
+				for(std::size_t Offset = 0; Offset < Row.m_Length; ++Offset)
+				{
+					const auto Index = Y * Width + X + Offset;
+					const auto Expected = Index == 0 || Index == 31 || Index == 32 || Index == 64 || Index == 32 * Width + 64 ? Native : TNative{};
+					const auto Actual = Row.m_Cells.empty() ? TNative{} : Row.m_Cells[Offset];
+					EXPECT_EQ(Actual.m_Type, Expected.m_Type);
+					if constexpr(requires { Actual.m_Number; })
+					{
+						EXPECT_EQ(Actual.m_Number, Expected.m_Number);
+					}
+					if constexpr(requires { Actual.m_Flags; })
+					{
+						EXPECT_EQ(Actual.m_Flags, Expected.m_Flags);
+						EXPECT_EQ(Actual.m_Delay, Expected.m_Delay);
+					}
+					if constexpr(requires { Actual.m_Force; })
+					{
+						EXPECT_EQ(Actual.m_Force, Expected.m_Force);
+						EXPECT_EQ(Actual.m_MaxSpeed, Expected.m_MaxSpeed);
+						EXPECT_EQ(Actual.m_Angle, Expected.m_Angle);
+						EXPECT_EQ(Actual.m_MustBe0, 0);
+					}
+				}
+				X += Row.m_Length;
+			}
+	};
+	Check(CTeleTileValues{}, CTeleTile{79, TILE_TELEIN});
+	Check(CSpeedupTileValues{}, CSpeedupTile{31, 83, TILE_SPEED_BOOST, 0, -135});
+	Check(CSwitchTileValues{}, CSwitchTile{46, TILE_SWITCHTIMEDOPEN, TILEFLAG_ROTATE | TILEFLAG_YFLIP, 255});
+	Check(CTuneTileValues{}, CTuneTile{28, TILE_TUNE});
+}
