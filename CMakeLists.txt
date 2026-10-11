@@ -2754,6 +2754,7 @@ if(CLIENT)
     lineinput.cpp
     lineinput.h
     multiview.cpp
+    number_input.h
     pickup_data.cpp
     pickup_data.h
     prediction/entities/character.cpp
@@ -3490,6 +3491,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     net_test.cpp
     netaddr_test.cpp
     network_test.cpp
+    number_input.cpp
     os_test.cpp
     packer_test.cpp
     prng_test.cpp
