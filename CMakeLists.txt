@@ -2829,6 +2829,7 @@ if(CLIENT)
     file_browser.h
     font_typer.cpp
     font_typer.h
+    history/edit_coordinator.h
     history/resource_blob.h
     history/revision_history.h
     history/save_state.h

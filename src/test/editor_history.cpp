@@ -7,6 +7,7 @@
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
+#include <game/editor/history/edit_coordinator.h>
 #include <game/editor/history/revision_history.h>
 #include <game/editor/history/tile_plane.h>
 #include <game/editor/history/tile_projection.h>
@@ -893,6 +894,231 @@ TEST(EditorDocumentExport, FingerprintRebindsPlaneTypesAndDimensionsAfterReorder
 	UpdateDocumentLayer(Document, 2, [](auto &Layer) { std::get<CTileLayerDocumentValues>(Layer.m_Data).m_Tiles.Resize(33, 17); });
 	EXPECT_EQ(Cache.Key(Document), EditorDocumentPersistedKey(Document));
 	EXPECT_EQ(Cache.Statistics().m_TileChunks, 2u);
+}
+
+namespace
+{
+	using CTestCoordinator = CEditCoordinator<CTestDocument>;
+	class CCoordinatorFixture
+	{
+	public:
+		CTestDocument m_Runtime;
+		int m_Captures = 0;
+		int m_Restores = 0;
+		int m_Begins = 0;
+		int m_Errors = 0;
+		bool m_FailCapture = false;
+		bool m_FailRestore = false;
+		std::function<void()> m_OnError;
+		std::function<void()> m_OnRestore;
+		std::unique_ptr<CTestCoordinator> m_pCoordinator = std::make_unique<CTestCoordinator>(MakeHistory(), [this](const auto &, std::string &) -> std::optional<CTestDocument> {
+				++m_Captures;
+				return m_FailCapture ? std::nullopt : std::optional(m_Runtime); }, [this](const auto &Document) {
+				++m_Restores;
+				if(m_OnRestore)
+					m_OnRestore();
+				if(m_FailRestore)
+					return false;
+				m_Runtime = Document;
+				return true; }, [this] { ++m_Begins; }, [this](const char *) {
+				++m_Errors;
+				if(m_OnError)
+					m_OnError(); });
+	};
+}
+
+TEST(EditorEditCoordinator, RetainsBaselineBeforeMutationAndCapturesOnlyCompletion)
+{
+	CCoordinatorFixture Fixture;
+	auto &Edits = *Fixture.m_pCoordinator;
+	auto Owner = Edits.BeginEdit("Drag value", ECategory::MAP);
+	ASSERT_TRUE(Owner);
+	EXPECT_EQ(Fixture.m_Begins, 1);
+	EXPECT_EQ(Fixture.m_Captures, 0);
+	ASSERT_TRUE(Edits.Update(*Owner, [&] { Fixture.m_Runtime.m_Value = 99; }));
+	ASSERT_TRUE(Edits.Update(*Owner, [&] { Fixture.m_Runtime.m_Value = 80; }));
+	EXPECT_EQ(Fixture.m_Captures, 0);
+	EXPECT_EQ(Edits.History().Current().m_Value, 64);
+	EXPECT_EQ(Edits.Complete(*Owner, EEditCompletion::POINTER_RELEASE), ECommitResult::CHANGED);
+	EXPECT_FALSE(Owner->Active());
+	EXPECT_EQ(Fixture.m_Captures, 1);
+	EXPECT_EQ(Fixture.m_Restores, 0);
+	ASSERT_EQ(Edits.History().Revisions().size(), 2u);
+	EXPECT_EQ(Edits.History().Current().m_Value, 80);
+	EXPECT_EQ(Edits.History().Revisions()[0].m_pRoot->m_Value, 64);
+	EXPECT_EQ(Edits.LastCompletion(), EEditCompletion::POINTER_RELEASE);
+	EXPECT_TRUE(Edits.RequestUndo());
+	EXPECT_EQ(Fixture.m_Runtime.m_Value, 80);
+	EXPECT_TRUE(Edits.PublishAtSafePoint());
+	EXPECT_EQ(Fixture.m_Runtime.m_Value, 64);
+	EXPECT_EQ(Fixture.m_Restores, 1);
+}
+
+TEST(EditorEditCoordinator, NestedHelpersExplicitlyJoinAndUnrelatedOwnersCannotInterleave)
+{
+	CCoordinatorFixture Fixture;
+	CCoordinatorFixture OtherFixture;
+	auto &Edits = *Fixture.m_pCoordinator;
+	auto Owner = Edits.BeginEdit("Stroke and dependent effects", ECategory::MAP);
+	ASSERT_TRUE(Owner);
+	EXPECT_FALSE(Edits.BeginEdit("Unrelated widget", ECategory::ENVELOPE));
+	EXPECT_FALSE(OtherFixture.m_pCoordinator->Update(*Owner, [] {}));
+	EXPECT_TRUE(Edits.Update(*Owner, [&] {
+		Fixture.m_Runtime.m_Value = 70;
+		EXPECT_TRUE(Edits.Update(*Owner, [&] { Fixture.m_Runtime.m_AuthoringSetting = 17; }));
+		EXPECT_FALSE(Edits.RequestUndo());
+		EXPECT_FALSE(Edits.PublishAtSafePoint());
+		EXPECT_EQ(Edits.Complete(*Owner, EEditCompletion::ACCEPT), ECommitResult::INVALID_OWNER);
+	}));
+	EXPECT_EQ(Edits.Complete(*Owner, EEditCompletion::POINTER_RELEASE), ECommitResult::CHANGED);
+	EXPECT_EQ(Edits.History().Current().m_AuthoringSetting, 17);
+	EXPECT_EQ(Edits.History().Revisions().size(), 2u);
+}
+
+TEST(EditorEditCoordinator, ActiveUndoCancelsOnlyTheDraftAndNoopPreservesRedo)
+{
+	CCoordinatorFixture Fixture;
+	auto &Edits = *Fixture.m_pCoordinator;
+	ASSERT_EQ(Edits.Edit("First", ECategory::MAP, [&] { Fixture.m_Runtime.m_Value = 71; }), ECommitResult::CHANGED);
+	ASSERT_TRUE(Edits.RequestUndo());
+	ASSERT_TRUE(Edits.PublishAtSafePoint());
+	auto Owner = Edits.BeginEdit("Preview", ECategory::MAP);
+	ASSERT_TRUE(Owner);
+	ASSERT_TRUE(Edits.Update(*Owner, [&] { Fixture.m_Runtime.m_Value = 200; }));
+	EXPECT_FALSE(Edits.RequestRedo());
+	EXPECT_FALSE(Edits.CaptureSave("automatic.map", ESaveKind::AUTOMATIC));
+	EXPECT_TRUE(Edits.RequestUndo());
+	EXPECT_EQ(Fixture.m_Runtime.m_Value, 200);
+	EXPECT_TRUE(Edits.PublishAtSafePoint());
+	EXPECT_EQ(Fixture.m_Runtime.m_Value, 64);
+	EXPECT_EQ(Edits.History().Cursor(), 0u);
+	EXPECT_TRUE(Edits.History().CanRedo());
+	EXPECT_EQ(Edits.LastCancellation(), EEditCancellation::UNDO);
+	EXPECT_EQ(Edits.Edit("Unchanged gesture", ECategory::MAP, [&] {
+		Fixture.m_Runtime.m_Value = 120;
+		Fixture.m_Runtime.m_Value = 64;
+	}),
+		ECommitResult::UNCHANGED);
+	EXPECT_TRUE(Edits.History().CanRedo());
+	EXPECT_TRUE(Edits.RequestRedo());
+	EXPECT_TRUE(Edits.PublishAtSafePoint());
+	EXPECT_EQ(Fixture.m_Runtime.m_Value, 71);
+}
+
+TEST(EditorEditCoordinator, InterruptionAndAbandonedOwnerCancelAtSafePoint)
+{
+	for(const auto Reason : {EEditCancellation::ESCAPE, EEditCancellation::CAPTURE_LOST, EEditCancellation::FOCUS_LOST, EEditCancellation::INVALID_INPUT})
+	{
+		CCoordinatorFixture Fixture;
+		auto &Edits = *Fixture.m_pCoordinator;
+		{
+			auto Owner = Edits.BeginEdit("Interrupted", ECategory::MAP);
+			ASSERT_TRUE(Owner);
+			ASSERT_TRUE(Edits.Update(*Owner, [&] { Fixture.m_Runtime.m_Value = 123; }));
+			ASSERT_TRUE(Edits.CancelActive(Reason));
+		}
+		EXPECT_EQ(Edits.LastCancellation(), Reason);
+		EXPECT_EQ(Fixture.m_Runtime.m_Value, 123);
+		EXPECT_TRUE(Edits.PublishAtSafePoint());
+		EXPECT_FALSE(Edits.PublishAtSafePoint());
+		EXPECT_EQ(Fixture.m_Runtime.m_Value, 64);
+		EXPECT_EQ(Edits.History().Revisions().size(), 1u);
+		EXPECT_EQ(Fixture.m_Captures, 0);
+	}
+	CCoordinatorFixture Fixture;
+	auto &Edits = *Fixture.m_pCoordinator;
+	{
+		auto Owner = Edits.BeginEdit("Abandoned", ECategory::MAP);
+		ASSERT_TRUE(Owner);
+		EXPECT_TRUE(Edits.Update(*Owner, [&] { Fixture.m_Runtime.m_Value = 88; }));
+	}
+	EXPECT_EQ(Edits.LastCancellation(), EEditCancellation::OWNER_DESTROYED);
+	EXPECT_TRUE(Edits.PublishAtSafePoint());
+	EXPECT_EQ(Fixture.m_Runtime.m_Value, 64);
+}
+
+TEST(EditorEditCoordinator, CaptureAndValidationFailuresRestoreTheRetainedBaseline)
+{
+	for(const bool FailCapture : {false, true})
+	{
+		CCoordinatorFixture Fixture;
+		auto &Edits = *Fixture.m_pCoordinator;
+		Fixture.m_FailCapture = FailCapture;
+		EXPECT_EQ(Edits.Edit("Rejected", ECategory::MAP, [&] { Fixture.m_Runtime.m_Value = -1; }), ECommitResult::FAILED);
+		EXPECT_EQ(Edits.History().Current().m_Value, 64);
+		EXPECT_EQ(Edits.History().Revisions().size(), 1u);
+		EXPECT_EQ(Fixture.m_Runtime.m_Value, -1);
+		EXPECT_EQ(Fixture.m_Errors, 1);
+		EXPECT_TRUE(Edits.HasPendingPublication());
+		EXPECT_FALSE(Edits.BeginEdit("Cannot interleave", ECategory::MAP));
+		Fixture.m_FailRestore = true;
+		EXPECT_FALSE(Edits.PublishAtSafePoint());
+		EXPECT_FALSE(Edits.Clear());
+		EXPECT_FALSE(Edits.AbandonPendingTraversal());
+		Fixture.m_FailRestore = false;
+		EXPECT_TRUE(Edits.PublishAtSafePoint());
+		EXPECT_EQ(Fixture.m_Runtime.m_Value, 64);
+		EXPECT_TRUE(Edits.Clear());
+	}
+}
+
+TEST(EditorEditCoordinator, PublicationBlocksLifecycleReentryUntilRuntimeBindingSucceeds)
+{
+	CCoordinatorFixture Fixture;
+	auto &Edits = *Fixture.m_pCoordinator;
+	ASSERT_EQ(Edits.Edit("First", ECategory::MAP, [&] { Fixture.m_Runtime.m_Value = 90; }), ECommitResult::CHANGED);
+	auto Owner = Edits.BeginEdit("Preview", ECategory::MAP);
+	ASSERT_TRUE(Owner);
+	ASSERT_TRUE(Edits.Update(*Owner, [&] { Fixture.m_Runtime.m_Value = 100; }));
+	ASSERT_TRUE(Owner->Cancel(EEditCancellation::ESCAPE));
+	Fixture.m_OnRestore = [&] {
+		EXPECT_TRUE(Edits.Publishing());
+		EXPECT_EQ(Edits.History().Cursor(), 1u);
+		EXPECT_FALSE(Edits.BeginEdit("Callback", ECategory::MAP));
+		EXPECT_FALSE(Edits.Update(*Owner, [] {}));
+		EXPECT_EQ(Edits.CompleteActive(EEditCompletion::VALID_BLUR), ECommitResult::INVALID_OWNER);
+		EXPECT_FALSE(Owner->Cancel(EEditCancellation::OWNER_DESTROYED));
+		EXPECT_FALSE(Edits.RequestUndo());
+		EXPECT_FALSE(Edits.RequestRedo());
+		EXPECT_FALSE(Edits.RequestRevision(0));
+		EXPECT_FALSE(Edits.AbandonPendingTraversal());
+		EXPECT_FALSE(Edits.Clear());
+		EXPECT_FALSE(Edits.PublishAtSafePoint());
+		EXPECT_FALSE(Edits.CaptureSave("reentrant.map", ESaveKind::MANUAL));
+	};
+	Fixture.m_FailRestore = true;
+	EXPECT_FALSE(Edits.PublishAtSafePoint());
+	EXPECT_TRUE(Edits.HasActiveEdit());
+	EXPECT_EQ(Fixture.m_Runtime.m_Value, 100);
+	Fixture.m_FailRestore = false;
+	EXPECT_TRUE(Edits.PublishAtSafePoint());
+	EXPECT_FALSE(Edits.HasActiveEdit());
+	EXPECT_FALSE(Edits.Publishing());
+	EXPECT_EQ(Fixture.m_Runtime.m_Value, 90);
+	EXPECT_EQ(Edits.LastCancellation(), EEditCancellation::ESCAPE);
+}
+
+TEST(EditorEditCoordinator, ManualSaveSettlesOwnerAndCompletionStaysBoundToCapturedContent)
+{
+	CCoordinatorFixture Fixture;
+	auto &Edits = *Fixture.m_pCoordinator;
+	auto Owner = Edits.BeginEdit("Typed metadata", ECategory::MAP);
+	ASSERT_TRUE(Owner);
+	ASSERT_TRUE(Edits.Update(*Owner, [&] { Fixture.m_Runtime.m_Value = 128; }));
+	EXPECT_FALSE(Edits.CaptureSave("manual.map", ESaveKind::MANUAL));
+	EXPECT_EQ(Edits.CompleteActive(EEditCompletion::MANUAL_SAVE), ECommitResult::CHANGED);
+	auto Ticket = Edits.CaptureSave("manual.map", ESaveKind::MANUAL);
+	ASSERT_TRUE(Ticket);
+	EXPECT_EQ(Ticket->m_pRoot->m_Value, 128);
+	ASSERT_EQ(Edits.Edit("Later edit", ECategory::SETTINGS, [&] { Fixture.m_Runtime.m_Value = 129; }), ECommitResult::CHANGED);
+	EXPECT_TRUE(Edits.CompleteSave(*Ticket, true));
+	EXPECT_TRUE(Edits.History().Dirty(ESaveKind::MANUAL));
+	EXPECT_TRUE(Edits.RequestUndo());
+	EXPECT_TRUE(Edits.PublishAtSafePoint());
+	EXPECT_FALSE(Edits.History().Dirty(ESaveKind::MANUAL));
+	EXPECT_TRUE(Edits.History().Dirty(ESaveKind::AUTOMATIC));
+	CCoordinatorFixture Replacement;
+	EXPECT_FALSE(Replacement.m_pCoordinator->CompleteSave(*Ticket, true));
 }
 
 TEST(EditorHistory, LiveLimitsPreserveUndoPairSaveMarkersAndExistingRedo)
