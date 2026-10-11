@@ -71,10 +71,15 @@ public:
 	int Size() const;
 };
 
-// write access
+/**
+ * Collects items and data blocks for a single output file.
+ * Add failures are sticky: Finish reports them even if an unused index is discarded.
+ */
 class CDataFileWriter
 {
 public:
+	static constexpr int WRITER_ERROR = -1;
+
 	enum ECompressionLevel
 	{
 		COMPRESSION_DEFAULT,
@@ -123,6 +128,7 @@ private:
 	std::vector<CItemInfo> m_vItems;
 	std::vector<CDataInfo> m_vDatas;
 	std::vector<CExtendedItemType> m_vExtendedItemTypes;
+	bool m_Failed = false;
 
 	int GetTypeFromIndex(int Index) const;
 	int GetExtendedItemTypeIndex(int Type, const CUuid *pUuid);
@@ -137,15 +143,24 @@ public:
 		m_vItems = std::move(Other.m_vItems);
 		m_vDatas = std::move(Other.m_vDatas);
 		m_vExtendedItemTypes = std::move(Other.m_vExtendedItemTypes);
+		m_Failed = Other.m_Failed;
 	}
 	~CDataFileWriter();
 
 	[[nodiscard]] bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
+	bool Failed() const { return m_Failed; }
+	/** Returns an item index, or WRITER_ERROR on failure. */
 	int AddItem(int Type, int Id, size_t Size, const void *pData, const CUuid *pUuid = nullptr);
+	/** Returns a data index, or WRITER_ERROR on failure. */
 	int AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel = COMPRESSION_DEFAULT);
+	/** Like AddData, but converts 32-bit integers to little endian. */
 	int AddDataSwapped(size_t Size, const void *pData);
+	/** Empty strings return -1 without adding data; otherwise, like AddData. Check Failed to distinguish errors. */
 	int AddDataString(const char *pStr);
-	void Finish();
+	/** Close an unfinished output; the caller may then remove its temporary file. */
+	void Abort();
+	/** Returns false on any add, compression, size limit, write, or close failure. */
+	[[nodiscard]] bool Finish();
 };
 
 #endif
