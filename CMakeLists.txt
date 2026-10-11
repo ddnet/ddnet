@@ -2842,6 +2842,10 @@ if(CLIENT)
     map_view.cpp
     map_view.h
     mapitems.h
+    mapitems/document_graph.h
+    mapitems/document_session.h
+    mapitems/document_values.h
+    mapitems/element_values.h
     mapitems/envelope.cpp
     mapitems/envelope.h
     mapitems/envelope_evaluator.cpp
@@ -2875,6 +2879,7 @@ if(CLIENT)
     mapitems/map_io.cpp
     mapitems/sound.cpp
     mapitems/sound.h
+    mapitems/tile_values.h
     popups.cpp
     prompt.cpp
     prompt.h
