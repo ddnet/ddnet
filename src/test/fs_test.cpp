@@ -3,6 +3,11 @@
 #include <base/fs.h>
 #include <base/io.h>
 #include <base/str.h>
+#include <base/windows.h>
+
+#if defined(CONF_FAMILY_WINDOWS)
+#include <windows.h>
+#endif
 
 #include <gtest/gtest.h>
 
@@ -393,4 +398,49 @@ TEST(Filesystem, RenameOpenFileDeleteTarget)
 	EXPECT_FALSE(io_close(FileRead));
 
 	EXPECT_FALSE(fs_remove(aNewFilename));
+}
+
+TEST(Filesystem, ReplacePreparedFileAndPreserveDestinationOnFailure)
+{
+	CTestInfo Info;
+	char aPrepared[IO_MAX_PATH_LENGTH];
+	Info.Filename(aPrepared, sizeof(aPrepared), ".prepared");
+	const auto Write = [](const char *pPath, const char *pContents) {
+		const auto File = io_open(pPath, IOFLAG_WRITE);
+		ASSERT_NE(File, nullptr);
+		EXPECT_EQ(io_write(File, pContents, str_length(pContents)), static_cast<unsigned>(str_length(pContents)));
+		EXPECT_EQ(io_close(File), 0);
+	};
+	const auto Read = [](const char *pPath) {
+		const auto File = io_open(pPath, IOFLAG_READ);
+		if(File == nullptr)
+			return std::string();
+		char aContents[64] = {};
+		io_read(File, aContents, sizeof(aContents) - 1);
+		io_close(File);
+		return std::string(aContents);
+	};
+	Write(Info.m_aFilename, "previous saved map");
+	EXPECT_NE(fs_replace(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "previous saved map");
+	Write(aPrepared, "completed new map");
+#if defined(CONF_FAMILY_WINDOWS)
+	// Reproduce an actual final-replacement refusal, without an earlier delete.
+	const auto WideName = windows_utf8_to_wide(Info.m_aFilename);
+	const auto Locked = CreateFileW(WideName.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+	ASSERT_NE(Locked, INVALID_HANDLE_VALUE);
+	EXPECT_NE(fs_replace(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "previous saved map");
+	EXPECT_EQ(Read(aPrepared), "completed new map");
+	EXPECT_NE(CloseHandle(Locked), 0);
+#endif
+	EXPECT_EQ(fs_replace(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "completed new map");
+	EXPECT_FALSE(fs_is_file(aPrepared));
+	EXPECT_EQ(fs_remove(Info.m_aFilename), 0);
+	Write(aPrepared, "new destination");
+	EXPECT_EQ(fs_replace(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "new destination");
+	EXPECT_FALSE(fs_is_file(aPrepared));
+	EXPECT_EQ(fs_remove(Info.m_aFilename), 0);
 }

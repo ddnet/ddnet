@@ -623,6 +623,24 @@ int fs_rename(const char *oldname, const char *newname)
 #endif
 }
 
+int fs_replace(const char *oldname, const char *newname)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	const std::wstring wide_oldname = windows_utf8_to_wide(oldname);
+	const std::wstring wide_newname = windows_utf8_to_wide(newname);
+	if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0)
+		return 0;
+	const DWORD error = GetLastError();
+	log_error("filesystem", "Failed to replace file '%s' with '%s' (%ld '%s')", newname, oldname, error, windows_format_system_message(error).c_str());
+	return 1;
+#else
+	if(rename(oldname, newname) == 0)
+		return 0;
+	log_error("filesystem", "Failed to replace file '%s' with '%s' (%d '%s')", newname, oldname, errno, strerror(errno));
+	return 1;
+#endif
+}
+
 int fs_file_time(const char *name, time_t *created, time_t *modified)
 {
 #if defined(CONF_FAMILY_WINDOWS)
