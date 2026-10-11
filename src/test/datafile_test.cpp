@@ -10,7 +10,9 @@
 #include <game/mapitems_ex.h>
 
 #include <gtest/gtest.h>
+#include <zlib.h>
 
+#include <cstring>
 #include <limits>
 #include <memory>
 
@@ -168,4 +170,50 @@ TEST(Datafile, InvalidDataArgumentsAssert)
 	EXPECT_DEATH({ Writer.AddData(sizeof(Item), nullptr); }, "");
 	EXPECT_DEATH({ Writer.AddData(static_cast<size_t>(std::numeric_limits<int>::max()) + 1, &Item); }, "");
 	EXPECT_DEATH({ Writer.AddDataSwapped(1, &Item); }, "");
+}
+
+TEST(Datafile, EagerCompressionMatchesDeferredAndCompress2)
+{
+	CTestInfo Info;
+	const auto pStorage = Info.CreateTestStorage();
+	ASSERT_NE(pStorage, nullptr);
+	std::vector<unsigned char> vData(300000);
+	unsigned State = 17;
+	for(auto &DataByte : vData)
+	{
+		State = State * 1664525u + 1013904223u;
+		DataByte = State >> 24;
+	}
+	for(bool Eager : {false, true})
+	{
+		CDataFileWriter Writer;
+		ASSERT_TRUE(Writer.Open(pStorage.get(), Eager ? "eager" : "deferred"));
+		if(Eager)
+			Writer.SetEagerCompression();
+		EXPECT_EQ(Writer.AddData(vData.size(), vData.data()), 0);
+		EXPECT_EQ(Writer.AddDataString("highly compressible second block"), 1);
+		ASSERT_TRUE(Writer.Finish());
+	}
+	void *pDeferred, *pEager;
+	unsigned DeferredSize, EagerSize;
+	ASSERT_TRUE(pStorage->ReadFile("deferred", IStorage::TYPE_SAVE, &pDeferred, &DeferredSize));
+	ASSERT_TRUE(pStorage->ReadFile("eager", IStorage::TYPE_SAVE, &pEager, &EagerSize));
+	ASSERT_EQ(DeferredSize, EagerSize);
+	EXPECT_EQ(memcmp(pDeferred, pEager, EagerSize), 0);
+	// Independent zlib oracle: 36-byte header plus two offset/size pairs.
+	uLongf CompressedSize = compressBound(vData.size());
+	std::vector<unsigned char> vCompressed(CompressedSize);
+	ASSERT_EQ(compress2(vCompressed.data(), &CompressedSize, vData.data(), vData.size(), Z_DEFAULT_COMPRESSION), Z_OK);
+	ASSERT_GE(EagerSize, 52u + CompressedSize);
+	EXPECT_EQ(memcmp(static_cast<unsigned char *>(pEager) + 52, vCompressed.data(), CompressedSize), 0);
+	CDataFileReader Reader;
+	ASSERT_TRUE(Reader.Open(pStorage.get(), "eager", IStorage::TYPE_SAVE));
+	ASSERT_EQ(Reader.NumData(), 2);
+	ASSERT_EQ(Reader.GetDataSize(0), vData.size());
+	EXPECT_EQ(memcmp(Reader.GetData(0), vData.data(), vData.size()), 0);
+	EXPECT_STREQ(Reader.GetDataString(1), "highly compressible second block");
+	Reader.Close();
+	free(pDeferred);
+	free(pEager);
+	Info.m_DeleteTestStorageFilesOnSuccess = true;
 }

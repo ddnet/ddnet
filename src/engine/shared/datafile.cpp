@@ -1186,14 +1186,22 @@ int CDataFileWriter::AddData(size_t Size, const void *pData, ECompressionLevel C
 	CDataInfo &Info = m_vDatas.back();
 	Info.m_UncompressedSize = Size;
 	Info.m_CompressionLevel = CompressionLevel;
-	Info.m_pUncompressedData = malloc(Size);
-	if(!Info.m_pUncompressedData)
+	if(m_EagerCompression)
 	{
-		log_error("datafile", "Failed to allocate %" PRIzu " bytes for raw data", Size);
-		m_Failed = true;
-		return WRITER_ERROR;
+		if(!CompressData(Info, pData))
+			return WRITER_ERROR;
 	}
-	mem_copy(Info.m_pUncompressedData, pData, Size);
+	else
+	{
+		Info.m_pUncompressedData = malloc(Size);
+		if(!Info.m_pUncompressedData)
+		{
+			log_error("datafile", "Failed to allocate %" PRIzu " bytes for raw data", Size);
+			m_Failed = true;
+			return WRITER_ERROR;
+		}
+		mem_copy(Info.m_pUncompressedData, pData, Size);
+	}
 
 	return m_vDatas.size() - 1;
 }
@@ -1249,6 +1257,51 @@ static int CompressionLevelToZlib(CDataFileWriter::ECompressionLevel Compression
 	}
 }
 
+bool CDataFileWriter::CompressData(CDataInfo &Info, const void *pData)
+{
+	// Grow compressed storage, not a second buffer the size of the raw plane.
+	// The deflate parameters and Z_FINISH stream are identical to compress2.
+	z_stream Stream{};
+	int Result = deflateInit(&Stream, CompressionLevelToZlib(Info.m_CompressionLevel));
+	if(Result != Z_OK)
+	{
+		log_error("datafile", "Failed to initialize zlib compression: %s", zError(Result));
+		m_Failed = true;
+		return false;
+	}
+	Stream.next_in = static_cast<Bytef *>(const_cast<void *>(pData));
+	Stream.avail_in = Info.m_UncompressedSize;
+	size_t Capacity = 0;
+	while(Result == Z_OK)
+	{
+		const size_t NextCapacity = std::min<size_t>(std::numeric_limits<int>::max(), Capacity == 0 ? 65536 : Capacity * 2);
+		void *pExpanded = NextCapacity > Capacity ? realloc(Info.m_pCompressedData, NextCapacity) : nullptr;
+		if(!pExpanded)
+		{
+			Result = Z_MEM_ERROR;
+			break;
+		}
+		Info.m_pCompressedData = pExpanded;
+		Stream.next_out = static_cast<Bytef *>(pExpanded) + Stream.total_out;
+		Stream.avail_out = NextCapacity - Stream.total_out;
+		Capacity = NextCapacity;
+		Result = deflate(&Stream, Z_FINISH);
+	}
+	const auto CompressedSize = Stream.total_out;
+	deflateEnd(&Stream);
+	if(Result != Z_STREAM_END || CompressedSize > (size_t)std::numeric_limits<int>::max())
+	{
+		log_error("datafile", "Failed to compress data within the size limit: %s", zError(Result));
+		m_Failed = true;
+		return false;
+	}
+	Info.m_CompressedSize = CompressedSize;
+	void *pCompact = realloc(Info.m_pCompressedData, CompressedSize);
+	if(pCompact)
+		Info.m_pCompressedData = pCompact;
+	return true;
+}
+
 bool CDataFileWriter::Finish()
 {
 	dbg_assert((bool)m_File, "File not open");
@@ -1258,30 +1311,20 @@ bool CDataFileWriter::Finish()
 		return false;
 	}
 
-	// Compress data. This takes the majority of the time when saving a datafile,
-	// so it's delayed until the end so it can be off-loaded to another thread.
+	// Deferred compression remains the default, allowing Finish to run on a worker.
+	// Eager callers already compressed their blocks without retaining raw copies.
 	for(CDataInfo &DataInfo : m_vDatas)
 	{
-		unsigned long CompressedSize = compressBound(DataInfo.m_UncompressedSize);
-		DataInfo.m_pCompressedData = malloc(CompressedSize);
-		if(!DataInfo.m_pCompressedData)
-		{
-			log_error("datafile", "Failed to allocate %lu bytes for compressed data", CompressedSize);
-			m_Failed = true;
-			Abort();
-			return false;
-		}
-		const int Result = compress2(static_cast<Bytef *>(DataInfo.m_pCompressedData), &CompressedSize, static_cast<Bytef *>(DataInfo.m_pUncompressedData), DataInfo.m_UncompressedSize, CompressionLevelToZlib(DataInfo.m_CompressionLevel));
+		if(DataInfo.m_pCompressedData)
+			continue;
+		const bool Success = CompressData(DataInfo, DataInfo.m_pUncompressedData);
 		free(DataInfo.m_pUncompressedData);
 		DataInfo.m_pUncompressedData = nullptr;
-		if(Result != Z_OK || CompressedSize > (size_t)std::numeric_limits<int>::max())
+		if(!Success)
 		{
-			log_error("datafile", "Failed to compress data within the size limit: %s", zError(Result));
-			m_Failed = true;
 			Abort();
 			return false;
 		}
-		DataInfo.m_CompressedSize = CompressedSize;
 	}
 
 	// Calculate total size of items
