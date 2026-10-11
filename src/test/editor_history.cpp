@@ -7,6 +7,7 @@
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
+#include <game/editor/history/revision_history.h>
 #include <game/editor/history/tile_plane.h>
 #include <game/editor/history/tile_projection.h>
 #include <game/editor/mapitems/document_export.h>
@@ -40,6 +41,62 @@ namespace
 	};
 
 	using CTestPlane = CTilePlane<CTestTile, 16>;
+
+	class CTestDocument
+	{
+	public:
+		int m_Value = 64;
+		int m_AuthoringSetting = 0;
+		CTestPlane m_Tiles = *CTestPlane::Create(64, 64);
+		CSharedVector<unsigned char> m_Resource{std::vector<unsigned char>(4096, 42)};
+		bool operator==(const CTestDocument &) const = default;
+
+		void Account(CStorageUsage &Usage) const
+		{
+			m_Tiles.Account(Usage);
+			m_Resource.Account(Usage);
+		}
+	};
+
+	using CTestHistory = CRevisionHistory<CTestDocument>;
+
+	std::unique_ptr<CTestHistory> MakeHistory(CRetentionLimits Limits = {100, 64 * 1024 * 1024})
+	{
+		return CTestHistory::Create(CTestDocument{}, Limits, [](const auto &Document) { return Document.m_Value >= 0; }, [](const auto &Document) {
+			// Test-specific projection: real .map projection is an adapter concern.
+			std::string Key = std::to_string(Document.m_Value);
+			for(std::size_t Y = 0; Y < Document.m_Tiles.Height(); ++Y)
+				for(std::size_t X = 0; X < Document.m_Tiles.Width(); ++X)
+				{
+					Key += std::to_string(Document.m_Tiles.At(X, Y).m_Index);
+					Key += ',';
+					Key += std::to_string(Document.m_Tiles.At(X, Y).m_Flags);
+					Key += ';';
+				}
+			Key.append(Document.m_Resource.Read().begin(), Document.m_Resource.Read().end());
+			const auto Digest = sha256(Key.data(), Key.size());
+			return std::string(reinterpret_cast<const char *>(Digest.data), sizeof(Digest.data)); }, [](const auto &Document, auto &Usage) { Document.Account(Usage); });
+	}
+
+	void SetValue(CTestHistory &History, int Value, ECategory Category = ECategory::MAP)
+	{
+		auto Edit = History.BeginEdit("Set value", Category);
+		ASSERT_TRUE(Edit);
+		ASSERT_TRUE(History.Update(*Edit, [&](auto &Document) { Document.m_Value = Value; }));
+		ASSERT_EQ(History.Commit(*Edit), ECommitResult::CHANGED);
+	}
+
+	void Undo(CTestHistory &History)
+	{
+		ASSERT_TRUE(History.RequestUndo());
+		ASSERT_TRUE(History.PublishPending());
+	}
+
+	void Redo(CTestHistory &History)
+	{
+		ASSERT_TRUE(History.RequestRedo());
+		ASSERT_TRUE(History.PublishPending());
+	}
 
 } // namespace
 
@@ -101,6 +158,167 @@ TEST(EditorHistoryStorage, OverflowDoesNotModifyPlane)
 	EXPECT_FALSE(CTestPlane::Create(std::numeric_limits<std::size_t>::max(), 1));
 	EXPECT_FALSE(Plane.Resize(1, std::numeric_limits<std::size_t>::max()));
 	EXPECT_EQ(Plane, Baseline);
+}
+
+TEST(EditorHistory, InvalidInitialDocumentIsRejectedInAllBuildModes)
+{
+	CTestDocument Invalid;
+	Invalid.m_Value = -1;
+	bool Validated = false;
+	const auto pHistory = CTestHistory::Create(std::move(Invalid), {100, 1024 * 1024}, [&](const auto &Document) { Validated = true; return Document.m_Value >= 0; }, [](const auto &Document) { return std::to_string(Document.m_Value); }, [](const auto &Document, auto &Usage) { Document.Account(Usage); });
+	EXPECT_TRUE(Validated);
+	EXPECT_EQ(pHistory, nullptr);
+}
+
+TEST(EditorHistory, NoOpAndCancellationPreserveRedoAndSaveMarkers)
+{
+	auto pHistory = MakeHistory();
+	auto Save = pHistory->CaptureSave("map.map", ESaveKind::MANUAL);
+	ASSERT_TRUE(Save);
+	ASSERT_TRUE(pHistory->CompleteSave(*Save, true));
+	SetValue(*pHistory, 128);
+	Undo(*pHistory);
+	const auto Cursor = pHistory->Cursor();
+	{
+		auto Edit = pHistory->BeginEdit("Cancelled drag", ECategory::MAP);
+		ASSERT_TRUE(Edit);
+		pHistory->Update(*Edit, [](auto &Document) { Document.m_Value = 99; });
+	}
+	EXPECT_EQ(pHistory->Current().m_Value, 64);
+	EXPECT_EQ(pHistory->Cursor(), Cursor);
+	EXPECT_TRUE(pHistory->CanRedo());
+	EXPECT_FALSE(pHistory->Dirty(ESaveKind::MANUAL));
+	auto Edit = pHistory->BeginEdit("Drag back", ECategory::MAP);
+	pHistory->Update(*Edit, [](auto &Document) { Document.m_Value = 99; });
+	pHistory->Update(*Edit, [](auto &Document) { Document.m_Value = 64; });
+	EXPECT_EQ(pHistory->Commit(*Edit), ECommitResult::UNCHANGED);
+	EXPECT_EQ(pHistory->Revisions().size(), 2);
+	EXPECT_EQ(pHistory->Cursor(), Cursor);
+	EXPECT_TRUE(pHistory->CanRedo());
+	EXPECT_FALSE(pHistory->Dirty(ESaveKind::MANUAL));
+}
+
+TEST(EditorHistory, FailedValidationPreservesCommittedRootAndFuture)
+{
+	auto pHistory = MakeHistory();
+	SetValue(*pHistory, 128);
+	Undo(*pHistory);
+	const auto pBefore = pHistory->PinCurrent();
+	const auto Bytes = pHistory->RetainedBytes();
+	auto Edit = pHistory->BeginEdit("Invalid edit", ECategory::MAP);
+	pHistory->Update(*Edit, [](auto &Document) { Document.m_Value = -1; });
+	EXPECT_EQ(pHistory->Commit(*Edit), ECommitResult::FAILED);
+	EXPECT_EQ(pHistory->PinCurrent(), pBefore);
+	EXPECT_EQ(pHistory->RetainedBytes(), Bytes);
+	EXPECT_TRUE(pHistory->CanRedo());
+	EXPECT_FALSE(pHistory->HasActiveEdit());
+}
+
+TEST(EditorHistory, CategoriesShareOneChronologicalTimeline)
+{
+	auto pHistory = MakeHistory();
+	SetValue(*pHistory, 65, ECategory::MAP);
+	SetValue(*pHistory, 66, ECategory::ENVELOPE);
+	SetValue(*pHistory, 67, ECategory::SETTINGS);
+	ASSERT_EQ(pHistory->Revisions().size(), 4);
+	ASSERT_TRUE(pHistory->RequestRevision(1));
+	ASSERT_TRUE(pHistory->PublishPending());
+	EXPECT_EQ(pHistory->Current().m_Value, 65);
+	Redo(*pHistory);
+	EXPECT_EQ(pHistory->Current().m_Value, 66);
+	EXPECT_EQ(pHistory->Revisions()[pHistory->Cursor()].m_Category, ECategory::ENVELOPE);
+}
+
+TEST(EditorHistory, SaveCompletionUsesCapturedContentAndDocumentLifetime)
+{
+	auto pFirst = MakeHistory();
+	auto OldSave = pFirst->CaptureSave("same.map", ESaveKind::MANUAL);
+	SetValue(*pFirst, 65);
+	ASSERT_TRUE(pFirst->CompleteSave(*OldSave, true));
+	EXPECT_TRUE(pFirst->Dirty(ESaveKind::MANUAL));
+	Undo(*pFirst);
+	EXPECT_FALSE(pFirst->Dirty(ESaveKind::MANUAL));
+	Redo(*pFirst);
+	auto Failed = pFirst->CaptureSave("same.map", ESaveKind::MANUAL);
+	EXPECT_FALSE(pFirst->CompleteSave(*Failed, false));
+	EXPECT_TRUE(pFirst->Dirty(ESaveKind::MANUAL));
+	auto pSecond = MakeHistory();
+	EXPECT_FALSE(pSecond->CompleteSave(*OldSave, true));
+	EXPECT_TRUE(pSecond->Dirty(ESaveKind::MANUAL));
+	pFirst.reset();
+	EXPECT_FALSE(pSecond->CompleteSave(*OldSave, true));
+	EXPECT_EQ(OldSave->m_pRoot->m_Value, 64);
+}
+
+TEST(EditorHistorySave, DifferentDestinationsAndKindsDoNotAcceptStaleMarkers)
+{
+	CSaveState<CTestDocument> State;
+	ASSERT_TRUE(State.InitializeLoaded("loaded"));
+	auto pRoot = std::make_shared<const CTestDocument>();
+	const auto First = State.Capture(pRoot, "first", "first.map", ESaveKind::MANUAL);
+	const auto Second = State.Capture(pRoot, "second", "renamed.map", ESaveKind::MANUAL);
+	const auto Automatic = State.Capture(pRoot, "automatic", "auto.map", ESaveKind::AUTOMATIC);
+	ASSERT_TRUE(First && Second && Automatic);
+	EXPECT_FALSE(State.InitializeLoaded("later"));
+	EXPECT_FALSE(State.Complete(*Second, false));
+	EXPECT_FALSE(State.Dirty("loaded", ESaveKind::MANUAL));
+	EXPECT_TRUE(State.Complete(*Second, true));
+	EXPECT_FALSE(State.Complete(*First, true));
+	EXPECT_FALSE(State.Dirty("second", ESaveKind::MANUAL));
+	EXPECT_FALSE(State.Dirty("loaded", ESaveKind::AUTOMATIC));
+	EXPECT_TRUE(State.Complete(*Automatic, true));
+	EXPECT_FALSE(State.Dirty("automatic", ESaveKind::AUTOMATIC));
+	EXPECT_FALSE(State.Dirty("second", ESaveKind::MANUAL));
+	const auto Copy = State.Capture(pRoot, "copy contents", "copy.map", ESaveKind::COPY);
+	ASSERT_TRUE(Copy);
+	EXPECT_FALSE(State.Complete(*Copy, true));
+	EXPECT_FALSE(State.Dirty("second", ESaveKind::MANUAL));
+	EXPECT_FALSE(State.Dirty("automatic", ESaveKind::AUTOMATIC));
+}
+
+TEST(EditorHistory, RandomizedTimelineMatchesIndependentValueModel)
+{
+	constexpr unsigned Seed = 0xDDAA67;
+	std::mt19937 Random(Seed);
+	auto pHistory = MakeHistory({1000, std::numeric_limits<std::size_t>::max()});
+	std::vector<int> vReference{64};
+	std::size_t Cursor = 0;
+	for(int Iteration = 0; Iteration < 250; ++Iteration)
+	{
+		SCOPED_TRACE("Seed " + std::to_string(Seed) + ", iteration " + std::to_string(Iteration));
+		const auto Operation = Random() % 5;
+		if(Operation == 0 && Cursor > 0)
+		{
+			Undo(*pHistory);
+			--Cursor;
+		}
+		else if(Operation == 1 && Cursor + 1 < vReference.size())
+		{
+			Redo(*pHistory);
+			++Cursor;
+		}
+		else
+		{
+			const int Value = static_cast<int>(Random() % 100);
+			auto Edit = pHistory->BeginEdit("Random edit", ECategory::MAP);
+			ASSERT_TRUE(Edit);
+			pHistory->Update(*Edit, [&](auto &Document) { Document.m_Value = Value; });
+			if(Operation == 2)
+				Edit->Cancel();
+			else if(Value == vReference[Cursor])
+				EXPECT_EQ(pHistory->Commit(*Edit), ECommitResult::UNCHANGED);
+			else
+			{
+				ASSERT_EQ(pHistory->Commit(*Edit), ECommitResult::CHANGED);
+				vReference.resize(Cursor + 1);
+				vReference.push_back(Value);
+				++Cursor;
+			}
+		}
+		EXPECT_EQ(pHistory->Current().m_Value, vReference[Cursor]);
+		EXPECT_EQ(pHistory->Cursor(), Cursor);
+		EXPECT_EQ(pHistory->Revisions().size(), vReference.size());
+	}
 }
 
 TEST(EditorHistorySchema, TileFlagRotationHasExpectedOrientationForEveryCombination)
@@ -541,6 +759,48 @@ TEST(EditorDocumentSchema, CompleteGraphValidatesAndRejectsBrokenIdentityReferen
 	EXPECT_TRUE(Error.empty());
 }
 
+TEST(EditorDocumentSchema, DocumentHistoryRestoresCompleteGraphAndSharesUnchangedRecords)
+{
+	using CDocumentHistory = CRevisionHistory<CEditorDocumentValues>;
+	const auto Baseline = MakeCompleteDocument();
+	auto History = CDocumentHistory::Create(Baseline, {10, 1024 * 1024}, [](const auto &Document) {
+		std::string Error;
+		return Document.Validate(Error); }, [](const auto &) { return std::string("test projection"); }, [](const auto &Document, auto &Usage) { Document.Account(Usage); });
+	ASSERT_TRUE(History);
+	auto Edit = History->BeginEdit("mixed graph edit", ECategory::MAP);
+	ASSERT_TRUE(Edit);
+	History->Update(*Edit, [](auto &Document) {
+		str_copy(Document.m_MapInfo.m_Author.Buffer(), "new author");
+		Document.m_vSettings.erase(Document.m_vSettings.begin());
+		UpdateDocumentLayer(Document, 7, [](auto &Layer) { std::get<CLayerQuadsValues>(Layer.m_Data).m_vQuads[0].m_aPoints[4].x = 9000; });
+		Document.m_Envelopes.Update([](auto &vEnvelopes) { vEnvelopes[0].Update([](auto &Envelope) { Envelope.m_vPoints[1].m_Bezier.m_aOutTangentDeltaY[3] = 8000; }); });
+	});
+	EXPECT_EQ(History->Commit(*Edit), ECommitResult::CHANGED);
+	const auto Changed = History->PinCurrent();
+	EXPECT_STREQ(Changed->m_MapInfo.m_Author.Buffer(), "new author");
+	EXPECT_EQ(std::get<CLayerQuadsValues>(DocumentLayer(*Changed, 7).m_Data).m_vQuads[0].m_aPoints[4].x, 9000);
+	EXPECT_EQ(Changed->m_Envelopes.Read()[0].Read().m_vPoints[1].m_Bezier.m_aOutTangentDeltaY[3], 8000);
+	EXPECT_TRUE(Changed->m_Images.SharesStorageWith(Baseline.m_Images));
+	EXPECT_TRUE(Changed->m_Sounds.SharesStorageWith(Baseline.m_Sounds));
+	EXPECT_TRUE(Changed->m_Groups.Read()[0].Read().m_Layers.Read()[0].SharesStorageWith(Baseline.m_Groups.Read()[0].Read().m_Layers.Read()[0]));
+	EXPECT_FALSE(Changed->m_Groups.Read()[0].Read().m_Layers.Read()[7].SharesStorageWith(Baseline.m_Groups.Read()[0].Read().m_Layers.Read()[7]));
+	ASSERT_TRUE(History->RequestUndo());
+	ASSERT_TRUE(History->PublishPending());
+	EXPECT_EQ(History->Current(), Baseline);
+	EXPECT_EQ(std::get<CLayerQuadsValues>(DocumentLayer(History->Current(), 7).m_Data).m_vQuads[0].m_aPoints[4].x, 1004);
+	EXPECT_EQ(History->Current().m_Envelopes.Read()[0].Read().m_vPoints[1].m_Bezier.m_aOutTangentDeltaY[3], 503);
+	ASSERT_TRUE(History->RequestRedo());
+	ASSERT_TRUE(History->PublishPending());
+	EXPECT_EQ(History->Current(), *Changed);
+	CStorageUsage Usage;
+	Baseline.Account(Usage);
+	const auto FirstBytes = Usage.Bytes();
+	Baseline.Account(Usage);
+	EXPECT_EQ(Usage.Bytes(), FirstBytes);
+	Changed->Account(Usage);
+	EXPECT_GT(Usage.Bytes(), FirstBytes);
+}
+
 TEST(EditorDocumentSchema, IdentityAllocationNeverRewindsWithCopiedValues)
 {
 	CDocumentIdentityAllocator Ids;
@@ -633,6 +893,72 @@ TEST(EditorDocumentExport, FingerprintRebindsPlaneTypesAndDimensionsAfterReorder
 	UpdateDocumentLayer(Document, 2, [](auto &Layer) { std::get<CTileLayerDocumentValues>(Layer.m_Data).m_Tiles.Resize(33, 17); });
 	EXPECT_EQ(Cache.Key(Document), EditorDocumentPersistedKey(Document));
 	EXPECT_EQ(Cache.Statistics().m_TileChunks, 2u);
+}
+
+TEST(EditorHistory, LiveLimitsPreserveUndoPairSaveMarkersAndExistingRedo)
+{
+	auto pHistory = MakeHistory();
+	ASSERT_TRUE(pHistory->InitializeLoadedBaseline(0));
+	for(int Value = 65; Value < 75; ++Value)
+		SetValue(*pHistory, Value);
+	ASSERT_TRUE(pHistory->SetRetentionLimits({2, 64 * 1024 * 1024}));
+	EXPECT_EQ(pHistory->Revisions().size(), 3u);
+	ASSERT_TRUE(pHistory->RequestUndo());
+	ASSERT_TRUE(pHistory->PublishPending());
+	const auto Before = pHistory->PinCurrent();
+	ASSERT_TRUE(pHistory->SetRetentionLimits({1, 1}));
+	EXPECT_EQ(pHistory->PinCurrent(), Before);
+	EXPECT_TRUE(pHistory->CanUndo());
+	EXPECT_TRUE(pHistory->CanRedo());
+	EXPECT_TRUE(pHistory->Oversized());
+	EXPECT_TRUE(pHistory->Dirty(ESaveKind::MANUAL));
+	SetValue(*pHistory, 100);
+	EXPECT_EQ(pHistory->Revisions().size(), 2u);
+	EXPECT_FALSE(pHistory->CanRedo());
+	EXPECT_TRUE(pHistory->Oversized());
+	ASSERT_TRUE(pHistory->RequestUndo());
+	ASSERT_TRUE(pHistory->PublishPending());
+	EXPECT_EQ(pHistory->Current(), *Before);
+}
+
+TEST(EditorHistoryStorage, SparseHierarchyAndFiftyRevisionsHaveBoundedWork)
+{
+	for(const std::size_t Edge : {256u, 4096u, 32768u})
+	{
+		CTestDocument Initial;
+		Initial.m_Tiles = *CTestPlane::Create(Edge, Edge);
+		CStorageUsage Empty;
+		Initial.m_Tiles.Account(Empty);
+		EXPECT_EQ(Empty.Bytes(), 0u);
+		auto History = CTestHistory::Create(std::move(Initial), {50, 64 * 1024 * 1024}, [](const auto &) { return true; }, [](const auto &Document) { return std::to_string(Document.m_Value); }, [](const auto &Document, auto &Usage) { Document.Account(Usage); });
+		ASSERT_NE(History, nullptr);
+		for(int Revision = 0; Revision < 50; ++Revision)
+		{
+			auto Edit = History->BeginEdit("Sparse edit", ECategory::MAP);
+			ASSERT_TRUE(Edit);
+			ASSERT_TRUE(History->Update(*Edit, [&](auto &Document) {
+				Document.m_Value = Revision;
+				Document.m_Tiles.Set(Edge - 1, Edge - 1, {Revision + 1, 0});
+			}));
+			ASSERT_EQ(History->Commit(*Edit), ECommitResult::CHANGED);
+			EXPECT_LT(History->AccountingVisits(), 150u);
+			CStorageUsage Fresh;
+			History->AccountRetainedPayload(Fresh);
+			EXPECT_EQ(History->RetainedPayloadBytes(), Fresh.Bytes());
+			std::size_t Changed = 0;
+			const auto &Previous = History->Revisions()[History->Cursor() - 1].m_pRoot->m_Tiles;
+			const auto Visits = History->Current().m_Tiles.VisitChangedChunks(&Previous, [&](auto...) { ++Changed; });
+			EXPECT_EQ(Changed, 1u);
+			EXPECT_LE(Visits, 1u + 16u * History->Current().m_Tiles.TreeDepth());
+		}
+		EXPECT_LT(History->RetainedBytes(), 512u * 1024u);
+		auto Save = History->CaptureSave("pinned.map", ESaveKind::MANUAL);
+		ASSERT_TRUE(Save);
+		ASSERT_TRUE(History->SetRetentionLimits({1, 1}));
+		EXPECT_EQ(History->Revisions().size(), 2u);
+		EXPECT_LT(History->AccountingVisits(), 8000u);
+		EXPECT_EQ(Save->m_pRoot->m_Tiles.At(Edge - 1, Edge - 1).m_Index, 50);
+	}
 }
 
 TEST(EditorHistoryStorage, IncrementalUnionMatchesFreshAccountingAndRollsBack)

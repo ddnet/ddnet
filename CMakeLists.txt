@@ -2830,6 +2830,8 @@ if(CLIENT)
     font_typer.cpp
     font_typer.h
     history/resource_blob.h
+    history/revision_history.h
+    history/save_state.h
     history/shared_value.h
     history/tile_plane.h
     history/tile_projection.h
