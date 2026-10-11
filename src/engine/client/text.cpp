@@ -1721,6 +1721,9 @@ public:
 					{
 						if(StartNewLine())
 						{
+							// Count the newline as a decoded character, so that m_GlyphCount stays
+							// in sync with the decoded character offsets used for text selection
+							pCursor->m_GlyphCount++;
 							pLastGlyph = nullptr;
 							continue;
 						}
