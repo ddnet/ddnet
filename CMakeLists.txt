@@ -2807,9 +2807,6 @@ if(CLIENT)
     component.h
     editor.cpp
     editor.h
-    editor_action.h
-    editor_actions.cpp
-    editor_actions.h
     editor_history.cpp
     editor_history.h
     editor_object.cpp
@@ -2817,8 +2814,6 @@ if(CLIENT)
     editor_props.cpp
     editor_server_settings.cpp
     editor_server_settings.h
-    editor_trackers.cpp
-    editor_trackers.h
     editor_ui.cpp
     editor_ui.h
     enums.h
@@ -2904,21 +2899,10 @@ if(CLIENT)
     quick_action.h
     quick_actions.cpp
     quick_actions.h
-    references.cpp
-    references.h
     smooth_value.cpp
     smooth_value.h
     tile_art.cpp
     # tidy-alphabetical-end
-  )
-  list(REMOVE_ITEM GAME_EDITOR
-    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_action.h"
-    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_actions.cpp"
-    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_actions.h"
-    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_trackers.cpp"
-    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_trackers.h"
-    "${PROJECT_SOURCE_DIR}/src/game/editor/references.cpp"
-    "${PROJECT_SOURCE_DIR}/src/game/editor/references.h"
   )
   set_src(GAME_MAP GLOB_RECURSE src/game/map
     # tidy-alphabetical-start
