@@ -2829,6 +2829,10 @@ if(CLIENT)
     file_browser.h
     font_typer.cpp
     font_typer.h
+    history/resource_blob.h
+    history/shared_value.h
+    history/tile_plane.h
+    history/tile_projection.h
     layer_selector.cpp
     layer_selector.h
     map_grid.cpp
@@ -2904,6 +2908,7 @@ if(CLIENT)
     render_layer.h
     render_map.cpp
     render_map.h
+    tile_cursor.h
     # tidy-alphabetical-end
   )
   set(GAME_GENERATED_CLIENT
@@ -3454,6 +3459,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     csv_test.cpp
     datafile_test.cpp
     dbg_test.cpp
+    editor_history.cpp
     editor_test.cpp
     fs_test.cpp
     gameworld_test.cpp
