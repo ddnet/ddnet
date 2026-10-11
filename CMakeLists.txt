@@ -2842,6 +2842,8 @@ if(CLIENT)
     map_view.cpp
     map_view.h
     mapitems.h
+    mapitems/document_export.cpp
+    mapitems/document_export.h
     mapitems/document_graph.h
     mapitems/document_session.h
     mapitems/document_values.h
@@ -3522,6 +3524,8 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/sqlite.cpp
     src/game/client/components/censor.cpp
     src/game/client/components/censor.h
+    src/game/editor/mapitems/document_export.cpp
+    src/game/editor/mapitems/document_export.h
     # tidy-alphabetical-end
   )
 
