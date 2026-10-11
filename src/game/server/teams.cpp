@@ -1336,7 +1336,7 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 				{
 					for(int ClientId1 = 0; ClientId1 < MAX_CLIENTS; ClientId1++)
 					{
-						if(m_Core.Team(ClientId1) == Team)
+						if(ClientId1 != ClientId && m_Core.Team(ClientId1) == Team)
 						{
 							CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId1];
 							if(pPlayer && pPlayer->IsPaused() == -1 * CPlayer::PAUSE_SPEC)
