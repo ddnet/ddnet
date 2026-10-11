@@ -6,20 +6,12 @@
 #include <base/dbg.h>
 #include <base/mem.h>
 
-#include <game/editor/editor_trackers.h>
 #include <game/editor/enums.h>
+#include <game/editor/history/tile_projection.h>
+#include <game/editor/mapitems.h>
+#include <game/map/render_map.h>
 
 #include <map>
-
-struct STileStateChange
-{
-	bool m_Changed;
-	CTile m_Previous;
-	CTile m_Current;
-};
-
-template<typename T>
-using EditorTileStateChangeHistory = std::map<int, std::map<int, T>>;
 
 /**
  * Represents a direction to shift a tile layer with the CLayerTiles::Shift function.
@@ -40,86 +32,34 @@ public:
 	int w, h;
 };
 
-class CLayerTiles : public CLayer
+class CLayerTiles : public CLayer, public CLayerTilesValues
 {
 protected:
 	template<typename T>
-	void ShiftImpl(T *pTiles, EShiftDirection Direction, int ShiftBy)
+	void ShiftImpl(CEditorTilePlane<T> &Tiles, EShiftDirection Direction, int ShiftBy)
 	{
 		switch(Direction)
 		{
-		case EShiftDirection::LEFT:
-			ShiftBy = std::min(ShiftBy, m_Width);
-			for(int y = 0; y < m_Height; ++y)
-			{
-				if(ShiftBy < m_Width)
-					mem_move(&pTiles[y * m_Width], &pTiles[y * m_Width + ShiftBy], (m_Width - ShiftBy) * sizeof(T));
-				mem_zero(&pTiles[y * m_Width + (m_Width - ShiftBy)], ShiftBy * sizeof(T));
-			}
-			break;
-		case EShiftDirection::RIGHT:
-			ShiftBy = std::min(ShiftBy, m_Width);
-			for(int y = 0; y < m_Height; ++y)
-			{
-				if(ShiftBy < m_Width)
-					mem_move(&pTiles[y * m_Width + ShiftBy], &pTiles[y * m_Width], (m_Width - ShiftBy) * sizeof(T));
-				mem_zero(&pTiles[y * m_Width], ShiftBy * sizeof(T));
-			}
-			break;
-		case EShiftDirection::UP:
-			ShiftBy = std::min(ShiftBy, m_Height);
-			for(int y = ShiftBy; y < m_Height; ++y)
-			{
-				mem_copy(&pTiles[(y - ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
-			}
-			for(int y = m_Height - ShiftBy; y < m_Height; ++y)
-			{
-				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
-			}
-			break;
-		case EShiftDirection::DOWN:
-			ShiftBy = std::min(ShiftBy, m_Height);
-			for(int y = m_Height - ShiftBy - 1; y >= 0; --y)
-			{
-				mem_copy(&pTiles[(y + ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
-			}
-			for(int y = 0; y < ShiftBy; ++y)
-			{
-				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
-			}
-			break;
-		default:
-			dbg_assert_failed("Direction invalid: %d", (int)Direction);
+		case EShiftDirection::LEFT: Tiles.Shift(-ShiftBy, 0); break;
+		case EShiftDirection::RIGHT: Tiles.Shift(ShiftBy, 0); break;
+		case EShiftDirection::UP: Tiles.Shift(0, -ShiftBy); break;
+		case EShiftDirection::DOWN: Tiles.Shift(0, ShiftBy); break;
+		default: dbg_assert_failed("Direction invalid: %d", (int)Direction);
 		}
-	}
-	template<typename T>
-	void BrushFlipXImpl(T *pTiles)
-	{
-		for(int y = 0; y < m_Height; y++)
-			for(int x = 0; x < m_Width / 2; x++)
-				std::swap(pTiles[y * m_Width + x], pTiles[(y + 1) * m_Width - 1 - x]);
-	}
-	template<typename T>
-	void BrushFlipYImpl(T *pTiles)
-	{
-		for(int y = 0; y < m_Height / 2; y++)
-			for(int x = 0; x < m_Width; x++)
-				std::swap(pTiles[y * m_Width + x], pTiles[(m_Height - 1 - y) * m_Width + x]);
 	}
 
 public:
-	CLayerTiles(CEditorMap *pMap, int w, int h);
+	CLayerTiles(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId = 0);
 	CLayerTiles(const CLayerTiles &Other);
 	~CLayerTiles() override;
 
 	[[nodiscard]] virtual CTile GetTile(int x, int y) const;
 	virtual void SetTile(int x, int y, CTile Tile);
-	void SetTileIgnoreHistory(int x, int y, CTile Tile) const;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(EShiftDirection Direction);
 
-	void MakePalette() const;
+	void MakePalette();
 	void Render(const CEditorMap *pRenderMap) override;
 
 	int ConvertX(float x) const;
@@ -164,53 +104,29 @@ public:
 	bool IsEnvelopeUsed(int EnvelopeIndex) const override;
 	bool IsImageUsed(int ImageIndex) const override;
 
-	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) override;
-	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
+	void VisitImageReferences(const FDocumentReferenceFunction &ReferenceFunction) override;
+	void VisitEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction) override;
 
-	void PrepareForSave();
+	std::vector<CTile> TilesForSave() const;
+	CRenderTileSource<CTile> TilesForRender(const CEditorMap *pRenderMap);
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{
-		*pWidth = m_Width * 32.0f;
-		*pHeight = m_Height * 32.0f;
+		*pWidth = Width() * 32.0f;
+		*pHeight = Height() * 32.0f;
 	}
 
 	void FlagModified(int x, int y, int w, int h);
 
-	bool m_HasGame;
-	int m_Image;
-	int m_Width;
-	int m_Height;
-	CColor m_Color;
-	int m_ColorEnv;
-	int m_ColorEnvOffset;
-	CTile *m_pTiles;
-
 	// DDRace
 
-	int m_FillGameTile = -1;
-	bool m_LiveGameTiles = false;
-	int m_AutomapperConfig;
-	int m_AutomapperReference;
-	int m_Seed;
-	bool m_AutoAutomapper;
-	bool m_HasTele;
-	bool m_HasSpeedup;
-	bool m_HasFront;
-	bool m_HasSwitch;
-	bool m_HasTune;
-	char m_aFilename[IO_MAX_PATH_LENGTH];
+	char m_aFilename[IO_MAX_PATH_LENGTH]{};
 	bool m_KnownTextModeLayer = false;
 	bool m_RenderOverlays = true;
-
-	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;
-	virtual void ClearHistory() { m_TilesHistory.clear(); }
 
 	static bool HasAutomapEffect(ETilesProp Prop);
 
 protected:
-	void RecordStateChange(int x, int y, CTile Previous, CTile Tile);
-
 	void ShowPreventUnusedTilesWarning();
 
 	friend class CAutomapper;

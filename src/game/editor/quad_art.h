@@ -37,7 +37,7 @@ private:
 	ColorRGBA GetPixelClamped(const ivec2 &Pos) const;
 	bool IsPixelOptimizable(const ivec2 &Pos, const ColorRGBA &Pixel) const;
 
-	CQuad CreateNewQuad(const vec2 &Pos, const ivec2 &Size, const ColorRGBA &Color) const;
+	CQuadValues CreateNewQuad(const vec2 &Pos, const ivec2 &Size, const ColorRGBA &Color) const;
 
 	CQuadArtParameters m_Parameters;
 	CImageInfo m_Img;

@@ -1,6 +1,8 @@
 #ifndef GAME_EDITOR_MAPITEMS_LAYER_H
 #define GAME_EDITOR_MAPITEMS_LAYER_H
 
+#include "document_values.h"
+
 #include <game/client/ui.h>
 #include <game/client/ui_rect.h>
 #include <game/editor/map_object.h>
@@ -8,14 +10,15 @@
 
 #include <memory>
 
-using FIndexModifyFunction = std::function<void(int *pIndex)>;
+using FDocumentReferenceFunction = std::function<void(CDocumentReference &Reference)>;
 
 class CLayerGroup;
 
-class CLayer : public CMapObject
+class CLayer : public CMapObject, public CLayerValues
 {
 public:
-	explicit CLayer(CEditorMap *pMap, int Type);
+	void OnAttach(CEditorMap *pMap) override;
+	explicit CLayer(CEditorMap *pMap, int Type, std::uint64_t RetainedId = 0);
 	CLayer(const CLayer &Other);
 
 	virtual void BrushSelecting(CUIRect Rect) {}
@@ -36,9 +39,9 @@ public:
 	virtual bool IsImageUsed(int ImageIndex) const { return false; }
 	virtual bool IsSoundUsed(int SoundIndex) const { return false; }
 
-	virtual void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) {}
-	virtual void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) {}
-	virtual void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction) {}
+	virtual void VisitImageReferences(const FDocumentReferenceFunction &ReferenceFunction) {}
+	virtual void VisitEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction) {}
+	virtual void VisitSoundReferences(const FDocumentReferenceFunction &ReferenceFunction) {}
 
 	virtual std::shared_ptr<CLayer> Duplicate() const = 0;
 	virtual const char *TypeName() const = 0;
@@ -48,10 +51,6 @@ public:
 		*pWidth = 0;
 		*pHeight = 0;
 	}
-	int m_Type;
-	char m_aName[12] = "";
-	int m_Flags = 0;
-
 	bool m_Readonly = false;
 	bool m_Visible = true;
 };

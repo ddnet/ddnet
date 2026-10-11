@@ -177,6 +177,50 @@ bool CEditor::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float Font
 	return Ui()->DoEditBox(pLineInput, pRect, FontSize, Corners, vColorSplits);
 }
 
+bool CEditor::DoDocumentEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, const char *pLabel, editor_history::ECategory Category)
+{
+	if(m_pDocumentTextInput == pLineInput &&
+		(m_pDocumentTextMap != Map() || m_pDocumentTextBuffer != pLineInput->GetString()))
+		FinishDocumentText(true);
+	const bool Changed = DoEditBox(pLineInput, pRect, FontSize);
+	if(pLineInput->IsActive())
+	{
+		if(m_pDocumentTextInput != pLineInput)
+		{
+			FinishDocumentText(true);
+			if(!Map()->m_DocumentHistory.Begin(pLineInput, pLabel, Category))
+			{
+				pLineInput->Deactivate();
+				return false;
+			}
+			m_pDocumentTextInput = pLineInput;
+			m_pDocumentTextMap = Map();
+			m_pDocumentTextBuffer = pLineInput->GetString();
+		}
+		m_DocumentTextRendered = true;
+	}
+	else if(m_pDocumentTextInput == pLineInput)
+		FinishDocumentText(true);
+	return Changed;
+}
+
+void CEditor::FinishDocumentText(bool Accept)
+{
+	if(!m_pDocumentTextInput)
+		return;
+	if(m_pDocumentTextMap->m_DocumentHistory.Owns(m_pDocumentTextInput))
+	{
+		if(Accept)
+			m_pDocumentTextMap->m_DocumentHistory.Complete(m_pDocumentTextInput, editor_history::EEditCompletion::VALID_BLUR);
+		else
+			m_pDocumentTextMap->m_DocumentHistory.Cancel(editor_history::EEditCancellation::OWNER_DESTROYED);
+	}
+	m_pDocumentTextInput->Deactivate();
+	m_pDocumentTextInput = nullptr;
+	m_pDocumentTextMap = nullptr;
+	m_pDocumentTextBuffer = nullptr;
+}
+
 bool CEditor::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const char *pToolTip, const std::vector<STextColorSplit> &vColorSplits)
 {
 	UpdateTooltip(pLineInput, pRect, pToolTip);
@@ -186,67 +230,89 @@ bool CEditor::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, f
 SEditResult<int> CEditor::UiDoValueSelector(const void *pId, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, const ColorRGBA *pColor, bool ShowValue)
 {
 	// logic
-	static bool s_DidScroll = false;
-	static float s_ScrollValue = 0.0f;
-	static CLineInputNumber s_NumberInput;
-	static int s_ButtonUsed = -1;
-	static const void *s_pLastTextId = nullptr;
+	auto &Selector = m_ValueSelector;
+	bool Cancelled = false;
 
 	const bool Inside = Ui()->MouseInside(pRect);
 	const int Base = IsHex ? 16 : 10;
 
-	if(Ui()->HotItem() == pId && s_ButtonUsed >= 0 && !Ui()->MouseButton(s_ButtonUsed))
+	if(Selector.m_pPointerId == pId && Selector.m_Button >= 0 && !Ui()->MouseButton(Selector.m_Button))
 	{
 		Ui()->DisableMouseLock();
 		if(Ui()->CheckActiveItem(pId))
 		{
 			Ui()->SetActiveItem(nullptr);
 		}
-		if(Inside && ((s_ButtonUsed == 0 && !s_DidScroll && Ui()->DoDoubleClickLogic(pId)) || s_ButtonUsed == 1))
+		if(Inside && ((Selector.m_Button == 0 && !Selector.m_DidScroll && Ui()->DoDoubleClickLogic(pId)) || Selector.m_Button == 1))
 		{
-			s_pLastTextId = pId;
-			s_NumberInput.SetInteger(Current, Base);
-			s_NumberInput.SelectAll();
+			Selector.m_pTextId = pId;
+			Selector.m_NumberInput.SetInteger(Current, Base);
+			Selector.m_NumberInput.SelectAll();
+			Selector.m_Invalid = false;
+			Selector.m_pInvalidId = nullptr;
 		}
-		s_ButtonUsed = -1;
+		Selector.m_Button = -1;
+		Selector.m_pPointerId = nullptr;
 	}
 
-	if(s_pLastTextId == pId)
+	if(Selector.m_pTextId == pId)
 	{
 		str_copy(m_aTooltip, "Type your number. Press enter to confirm.");
-		Ui()->SetActiveItem(&s_NumberInput);
-		DoEditBox(&s_NumberInput, pRect, 10.0f, Corners);
+		Ui()->SetActiveItem(&Selector.m_NumberInput);
+		DoEditBox(&Selector.m_NumberInput, pRect, 10.0f, Corners);
 
-		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || ((Ui()->MouseButtonClicked(1) || Ui()->MouseButtonClicked(0)) && !Inside))
+		const auto Value = Selector.m_NumberInput.IntegerDraft(Base);
+		if(Value)
 		{
-			Current = std::clamp(s_NumberInput.GetInteger(Base), Min, Max);
-			Ui()->DisableMouseLock();
-			Ui()->SetActiveItem(nullptr);
-			s_pLastTextId = nullptr;
+			Selector.m_Invalid = false;
+			Selector.m_pInvalidId = nullptr;
+		}
+		const bool Blur = (Ui()->MouseButtonClicked(1) || Ui()->MouseButtonClicked(0)) && !Inside;
+		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || Blur || m_SettleDocumentInput)
+		{
+			if(Value)
+				Current = static_cast<int>(std::clamp<int64_t>(*Value, Min, Max));
+			else
+			{
+				Selector.m_Invalid = true;
+				Selector.m_pInvalidId = pId;
+			}
+			if(Value || Blur || m_SettleDocumentInput)
+			{
+				Cancelled = !Value;
+				Ui()->DisableMouseLock();
+				Ui()->SetActiveItem(nullptr);
+				Selector.m_NumberInput.Deactivate();
+				Selector.m_pTextId = nullptr;
+			}
 		}
 
 		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 		{
+			Cancelled = true;
 			Ui()->DisableMouseLock();
 			Ui()->SetActiveItem(nullptr);
-			s_pLastTextId = nullptr;
+			Selector.m_NumberInput.Deactivate();
+			Selector.m_pTextId = nullptr;
+			Selector.m_Invalid = false;
+			Selector.m_pInvalidId = nullptr;
 		}
 	}
 	else
 	{
 		if(Ui()->CheckActiveItem(pId))
 		{
-			if(s_ButtonUsed == 0 && Ui()->MouseButton(0))
+			if(Selector.m_Button == 0 && Ui()->MouseButton(0))
 			{
-				s_ScrollValue += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
+				Selector.m_ScrollValue += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
 
-				if(absolute(s_ScrollValue) >= Scale)
+				if(absolute(Selector.m_ScrollValue) >= Scale)
 				{
-					int Count = (int)(s_ScrollValue / Scale);
-					s_ScrollValue = std::fmod(s_ScrollValue, Scale);
+					int Count = (int)(Selector.m_ScrollValue / Scale);
+					Selector.m_ScrollValue = std::fmod(Selector.m_ScrollValue, Scale);
 					Current += Step * Count;
 					Current = std::clamp(Current, Min, Max);
-					s_DidScroll = true;
+					Selector.m_DidScroll = true;
 
 					// Constrain to discrete steps
 					if(Count > 0)
@@ -256,26 +322,28 @@ SEditResult<int> CEditor::UiDoValueSelector(const void *pId, CUIRect *pRect, con
 				}
 			}
 
-			if(pToolTip && s_pLastTextId != pId)
+			if(pToolTip && Selector.m_pTextId != pId)
 				str_copy(m_aTooltip, pToolTip);
 		}
 		else if(Ui()->HotItem() == pId)
 		{
 			if(Ui()->MouseButton(0))
 			{
-				s_ButtonUsed = 0;
-				s_DidScroll = false;
-				s_ScrollValue = 0.0f;
+				Selector.m_Button = 0;
+				Selector.m_pPointerId = pId;
+				Selector.m_DidScroll = false;
+				Selector.m_ScrollValue = 0.0f;
 				Ui()->SetActiveItem(pId);
 				Ui()->EnableMouseLock(pId);
 			}
 			else if(Ui()->MouseButton(1))
 			{
-				s_ButtonUsed = 1;
+				Selector.m_Button = 1;
+				Selector.m_pPointerId = pId;
 				Ui()->SetActiveItem(pId);
 			}
 
-			if(pToolTip && s_pLastTextId != pId)
+			if(pToolTip && Selector.m_pTextId != pId)
 				str_copy(m_aTooltip, pToolTip);
 		}
 
@@ -298,24 +366,29 @@ SEditResult<int> CEditor::UiDoValueSelector(const void *pId, CUIRect *pRect, con
 		Ui()->DoLabel(pRect, aBuf, 10, TEXTALIGN_MC);
 	}
 
+	if(Selector.m_Invalid && Selector.m_pInvalidId == pId)
+	{
+		pRect->DrawOutline(ColorRGBA(1.0f, 0.3f, 0.3f, 1.0f));
+		if(Inside)
+			str_copy(m_aTooltip, "Invalid number. Enter a complete integer; the document value has not changed.");
+	}
 	if(Inside && !Ui()->MouseButton(0) && !Ui()->MouseButton(1))
 		Ui()->SetHotItem(pId);
 
-	static const void *s_pEditing = nullptr;
 	EEditState State = EEditState::NONE;
-	if(s_pEditing == pId)
+	if(Selector.m_pEditingId == pId)
 	{
 		State = EEditState::EDITING;
 	}
-	if(((Ui()->CheckActiveItem(pId) && Ui()->CheckMouseLock() && s_DidScroll) || s_pLastTextId == pId) && s_pEditing != pId)
+	if(((Ui()->CheckActiveItem(pId) && Ui()->CheckMouseLock() && Selector.m_DidScroll) || Selector.m_pTextId == pId) && Selector.m_pEditingId != pId)
 	{
 		State = EEditState::START;
-		s_pEditing = pId;
+		Selector.m_pEditingId = pId;
 	}
-	if(!Ui()->CheckMouseLock() && s_pLastTextId != pId && s_pEditing == pId)
+	if(!Ui()->CheckMouseLock() && Selector.m_pTextId != pId && Selector.m_pEditingId == pId)
 	{
-		State = EEditState::END;
-		s_pEditing = nullptr;
+		State = Cancelled ? EEditState::CANCELLED : EEditState::END;
+		Selector.m_pEditingId = nullptr;
 	}
 
 	return SEditResult<int>{State, Current};

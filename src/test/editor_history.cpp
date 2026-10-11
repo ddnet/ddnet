@@ -215,6 +215,34 @@ TEST(EditorHistory, FailedValidationPreservesCommittedRootAndFuture)
 	EXPECT_FALSE(pHistory->HasActiveEdit());
 }
 
+TEST(EditorHistory, ClearPreservesContentsAndSavedMarkerWithoutTraversal)
+{
+	auto pHistory = MakeHistory();
+	SetValue(*pHistory, 128);
+	auto Save = pHistory->CaptureSave("map.map", ESaveKind::MANUAL);
+	ASSERT_TRUE(Save);
+	ASSERT_TRUE(pHistory->CompleteSave(*Save, true));
+	SetValue(*pHistory, 256);
+	Undo(*pHistory);
+	ASSERT_TRUE(pHistory->CanUndo());
+	ASSERT_TRUE(pHistory->CanRedo());
+	const auto Saved = pHistory->Current();
+	ASSERT_TRUE(pHistory->Clear());
+	EXPECT_EQ(pHistory->Current(), Saved);
+	EXPECT_FALSE(pHistory->Dirty(ESaveKind::MANUAL));
+	EXPECT_EQ(pHistory->Revisions().size(), 1u);
+	EXPECT_FALSE(pHistory->CanUndo());
+	EXPECT_FALSE(pHistory->CanRedo());
+
+	SetValue(*pHistory, 256);
+	const auto Unsaved = pHistory->Current();
+	ASSERT_TRUE(pHistory->Clear());
+	EXPECT_EQ(pHistory->Current(), Unsaved);
+	EXPECT_TRUE(pHistory->Dirty(ESaveKind::MANUAL));
+	EXPECT_FALSE(pHistory->CanUndo());
+	EXPECT_FALSE(pHistory->CanRedo());
+}
+
 TEST(EditorHistory, CategoriesShareOneChronologicalTimeline)
 {
 	auto pHistory = MakeHistory();

@@ -2830,9 +2830,13 @@ if(CLIENT)
     file_browser.h
     font_typer.cpp
     font_typer.h
+    history/document_history.cpp
+    history/document_history.h
     history/edit_coordinator.h
     history/resource_blob.h
     history/revision_history.h
+    history/save_job.cpp
+    history/save_job.h
     history/save_state.h
     history/shared_value.h
     history/tile_plane.h
@@ -2848,7 +2852,9 @@ if(CLIENT)
     mapitems.h
     mapitems/document_export.cpp
     mapitems/document_export.h
+    mapitems/document_graph.cpp
     mapitems/document_graph.h
+    mapitems/document_restore.cpp
     mapitems/document_session.h
     mapitems/document_values.h
     mapitems/element_values.h
@@ -2904,6 +2910,15 @@ if(CLIENT)
     smooth_value.h
     tile_art.cpp
     # tidy-alphabetical-end
+  )
+  list(REMOVE_ITEM GAME_EDITOR
+    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_action.h"
+    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_actions.cpp"
+    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_actions.h"
+    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_trackers.cpp"
+    "${PROJECT_SOURCE_DIR}/src/game/editor/editor_trackers.h"
+    "${PROJECT_SOURCE_DIR}/src/game/editor/references.cpp"
+    "${PROJECT_SOURCE_DIR}/src/game/editor/references.h"
   )
   set_src(GAME_MAP GLOB_RECURSE src/game/map
     # tidy-alphabetical-start
@@ -3471,6 +3486,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     datafile_test.cpp
     dbg_test.cpp
     editor_history.cpp
+    editor_save.cpp
     editor_test.cpp
     fs_test.cpp
     gameworld_test.cpp
@@ -3529,6 +3545,8 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/sqlite.cpp
     src/game/client/components/censor.cpp
     src/game/client/components/censor.h
+    src/game/editor/history/save_job.cpp
+    src/game/editor/history/save_job.h
     src/game/editor/mapitems/document_export.cpp
     src/game/editor/mapitems/document_export.h
     # tidy-alphabetical-end

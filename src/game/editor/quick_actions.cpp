@@ -1,9 +1,9 @@
 #include "editor.h"
-#include "editor_actions.h"
 
 #include <engine/keys.h>
 
 #include <game/client/gameclient.h>
+#include <game/editor/mapitems/image.h>
 #include <game/mapitems.h>
 
 void CEditor::FillGameTiles(EGameTileOp FillTile) const
@@ -40,102 +40,125 @@ void CEditor::AddQuadOrSound()
 		y += MapView()->MouseWorldPos().y - (MapView()->GetWorldOffset().y * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
 	}
 
-	if(pLayer->m_Type == LAYERTYPE_QUADS)
-		Map()->m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptyQuad>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], x, y));
-	else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-		Map()->m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptySound>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], x, y));
+	Map()->m_DocumentHistory.Edit(this, pLayer->m_Type == LAYERTYPE_QUADS ? "Add quad" : "Add sound source", editor_history::ECategory::MAP, [&] {
+		if(pLayer->m_Type == LAYERTYPE_QUADS)
+		{
+			auto pQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
+			int Width = 64;
+			int Height = 64;
+			const int ImageIndex = Map()->ImageIndex(pQuads->m_Image);
+			if(ImageIndex >= 0)
+			{
+				Width = Map()->m_vpImages[ImageIndex]->m_Width;
+				Height = Map()->m_vpImages[ImageIndex]->m_Height;
+			}
+			pQuads->NewQuad(x, y, Width, Height);
+		}
+		else
+			std::static_pointer_cast<CLayerSounds>(pLayer)->NewSource(x, y);
+		Map()->OnModify();
+	});
 }
 
 void CEditor::AddGroup()
 {
-	Map()->NewGroup();
-	Map()->m_SelectedGroup = Map()->m_vpGroups.size() - 1;
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(Map(), Map()->m_SelectedGroup, false));
+	Map()->m_DocumentHistory.Edit(this, "Add group", editor_history::ECategory::MAP, [&] {
+		Map()->NewGroup();
+		Map()->m_SelectedGroup = Map()->m_vpGroups.size() - 1;
+	});
 }
 
 void CEditor::AddSoundLayer()
 {
-	std::shared_ptr<CLayer> pSoundLayer = std::make_shared<CLayerSounds>(Map());
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pSoundLayer);
-	int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
-	Map()->SelectLayer(LayerIndex);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->m_Collapse = false;
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), Map()->m_SelectedGroup, LayerIndex));
+	Map()->m_DocumentHistory.Edit(this, "Add sound layer", editor_history::ECategory::MAP, [&] {
+		std::shared_ptr<CLayer> pSoundLayer = std::make_shared<CLayerSounds>(Map());
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pSoundLayer);
+		int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
+		Map()->SelectLayer(LayerIndex);
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->m_Collapse = false;
+	});
 }
 
 void CEditor::AddTileLayer()
 {
-	std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(Map(), Map()->m_pGameLayer->m_Width, Map()->m_pGameLayer->m_Height);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pTileLayer);
-	int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
-	Map()->SelectLayer(LayerIndex);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->m_Collapse = false;
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), Map()->m_SelectedGroup, LayerIndex));
+	Map()->m_DocumentHistory.Edit(this, "Add tile layer", editor_history::ECategory::MAP, [&] {
+		std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(Map(), Map()->m_pGameLayer->Width(), Map()->m_pGameLayer->Height());
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pTileLayer);
+		int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
+		Map()->SelectLayer(LayerIndex);
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->m_Collapse = false;
+	});
 }
 
 void CEditor::AddQuadsLayer()
 {
-	std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>(Map());
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pQuadLayer);
-	int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
-	Map()->SelectLayer(LayerIndex);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->m_Collapse = false;
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), Map()->m_SelectedGroup, LayerIndex));
+	Map()->m_DocumentHistory.Edit(this, "Add quad layer", editor_history::ECategory::MAP, [&] {
+		std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>(Map());
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pQuadLayer);
+		int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
+		Map()->SelectLayer(LayerIndex);
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->m_Collapse = false;
+	});
 }
 
 void CEditor::AddSwitchLayer()
 {
-	std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(Map(), Map()->m_pGameLayer->m_Width, Map()->m_pGameLayer->m_Height);
-	Map()->MakeSwitchLayer(pSwitchLayer);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pSwitchLayer);
-	int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
-	Map()->SelectLayer(LayerIndex);
-	m_pBrush->Clear();
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), Map()->m_SelectedGroup, LayerIndex));
+	Map()->m_DocumentHistory.Edit(this, "Add switch layer", editor_history::ECategory::MAP, [&] {
+		std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(Map(), Map()->m_pGameLayer->Width(), Map()->m_pGameLayer->Height());
+		Map()->MakeSwitchLayer(pSwitchLayer);
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pSwitchLayer);
+		int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
+		Map()->SelectLayer(LayerIndex);
+		m_pBrush->Clear();
+	});
 }
 
 void CEditor::AddFrontLayer()
 {
-	std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(Map(), Map()->m_pGameLayer->m_Width, Map()->m_pGameLayer->m_Height);
-	Map()->MakeFrontLayer(pFrontLayer);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pFrontLayer);
-	int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
-	Map()->SelectLayer(LayerIndex);
-	m_pBrush->Clear();
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), Map()->m_SelectedGroup, LayerIndex));
+	Map()->m_DocumentHistory.Edit(this, "Add front layer", editor_history::ECategory::MAP, [&] {
+		std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(Map(), Map()->m_pGameLayer->Width(), Map()->m_pGameLayer->Height());
+		Map()->MakeFrontLayer(pFrontLayer);
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pFrontLayer);
+		int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
+		Map()->SelectLayer(LayerIndex);
+		m_pBrush->Clear();
+	});
 }
 
 void CEditor::AddTuneLayer()
 {
-	std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(Map(), Map()->m_pGameLayer->m_Width, Map()->m_pGameLayer->m_Height);
-	Map()->MakeTuneLayer(pTuneLayer);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pTuneLayer);
-	int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
-	Map()->SelectLayer(LayerIndex);
-	m_pBrush->Clear();
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), Map()->m_SelectedGroup, LayerIndex));
+	Map()->m_DocumentHistory.Edit(this, "Add tune layer", editor_history::ECategory::MAP, [&] {
+		std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(Map(), Map()->m_pGameLayer->Width(), Map()->m_pGameLayer->Height());
+		Map()->MakeTuneLayer(pTuneLayer);
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pTuneLayer);
+		int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
+		Map()->SelectLayer(LayerIndex);
+		m_pBrush->Clear();
+	});
 }
 
 void CEditor::AddSpeedupLayer()
 {
-	std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(Map(), Map()->m_pGameLayer->m_Width, Map()->m_pGameLayer->m_Height);
-	Map()->MakeSpeedupLayer(pSpeedupLayer);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pSpeedupLayer);
-	int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
-	Map()->SelectLayer(LayerIndex);
-	m_pBrush->Clear();
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), Map()->m_SelectedGroup, LayerIndex));
+	Map()->m_DocumentHistory.Edit(this, "Add speedup layer", editor_history::ECategory::MAP, [&] {
+		std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(Map(), Map()->m_pGameLayer->Width(), Map()->m_pGameLayer->Height());
+		Map()->MakeSpeedupLayer(pSpeedupLayer);
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pSpeedupLayer);
+		int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
+		Map()->SelectLayer(LayerIndex);
+		m_pBrush->Clear();
+	});
 }
 
 void CEditor::AddTeleLayer()
 {
-	std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(Map(), Map()->m_pGameLayer->m_Width, Map()->m_pGameLayer->m_Height);
-	Map()->MakeTeleLayer(pTeleLayer);
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pTeleLayer);
-	int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
-	Map()->SelectLayer(LayerIndex);
-	m_pBrush->Clear();
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), Map()->m_SelectedGroup, LayerIndex));
+	Map()->m_DocumentHistory.Edit(this, "Add tele layer", editor_history::ECategory::MAP, [&] {
+		std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(Map(), Map()->m_pGameLayer->Width(), Map()->m_pGameLayer->Height());
+		Map()->MakeTeleLayer(pTeleLayer);
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->AddLayer(pTeleLayer);
+		int LayerIndex = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1;
+		Map()->SelectLayer(LayerIndex);
+		m_pBrush->Clear();
+	});
 }
 
 bool CEditor::IsNonGameTileLayerSelected() const
@@ -168,7 +191,7 @@ void CEditor::LayerSelectImage()
 	static SLayerPopupContext s_LayerPopupContext = {};
 	s_LayerPopupContext.m_pEditor = this;
 	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 150, 300, &s_LayerPopupContext, PopupLayer);
-	PopupSelectImageInvoke(pTiles->m_Image, Ui()->MouseX(), Ui()->MouseY());
+	PopupSelectImageInvoke(Map()->ImageIndex(pTiles->m_Image), Ui()->MouseX(), Ui()->MouseY());
 }
 
 void CEditor::MapDetails()
@@ -204,25 +227,30 @@ void CEditor::DeleteSelectedLayer()
 	if(Map()->m_pGameLayer == pCurrentLayer)
 		return;
 
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionDeleteLayer>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0]));
+	Map()->m_DocumentHistory.Edit(this, "Delete layer", editor_history::ECategory::MAP, [&] {
+		if(pCurrentLayer == Map()->m_pFrontLayer)
+			Map()->m_pFrontLayer = nullptr;
+		if(pCurrentLayer == Map()->m_pTeleLayer)
+			Map()->m_pTeleLayer = nullptr;
+		if(pCurrentLayer == Map()->m_pSpeedupLayer)
+			Map()->m_pSpeedupLayer = nullptr;
+		if(pCurrentLayer == Map()->m_pSwitchLayer)
+			Map()->m_pSwitchLayer = nullptr;
+		if(pCurrentLayer == Map()->m_pTuneLayer)
+			Map()->m_pTuneLayer = nullptr;
+		Map()->m_vpGroups[Map()->m_SelectedGroup]->DeleteLayer(Map()->m_vSelectedLayers[0]);
 
-	if(pCurrentLayer == Map()->m_pFrontLayer)
-		Map()->m_pFrontLayer = nullptr;
-	if(pCurrentLayer == Map()->m_pTeleLayer)
-		Map()->m_pTeleLayer = nullptr;
-	if(pCurrentLayer == Map()->m_pSpeedupLayer)
-		Map()->m_pSpeedupLayer = nullptr;
-	if(pCurrentLayer == Map()->m_pSwitchLayer)
-		Map()->m_pSwitchLayer = nullptr;
-	if(pCurrentLayer == Map()->m_pTuneLayer)
-		Map()->m_pTuneLayer = nullptr;
-	Map()->m_vpGroups[Map()->m_SelectedGroup]->DeleteLayer(Map()->m_vSelectedLayers[0]);
-
-	Map()->SelectPreviousLayer();
+		Map()->SelectPreviousLayer();
+	});
 }
 
 void CEditor::TestMapLocally()
 {
+	if(DocumentNumberInputActive() || Map()->m_DocumentHistory.Pending())
+	{
+		DeferDocumentAction(Map(), [this] { TestMapLocally(); });
+		return;
+	}
 	const char *pFilenameNoMaps = str_startswith(Map()->m_aFilename, "maps/");
 	if(!pFilenameNoMaps)
 	{
@@ -237,7 +265,8 @@ void CEditor::TestMapLocally()
 	{
 		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
-			OnClose();
+			if(!OnClose())
+				return;
 			g_Config.m_ClEditor = 0;
 			char aMapChange[IO_MAX_PATH_LENGTH + 64];
 			str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFilenameNoExt);
@@ -258,7 +287,8 @@ void CEditor::TestMapLocally()
 		str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFilenameNoExt);
 		if(pGameClient->m_LocalServer.RunServer({"sv_register 0", aMapChange}))
 		{
-			OnClose();
+			if(!OnClose())
+				return;
 			g_Config.m_ClEditor = 0;
 			pGameClient->m_LocalServer.Connect();
 		}

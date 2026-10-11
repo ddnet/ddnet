@@ -1,5 +1,7 @@
 #include "envelope.h"
 
+#include "map.h"
+
 #include <base/dbg.h>
 
 #include <algorithm>
@@ -8,7 +10,7 @@
 
 using namespace std::chrono_literals;
 
-CEnvelope::CEnvelopePointAccess::CEnvelopePointAccess(std::vector<CEnvPoint_runtime> *pvPoints)
+CEnvelope::CEnvelopePointAccess::CEnvelopePointAccess(const std::vector<CEnvelopePointValues> *pvPoints)
 {
 	m_pvPoints = pvPoints;
 }
@@ -32,12 +34,17 @@ const CEnvPointBezier *CEnvelope::CEnvelopePointAccess::GetBezier(int Index) con
 	return &m_pvPoints->at(Index).m_Bezier;
 }
 
-CEnvelope::CEnvelope(EType Type) :
-	m_Type(Type), m_PointsAccess(&m_vPoints) {}
-
-CEnvelope::CEnvelope(int NumChannels) :
-	m_PointsAccess(&m_vPoints)
+CEnvelope::CEnvelope(CEditorMap *pMap, EType Type, std::uint64_t RetainedId) :
+	CMapObject(pMap), m_PointsAccess(&m_vPoints)
 {
+	m_Id = RetainedId ? RetainedId : Map()->AllocateObjectId();
+	m_Type = Type;
+}
+
+CEnvelope::CEnvelope(CEditorMap *pMap, int NumChannels) :
+	CMapObject(pMap), m_PointsAccess(&m_vPoints)
+{
+	m_Id = Map()->AllocateObjectId();
 	switch(NumChannels)
 	{
 	case 1:
@@ -110,7 +117,8 @@ void CEnvelope::Eval(float Time, ColorRGBA &Result, size_t Channels) const
 
 void CEnvelope::AddPoint(CFixedTime Time, std::array<int, CEnvPoint::MAX_CHANNELS> aValues)
 {
-	CEnvPoint_runtime Point;
+	CEnvelopePointValues Point;
+	Point.m_Id = Map()->AllocateObjectId();
 	Point.m_Time = Time;
 	Point.m_Curvetype = CURVETYPE_LINEAR;
 	std::copy_n(aValues.begin(), std::size(Point.m_aValues), Point.m_aValues);
@@ -147,4 +155,15 @@ int CEnvelope::GetChannels() const
 	default:
 		dbg_assert_failed("unknown envelope type");
 	}
+}
+
+void CEnvelope::OnAttach(CEditorMap *pMap)
+{
+	if(Map() != pMap)
+	{
+		m_Id = pMap->AllocateObjectId();
+		for(auto &Element : m_vPoints)
+			Element.m_Id = pMap->AllocateObjectId();
+	}
+	CMapObject::OnAttach(pMap);
 }
