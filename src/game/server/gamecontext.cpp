@@ -4538,7 +4538,12 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		log_error("mapchange", "Failed to import settings from '%s': failed to open map '%s' for writing", aConfig, aTemp);
 		return false;
 	}
-	Writer.Finish();
+	if(!Writer.Finish())
+	{
+		log_error("mapchange", "Failed to import settings from '%s': failed to write map '%s'", aConfig, aTemp);
+		Storage()->RemoveFile(aTemp, IStorage::TYPE_SAVE);
+		return false;
+	}
 	log_info("mapchange", "Imported settings from '%s' into '%s'", aConfig, aTemp);
 
 	str_copy(pNewMapName, aTemp, MapNameSize);
