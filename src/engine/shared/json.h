@@ -12,6 +12,7 @@ int json_array_length(const json_value *pArray);
 const char *json_string_get(const json_value *pString);
 int json_int_get(const json_value *pInteger);
 int json_boolean_get(const json_value *pBoolean);
+char EscapeJsonChar(char c);
 
 char *EscapeJson(char *pBuffer, int BufferSize, const char *pString);
 const char *JsonBool(bool Bool);
