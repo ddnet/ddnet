@@ -584,3 +584,8 @@ void CRenderTools::RenderTee6(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 		}
 	}
 }
+
+ColorRGBA CRenderTools::GetPingTextColor(int Latency)
+{
+	return color_cast<ColorRGBA>(ColorHSLA((300.0f - std::clamp(Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+}
