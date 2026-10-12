@@ -350,9 +350,7 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 		{
 			// interactive tee: tee is happy to be selected
 			int TeeEmote = (Item.m_Selected && s_LastSelectionTime + 0.75f > Client()->GlobalTime()) ? EMOTE_HAPPY : EMOTE_NORMAL;
-			vec2 OffsetToMid;
-			CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &Info, OffsetToMid);
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeeEmote, vec2(1.0f, 0.0f), TeePreview.Center() + OffsetToMid);
+			RenderTools()->RenderIdleTeeAtCenter(&Info, TeePreview.Center(), TeeEmote);
 		}
 
 		SLabelProperties Props;
@@ -435,19 +433,16 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 		}
 		Info.m_Size = 50.0f;
 
-		vec2 OffsetToMid;
-		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &Info, OffsetToMid);
-		const vec2 TeePos = Item.m_Rect.Center() + OffsetToMid;
 		if(m_TeePartSelected == protocol7::SKINPART_HANDS)
 		{
-			// RenderTools()->RenderTeeHand(&Info, TeePos, vec2(1.0f, 0.0f), -pi*0.5f, vec2(18, 0));
+			// RenderTools()->RenderTeeHand(&Info, Item.m_Rect.Center(), vec2(1.0f, 0.0f), -pi*0.5f, vec2(18, 0));
 		}
 		int TeePartEmote = EMOTE_NORMAL;
 		if(m_TeePartSelected == protocol7::SKINPART_EYES)
 		{
 			TeePartEmote = (int)(Client()->GlobalTime() * 0.5f) % NUM_EMOTES;
 		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeePartEmote, vec2(1.0f, 0.0f), TeePos);
+		RenderTools()->RenderIdleTeeAtCenter(&Info, Item.m_Rect.Center(), TeePartEmote);
 
 		Ui()->DoLabel(&Label, pPart->m_aName, 12.0f, TEXTALIGN_MC);
 	}

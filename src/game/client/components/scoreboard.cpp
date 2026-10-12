@@ -803,10 +803,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			{
 				CTeeRenderInfo TeeInfo = ClientData.m_RenderInfo;
 				TeeInfo.m_Size *= TeeSizeMod;
-				vec2 OffsetToMid;
-				CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &TeeInfo, OffsetToMid);
-				const vec2 TeeRenderPos = vec2(TeeOffset + TeeLength / 2, Row.y + Row.h / 2.0f + OffsetToMid.y);
-				RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+				RenderTools()->RenderIdleTeeAtCenter(&TeeInfo, vec2(TeeOffset + TeeLength / 2, Row.y + Row.h / 2.0f));
 
 				if(m_MouseUnlocked)
 				{

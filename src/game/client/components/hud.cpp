@@ -298,12 +298,7 @@ void CHud::RenderScoreHud()
 						CTeeRenderInfo TeeInfo = GameClient()->m_aClients[Id].m_RenderInfo;
 						TeeInfo.m_Size = ScoreSingleBoxHeight;
 
-						const CAnimState *pIdleState = CAnimState::GetIdle();
-						vec2 OffsetToMid;
-						CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-						vec2 TeeRenderPos(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
-
-						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+						RenderTools()->RenderIdleTeeAtCenter(&TeeInfo, vec2(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f));
 					}
 				}
 				StartY += 8.0f;
@@ -477,12 +472,7 @@ void CHud::RenderScoreHud()
 						CTeeRenderInfo TeeInfo = GameClient()->m_aClients[Id].m_RenderInfo;
 						TeeInfo.m_Size = ScoreSingleBoxHeight;
 
-						const CAnimState *pIdleState = CAnimState::GetIdle();
-						vec2 OffsetToMid;
-						CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-						vec2 TeeRenderPos(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
-
-						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+						RenderTools()->RenderIdleTeeAtCenter(&TeeInfo, vec2(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f));
 					}
 				}
 				else
