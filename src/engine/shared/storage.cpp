@@ -844,6 +844,18 @@ public:
 		return fs_rename(aOldBuffer, aNewBuffer) == 0;
 	}
 
+	bool ReplaceFile(const char *pOldFilename, const char *pNewFilename, int Type) override
+	{
+		dbg_assert(Type >= TYPE_SAVE && Type < m_NumPaths, "Type invalid");
+
+		char aOldBuffer[IO_MAX_PATH_LENGTH];
+		char aNewBuffer[IO_MAX_PATH_LENGTH];
+		GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer));
+		GetPath(Type, pNewFilename, aNewBuffer, sizeof(aNewBuffer));
+
+		return fs_replace_file(aOldBuffer, aNewBuffer) == 0;
+	}
+
 	bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename) override
 	{
 		char aOldBuffer[IO_MAX_PATH_LENGTH];
@@ -858,6 +870,22 @@ public:
 		}
 
 		return fs_rename(aOldBuffer, aNewBuffer) == 0;
+	}
+
+	bool ReplaceBinaryFile(const char *pOldFilename, const char *pNewFilename) override
+	{
+		char aOldBuffer[IO_MAX_PATH_LENGTH];
+		char aNewBuffer[IO_MAX_PATH_LENGTH];
+		GetBinaryPath(pOldFilename, aOldBuffer, sizeof(aOldBuffer));
+		GetBinaryPath(pNewFilename, aNewBuffer, sizeof(aNewBuffer));
+
+		if(fs_makedir_rec_for(aNewBuffer) < 0)
+		{
+			log_error("storage", "failed to create folders for: %s", aNewBuffer);
+			return false;
+		}
+
+		return fs_replace_file(aOldBuffer, aNewBuffer) == 0;
 	}
 
 	bool CreateFolder(const char *pFoldername, int Type) override

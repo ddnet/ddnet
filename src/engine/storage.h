@@ -65,11 +65,15 @@ public:
 	virtual bool RemoveFile(const char *pFilename, int Type) = 0;
 	virtual bool RemoveFolder(const char *pFilename, int Type) = 0;
 	virtual bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type) = 0;
+	/** Replaces a file with a prepared file in the same storage path, preserving the destination on failure. */
+	virtual bool ReplaceFile(const char *pOldFilename, const char *pNewFilename, int Type) = 0;
 	virtual bool CreateFolder(const char *pFoldername, int Type) = 0;
 	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
 
 	virtual bool RemoveBinaryFile(const char *pFilename) = 0;
 	virtual bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename) = 0;
+	/** Replaces a file with a prepared file relative to the binary directory, creating destination folders as needed. */
+	virtual bool ReplaceBinaryFile(const char *pOldFilename, const char *pNewFilename) = 0;
 	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) = 0;
 	virtual const char *GetBinaryPathAbsolute(const char *pFilename, char *pBuffer, unsigned BufferSize) = 0;
 
