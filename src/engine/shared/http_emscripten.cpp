@@ -36,14 +36,17 @@ void CHttpRequestEmscripten::Header(const char *pNameColonValue)
 
 void CHttpRequestEmscripten::Abort()
 {
-	if(m_Abort)
+	if(m_Abort.load(std::memory_order_acquire))
 	{
 		return;
 	}
 
 	IHttpRequest::Abort();
 
-	m_pHttp->AddPendingStateChange(m_RequestId, EHttpState::ABORTED);
+	if(m_Initialized.load(std::memory_order_acquire))
+	{
+		m_pHttp->AddPendingStateChange(m_RequestId, EHttpState::ABORTED);
+	}
 }
 
 EM_JS(void, FormatTimestampJsImpl, (char *pBuf, size_t Size, time_t Timestamp), {
@@ -331,6 +334,7 @@ void CHttpEmscripten::Run(std::shared_ptr<IHttpRequest> pRequest)
 		std::shared_ptr<CHttpRequestEmscripten> pRequestImpl = std::static_pointer_cast<CHttpRequestEmscripten>(pRequest);
 		pRequestImpl->m_pHttp = this;
 		pRequestImpl->m_RequestId = m_NextRequestId;
+		pRequestImpl->m_Initialized.store(true, std::memory_order_release);
 		++m_NextRequestId;
 		if(m_Shutdown)
 		{

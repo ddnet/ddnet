@@ -36,6 +36,7 @@ public:
 
 private:
 	CHttpEmscripten *m_pHttp;
+	std::atomic<bool> m_Initialized = false;
 
 	std::vector<std::pair<std::string, std::string>> m_vRequestHeaders;
 
