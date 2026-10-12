@@ -56,6 +56,7 @@ namespace FontIcon
 	inline const char *const HOUSE = "\uF015";
 	inline const char *const IMAGE = "\uF03E";
 	inline const char *const INFO = "\uF129";
+	inline const char *const I_CURSOR = "\uF246";
 	inline const char *const KEY = "\uF084";
 	inline const char *const KEYBOARD = "\u2328";
 	inline const char *const LAYER_GROUP = "\uF5FD";

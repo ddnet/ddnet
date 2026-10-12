@@ -52,7 +52,7 @@ public:
 	const CRenderMap *RenderMap() const;
 
 private:
-	CEditor *m_pEditor;
+	CEditor *m_pEditor = nullptr;
 };
 
 #endif
