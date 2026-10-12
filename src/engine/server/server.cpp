@@ -3340,7 +3340,7 @@ void CServer::WritePortFile()
 		const int Length = str_format(aPort, sizeof(aPort), "%d", m_NetServer.Address().port);
 		const bool Written = io_write(PortFile, aPort, Length) == (unsigned)Length;
 		if(io_close(PortFile) == 0 && Written &&
-			Storage()->RenameFile(aPortFileTmp, pPortFile, IStorage::TYPE_SAVE))
+			Storage()->ReplaceFile(aPortFileTmp, pPortFile, IStorage::TYPE_SAVE))
 		{
 			return;
 		}

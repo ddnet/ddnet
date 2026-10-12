@@ -435,8 +435,11 @@ void CGhost::StopRecord(int Time)
 		Item.m_Slot = Slot;
 
 		// save new ghost file
-		if(Item.HasFile())
-			Storage()->RenameFile(m_aTmpFilename, Item.m_aFilename, IStorage::TYPE_SAVE);
+		if(Item.HasFile() && !Storage()->ReplaceFile(m_aTmpFilename, Item.m_aFilename, IStorage::TYPE_SAVE))
+		{
+			log_error("ghost", "Could not save ghost file '%s'.", Item.m_aFilename);
+			Item.m_aFilename[0] = '\0';
+		}
 
 		// add item to menu list
 		GameClient()->m_Menus.UpdateOwnGhost(Item);
