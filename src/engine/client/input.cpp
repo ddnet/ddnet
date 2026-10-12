@@ -141,7 +141,8 @@ bool CInput::OpenJoystick(int JoystickIndex)
 	}
 	if(std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [pJoystick](const CJoystick &Joystick) -> bool { return Joystick.m_pDelegate == pJoystick; }) != m_vJoysticks.end())
 	{
-		// Joystick has already been added
+		// Joystick has already been added, drop the extra reference from SDL_JoystickOpen
+		SDL_JoystickClose(pJoystick);
 		return false;
 	}
 	m_vJoysticks.emplace_back(this, m_vJoysticks.size(), pJoystick);
@@ -524,6 +525,10 @@ void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 	if(RemovedJoystick != m_vJoysticks.end())
 	{
 		log_info("joystick", "Closed joystick %d '%s'", (*RemovedJoystick).GetIndex(), (*RemovedJoystick).GetName());
+		// NOTE: The SDL_QuitSubSystem() in CloseJoysticks() only runs at shutdown,
+		// so a joystick removed mid-session must be closed here explicitly,
+		// otherwise every plug/unplug cycle leaks its SDL_Joystick allocation until restart.
+		SDL_JoystickClose((*RemovedJoystick).m_pDelegate);
 		auto NextJoystick = m_vJoysticks.erase(RemovedJoystick);
 		// Adjust indices of following joysticks
 		while(NextJoystick != m_vJoysticks.end())
