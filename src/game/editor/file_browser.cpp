@@ -934,7 +934,7 @@ CUi::EPopupMenuFunctionResult CFileBrowser::CPopupConfirmDelete::Render(void *pC
 		{
 			if(pFileBrowser->Storage()->RemoveFolder(pConfirmDeleteContext->m_aDeletePath, IStorage::TYPE_SAVE))
 			{
-				pFileBrowser->FilelistPopulate(IStorage::TYPE_SAVE, true);
+				pFileBrowser->FilelistPopulate(pFileBrowser->m_StorageType, true);
 			}
 			else
 			{
@@ -945,7 +945,7 @@ CUi::EPopupMenuFunctionResult CFileBrowser::CPopupConfirmDelete::Render(void *pC
 		{
 			if(pFileBrowser->Storage()->RemoveFile(pConfirmDeleteContext->m_aDeletePath, IStorage::TYPE_SAVE))
 			{
-				pFileBrowser->FilelistPopulate(IStorage::TYPE_SAVE, true);
+				pFileBrowser->FilelistPopulate(pFileBrowser->m_StorageType, true);
 			}
 			else
 			{
