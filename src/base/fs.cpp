@@ -623,7 +623,7 @@ int fs_rename(const char *oldname, const char *newname)
 #endif
 }
 
-int fs_replace(const char *oldname, const char *newname)
+int fs_replace_file(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_oldname = windows_utf8_to_wide(oldname);
