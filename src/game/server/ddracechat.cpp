@@ -664,7 +664,10 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 				}
 				return;
 			}
+		}
 
+		if(Teams.HasPracticeSave(Team))
+		{
 			pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing! Use /unpractice to restore your team.");
 		}
 		else
