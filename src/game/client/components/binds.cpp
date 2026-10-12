@@ -552,5 +552,10 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_W, "+jump", FreeOnly);
 	}
 
-	g_Config.m_ClDDRaceBindsSet = 3;
+	if(g_Config.m_ClDDRaceBindsSet < 4)
+	{
+		Bind(KEY_LCTRL, "toggle_scoreboard_cursor", FreeOnly);
+	}
+
+	g_Config.m_ClDDRaceBindsSet = 4;
 }
