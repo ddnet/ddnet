@@ -51,6 +51,18 @@ EM_JS(void, FormatTimestampJsImpl, (char *pBuf, size_t Size, time_t Timestamp), 
 	stringToUTF8(timestampString, pBuf, Size);
 });
 
+EM_JS(bool, IsValidUrlJsImpl, (const char *pUrl), {
+	try
+	{
+		new URL(UTF8ToString(pUrl));
+		return true;
+	}
+	catch(_)
+	{
+		return false;
+	}
+});
+
 bool CHttpRequestEmscripten::ConfigureAndRun()
 {
 	if(!BeforeInit())
@@ -62,6 +74,12 @@ bool CHttpRequestEmscripten::ConfigureAndRun()
 		(!g_Config.m_HttpAllowInsecure || !str_startswith(m_aUrl, "http://")))
 	{
 		log_error("http", "unsupported protocol: %s", m_aUrl);
+		return false;
+	}
+
+	if(!IsValidUrlJsImpl(m_aUrl))
+	{
+		log_error("http", "invalid URL: %s", m_aUrl);
 		return false;
 	}
 
