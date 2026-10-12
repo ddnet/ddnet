@@ -50,26 +50,18 @@ static inline int SwapEndianInt(int Number)
 class CItemEx
 {
 public:
-	int m_aUuid[sizeof(CUuid) / sizeof(int32_t)];
+	int m_aUuid[UUID_INT_SIZE];
 
 	static CItemEx FromUuid(CUuid Uuid)
 	{
 		CItemEx Result;
-		for(size_t i = 0; i < std::size(Result.m_aUuid); i++)
-		{
-			Result.m_aUuid[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
-		}
+		UuidToInts(Uuid, Result.m_aUuid);
 		return Result;
 	}
 
 	CUuid ToUuid() const
 	{
-		CUuid Result;
-		for(size_t i = 0; i < std::size(m_aUuid); i++)
-		{
-			uint_to_bytes_be(&Result.m_aData[i * sizeof(int32_t)], m_aUuid[i]);
-		}
-		return Result;
+		return UuidFromInts(m_aUuid);
 	}
 };
 

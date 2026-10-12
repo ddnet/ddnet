@@ -9,7 +9,7 @@
 #include <memory>
 
 class IStorage;
-struct CUuid;
+class CUuid;
 
 enum
 {
