@@ -6,6 +6,7 @@
 
 #include <game/race_state.h>
 #include <game/server/gamecontext.h>
+#include <game/server/save.h>
 #include <game/team_state.h>
 #include <game/teamscore.h>
 
@@ -35,6 +36,11 @@ class CGameTeams
 	bool m_aTeamFlock[NUM_DDRACE_TEAMS];
 	CClientMask m_aInvited[NUM_DDRACE_TEAMS];
 	bool m_aPractice[NUM_DDRACE_TEAMS];
+
+	// practice saves that restores when unpractice
+	std::unique_ptr<CSaveTeam> m_apPracticeSaves[NUM_DDRACE_TEAMS];
+	bool m_aPracticeRestoring[NUM_DDRACE_TEAMS];
+
 	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_DDRACE_TEAMS];
 	uint64_t m_aLastSwap[MAX_CLIENTS]; // index is id of player who initiated swap
 	bool m_aTeamSentStartWarning[NUM_DDRACE_TEAMS];
@@ -143,6 +149,13 @@ public:
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
 	bool IsValidTeamNumber(int Team) const;
+
+	std::optional<ESaveResult> CreatePracticeSave(int Team);
+	bool HasPracticeSave(int Team) const;
+	bool RestorePracticeSave(int Team);
+	void ClearPracticeSave(int Team);
+	void DropPracticeSavePlayer(int Team, int ClientId);
+	bool GetPracticeRestoring(int Team) const;
 };
 
 #endif

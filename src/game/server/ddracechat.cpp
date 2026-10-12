@@ -636,8 +636,36 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 	if(NumCurrentVotes >= NumRequiredVotes)
 	{
+		if(Teams.GetTeamState(Team) == ETeamState::STARTED)
+		{
+			// create practice save to restore when /unpractice
+			std::optional<ESaveResult> PracticeSave = Teams.CreatePracticeSave(Team);
+
+			if(PracticeSave.has_value() && *PracticeSave != ESaveResult::SUCCESS)
+			{
+				switch(*PracticeSave)
+				{
+				case ESaveResult::CHAR_NOT_FOUND:
+					pSelf->SendChatTeam(Team, "Practice mode is not enabled because all players in your team have to be alive and not in '/spec'.");
+					break;
+				case ESaveResult::DRAGGER_ACTIVE:
+					pSelf->SendChatTeam(Team, "Practice mode is not enabled because a dragger is active.");
+					break;
+				default:
+					pSelf->SendChatTeam(Team, "Practice mode was not enabled.");
+					break;
+				}
+				return;
+			}
+
+			pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing! Use /unpractice to restore your team.");
+		}
+		else
+		{
+			pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing!");
+		}
+
 		Teams.SetPractice(Team, true);
-		pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing!");
 		pSelf->SendChatTeam(Team, "See /practicecmdlist for a list of all available practice commands. Most commonly used ones are /telecursor, /lasttp and /rescue");
 	}
 }
@@ -704,9 +732,18 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "'%s' disabled practice mode for your team", pSelf->Server()->ClientName(pResult->m_ClientId));
 	pSelf->SendChatTeam(Team, aBuf);
 
-	Teams.KillCharacterOrTeam(pResult->m_ClientId, Team);
-	Teams.SetPractice(Team, false);
-	pPlayer->Respawn(); // set spawn as strong hook
+	if(Teams.HasPracticeSave(Team))
+	{
+		pSelf->SendChatTeam(Team, "Your team has been restored.");
+		Teams.RestorePracticeSave(Team);
+		Teams.SetPractice(Team, false);
+	}
+	else
+	{
+		Teams.KillCharacterOrTeam(pResult->m_ClientId, Team);
+		Teams.SetPractice(Team, false);
+		pPlayer->Respawn(); // set spawn as strong hook
+	}
 }
 
 void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData)

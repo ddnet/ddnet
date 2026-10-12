@@ -528,6 +528,18 @@ void CSaveTee::LoadHookedPlayer(const CSaveTeam *pTeam)
 	m_HookedPlayer = pTeam->m_pSavedTees[m_HookedPlayer].GetClientId();
 }
 
+void CSaveTee::DropHookedPlayerIfMissing(const CSaveTeam *pTeam)
+{
+	if(m_HookedPlayer == -1)
+		return;
+	for(int i = 0; i < pTeam->GetMembersCount(); i++)
+	{
+		if(pTeam->m_pSavedTees[i].GetClientId() == m_HookedPlayer)
+			return;
+	}
+	m_HookedPlayer = -1;
+}
+
 bool CSaveTee::IsHooking() const
 {
 	return m_HookState == HOOK_GRABBED || m_HookState == HOOK_FLYING;
@@ -658,6 +670,19 @@ bool CSaveTeam::HandleSaveError(ESaveResult Result, int ClientId, CGameContext *
 		break;
 	}
 	return true;
+}
+
+void CSaveTeam::RemoveClient(int ClientId)
+{
+	for(int i = 0; i < m_MembersCount; i++)
+	{
+		if(m_pSavedTees[i].GetClientId() != ClientId)
+			continue;
+		for(int j = i; j < m_MembersCount - 1; j++)
+			m_pSavedTees[j] = m_pSavedTees[j + 1];
+		m_MembersCount--;
+		i--;
+	}
 }
 
 bool CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong, bool IgnorePlayers)
