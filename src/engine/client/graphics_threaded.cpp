@@ -1021,14 +1021,24 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
-void CGraphics_Threaded::DrawRectExt(float x, float y, float w, float h, float r, int Corners)
+class CRoundedRect
 {
-	const int NumSegments = 8;
-	const float SegmentsAngle = pi / 2 / NumSegments;
-	IGraphics::CFreeformItem aFreeform[NumSegments * 4];
-	size_t NumItems = 0;
+public:
+	static constexpr int NUM_SEGMENTS = 8;
 
-	for(int i = 0; i < NumSegments; i += 2)
+	IGraphics::CFreeformItem m_aFreeform[NUM_SEGMENTS * 4];
+	int m_aFreeformCorners[NUM_SEGMENTS * 4]; // corner each freeform item belongs to
+	int m_NumFreeform = 0;
+	IGraphics::CQuadItem m_aQuads[9];
+	int m_NumQuads = 0;
+};
+
+static CRoundedRect GetRoundedRect(float x, float y, float w, float h, float r, int Corners)
+{
+	CRoundedRect Rect;
+	const float SegmentsAngle = pi / 2 / CRoundedRect::NUM_SEGMENTS;
+
+	for(int i = 0; i < CRoundedRect::NUM_SEGMENTS; i += 2)
 	{
 		float a1 = i * SegmentsAngle;
 		float a2 = (i + 1) * SegmentsAngle;
@@ -1040,54 +1050,70 @@ void CGraphics_Threaded::DrawRectExt(float x, float y, float w, float h, float r
 		float Sa2 = std::sin(a2);
 		float Sa3 = std::sin(a3);
 
-		if(Corners & CORNER_TL)
-			aFreeform[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & IGraphics::CORNER_TL)
+		{
+			Rect.m_aFreeformCorners[Rect.m_NumFreeform] = IGraphics::CORNER_TL;
+			Rect.m_aFreeform[Rect.m_NumFreeform++] = IGraphics::CFreeformItem(
 				x + r, y + r,
 				x + (1 - Ca1) * r, y + (1 - Sa1) * r,
 				x + (1 - Ca3) * r, y + (1 - Sa3) * r,
 				x + (1 - Ca2) * r, y + (1 - Sa2) * r);
+		}
 
-		if(Corners & CORNER_TR)
-			aFreeform[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & IGraphics::CORNER_TR)
+		{
+			Rect.m_aFreeformCorners[Rect.m_NumFreeform] = IGraphics::CORNER_TR;
+			Rect.m_aFreeform[Rect.m_NumFreeform++] = IGraphics::CFreeformItem(
 				x + w - r, y + r,
 				x + w - r + Ca1 * r, y + (1 - Sa1) * r,
 				x + w - r + Ca3 * r, y + (1 - Sa3) * r,
 				x + w - r + Ca2 * r, y + (1 - Sa2) * r);
+		}
 
-		if(Corners & CORNER_BL)
-			aFreeform[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & IGraphics::CORNER_BL)
+		{
+			Rect.m_aFreeformCorners[Rect.m_NumFreeform] = IGraphics::CORNER_BL;
+			Rect.m_aFreeform[Rect.m_NumFreeform++] = IGraphics::CFreeformItem(
 				x + r, y + h - r,
 				x + (1 - Ca1) * r, y + h - r + Sa1 * r,
 				x + (1 - Ca3) * r, y + h - r + Sa3 * r,
 				x + (1 - Ca2) * r, y + h - r + Sa2 * r);
+		}
 
-		if(Corners & CORNER_BR)
-			aFreeform[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & IGraphics::CORNER_BR)
+		{
+			Rect.m_aFreeformCorners[Rect.m_NumFreeform] = IGraphics::CORNER_BR;
+			Rect.m_aFreeform[Rect.m_NumFreeform++] = IGraphics::CFreeformItem(
 				x + w - r, y + h - r,
 				x + w - r + Ca1 * r, y + h - r + Sa1 * r,
 				x + w - r + Ca3 * r, y + h - r + Sa3 * r,
 				x + w - r + Ca2 * r, y + h - r + Sa2 * r);
+		}
 	}
-	QuadsDrawFreeform(aFreeform, NumItems);
 
-	CQuadItem aQuads[9];
-	NumItems = 0;
-	aQuads[NumItems++] = CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
-	aQuads[NumItems++] = CQuadItem(x + r, y, w - r * 2, r); // top
-	aQuads[NumItems++] = CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
-	aQuads[NumItems++] = CQuadItem(x, y + r, r, h - r * 2); // left
-	aQuads[NumItems++] = CQuadItem(x + w - r, y + r, r, h - r * 2); // right
+	Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
+	Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x + r, y, w - r * 2, r); // top
+	Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
+	Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x, y + r, r, h - r * 2); // left
+	Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x + w - r, y + r, r, h - r * 2); // right
 
-	if(!(Corners & CORNER_TL))
-		aQuads[NumItems++] = CQuadItem(x, y, r, r);
-	if(!(Corners & CORNER_TR))
-		aQuads[NumItems++] = CQuadItem(x + w, y, -r, r);
-	if(!(Corners & CORNER_BL))
-		aQuads[NumItems++] = CQuadItem(x, y + h, r, -r);
-	if(!(Corners & CORNER_BR))
-		aQuads[NumItems++] = CQuadItem(x + w, y + h, -r, -r);
+	if(!(Corners & IGraphics::CORNER_TL))
+		Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x, y, r, r);
+	if(!(Corners & IGraphics::CORNER_TR))
+		Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x + w, y, -r, r);
+	if(!(Corners & IGraphics::CORNER_BL))
+		Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x, y + h, r, -r);
+	if(!(Corners & IGraphics::CORNER_BR))
+		Rect.m_aQuads[Rect.m_NumQuads++] = IGraphics::CQuadItem(x + w, y + h, -r, -r);
 
-	QuadsDrawTL(aQuads, NumItems);
+	return Rect;
+}
+
+void CGraphics_Threaded::DrawRectExt(float x, float y, float w, float h, float r, int Corners)
+{
+	const CRoundedRect Rect = GetRoundedRect(x, y, w, h, r, Corners);
+	QuadsDrawFreeform(Rect.m_aFreeform, Rect.m_NumFreeform);
+	QuadsDrawTL(Rect.m_aQuads, Rect.m_NumQuads);
 }
 
 void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, float r, int Corners)
@@ -1100,111 +1126,59 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, ColorR
 		return;
 	}
 
-	const int NumSegments = 8;
-	const float SegmentsAngle = pi / 2 / NumSegments;
-	for(int i = 0; i < NumSegments; i += 2)
+	const CRoundedRect Rect = GetRoundedRect(x, y, w, h, r, Corners);
+
+	for(int i = 0; i < Rect.m_NumFreeform; i++)
 	{
-		float a1 = i * SegmentsAngle;
-		float a2 = (i + 1) * SegmentsAngle;
-		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = std::cos(a1);
-		float Ca2 = std::cos(a2);
-		float Ca3 = std::cos(a3);
-		float Sa1 = std::sin(a1);
-		float Sa2 = std::sin(a2);
-		float Sa3 = std::sin(a3);
-
-		if(Corners & CORNER_TL)
+		switch(Rect.m_aFreeformCorners[i])
 		{
-			SetColor(ColorTopLeft);
-			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
-				x + r, y + r,
-				x + (1 - Ca1) * r, y + (1 - Sa1) * r,
-				x + (1 - Ca3) * r, y + (1 - Sa3) * r,
-				x + (1 - Ca2) * r, y + (1 - Sa2) * r);
-			QuadsDrawFreeform(&ItemF, 1);
+		case IGraphics::CORNER_TL: SetColor(ColorTopLeft); break;
+		case IGraphics::CORNER_TR: SetColor(ColorTopRight); break;
+		case IGraphics::CORNER_BL: SetColor(ColorBottomLeft); break;
+		case IGraphics::CORNER_BR: SetColor(ColorBottomRight); break;
+		default: dbg_assert_failed("unknown corner type %d", Corners);
 		}
-
-		if(Corners & CORNER_TR)
-		{
-			SetColor(ColorTopRight);
-			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
-				x + w - r, y + r,
-				x + w - r + Ca1 * r, y + (1 - Sa1) * r,
-				x + w - r + Ca3 * r, y + (1 - Sa3) * r,
-				x + w - r + Ca2 * r, y + (1 - Sa2) * r);
-			QuadsDrawFreeform(&ItemF, 1);
-		}
-
-		if(Corners & CORNER_BL)
-		{
-			SetColor(ColorBottomLeft);
-			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
-				x + r, y + h - r,
-				x + (1 - Ca1) * r, y + h - r + Sa1 * r,
-				x + (1 - Ca3) * r, y + h - r + Sa3 * r,
-				x + (1 - Ca2) * r, y + h - r + Sa2 * r);
-			QuadsDrawFreeform(&ItemF, 1);
-		}
-
-		if(Corners & CORNER_BR)
-		{
-			SetColor(ColorBottomRight);
-			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
-				x + w - r, y + h - r,
-				x + w - r + Ca1 * r, y + h - r + Sa1 * r,
-				x + w - r + Ca3 * r, y + h - r + Sa3 * r,
-				x + w - r + Ca2 * r, y + h - r + Sa2 * r);
-			QuadsDrawFreeform(&ItemF, 1);
-		}
+		QuadsDrawFreeform(&Rect.m_aFreeform[i], 1);
 	}
 
 	SetColor4(ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight);
-	CQuadItem ItemQ = CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
-	QuadsDrawTL(&ItemQ, 1);
+	QuadsDrawTL(&Rect.m_aQuads[0], 1); // center
 
 	SetColor4(ColorTopLeft, ColorTopRight, ColorTopLeft, ColorTopRight);
-	ItemQ = CQuadItem(x + r, y, w - r * 2, r); // top
-	QuadsDrawTL(&ItemQ, 1);
+	QuadsDrawTL(&Rect.m_aQuads[1], 1); // top
 
 	SetColor4(ColorBottomLeft, ColorBottomRight, ColorBottomLeft, ColorBottomRight);
-	ItemQ = CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
-	QuadsDrawTL(&ItemQ, 1);
+	QuadsDrawTL(&Rect.m_aQuads[2], 1); // bottom
 
 	SetColor4(ColorTopLeft, ColorTopLeft, ColorBottomLeft, ColorBottomLeft);
-	ItemQ = CQuadItem(x, y + r, r, h - r * 2); // left
-	QuadsDrawTL(&ItemQ, 1);
+	QuadsDrawTL(&Rect.m_aQuads[3], 1); // left
 
 	SetColor4(ColorTopRight, ColorTopRight, ColorBottomRight, ColorBottomRight);
-	ItemQ = CQuadItem(x + w - r, y + r, r, h - r * 2); // right
-	QuadsDrawTL(&ItemQ, 1);
+	QuadsDrawTL(&Rect.m_aQuads[4], 1); // right
 
-	if(!(Corners & CORNER_TL))
+	int QuadIndex = 5;
+	if(!(Corners & IGraphics::CORNER_TL))
 	{
 		SetColor(ColorTopLeft);
-		ItemQ = CQuadItem(x, y, r, r);
-		QuadsDrawTL(&ItemQ, 1);
+		QuadsDrawTL(&Rect.m_aQuads[QuadIndex++], 1);
 	}
 
-	if(!(Corners & CORNER_TR))
+	if(!(Corners & IGraphics::CORNER_TR))
 	{
 		SetColor(ColorTopRight);
-		ItemQ = CQuadItem(x + w, y, -r, r);
-		QuadsDrawTL(&ItemQ, 1);
+		QuadsDrawTL(&Rect.m_aQuads[QuadIndex++], 1);
 	}
 
-	if(!(Corners & CORNER_BL))
+	if(!(Corners & IGraphics::CORNER_BL))
 	{
 		SetColor(ColorBottomLeft);
-		ItemQ = CQuadItem(x, y + h, r, -r);
-		QuadsDrawTL(&ItemQ, 1);
+		QuadsDrawTL(&Rect.m_aQuads[QuadIndex++], 1);
 	}
 
-	if(!(Corners & CORNER_BR))
+	if(!(Corners & IGraphics::CORNER_BR))
 	{
 		SetColor(ColorBottomRight);
-		ItemQ = CQuadItem(x + w, y + h, -r, -r);
-		QuadsDrawTL(&ItemQ, 1);
+		QuadsDrawTL(&Rect.m_aQuads[QuadIndex++], 1);
 	}
 }
 
@@ -1221,74 +1195,12 @@ int CGraphics_Threaded::CreateRectQuadContainer(float x, float y, float w, float
 		return ContainerIndex;
 	}
 
-	const int NumSegments = 8;
-	const float SegmentsAngle = pi / 2 / NumSegments;
-	IGraphics::CFreeformItem aFreeform[NumSegments * 4];
-	size_t NumItems = 0;
+	const CRoundedRect Rect = GetRoundedRect(x, y, w, h, r, Corners);
 
-	for(int i = 0; i < NumSegments; i += 2)
-	{
-		float a1 = i * SegmentsAngle;
-		float a2 = (i + 1) * SegmentsAngle;
-		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = std::cos(a1);
-		float Ca2 = std::cos(a2);
-		float Ca3 = std::cos(a3);
-		float Sa1 = std::sin(a1);
-		float Sa2 = std::sin(a2);
-		float Sa3 = std::sin(a3);
-
-		if(Corners & CORNER_TL)
-			aFreeform[NumItems++] = IGraphics::CFreeformItem(
-				x + r, y + r,
-				x + (1 - Ca1) * r, y + (1 - Sa1) * r,
-				x + (1 - Ca3) * r, y + (1 - Sa3) * r,
-				x + (1 - Ca2) * r, y + (1 - Sa2) * r);
-
-		if(Corners & CORNER_TR)
-			aFreeform[NumItems++] = IGraphics::CFreeformItem(
-				x + w - r, y + r,
-				x + w - r + Ca1 * r, y + (1 - Sa1) * r,
-				x + w - r + Ca3 * r, y + (1 - Sa3) * r,
-				x + w - r + Ca2 * r, y + (1 - Sa2) * r);
-
-		if(Corners & CORNER_BL)
-			aFreeform[NumItems++] = IGraphics::CFreeformItem(
-				x + r, y + h - r,
-				x + (1 - Ca1) * r, y + h - r + Sa1 * r,
-				x + (1 - Ca3) * r, y + h - r + Sa3 * r,
-				x + (1 - Ca2) * r, y + h - r + Sa2 * r);
-
-		if(Corners & CORNER_BR)
-			aFreeform[NumItems++] = IGraphics::CFreeformItem(
-				x + w - r, y + h - r,
-				x + w - r + Ca1 * r, y + h - r + Sa1 * r,
-				x + w - r + Ca3 * r, y + h - r + Sa3 * r,
-				x + w - r + Ca2 * r, y + h - r + Sa2 * r);
-	}
-
-	if(NumItems > 0)
-		QuadContainerAddQuads(ContainerIndex, aFreeform, NumItems);
-
-	CQuadItem aQuads[9];
-	NumItems = 0;
-	aQuads[NumItems++] = CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
-	aQuads[NumItems++] = CQuadItem(x + r, y, w - r * 2, r); // top
-	aQuads[NumItems++] = CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
-	aQuads[NumItems++] = CQuadItem(x, y + r, r, h - r * 2); // left
-	aQuads[NumItems++] = CQuadItem(x + w - r, y + r, r, h - r * 2); // right
-
-	if(!(Corners & CORNER_TL))
-		aQuads[NumItems++] = CQuadItem(x, y, r, r);
-	if(!(Corners & CORNER_TR))
-		aQuads[NumItems++] = CQuadItem(x + w, y, -r, r);
-	if(!(Corners & CORNER_BL))
-		aQuads[NumItems++] = CQuadItem(x, y + h, r, -r);
-	if(!(Corners & CORNER_BR))
-		aQuads[NumItems++] = CQuadItem(x + w, y + h, -r, -r);
-
-	if(NumItems > 0)
-		QuadContainerAddQuads(ContainerIndex, aQuads, NumItems);
+	if(Rect.m_NumFreeform > 0)
+		QuadContainerAddQuads(ContainerIndex, Rect.m_aFreeform, Rect.m_NumFreeform);
+	if(Rect.m_NumQuads > 0)
+		QuadContainerAddQuads(ContainerIndex, Rect.m_aQuads, Rect.m_NumQuads);
 
 	QuadContainerUpload(ContainerIndex);
 	QuadContainerChangeAutomaticUpload(ContainerIndex, true);
