@@ -5,6 +5,7 @@
 #include <base/log.h>
 #include <base/str.h>
 #include <base/thread.h>
+#include <base/time.h>
 
 #include <engine/shared/config.h>
 #include <engine/storage.h>
@@ -104,6 +105,9 @@ bool CHttpRequestEmscripten::ConfigureAndRun()
 		HeaderString("If-Modified-Since", aTimestamp);
 	}
 
+	m_LowSpeedOffset = 0;
+	m_LowSpeedCheckTime = time_get_nanoseconds();
+
 	std::vector<const char *> vpPackedHeaders;
 	vpPackedHeaders.reserve(2 * m_vRequestHeaders.size() + 1);
 	for(const auto &[Name, Value] : m_vRequestHeaders)
@@ -121,7 +125,8 @@ bool CHttpRequestEmscripten::ConfigureAndRun()
 	FetchAttributes.onerror = FetchCallbackFailure;
 	FetchAttributes.onprogress = FetchCallbackProgress;
 	FetchAttributes.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
-	// Only timeout property for whole transfer is supported.
+	// Only timeout property for whole transfer is supported by Fetch API.
+	// We implement low speed timeout ourselves in `OnProgress` function.
 	FetchAttributes.timeoutMSecs = m_Timeout.m_TimeoutMs;
 	FetchAttributes.requestHeaders = vpPackedHeaders.data();
 	FetchAttributes.requestData = reinterpret_cast<const char *>(m_pBody);
@@ -171,6 +176,22 @@ void CHttpRequestEmscripten::OnProgress()
 		m_pHttp->AddPendingStateChange(m_RequestId, EHttpState::ERROR);
 		return;
 	}
+
+	if(m_Timeout.m_LowSpeedLimit > 0 && m_Timeout.m_LowSpeedTime > 0)
+	{
+		const std::chrono::nanoseconds Now = time_get_nanoseconds();
+		if(m_pFetch->dataOffset - m_LowSpeedOffset >= (uint64_t)m_Timeout.m_LowSpeedLimit)
+		{
+			m_LowSpeedOffset = m_pFetch->dataOffset;
+			m_LowSpeedCheckTime = Now;
+		}
+		else if(Now - m_LowSpeedCheckTime > std::chrono::seconds(m_Timeout.m_LowSpeedTime))
+		{
+			m_pHttp->AddPendingStateChange(m_RequestId, EHttpState::ERROR);
+			return;
+		}
+	}
+
 	m_Current.store(m_pFetch->dataOffset, std::memory_order_relaxed);
 	m_Size.store(m_pFetch->totalBytes, std::memory_order_relaxed);
 	m_Progress.store(m_pFetch->totalBytes == 0 ? 0 : (100 * m_pFetch->dataOffset) / m_pFetch->totalBytes, std::memory_order_relaxed);

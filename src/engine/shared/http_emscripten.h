@@ -42,6 +42,8 @@ private:
 
 	uint64_t m_RequestId;
 	emscripten_fetch_t *m_pFetch = nullptr;
+	uint64_t m_LowSpeedOffset;
+	std::chrono::nanoseconds m_LowSpeedCheckTime;
 	bool m_CallbackFinished = false;
 
 	bool ConfigureAndRun();
