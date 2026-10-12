@@ -1,4 +1,3 @@
-#include <base/dbg.h>
 #include <base/io.h>
 #include <base/logger.h>
 #include <base/os.h>
@@ -12,6 +11,8 @@
 
 #include <cstdlib>
 #include <memory>
+
+static constexpr const char *const TOOL_NAME = "map_diff";
 
 static int TileDataIndex(const CMapItemLayerTilemap *pTilemap, int PhysicsLayerFlags)
 {
@@ -42,7 +43,7 @@ static bool DiffTileLayer(std::shared_ptr<IMap> apMaps[2], const char *apMapName
 		for(int i = 0; i < 2; ++i)
 		{
 			if(apTile[i] == nullptr)
-				dbg_msg("map_diff", "invalid tile layer data in \"%s\"", apMapNames[i]);
+				log_error(TOOL_NAME, "invalid tile layer data in \"%s\"", apMapNames[i]);
 		}
 		for(int i = 0; i < 2; ++i)
 			apMaps[i]->UnloadData(aData[i]);
@@ -74,7 +75,7 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 
 		if(!apMaps[i]->Load(pStorage, apMapNames[i], IStorage::TYPE_ABSOLUTE))
 		{
-			dbg_msg("map_diff", "error opening map '%s'", apMapNames[i]);
+			log_error(TOOL_NAME, "error opening map '%s'", apMapNames[i]);
 			return false;
 		}
 	}
@@ -86,9 +87,9 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 	// ensure basic layout
 	if(aLayersNum[0] != aLayersNum[1])
 	{
-		dbg_msg("map_diff", "different layer numbers:");
+		log_info(TOOL_NAME, "different layer numbers:");
 		for(int i = 0; i < 2; ++i)
-			dbg_msg("map_diff", "  \"%s\": %d layers", apMapNames[i], aLayersNum[i]);
+			log_info(TOOL_NAME, "  \"%s\": %d layers", apMapNames[i], aLayersNum[i]);
 		return false;
 	}
 
@@ -117,9 +118,9 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 			apTilemap[0]->m_Height != apTilemap[1]->m_Height ||
 			(apTilemap[0]->m_Flags & PhysicsLayerFlags) != (apTilemap[1]->m_Flags & PhysicsLayerFlags))
 		{
-			dbg_msg("map_diff", "different tile layers:");
+			log_info(TOOL_NAME, "different tile layers:");
 			for(int i = 0; i < 2; ++i)
-				dbg_msg("map_diff", " [%d:%s] (%dx%d, flags: %d)", j, aaName[i], apTilemap[i]->m_Width, apTilemap[i]->m_Height, apTilemap[i]->m_Flags);
+				log_info(TOOL_NAME, " [%d:%s] (%dx%d, flags: %d)", j, aaName[i], apTilemap[i]->m_Width, apTilemap[i]->m_Height, apTilemap[i]->m_Flags);
 			return false;
 		}
 
@@ -133,7 +134,7 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 			Ok = DiffTileLayer<CTeleTile>(apMaps, apMapNames, aData, Width, Height, [&](const CTeleTile &Tile0, const CTeleTile &Tile1, int x, int y) {
 				if(Tile0.m_Number != Tile1.m_Number || Tile0.m_Type != Tile1.m_Type)
 				{
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)",
+					log_info(TOOL_NAME, "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)",
 						aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile1.m_Number, Tile1.m_Type);
 				}
 			});
@@ -143,7 +144,7 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 			Ok = DiffTileLayer<CSpeedupTile>(apMaps, apMapNames, aData, Width, Height, [&](const CSpeedupTile &Tile0, const CSpeedupTile &Tile1, int x, int y) {
 				if(Tile0.m_Force != Tile1.m_Force || Tile0.m_MaxSpeed != Tile1.m_MaxSpeed || Tile0.m_Type != Tile1.m_Type || Tile0.m_Angle != Tile1.m_Angle)
 				{
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (force: %d, maxspeed: %d, angle: %d, type: %d) != (force: %d, maxspeed: %d, angle: %d, type: %d)",
+					log_info(TOOL_NAME, "[%d:%s] %dx%d: (force: %d, maxspeed: %d, angle: %d, type: %d) != (force: %d, maxspeed: %d, angle: %d, type: %d)",
 						aLayersNum[0], aaName[0], x, y, Tile0.m_Force, Tile0.m_MaxSpeed, Tile0.m_Angle, Tile0.m_Type, Tile1.m_Force, Tile1.m_MaxSpeed, Tile1.m_Angle, Tile1.m_Type);
 				}
 			});
@@ -153,7 +154,7 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 			Ok = DiffTileLayer<CSwitchTile>(apMaps, apMapNames, aData, Width, Height, [&](const CSwitchTile &Tile0, const CSwitchTile &Tile1, int x, int y) {
 				if(Tile0.m_Number != Tile1.m_Number || Tile0.m_Type != Tile1.m_Type || Tile0.m_Flags != Tile1.m_Flags || Tile0.m_Delay != Tile1.m_Delay)
 				{
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d, flags: %d, delay: %d) != (number: %d, type: %d, flags: %d, delay: %d)",
+					log_info(TOOL_NAME, "[%d:%s] %dx%d: (number: %d, type: %d, flags: %d, delay: %d) != (number: %d, type: %d, flags: %d, delay: %d)",
 						aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile0.m_Flags, Tile0.m_Delay, Tile1.m_Number, Tile1.m_Type, Tile1.m_Flags, Tile1.m_Delay);
 				}
 			});
@@ -163,7 +164,7 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 			Ok = DiffTileLayer<CTuneTile>(apMaps, apMapNames, aData, Width, Height, [&](const CTuneTile &Tile0, const CTuneTile &Tile1, int x, int y) {
 				if(Tile0.m_Number != Tile1.m_Number || Tile0.m_Type != Tile1.m_Type)
 				{
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)",
+					log_info(TOOL_NAME, "[%d:%s] %dx%d: (number: %d, type: %d) != (number: %d, type: %d)",
 						aLayersNum[0], aaName[0], x, y, Tile0.m_Number, Tile0.m_Type, Tile1.m_Number, Tile1.m_Type);
 				}
 			});
@@ -174,7 +175,7 @@ static bool Process(IStorage *pStorage, const char *apMapNames[2])
 			Ok = DiffTileLayer<CTile>(apMaps, apMapNames, aData, Width, Height, [&](const CTile &Tile0, const CTile &Tile1, int x, int y) {
 				if(Tile0.m_Index != Tile1.m_Index || Tile0.m_Flags != Tile1.m_Flags)
 				{
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)",
+					log_info(TOOL_NAME, "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)",
 						aLayersNum[0], aaName[0], x, y, Tile0.m_Index, Tile0.m_Flags, Tile1.m_Index, Tile1.m_Flags);
 				}
 			});
@@ -205,14 +206,14 @@ int main(int argc, const char *argv[])
 
 	if(argc != 3)
 	{
-		dbg_msg("usage", "%s map1 map2", argv[0]);
+		log_error(TOOL_NAME, "Usage: %s map1 map2", argc > 0 ? argv[0] : TOOL_NAME);
 		return -1;
 	}
 
 	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 	if(!pStorage)
 	{
-		log_error("map_diff", "Error creating local storage");
+		log_error(TOOL_NAME, "Error creating local storage");
 		return -1;
 	}
 

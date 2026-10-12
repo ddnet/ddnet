@@ -11,6 +11,8 @@
 
 #include <chrono>
 
+static constexpr const char *const TOOL_NAME = "twping";
+
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
@@ -27,14 +29,14 @@ int main(int argc, const char **argv)
 
 	if(argc != 2)
 	{
-		log_error("twping", "usage: %s server[:port] (default port: 8303)", argv[0]);
+		log_error(TOOL_NAME, "Usage: %s server[:port] (default port: 8303)", argc > 0 ? argv[0] : TOOL_NAME);
 		return -1;
 	}
 
 	NETADDR Addr;
 	if(net_host_lookup(argv[1], &Addr, NETTYPE_ALL))
 	{
-		log_error("twping", "host lookup failed");
+		log_error(TOOL_NAME, "host lookup failed");
 		return -1;
 	}
 
@@ -76,11 +78,11 @@ int main(int argc, const char **argv)
 				continue;
 
 			const int64_t EndTime = time_get();
-			log_info("twping", "%g ms", (double)(EndTime - StartTime) / time_freq() * 1000);
+			log_info(TOOL_NAME, "%g ms", (double)(EndTime - StartTime) / time_freq() * 1000);
 			return 0;
 		}
 	}
 
-	log_info("twping", "timeout (%" PRId64 " ms)", std::chrono::duration_cast<std::chrono::milliseconds>(Timeout).count());
+	log_info(TOOL_NAME, "timeout (%" PRId64 " ms)", std::chrono::duration_cast<std::chrono::milliseconds>(Timeout).count());
 	return 1;
 }

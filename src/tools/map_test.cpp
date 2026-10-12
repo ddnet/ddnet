@@ -7,7 +7,7 @@
 #include <engine/shared/uuid_manager.h>
 #include <engine/storage.h>
 
-static const char *TOOL_NAME = "map_test";
+static constexpr const char *const TOOL_NAME = "map_test";
 
 static int TestMap(const char *pMapPath, bool CalcHashes, IStorage *pStorage)
 {
@@ -109,7 +109,7 @@ int main(int argc, const char **argv)
 	}
 	else
 	{
-		log_error(TOOL_NAME, "Usage: %s [--calc-hashes] <map>", TOOL_NAME);
+		log_error(TOOL_NAME, "Usage: %s [--calc-hashes] <map>", argc > 0 ? argv[0] : TOOL_NAME);
 		return -1;
 	}
 

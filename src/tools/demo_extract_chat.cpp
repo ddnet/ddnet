@@ -15,7 +15,7 @@
 
 #include <memory>
 
-static const char *TOOL_NAME = "demo_extract_chat";
+static constexpr const char *const TOOL_NAME = "demo_extract_chat";
 
 class CClientSnapshotHandler
 {
@@ -282,7 +282,7 @@ int main(int argc, const char *argv[])
 
 	if(argc != 2)
 	{
-		log_error(TOOL_NAME, "Usage: %s <demo_filename>", TOOL_NAME);
+		log_error(TOOL_NAME, "Usage: %s <demo_filename>", argc > 0 ? argv[0] : TOOL_NAME);
 		return -1;
 	}
 
