@@ -7,20 +7,7 @@
 #include <base/io.h>
 #include <base/str.h>
 
-static char EscapeJsonChar(char c)
-{
-	switch(c)
-	{
-	case '\"': return '\"';
-	case '\\': return '\\';
-	case '\b': return 'b';
-	case '\n': return 'n';
-	case '\r': return 'r';
-	case '\t': return 't';
-	// Don't escape '\f', who uses that. :)
-	default: return 0;
-	}
-}
+#include <engine/shared/json.h>
 
 CJsonWriter::CJsonWriter()
 {
