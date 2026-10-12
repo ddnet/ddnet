@@ -832,8 +832,8 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 									pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
 								}
 							}
-							pMap->UnloadData(pTilemapItem->m_Switch);
 						}
+						pMap->UnloadData(pTilemapItem->m_Switch);
 					}
 					else if(pTiles->m_HasTune)
 					{
@@ -849,8 +849,8 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 								else
 									pTiles->m_pTiles[i].m_Index = 0;
 							}
-							pMap->UnloadData(pTilemapItem->m_Tune);
 						}
+						pMap->UnloadData(pTilemapItem->m_Tune);
 					}
 					else // regular tile layer or game layer
 					{
