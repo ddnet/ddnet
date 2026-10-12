@@ -136,7 +136,9 @@ void CHttpRequestEmscripten::OnFailure()
 	}
 	m_CallbackFinished = true;
 
-	m_pHttp->AddPendingStateChange(m_RequestId, !m_FailOnErrorStatus && m_pFetch->status >= 400 ? EHttpState::DONE : EHttpState::ERROR);
+	const bool Success = m_pFetch->status >= 200 && (m_pFetch->status < 400 || !m_FailOnErrorStatus);
+
+	m_pHttp->AddPendingStateChange(m_RequestId, Success ? EHttpState::DONE : EHttpState::ERROR);
 }
 
 void CHttpRequestEmscripten::OnProgress()
