@@ -655,6 +655,13 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 					pSelf->SendChatTeam(Team, "Practice mode was not enabled.");
 					break;
 				}
+
+				// reset voting so everyone can /practice again
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(Teams.m_Core.Team(i) == Team && pSelf->m_apPlayers[i])
+						pSelf->m_apPlayers[i]->m_VotedForPractice = false;
+				}
 				return;
 			}
 
@@ -702,6 +709,15 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 	if(Teams.GetSaving(Team))
 	{
 		log_info("chatresp", "Practice mode can't be disabled while team save or load is in progress");
+		return;
+	}
+
+	if(Teams.HasPracticeSave(Team) && !Teams.IsPracticeSaveMember(Team, pResult->m_ClientId))
+	{
+		// joined during practice, kick them back to team 0 to "unpractice" themselves instead of the whole team.
+		Teams.SetForceCharacterTeam(pResult->m_ClientId, TEAM_FLOCK);
+		pPlayer->KillCharacter(WEAPON_GAME);
+		pSelf->SendChatTarget(pResult->m_ClientId, "You were moved back to team 0 because you joined during practice.");
 		return;
 	}
 
@@ -1014,6 +1030,12 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if(pSelf->m_pController->Teams().HasPracticeSave(Team) && !pSelf->m_pController->Teams().IsPracticeSaveMember(Team, pResult->m_ClientId))
+	{
+		log_info("chatresp", "Only members from before practice can lock this team.");
+		return;
+	}
+
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
 		return;
 
@@ -1024,6 +1046,9 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
+		// locking team kicks everyone not in practice save
+		if(pSelf->m_pController->Teams().HasPracticeSave(Team))
+			pSelf->m_pController->Teams().KickPracticeJoiners(Team);
 		pSelf->m_pController->Teams().SetTeamLock(Team, true);
 
 		if(pSelf->m_pController->Teams().TeamFlock(Team))

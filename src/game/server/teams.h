@@ -152,8 +152,10 @@ public:
 
 	std::optional<ESaveResult> CreatePracticeSave(int Team);
 	bool HasPracticeSave(int Team) const;
+	bool IsPracticeSaveMember(int Team, int ClientId) const;
 	bool RestorePracticeSave(int Team);
 	void ClearPracticeSave(int Team);
+	void KickPracticeJoiners(int Team);
 	void DropPracticeSavePlayer(int Team, int ClientId);
 	bool GetPracticeRestoring(int Team) const;
 };
