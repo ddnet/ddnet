@@ -36,6 +36,14 @@ TEST(Storage, ReplaceFile)
 	EXPECT_FALSE(pStorage->ReplaceFile("nested/prepared", "nested/file", IStorage::TYPE_SAVE));
 	ExpectContents("nested/file", "previous file");
 
+	// Windows allows fs_rename to replace a file with a directory. The file-only
+	// replacement wrapper must reject that input and preserve the destination.
+	ASSERT_TRUE(pStorage->CreateFolder("nested/prepared", IStorage::TYPE_SAVE));
+	EXPECT_FALSE(pStorage->ReplaceFile("nested/prepared", "nested/file", IStorage::TYPE_SAVE));
+	ExpectContents("nested/file", "previous file");
+	EXPECT_TRUE(pStorage->FolderExists("nested/prepared", IStorage::TYPE_SAVE));
+	ASSERT_TRUE(pStorage->RemoveFolder("nested/prepared", IStorage::TYPE_SAVE));
+
 	Write("nested/prepared", "completed file");
 	EXPECT_FALSE(pStorage->ReplaceFile("nested/prepared", "missing/file", IStorage::TYPE_SAVE));
 	ExpectContents("nested/prepared", "completed file");

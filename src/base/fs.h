@@ -288,6 +288,10 @@ void fs_normalize_path(char *path);
  * @return `0` on success, `1` on failure. A failure preserves the destination.
  *
  * @remark Does not fall back to copying across filesystems.
+ * @remark Returns an error if the source path names a directory.
+ * @remark Replacing an open destination on Windows requires filesystem support
+ * for POSIX rename semantics and readers that allow deletion. Otherwise it fails
+ * without deleting the destination.
  */
 [[nodiscard]] int fs_replace_file(const char *oldname, const char *newname);
 
