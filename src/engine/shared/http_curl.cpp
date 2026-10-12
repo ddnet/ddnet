@@ -102,6 +102,8 @@ bool CHttpRequestCurl::ConfigureHandle(CURL *pHandle)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, Protocols);
+	// Note that ‘CURLOPT_REDIR_PROTOCOLS’ does not need to be set explicitly,
+	// as redirects are only allowed for the same protocols specified above.
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
