@@ -123,8 +123,13 @@ void IHttpRequest::OnValidation(bool Success)
 	m_ValidateBeforeOverwrite = false;
 	if(Success)
 	{
-		if(m_IfModifiedSince >= 0 && m_StatusCode == 304) // 304 Not Modified
+		if(m_StatusCode == 304) // 304 Not Modified
 		{
+			if(m_IfModifiedSince < 0)
+			{
+				log_error("http", "got unexpected '304 Not Modified' status: %s", m_aDest);
+				m_State = EHttpState::ERROR;
+			}
 			(void)fs_remove(m_aDestAbsoluteTmp);
 			return;
 		}
@@ -342,10 +347,15 @@ void IHttpRequest::OnCompletionInternal(EHttpState State)
 		{
 			(void)fs_remove(m_aDestAbsoluteTmp);
 		}
-		else if(m_IfModifiedSince >= 0 && m_StatusCode == 304) // 304 Not Modified
+		else if(m_StatusCode == 304) // 304 Not Modified
 		{
 			(void)fs_remove(m_aDestAbsoluteTmp);
-			if(m_WriteToMemory)
+			if(m_IfModifiedSince < 0)
+			{
+				log_error("http", "got unexpected '304 Not Modified' status: %s", m_aDest);
+				State = EHttpState::ERROR;
+			}
+			else if(m_WriteToMemory)
 			{
 				free(m_pBuffer);
 				m_pBuffer = nullptr;
