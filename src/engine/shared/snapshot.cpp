@@ -5,7 +5,6 @@
 #include "compression.h"
 #include "uuid_manager.h"
 
-#include <base/bytes.h>
 #include <base/dbg.h>
 #include <base/math.h>
 #include <base/mem.h>
@@ -53,9 +52,7 @@ int CSnapshot::GetExternalItemType(int InternalType) const
 		return -1;
 	}
 	const CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
-	CUuid Uuid;
-	for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
-		uint_to_bytes_be(&Uuid.m_aData[i * sizeof(int32_t)], pTypeItem->Data()[i]);
+	const CUuid Uuid = UuidFromInts(pTypeItem->Data(), UUID_INT_SIZE);
 
 	return g_UuidManager.LookupUuid(Uuid);
 }
@@ -82,9 +79,8 @@ const void *CSnapshot::FindItem(int Type, int Id) const
 	if(Type >= OFFSET_UUID)
 	{
 		CUuid TypeUuid = g_UuidManager.GetUuid(Type);
-		int aTypeUuidItem[sizeof(CUuid) / sizeof(int32_t)];
-		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
-			aTypeUuidItem[i] = bytes_be_to_uint(&TypeUuid.m_aData[i * sizeof(int32_t)]);
+		int aTypeUuidItem[UUID_INT_SIZE];
+		UuidToInts(TypeUuid, aTypeUuidItem);
 
 		bool Found = false;
 		for(int i = 0; i < m_NumItems; i++)
@@ -840,10 +836,7 @@ bool CSnapshotBuilder::AddExtendedItemType(int Index)
 
 	const int TypeId = m_aExtendedItemTypes[Index];
 	const CUuid Uuid = g_UuidManager.GetUuid(TypeId);
-	for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
-	{
-		pUuidItem[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
-	}
+	UuidToInts(Uuid, pUuidItem, UUID_INT_SIZE);
 	return true;
 }
 
