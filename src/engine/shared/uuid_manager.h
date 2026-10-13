@@ -33,21 +33,23 @@ void FormatUuid(CUuid Uuid, char *pBuffer, unsigned BufferLength);
 // Returns nonzero on failure.
 int ParseUuid(CUuid *pUuid, const char *pBuffer);
 // Converts a UUID into an array of UUID_INT_SIZE big-endian 32-bit ints.
-void UuidToInts(const CUuid &Uuid, int *pInts, size_t Size);
+void UuidToInts(const CUuid &Uuid, int *pInts);
 
 template<int N>
 void UuidToInts(const CUuid &Uuid, int (&aInts)[N])
 {
-	UuidToInts(Uuid, aInts, N);
+	static_assert(N == UUID_INT_SIZE, "Array has wrong size");
+	UuidToInts(Uuid, static_cast<int *>(aInts));
 }
 
 // Converts an array of UUID_INT_SIZE integers, each holding one big-endian 32-bit int, into a UUID.
-CUuid UuidFromInts(const int *pInts, size_t Size);
+CUuid UuidFromInts(const int *pInts);
 
 template<int N>
 CUuid UuidFromInts(const int (&aInts)[N])
 {
-	return UuidFromInts(aInts, N);
+	static_assert(N == UUID_INT_SIZE, "Array has wrong size");
+	return UuidFromInts(static_cast<const int *>(aInts));
 }
 
 class CName

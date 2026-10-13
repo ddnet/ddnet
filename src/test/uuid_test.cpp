@@ -65,8 +65,9 @@ TEST(Uuid, FromInts)
 		0x01234567,
 		std::bit_cast<int32_t>(0x89abcdef),
 	};
+	int *pInts = &aInts[0];
 	CUuid Uuid1 = UuidFromInts(aInts);
-	CUuid Uuid2 = UuidFromInts(aInts, UUID_INT_SIZE);
+	CUuid Uuid2 = UuidFromInts(pInts);
 	ASSERT_EQ(Uuid1, Uuid2);
 
 	char aUuid1[UUID_MAXSTRSIZE];
@@ -75,25 +76,4 @@ TEST(Uuid, FromInts)
 	FormatUuid(Uuid2, aUuid2, sizeof(aUuid2));
 	EXPECT_STREQ(aUuid1, "01234567-89ab-cdef-0123-456789abcdef");
 	EXPECT_STREQ(aUuid2, "01234567-89ab-cdef-0123-456789abcdef");
-}
-
-TEST(Uuid, ToIntsFailed)
-{
-	CUuid Uuid;
-	char aUuid[UUID_MAXSTRSIZE] = "01234567-89ab-cdef-0123-456789abcdef";
-	EXPECT_FALSE(ParseUuid(&Uuid, aUuid));
-
-	int aIntsTooSmall[UUID_INT_SIZE - 1];
-	int aIntsTooBig[UUID_INT_SIZE + 1];
-	ASSERT_DEATH(UuidToInts(Uuid, aIntsTooSmall), "");
-	ASSERT_DEATH(UuidToInts(Uuid, aIntsTooBig), "");
-}
-
-TEST(Uuid, FromIntsFailed)
-{
-	int aIntsTooSmall[UUID_INT_SIZE - 1]{1, 2, 3};
-	int aIntsTooBig[UUID_INT_SIZE + 1]{1, 2, 3, 4, 5};
-
-	ASSERT_DEATH(UuidFromInts(aIntsTooSmall);, "");
-	ASSERT_DEATH(UuidFromInts(aIntsTooBig);, "");
 }
