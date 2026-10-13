@@ -1189,6 +1189,19 @@ void CClient::RecreateBrokenSockets()
 }
 #endif
 
+bool CClient::IsAllowedOrigin(const char *pAllowedOrigins, const char *pOrigin)
+{
+	if(pAllowedOrigins[0] == '\0')
+		return false;
+	if(!str_comp(pAllowedOrigins, "*"))
+		return true;
+	if(pOrigin[0] == '\0')
+		return false;
+	if(str_in_list(pAllowedOrigins, ",", pOrigin))
+		return true;
+	return false;
+}
+
 void CClient::FailedRedirect(const char *pReason)
 {
 	m_Redirect = std::nullopt;
@@ -1718,7 +1731,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 
 			const char *pOriginIp = m_Redirect.value().OriginServerIpNoPort();
-			if(!str_is_allowed_origin(pAllowedOrigins, pOriginIp))
+			if(!IsAllowedOrigin(pAllowedOrigins, pOriginIp))
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "redirects from '%s' not allowed", pOriginIp);

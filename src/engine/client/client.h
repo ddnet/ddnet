@@ -400,6 +400,17 @@ public:
 #if defined(CONF_PLATFORM_IOS)
 	void RecreateBrokenSockets();
 #endif
+	/**
+	 * Checks if a host is in a list of allowed origins.
+	 * This is used for redirects.
+	 *
+	 * @param pAllowedOrigins Comma-separated list of hosts ("" is allow none and "*" is allow all)
+	 * @param pOrigin Origin to search in the list of allowed origins. This has to be a ip address without port.
+	 *
+	 * @return true if the pOrigin is allowed by the pAllowedOrigins list
+	 */
+	static bool IsAllowedOrigin(const char *pAllowedOrigins, const char *pOrigin);
+
 	void FailedRedirect(const char *pReason);
 
 	const char *PlayerName() const override;
