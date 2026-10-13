@@ -224,6 +224,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 			{
 				if(Command == 'v')
 				{
+					// If the victim argument is optional we default to "me"
 					pResult->AddVictim("me");
 					break;
 				}
