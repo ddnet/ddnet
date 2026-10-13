@@ -52,7 +52,7 @@ int CSnapshot::GetExternalItemType(int InternalType) const
 		return -1;
 	}
 	const CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
-	const CUuid Uuid = UuidFromInts(pTypeItem->Data(), UUID_INT_SIZE);
+	const CUuid Uuid = UuidFromInts(pTypeItem->Data());
 
 	return g_UuidManager.LookupUuid(Uuid);
 }
@@ -836,7 +836,7 @@ bool CSnapshotBuilder::AddExtendedItemType(int Index)
 
 	const int TypeId = m_aExtendedItemTypes[Index];
 	const CUuid Uuid = g_UuidManager.GetUuid(TypeId);
-	UuidToInts(Uuid, pUuidItem, UUID_INT_SIZE);
+	UuidToInts(Uuid, pUuidItem);
 	return true;
 }
 
