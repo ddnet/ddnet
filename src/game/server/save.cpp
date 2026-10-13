@@ -217,6 +217,9 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_HasTelegunLaser = m_HasTelegunLaser;
 	pChr->m_Core.m_HasTelegunGrenade = m_HasTelegunGrenade;
 
+	// Practice mode reset
+	pChr->m_Core.m_Invincible = false;
+
 	// Core
 	pChr->m_Core.m_Pos = m_CorePos;
 	pChr->m_Core.m_Vel = m_Vel;
