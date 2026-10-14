@@ -2,11 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "hud.h"
 
-#include "binds.h"
-#include "camera.h"
-#include "controls.h"
-#include "voting.h"
-
 #include <base/color.h>
 #include <base/time.h>
 
@@ -19,7 +14,10 @@
 #include <generated/protocol.h>
 
 #include <game/client/animstate.h>
+#include <game/client/components/camera.h>
+#include <game/client/components/controls.h>
 #include <game/client/components/scoreboard.h>
+#include <game/client/components/voting.h>
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
 #include <game/layers.h>
