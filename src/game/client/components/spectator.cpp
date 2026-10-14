@@ -12,6 +12,7 @@
 #include <generated/protocol.h>
 
 #include <game/client/animstate.h>
+#include <game/client/components/multiview.h>
 #include <game/client/gameclient.h>
 #include <game/localization.h>
 
@@ -134,9 +135,9 @@ void CSpectator::ConMultiView(IConsole::IResult *pResult, void *pUserData)
 	int Input = pResult->GetInteger(0);
 
 	if(Input == -1)
-		pSelf->GameClient()->m_MultiView.ClearIds(); // remove everyone from multiview
+		pSelf->GameClient()->m_MultiView.ClearViews(); // remove everyone from multiview
 	else if(Input < MAX_CLIENTS && Input >= 0)
-		pSelf->GameClient()->m_MultiView.ToggleId(Input); // activate or deactivate one player from multiview
+		pSelf->GameClient()->m_MultiView.ToggleView(Input); // activate or deactivate one player from multiview
 }
 
 CSpectator::CSpectator()
@@ -491,14 +492,14 @@ void CSpectator::OnRender()
 				{
 					if(GameClient()->m_MultiView.Team() == DDTeam)
 					{
-						GameClient()->m_MultiView.ToggleId(m_SelectedSpectatorId);
-						if(!GameClient()->m_MultiView.IsIdSet(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId))
+						GameClient()->m_MultiView.ToggleView(m_SelectedSpectatorId);
+						if(!GameClient()->m_MultiView.IsViewed(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId))
 						{
-							int NewClientId = GameClient()->m_MultiView.FindFirstId();
-							if(NewClientId < MAX_CLIENTS && NewClientId >= 0)
+							int NewClientId = GameClient()->m_MultiView.FindFirstViewed();
+							if(NewClientId != SPEC_FREEVIEW)
 							{
-								GameClient()->m_MultiView.ClearId(NewClientId);
-								GameClient()->m_MultiView.SetId(NewClientId, true);
+								GameClient()->m_MultiView.ClearView(NewClientId);
+								GameClient()->m_MultiView.ViewPlayer(NewClientId);
 								Spectate(NewClientId);
 							}
 						}
@@ -543,7 +544,7 @@ void CSpectator::OnRender()
 
 		if(GameClient()->m_MultiView.IsActivated())
 		{
-			if(GameClient()->m_MultiView.IsIdSet(GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId))
+			if(GameClient()->m_MultiView.IsViewed(GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId))
 			{
 				TextRender()->TextColor(0.1f, 1.0f, 0.1f, PlayerSelected ? 1.0f : 0.5f);
 				TextRender()->Text(Width / 2.0f + x + 50.0f + 180.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize - 3, "⬤", 220.0f);
