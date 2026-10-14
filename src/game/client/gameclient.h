@@ -56,6 +56,7 @@
 #include "components/menu_background.h"
 #include "components/menus.h"
 #include "components/motd.h"
+#include "components/multiview.h"
 #include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/players.h"
@@ -178,6 +179,7 @@ public:
 	CTouchControls m_TouchControls;
 	CVoting m_Voting;
 	CSpectator m_Spectator;
+	CMultiView m_MultiView;
 
 	CPlayers m_Players;
 	CNamePlates m_NamePlates;
@@ -907,15 +909,6 @@ public:
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
-	int m_MultiViewTeam;
-	float m_MultiViewPersonalZoom;
-	bool m_MultiViewShowHud;
-	bool m_MultiViewActivated;
-	bool m_aMultiViewId[MAX_CLIENTS];
-
-	void ResetMultiView();
-	int FindFirstMultiViewId();
-	void CleanMultiViewId(int ClientId);
 	int m_MapBestTimeSeconds;
 	int m_MapBestTimeMillis;
 	char m_aMapDescription[512];
@@ -976,29 +969,6 @@ private:
 	float m_LastDeadzone;
 	float m_LastFollowFactor;
 	bool m_LastDummyConnected;
-
-	bool InitMultiView(int Team);
-	void HandleMultiView();
-	bool IsMultiViewIdSet();
-	void CleanMultiViewIds();
-	float CalculateMultiViewMultiplier(vec2 TargetPos);
-	float CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel);
-	float MapValue(float MaxValue, float MinValue, float MaxRange, float MinRange, float Value);
-
-	struct SMultiView
-	{
-		bool m_Solo;
-		bool m_IsInit;
-		bool m_Teleported;
-		bool m_aVanish[MAX_CLIENTS];
-		vec2 m_OldPos;
-		int m_OldPersonalZoom;
-		float m_SecondChance;
-		float m_OldCameraDistance;
-		float m_aLastFreeze[MAX_CLIENTS];
-	};
-
-	SMultiView m_MultiView;
 
 	void OnSaveCodeNetMessage(const CNetMsg_Sv_SaveCode *pMsg);
 	void StoreSave(const char *pTeamMembers, const char *pGeneratedCode) const;
