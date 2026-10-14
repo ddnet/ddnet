@@ -264,6 +264,14 @@ void CRenderTools::RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInf
 	Graphics()->QuadsSetRotation(0);
 }
 
+void CRenderTools::RenderIdleTeeAtCenter(const CTeeRenderInfo *pInfo, vec2 Center, int Emote, vec2 Dir, float Alpha) const
+{
+	const CAnimState *pIdleState = CAnimState::GetIdle();
+	vec2 OffsetToMid;
+	GetRenderTeeOffsetToRenderedTee(pIdleState, pInfo, OffsetToMid);
+	RenderTee(pIdleState, pInfo, Emote, Dir, Center + vec2(0.0f, OffsetToMid.y), Alpha);
+}
+
 void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha) const
 {
 	vec2 Direction = Dir;

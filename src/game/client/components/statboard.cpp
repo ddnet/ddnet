@@ -297,12 +297,7 @@ void CStatboard::RenderGlobalStats()
 		CTeeRenderInfo Teeinfo = GameClient()->m_aClients[pInfo->m_ClientId].m_RenderInfo;
 		Teeinfo.m_Size *= TeeSizemod;
 
-		const CAnimState *pIdleState = CAnimState::GetIdle();
-		vec2 OffsetToMid;
-		CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &Teeinfo, OffsetToMid);
-		vec2 TeeRenderPos(x + Teeinfo.m_Size / 2, y + LineHeight / 2.0f + OffsetToMid.y);
-
-		RenderTools()->RenderTee(pIdleState, &Teeinfo, EMOTE_NORMAL, vec2(1, 0), TeeRenderPos);
+		RenderTools()->RenderIdleTeeAtCenter(&Teeinfo, vec2(x + Teeinfo.m_Size / 2, y + LineHeight / 2.0f));
 
 		char aBuf[128];
 		CTextCursor Cursor;
