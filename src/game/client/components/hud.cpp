@@ -1576,7 +1576,7 @@ void CHud::RenderSpectatorHud()
 
 	// draw the text
 	char aBuf[128];
-	if(GameClient()->m_MultiViewActivated)
+	if(GameClient()->m_MultiView.IsActivated())
 	{
 		str_copy(aBuf, Localize("Multi-View"));
 	}
@@ -1718,7 +1718,7 @@ void CHud::OnRender()
 			if(SpectatorId != SPEC_FREEVIEW &&
 				GameClient()->m_Snap.m_aCharacters[SpectatorId].m_HasExtendedData &&
 				g_Config.m_ClShowhudDDRace &&
-				(!GameClient()->m_MultiViewActivated || GameClient()->m_MultiViewShowHud) &&
+				(!GameClient()->m_MultiView.IsActivated() || GameClient()->m_MultiView.ShowHud()) &&
 				GameClient()->m_GameInfo.m_HudDDRace)
 			{
 				RenderPlayerState(SpectatorId);

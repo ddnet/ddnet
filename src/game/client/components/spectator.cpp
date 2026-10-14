@@ -134,9 +134,9 @@ void CSpectator::ConMultiView(IConsole::IResult *pResult, void *pUserData)
 	int Input = pResult->GetInteger(0);
 
 	if(Input == -1)
-		std::fill(std::begin(pSelf->GameClient()->m_aMultiViewId), std::end(pSelf->GameClient()->m_aMultiViewId), false); // remove everyone from multiview
+		pSelf->GameClient()->m_MultiView.ClearIds(); // remove everyone from multiview
 	else if(Input < MAX_CLIENTS && Input >= 0)
-		pSelf->GameClient()->m_aMultiViewId[Input] = !pSelf->GameClient()->m_aMultiViewId[Input]; // activate or deactivate one player from multiview
+		pSelf->GameClient()->m_MultiView.ToggleId(Input); // activate or deactivate one player from multiview
 }
 
 CSpectator::CSpectator()
@@ -175,7 +175,7 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 
 	if(g_Config.m_ClSpectatorMouseclicks)
 	{
-		if(GameClient()->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
+		if(GameClient()->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiView.IsActivated() &&
 			!Ui()->IsPopupOpen() && !GameClient()->m_GameConsole.IsActive() && !GameClient()->m_Menus.IsActive())
 		{
 			if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
@@ -211,12 +211,12 @@ void CSpectator::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	if(!GameClient()->m_MultiViewActivated && m_MultiViewActivateDelay != 0.0f)
+	if(!GameClient()->m_MultiView.IsActivated() && m_MultiViewActivateDelay != 0.0f)
 	{
 		if(m_MultiViewActivateDelay <= Client()->LocalTime())
 		{
 			m_MultiViewActivateDelay = 0.0f;
-			GameClient()->m_MultiViewActivated = true;
+			GameClient()->m_MultiView.SetActivated(true);
 		}
 	}
 
@@ -228,16 +228,16 @@ void CSpectator::OnRender()
 			if(m_SelectedSpectatorId != NO_SELECTION)
 			{
 				if(m_SelectedSpectatorId == MULTI_VIEW)
-					GameClient()->m_MultiViewActivated = true;
+					GameClient()->m_MultiView.SetActivated(true);
 				else if(m_SelectedSpectatorId == SPEC_FREEVIEW || m_SelectedSpectatorId == SPEC_FOLLOW)
-					GameClient()->m_MultiViewActivated = false;
+					GameClient()->m_MultiView.SetActivated(false);
 
-				if(!GameClient()->m_MultiViewActivated)
+				if(!GameClient()->m_MultiView.IsActivated())
 					Spectate(m_SelectedSpectatorId);
 
-				if(GameClient()->m_MultiViewActivated && m_SelectedSpectatorId != MULTI_VIEW && GameClient()->m_Teams.Team(m_SelectedSpectatorId) != GameClient()->m_MultiViewTeam)
+				if(GameClient()->m_MultiView.IsActivated() && m_SelectedSpectatorId != MULTI_VIEW && GameClient()->m_Teams.Team(m_SelectedSpectatorId) != GameClient()->m_MultiView.Team())
 				{
-					GameClient()->ResetMultiView();
+					GameClient()->m_MultiView.Reset();
 					Spectate(m_SelectedSpectatorId);
 					m_MultiViewActivateDelay = Client()->LocalTime() + 0.3f;
 				}
@@ -359,7 +359,7 @@ void CSpectator::OnRender()
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
 
-	if(GameClient()->m_MultiViewActivated)
+	if(GameClient()->m_MultiView.IsActivated())
 	{
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f) + (ObjWidth * 2.0f / 3.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
@@ -377,7 +377,7 @@ void CSpectator::OnRender()
 		FreeViewSelected = true;
 		if(MousePressed)
 		{
-			GameClient()->m_MultiViewActivated = false;
+			GameClient()->m_MultiView.SetActivated(false);
 			Spectate(m_SelectedSpectatorId);
 		}
 	}
@@ -391,7 +391,7 @@ void CSpectator::OnRender()
 		MultiViewSelected = true;
 		if(MousePressed)
 		{
-			GameClient()->m_MultiViewActivated = true;
+			GameClient()->m_MultiView.SetActivated(true);
 		}
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, MultiViewSelected ? 1.0f : 0.5f);
@@ -407,7 +407,7 @@ void CSpectator::OnRender()
 			FollowSelected = true;
 			if(MousePressed)
 			{
-				GameClient()->m_MultiViewActivated = false;
+				GameClient()->m_MultiView.SetActivated(false);
 				Spectate(m_SelectedSpectatorId);
 			}
 		}
@@ -487,25 +487,25 @@ void CSpectator::OnRender()
 			PlayerSelected = true;
 			if(MousePressed)
 			{
-				if(GameClient()->m_MultiViewActivated)
+				if(GameClient()->m_MultiView.IsActivated())
 				{
-					if(GameClient()->m_MultiViewTeam == DDTeam)
+					if(GameClient()->m_MultiView.Team() == DDTeam)
 					{
-						GameClient()->m_aMultiViewId[m_SelectedSpectatorId] = !GameClient()->m_aMultiViewId[m_SelectedSpectatorId];
-						if(!GameClient()->m_aMultiViewId[GameClient()->m_Snap.m_SpecInfo.m_SpectatorId])
+						GameClient()->m_MultiView.ToggleId(m_SelectedSpectatorId);
+						if(!GameClient()->m_MultiView.IsIdSet(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId))
 						{
-							int NewClientId = GameClient()->FindFirstMultiViewId();
+							int NewClientId = GameClient()->m_MultiView.FindFirstId();
 							if(NewClientId < MAX_CLIENTS && NewClientId >= 0)
 							{
-								GameClient()->CleanMultiViewId(NewClientId);
-								GameClient()->m_aMultiViewId[NewClientId] = true;
+								GameClient()->m_MultiView.ClearId(NewClientId);
+								GameClient()->m_MultiView.SetId(NewClientId, true);
 								Spectate(NewClientId);
 							}
 						}
 					}
 					else
 					{
-						GameClient()->ResetMultiView();
+						GameClient()->m_MultiView.Reset();
 						Spectate(m_SelectedSpectatorId);
 						m_MultiViewActivateDelay = Client()->LocalTime() + 0.3f;
 					}
@@ -541,14 +541,14 @@ void CSpectator::OnRender()
 		}
 		TextRender()->TextEx(&NameCursor, GameClient()->m_aClients[GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_aName);
 
-		if(GameClient()->m_MultiViewActivated)
+		if(GameClient()->m_MultiView.IsActivated())
 		{
-			if(GameClient()->m_aMultiViewId[GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId])
+			if(GameClient()->m_MultiView.IsIdSet(GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId))
 			{
 				TextRender()->TextColor(0.1f, 1.0f, 0.1f, PlayerSelected ? 1.0f : 0.5f);
 				TextRender()->Text(Width / 2.0f + x + 50.0f + 180.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize - 3, "⬤", 220.0f);
 			}
-			else if(GameClient()->m_MultiViewTeam == DDTeam)
+			else if(GameClient()->m_MultiView.Team() == DDTeam)
 			{
 				TextRender()->TextColor(1.0f, 0.1f, 0.1f, PlayerSelected ? 1.0f : 0.5f);
 				TextRender()->Text(Width / 2.0f + x + 50.0f + 180.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize - 3, "◯", 220.0f);

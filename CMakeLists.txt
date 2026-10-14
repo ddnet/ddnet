@@ -2723,6 +2723,8 @@ if(CLIENT)
     components/menus_start.h
     components/motd.cpp
     components/motd.h
+    components/multiview.cpp
+    components/multiview.h
     components/nameplates.cpp
     components/nameplates.h
     components/particles.cpp
@@ -2753,7 +2755,6 @@ if(CLIENT)
     laser_data.h
     lineinput.cpp
     lineinput.h
-    multiview.cpp
     pickup_data.cpp
     pickup_data.h
     prediction/entities/character.cpp
