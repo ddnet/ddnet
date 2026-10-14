@@ -483,6 +483,7 @@ public:
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType) override;
 	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) override;
+	void DemoRecorder_Stop(int Recorder);
 	void DemoRecorder_HandleAutoStart() override;
 	void DemoRecorder_UpdateReplayRecorder() override;
 	void DemoRecorder_AddDemoMarker(int Recorder);

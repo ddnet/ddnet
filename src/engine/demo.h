@@ -117,6 +117,7 @@ public:
 	virtual int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") = 0;
 	virtual int Length() const = 0;
 	virtual const char *CurrentFilename() const = 0;
+	virtual bool HasMarkers() const = 0;
 };
 
 class IDemoEditor : public IInterface
