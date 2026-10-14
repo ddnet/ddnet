@@ -575,19 +575,27 @@ void CCharacterCore::Move()
 		float Distance = distance(m_Pos, NewPos);
 		if(Distance > 0)
 		{
+			const CCharacterCore *apColliders[MAX_CLIENTS];
+			int NumColliders = 0;
+			for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+			{
+				const CCharacterCore *pCharCore = m_pWorld->m_apCharacters[ClientId];
+				if(!pCharCore || pCharCore == this)
+					continue;
+				if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, ClientId)))))
+					continue;
+				apColliders[NumColliders++] = pCharCore;
+			}
+
 			int End = Distance + 1;
 			vec2 LastPos = m_Pos;
 			for(int i = 0; i < End; i++)
 			{
 				float a = i / Distance;
 				vec2 Pos = mix(m_Pos, NewPos, a);
-				for(int p = 0; p < MAX_CLIENTS; p++)
+				for(int Collider = 0; Collider < NumColliders; Collider++)
 				{
-					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
-					if(!pCharCore || pCharCore == this)
-						continue;
-					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
-						continue;
+					const CCharacterCore *pCharCore = apColliders[Collider];
 					float D = distance(Pos, pCharCore->m_Pos);
 					if(D < PhysicalSize())
 					{
