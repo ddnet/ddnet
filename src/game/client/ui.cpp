@@ -115,7 +115,8 @@ void CUi::Init(IKernel *pKernel)
 	CUIRect::Init(m_pGraphics);
 	CLineInput::Init(m_pClient, m_pGraphics, m_pInput, m_pTextRender);
 	CUIElementBase::Init(this);
-	m_Tooltips.Init(this, m_pTextRender);
+	m_pTooltips = std::make_unique<CTooltips>();
+	m_pTooltips->Init(this, m_pTextRender);
 }
 
 CUi::CUi()
@@ -822,6 +823,15 @@ CLabelResult CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, i
 	Cursor.m_vColorSplits = LabelProps.m_vColorSplits;
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	TextRender()->TextEx(&Cursor, pText, -1);
+	if(Cursor.m_Truncated && LabelProps.m_pTooltipId)
+	{
+		DoToolTip({LabelProps.m_pTooltipId,
+			*pRect,
+			pText,
+			-1,
+			Size,
+			true});
+	}
 	return CLabelResult{.m_Truncated = Cursor.m_Truncated};
 }
 
@@ -850,7 +860,7 @@ void CUi::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	TextRender()->CreateTextContainer(RectEl.m_UITextContainer, &Cursor, pText, StrLen);
 	TextRender()->TextColor(RectEl.m_TextColor);
 	TextRender()->TextOutlineColor(RectEl.m_TextOutlineColor);
-	RectEl.m_Cursor = Cursor;
+	RectEl.m_Cursor = std::move(Cursor);
 }
 
 void CUi::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor) const
@@ -906,6 +916,16 @@ void CUi::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 	{
 		const vec2 CursorPos = CalcAlignedCursorPos(pRect, vec2(RectEl.m_Cursor.m_LongestLineWidth, RectEl.m_Cursor.Height()), Align);
 		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, RectEl.m_TextColor, RectEl.m_TextOutlineColor, CursorPos.x, CursorPos.y);
+
+		if(RectEl.m_Cursor.m_Truncated && LabelProps.m_pTooltipId)
+		{
+			DoToolTip({LabelProps.m_pTooltipId,
+				*pRect,
+				pText,
+				-1,
+				Size,
+				true});
+		}
 	}
 }
 
@@ -1820,7 +1840,17 @@ void CUi::RenderBackButton()
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 }
 
-void CUi::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint)
+void CUi::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint) const
 {
-	m_Tooltips.DoToolTip(pId, pNearRect, pText, WidthHint);
+	DoToolTip({pId,
+		*pNearRect,
+		pText,
+		WidthHint,
+		14.0f,
+		false});
+}
+
+void CUi::DoToolTip(const CTooltip &Tooltip) const
+{
+	m_pTooltips->DoToolTip(Tooltip);
 }
