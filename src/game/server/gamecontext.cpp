@@ -563,10 +563,10 @@ void CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, cons
 	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
 	{
 		CNetObj_DDNetLaser Laser = {};
-		Laser.m_ToX = (int)To.x;
-		Laser.m_ToY = (int)To.y;
-		Laser.m_FromX = (int)From.x;
-		Laser.m_FromY = (int)From.y;
+		Laser.m_ToX = round_to_int(To.x);
+		Laser.m_ToY = round_to_int(To.y);
+		Laser.m_FromX = round_to_int(From.x);
+		Laser.m_FromY = round_to_int(From.y);
 		Laser.m_StartTick = StartTick;
 		Laser.m_Owner = Owner;
 		Laser.m_Type = LaserType;
@@ -580,10 +580,10 @@ void CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, cons
 	else
 	{
 		CNetObj_Laser Laser = {};
-		Laser.m_X = (int)To.x;
-		Laser.m_Y = (int)To.y;
-		Laser.m_FromX = (int)From.x;
-		Laser.m_FromY = (int)From.y;
+		Laser.m_X = round_to_int(To.x);
+		Laser.m_Y = round_to_int(To.y);
+		Laser.m_FromX = round_to_int(From.x);
+		Laser.m_FromY = round_to_int(From.y);
 		Laser.m_StartTick = StartTick;
 		Server()->SnapNewItem(SnapId, Laser);
 	}
