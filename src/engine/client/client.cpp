@@ -2548,29 +2548,6 @@ void CClient::ResetDDNetInfoTask()
 	}
 }
 
-typedef std::tuple<int, int, int> TVersion;
-static const TVersion gs_InvalidVersion = std::make_tuple(-1, -1, -1);
-
-static TVersion ToVersion(char *pStr)
-{
-	int aVersion[3] = {0, 0, 0};
-	const char *p = strtok(pStr, ".");
-
-	for(int i = 0; i < 3 && p; ++i)
-	{
-		if(!str_isallnum(p))
-			return gs_InvalidVersion;
-
-		aVersion[i] = str_toint(p);
-		p = strtok(nullptr, ".");
-	}
-
-	if(p)
-		return gs_InvalidVersion;
-
-	return std::make_tuple(aVersion[0], aVersion[1], aVersion[2]);
-}
-
 void CClient::LoadDDNetInfo()
 {
 	const json_value *pDDNetInfo = m_ServerBrowser.LoadDDNetInfo();
@@ -2589,12 +2566,17 @@ void CClient::LoadDDNetInfo()
 		str_copy(aNewVersionStr, CurrentVersion);
 		char aCurVersionStr[64];
 		str_copy(aCurVersionStr, GAME_RELEASE_VERSION);
-		if(ToVersion(aNewVersionStr) > ToVersion(aCurVersionStr))
+		int VersionComp = str_comp_version(aNewVersionStr, aCurVersionStr);
+		if(VersionComp > 0)
 		{
 			str_copy(m_aVersionStr, CurrentVersion);
 		}
 		else
 		{
+			if(VersionComp < 0)
+			{
+				log_debug("client/info", "Client appears to be newer than latest");
+			}
 			m_aVersionStr[0] = '0';
 			m_aVersionStr[1] = '\0';
 		}
