@@ -18,7 +18,7 @@
 
 #include <game/localization.h>
 
-#include <limits>
+constexpr float TOOLTIP_FONTSIZE = 14.0f;
 
 void CUIElement::Init(CUi *pUI, int RequestedRectCount)
 {
@@ -1423,6 +1423,15 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 		const float Max = Rail.h - Handle.h;
 		const float Cur = MouseY() - m_ActiveScrollbarOffset;
 		ReturnValue = std::clamp((Cur - Min) / Max, 0.0f, 1.0f);
+
+		DoToolTip({
+			pId,
+			Handle,
+			Localize("Hold Shift to be more precise."),
+			-1.0f,
+			TOOLTIP_FONTSIZE,
+			false,
+		});
 	}
 
 	// render
@@ -1513,6 +1522,15 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		const float Max = Rail.w - Handle.w;
 		const float Cur = MouseX() - m_ActiveScrollbarOffset;
 		ReturnValue = std::clamp((Cur - Min) / Max, 0.0f, 1.0f);
+
+		DoToolTip({
+			pId,
+			Handle,
+			Localize("Hold Shift to be more precise."),
+			-1.0f,
+			TOOLTIP_FONTSIZE,
+			false,
+		});
 	}
 
 	// render
@@ -1846,7 +1864,7 @@ void CUi::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText
 		*pNearRect,
 		pText,
 		WidthHint,
-		14.0f,
+		TOOLTIP_FONTSIZE,
 		false});
 }
 
