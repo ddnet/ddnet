@@ -8,6 +8,7 @@
 
 #include <game/client/ui.h>
 #include <game/editor/editor_actions.h>
+#include <game/editor/editor_binds.h>
 #include <game/editor/explanations.h>
 
 void CMapView::CState::Reset(CEditor *pEditor)
@@ -30,6 +31,21 @@ void CMapView::OnInit(CEditor *pEditor)
 	RegisterSubComponent(m_MapGrid);
 	RegisterSubComponent(m_ProofMode);
 	InitSubComponents();
+
+	pEditor->RegisterBind(false, false, false, KEY_W, "Go one tile up.", EBindSection::MAP_VIEW);
+	pEditor->RegisterBind(false, false, false, KEY_A, "Go one tile left.", EBindSection::MAP_VIEW);
+	pEditor->RegisterBind(false, false, false, KEY_S, "Go one tile down.", EBindSection::MAP_VIEW);
+	pEditor->RegisterBind(false, false, false, KEY_D, "Go one tile right.", EBindSection::MAP_VIEW);
+	pEditor->RegisterBind(true, false, false, KEY_W, "Go multiple tiles up.", EBindSection::MAP_VIEW);
+	pEditor->RegisterBind(true, false, false, KEY_A, "Go multiple tiles left.", EBindSection::MAP_VIEW);
+	pEditor->RegisterBind(true, false, false, KEY_S, "Go multiple tiles down.", EBindSection::MAP_VIEW);
+	pEditor->RegisterBind(true, false, false, KEY_D, "Go multiple tiles right.", EBindSection::MAP_VIEW);
+
+	pEditor->RegisterBind(true, false, false, KEY_G, "Show/Hide physics layers.", EBindSection::MAP_VIEW);
+
+	pEditor->RegisterBind(false, false, false, KEY_MOUSE_1, "[Hold] Draw with the brush or select a brush.", EBindSection::BRUSH);
+	pEditor->RegisterBind(true, false, false, KEY_MOUSE_1, "[Hold] Clear the area.", EBindSection::BRUSH);
+	pEditor->RegisterBind(false, false, false, KEY_MOUSE_2, "Clear the brush.", EBindSection::BRUSH);
 }
 
 void CMapView::OnMapLoad()
