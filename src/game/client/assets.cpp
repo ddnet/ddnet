@@ -63,6 +63,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponGrenade);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponNinja);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteWeaponLaser);
+		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteJetpack);
 
 		std::fill(std::begin(m_GameSkin.m_aSpriteWeapons), std::end(m_GameSkin.m_aSpriteWeapons), IGraphics::CTextureHandle());
 
@@ -167,6 +168,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		m_GameSkin.m_SpriteWeaponGrenade = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_GRENADE_BODY]);
 		m_GameSkin.m_SpriteWeaponNinja = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_NINJA_BODY]);
 		m_GameSkin.m_SpriteWeaponLaser = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_LASER_BODY]);
+		m_GameSkin.m_SpriteJetpack = Graphics()->LoadSpriteTexture(ImgInfo, FallbackImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_JETPACK]);
 
 		m_GameSkin.m_aSpriteWeapons[0] = m_GameSkin.m_SpriteWeaponHammer;
 		m_GameSkin.m_aSpriteWeapons[1] = m_GameSkin.m_SpriteWeaponGun;

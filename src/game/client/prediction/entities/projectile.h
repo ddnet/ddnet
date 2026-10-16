@@ -53,6 +53,7 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
+	bool m_JetpackExhaust;
 	int m_TuneZone;
 };
 
