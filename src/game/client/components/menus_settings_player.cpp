@@ -14,6 +14,7 @@
 #include <game/client/ui_listbox.h>
 #include <game/localization.h>
 
+#include <optional>
 #include <vector>
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
@@ -97,6 +98,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	public:
 		const CCountryFlags::CCountryFlag *m_pFlag;
 		std::optional<std::pair<int, int>> m_NameMatch;
+		std::optional<std::pair<int, int>> m_CountryCodeMatch;
 	};
 	std::vector<CCountryFlagEntry> vFilteredFlags;
 	for(size_t i = 0; i < GameClient()->m_CountryFlags.Num(); ++i)
@@ -105,10 +107,17 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		if(!s_FlagFilterInput.IsEmpty())
 		{
 			const char *pNameMatchEnd;
-			const char *pNameMatchStart = str_utf8_find_nocase(Entry.m_aCountryCodeString, s_FlagFilterInput.GetString(), &pNameMatchEnd);
+			const char *pNameMatchStart = str_utf8_find_nocase(Entry.m_aCountryName, s_FlagFilterInput.GetString(), &pNameMatchEnd);
+
+			const char *pCodeMatchEnd;
+			const char *pCodeMatchStart = str_utf8_find_nocase(Entry.m_aCountryCodeString, s_FlagFilterInput.GetString(), &pCodeMatchEnd);
 			if(pNameMatchStart != nullptr)
 			{
-				vFilteredFlags.emplace_back(&Entry, std::make_pair<int, int>(pNameMatchStart - Entry.m_aCountryCodeString, pNameMatchEnd - pNameMatchStart));
+				vFilteredFlags.emplace_back(&Entry, std::make_pair<int, int>(pNameMatchStart - Entry.m_aCountryName, pNameMatchEnd - pNameMatchStart), std::nullopt);
+			}
+			else if(pCodeMatchStart != nullptr)
+			{
+				vFilteredFlags.emplace_back(&Entry, std::nullopt, std::make_pair<int, int>(pCodeMatchStart - Entry.m_aCountryCodeString, pCodeMatchEnd - pCodeMatchStart));
 			}
 		}
 		else
@@ -150,12 +159,21 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		{
 			SLabelProperties Props;
 			Props.m_MaxWidth = Label.w - 5.0f;
+			Props.m_EllipsisAtEnd = true;
+			Props.m_MinimumFontSize = 8.0f;
 			if(Entry.m_NameMatch.has_value())
 			{
 				const auto [MatchStart, MatchLength] = Entry.m_NameMatch.value();
 				Props.m_vColorSplits.emplace_back(MatchStart, MatchLength, ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f));
 			}
-			Ui()->DoLabel(&Label, Entry.m_pFlag->m_aCountryCodeString, 10.0f, TEXTALIGN_MC, Props);
+			else if(Entry.m_CountryCodeMatch.has_value())
+			{
+				const auto [MatchStart, MatchLength] = Entry.m_CountryCodeMatch.value();
+				Props.m_vColorSplits.emplace_back(MatchStart, MatchLength, ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f));
+				Ui()->DoLabel(&Label, Entry.m_pFlag->m_aCountryCodeString, 10.0f, TEXTALIGN_MC, Props);
+				continue;
+			}
+			Ui()->DoLabel(&Label, Entry.m_pFlag->m_aCountryName, 10.0f, TEXTALIGN_MC, Props);
 		}
 	}
 

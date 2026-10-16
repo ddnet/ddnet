@@ -93,6 +93,22 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 				continue;
 			}
 
+			// country name
+			const char *pCountryNameLine = LineReader.Get();
+			if(!pCountryNameLine)
+			{
+				log_error("countryflags", "Unexpected end of index file after country '%s'", CountryFlag.m_aCountryCodeString);
+				break;
+			}
+
+			if(!str_startswith(pCountryNameLine, "== "))
+			{
+				log_error("countryflags", "Malformed country name of '%s'", CountryFlag.m_aCountryCodeString);
+				continue;
+			}
+			pCountryNameLine += str_length("== ");
+			str_copy(CountryFlag.m_aCountryName, pCountryNameLine);
+
 			char aFlagPath[IO_MAX_PATH_LENGTH];
 			CImageInfo ImageInfo;
 			str_format(aFlagPath, sizeof(aFlagPath), "countryflags/%s.png", CountryFlag.m_aCountryCodeString);
