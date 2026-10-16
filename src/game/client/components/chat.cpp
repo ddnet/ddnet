@@ -243,6 +243,7 @@ void CChat::EchoCmd(const char *pName)
 	if(pVariable == nullptr)
 	{
 		str_format(aBuf, sizeof(aBuf), "Unknown variable %s", pName);
+		Echo(aBuf);
 		return;
 	}
 
