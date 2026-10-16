@@ -944,6 +944,7 @@ void CPlayers::RenderPlayer(
 inline bool CPlayers::IsPlayerInfoAvailable(int ClientId) const
 {
 	return GameClient()->m_Snap.m_aCharacters[ClientId].m_Active &&
+	       !GameClient()->m_aClients[ClientId].m_PredictedDead &&
 	       GameClient()->m_Snap.m_apPrevPlayerInfos[ClientId] != nullptr &&
 	       GameClient()->m_Snap.m_apPlayerInfos[ClientId] != nullptr;
 }

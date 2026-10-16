@@ -641,6 +641,8 @@ void IGameController::Snap(int SnappingClient)
 		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	if(g_Config.m_SvOldLaser)
 		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_OLD_LASER;
+	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && !g_Config.m_SvTeleportHoldHook && !g_Config.m_SvTeleportLoseWeapons)
+		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_PREDICT_TELEPORT;
 	GameInfoEx.m_Version = GAMEINFO_CURVERSION;
 	GameInfoEx.m_MinTeamSize = g_Config.m_SvMinTeamSize;
 	GameInfoEx.m_MaxTeamSize = g_Config.m_SvMaxTeamSize;

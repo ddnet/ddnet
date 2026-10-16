@@ -84,6 +84,7 @@ public:
 		bool m_BugDDRaceInput;
 		bool m_NoWeakHookAndBounce;
 		bool m_PredictEvents;
+		bool m_PredictTeleport;
 		bool m_OldLaser;
 	} m_WorldConfig;
 
@@ -137,6 +138,7 @@ public:
 	void PlayPredictedEvents(int Tick);
 
 	void CreatePredictedSound(vec2 Pos, int SoundId, int Id = -1);
+	void CreatePredictedDeathEvent(vec2 Pos, int ClientId);
 	void CreatePredictedExplosionEvent(vec2 Pos, int Id = -1);
 	void CreatePredictedHammerHitEvent(vec2 Pos, int Id = -1);
 	void CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount, int Id = -1);
