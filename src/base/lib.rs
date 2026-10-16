@@ -14,8 +14,15 @@ extern crate ddnet_test;
 
 mod color;
 mod dbg;
+mod log;
+#[allow(missing_docs)]
+mod net;
 mod rust;
+#[allow(missing_docs)]
+mod types;
 
 pub use color::*;
 pub use dbg::*;
+pub use net::*;
 pub use rust::*;
+pub use types::*;

@@ -69,6 +69,7 @@ public:
 			}
 
 			rust_panic_use_dbg_assert();
+			rust_log_use_log_log();
 
 			// init the network
 			net_init();

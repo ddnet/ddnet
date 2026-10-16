@@ -2,8 +2,12 @@
 members = [
   "src/base",
   "src/engine",
+  "src/engine/server",
   "src/engine/shared",
   "src/rust-bridge/test",
+]
+exclude = [
+  "asdf",
 ]
 
 resolver = "2"
