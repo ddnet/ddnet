@@ -368,6 +368,7 @@ private:
 
 	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
+	int64_t m_LastRefreshTime = 0;
 
 	int m_NumSortedPlayers;
 
