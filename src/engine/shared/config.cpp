@@ -87,6 +87,11 @@ void SIntConfigVariable::Serialize(char *pOut, size_t Size) const
 	Serialize(pOut, Size, *m_pVariable);
 }
 
+void SIntConfigVariable::SerializeHumanReadable(char *pOut, size_t Size) const
+{
+	Serialize(pOut, Size);
+}
+
 void SIntConfigVariable::SetValue(int Value)
 {
 	if(CheckReadOnly())
@@ -158,6 +163,15 @@ void SColorConfigVariable::Serialize(char *pOut, size_t Size, unsigned Value) co
 void SColorConfigVariable::Serialize(char *pOut, size_t Size) const
 {
 	Serialize(pOut, Size, *m_pVariable);
+}
+
+void SColorConfigVariable::SerializeHumanReadable(char *pOut, size_t Size) const
+{
+	const ColorRGBA Rgba = color_cast<ColorRGBA>(ColorHSLA(*m_pVariable, m_Alpha));
+	if(m_Alpha)
+		str_format(pOut, Size, "%s $%06X%02X", m_pScriptName, Rgba.Pack(false), round_to_int(Rgba.a * 255.0f));
+	else
+		str_format(pOut, Size, "%s $%06X", m_pScriptName, Rgba.Pack(false));
 }
 
 void SColorConfigVariable::SetValue(unsigned Value)
@@ -235,6 +249,11 @@ void SStringConfigVariable::Serialize(char *pOut, size_t Size, const char *pValu
 void SStringConfigVariable::Serialize(char *pOut, size_t Size) const
 {
 	Serialize(pOut, Size, m_pStr);
+}
+
+void SStringConfigVariable::SerializeHumanReadable(char *pOut, size_t Size) const
+{
+	Serialize(pOut, Size);
 }
 
 void SStringConfigVariable::SetValue(const char *pValue)
