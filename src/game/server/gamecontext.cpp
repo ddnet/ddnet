@@ -45,6 +45,7 @@
 #include <game/mapitems.h>
 #include <game/version.h>
 
+#include <memory>
 #include <vector>
 
 // Not thread-safe!
@@ -4430,8 +4431,8 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		return true;
 	}
 
-	CDataFileReader Reader;
-	if(!Reader.Open(g_Config.m_SvMap, Storage(), pNewMapName, IStorage::TYPE_ALL))
+	std::shared_ptr<IMap> pImportedMap = CreateMap();
+	if(!pImportedMap->Load(g_Config.m_SvMap, Storage(), pNewMapName, IStorage::TYPE_ALL))
 	{
 		log_error("mapchange", "Failed to import settings from '%s': failed to open map '%s' for reading", aConfig, pNewMapName);
 		return false;
@@ -4456,14 +4457,14 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 
 	CDataFileWriter Writer;
 
-	int SettingsIndex = Reader.NumData();
+	int SettingsIndex = pImportedMap->NumData();
 	bool FoundInfo = false;
-	for(int i = 0; i < Reader.NumItems(); i++)
+	for(int i = 0; i < pImportedMap->NumItems(); i++)
 	{
 		int TypeId;
 		int ItemId;
-		void *pData = Reader.GetItem(i, &TypeId, &ItemId);
-		int Size = Reader.GetItemSize(i);
+		void *pData = pImportedMap->GetItem(i, &TypeId, &ItemId);
+		int Size = pImportedMap->GetItemSize(i);
 		CMapItemInfoSettings MapInfo;
 		if(TypeId == MAPITEMTYPE_INFO && ItemId == 0)
 		{
@@ -4474,15 +4475,15 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 				if(pInfo->m_Settings > -1)
 				{
 					SettingsIndex = pInfo->m_Settings;
-					char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
-					int DataSize = Reader.GetDataSize(SettingsIndex);
+					char *pMapSettings = (char *)pImportedMap->GetData(SettingsIndex);
+					int DataSize = pImportedMap->GetDataSize(SettingsIndex);
 					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
 						// Configs coincide, no need to update map.
 						free(pSettings);
 						return true;
 					}
-					Reader.UnloadData(pInfo->m_Settings);
+					pImportedMap->UnloadData(pInfo->m_Settings);
 				}
 				else
 				{
@@ -4515,21 +4516,21 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Info), &Info);
 	}
 
-	for(int i = 0; i < Reader.NumData() || i == SettingsIndex; i++)
+	for(int i = 0; i < pImportedMap->NumData() || i == SettingsIndex; i++)
 	{
 		if(i == SettingsIndex)
 		{
 			Writer.AddData(TotalLength, pSettings);
 			continue;
 		}
-		const void *pData = Reader.GetData(i);
-		int Size = Reader.GetDataSize(i);
+		const void *pData = pImportedMap->GetData(i);
+		const int Size = pImportedMap->GetDataSize(i);
 		Writer.AddData(Size, pData);
-		Reader.UnloadData(i);
+		pImportedMap->UnloadData(i);
 	}
 
 	free(pSettings);
-	Reader.Close();
+	pImportedMap->Unload();
 
 	char aTemp[IO_MAX_PATH_LENGTH];
 	if(!Writer.Open(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName)))
