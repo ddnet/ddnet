@@ -16,6 +16,9 @@
 #if defined(CONF_FAMILY_WINDOWS)
 #define PLAT_EXT ".exe"
 #define PLAT_NAME CONF_PLATFORM_STRING
+#elif defined(CONF_PLATFORM_MACOS)
+#define PLAT_EXT ""
+#define PLAT_NAME CONF_PLATFORM_STRING
 #elif defined(CONF_FAMILY_UNIX)
 #define PLAT_EXT ""
 #if defined(CONF_ARCH_IA32)
@@ -33,8 +36,13 @@
 #define PLAT_NAME "unsupported-unsupported"
 #endif
 
+#if defined(CONF_PLATFORM_MACOS)
+#define PLAT_CLIENT_DOWN CLIENT_EXEC "-" PLAT_NAME ".tar.xz"
+#define PLAT_SERVER_DOWN SERVER_EXEC "-" PLAT_NAME ".tar.xz"
+#else
 #define PLAT_CLIENT_DOWN CLIENT_EXEC "-" PLAT_NAME PLAT_EXT
 #define PLAT_SERVER_DOWN SERVER_EXEC "-" PLAT_NAME PLAT_EXT
+#endif
 
 #define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
 #define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
@@ -79,6 +87,13 @@ class CUpdater : public IUpdater
 
 	bool ReplaceClient();
 	bool ReplaceServer();
+
+#if defined(CONF_PLATFORM_MACOS)
+	bool GetClientBundlePath(char *pPath, int PathSize);
+	bool GetServerBundlePath(char *pPath, int PathSize);
+	bool ExtractBundle(const char *pUpdateDir, const char *pExtractPath, const char *pTmpName, const char *pBundleOldPath);
+	void RemoveOldBundle(const char *pBundlePath);
+#endif
 
 	void SetCurrentState(EUpdaterState NewState) REQUIRES(!m_Lock);
 
