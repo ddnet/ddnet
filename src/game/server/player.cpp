@@ -107,6 +107,7 @@ void CPlayer::Reset()
 		}
 	}
 	m_OverrideEmoteReset = -1;
+	m_PreviousOverrideEmoteReset = -1;
 
 	GameServer()->Score()->PlayerData(m_ClientId)->Reset();
 
@@ -282,11 +283,6 @@ void CPlayer::Tick()
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunings all the time
 	{
 		GameServer()->SendTuningParams(m_ClientId, m_TuneZone);
-	}
-
-	if(m_OverrideEmoteReset >= 0 && m_OverrideEmoteReset <= Server()->Tick())
-	{
-		m_OverrideEmoteReset = -1;
 	}
 
 	if(m_Halloween && m_pCharacter && !m_pCharacter->IsPaused())
@@ -869,16 +865,32 @@ void CPlayer::SetInitialAfk(bool Afk)
 
 int CPlayer::GetDefaultEmote() const
 {
-	if(m_OverrideEmoteReset >= 0)
+	if(m_OverrideEmoteReset > Server()->Tick())
 		return m_OverrideEmote;
+
+	if(m_PreviousOverrideEmoteReset > Server()->Tick())
+		return m_PreviousOverrideEmote;
 
 	return m_DefEmote;
 }
 
-void CPlayer::OverrideDefaultEmote(int Emote, int Tick)
+void CPlayer::OverrideDefaultEmote(int Emote, int ResetTick)
 {
+	// A longer lasting emote, usually the one selected in the eye emote wheel,
+	// is resumed once the shorter emotes covering it have run out.
+	if(m_OverrideEmoteReset > m_PreviousOverrideEmoteReset)
+	{
+		m_PreviousOverrideEmote = m_OverrideEmote;
+		m_PreviousOverrideEmoteReset = m_OverrideEmoteReset;
+	}
+
+	if(m_PreviousOverrideEmoteReset <= ResetTick)
+	{
+		m_PreviousOverrideEmoteReset = -1;
+	}
+
 	m_OverrideEmote = Emote;
-	m_OverrideEmoteReset = Tick;
+	m_OverrideEmoteReset = ResetTick;
 	m_LastEyeEmote = Server()->Tick();
 }
 
