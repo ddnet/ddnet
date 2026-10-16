@@ -247,6 +247,17 @@ void CChat::EchoCmd(const char *pName)
 	}
 
 	pVariable->Serialize(aBuf, sizeof(aBuf));
+
+	if(pVariable->m_Type == SConfigVariable::EVariableType::VAR_COLOR)
+	{
+		const SColorConfigVariable *pColorVariable = static_cast<const SColorConfigVariable *>(pVariable);
+		const ColorRGBA Rgba = color_cast<ColorRGBA>(ColorHSLA(*pColorVariable->m_pVariable, pColorVariable->m_Alpha));
+		if(pColorVariable->m_Alpha)
+			str_format(aBuf, sizeof(aBuf), "%s $%06X%02X", pName, Rgba.Pack(false), round_to_int(Rgba.a * 255.0f));
+		else
+			str_format(aBuf, sizeof(aBuf), "%s $%06X", pName, Rgba.Pack(false));
+	}
+
 	Echo(aBuf);
 }
 
