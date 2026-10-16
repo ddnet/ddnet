@@ -2139,7 +2139,9 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 				}
 				char aCommand[IConsole::CMDLINE_LENGTH];
 				str_format(aCommand, sizeof(aCommand), "force_vote \"%s\" \"%s\" \"%s\"", pMsg7->m_pType, pMsg7->m_pValue, pMsg7->m_pReason);
+				Server()->SetRconCid(ClientId);
 				Console()->ExecuteLine(aCommand, ClientId, false);
+				Server()->SetRconCid(IServer::RCON_CID_SERV);
 				return nullptr;
 			}
 
