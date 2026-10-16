@@ -481,6 +481,16 @@ void CConfigManager::PossibleConfigVariables(const char *pStr, int FlagMask, POS
 	}
 }
 
+const SConfigVariable *CConfigManager::FindVariable(const char *pScriptName) const
+{
+	for(const auto *pVariable : m_vpAllVariables)
+	{
+		if(str_comp(pVariable->m_pScriptName, pScriptName) == 0)
+			return pVariable;
+	}
+	return nullptr;
+}
+
 void CConfigManager::Con_Reset(IConsole::IResult *pResult, void *pUserData)
 {
 	static_cast<CConfigManager *>(pUserData)->Reset(pResult->GetString(0));
