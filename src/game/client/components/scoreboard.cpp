@@ -737,6 +737,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				}
 
 				if(Ui()->HotItem() == &Player.m_PlayerButtonId ||
+					Ui()->HotItem() == &Player.m_TimeTooltipId ||
 					(Ui()->IsPopupOpen(&m_ScoreboardPopupContext) && m_ScoreboardPopupContext.m_ClientId == pInfo->m_ClientId))
 				{
 					Row.Draw(ColorRGBA(0.7f, 0.7f, 0.7f, 0.7f), IGraphics::CORNER_ALL, RoundRadius);
@@ -750,15 +751,38 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			ScorePosition.y = Row.y;
 			ScorePosition.h = Row.h;
 
+			auto DoMillisecondTooltip = [&](const CUIRect *pRect, int64_t TimeInMillis, float WidthHint) {
+				if(m_MouseUnlocked && pRect->Inside(Ui()->MousePos()))
+				{
+					Ui()->SetHotItem(&Player.m_TimeTooltipId);
+					str_time(TimeInMillis / 10, ETimeFormat::HOURS_CENTISECS, Player.m_aTimeTooltip, sizeof(Player.m_aTimeTooltip));
+					Ui()->DoToolTip({&Player.m_TimeTooltipId,
+						*pRect,
+						Player.m_aTimeTooltip,
+						WidthHint * 1.5f,
+						FontSize,
+						true});
+				}
+			};
+			constexpr int SecondsPerHour = 60 * 60;
+
 			if(Race7)
 			{
 				Ui()->RenderTime(ScorePosition, FontSize, pInfo->m_Score / 1000, pInfo->m_Score == protocol7::FinishTime::NOT_FINISHED, pInfo->m_Score % 1000, true,
 					Player.m_Score, Player.m_ScoreMillis, TextColor);
+				if(pInfo->m_Score / 1000 >= SecondsPerHour)
+				{
+					DoMillisecondTooltip(&ScorePosition, time_milliseconds_from_seconds(pInfo->m_Score / 1000.0f), Player.m_Score.Width());
+				}
 			}
 			else if(MillisecondScore)
 			{
 				Ui()->RenderTime(ScorePosition, FontSize, ClientData.m_FinishTimeSeconds, ClientData.m_FinishTimeSeconds == FinishTime::NOT_FINISHED_MILLIS, ClientData.m_FinishTimeMillis, TrueMilliseconds,
 					Player.m_Score, Player.m_ScoreMillis, TextColor);
+				if(ClientData.m_FinishTimeSeconds >= SecondsPerHour)
+				{
+					DoMillisecondTooltip(&ScorePosition, static_cast<int64_t>(ClientData.m_FinishTimeSeconds) * 1000 + ClientData.m_FinishTimeMillis, Player.m_Score.Width());
+				}
 			}
 			else if(TimeScore)
 			{
