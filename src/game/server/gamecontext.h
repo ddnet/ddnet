@@ -12,6 +12,7 @@
 
 #include <engine/console.h>
 #include <engine/server.h>
+#include <engine/server/authmanager.h>
 
 #include <generated/protocol.h>
 
