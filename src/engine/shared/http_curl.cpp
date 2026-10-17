@@ -102,6 +102,8 @@ bool CHttpRequestCurl::ConfigureHandle(CURL *pHandle)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, Protocols);
+	// Note that ‘CURLOPT_REDIR_PROTOCOLS’ does not need to be set explicitly,
+	// as redirects are only allowed for the same protocols specified above.
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
@@ -181,7 +183,7 @@ size_t CHttpRequestCurl::OnHeader(char *pHeader, size_t HeaderSize)
 	// `pHeader` is NOT null-terminated.
 	// `pHeader` has a trailing newline.
 
-	if(HeaderSize <= 1)
+	if(HeaderSize <= 1 || (HeaderSize == 2 && pHeader[0] == '\r' && pHeader[1] == '\n'))
 	{
 		m_ResponseHeadersEnded = true;
 		return HeaderSize;
@@ -431,14 +433,15 @@ void CHttpCurl::RunLoop()
 		{
 			if(pMsg->msg == CURLMSG_DONE)
 			{
-				auto RequestIt = m_RunningRequests.find(pMsg->easy_handle);
+				CURL *pEasyHandle = pMsg->easy_handle;
+				auto RequestIt = m_RunningRequests.find(pEasyHandle);
 				dbg_assert(RequestIt != m_RunningRequests.end(), "Running handle not added to map");
 				auto pRequest = std::move(RequestIt->second);
 				m_RunningRequests.erase(RequestIt);
 
-				pRequest->OnCompletionInternal(pMsg->easy_handle, pMsg->data.result);
-				curl_multi_remove_handle(m_pMultiH, pMsg->easy_handle);
-				curl_easy_cleanup(pMsg->easy_handle);
+				pRequest->OnCompletionInternal(pEasyHandle, pMsg->data.result);
+				curl_multi_remove_handle(m_pMultiH, pEasyHandle);
+				curl_easy_cleanup(pEasyHandle);
 			}
 		}
 
@@ -479,7 +482,7 @@ void CHttpCurl::RunLoop()
 			{
 				curl_easy_cleanup(pEH);
 				str_copy(pRequest->m_aErr, "Failed to initialize request");
-				pRequest->OnCompletionInternal(nullptr, CURLE_ABORTED_BY_CALLBACK);
+				pRequest->OnCompletionInternal(nullptr, CURLE_FAILED_INIT);
 				NewRequests.pop_front();
 				continue;
 			}
