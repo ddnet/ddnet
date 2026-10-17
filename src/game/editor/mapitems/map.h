@@ -145,6 +145,8 @@ public:
 	CSoundSourceCircleShapePropTracker m_SoundSourceCircleShapePropTracker;
 
 	// Selections
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_SearchInput;
+
 	int m_SelectedGroup;
 	std::vector<int> m_vSelectedLayers;
 	std::vector<int> m_vSelectedQuads;
@@ -200,6 +202,7 @@ public:
 	int MoveGroup(int IndexFrom, int IndexTo);
 	void DeleteGroup(int Index);
 	void MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup);
+	const char *GroupDisplayName(int Index) const;
 
 	// Layers
 	std::shared_ptr<CLayer> SelectedLayer(int Index) const;
@@ -215,6 +218,7 @@ public:
 	void MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
+	const char *LayerDisplayName(int GroupIndex, int LayerIndex) const;
 
 	// Quads
 	std::vector<CQuad *> SelectedQuads();

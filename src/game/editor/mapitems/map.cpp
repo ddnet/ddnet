@@ -324,6 +324,13 @@ void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
 	str_copy(m_pGameGroup->m_aName, "Game");
 }
 
+const char *CEditorMap::GroupDisplayName(int Index) const
+{
+	static char s_aBuf[64];
+	str_format(s_aBuf, sizeof(s_aBuf), "#%d %s", Index, m_vpGroups[Index]->m_aName);
+	return s_aBuf;
+}
+
 std::shared_ptr<CLayer> CEditorMap::SelectedLayer(int Index) const
 {
 	std::shared_ptr<CLayerGroup> pGroup = SelectedGroup();
@@ -456,6 +463,33 @@ void CEditorMap::MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer)
 void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
+}
+
+const char *CEditorMap::LayerDisplayName(int GroupIndex, int LayerIndex) const
+{
+	static char s_aBuf[64];
+	str_copy(s_aBuf, "");
+	if(m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]->m_aName[0])
+		str_copy(s_aBuf, m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]->m_aName);
+	else
+	{
+		if(m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]->m_Type == LAYERTYPE_TILES)
+		{
+			std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]);
+			str_copy(s_aBuf, pTiles->m_Image >= 0 ? m_vpImages[pTiles->m_Image]->m_aName : "Tiles");
+		}
+		else if(m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]->m_Type == LAYERTYPE_QUADS)
+		{
+			std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]);
+			str_copy(s_aBuf, pQuads->m_Image >= 0 ? m_vpImages[pQuads->m_Image]->m_aName : "Quads");
+		}
+		else if(m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]->m_Type == LAYERTYPE_SOUNDS)
+		{
+			std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]);
+			str_copy(s_aBuf, pSounds->m_Sound >= 0 ? m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds");
+		}
+	}
+	return s_aBuf;
 }
 
 std::vector<CQuad *> CEditorMap::SelectedQuads()
