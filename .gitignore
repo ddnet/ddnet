@@ -50,7 +50,7 @@ rules.ninja
 testrunner\[1\]_include.cmake
 # tidy-alphabetical-end
 
-/SDL2.framework
+/SDL3.framework
 
 # Android
 local.properties

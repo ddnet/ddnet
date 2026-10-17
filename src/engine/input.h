@@ -127,8 +127,8 @@ public:
 	{
 		friend class CInput;
 
-		int64_t m_DeviceId;
-		int64_t m_FingerId;
+		uint64_t m_DeviceId;
+		uint64_t m_FingerId;
 
 	public:
 		bool operator==(const CTouchFinger &Other) const { return m_DeviceId == Other.m_DeviceId && m_FingerId == Other.m_FingerId; }
@@ -184,6 +184,7 @@ public:
 	virtual void StartTextInput() = 0;
 	virtual void StopTextInput() = 0;
 	virtual void EnsureScreenKeyboardShown() = 0;
+	virtual void ClearComposition() = 0;
 	virtual const char *GetComposition() const = 0;
 	virtual bool HasComposition() const = 0;
 	virtual int GetCompositionCursor() const = 0;
