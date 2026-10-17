@@ -1,21 +1,22 @@
 #ifndef GAME_EDITOR_MAPITEMS_SOUND_H
 #define GAME_EDITOR_MAPITEMS_SOUND_H
 
+#include "document_values.h"
+
 #include <base/types.h>
 
 #include <game/editor/map_object.h>
 
-class CEditorSound : public CMapObject
+class CEditorSound : public CMapObject, public CEditorSoundValues
 {
 public:
-	explicit CEditorSound(CEditorMap *pMap);
+	void OnAttach(CEditorMap *pMap) override;
+	explicit CEditorSound(CEditorMap *pMap, std::uint64_t RetainedId = 0);
+	CEditorSound(const CEditorSound &) = delete;
+	CEditorSound &operator=(const CEditorSound &) = delete;
 	~CEditorSound() override;
 
 	int m_SoundId = -1;
-	char m_aName[IO_MAX_PATH_LENGTH] = "";
-
-	void *m_pData = nullptr;
-	unsigned m_DataSize = 0;
 };
 
 #endif

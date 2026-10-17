@@ -52,7 +52,7 @@ void CUi::RenderPopupMenus()
 			{
 				if(!Inside)
 				{
-					ClosePopupMenu(pId);
+					ClosePopupMenu(pId, false, EPopupCloseReason::ACCEPT);
 					--i;
 					continue;
 				}
@@ -80,12 +80,13 @@ void CUi::RenderPopupMenus()
 		// The popup render function can open/close popups, which may resize the vector and thus
 		// invalidate the variable PopupMenu. We therefore store pId in a separate variable.
 		EPopupMenuFunctionResult Result = PopupMenu.m_pfnFunc(PopupMenu.m_pContext, PopupRect, Active);
-		if(Result != POPUP_KEEP_OPEN || (Active && ConsumeHotkey(HOTKEY_ESCAPE)))
-			ClosePopupMenu(pId, Result == POPUP_CLOSE_CURRENT_AND_DESCENDANTS);
+		const bool Escape = Active && ConsumeHotkey(HOTKEY_ESCAPE);
+		if(Result != POPUP_KEEP_OPEN || Escape)
+			ClosePopupMenu(pId, Result == POPUP_CLOSE_CURRENT_AND_DESCENDANTS, Escape ? EPopupCloseReason::CANCEL : EPopupCloseReason::ACCEPT);
 	}
 }
 
-void CUi::ClosePopupMenu(const SPopupMenuId *pId, bool IncludeDescendants)
+void CUi::ClosePopupMenu(const SPopupMenuId *pId, bool IncludeDescendants, EPopupCloseReason Reason)
 {
 	auto PopupMenuToClose = std::find_if(m_vPopupMenus.begin(), m_vPopupMenus.end(), [pId](const SPopupMenu &PopupMenu) { return PopupMenu.m_pId == pId; });
 	if(PopupMenuToClose != m_vPopupMenus.end())
@@ -96,7 +97,7 @@ void CUi::ClosePopupMenu(const SPopupMenuId *pId, bool IncludeDescendants)
 			m_vPopupMenus.erase(PopupMenuToClose);
 		SetActiveItem(nullptr);
 		if(m_pfnPopupMenuClosedCallback)
-			m_pfnPopupMenuClosedCallback();
+			m_pfnPopupMenuClosedCallback(Reason);
 	}
 }
 
@@ -108,7 +109,7 @@ void CUi::ClosePopupMenus()
 	m_vPopupMenus.clear();
 	SetActiveItem(nullptr);
 	if(m_pfnPopupMenuClosedCallback)
-		m_pfnPopupMenuClosedCallback();
+		m_pfnPopupMenuClosedCallback(EPopupCloseReason::CANCEL);
 }
 
 bool CUi::IsPopupOpen() const

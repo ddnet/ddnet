@@ -62,9 +62,9 @@ void CProofMode::InitMenuBackgroundPositions()
 	std::array<vec2, CMenuBackground::NUM_POS> aBackgroundPositions = GenerateMenuBackgroundPositions();
 	State.m_vMenuBackgroundPositions.assign(aBackgroundPositions.begin(), aBackgroundPositions.end());
 
-	for(int y = 0; y < Map()->m_pGameLayer->m_Height; ++y)
+	for(int y = 0; y < Map()->m_pGameLayer->Height(); ++y)
 	{
-		for(int x = 0; x < Map()->m_pGameLayer->m_Width; ++x)
+		for(int x = 0; x < Map()->m_pGameLayer->Width(); ++x)
 		{
 			CTile Tile = Map()->m_pGameLayer->GetTile(x, y);
 			if(Tile.m_Index >= TILE_TIME_CHECKPOINT_FIRST && Tile.m_Index <= TILE_TIME_CHECKPOINT_LAST)

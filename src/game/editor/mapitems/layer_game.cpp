@@ -3,10 +3,9 @@
 #include "layer_game.h"
 
 #include <game/editor/editor.h>
-#include <game/editor/editor_actions.h>
 
-CLayerGame::CLayerGame(CEditorMap *pMap, int w, int h) :
-	CLayerTiles(pMap, w, h)
+CLayerGame::CLayerGame(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId) :
+	CLayerTiles(pMap, w, h, RetainedId)
 {
 	str_copy(m_aName, "Game");
 	m_HasGame = true;
@@ -32,12 +31,9 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 	{
 		if(!Map()->m_pFrontLayer)
 		{
-			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(Map(), m_Width, m_Height);
+			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(Map(), Width(), Height());
 			Map()->MakeFrontLayer(pLayerFront);
 			Map()->m_pGameGroup->AddLayer(pLayerFront);
-			int GameGroupIndex = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), Map()->m_pGameGroup) - Map()->m_vpGroups.begin();
-			int LayerIndex = Map()->m_vpGroups[GameGroupIndex]->m_vpLayers.size() - 1;
-			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), GameGroupIndex, LayerIndex));
 		}
 		CLayerTiles::SetTile(x, y, CTile{TILE_NOHOOK});
 		Map()->m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_THROUGH_CUT}); // NOLINT(bugprone-parent-virtual-call)
@@ -62,9 +58,9 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 
 bool CLayerGame::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < Height(); y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < Width(); x++)
 		{
 			const int Index = GetTile(x, y).m_Index;
 			if(Index == 0)
@@ -83,7 +79,7 @@ bool CLayerGame::IsEmpty() const
 CUi::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
 {
 	const CUi::EPopupMenuFunctionResult Result = CLayerTiles::RenderProperties(pToolbox);
-	m_Image = -1;
+	m_Image = Map()->ImageReference(-1);
 	return Result;
 }
 

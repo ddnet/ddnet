@@ -5,7 +5,6 @@
 
 #include "editor_history.h"
 #include "editor_server_settings.h"
-#include "editor_trackers.h"
 #include "editor_ui.h"
 #include "font_typer.h"
 #include "layer_selector.h"
@@ -23,6 +22,7 @@
 #include <game/editor/enums.h>
 #include <game/editor/envelope_editor.h>
 #include <game/editor/file_browser.h>
+#include <game/editor/mapitems.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
 #include <game/editor/mapitems/layer_front.h>
@@ -73,6 +73,13 @@ enum
 	DIALOG_PSEUDO_FONT_TYPER,
 };
 
+enum class ESoundSourceOp
+{
+	NONE = 0,
+	MOVE,
+	CONTEXT_MENU,
+};
+
 class CProperty
 {
 public:
@@ -117,6 +124,33 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage = nullptr;
 	CRenderMap m_RenderMap;
 	CUi m_UI;
+	class CValueSelectorState
+	{
+	public:
+		bool m_DidScroll = false;
+		float m_ScrollValue = 0.0f;
+		CLineInputNumber m_NumberInput;
+		int m_Button = -1;
+		const void *m_pTextId = nullptr;
+		const void *m_pPointerId = nullptr;
+		const void *m_pEditingId = nullptr;
+		bool m_Invalid = false;
+		const void *m_pInvalidId = nullptr;
+
+		void Reset()
+		{
+			m_NumberInput.Deactivate();
+			m_DidScroll = false;
+			m_ScrollValue = 0.0f;
+			m_Button = -1;
+			m_pTextId = nullptr;
+			m_pPointerId = nullptr;
+			m_pEditingId = nullptr;
+			m_Invalid = false;
+			m_pInvalidId = nullptr;
+		}
+	};
+	CValueSelectorState m_ValueSelector;
 
 	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
 	CMapView m_MapView;
@@ -162,6 +196,7 @@ public:
 	const CEditorMap *Map() const;
 	CMapView *MapView() { return &m_MapView; }
 	const CMapView *MapView() const { return &m_MapView; }
+	CFontTyper *FontTyper() { return &m_FontTyper; }
 	CQuadKnife *QuadKnife() { return &m_QuadKnife; }
 	const CQuadKnife *QuadKnife() const { return &m_QuadKnife; }
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
@@ -254,7 +289,7 @@ public:
 	void OnRender() override;
 	void OnActivate() override;
 	void OnWindowResize() override;
-	void OnClose() override;
+	bool OnClose() override;
 	void OnDialogClose();
 	bool HasUnsavedData() const override;
 	void UpdateMentions() override { m_Mentions++; }
@@ -282,18 +317,20 @@ public:
 	float m_LastAutosaveUpdateTime = -1.0f;
 	void HandleAutosave();
 	std::deque<std::shared_ptr<CDataFileWriterFinishJob>> m_WriterFinishJobs;
+	std::uint64_t m_NextSaveJob = 1;
+	void QueueWriterFinishJob(const std::shared_ptr<CDataFileWriterFinishJob> &pJob);
 	void HandleWriterFinishJobs();
+	bool IsSavingMap(const CEditorMap &Map) const;
 	bool IsSaving(const char *pFilename) const;
 	void UpdateMapDisplayNames();
 
 	// TODO: The name of the ShowFileDialogError function is not accurate anymore, this is used for generic error messages.
-	//       Popups in UI should be shared_ptrs to make this even more generic.
 	class CStringKeyComparator
 	{
 	public:
 		bool operator()(const char *pLhs, const char *pRhs) const;
 	};
-	std::map<const char *, CUi::SMessagePopupContext *, CStringKeyComparator> m_PopupMessageContexts;
+	std::map<const char *, std::unique_ptr<CUi::SMessagePopupContext>, CStringKeyComparator> m_PopupMessageContexts;
 	[[gnu::format(printf, 2, 3)]] void ShowFileDialogError(const char *pFormat, ...);
 
 	void Reset();
@@ -301,6 +338,7 @@ public:
 	void CloseMap(size_t Index, bool Confirm);
 	bool Save(const char *pFilename) override;
 	bool Load(const char *pFilename, int StorageType) override;
+	bool LoadWithCallback(const char *pFilename, int StorageType, std::function<void()> OnLoaded);
 	bool HandleMapDrop(const char *pFilename, int StorageType) override;
 	void LoadIngameMap();
 	void Render();
@@ -319,6 +357,7 @@ public:
 
 	CUi::SColorPickerPopupContext m_ColorPickerPopupContext;
 	const void *m_pColorPickerPopupActiveId = nullptr;
+	bool m_ColorPickerEditing = false;
 	void DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRGBA Color, const std::function<void(ColorRGBA Color)> &SetColor);
 
 	int m_Mode;
@@ -457,6 +496,28 @@ public:
 	int DoButton_MenuItem(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags = BUTTONFLAG_LEFT, const char *pToolTip = nullptr);
 	int DoButton_DraggableEx(const void *pId, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
 	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr, const std::vector<STextColorSplit> &vColorSplits = {});
+	/** Bind a persistent input to document text; groups typing until acceptance/cancel. */
+	bool DoDocumentEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, const char *pLabel, editor_history::ECategory Category = editor_history::ECategory::MAP);
+	/** Retire the text owner before its buffer disappears; false requests rollback. */
+	void FinishDocumentText(bool Accept);
+	bool DocumentNumberInputActive() const;
+	bool DocumentInputSettlementRequested() const { return m_SettleDocumentInput; }
+	void DeferDocumentAction(CEditorMap *pMap, std::function<void()> Action);
+	void SelectMap(size_t Index);
+	void SwitchTool(std::function<void()> Action);
+	CLineInput *m_pDocumentNumberInput = nullptr;
+	bool m_SettleDocumentInput = false;
+	struct SDeferredDocumentAction
+	{
+		std::weak_ptr<const CEditorSaveState> m_Lifetime;
+		std::function<void()> m_Action;
+	};
+	std::vector<SDeferredDocumentAction> m_vDeferredDocumentActions;
+
+	CLineInput *m_pDocumentTextInput = nullptr;
+	CEditorMap *m_pDocumentTextMap = nullptr;
+	const char *m_pDocumentTextBuffer = nullptr;
+	bool m_DocumentTextRendered = false;
 	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr, const std::vector<STextColorSplit> &vColorSplits = {});
 	SEditResult<int> UiDoValueSelector(const void *pId, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int Corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness) const;
@@ -567,11 +628,11 @@ public:
 	int PopupSelectAutomapperReferenceResult();
 
 	void DoQuadEnvelopes(const CLayerQuads *pLayerQuads);
-	void DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex);
-	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v);
+	void DoQuadEnvPoint(const CQuadValues *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex);
+	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuadValues *pQuad, int QuadIndex, int v);
 	void UpdateHotQuadPoint(const CLayerQuads *pLayer);
 
-	void DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index);
+	void DoSoundSource(int LayerIndex, CSoundSourceValues *pSource, int Index);
 	void UpdateHotSoundSource(const CLayerSounds *pLayer);
 
 	enum class EAxis
@@ -601,9 +662,9 @@ public:
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarImages(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
-	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
-	void PreparePointDrag(const CQuad *pQuad, int QuadIndex, int PointIndex);
-	void DoPointDrag(CQuad *pQuad, int QuadIndex, int PointIndex, ivec2 Offset);
+	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuadValues *pQuad, int Index);
+	void PreparePointDrag(const CQuadValues *pQuad, int QuadIndex, int PointIndex);
+	void DoPointDrag(CQuadValues *pQuad, int QuadIndex, int PointIndex, ivec2 Offset);
 	EAxis GetDragAxis(ivec2 Offset) const;
 	void DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const;
 	void DrawAABB(const SAxisAlignedBoundingBox &AABB, ivec2 Offset) const;
@@ -626,7 +687,7 @@ public:
 		int m_PointIndex; // The point index we are aligning
 		int m_Diff; // Store the difference
 	};
-	void ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, ivec2 Offset, std::vector<SAlignmentInfo> &vAlignments, bool Append = false) const;
+	void ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer, CQuadValues *pQuad, int QuadIndex, int PointIndex, ivec2 Offset, std::vector<SAlignmentInfo> &vAlignments, bool Append = false) const;
 	void ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer, bool Pivot, ivec2 Offset, std::vector<SAlignmentInfo> &vAlignments) const;
 	void ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, const SAxisAlignedBoundingBox &AABB, ivec2 Offset, std::vector<SAlignmentInfo> &vAlignments) const;
 	void DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, ivec2 Offset) const;
@@ -654,13 +715,10 @@ public:
 	{
 	public:
 		ELayerOperation m_Operation;
-		ELayerOperation m_PreviousOperation;
 		const void *m_pDraggedButton;
 		float m_InitialMouseY;
 		float m_InitialCutHeight;
 		bool m_ScrollToSelectionNext;
-		int m_InitialGroupIndex;
-		std::vector<int> m_vInitialLayerIndices;
 		const char m_AddGroupButtonId = 0;
 		const char m_CollapseAllButtonId = 0;
 		const SPopupMenuId m_PopupGroupId = {};
@@ -729,7 +787,7 @@ private:
 	std::vector<std::unique_ptr<CEditorMap>> m_vpMaps;
 	size_t m_SelectedMap;
 
-	CEditorHistory &ActiveHistory();
+	CEditorDocumentHistory &ActiveHistory();
 
 	std::map<int, CPoint[5]> m_QuadDragOriginalPoints;
 };

@@ -1,7 +1,6 @@
 #include "quad_knife.h"
 
 #include "editor.h"
-#include "editor_actions.h"
 
 void CQuadKnife::CState::Reset()
 {
@@ -18,6 +17,8 @@ bool CQuadKnife::IsActive() const
 
 void CQuadKnife::Activate(int SelectedQuad)
 {
+	if(!Map()->m_DocumentHistory.Begin(this, "Quad knife", editor_history::ECategory::MAP))
+		return;
 	Map()->m_QuadKnifeState.m_Active = true;
 	Map()->m_QuadKnifeState.m_Count = 0;
 	Map()->m_QuadKnifeState.m_SelectedQuadIndex = SelectedQuad;
@@ -25,6 +26,7 @@ void CQuadKnife::Activate(int SelectedQuad)
 
 void CQuadKnife::Deactivate()
 {
+	Map()->m_DocumentHistory.Complete(this, CEditorDocumentHistory::ECompletion::TOOL_SWITCH);
 	Map()->m_QuadKnifeState.Reset();
 }
 
@@ -63,7 +65,7 @@ void CQuadKnife::DoSlice()
 
 	int QuadIndex = Map()->m_vSelectedQuads[Map()->m_QuadKnifeState.m_SelectedQuadIndex];
 	std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(Map()->SelectedLayerType(0, LAYERTYPE_QUADS));
-	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
+	CQuadValues *pQuad = &pLayer->m_vQuads[QuadIndex];
 
 	const bool IgnoreGrid = Editor()->Input()->AltIsPressed();
 	float SnapRadius = 4.f * Editor()->MapView()->MouseWorldScale();
@@ -192,39 +194,39 @@ void CQuadKnife::DoSlice()
 
 		std::swap(aPoints[2], aPoints[3]);
 
-		CQuad *pResult = pLayer->NewQuad(64, 64, 64, 64);
-		pQuad = &pLayer->m_vQuads[QuadIndex];
+		Map()->m_DocumentHistory.Update(this, [&] {
+			CQuadValues *pResult = pLayer->NewQuad(64, 64, 64, 64);
+			pQuad = &pLayer->m_vQuads[QuadIndex];
 
-		for(int i = 0; i < 4; i++)
-		{
-			int t = IsInTriangle(aPoints[i], v[0], v[3], v[2]) ? 2 : 1;
+			for(int i = 0; i < 4; i++)
+			{
+				int t = IsInTriangle(aPoints[i], v[0], v[3], v[2]) ? 2 : 1;
 
-			vec2 A = vec2(fx2f(pQuad->m_aPoints[0].x), fx2f(pQuad->m_aPoints[0].y));
-			vec2 B = vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y));
-			vec2 C = vec2(fx2f(pQuad->m_aPoints[t].x), fx2f(pQuad->m_aPoints[t].y));
+				vec2 A = vec2(fx2f(pQuad->m_aPoints[0].x), fx2f(pQuad->m_aPoints[0].y));
+				vec2 B = vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y));
+				vec2 C = vec2(fx2f(pQuad->m_aPoints[t].x), fx2f(pQuad->m_aPoints[t].y));
 
-			float TriArea = TriangleArea(A, B, C);
-			float WeightA = TriangleArea(aPoints[i], B, C) / TriArea;
-			float WeightB = TriangleArea(aPoints[i], C, A) / TriArea;
-			float WeightC = TriangleArea(aPoints[i], A, B) / TriArea;
+				float TriArea = TriangleArea(A, B, C);
+				float WeightA = TriangleArea(aPoints[i], B, C) / TriArea;
+				float WeightB = TriangleArea(aPoints[i], C, A) / TriArea;
+				float WeightC = TriangleArea(aPoints[i], A, B) / TriArea;
 
-			pResult->m_aColors[i].r = (int)std::round(pQuad->m_aColors[0].r * WeightA + pQuad->m_aColors[3].r * WeightB + pQuad->m_aColors[t].r * WeightC);
-			pResult->m_aColors[i].g = (int)std::round(pQuad->m_aColors[0].g * WeightA + pQuad->m_aColors[3].g * WeightB + pQuad->m_aColors[t].g * WeightC);
-			pResult->m_aColors[i].b = (int)std::round(pQuad->m_aColors[0].b * WeightA + pQuad->m_aColors[3].b * WeightB + pQuad->m_aColors[t].b * WeightC);
-			pResult->m_aColors[i].a = (int)std::round(pQuad->m_aColors[0].a * WeightA + pQuad->m_aColors[3].a * WeightB + pQuad->m_aColors[t].a * WeightC);
+				pResult->m_aColors[i].r = (int)std::round(pQuad->m_aColors[0].r * WeightA + pQuad->m_aColors[3].r * WeightB + pQuad->m_aColors[t].r * WeightC);
+				pResult->m_aColors[i].g = (int)std::round(pQuad->m_aColors[0].g * WeightA + pQuad->m_aColors[3].g * WeightB + pQuad->m_aColors[t].g * WeightC);
+				pResult->m_aColors[i].b = (int)std::round(pQuad->m_aColors[0].b * WeightA + pQuad->m_aColors[3].b * WeightB + pQuad->m_aColors[t].b * WeightC);
+				pResult->m_aColors[i].a = (int)std::round(pQuad->m_aColors[0].a * WeightA + pQuad->m_aColors[3].a * WeightB + pQuad->m_aColors[t].a * WeightC);
 
-			pResult->m_aTexcoords[i].x = (int)std::round(pQuad->m_aTexcoords[0].x * WeightA + pQuad->m_aTexcoords[3].x * WeightB + pQuad->m_aTexcoords[t].x * WeightC);
-			pResult->m_aTexcoords[i].y = (int)std::round(pQuad->m_aTexcoords[0].y * WeightA + pQuad->m_aTexcoords[3].y * WeightB + pQuad->m_aTexcoords[t].y * WeightC);
+				pResult->m_aTexcoords[i].x = (int)std::round(pQuad->m_aTexcoords[0].x * WeightA + pQuad->m_aTexcoords[3].x * WeightB + pQuad->m_aTexcoords[t].x * WeightC);
+				pResult->m_aTexcoords[i].y = (int)std::round(pQuad->m_aTexcoords[0].y * WeightA + pQuad->m_aTexcoords[3].y * WeightB + pQuad->m_aTexcoords[t].y * WeightC);
 
-			pResult->m_aPoints[i].x = f2fx(aPoints[i].x);
-			pResult->m_aPoints[i].y = f2fx(aPoints[i].y);
-		}
+				pResult->m_aPoints[i].x = f2fx(aPoints[i].x);
+				pResult->m_aPoints[i].y = f2fx(aPoints[i].y);
+			}
 
-		pResult->m_aPoints[4].x = ((pResult->m_aPoints[0].x + pResult->m_aPoints[3].x) / 2 + (pResult->m_aPoints[1].x + pResult->m_aPoints[2].x) / 2) / 2;
-		pResult->m_aPoints[4].y = ((pResult->m_aPoints[0].y + pResult->m_aPoints[3].y) / 2 + (pResult->m_aPoints[1].y + pResult->m_aPoints[2].y) / 2) / 2;
-
+			pResult->m_aPoints[4].x = ((pResult->m_aPoints[0].x + pResult->m_aPoints[3].x) / 2 + (pResult->m_aPoints[1].x + pResult->m_aPoints[2].x) / 2) / 2;
+			pResult->m_aPoints[4].y = ((pResult->m_aPoints[0].y + pResult->m_aPoints[3].y) / 2 + (pResult->m_aPoints[1].y + pResult->m_aPoints[2].y) / 2) / 2;
+		});
 		Map()->m_QuadKnifeState.m_Count = 0;
-		Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionNewQuad>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0]));
 	}
 
 	// Render

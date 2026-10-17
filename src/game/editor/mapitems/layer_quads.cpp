@@ -5,52 +5,60 @@
 #include "image.h"
 
 #include <game/editor/editor.h>
-#include <game/editor/editor_actions.h>
 
 #include <limits>
 
-CLayerQuads::CLayerQuads(CEditorMap *pMap) :
-	CLayer(pMap, LAYERTYPE_QUADS)
+CLayerQuads::CLayerQuads(CEditorMap *pMap, std::uint64_t RetainedId) :
+	CLayer(pMap, LAYERTYPE_QUADS, RetainedId)
 {
 	m_aName[0] = '\0';
-	m_Image = -1;
+	m_Image = Map()->ImageReference(-1);
 }
 
 CLayerQuads::CLayerQuads(const CLayerQuads &Other) :
-	CLayer(Other)
+	CLayer(Other),
+	CLayerQuadsValues(Other)
 {
-	m_Image = Other.m_Image;
-	m_vQuads = Other.m_vQuads;
+	for(auto &Quad : m_vQuads)
+		Quad.m_Id = Map()->AllocateObjectId();
 }
 
 CLayerQuads::~CLayerQuads() = default;
 
 void CLayerQuads::Render(const CEditorMap *pRenderMap)
 {
-	if(m_Image >= 0 && (size_t)m_Image < pRenderMap->m_vpImages.size())
+	if(pRenderMap->ImageIndex(m_Image) >= 0 && (size_t)pRenderMap->ImageIndex(m_Image) < pRenderMap->m_vpImages.size())
 	{
-		Graphics()->TextureSet(pRenderMap->m_vpImages[m_Image]->m_Texture);
+		Graphics()->TextureSet(pRenderMap->m_vpImages[pRenderMap->ImageIndex(m_Image)]->m_Texture);
 	}
 	else
 	{
 		Graphics()->TextureClear();
 	}
 
-	Graphics()->BlendNone();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, &pRenderMap->m_EnvelopeEvaluator);
-	Graphics()->BlendNormal();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, &pRenderMap->m_EnvelopeEvaluator);
+	for(const int Flags : {LAYERRENDERFLAG_OPAQUE, LAYERRENDERFLAG_TRANSPARENT})
+	{
+		if(Flags == LAYERRENDERFLAG_OPAQUE)
+			Graphics()->BlendNone();
+		else
+			Graphics()->BlendNormal();
+		Graphics()->TrianglesBegin();
+		for(const auto &Quad : m_vQuads)
+			Editor()->RenderMap()->RenderQuad(Quad.Export([&](CDocumentReference Reference) { return pRenderMap->EnvelopeIndex(Reference); }), Flags, &pRenderMap->m_EnvelopeEvaluator, 1.0f);
+		Graphics()->TrianglesEnd();
+	}
 }
 
-CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
+CQuadValues *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 {
 	Map()->OnModify();
 
 	m_vQuads.emplace_back();
-	CQuad *pQuad = &m_vQuads[m_vQuads.size() - 1];
+	m_vQuads.back().m_Id = Map()->AllocateObjectId();
+	CQuadValues *pQuad = &m_vQuads[m_vQuads.size() - 1];
 
-	pQuad->m_PosEnv = -1;
-	pQuad->m_ColorEnv = -1;
+	pQuad->m_PosEnv = Map()->EnvelopeReference(-1);
+	pQuad->m_ColorEnv = Map()->EnvelopeReference(-1);
 	pQuad->m_PosEnvOffset = 0;
 	pQuad->m_ColorEnvOffset = 0;
 
@@ -104,7 +112,8 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 		if(PointX > Rect.x && PointX < Rect.x + Rect.w && PointY > Rect.y && PointY < Rect.y + Rect.h)
 		{
-			CQuad NewQuad = Quad;
+			CQuadValues NewQuad = Quad;
+			NewQuad.m_Id = pGrabbed->Map()->AllocateObjectId();
 			for(auto &Point : NewQuad.m_aPoints)
 			{
 				Point.x -= f2fx(Rect.x);
@@ -124,10 +133,10 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 		return;
 
 	CLayerQuads *pQuadLayer = static_cast<CLayerQuads *>(pBrush);
-	std::vector<CQuad> vAddedQuads;
 	for(const auto &Quad : pQuadLayer->m_vQuads)
 	{
-		CQuad NewQuad = Quad;
+		CQuadValues NewQuad = Quad;
+		NewQuad.m_Id = Map()->AllocateObjectId();
 		for(auto &Point : NewQuad.m_aPoints)
 		{
 			Point.x += f2fx(WorldPos.x);
@@ -135,9 +144,7 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 		}
 
 		m_vQuads.push_back(NewQuad);
-		vAddedQuads.push_back(NewQuad);
 	}
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], vAddedQuads));
 	Map()->OnModify();
 }
 
@@ -236,7 +243,7 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
 	CProperty aProps[] = {
-		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
+		{"Image", Map()->ImageIndex(m_Image), PROPTYPE_IMAGE, -1, 0},
 		{nullptr},
 	};
 
@@ -248,17 +255,19 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 		Map()->OnModify();
 	}
 
-	Map()->m_LayerQuadPropTracker.Begin(this, Prop, State);
-
-	if(Prop == ELayerQuadsProp::IMAGE)
+	if(Map()->m_DocumentHistory.BeginControl(s_aIds, "Edit quad layer", State))
 	{
-		if(NewVal >= 0)
-			m_Image = NewVal % Map()->m_vpImages.size();
-		else
-			m_Image = -1;
+		Map()->m_DocumentHistory.Update(s_aIds, [&] {
+			if(Prop == ELayerQuadsProp::IMAGE)
+			{
+				if(NewVal >= 0)
+					m_Image = Map()->ImageReference(NewVal % Map()->m_vpImages.size());
+				else
+					m_Image = Map()->ImageReference(-1);
+			}
+		});
+		Map()->m_DocumentHistory.EndControl(s_aIds, State);
 	}
-
-	Map()->m_LayerQuadPropTracker.End(Prop, State);
 
 	return CUi::POPUP_KEEP_OPEN;
 }
@@ -266,26 +275,26 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 bool CLayerQuads::IsEnvelopeUsed(int EnvelopeIndex) const
 {
 	return std::any_of(m_vQuads.begin(), m_vQuads.end(), [&](const auto &Quad) {
-		return Quad.m_PosEnv == EnvelopeIndex || Quad.m_ColorEnv == EnvelopeIndex;
+		return Map()->EnvelopeIndex(Quad.m_PosEnv) == EnvelopeIndex || Map()->EnvelopeIndex(Quad.m_ColorEnv) == EnvelopeIndex;
 	});
 }
 
 bool CLayerQuads::IsImageUsed(int ImageIndex) const
 {
-	return m_Image == ImageIndex;
+	return Map()->ImageIndex(m_Image) == ImageIndex;
 }
 
-void CLayerQuads::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
+void CLayerQuads::VisitImageReferences(const FDocumentReferenceFunction &ReferenceFunction)
 {
-	IndexModifyFunction(&m_Image);
+	ReferenceFunction(m_Image);
 }
 
-void CLayerQuads::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
+void CLayerQuads::VisitEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction)
 {
 	for(auto &Quad : m_vQuads)
 	{
-		IndexModifyFunction(&Quad.m_PosEnv);
-		IndexModifyFunction(&Quad.m_ColorEnv);
+		ReferenceFunction(Quad.m_PosEnv);
+		ReferenceFunction(Quad.m_ColorEnv);
 	}
 }
 
@@ -310,4 +319,14 @@ int CLayerQuads::SwapQuads(int Index0, int Index1)
 const char *CLayerQuads::TypeName() const
 {
 	return "quads";
+}
+
+void CLayerQuads::OnAttach(CEditorMap *pMap)
+{
+	if(Map() != pMap)
+	{
+		for(auto &Element : m_vQuads)
+			Element.m_Id = pMap->AllocateObjectId();
+	}
+	CLayer::OnAttach(pMap);
 }

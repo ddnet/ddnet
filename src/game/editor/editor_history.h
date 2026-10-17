@@ -1,8 +1,6 @@
 #ifndef GAME_EDITOR_EDITOR_HISTORY_H
 #define GAME_EDITOR_EDITOR_HISTORY_H
 
-#include "editor_action.h"
-
 #include <game/client/ui_listbox.h>
 #include <game/editor/map_object.h>
 
@@ -10,58 +8,15 @@
 #include <memory>
 #include <vector>
 
-class CEditorHistory : public CMapObject
-{
-public:
-	explicit CEditorHistory(CEditorMap *pMap) :
-		CMapObject(pMap)
-	{
-	}
-
-	~CEditorHistory() override
-	{
-		Clear();
-	}
-
-	void RecordAction(const std::shared_ptr<IEditorAction> &pAction);
-	void RecordAction(const std::shared_ptr<IEditorAction> &pAction, const char *pDisplay);
-	void Execute(const std::shared_ptr<IEditorAction> &pAction, const char *pDisplay = nullptr);
-
-	bool Undo();
-	bool Redo();
-
-	void Clear();
-	bool CanUndo() const { return !m_vpUndoActions.empty(); }
-	bool CanRedo() const { return !m_vpRedoActions.empty(); }
-
-	void BeginBulk();
-	void EndBulk(const char *pDisplay = nullptr);
-	void EndBulk(int DisplayToUse);
-
-	std::deque<std::shared_ptr<IEditorAction>> m_vpUndoActions;
-	std::deque<std::shared_ptr<IEditorAction>> m_vpRedoActions;
-
-private:
-	std::vector<std::shared_ptr<IEditorAction>> m_vpBulkActions;
-	bool m_IsBulk = false;
-};
-
-enum class EHistoryType
-{
-	EDITOR,
-	ENVELOPE,
-	SERVER_SETTINGS,
-};
-
 class CEditorHistoryUiState
 {
 public:
-	EHistoryType m_HistoryType = EHistoryType::EDITOR;
-	CListBox m_aListBoxes[(int)EHistoryType::SERVER_SETTINGS + 1];
-	int m_aSelectedActionIndices[(int)EHistoryType::SERVER_SETTINGS + 1] = {0};
-	const char m_aHistoryTypeButtonIds[(int)EHistoryType::SERVER_SETTINGS + 1] = {0};
+	int m_Category = -1;
+	CListBox m_ListBox;
+	const char m_aCategoryButtonIds[4] = {0};
 	const char m_DeleteButtonId = 0;
-	const char m_BaseActionButtonId = 0;
+	const char m_EntryLimitId = 0;
+	const char m_MemoryLimitId = 0;
 };
 
 #endif

@@ -1238,10 +1238,11 @@ int64_t CUi::DoValueSelector(const void *pId, const CUIRect *pRect, const char *
 SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
 {
 	// logic
+	bool Cancelled = false;
 	const bool Inside = MouseInside(pRect);
 	const int Base = Props.m_IsHex ? 16 : 10;
 
-	if(HotItem() == pId && m_ActiveValueSelectorState.m_Button >= 0 && !MouseButton(m_ActiveValueSelectorState.m_Button))
+	if(m_ActiveValueSelectorState.m_pPointerId == pId && m_ActiveValueSelectorState.m_Button >= 0 && !MouseButton(m_ActiveValueSelectorState.m_Button))
 	{
 		DisableMouseLock();
 		if(CheckActiveItem(pId))
@@ -1253,8 +1254,11 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 			m_ActiveValueSelectorState.m_pLastTextId = pId;
 			m_ActiveValueSelectorState.m_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);
 			m_ActiveValueSelectorState.m_NumberInput.SelectAll();
+			m_ActiveValueSelectorState.m_Invalid = false;
+			m_ActiveValueSelectorState.m_pInvalidId = nullptr;
 		}
 		m_ActiveValueSelectorState.m_Button = -1;
+		m_ActiveValueSelectorState.m_pPointerId = nullptr;
 	}
 
 	if(m_ActiveValueSelectorState.m_pLastTextId == pId)
@@ -1262,19 +1266,43 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 		SetActiveItem(&m_ActiveValueSelectorState.m_NumberInput);
 		DoEditBox(&m_ActiveValueSelectorState.m_NumberInput, pRect, 10.0f);
 
-		if(ConsumeHotkey(HOTKEY_ENTER) || ((MouseButtonClicked(1) || MouseButtonClicked(0)) && !Inside))
+		const auto Value = m_ActiveValueSelectorState.m_NumberInput.IntegerDraft(Base);
+		if(Value)
 		{
-			Current = std::clamp(m_ActiveValueSelectorState.m_NumberInput.GetInteger64(Base), Min, Max);
-			DisableMouseLock();
-			SetActiveItem(nullptr);
-			m_ActiveValueSelectorState.m_pLastTextId = nullptr;
+			m_ActiveValueSelectorState.m_Invalid = false;
+			m_ActiveValueSelectorState.m_pInvalidId = nullptr;
+		}
+		const bool Blur = (MouseButtonClicked(1) || MouseButtonClicked(0)) && !Inside;
+		if(ConsumeHotkey(HOTKEY_ENTER) || Blur || m_ActiveValueSelectorState.m_SettleText)
+		{
+			if(Value)
+				Current = std::clamp(*Value, Min, Max);
+			else
+			{
+				m_ActiveValueSelectorState.m_Invalid = true;
+				m_ActiveValueSelectorState.m_pInvalidId = pId;
+			}
+			if(Value || Blur || m_ActiveValueSelectorState.m_SettleText)
+			{
+				Cancelled = !Value;
+				DisableMouseLock();
+				SetActiveItem(nullptr);
+				m_ActiveValueSelectorState.m_NumberInput.Deactivate();
+				m_ActiveValueSelectorState.m_pLastTextId = nullptr;
+				m_ActiveValueSelectorState.m_SettleText = false;
+			}
 		}
 
 		if(ConsumeHotkey(HOTKEY_ESCAPE))
 		{
+			Cancelled = true;
 			DisableMouseLock();
 			SetActiveItem(nullptr);
+			m_ActiveValueSelectorState.m_NumberInput.Deactivate();
 			m_ActiveValueSelectorState.m_pLastTextId = nullptr;
+			m_ActiveValueSelectorState.m_SettleText = false;
+			m_ActiveValueSelectorState.m_Invalid = false;
+			m_ActiveValueSelectorState.m_pInvalidId = nullptr;
 		}
 	}
 	else
@@ -1307,6 +1335,7 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 			if(MouseButton(0))
 			{
 				m_ActiveValueSelectorState.m_Button = 0;
+				m_ActiveValueSelectorState.m_pPointerId = pId;
 				m_ActiveValueSelectorState.m_DidScroll = false;
 				m_ActiveValueSelectorState.m_ScrollValue = 0.0f;
 				SetActiveItem(pId);
@@ -1316,6 +1345,7 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 			else if(MouseButton(1))
 			{
 				m_ActiveValueSelectorState.m_Button = 1;
+				m_ActiveValueSelectorState.m_pPointerId = pId;
 				SetActiveItem(pId);
 			}
 		}
@@ -1343,6 +1373,12 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 	if(Inside && !MouseButton(0) && !MouseButton(1))
 		SetHotItem(pId);
 
+	if(m_ActiveValueSelectorState.m_Invalid && m_ActiveValueSelectorState.m_pInvalidId == pId)
+	{
+		pRect->DrawOutline(ColorRGBA(1.0f, 0.3f, 0.3f, 1.0f));
+		DoToolTip(pId, pRect, "Invalid number. Enter a complete integer.");
+	}
+
 	EEditState State = EEditState::NONE;
 	if(m_pLastEditingItem == pId)
 	{
@@ -1355,7 +1391,7 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 	}
 	if(!CheckMouseLock() && m_ActiveValueSelectorState.m_pLastTextId != pId && m_pLastEditingItem == pId)
 	{
-		State = EEditState::END;
+		State = Cancelled ? EEditState::CANCELLED : EEditState::END;
 		m_pLastEditingItem = nullptr;
 	}
 
@@ -1871,4 +1907,38 @@ void CUi::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText
 void CUi::DoToolTip(const CTooltip &Tooltip) const
 {
 	m_pTooltips->DoToolTip(Tooltip);
+}
+
+void CUi::ClearObjectReferences()
+{
+	if(CLineInput::GetActiveInput() != nullptr)
+		CLineInput::GetActiveInput()->Deactivate();
+	m_pHotItem = nullptr;
+	m_pActiveItem = nullptr;
+	m_pLastActiveItem = nullptr;
+	m_pBecomingHotItem = nullptr;
+	m_pHotScrollRegion = nullptr;
+	m_pBecomingHotScrollRegion = nullptr;
+	m_pLastEditingItem = nullptr;
+	m_pLastActiveScrollbar = nullptr;
+	m_ActiveItemValid = false;
+	m_ActiveButtonLogicButton = -1;
+	m_ActiveDraggableButtonLogicButton = -1;
+	m_DoubleClickState = {};
+	ResetValueSelector();
+	m_MouseLock = false;
+	m_pMouseLockId = nullptr;
+}
+
+void CUi::ResetValueSelector()
+{
+	m_ActiveValueSelectorState.m_NumberInput.Deactivate();
+	m_ActiveValueSelectorState.m_SettleText = false;
+	m_ActiveValueSelectorState.m_Button = -1;
+	m_ActiveValueSelectorState.m_pPointerId = nullptr;
+	m_ActiveValueSelectorState.m_DidScroll = false;
+	m_ActiveValueSelectorState.m_ScrollValue = 0.0f;
+	m_ActiveValueSelectorState.m_pLastTextId = nullptr;
+	m_ActiveValueSelectorState.m_Invalid = false;
+	m_ActiveValueSelectorState.m_pInvalidId = nullptr;
 }

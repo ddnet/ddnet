@@ -3,15 +3,16 @@
 
 #include "layer.h"
 
-class CLayerQuads : public CLayer
+class CLayerQuads : public CLayer, public CLayerQuadsValues
 {
 public:
-	explicit CLayerQuads(CEditorMap *pMap);
+	void OnAttach(CEditorMap *pMap) override;
+	explicit CLayerQuads(CEditorMap *pMap, std::uint64_t RetainedId = 0);
 	CLayerQuads(const CLayerQuads &Other);
 	~CLayerQuads() override;
 
 	void Render(const CEditorMap *pRenderMap) override;
-	CQuad *NewQuad(int x, int y, int Width, int Height);
+	CQuadValues *NewQuad(int x, int y, int Width, int Height);
 	int SwapQuads(int Index0, int Index1);
 
 	void BrushSelecting(CUIRect Rect) override;
@@ -26,15 +27,12 @@ public:
 	bool IsEnvelopeUsed(int EnvelopeIndex) const override;
 	bool IsImageUsed(int ImageIndex) const override;
 
-	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) override;
-	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
+	void VisitImageReferences(const FDocumentReferenceFunction &ReferenceFunction) override;
+	void VisitEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction) override;
 
 	void GetSize(float *pWidth, float *pHeight) override;
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
-
-	int m_Image;
-	std::vector<CQuad> m_vQuads;
 };
 
 #endif

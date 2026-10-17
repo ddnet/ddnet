@@ -12,6 +12,7 @@
 
 #include <game/client/ui_rect.h>
 
+#include <optional>
 #include <string>
 
 enum class EInputPriority
@@ -232,6 +233,7 @@ public:
 
 	void SetInteger64(int64_t Number, int Base = 10, int HexPrefix = 6);
 	int64_t GetInteger64(int Base = 10) const;
+	std::optional<int64_t> IntegerDraft(int Base) const;
 
 	void SetFloat(float Number);
 	float GetFloat() const;

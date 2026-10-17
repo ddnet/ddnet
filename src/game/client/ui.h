@@ -27,7 +27,8 @@ enum class EEditState
 	START,
 	EDITING,
 	END,
-	ONE_GO
+	ONE_GO,
+	CANCELLED,
 };
 
 template<typename T>
@@ -375,7 +376,12 @@ public:
 	/**
 	 * Callback that is called when one or more popups are closed.
 	 */
-	typedef std::function<void()> FPopupMenuClosedCallback;
+	enum class EPopupCloseReason
+	{
+		ACCEPT,
+		CANCEL,
+	};
+	typedef std::function<void(EPopupCloseReason)> FPopupMenuClosedCallback;
 
 	/**
 	 * Represents the aggregated state of current touch events to control a user interface.
@@ -431,6 +437,10 @@ private:
 		float m_ScrollValue = 0.0f;
 		CLineInputNumber m_NumberInput;
 		const void *m_pLastTextId = nullptr;
+		const void *m_pPointerId = nullptr;
+		bool m_Invalid = false;
+		bool m_SettleText = false;
+		const void *m_pInvalidId = nullptr;
 	};
 	CValueSelectorState m_ActiveValueSelectorState;
 
@@ -569,6 +579,8 @@ public:
 	}
 	void DisableMouseLock() { m_MouseLock = false; }
 
+	/** Retire object-address widget IDs before document storage is replaced. */
+	void ClearObjectReferences();
 	void SetHotItem(const void *pId) { m_pBecomingHotItem = pId; }
 	void SetActiveItem(const void *pId)
 	{
@@ -705,6 +717,10 @@ public:
 	SEditResult<int64_t> DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
 	int64_t DoValueSelector(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
 
+	bool ValueSelectorTextActive() const { return m_ActiveValueSelectorState.m_pLastTextId != nullptr; }
+	void SettleValueSelectorText() { m_ActiveValueSelectorState.m_SettleText = ValueSelectorTextActive(); }
+	void ResetValueSelector();
+
 	// scrollbars
 	enum
 	{
@@ -736,7 +752,7 @@ public:
 	// found in ui_popups.cpp
 	void DoPopupMenu(const SPopupMenuId *pId, float X, float Y, float Width, float Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props = {});
 	void RenderPopupMenus();
-	void ClosePopupMenu(const SPopupMenuId *pId, bool IncludeDescendants = false);
+	void ClosePopupMenu(const SPopupMenuId *pId, bool IncludeDescendants = false, EPopupCloseReason Reason = EPopupCloseReason::CANCEL);
 	void ClosePopupMenus();
 	bool IsPopupOpen() const;
 	bool IsPopupOpen(const SPopupMenuId *pId) const;

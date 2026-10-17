@@ -15,6 +15,7 @@ int CEditor::DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIds, int *
 template<typename E>
 SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pProps, int *pIds, int *pNewVal, const std::vector<ColorRGBA> &vColors)
 {
+	Map()->m_DocumentHistory.TouchControl(pIds);
 	int Change = -1;
 	EEditState State = EEditState::NONE;
 

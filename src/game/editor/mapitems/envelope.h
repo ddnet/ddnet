@@ -1,27 +1,23 @@
 #ifndef GAME_EDITOR_MAPITEMS_ENVELOPE_H
 #define GAME_EDITOR_MAPITEMS_ENVELOPE_H
 
+#include "document_values.h"
+
+#include <game/editor/map_object.h>
 #include <game/map/render_map.h>
 #include <game/mapitems.h>
 
 #include <array>
 #include <vector>
 
-class CEnvelope
+class CEnvelope : public CMapObject, public CEnvelopeValues
 {
 public:
-	std::vector<CEnvPoint_runtime> m_vPoints;
-	char m_aName[32] = "";
-	bool m_Synchronized = true;
-
-	enum class EType
-	{
-		POSITION,
-		COLOR,
-		SOUND,
-	};
-	explicit CEnvelope(EType Type);
-	explicit CEnvelope(int NumChannels);
+	void OnAttach(CEditorMap *pMap) override;
+	CEnvelope(CEditorMap *pMap, EType Type, std::uint64_t RetainedId = 0);
+	CEnvelope(CEditorMap *pMap, int NumChannels);
+	CEnvelope(const CEnvelope &) = delete;
+	CEnvelope &operator=(const CEnvelope &) = delete;
 
 	std::pair<float, float> GetValueRange(int ChannelMask);
 	void Eval(float Time, ColorRGBA &Result, size_t Channels) const;
@@ -34,14 +30,12 @@ public:
 private:
 	void Resort();
 
-	EType m_Type;
-
 	class CEnvelopePointAccess : public IEnvelopePointAccess
 	{
-		std::vector<CEnvPoint_runtime> *m_pvPoints;
+		const std::vector<CEnvelopePointValues> *m_pvPoints;
 
 	public:
-		CEnvelopePointAccess(std::vector<CEnvPoint_runtime> *pvPoints);
+		CEnvelopePointAccess(const std::vector<CEnvelopePointValues> *pvPoints);
 
 		int NumPoints() const override;
 		const CEnvPoint *GetPoint(int Index) const override;

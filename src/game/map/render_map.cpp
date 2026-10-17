@@ -23,6 +23,64 @@
 
 using namespace std::chrono_literals;
 
+namespace
+{
+	class CEmptyTileCursor
+	{
+	};
+	template<typename TSource>
+	using CRenderRowCursor = std::conditional_t<std::is_pointer_v<TSource>, CEmptyTileCursor, CTileChunkCursor>;
+
+	/** Keep row order and the native gameplay skip path; editor access is per span. */
+	template<typename TSource, typename F>
+	void VisitRenderRow(TSource &Source, int Width, int StartX, int EndX, int Y, bool Extend, CRenderRowCursor<TSource> &Cursor, F &&Render)
+	{
+		if constexpr(std::is_pointer_v<TSource>)
+		{
+			for(int X = StartX; X < EndX; ++X)
+			{
+				const int MapX = Extend ? std::clamp(X, 0, Width - 1) : X;
+				X += Render(X, Source[MapX + static_cast<std::size_t>(Y) * Width]);
+			}
+		}
+		else
+		{
+			std::array<typename TSource::CTileType, 32> aBuffer;
+			for(int X = StartX; X < EndX;)
+			{
+				const int MapX = Extend ? std::clamp(X, 0, Width - 1) : X;
+				const bool RepeatedEdge = MapX != X;
+				const auto Row = Source.ReadRow(MapX, Y, RepeatedEdge ? MapX + 1 : std::min(EndX, Width), aBuffer, &Cursor);
+				const int Length = RepeatedEdge ? (X < 0 ? std::min(EndX, 0) - X : EndX - X) : static_cast<int>(Row.m_Length);
+				if(!Row.m_Cells.empty())
+				{
+					const auto *pCells = Row.m_Cells.data();
+					if(RepeatedEdge)
+					{
+						if constexpr(std::is_same_v<typename TSource::CTileType, CTile>)
+							if(pCells[0].m_Index == 0)
+							{
+								X += Length;
+								continue;
+							}
+						for(int Offset = 0; Offset < Length; ++Offset)
+							Render(X + Offset, pCells[0]);
+					}
+					else
+						for(int Offset = 0; Offset < Length; ++Offset)
+						{
+							if constexpr(std::is_same_v<typename TSource::CTileType, CTile>)
+								if(pCells[Offset].m_Index == 0)
+									continue;
+							Render(X + Offset, pCells[Offset]);
+						}
+				}
+				X += Length;
+			}
+		}
+	}
+}
+
 int IEnvelopePointAccess::FindPointIndex(CFixedTime Time) const
 {
 	// binary search for the interval around Time
@@ -369,68 +427,69 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
 }
 
-void CRenderMap::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, const IEnvelopeEval *pEnvEval, float Alpha)
+void CRenderMap::ForceRenderQuads(const CQuad *pQuads, int NumQuads, int RenderFlags, const IEnvelopeEval *pEnvEval, float Alpha)
 {
 	Graphics()->TrianglesBegin();
-	float Conv = 1 / 255.0f;
-	for(int i = 0; i < NumQuads; i++)
-	{
-		CQuad *pQuad = &pQuads[i];
-
-		ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		pEnvEval->EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4);
-
-		if(Color.a <= 0.0f)
-			continue;
-
-		bool Opaque = false;
-		/* TODO: Analyze quadtexture
-		if(a < 0.01f || (q->m_aColors[0].a < 0.01f && q->m_aColors[1].a < 0.01f && q->m_aColors[2].a < 0.01f && q->m_aColors[3].a < 0.01f))
-			Opaque = true;
-		*/
-		if(Opaque && !(RenderFlags & LAYERRENDERFLAG_OPAQUE))
-			continue;
-		if(!Opaque && !(RenderFlags & LAYERRENDERFLAG_TRANSPARENT))
-			continue;
-
-		Graphics()->QuadsSetSubsetFree(
-			fx2f(pQuad->m_aTexcoords[0].x), fx2f(pQuad->m_aTexcoords[0].y),
-			fx2f(pQuad->m_aTexcoords[1].x), fx2f(pQuad->m_aTexcoords[1].y),
-			fx2f(pQuad->m_aTexcoords[2].x), fx2f(pQuad->m_aTexcoords[2].y),
-			fx2f(pQuad->m_aTexcoords[3].x), fx2f(pQuad->m_aTexcoords[3].y));
-
-		ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		pEnvEval->EnvelopeEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Position, 3);
-		const vec2 Offset = vec2(Position.r, Position.g);
-		const float Rotation = Position.b / 180.0f * pi;
-
-		Graphics()->SetColor4(
-			ColorRGBA(pQuad->m_aColors[0].r, pQuad->m_aColors[0].g, pQuad->m_aColors[0].b, pQuad->m_aColors[0].a * Alpha).Multiply(Color).Multiply(Conv),
-			ColorRGBA(pQuad->m_aColors[1].r, pQuad->m_aColors[1].g, pQuad->m_aColors[1].b, pQuad->m_aColors[1].a * Alpha).Multiply(Color).Multiply(Conv),
-			ColorRGBA(pQuad->m_aColors[3].r, pQuad->m_aColors[3].g, pQuad->m_aColors[3].b, pQuad->m_aColors[3].a * Alpha).Multiply(Color).Multiply(Conv),
-			ColorRGBA(pQuad->m_aColors[2].r, pQuad->m_aColors[2].g, pQuad->m_aColors[2].b, pQuad->m_aColors[2].a * Alpha).Multiply(Color).Multiply(Conv));
-
-		CPoint *pPoints = pQuad->m_aPoints;
-
-		CPoint aRotated[4];
-		if(Rotation != 0.0f)
-		{
-			for(size_t p = 0; p < std::size(aRotated); ++p)
-			{
-				aRotated[p] = pQuad->m_aPoints[p];
-				Rotate(&pQuad->m_aPoints[4], &aRotated[p], Rotation);
-			}
-			pPoints = aRotated;
-		}
-
-		IGraphics::CFreeformItem Freeform(
-			fx2f(pPoints[0].x) + Offset.x, fx2f(pPoints[0].y) + Offset.y,
-			fx2f(pPoints[1].x) + Offset.x, fx2f(pPoints[1].y) + Offset.y,
-			fx2f(pPoints[2].x) + Offset.x, fx2f(pPoints[2].y) + Offset.y,
-			fx2f(pPoints[3].x) + Offset.x, fx2f(pPoints[3].y) + Offset.y);
-		Graphics()->QuadsDrawFreeform(&Freeform, 1);
-	}
+	for(int Index = 0; Index < NumQuads; ++Index)
+		RenderQuad(pQuads[Index], RenderFlags, pEnvEval, Alpha);
 	Graphics()->TrianglesEnd();
+}
+
+void CRenderMap::RenderQuad(const CQuad &Quad, int RenderFlags, const IEnvelopeEval *pEnvEval, float Alpha)
+{
+	const float Conv = 1 / 255.0f;
+	ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	pEnvEval->EnvelopeEval(Quad.m_ColorEnvOffset, Quad.m_ColorEnv, Color, 4);
+
+	if(Color.a <= 0.0f)
+		return;
+
+	bool Opaque = false;
+	/* TODO: Analyze quadtexture
+	if(a < 0.01f || (q->m_aColors[0].a < 0.01f && q->m_aColors[1].a < 0.01f && q->m_aColors[2].a < 0.01f && q->m_aColors[3].a < 0.01f))
+		Opaque = true;
+	*/
+	if(Opaque && !(RenderFlags & LAYERRENDERFLAG_OPAQUE))
+		return;
+	if(!Opaque && !(RenderFlags & LAYERRENDERFLAG_TRANSPARENT))
+		return;
+
+	Graphics()->QuadsSetSubsetFree(
+		fx2f(Quad.m_aTexcoords[0].x), fx2f(Quad.m_aTexcoords[0].y),
+		fx2f(Quad.m_aTexcoords[1].x), fx2f(Quad.m_aTexcoords[1].y),
+		fx2f(Quad.m_aTexcoords[2].x), fx2f(Quad.m_aTexcoords[2].y),
+		fx2f(Quad.m_aTexcoords[3].x), fx2f(Quad.m_aTexcoords[3].y));
+
+	ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+	pEnvEval->EnvelopeEval(Quad.m_PosEnvOffset, Quad.m_PosEnv, Position, 3);
+	const vec2 Offset = vec2(Position.r, Position.g);
+	const float Rotation = Position.b / 180.0f * pi;
+
+	Graphics()->SetColor4(
+		ColorRGBA(Quad.m_aColors[0].r, Quad.m_aColors[0].g, Quad.m_aColors[0].b, Quad.m_aColors[0].a * Alpha).Multiply(Color).Multiply(Conv),
+		ColorRGBA(Quad.m_aColors[1].r, Quad.m_aColors[1].g, Quad.m_aColors[1].b, Quad.m_aColors[1].a * Alpha).Multiply(Color).Multiply(Conv),
+		ColorRGBA(Quad.m_aColors[3].r, Quad.m_aColors[3].g, Quad.m_aColors[3].b, Quad.m_aColors[3].a * Alpha).Multiply(Color).Multiply(Conv),
+		ColorRGBA(Quad.m_aColors[2].r, Quad.m_aColors[2].g, Quad.m_aColors[2].b, Quad.m_aColors[2].a * Alpha).Multiply(Color).Multiply(Conv));
+
+	const CPoint *pPoints = Quad.m_aPoints;
+
+	CPoint aRotated[4];
+	if(Rotation != 0.0f)
+	{
+		for(size_t p = 0; p < std::size(aRotated); ++p)
+		{
+			aRotated[p] = Quad.m_aPoints[p];
+			Rotate(&Quad.m_aPoints[4], &aRotated[p], Rotation);
+		}
+		pPoints = aRotated;
+	}
+
+	IGraphics::CFreeformItem Freeform(
+		fx2f(pPoints[0].x) + Offset.x, fx2f(pPoints[0].y) + Offset.y,
+		fx2f(pPoints[1].x) + Offset.x, fx2f(pPoints[1].y) + Offset.y,
+		fx2f(pPoints[2].x) + Offset.x, fx2f(pPoints[2].y) + Offset.y,
+		fx2f(pPoints[3].x) + Offset.x, fx2f(pPoints[3].y) + Offset.y);
+	Graphics()->QuadsDrawFreeform(&Freeform, 1);
 }
 
 void CRenderMap::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
@@ -591,16 +650,31 @@ void CRenderMap::RenderTile(int x, int y, unsigned char Index, float Scale, Colo
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
+void CRenderMap::RenderTilemap(const CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
+	RenderTilemapImpl(pTiles, w, h, Scale, Color, RenderFlags);
+}
+
+void CRenderMap::RenderTilemap(CRenderTileSource<CTile> pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
+{
+	RenderTilemapImpl(pTiles, w, h, Scale, Color, RenderFlags);
+}
+
+template<typename TSource>
+void CRenderMap::RenderTilemapImpl(TSource pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
+{
+	if(w <= 0 || h <= 0)
+		return;
+
 	CScreenRect ScreenRect = Graphics()->GetScreen();
+	const bool TextureArrays = Graphics()->HasTextureArraysSupport();
 
 	// calculate the final pixelsize for the tiles
 	float TilePixelSize = 1024 / 32.0f;
 	float FinalTileSize = Scale / ScreenRect.Width() * Graphics()->ScreenWidth();
 	float FinalTilesetScale = FinalTileSize / TilePixelSize;
 
-	if(Graphics()->HasTextureArraysSupport())
+	if(TextureArrays)
 		Graphics()->QuadsTex3DBegin();
 	else
 		Graphics()->QuadsBegin();
@@ -626,130 +700,122 @@ void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRG
 	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
 	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
 
-	for(int y = StartY; y < EndY; y++)
+	// A translucent color cannot contribute to a pass without transparency.
+	// Keep begin/color/end state changes even when no cells can be submitted.
+	if(ColorOpaque || (RenderFlags & LAYERRENDERFLAG_TRANSPARENT))
 	{
-		for(int x = StartX; x < EndX; x++)
+		CRenderRowCursor<TSource> Cursor;
+		for(int y = StartY; y < EndY; y++)
 		{
-			int mx = x;
-			int my = y;
-
-			if(ExtendTiles)
-			{
-				if(mx < 0)
-					mx = 0;
-				if(mx >= w)
-					mx = w - 1;
-				if(my < 0)
-					my = 0;
-				if(my >= h)
-					my = h - 1;
-			}
-
-			int c = mx + my * w;
-
-			unsigned char Index = pTiles[c].m_Index;
-			if(Index)
-			{
-				unsigned char Flags = pTiles[c].m_Flags;
-
-				bool Render = false;
-				if(ColorOpaque && Flags & TILEFLAG_OPAQUE)
+			VisitRenderRow(pTiles, w, StartX, EndX, ExtendTiles ? std::clamp(y, 0, h - 1) : y, ExtendTiles, Cursor, [&](int x, const auto &Tile) {
+				unsigned char Index = Tile.m_Index;
+				if(Index)
 				{
-					if(RenderFlags & LAYERRENDERFLAG_OPAQUE)
-						Render = true;
-				}
-				else
-				{
-					if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
-						Render = true;
-				}
+					unsigned char Flags = Tile.m_Flags;
 
-				if(Render)
-				{
-					int tx = Index % 16;
-					int ty = Index / 16;
-					int Px0 = tx * (1024 / 16);
-					int Py0 = ty * (1024 / 16);
-					int Px1 = Px0 + (1024 / 16) - 1;
-					int Py1 = Py0 + (1024 / 16) - 1;
-
-					float x0 = Nudge + Px0 / TexSize + Frac;
-					float y0 = Nudge + Py0 / TexSize + Frac;
-					float x1 = Nudge + Px1 / TexSize - Frac;
-					float y1 = Nudge + Py0 / TexSize + Frac;
-					float x2 = Nudge + Px1 / TexSize - Frac;
-					float y2 = Nudge + Py1 / TexSize - Frac;
-					float x3 = Nudge + Px0 / TexSize + Frac;
-					float y3 = Nudge + Py1 / TexSize - Frac;
-
-					if(Graphics()->HasTextureArraysSupport())
+					bool Render = false;
+					if(ColorOpaque && Flags & TILEFLAG_OPAQUE)
 					{
-						x0 = 0;
-						y0 = 0;
-						x1 = x0 + 1;
-						y1 = y0;
-						x2 = x0 + 1;
-						y2 = y0 + 1;
-						x3 = x0;
-						y3 = y0 + 1;
-					}
-
-					if(Flags & TILEFLAG_XFLIP)
-					{
-						x0 = x2;
-						x1 = x3;
-						x2 = x3;
-						x3 = x0;
-					}
-
-					if(Flags & TILEFLAG_YFLIP)
-					{
-						y0 = y3;
-						y2 = y1;
-						y3 = y1;
-						y1 = y0;
-					}
-
-					if(Flags & TILEFLAG_ROTATE)
-					{
-						float Tmp = x0;
-						x0 = x3;
-						x3 = x2;
-						x2 = x1;
-						x1 = Tmp;
-						Tmp = y0;
-						y0 = y3;
-						y3 = y2;
-						y2 = y1;
-						y1 = Tmp;
-					}
-
-					if(Graphics()->HasTextureArraysSupport())
-					{
-						Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
-						IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
-						Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
+						if(RenderFlags & LAYERRENDERFLAG_OPAQUE)
+							Render = true;
 					}
 					else
 					{
-						Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
-						IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
-						Graphics()->QuadsDrawTL(&QuadItem, 1);
+						if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
+							Render = true;
+					}
+
+					if(Render)
+					{
+						float x0 = 0, y0 = 0, x1 = 1, y1 = 0;
+						float x2 = 1, y2 = 1, x3 = 0, y3 = 1;
+						if(!TextureArrays)
+						{
+							int tx = Index % 16;
+							int ty = Index / 16;
+							int Px0 = tx * (1024 / 16);
+							int Py0 = ty * (1024 / 16);
+							int Px1 = Px0 + (1024 / 16) - 1;
+							int Py1 = Py0 + (1024 / 16) - 1;
+
+							x0 = Nudge + Px0 / TexSize + Frac;
+							y0 = Nudge + Py0 / TexSize + Frac;
+							x1 = Nudge + Px1 / TexSize - Frac;
+							y1 = Nudge + Py0 / TexSize + Frac;
+							x2 = Nudge + Px1 / TexSize - Frac;
+							y2 = Nudge + Py1 / TexSize - Frac;
+							x3 = Nudge + Px0 / TexSize + Frac;
+							y3 = Nudge + Py1 / TexSize - Frac;
+						}
+
+						if(Flags & TILEFLAG_XFLIP)
+						{
+							x0 = x2;
+							x1 = x3;
+							x2 = x3;
+							x3 = x0;
+						}
+
+						if(Flags & TILEFLAG_YFLIP)
+						{
+							y0 = y3;
+							y2 = y1;
+							y3 = y1;
+							y1 = y0;
+						}
+
+						if(Flags & TILEFLAG_ROTATE)
+						{
+							float Tmp = x0;
+							x0 = x3;
+							x3 = x2;
+							x2 = x1;
+							x1 = Tmp;
+							Tmp = y0;
+							y0 = y3;
+							y3 = y2;
+							y2 = y1;
+							y1 = Tmp;
+						}
+
+						if(TextureArrays)
+						{
+							Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
+							IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
+							Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
+						}
+						else
+						{
+							Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
+							IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
+							Graphics()->QuadsDrawTL(&QuadItem, 1);
+						}
 					}
 				}
-			}
-			x += pTiles[c].m_Skip;
+				return Tile.m_Skip;
+			});
 		}
 	}
 
-	if(Graphics()->HasTextureArraysSupport())
+	if(TextureArrays)
 		Graphics()->QuadsTex3DEnd();
 	else
 		Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderTeleOverlay(const CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+{
+	RenderTeleOverlayImpl(pTele, w, h, Scale, OverlayRenderFlag, Alpha);
+}
+
+void CRenderMap::RenderTeleOverlay(CRenderTileSource<CTeleTile> pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+{
+	RenderTeleOverlayImpl(pTele, w, h, Scale, OverlayRenderFlag, Alpha);
+}
+
+template<typename TSource>
+void CRenderMap::RenderTeleOverlayImpl(TSource pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -772,14 +838,12 @@ void CRenderMap::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, 
 	char aBuf[16];
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+	CRenderRowCursor<TSource> Cursor;
 	for(int y = StartY; y < EndY; y++)
 	{
-		for(int x = StartX; x < EndX; x++)
-		{
-			int c = x + y * w;
-
-			unsigned char Index = pTele[c].m_Number;
-			if(Index && IsTeleTileNumberUsedAny(pTele[c].m_Type))
+		VisitRenderRow(pTele, w, StartX, EndX, y, false, Cursor, [&](int x, const auto &Tile) {
+			unsigned char Index = Tile.m_Number;
+			if(Index && IsTeleTileNumberUsedAny(Tile.m_Type))
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
@@ -789,13 +853,25 @@ void CRenderMap::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, 
 				float ToCenterOffset = (1 - LocalSize) / 2.f;
 				TextRender()->Text((x + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (y + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
 			}
-		}
+			return 0;
+		});
 	}
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderSpeedupOverlay(const CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+{
+	RenderSpeedupOverlayImpl(pSpeedup, w, h, Scale, OverlayRenderFlag, Alpha);
+}
+
+void CRenderMap::RenderSpeedupOverlay(CRenderTileSource<CSpeedupTile> pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+{
+	RenderSpeedupOverlayImpl(pSpeedup, w, h, Scale, OverlayRenderFlag, Alpha);
+}
+
+template<typename TSource>
+void CRenderMap::RenderSpeedupOverlayImpl(TSource pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	CScreenRect ScreenRect = Graphics()->GetScreen();
 
@@ -816,16 +892,14 @@ void CRenderMap::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, floa
 	char aBuf[16];
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+	CRenderRowCursor<TSource> Cursor;
 	for(int y = StartY; y < EndY; y++)
 	{
-		for(int x = StartX; x < EndX; x++)
-		{
-			int c = x + y * w;
-
-			int Force = (int)pSpeedup[c].m_Force;
-			int MaxSpeed = (int)pSpeedup[c].m_MaxSpeed;
-			int Type = (int)pSpeedup[c].m_Type;
-			int Angle = (int)pSpeedup[c].m_Angle;
+		VisitRenderRow(pSpeedup, w, StartX, EndX, y, false, Cursor, [&](int x, const auto &Tile) {
+			int Force = (int)Tile.m_Force;
+			int MaxSpeed = (int)Tile.m_MaxSpeed;
+			int Type = (int)Tile.m_Type;
+			int Angle = (int)Tile.m_Angle;
 			if((Force && Type == TILE_SPEED_BOOST_OLD) || ((Force || MaxSpeed) && Type == TILE_SPEED_BOOST) || (OverlayRenderFlag & OVERLAYRENDERFLAG_EDITOR && (Type || Force || MaxSpeed || Angle)))
 			{
 				if(IsValidSpeedupTile(Type))
@@ -835,7 +909,7 @@ void CRenderMap::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, floa
 					Graphics()->QuadsBegin();
 					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 					Graphics()->SelectSprite(SPRITE_SPEEDUP_ARROW);
-					Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
+					Graphics()->QuadsSetRotation(Tile.m_Angle * (pi / 180.0f));
 					Graphics()->DrawSprite(x * Scale + 16, y * Scale + 16, 35.0f);
 					Graphics()->QuadsEnd();
 
@@ -867,13 +941,25 @@ void CRenderMap::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, floa
 					}
 				}
 			}
-		}
+			return 0;
+		});
 	}
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderSwitchOverlay(const CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+{
+	RenderSwitchOverlayImpl(pSwitch, w, h, Scale, OverlayRenderFlag, Alpha);
+}
+
+void CRenderMap::RenderSwitchOverlay(CRenderTileSource<CSwitchTile> pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+{
+	RenderSwitchOverlayImpl(pSwitch, w, h, Scale, OverlayRenderFlag, Alpha);
+}
+
+template<typename TSource>
+void CRenderMap::RenderSwitchOverlayImpl(TSource pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -897,32 +983,42 @@ void CRenderMap::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float S
 	char aBuf[16];
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+	CRenderRowCursor<TSource> Cursor;
 	for(int y = StartY; y < EndY; y++)
 	{
-		for(int x = StartX; x < EndX; x++)
-		{
-			int c = x + y * w;
-
-			unsigned char Index = pSwitch[c].m_Number;
-			if(Index && IsSwitchTileNumberUsed(pSwitch[c].m_Type))
+		VisitRenderRow(pSwitch, w, StartX, EndX, y, false, Cursor, [&](int x, const auto &Tile) {
+			unsigned char Index = Tile.m_Number;
+			if(Index && IsSwitchTileNumberUsed(Tile.m_Type))
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				TextRender()->Text(x * Scale, (y + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 			}
 
-			unsigned char Delay = pSwitch[c].m_Delay;
-			if(Delay && IsSwitchTileDelayUsed(pSwitch[c].m_Type))
+			unsigned char Delay = Tile.m_Delay;
+			if(Delay && IsSwitchTileDelayUsed(Tile.m_Type))
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
 				TextRender()->Text(x * Scale, (y + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 			}
-		}
+			return 0;
+		});
 	}
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderTuneOverlay(const CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+{
+	RenderTuneOverlayImpl(pTune, w, h, Scale, OverlayRenderFlag, Alpha);
+}
+
+void CRenderMap::RenderTuneOverlay(CRenderTileSource<CTuneTile> pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+{
+	RenderTuneOverlayImpl(pTune, w, h, Scale, OverlayRenderFlag, Alpha);
+}
+
+template<typename TSource>
+void CRenderMap::RenderTuneOverlayImpl(TSource pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -945,13 +1041,11 @@ void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, 
 	char aBuf[16];
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+	CRenderRowCursor<TSource> Cursor;
 	for(int y = StartY; y < EndY; y++)
 	{
-		for(int x = StartX; x < EndX; x++)
-		{
-			int c = x + y * w;
-
-			unsigned char Index = pTune[c].m_Number;
+		VisitRenderRow(pTune, w, StartX, EndX, y, false, Cursor, [&](int x, const auto &Tile) {
+			unsigned char Index = Tile.m_Number;
 			if(Index)
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
@@ -962,7 +1056,8 @@ void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, 
 				float ToCenterOffset = (1 - LocalSize) / 2.f;
 				TextRender()->Text((x + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (y + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
 			}
-		}
+			return 0;
+		});
 	}
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Graphics()->MapScreen(ScreenRect);
@@ -1020,7 +1115,7 @@ void CRenderMap::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Colo
 					my = h - 1;
 			}
 
-			int c = mx + my * w;
+			const std::size_t c = mx + static_cast<std::size_t>(my) * w;
 
 			unsigned char Index = pTele[c].m_Type;
 			if(Index)
@@ -1134,7 +1229,7 @@ void CRenderMap::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float S
 					my = h - 1;
 			}
 
-			int c = mx + my * w;
+			const std::size_t c = mx + static_cast<std::size_t>(my) * w;
 
 			unsigned char Index = pSwitchTile[c].m_Type;
 			if(Index)
@@ -1291,7 +1386,7 @@ void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Colo
 					my = h - 1;
 			}
 
-			int c = mx + my * w;
+			const std::size_t c = mx + static_cast<std::size_t>(my) * w;
 
 			const unsigned char Index = pTune[c].m_Type;
 

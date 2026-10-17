@@ -255,8 +255,7 @@ REGISTER_QUICK_ACTION(
 	NewMap,
 	"New map",
 	[&]() {
-		Reset();
-		AddDefaultMap();
+		SwitchTool([this] { AddDefaultMap(); });
 	},
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
@@ -340,7 +339,7 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",
-	[&]() { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES; },
+	[&]() { SwitchTool([this] { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES; }); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES; },
@@ -348,7 +347,7 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	ServerSettings,
 	"Server settings",
-	[&]() { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS ? EXTRAEDITOR_NONE : EXTRAEDITOR_SERVER_SETTINGS; },
+	[&]() { SwitchTool([this] { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS ? EXTRAEDITOR_NONE : EXTRAEDITOR_SERVER_SETTINGS; }); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS; },
@@ -356,7 +355,7 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	History,
 	"History",
-	[&]() { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_HISTORY ? EXTRAEDITOR_NONE : EXTRAEDITOR_HISTORY; },
+	[&]() { SwitchTool([this] { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_HISTORY ? EXTRAEDITOR_NONE : EXTRAEDITOR_HISTORY; }); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_HISTORY; },

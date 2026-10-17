@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "lineinput.h"
 
+#include "number_input.h"
 #include "ui.h"
 
 #include <base/dbg.h>
@@ -715,6 +716,11 @@ void CLineInputNumber::SetInteger64(int64_t Number, int Base, int HexPrefix)
 int64_t CLineInputNumber::GetInteger64(int Base) const
 {
 	return str_toint64_base(GetString(), Base);
+}
+
+std::optional<int64_t> CLineInputNumber::IntegerDraft(int Base) const
+{
+	return ParseIntegerDraft(GetString(), Base);
 }
 
 void CLineInputNumber::SetFloat(float Number)
