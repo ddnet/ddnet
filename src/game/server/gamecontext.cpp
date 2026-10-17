@@ -1869,13 +1869,22 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	delete m_apPlayers[ClientId];
 	m_apPlayers[ClientId] = nullptr;
 
-	delete m_apSavedTeams[ClientId];
-	m_apSavedTeams[ClientId] = nullptr;
-
 	delete m_apSavedTees[ClientId];
 	m_apSavedTees[ClientId] = nullptr;
 
+	const int SavedTeam = m_aTeamMapping[ClientId];
 	m_aTeamMapping[ClientId] = -1;
+	if(SavedTeam != -1)
+	{
+		bool TeamStillPending = false;
+		for(int MappedTeam : m_aTeamMapping)
+			TeamStillPending |= MappedTeam == SavedTeam;
+		if(!TeamStillPending)
+		{
+			delete m_apSavedTeams[SavedTeam];
+			m_apSavedTeams[SavedTeam] = nullptr;
+		}
+	}
 
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && PracticeByDefault())
 		m_pController->Teams().SetPractice(GetDDRaceTeam(ClientId), true);
