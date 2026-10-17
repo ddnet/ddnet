@@ -162,7 +162,11 @@ int main(int argc, const char **argv)
 	}
 
 	g_DataReader.Close();
-	Writer.Finish();
+	if(!Writer.Finish())
+	{
+		log_error(TOOL_NAME, "failed to write destination map. filename='%s'", pDestFilename);
+		return -1;
+	}
 
 	log_info(TOOL_NAME, "image '%s' replaced", pImageName);
 	return 0;
