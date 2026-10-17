@@ -93,6 +93,8 @@ public:
 	virtual void StopAll() = 0;
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
 	virtual bool IsPlaying(int SampleId) = 0;
+	virtual bool IsLooping(int SampleId) = 0;
+	virtual void SetLooping(int SampleId, bool Loop) = 0;
 
 	virtual int MixingRate() const = 0;
 	virtual void Mix(short *pFinalOut, unsigned Frames) = 0;
