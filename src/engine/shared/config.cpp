@@ -87,6 +87,11 @@ void SIntConfigVariable::Serialize(char *pOut, size_t Size) const
 	Serialize(pOut, Size, *m_pVariable);
 }
 
+void SIntConfigVariable::SerializeHumanReadable(char *pOut, size_t Size) const
+{
+	Serialize(pOut, Size);
+}
+
 void SIntConfigVariable::SetValue(int Value)
 {
 	if(CheckReadOnly())
@@ -158,6 +163,12 @@ void SColorConfigVariable::Serialize(char *pOut, size_t Size, unsigned Value) co
 void SColorConfigVariable::Serialize(char *pOut, size_t Size) const
 {
 	Serialize(pOut, Size, *m_pVariable);
+}
+
+void SColorConfigVariable::SerializeHumanReadable(char *pOut, size_t Size) const
+{
+	const ColorRGBA Rgba = color_cast<ColorRGBA>(ColorHSLA(*m_pVariable, m_Alpha).UnclampLighting(m_DarkestLighting));
+	str_format(pOut, Size, "%s $%0*X", m_pScriptName, m_Alpha ? 8 : 6, Rgba.PackAlphaLast(m_Alpha));
 }
 
 void SColorConfigVariable::SetValue(unsigned Value)
@@ -235,6 +246,11 @@ void SStringConfigVariable::Serialize(char *pOut, size_t Size, const char *pValu
 void SStringConfigVariable::Serialize(char *pOut, size_t Size) const
 {
 	Serialize(pOut, Size, m_pStr);
+}
+
+void SStringConfigVariable::SerializeHumanReadable(char *pOut, size_t Size) const
+{
+	Serialize(pOut, Size);
 }
 
 void SStringConfigVariable::SetValue(const char *pValue)
@@ -479,6 +495,16 @@ void CConfigManager::PossibleConfigVariables(const char *pStr, int FlagMask, POS
 			}
 		}
 	}
+}
+
+const SConfigVariable *CConfigManager::FindVariable(const char *pScriptName) const
+{
+	for(const auto *pVariable : m_vpAllVariables)
+	{
+		if(str_comp(pVariable->m_pScriptName, pScriptName) == 0)
+			return pVariable;
+	}
+	return nullptr;
 }
 
 void CConfigManager::Con_Reset(IConsole::IResult *pResult, void *pUserData)
