@@ -244,14 +244,11 @@ void CChat::EchoCmd(const char *pName)
 
 	if(pVariable == nullptr)
 	{
-		if(pCommand == nullptr)
-		{
-			str_format(aBuf, sizeof(aBuf), "Command %s have not any value", pName);
-		}
+		if(pCommand != nullptr)
+			str_format(aBuf, sizeof(aBuf), "Command %s have no value", pName);
 		else
-		{
-			str_format(aBuf, sizeof(aBuf), "Unknown variable %s", pName);
-		}
+			str_format(aBuf, sizeof(aBuf), "Unknown command %s", pName);
+
 		Echo(aBuf);
 		return;
 	}
