@@ -45,6 +45,7 @@ void CGameTeams::Reset()
 		m_aTeamLocked[i] = false;
 		m_aTeamFlock[i] = false;
 		m_apSaveTeamResult[i] = nullptr;
+		m_aPracticeRestoring[i] = false;
 		m_aTeamSentStartWarning[i] = false;
 		if(m_pGameContext->PracticeByDefault())
 			m_aPractice[i] = true;
@@ -58,6 +59,7 @@ void CGameTeams::ResetRoundState(int Team)
 	if(Team != TEAM_SUPER)
 		ResetSwitchers(Team);
 
+	ClearPracticeSave(Team);
 	if(!m_pGameContext->PracticeByDefault())
 		m_aPractice[Team] = false;
 	m_aTeamUnfinishableKillTick[Team] = -1;
@@ -465,6 +467,10 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 	m_aTeeFinished[ClientId] = false;
 	int OldTeam = m_Core.Team(ClientId);
 
+	// leaving a team drops them from practice save, happens when a player kills while in a started team race
+	if(Team != OldTeam)
+		DropPracticeSavePlayer(OldTeam, ClientId);
+
 	if(Team != OldTeam && (OldTeam != TEAM_FLOCK || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) && OldTeam != TEAM_SUPER && m_aTeamState[OldTeam] != ETeamState::EMPTY)
 	{
 		bool NoElseInOldTeam = TeamSize(OldTeam) <= 1;
@@ -527,6 +533,7 @@ void CGameTeams::ChangeTeamState(int Team, ETeamState State)
 
 void CGameTeams::KillTeam(int Team, int NewStrongId, int ExceptId)
 {
+	ClearPracticeSave(Team);
 	CClientMask KilledMask;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -1279,7 +1286,7 @@ void CGameTeams::OnCharacterSpawn(int ClientId)
 	m_Core.SetSolo(ClientId, false);
 	int Team = m_Core.Team(ClientId);
 
-	if(GetSaving(Team))
+	if(GetSaving(Team) || GetPracticeRestoring(Team))
 		return;
 
 	if(!IsValidTeamNumber(Team) || Team == TEAM_FLOCK || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO ||
@@ -1299,7 +1306,7 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 	m_Core.SetSolo(ClientId, false);
 
 	int Team = m_Core.Team(ClientId);
-	if(GetSaving(Team))
+	if(GetSaving(Team) || GetPracticeRestoring(Team))
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
 
@@ -1556,4 +1563,127 @@ bool CGameTeams::IsPractice(int Team)
 bool CGameTeams::IsValidTeamNumber(int Team) const
 {
 	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS - 1; // no TEAM_SUPER
+}
+
+std::optional<ESaveResult> CGameTeams::CreatePracticeSave(int Team)
+{
+	ClearPracticeSave(Team);
+
+	if(!g_Config.m_SvSaveGames)
+		return std::nullopt;
+	if(GetSaving(Team))
+		return std::nullopt;
+	if(IsPractice(Team))
+		return std::nullopt;
+
+	std::unique_ptr<CSaveTeam> pSave = std::make_unique<CSaveTeam>();
+
+	// dry-run snapshot to find issues
+	ESaveResult Result = pSave->Save(GameServer(), Team, true);
+	if(Result != ESaveResult::SUCCESS)
+		return Result;
+
+	m_apPracticeSaves[Team] = std::move(pSave);
+	return ESaveResult::SUCCESS;
+}
+
+bool CGameTeams::IsPracticeSaveMember(int Team, int ClientId) const
+{
+	if(!HasPracticeSave(Team))
+		return false;
+	for(int i = 0; i < m_apPracticeSaves[Team]->GetMembersCount(); i++)
+	{
+		if(m_apPracticeSaves[Team]->m_pSavedTees[i].GetClientId() == ClientId)
+			return true;
+	}
+	return false;
+}
+
+bool CGameTeams::HasPracticeSave(int Team) const
+{
+	if(!IsValidTeamNumber(Team))
+		return false;
+	return m_apPracticeSaves[Team] != nullptr;
+}
+
+bool CGameTeams::RestorePracticeSave(int Team)
+{
+	if(!HasPracticeSave(Team))
+		return false;
+
+	KickPracticeJoiners(Team);
+
+	// consume the save
+	std::unique_ptr<CSaveTeam> pSave = std::move(m_apPracticeSaves[Team]);
+	const int NumMembers = pSave->GetMembersCount();
+
+	for(int i = 0; i < pSave->GetMembersCount(); i++)
+		pSave->m_pSavedTees[i].DropHookedPlayerIfMissing(pSave.get());
+
+	for(int i = 0; i < NumMembers; i++)
+	{
+		int ClientId = pSave->m_pSavedTees[i].GetClientId();
+		dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS && GameServer()->m_apPlayers[ClientId] && m_Core.Team(ClientId) == Team, "practice restore: saved player must still be in the team");
+	}
+
+	m_aPracticeRestoring[Team] = true;
+	bool TeamValid = true;
+	if(TeamSize(Team) > 0)
+		TeamValid = pSave->Load(GameServer(), Team, true);
+	m_aPracticeRestoring[Team] = false;
+
+	if(!TeamValid)
+	{
+		// fallback case, should never happen.
+		GameServer()->SendChatTeam(Team, "Your team has been killed because the server can not restore your team.");
+		KillTeam(Team, -1);
+		return false;
+	}
+	return true;
+}
+
+void CGameTeams::KickPracticeJoiners(int Team)
+{
+	if(!HasPracticeSave(Team))
+		return;
+	CSaveTeam *pSave = m_apPracticeSaves[Team].get();
+	bool aSavedClient[MAX_CLIENTS] = {false};
+	for(int i = 0; i < pSave->GetMembersCount(); i++)
+	{
+		int ClientId = pSave->m_pSavedTees[i].GetClientId();
+		if(ClientId >= 0 && ClientId < MAX_CLIENTS)
+			aSavedClient[ClientId] = true;
+	}
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		if(m_Core.Team(ClientId) != Team || aSavedClient[ClientId] || !GameServer()->m_apPlayers[ClientId])
+			continue;
+		// kick non-saved client back to team 0, move then kill to avoid team lock kill
+		SetForceCharacterTeam(ClientId, TEAM_FLOCK);
+		GameServer()->m_apPlayers[ClientId]->KillCharacter(WEAPON_GAME);
+		GameServer()->SendChatTarget(ClientId, "You were moved back to team 0 because you joined the team during practice.");
+	}
+}
+
+void CGameTeams::DropPracticeSavePlayer(int Team, int ClientId)
+{
+	if(Team < 0 || Team >= NUM_DDRACE_TEAMS || !m_apPracticeSaves[Team])
+		return;
+	m_apPracticeSaves[Team]->RemoveClient(ClientId);
+	if(m_apPracticeSaves[Team]->GetMembersCount() <= 0)
+		m_apPracticeSaves[Team].reset();
+}
+
+void CGameTeams::ClearPracticeSave(int Team)
+{
+	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
+		return;
+	m_apPracticeSaves[Team].reset();
+}
+
+bool CGameTeams::GetPracticeRestoring(int Team) const
+{
+	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
+		return false;
+	return m_aPracticeRestoring[Team];
 }
