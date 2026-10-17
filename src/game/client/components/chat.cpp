@@ -240,9 +240,18 @@ void CChat::EchoCmd(const char *pName)
 	char aBuf[2048];
 
 	const SConfigVariable *pVariable = GameClient()->ConfigManager()->FindVariable(pName);
+	const auto *pCommand = GameClient()->Console()->GetCommandInfo(pName, CFGFLAG_CLIENT, false);
+
 	if(pVariable == nullptr)
 	{
-		str_format(aBuf, sizeof(aBuf), "Unknown variable %s", pName);
+		if(pCommand == nullptr)
+		{
+			str_format(aBuf, sizeof(aBuf), "Command %s have not any value", pName);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "Unknown variable %s", pName);
+		}
 		Echo(aBuf);
 		return;
 	}
@@ -258,7 +267,7 @@ void CChat::OnConsoleInit()
 	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 	Console()->Register("echo", "r[message]", CFGFLAG_CLIENT | CFGFLAG_STORE, ConEcho, this, "Echo the text in chat window");
-	Console()->Register("echo_cmd", "r[command]", CFGFLAG_CLIENT | CFGFLAG_STORE, ConEchoCmd, this, "Echo the command state in chat window");
+	Console()->Register("echo_cmd", "r[command]", CFGFLAG_CLIENT | CFGFLAG_STORE, ConEchoCmd, this, "Echo the command value in chat window");
 	Console()->Register("clear_chat", "", CFGFLAG_CLIENT | CFGFLAG_STORE, ConClearChat, this, "Clear chat messages");
 }
 
