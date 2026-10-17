@@ -1039,7 +1039,8 @@ void CClient::RenderDebug()
 				Row++;
 			}
 		}
-		for(int i = CSnapshot::MAX_TYPE; i > (CSnapshot::MAX_TYPE - 64); i--)
+		// Extended item types count down from 0x7fff
+		for(int i = 0x7fff; i > (0x7fff - 64); i--)
 		{
 			if(SnapshotDelta()->GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
 			{
