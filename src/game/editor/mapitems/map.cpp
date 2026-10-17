@@ -324,6 +324,11 @@ void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
 	str_copy(m_pGameGroup->m_aName, "Game");
 }
 
+void CEditorMap::GroupDisplayName(int Index, char *pBuf, int BufSize) const
+{
+	str_format(pBuf, BufSize, "#%d %s", Index, m_vpGroups[Index]->m_aName);
+}
+
 std::shared_ptr<CLayer> CEditorMap::SelectedLayer(int Index) const
 {
 	std::shared_ptr<CLayerGroup> pGroup = SelectedGroup();
@@ -365,8 +370,45 @@ void CEditorMap::AddSelectedLayer(int LayerIndex)
 	m_QuadKnifeState.Reset();
 }
 
-void CEditorMap::SelectNextLayer()
+void CEditorMap::SelectMatchingLayer(int Direction)
 {
+	if(m_SearchInput.IsEmpty() || m_vpGroups.empty() || (Direction != 0 && m_vSelectedLayers.empty()))
+		return;
+
+	const int Step = Direction < 0 ? -1 : 1;
+	int Group = Direction == 0 ? 0 : m_SelectedGroup;
+	int Layer = -1;
+	if(Direction != 0)
+		Layer = Step > 0 ? *std::max_element(m_vSelectedLayers.begin(), m_vSelectedLayers.end()) : *std::min_element(m_vSelectedLayers.begin(), m_vSelectedLayers.end());
+
+	while(true)
+	{
+		Layer += Step;
+		if(Layer < 0 || Layer >= (int)m_vpGroups[Group]->m_vpLayers.size())
+		{
+			Group += Step;
+			if(Group < 0 || Group >= (int)m_vpGroups.size())
+				return;
+			Layer = Step > 0 ? -1 : (int)m_vpGroups[Group]->m_vpLayers.size();
+			continue;
+		}
+
+		if(str_utf8_find_nocase(LayerDisplayName(Group, Layer), m_SearchInput.GetString()))
+		{
+			SelectLayer(Layer, Group);
+			return;
+		}
+	}
+}
+
+void CEditorMap::SelectNextLayer(bool SearchMatches)
+{
+	if(SearchMatches && !m_SearchInput.IsEmpty())
+	{
+		SelectMatchingLayer(1);
+		return;
+	}
+
 	int CurrentLayer = 0;
 	for(const auto &Selected : m_vSelectedLayers)
 		CurrentLayer = std::max(Selected, CurrentLayer);
@@ -389,8 +431,14 @@ void CEditorMap::SelectNextLayer()
 	}
 }
 
-void CEditorMap::SelectPreviousLayer()
+void CEditorMap::SelectPreviousLayer(bool SearchMatches)
 {
+	if(SearchMatches && !m_SearchInput.IsEmpty())
+	{
+		SelectMatchingLayer(-1);
+		return;
+	}
+
 	int CurrentLayer = std::numeric_limits<int>::max();
 	for(const auto &Selected : m_vSelectedLayers)
 		CurrentLayer = std::min(Selected, CurrentLayer);
@@ -456,6 +504,31 @@ void CEditorMap::MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer)
 void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
+}
+
+const char *CEditorMap::LayerDisplayName(int GroupIndex, int LayerIndex) const
+{
+	const auto &pLayer = m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex];
+
+	if(pLayer->m_aName[0])
+		return pLayer->m_aName;
+
+	if(pLayer->m_Type == LAYERTYPE_TILES)
+	{
+		const auto pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+		return pTiles->m_Image >= 0 ? m_vpImages[pTiles->m_Image]->m_aName : "Tiles";
+	}
+	if(pLayer->m_Type == LAYERTYPE_QUADS)
+	{
+		const auto pQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
+		return pQuads->m_Image >= 0 ? m_vpImages[pQuads->m_Image]->m_aName : "Quads";
+	}
+	if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+	{
+		const auto pSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
+		return pSounds->m_Sound >= 0 ? m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds";
+	}
+	return "";
 }
 
 std::vector<CQuad *> CEditorMap::SelectedQuads()
