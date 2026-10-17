@@ -2349,7 +2349,21 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	CRenderLayersState &State = m_RenderLayersState;
 
 	const float RowHeight = 12.0f;
-	char aBuf[64];
+	// Render Search bar
+	{
+		CUIRect SearchBarSlot;
+		LayersBox.HSplitTop(RowHeight + 1.0f, &SearchBarSlot, &LayersBox);
+		SearchBarSlot.HSplitTop(RowHeight, &SearchBarSlot, nullptr);
+
+		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		{
+			Ui()->SetActiveItem(&Map()->m_SearchInput);
+			Map()->m_SearchInput.SelectAll();
+		}
+		Ui()->DoClearableEditBox(&Map()->m_SearchInput, &SearchBarSlot, 10.0f);
+
+		LayersBox.HSplitTop(5.0f, nullptr, &LayersBox);
+	}
 
 	CUIRect UnscrolledLayersBox = LayersBox;
 
@@ -2425,8 +2439,25 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	State.m_ScrollToSelectionNext = false;
 
 	// render layers
+	size_t NumSearchMatches = 0;
 	for(int g = 0; g < (int)Map()->m_vpGroups.size(); g++)
 	{
+		const char *pGroupName = Map()->GroupDisplayName(g);
+		const char *pSearchString = Map()->m_SearchInput.GetString();
+		bool HasLayerMatch = false;
+		for(int l = 0; l < (int)Map()->m_vpGroups[g]->m_vpLayers.size() && !HasLayerMatch; l++)
+		{
+			if(str_utf8_find_nocase(Map()->LayerDisplayName(g, l), pSearchString) != nullptr)
+			{
+				HasLayerMatch = true;
+			}
+		}
+		if(!Map()->m_SearchInput.IsEmpty() && !str_utf8_find_nocase(pGroupName, pSearchString) && !HasLayerMatch)
+		{
+			continue;
+		}
+		NumSearchMatches++;
+
 		if(State.m_Operation == ELayerOperation::LAYER_DRAG && g > 0 && !DraggedPositionFound && Ui()->MouseY() < LayersBox.y + RowHeight / 2)
 		{
 			DraggedPositionFound = true;
@@ -2510,11 +2541,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 
-			str_format(aBuf, sizeof(aBuf), "#%d %s", g, Map()->m_vpGroups[g]->m_aName);
-
 			bool Clicked;
 			bool Abrupted;
-			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g].get(), aBuf, g == Map()->m_SelectedGroup, &Slot, &Clicked, &Abrupted,
+			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g].get(), pGroupName, g == Map()->m_SelectedGroup, &Slot, &Clicked, &Abrupted,
 				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Map()->m_vpGroups[g]->m_Collapse ? "Select group. Shift+left click to select all layers. Double click to expand." : "Select group. Shift+left click to select all layers. Double click to collapse.", IGraphics::CORNER_R))
 			{
 				if(State.m_Operation == ELayerOperation::NONE)
@@ -2575,6 +2604,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		for(int i = 0; i < (int)Map()->m_vpGroups[g]->m_vpLayers.size(); i++)
 		{
 			if(Map()->m_vpGroups[g]->m_Collapse)
+				continue;
+
+			if(!Map()->m_SearchInput.IsEmpty() && !str_utf8_find_nocase(Map()->LayerDisplayName(g, i), pSearchString) && HasLayerMatch)
 				continue;
 
 			bool IsLayerSelected = false;
@@ -2668,27 +2700,6 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 
-			if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_aName[0])
-				str_copy(aBuf, Map()->m_vpGroups[g]->m_vpLayers[i]->m_aName);
-			else
-			{
-				if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_TILES)
-				{
-					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pTiles->m_Image >= 0 ? Map()->m_vpImages[pTiles->m_Image]->m_aName : "Tiles");
-				}
-				else if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_QUADS)
-				{
-					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pQuads->m_Image >= 0 ? Map()->m_vpImages[pQuads->m_Image]->m_aName : "Quads");
-				}
-				else if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_SOUNDS)
-				{
-					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pSounds->m_Sound >= 0 ? Map()->m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds");
-				}
-			}
-
 			int Checked = IsLayerSelected ? 1 : 0;
 			if(Map()->m_vpGroups[g]->m_vpLayers[i]->IsEntitiesLayer())
 			{
@@ -2697,7 +2708,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 			bool Clicked;
 			bool Abrupted;
-			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g]->m_vpLayers[i].get(), aBuf, Checked, &Button, &Clicked, &Abrupted,
+			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g]->m_vpLayers[i].get(), Map()->LayerDisplayName(g, i), Checked, &Button, &Clicked, &Abrupted,
 				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select layer. Hold shift to select multiple.", IGraphics::CORNER_R))
 			{
 				if(State.m_Operation == ELayerOperation::NONE)
@@ -2812,6 +2823,20 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		{
 			LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
 			ScrollRegion.AddRect(Slot);
+		}
+	}
+
+	if(NumSearchMatches == 0)
+	{
+		CUIRect NoSearchMatchesRect;
+		LayersBox.HSplitTop(RowHeight + 1.0f, &NoSearchMatchesRect, &LayersBox);
+		NoSearchMatchesRect.HSplitTop(RowHeight, &NoSearchMatchesRect, nullptr);
+
+		if(ScrollRegion.AddRect(NoSearchMatchesRect))
+		{
+			Ui()->DoLabel(&NoSearchMatchesRect, "No search matches", EditorFontSizes::MENU, TEXTALIGN_MC);
+
+			LayersBox.HSplitTop(5.0f, nullptr, &LayersBox);
 		}
 	}
 
