@@ -167,11 +167,8 @@ void SColorConfigVariable::Serialize(char *pOut, size_t Size) const
 
 void SColorConfigVariable::SerializeHumanReadable(char *pOut, size_t Size) const
 {
-	const ColorRGBA Rgba = color_cast<ColorRGBA>(ColorHSLA(*m_pVariable, m_Alpha));
-	if(m_Alpha)
-		str_format(pOut, Size, "%s $%06X%02X", m_pScriptName, Rgba.Pack(false), round_to_int(Rgba.a * 255.0f));
-	else
-		str_format(pOut, Size, "%s $%06X", m_pScriptName, Rgba.Pack(false));
+	const ColorRGBA Rgba = color_cast<ColorRGBA>(ColorHSLA(*m_pVariable, m_Alpha).UnclampLighting(m_DarkestLighting));
+	str_format(pOut, Size, "%s $%0*X", m_pScriptName, m_Alpha ? 8 : 6, Rgba.PackAlphaLast(m_Alpha));
 }
 
 void SColorConfigVariable::SetValue(unsigned Value)
