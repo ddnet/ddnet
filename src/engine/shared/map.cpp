@@ -254,10 +254,16 @@ int CMap::Size() const
 
 bool CMap::ValidateMapVersion(CDataFileReader &NewDataFile)
 {
-	const int VersionItemIndex = NewDataFile.FindItemIndex(MAPITEMTYPE_VERSION, 0);
-	if(VersionItemIndex < 0)
+	int VersionItemIndex, VersionItemNum;
+	NewDataFile.GetType(MAPITEMTYPE_VERSION, &VersionItemIndex, &VersionItemNum);
+	if(VersionItemNum == 0)
 	{
 		log_error("map/load", "Map version item is missing.");
+		return false;
+	}
+	if(VersionItemNum > 1)
+	{
+		log_error("map/load", "Map has multiple map version items (%d).", VersionItemNum);
 		return false;
 	}
 	const size_t VersionItemSize = NewDataFile.GetItemSize(VersionItemIndex);
