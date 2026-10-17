@@ -2349,7 +2349,24 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	CRenderLayersState &State = m_RenderLayersState;
 
 	const float RowHeight = 12.0f;
-	char aBuf[64];
+
+	// Render Search bar
+	{
+		CUIRect SearchBarSlot;
+		LayersBox.HSplitTop(RowHeight, &SearchBarSlot, &LayersBox);
+		SearchBarSlot.HSplitTop(RowHeight, &SearchBarSlot, nullptr);
+
+		if(Ui()->DoEditBox_Search(&Map()->m_SearchInput, &SearchBarSlot, EditorFontSizes::MENU, m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen()))
+		{
+			Map()->SelectMatchingLayer(0);
+			if(!Map()->m_SearchInput.IsEmpty())
+				State.m_ScrollToSelectionNext = true;
+		}
+		if(SearchBarSlot.Inside(Ui()->MousePos()))
+			str_copy(m_aTooltip, "While searching, use Up/Down arrows to move through search matches.");
+
+		LayersBox.HSplitTop(5.0f, nullptr, &LayersBox);
+	}
 
 	CUIRect UnscrolledLayersBox = LayersBox;
 
@@ -2510,12 +2527,22 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 
-			str_format(aBuf, sizeof(aBuf), "#%d %s", g, Map()->m_vpGroups[g]->m_aName);
-
 			bool Clicked;
 			bool Abrupted;
-			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g].get(), aBuf, g == Map()->m_SelectedGroup, &Slot, &Clicked, &Abrupted,
-				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Map()->m_vpGroups[g]->m_Collapse ? "Select group. Shift+left click to select all layers. Double click to expand." : "Select group. Shift+left click to select all layers. Double click to collapse.", IGraphics::CORNER_R))
+
+			char aGroupName[64];
+			Map()->GroupDisplayName(g, aGroupName, sizeof(aGroupName));
+
+			std::vector<STextColorSplit> vGroupColorSplits;
+			if(!Map()->m_SearchInput.IsEmpty())
+			{
+				const char *pGroupNameMatchEnd;
+				const char *pGroupNameMatchStart = str_utf8_find_nocase(aGroupName, Map()->m_SearchInput.GetString(), &pGroupNameMatchEnd);
+				if(pGroupNameMatchStart != nullptr)
+					vGroupColorSplits.emplace_back(pGroupNameMatchStart - aGroupName, pGroupNameMatchEnd - pGroupNameMatchStart, ColorRGBA(0.5f, 0.5f, 1.0f, 1.0f));
+			}
+			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g].get(), aGroupName, g == Map()->m_SelectedGroup, &Slot, &Clicked, &Abrupted,
+				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Map()->m_vpGroups[g]->m_Collapse ? "Select group. Shift+left click to select all layers. Double click to expand." : "Select group. Shift+left click to select all layers. Double click to collapse.", IGraphics::CORNER_R, EditorFontSizes::MENU, vGroupColorSplits))
 			{
 				if(State.m_Operation == ELayerOperation::NONE)
 				{
@@ -2668,27 +2695,6 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 
-			if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_aName[0])
-				str_copy(aBuf, Map()->m_vpGroups[g]->m_vpLayers[i]->m_aName);
-			else
-			{
-				if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_TILES)
-				{
-					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pTiles->m_Image >= 0 ? Map()->m_vpImages[pTiles->m_Image]->m_aName : "Tiles");
-				}
-				else if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_QUADS)
-				{
-					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pQuads->m_Image >= 0 ? Map()->m_vpImages[pQuads->m_Image]->m_aName : "Quads");
-				}
-				else if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_SOUNDS)
-				{
-					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pSounds->m_Sound >= 0 ? Map()->m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds");
-				}
-			}
-
 			int Checked = IsLayerSelected ? 1 : 0;
 			if(Map()->m_vpGroups[g]->m_vpLayers[i]->IsEntitiesLayer())
 			{
@@ -2697,8 +2703,18 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 			bool Clicked;
 			bool Abrupted;
-			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g]->m_vpLayers[i].get(), aBuf, Checked, &Button, &Clicked, &Abrupted,
-				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select layer. Hold shift to select multiple.", IGraphics::CORNER_R))
+
+			const char *pLayerName = Map()->LayerDisplayName(g, i);
+			std::vector<STextColorSplit> vLayerColorSplits;
+			if(!Map()->m_SearchInput.IsEmpty())
+			{
+				const char *pLayerNameMatchEnd;
+				const char *pLayerNameMatchStart = str_utf8_find_nocase(pLayerName, Map()->m_SearchInput.GetString(), &pLayerNameMatchEnd);
+				if(pLayerNameMatchStart != nullptr)
+					vLayerColorSplits.emplace_back(pLayerNameMatchStart - pLayerName, pLayerNameMatchEnd - pLayerNameMatchStart, ColorRGBA(0.5f, 0.5f, 1.0f, 1.0f));
+			}
+			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g]->m_vpLayers[i].get(), pLayerName, Checked, &Button, &Clicked, &Abrupted,
+				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select layer. Hold shift to select multiple.", IGraphics::CORNER_R, EditorFontSizes::MENU, vLayerColorSplits))
 			{
 				if(State.m_Operation == ELayerOperation::NONE)
 				{
@@ -2919,7 +2935,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 	}
 
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && State.m_Operation == ELayerOperation::NONE)
+	CLineInput *pActiveInput = CLineInput::GetActiveInput();
+	const bool SearchFocused = pActiveInput == &Map()->m_SearchInput;
+	const bool CanNavigateLayers = pActiveInput == nullptr || pActiveInput == &Map()->m_SearchInput;
+
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CanNavigateLayers && State.m_Operation == ELayerOperation::NONE)
 	{
 		if(Input()->ShiftIsPressed())
 		{
@@ -2928,11 +2948,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 		else
 		{
-			Map()->SelectNextLayer();
+			Map()->SelectNextLayer(SearchFocused);
 		}
 		State.m_ScrollToSelectionNext = true;
 	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && State.m_Operation == ELayerOperation::NONE)
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CanNavigateLayers && State.m_Operation == ELayerOperation::NONE)
 	{
 		if(Input()->ShiftIsPressed())
 		{
@@ -2941,7 +2961,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 		else
 		{
-			Map()->SelectPreviousLayer();
+			Map()->SelectPreviousLayer(SearchFocused);
 		}
 
 		State.m_ScrollToSelectionNext = true;
@@ -3015,6 +3035,35 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Map(), vpActions, nullptr, true));
 			}
 			State.m_PreviousOperation = ELayerOperation::NONE;
+		}
+	}
+
+	if(!Map()->m_SearchInput.IsEmpty())
+	{
+		size_t NumLayerMatches = 0;
+		for(int g = 0; g < (int)Map()->m_vpGroups.size(); g++)
+		{
+			for(int l = 0; l < (int)Map()->m_vpGroups[g]->m_vpLayers.size(); l++)
+			{
+				const char *pLayerName = Map()->LayerDisplayName(g, l);
+				if(str_utf8_find_nocase(pLayerName, Map()->m_SearchInput.GetString()) != nullptr)
+					NumLayerMatches++;
+			}
+		}
+
+		if(NumLayerMatches > 1 || SearchFocused)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%" PRIzu " search match%s", NumLayerMatches, NumLayerMatches == 1 ? "" : "es");
+			if(NumLayerMatches > 1)
+			{
+				if(SearchFocused)
+					str_append(aBuf, ", use Up/Down arrows to navigate through them.");
+				else
+					str_append(aBuf, ", select the search box and use Up/Down arrows to navigate through them.");
+			}
+
+			str_copy(m_aTooltip, aBuf);
 		}
 	}
 }
