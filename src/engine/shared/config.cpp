@@ -437,7 +437,7 @@ bool CConfigManager::Save()
 		return false;
 	}
 
-	if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
+	if(!m_pStorage->ReplaceFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
 	{
 		log_error("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
 		return false;
