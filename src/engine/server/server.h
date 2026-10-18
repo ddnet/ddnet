@@ -254,6 +254,8 @@ public:
 	// can also be -1 (RCON_CID_SERV) or -2 (RCON_CID_VOTE)
 	int m_RconClientId;
 	int m_RconAuthLevel;
+	// Log message that was already sent to the invoking rcon client directly
+	const CLogMessage *m_pRconClientLogLine = nullptr;
 	int m_PrintCBIndex;
 	char m_aShutdownReason[128];
 	void *m_pPersistentData;
