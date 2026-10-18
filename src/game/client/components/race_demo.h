@@ -3,6 +3,8 @@
 #ifndef GAME_CLIENT_COMPONENTS_RACE_DEMO_H
 #define GAME_CLIENT_COMPONENTS_RACE_DEMO_H
 
+#include <base/io.h>
+
 #include <game/client/component.h>
 
 #include <chrono>
@@ -20,7 +22,7 @@ class CRaceDemo : public CComponent
 
 	static const char *ms_pRaceDemoDir;
 
-	char m_aTmpFilename[128];
+	char m_aTmpFilename[IO_MAX_PATH_LENGTH];
 
 	int m_RaceState;
 	int m_RaceStartTick;

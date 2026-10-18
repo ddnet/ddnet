@@ -44,7 +44,12 @@ void CRaceDemo::GetPath(char *pBuf, int Size, int Time) const
 	str_sanitize_filename(aPlayerName);
 
 	if(Time < 0)
+	{
 		str_format(pBuf, Size, "%s/%s_tmp_%d.demo", ms_pRaceDemoDir, pMap, process_id());
+		// Failed recordings remain available for recovery across attempts.
+		for(int Index = 1; Storage()->FileExists(pBuf, IStorage::TYPE_SAVE); Index++)
+			str_format(pBuf, Size, "%s/%s_tmp_%d_%d.demo", ms_pRaceDemoDir, pMap, process_id(), Index);
+	}
 	else if(g_Config.m_ClDemoName)
 		str_format(pBuf, Size, "%s/%s_%d.%03d_%s.demo", ms_pRaceDemoDir, pMap, Time / 1000, Time % 1000, aPlayerName);
 	else
@@ -82,7 +87,7 @@ void CRaceDemo::OnNewSnapshot()
 		if(ForceStart || (!ServerControl && GameClient()->RaceHelper()->IsStart(PrevPos, Pos)))
 		{
 			if(m_RaceState == RACE_STARTED)
-				Client()->RaceRecord_Stop();
+				StopRecord();
 			if(m_RaceState != RACE_PREPARE) // start recording again
 			{
 				GetPath(m_aTmpFilename, sizeof(m_aTmpFilename));
@@ -132,7 +137,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
-		if(pMsg->m_Victim == GameClient()->m_Snap.m_LocalClientId && Client()->RaceRecord_IsRecording())
+		if(pMsg->m_Victim == GameClient()->m_Snap.m_LocalClientId)
 			StopRecord(m_Time);
 	}
 	else if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM)
@@ -140,7 +145,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(GameClient()->m_Teams.Team(i) == pMsg->m_Team && i == GameClient()->m_Snap.m_LocalClientId && Client()->RaceRecord_IsRecording())
+			if(GameClient()->m_Teams.Team(i) == pMsg->m_Team && i == GameClient()->m_Snap.m_LocalClientId)
 				StopRecord(m_Time);
 		}
 	}
@@ -178,10 +183,8 @@ void CRaceDemo::OnMapLoad()
 
 void CRaceDemo::StopRecord(int Time)
 {
-	if(Client()->RaceRecord_IsRecording())
-		Client()->RaceRecord_Stop();
-
-	if(m_aTmpFilename[0] != '\0')
+	const bool Completed = Client()->DemoRecorder(RECORDER_RACE)->Stop(IDemoRecorder::EStopMode::KEEP_FILE) == 0;
+	if(Completed && m_aTmpFilename[0] != '\0')
 	{
 		if(Time > 0 && CheckDemo(Time))
 		{
@@ -193,9 +196,8 @@ void CRaceDemo::StopRecord(int Time)
 		}
 		else // no new record
 			Storage()->RemoveFile(m_aTmpFilename, IStorage::TYPE_SAVE);
-
-		m_aTmpFilename[0] = '\0';
 	}
+	m_aTmpFilename[0] = '\0';
 
 	m_Time = 0;
 	m_RaceState = RACE_NONE;

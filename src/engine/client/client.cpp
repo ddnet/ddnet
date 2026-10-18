@@ -748,6 +748,9 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_DemoPlayer.Stop();
 	for(int Recorder = 0; Recorder < RECORDER_MAX; Recorder++)
 	{
+		// Race cleanup needs the finalization result when leaving the online state.
+		if(Recorder == RECORDER_RACE && State() == IClient::STATE_ONLINE)
+			continue;
 		DemoRecorder_Stop(Recorder);
 	}
 
