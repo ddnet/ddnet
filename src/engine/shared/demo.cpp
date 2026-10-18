@@ -189,6 +189,7 @@ int CDemoRecorder::Start(IStorage *pStorage, const char *pFilename, const char *
 	m_LastKeyFrame = -1;
 	m_LastTickMarker = -1;
 	m_FirstTick = -1;
+	m_LastFlushTick = -1;
 	m_NumTimelineMarkers = 0;
 
 	log_info_color(DEMO_PRINT_COLOR, "demo_recorder", "Recording to '%s'", pFilename);
@@ -253,6 +254,12 @@ void CDemoRecorder::WriteTickMarker(int Tick, bool Keyframe)
 	m_LastTickMarker = Tick;
 	if(m_FirstTick < 0)
 		m_FirstTick = Tick;
+	// Publishing the next marker makes the preceding tick available to live readers.
+	if(m_LastFlushTick < 0 || Tick - m_LastFlushTick >= SERVER_TICK_SPEED)
+	{
+		io_flush(m_File);
+		m_LastFlushTick = Tick;
+	}
 }
 
 bool CDemoRecorder::Write(int Type, const void *pData, int Size)
@@ -557,6 +564,7 @@ CDemoPlayer::EScanFileResult CDemoPlayer::ScanFile()
 	}
 
 	const auto &ResetToStartPosition = [&](EScanFileResult Result) -> EScanFileResult {
+		m_ScanComplete = Result == EScanFileResult::SUCCESS;
 		// Cannot play or seek without at least one keyframe, also when the scan stopped early
 		if(io_seek(m_File, StartPos, EIoSeekOrigin::START) != 0 || m_vKeyFrames.empty())
 		{
@@ -565,6 +573,13 @@ CDemoPlayer::EScanFileResult CDemoPlayer::ScanFile()
 		}
 		return Result;
 	};
+
+	m_ScanFileSize = io_length(m_File);
+	if(m_ScanFileSize < 0 ||
+		io_seek(m_File, offsetof(CDemoHeader, m_aLength), EIoSeekOrigin::START) != 0 ||
+		io_read(m_File, m_Info.m_Header.m_aLength, sizeof(m_Info.m_Header.m_aLength)) != sizeof(m_Info.m_Header.m_aLength) ||
+		io_seek(m_File, StartPos, EIoSeekOrigin::START) != 0)
+		return ResetToStartPosition(EScanFileResult::ERROR_UNRECOVERABLE);
 
 	int ChunkTick = -1;
 	if(!m_vKeyFrames.empty())
@@ -600,9 +615,14 @@ CDemoPlayer::EScanFileResult CDemoPlayer::ScanFile()
 		{
 			return ResetToStartPosition(EScanFileResult::ERROR_RECOVERABLE);
 		}
+		const int64_t PayloadPos = io_tell(m_File);
+		if(PayloadPos < 0 || PayloadPos > m_ScanFileSize || ChunkSize > m_ScanFileSize - PayloadPos)
+			return ResetToStartPosition(EScanFileResult::ERROR_RECOVERABLE);
 
 		if(ChunkType & CHUNKTYPEFLAG_TICKMARKER)
 		{
+			// A complete following marker closes the preceding tick, including its messages.
+			m_CompleteTickEnd = PayloadPos;
 			if(ChunkType & CHUNKTICKFLAG_KEYFRAME)
 			{
 				m_vKeyFrames.emplace_back(CurrentPos, ChunkTick);
@@ -625,20 +645,45 @@ CDemoPlayer::EScanFileResult CDemoPlayer::ScanFile()
 	return ResetToStartPosition(EScanFileResult::SUCCESS);
 }
 
-void CDemoPlayer::DoTick()
+bool CDemoPlayer::DoTick(bool WaitForData)
 {
-	// update ticks
-	m_Info.m_PreviousTick = m_Info.m_Info.m_CurrentTick;
-	m_Info.m_Info.m_CurrentTick = m_Info.m_NextTick;
+	// An apparently finished zero-length demo can grow before the next timed scan.
+	if(WaitForData && !m_Info.m_LiveStateUpdating && !m_Info.m_Info.m_LiveDemo &&
+		bytes_be_to_uint(m_Info.m_Header.m_aLength) == 0 && io_tell(m_File) >= m_CompleteTickEnd)
+	{
+		const int64_t PreviousSize = m_ScanFileSize;
+		if(ScanFile() == EScanFileResult::ERROR_UNRECOVERABLE)
+		{
+			Stop("Unrecoverable error on incrementally scanning demo file");
+			return false;
+		}
+		if(m_ScanFileSize > PreviousSize && bytes_be_to_uint(m_Info.m_Header.m_aLength) == 0)
+		{
+			m_Info.m_Info.m_LiveDemo = true;
+			m_Info.m_LiveStateUnchangedCount = 0;
+		}
+	}
+	if((m_Info.m_LiveStateUpdating || m_Info.m_Info.m_LiveDemo) &&
+		(WaitForData || !m_ScanComplete) && io_tell(m_File) >= m_CompleteTickEnd)
+		return false;
+
+	// Growth after an apparent EOF can still belong to the same tick.
+	const bool GotSnapshotBeforeEof = m_AtEndOfFile && m_EofHadSnapshot;
+	if(!m_AtEndOfFile)
+	{
+		m_Info.m_PreviousTick = m_Info.m_Info.m_CurrentTick;
+		m_Info.m_Info.m_CurrentTick = m_Info.m_NextTick;
+	}
+	m_AtEndOfFile = false;
 	int ChunkTick = m_Info.m_Info.m_CurrentTick;
 
 	UpdateTimes();
 
-	bool GotSnapshot = false;
+	bool GotSnapshot = GotSnapshotBeforeEof;
 	while(true)
 	{
 		int ChunkType, ChunkSize;
-		const EReadChunkHeaderResult Result = ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick);
+		const EReadChunkHeaderResult Result = !WaitForData && io_tell(m_File) >= m_ScanFileSize ? CHUNKHEADER_EOF : ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick);
 		if(Result == CHUNKHEADER_EOF)
 		{
 			if(m_Info.m_PreviousTick == -1)
@@ -648,6 +693,9 @@ void CDemoPlayer::DoTick()
 			else
 			{
 				Pause();
+				m_AtEndOfFile = true;
+				m_EofHadSnapshot = GotSnapshot;
+				m_AutoResume = WaitForData && bytes_be_to_uint(m_Info.m_Header.m_aLength) == 0;
 				// Stop rendering when reaching end of file
 #if defined(CONF_VIDEORECORDER)
 				if(m_UseVideo && IVideo::Current())
@@ -756,10 +804,12 @@ void CDemoPlayer::DoTick()
 			}
 		}
 	}
+	return IsPlaying();
 }
 
 void CDemoPlayer::Pause()
 {
+	m_AutoResume = false;
 	m_Info.m_Info.m_Paused = true;
 #if defined(CONF_VIDEORECORDER)
 	if(m_UseVideo && IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
@@ -769,6 +819,7 @@ void CDemoPlayer::Pause()
 
 void CDemoPlayer::Unpause()
 {
+	m_AutoResume = false;
 	m_Info.m_Info.m_Paused = false;
 #if defined(CONF_VIDEORECORDER)
 	if(m_UseVideo && IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
@@ -795,6 +846,12 @@ int CDemoPlayer::Load(IStorage *pStorage, const char *pFilename, int StorageType
 	m_Info.m_Info.m_Speed = 1;
 	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
 	m_LastSnapshotDataSize = -1;
+	m_CompleteTickEnd = 0;
+	m_ScanFileSize = 0;
+	m_ScanComplete = false;
+	m_AtEndOfFile = false;
+	m_EofHadSnapshot = false;
+	m_AutoResume = false;
 
 	if(!GetDemoInfo(pStorage, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
 	{
@@ -812,12 +869,12 @@ int CDemoPlayer::Load(IStorage *pStorage, const char *pFilename, int StorageType
 	}
 
 	// Scan the file for interesting points
+	m_Info.m_LiveStateUpdating = bytes_be_to_uint(m_Info.m_Header.m_aLength) == 0;
 	if(ScanFile() == EScanFileResult::ERROR_UNRECOVERABLE)
 	{
 		Stop("Error scanning demo file");
 		return -1;
 	}
-	m_Info.m_LiveStateUpdating = true;
 
 	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
@@ -933,13 +990,11 @@ void CDemoPlayer::Play()
 	// Fill in previous and next tick
 	while(m_Info.m_PreviousTick == -1)
 	{
-		DoTick();
-		if(!IsPlaying())
-		{
-			// Empty demo or error playing tick
-			return;
-		}
+		if(!DoTick(true))
+			break;
 	}
+	if(!IsPlaying())
+		return;
 
 	// Initialize playback time. Using `set_new_tick` is essential so that `Time`
 	// returns the updated time, otherwise the delta between `m_LastUpdate` and
@@ -995,11 +1050,12 @@ bool CDemoPlayer::SetPos(int WantedTick)
 {
 	if(!m_File)
 		return false;
+	m_AutoResume = false;
 
 	// TODO: Early exit when WantedTick > m_Info.m_Info.m_CurrentTick && WantedTick <= m_Info.m_NextTick with https://github.com/ddnet/ddnet/issues/11681
 
 	int LastSeekableTick = m_Info.m_Info.m_LastTick;
-	if(m_Info.m_Info.m_LiveDemo)
+	if(m_Info.m_Info.m_LiveDemo || m_Info.m_LiveStateUpdating)
 	{
 		// Make sure we don't seek all the way until the end in a live demo because the chunk data may not be fully written.
 		LastSeekableTick -= 2 * SERVER_TICK_SPEED;
@@ -1016,16 +1072,18 @@ bool CDemoPlayer::SetPos(int WantedTick)
 	// Just the next tick
 	if(WantedTick == m_Info.m_NextTick + 1)
 	{
-		DoTick();
+		DoTick(true);
 		Play();
-		return true;
+		return IsPlaying();
 	}
 
 	const int KeyFrameWantedTick = WantedTick - 5; // -5 because we have to have a current tick and previous tick when we do the playback
-	const float Percent = (KeyFrameWantedTick - m_Info.m_Info.m_FirstTick) / (float)(m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick);
+	const int TickRange = m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick;
+	// Seeking near the start looks five ticks back. Clamp before converting to size_t.
+	const float Percent = TickRange > 0 ? std::clamp((KeyFrameWantedTick - m_Info.m_Info.m_FirstTick) / (float)TickRange, 0.0f, 1.0f) : 0.0f;
 
 	// get correct key frame
-	size_t KeyFrame = std::clamp<size_t>(m_vKeyFrames.size() * Percent, 0, m_vKeyFrames.size() - 1);
+	size_t KeyFrame = std::min<size_t>(m_vKeyFrames.size() * Percent, m_vKeyFrames.size() - 1);
 	while(KeyFrame < m_vKeyFrames.size() - 1 && m_vKeyFrames[KeyFrame].m_Tick < KeyFrameWantedTick)
 		KeyFrame++;
 	while(KeyFrame > 0 && m_vKeyFrames[KeyFrame].m_Tick > KeyFrameWantedTick)
@@ -1045,17 +1103,17 @@ bool CDemoPlayer::SetPos(int WantedTick)
 		m_Info.m_NextTick = -1;
 		m_Info.m_Info.m_CurrentTick = -1;
 		m_Info.m_PreviousTick = -1;
+		m_AtEndOfFile = false;
 	}
 
 	// playback everything until we hit our tick
 	while(m_Info.m_NextTick < WantedTick)
 	{
-		DoTick();
-		if(!IsPlaying())
-		{
-			return false;
-		}
+		if(!DoTick(true))
+			break;
 	}
+	if(!IsPlaying())
+		return false;
 
 	Play();
 
@@ -1081,27 +1139,30 @@ void CDemoPlayer::AdjustSpeedIndex(int Offset)
 
 void CDemoPlayer::Update(bool RealTime)
 {
+	if(!IsPlaying())
+		return;
 	const int64_t Now = Time();
 	const int64_t Freq = time_freq();
 	const int64_t DeltaTime = Now - m_Info.m_LastUpdate;
 	m_Info.m_LastUpdate = Now;
 
-	if(m_Info.m_LiveStateUpdating)
+	if(m_Info.m_LiveStateUpdating || (!m_Info.m_Info.m_LiveDemo && bytes_be_to_uint(m_Info.m_Header.m_aLength) == 0))
 	{
 		// Determine if demo is live and still being written to, by scanning
 		// file again and checking if more ticks are available than before.
 		if(Now - m_Info.m_LastScan > Freq)
 		{
 			const int PreviousLastTick = m_Info.m_Info.m_LastTick;
+			const int64_t PreviousSize = m_ScanFileSize;
 			const EScanFileResult ScanResult = ScanFile();
 			if(ScanResult == EScanFileResult::ERROR_UNRECOVERABLE)
 			{
 				Stop("Unrecoverable error on incrementally scanning demo file to determine live state");
 				return;
 			}
-			else if(ScanResult == EScanFileResult::SUCCESS)
+			else if(ScanResult == EScanFileResult::SUCCESS && m_Info.m_Info.m_LastTick > m_Info.m_Info.m_FirstTick)
 			{
-				// Live state is known when ScanFile succeeded.
+				// A lone first marker can precede the recorder's next flush.
 				m_Info.m_LiveStateUpdating = false;
 			}
 			else
@@ -1116,7 +1177,10 @@ void CDemoPlayer::Update(bool RealTime)
 			}
 			// Check if we got more ticks also when ScanFile failed, because
 			// it could still have found more ticks.
-			if(m_Info.m_Info.m_LastTick > PreviousLastTick)
+			if(m_ScanFileSize > PreviousSize && m_AutoResume)
+				Unpause();
+			if(bytes_be_to_uint(m_Info.m_Header.m_aLength) == 0 &&
+				(m_Info.m_Info.m_LastTick > PreviousLastTick || m_ScanFileSize > PreviousSize))
 			{
 				m_Info.m_Info.m_LiveDemo = true;
 				m_Info.m_LiveStateUpdating = false;
@@ -1132,20 +1196,24 @@ void CDemoPlayer::Update(bool RealTime)
 		if(Now - m_Info.m_LastScan > Freq / SERVER_TICK_SPEED)
 		{
 			const int PreviousLastTick = m_Info.m_Info.m_LastTick;
+			const int64_t PreviousSize = m_ScanFileSize;
 			const EScanFileResult ScanResult = ScanFile();
 			if(ScanResult == EScanFileResult::ERROR_UNRECOVERABLE)
 			{
 				Stop("Unrecoverable error on incrementally scanning live demo file");
 				return;
 			}
-			else if(ScanResult == EScanFileResult::SUCCESS &&
-				m_Info.m_Info.m_LastTick == PreviousLastTick)
+			else if(bytes_be_to_uint(m_Info.m_Header.m_aLength) != 0)
+			{
+				m_Info.m_Info.m_LiveDemo = false;
+			}
+			else if(m_Info.m_Info.m_LastTick == PreviousLastTick && m_ScanFileSize == PreviousSize)
 			{
 				m_Info.m_LiveStateUnchangedCount++;
-				if(m_Info.m_LiveStateUnchangedCount >= 2 * SERVER_TICK_SPEED)
+				const int Timeout = ScanResult == EScanFileResult::SUCCESS ? 2 : 15;
+				if(m_Info.m_LiveStateUnchangedCount >= Timeout * SERVER_TICK_SPEED)
 				{
-					// Assume demo stopped being live if we scanned the demo
-					// successfully for 2 seconds without reading new ticks.
+					// Allow an incomplete tail more time to grow before treating it as truncated.
 					m_Info.m_Info.m_LiveDemo = false;
 				}
 			}
@@ -1183,7 +1251,13 @@ void CDemoPlayer::Update(bool RealTime)
 			{
 				break;
 			}
-			DoTick();
+			if(!DoTick(RealTime))
+			{
+				m_Info.m_CurrentTime = CurrentTickStart;
+				if(!RealTime)
+					Pause();
+				break;
+			}
 			if(!IsPlaying())
 			{
 				return;
@@ -1199,7 +1273,7 @@ void CDemoPlayer::UpdateTimes()
 	const int64_t Freq = time_freq();
 	const int64_t CurrentTickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
 	const int64_t PreviousTickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
-	m_Info.m_IntraTick = (m_Info.m_CurrentTime - PreviousTickStart) / (float)(CurrentTickStart - PreviousTickStart);
+	m_Info.m_IntraTick = CurrentTickStart > PreviousTickStart ? (m_Info.m_CurrentTime - PreviousTickStart) / (float)(CurrentTickStart - PreviousTickStart) : 0.0f;
 	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PreviousTickStart) / (float)(Freq / SERVER_TICK_SPEED);
 	m_Info.m_TickTime = (m_Info.m_CurrentTime - PreviousTickStart) / (float)Freq;
 	m_Info.m_Info.m_LivePlayback = m_Info.m_Info.m_LastTick - m_Info.m_Info.m_CurrentTick < 3 * SERVER_TICK_SPEED;
