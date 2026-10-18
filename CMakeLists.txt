@@ -2612,6 +2612,8 @@ if(CLIENT)
     keyboard.h
     keynames.cpp
     keynames.h
+    map_thumbnail.cpp
+    map_thumbnail.h
     notifications.cpp
     notifications.h
     serverbrowser.cpp
