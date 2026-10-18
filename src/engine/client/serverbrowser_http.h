@@ -1,5 +1,7 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_HTTP_H
 #define ENGINE_CLIENT_SERVERBROWSER_HTTP_H
+
+#include <base/color.h>
 #include <base/types.h>
 
 class CServerInfo;
@@ -23,6 +25,8 @@ public:
 
 	virtual int NumServers() const = 0;
 	virtual const CServerInfo &Server(int Index) const = 0;
+
+	virtual ColorRGBA GametypeColor(const char *pGametype) const = 0;
 };
 
 IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IStorage *pStorage, IHttp *pHttp, const char *pPreviousBestUrl);
