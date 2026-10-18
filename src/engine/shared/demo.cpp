@@ -1561,16 +1561,22 @@ bool CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 		return false;
 	}
 
-	// Copy timeline markers to sliced demo
-	for(int i = 0; i < pInfo->m_Info.m_NumTimelineMarkers; i++)
+	if(DemoPlayer.ErrorMessage()[0] != '\0')
 	{
-		if((StartTick == -1 || pInfo->m_Info.m_aTimelineMarkers[i] >= StartTick) && (EndTick == -1 || pInfo->m_Info.m_aTimelineMarkers[i] <= EndTick))
+		DemoPlayer.Stop();
+		DemoRecorder.Stop(IDemoRecorder::EStopMode::REMOVE_FILE);
+		return false;
+	}
+
+	// Copy timeline markers to sliced demo
+	for(int MarkerIndex = 0; MarkerIndex < pInfo->m_Info.m_NumTimelineMarkers; MarkerIndex++)
+	{
+		if((StartTick == -1 || pInfo->m_Info.m_aTimelineMarkers[MarkerIndex] >= StartTick) && (EndTick == -1 || pInfo->m_Info.m_aTimelineMarkers[MarkerIndex] <= EndTick))
 		{
-			DemoRecorder.AddDemoMarker(pInfo->m_Info.m_aTimelineMarkers[i]);
+			DemoRecorder.AddDemoMarker(pInfo->m_Info.m_aTimelineMarkers[MarkerIndex]);
 		}
 	}
 
 	DemoPlayer.Stop();
-	DemoRecorder.Stop(IDemoRecorder::EStopMode::KEEP_FILE);
-	return true;
+	return DemoRecorder.Stop(IDemoRecorder::EStopMode::KEEP_FILE) == 0;
 }
