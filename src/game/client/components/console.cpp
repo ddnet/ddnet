@@ -350,6 +350,11 @@ void CGameConsole::ForceUpdateRemoteCompletionSuggestions()
 	m_RemoteConsole.UpdateCompletionSuggestions();
 }
 
+bool CGameConsole::CInstance::UseTempCommands() const
+{
+	return m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
+}
+
 void CGameConsole::CInstance::UpdateCompletionSuggestions()
 {
 	if(!m_CompletionDirty)
@@ -372,9 +377,7 @@ void CGameConsole::CInstance::UpdateCompletionSuggestions()
 	// Command completion
 	char aSearch[IConsole::CMDLINE_LENGTH];
 	GetCommand(m_aCompletionBuffer, aSearch);
-	const bool RemoteConsoleCompletion = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed();
-	const bool UseTempCommands = RemoteConsoleCompletion && m_pGameConsole->Client()->UseTempRconCommands();
-	m_pGameConsole->m_pConsole->PossibleCommands(aSearch, m_CompletionFlagmask, UseTempCommands, CollectPossibleCommandsCallback, &m_vpCommandSuggestions);
+	m_pGameConsole->m_pConsole->PossibleCommands(aSearch, m_CompletionFlagmask, UseTempCommands(), CollectPossibleCommandsCallback, &m_vpCommandSuggestions);
 	SortCompletions(m_vpCommandSuggestions, aSearch);
 
 	// Argument completion
@@ -386,7 +389,7 @@ void CGameConsole::CInstance::UpdateCompletionSuggestions()
 		else if(CompletionType == EArgumentCompletionType::TUNE)
 			PossibleTunings(m_aCompletionBufferArgument, CollectPossibleCommandsCallback, &m_vpArgumentSuggestions);
 		else if(CompletionType == EArgumentCompletionType::SETTING)
-			m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_CompletionFlagmask, UseTempCommands, CollectPossibleCommandsCallback, &m_vpArgumentSuggestions);
+			m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_CompletionFlagmask, UseTempCommands(), CollectPossibleCommandsCallback, &m_vpArgumentSuggestions);
 		else if(CompletionType == EArgumentCompletionType::KEY)
 			PossibleKeys(m_aCompletionBufferArgument, m_pGameConsole->Input(), CollectPossibleCommandsCallback, &m_vpArgumentSuggestions);
 		SortCompletions(m_vpArgumentSuggestions, m_aCompletionBufferArgument);
@@ -421,6 +424,13 @@ void CGameConsole::CInstance::UpdateCompletionSuggestions()
 	}
 
 	m_CompletionDirty = false;
+}
+
+const IConsole::ICommandInfo *CGameConsole::CInstance::HighlightedCommandInfo() const
+{
+	if(m_CompletionChosen < 0 || (size_t)m_CompletionChosen >= m_vpCommandSuggestions.size())
+		return nullptr;
+	return m_pGameConsole->m_pConsole->GetCommandInfo(m_vpCommandSuggestions[m_CompletionChosen], m_CompletionFlagmask, UseTempCommands());
 }
 
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
@@ -745,8 +755,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			char aBuf[IConsole::CMDLINE_LENGTH];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), aCmd);
 
-			const IConsole::ICommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
-				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
+			const IConsole::ICommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask, UseTempCommands());
 			if(pCommand)
 			{
 				m_IsCommand = true;
@@ -1066,6 +1075,18 @@ struct CCompletionOptionRenderInfo
 	float m_TotalWidth;
 };
 
+void CGameConsole::RenderCommandInfo(CTextCursor *pCursor, const char *pName, const char *pHelp, const char *pParams)
+{
+	char aBuf[1024];
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	str_format(aBuf, sizeof(aBuf), "Help: %s ", pHelp);
+	TextRender()->TextEx(pCursor, aBuf, -1);
+	TextRender()->TextColor(0.75f, 0.75f, 0.75f, 1.0f);
+	str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pName, pParams);
+	TextRender()->TextEx(pCursor, aBuf, -1);
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+}
+
 void CGameConsole::PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser)
 {
 	CCompletionOptionRenderInfo *pInfo = static_cast<CCompletionOptionRenderInfo *>(pUser);
@@ -1199,7 +1220,23 @@ void CGameConsole::OnRender()
 	else // CONSOLE_OPEN
 		ConsoleHeightScale = ConsoleScaleFunc(1.0f);
 
-	const float ConsoleHeight = ConsoleHeightScale * MaxConsoleHeight;
+	// The info of the highlighted command suggestion is rendered on an additional row
+	// below the suggestions, for which the console is extended downwards so that
+	// neither the input nor the suggestions move.
+	const float CommandInfoSpacing = FONT_SIZE / 2.0f + 2.0f; // Same spacing that separates the input from the row below it
+	const bool RenderCompletions = !pConsole->m_Searching && (m_ConsoleType == CONSOLETYPE_LOCAL || Client()->RconAuthed()) && !pConsole->m_Input.IsEmpty();
+	const IConsole::ICommandInfo *pHighlightedCommand = nullptr;
+	if(RenderCompletions)
+	{
+		pConsole->UpdateCompletionSuggestions();
+		// Only reserve the additional row while the console is fully open, as the text
+		// of the row does not scale with the console during the opening and closing.
+		if(m_ConsoleState == CONSOLE_OPEN)
+			pHighlightedCommand = pConsole->HighlightedCommandInfo();
+	}
+	const float CommandInfoHeight = pHighlightedCommand == nullptr ? 0.0f : FONT_SIZE + CommandInfoSpacing;
+
+	const float ConsoleHeight = ConsoleHeightScale * MaxConsoleHeight + CommandInfoHeight;
 
 	const ColorRGBA ShadowColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f);
 	const ColorRGBA TransparentColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
@@ -1240,7 +1277,7 @@ void CGameConsole::OnRender()
 		const float RowHeight = FONT_SIZE * 2.0f;
 
 		float x = 3;
-		float y = ConsoleHeight - RowHeight - 18.0f;
+		float y = ConsoleHeight - CommandInfoHeight - RowHeight - 18.0f;
 
 		const float InitialX = x;
 		const float InitialY = y;
@@ -1368,9 +1405,16 @@ void CGameConsole::OnRender()
 		}
 
 		// render possible commands
-		if(!pConsole->m_Searching && (m_ConsoleType == CONSOLETYPE_LOCAL || Client()->RconAuthed()) && !pConsole->m_Input.IsEmpty())
+		if(RenderCompletions)
 		{
-			pConsole->UpdateCompletionSuggestions();
+			const float CompletionY = InitialY + RowHeight + 2.0f;
+			if(pHighlightedCommand != nullptr)
+			{
+				CTextCursor CommandInfoCursor;
+				CommandInfoCursor.SetPosition(vec2(InitialX, CompletionY + CommandInfoHeight));
+				CommandInfoCursor.m_FontSize = FONT_SIZE;
+				RenderCommandInfo(&CommandInfoCursor, pHighlightedCommand->Name(), pHighlightedCommand->Help(), pHighlightedCommand->Params());
+			}
 
 			CCompletionOptionRenderInfo Info;
 			Info.m_pSelf = this;
@@ -1383,7 +1427,7 @@ void CGameConsole::OnRender()
 			pConsole->GetCommand(pConsole->m_aCompletionBuffer, aCmd);
 			Info.m_pCurrentCmd = aCmd;
 
-			Info.m_Cursor.SetPosition(vec2(InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f));
+			Info.m_Cursor.SetPosition(vec2(InitialX - Info.m_Offset, CompletionY));
 			Info.m_Cursor.m_FontSize = FONT_SIZE;
 
 			for(size_t SuggestionId = 0; SuggestionId < pConsole->m_vpCommandSuggestions.size(); ++SuggestionId)
@@ -1414,12 +1458,7 @@ void CGameConsole::OnRender()
 
 				if(NumArguments <= 0 && pConsole->m_IsCommand)
 				{
-					char aBuf[1024];
-					str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_pCommandHelp);
-					TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
-					TextRender()->TextColor(0.75f, 0.75f, 0.75f, 1);
-					str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pConsole->m_pCommandName, pConsole->m_pCommandParams);
-					TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
+					RenderCommandInfo(&Info.m_Cursor, pConsole->m_pCommandName, pConsole->m_pCommandHelp, pConsole->m_pCommandParams);
 				}
 			}
 
