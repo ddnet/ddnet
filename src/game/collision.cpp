@@ -39,7 +39,6 @@ vec2 ClampVel(int MoveRestriction, vec2 Vel)
 
 CCollision::CCollision()
 {
-	m_pDoor = nullptr;
 	Unload();
 }
 
@@ -49,6 +48,11 @@ CCollision::~CCollision()
 }
 
 void CCollision::Init(class CLayers *pLayers)
+{
+	Init(pLayers, false);
+}
+
+void CCollision::Init(class CLayers *pLayers, bool UnloadRawData)
 {
 	Unload();
 
@@ -60,86 +64,115 @@ void CCollision::Init(class CLayers *pLayers)
 
 	if(m_pLayers->TeleLayer())
 	{
-		m_pTele = static_cast<CTeleTile *>(m_pLayers->Map()->GetData(m_pLayers->TeleLayer()->m_Tele));
-	}
-
-	if(m_pLayers->SpeedupLayer())
-	{
-		m_pSpeedup = static_cast<CSpeedupTile *>(m_pLayers->Map()->GetData(m_pLayers->SpeedupLayer()->m_Speedup));
-	}
-
-	if(m_pLayers->SwitchLayer())
-	{
-		m_pSwitch = static_cast<CSwitchTile *>(m_pLayers->Map()->GetData(m_pLayers->SwitchLayer()->m_Switch));
-		m_pDoor = new CDoorTile[m_Width * m_Height];
-		mem_zero(m_pDoor, (size_t)m_Width * m_Height * sizeof(CDoorTile));
-	}
-
-	if(m_pLayers->TuneLayer())
-	{
-		m_pTune = static_cast<CTuneTile *>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
-	}
-
-	if(m_pLayers->FrontLayer())
-	{
-		m_pFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
-	}
-
-	if(m_pSwitch)
-	{
-		for(int i = 0; i < m_Width * m_Height; i++)
+		CTeleTile *pRawTele = static_cast<CTeleTile *>(m_pLayers->Map()->GetData(m_pLayers->TeleLayer()->m_Tele));
+		if(pRawTele)
 		{
-			if(m_pSwitch[i].m_Number > m_HighestSwitchNumber)
+			for(int i = 0; i < m_Width * m_Height; i++)
 			{
-				m_HighestSwitchNumber = m_pSwitch[i].m_Number;
+				const unsigned char Number = pRawTele[i].m_Number;
+				const unsigned char Type = pRawTele[i].m_Type;
+				if(Number && Type)
+				{
+					const vec2 TelePos = vec2(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+					if(Type == TILE_TELEIN)
+					{
+						m_TeleIns[Number - 1].push_back(TelePos);
+					}
+					else if(Type == TILE_TELEOUT)
+					{
+						m_TeleOuts[Number - 1].push_back(TelePos);
+					}
+					else if(Type == TILE_TELECHECKOUT)
+					{
+						m_TeleCheckOuts[Number - 1].push_back(TelePos);
+					}
+					else
+					{
+						m_TeleOthers[Number - 1].push_back(TelePos);
+						if(Type == TILE_TELEINHOOK)
+							m_HasHookTeleIns = true;
+					}
+				}
 			}
-
-			m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
-
-			const unsigned char Index = m_pSwitch[i].m_Type;
-			if(Index <= TILE_NPH_ENABLE)
+			m_TeleLayer.InitFromRaw(pRawTele, m_Width, m_Height);
+			if(UnloadRawData)
 			{
-				if((Index >= TILE_JUMP && Index <= TILE_SUBTRACT_TIME) ||
-					Index == TILE_ALLOW_TELE_GUN ||
-					Index == TILE_ALLOW_BLUE_TELE_GUN)
-				{
-					m_pSwitch[i].m_Type = Index;
-				}
-				else
-				{
-					m_pSwitch[i].m_Type = 0;
-				}
+				m_pLayers->Map()->UnloadData(m_pLayers->TeleLayer()->m_Tele);
 			}
 		}
 	}
 
-	if(m_pTele)
+	if(m_pLayers->SpeedupLayer())
 	{
-		for(int i = 0; i < m_Width * m_Height; i++)
+		CSpeedupTile *pRawSpeedup = static_cast<CSpeedupTile *>(m_pLayers->Map()->GetData(m_pLayers->SpeedupLayer()->m_Speedup));
+		if(pRawSpeedup)
 		{
-			const unsigned char Number = m_pTele[i].m_Number;
-			const unsigned char Type = m_pTele[i].m_Type;
-			if(Number && Type)
+			m_SpeedupLayer.InitFromRaw(pRawSpeedup, m_Width, m_Height);
+			if(UnloadRawData)
 			{
-				const vec2 TelePos = vec2(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
-				if(Type == TILE_TELEIN)
+				m_pLayers->Map()->UnloadData(m_pLayers->SpeedupLayer()->m_Speedup);
+			}
+		}
+	}
+
+	if(m_pLayers->SwitchLayer())
+	{
+		CSwitchTile *pRawSwitch = static_cast<CSwitchTile *>(m_pLayers->Map()->GetData(m_pLayers->SwitchLayer()->m_Switch));
+		if(pRawSwitch)
+		{
+			for(int i = 0; i < m_Width * m_Height; i++)
+			{
+				if(pRawSwitch[i].m_Number > m_HighestSwitchNumber)
 				{
-					m_TeleIns[Number - 1].push_back(TelePos);
+					m_HighestSwitchNumber = pRawSwitch[i].m_Number;
 				}
-				else if(Type == TILE_TELEOUT)
+
+				const unsigned char Index = pRawSwitch[i].m_Type;
+				if(Index <= TILE_NPH_ENABLE)
 				{
-					m_TeleOuts[Number - 1].push_back(TelePos);
+					if((Index >= TILE_JUMP && Index <= TILE_SUBTRACT_TIME) ||
+						Index == TILE_ALLOW_TELE_GUN ||
+						Index == TILE_ALLOW_BLUE_TELE_GUN)
+					{
+						pRawSwitch[i].m_Type = Index;
+					}
+					else
+					{
+						pRawSwitch[i].m_Type = 0;
+					}
 				}
-				else if(Type == TILE_TELECHECKOUT)
-				{
-					m_TeleCheckOuts[Number - 1].push_back(TelePos);
-				}
-				else
-				{
-					m_TeleOthers[Number - 1].push_back(TelePos);
-					if(Type == TILE_TELEINHOOK)
-						m_HasHookTeleIns = true;
-				}
+			}
+
+			m_SwitchLayer.InitFromRaw(pRawSwitch, m_Width, m_Height);
+			if(UnloadRawData)
+			{
+				m_pLayers->Map()->UnloadData(m_pLayers->SwitchLayer()->m_Switch);
+			}
+		}
+	}
+
+	if(m_pLayers->TuneLayer())
+	{
+		CTuneTile *pRawTune = static_cast<CTuneTile *>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
+		if(pRawTune)
+		{
+			m_TuneLayer.InitFromRaw(pRawTune, m_Width, m_Height);
+			if(UnloadRawData)
+			{
+				m_pLayers->Map()->UnloadData(m_pLayers->TuneLayer()->m_Tune);
+			}
+		}
+	}
+
+	if(m_pLayers->FrontLayer())
+	{
+		CTile *pRawFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
+		if(pRawFront)
+		{
+			m_FrontLayer.InitFromRaw(pRawFront, m_Width, m_Height);
+			if(UnloadRawData)
+			{
+				m_pLayers->Map()->UnloadData(m_pLayers->FrontLayer()->m_Front);
 			}
 		}
 	}
@@ -159,13 +192,22 @@ void CCollision::Unload()
 	m_TeleCheckOuts.clear();
 	m_TeleOthers.clear();
 
-	m_pTele = nullptr;
-	m_pSpeedup = nullptr;
-	m_pFront = nullptr;
-	m_pSwitch = nullptr;
-	m_pTune = nullptr;
-	delete[] m_pDoor;
-	m_pDoor = nullptr;
+	m_TeleLayer.Clear();
+	m_SpeedupLayer.Clear();
+	m_FrontLayer.Clear();
+	m_SwitchLayer.Clear();
+	m_TuneLayer.Clear();
+	m_vDoors.clear();
+	m_vDoors.shrink_to_fit();
+}
+
+const CDoorTile *CCollision::FindDoor(int Index) const
+{
+	auto It = std::lower_bound(m_vDoors.begin(), m_vDoors.end(), Index,
+		[](const std::pair<int, CDoorTile> &Elem, int Val) { return Elem.first < Val; });
+	if(It != m_vDoors.end() && It->first == Index)
+		return &It->second;
+	return nullptr;
 }
 
 void CCollision::FillAntibot(CAntibotMapData *pMapData) const
@@ -611,26 +653,34 @@ int CCollision::IsSolid(int x, int y) const
 bool CCollision::IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const
 {
 	const int Index = GetPureMapIndex(x, y);
-	if(m_pFront && (m_pFront[Index].m_Index == TILE_THROUGH_ALL || m_pFront[Index].m_Index == TILE_THROUGH_CUT))
-		return true;
-	if(m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_DIR && ((m_pFront[Index].m_Flags == ROTATION_0 && Pos0.y > Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_90 && Pos0.x < Pos1.x) || (m_pFront[Index].m_Flags == ROTATION_180 && Pos0.y < Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_270 && Pos0.x > Pos1.x)))
-		return true;
+	if(m_FrontLayer.HasData())
+	{
+		const auto &Front = m_FrontLayer.At(Index);
+		if(Front.m_Index == TILE_THROUGH_ALL || Front.m_Index == TILE_THROUGH_CUT)
+			return true;
+		if(Front.m_Index == TILE_THROUGH_DIR && ((Front.m_Flags == ROTATION_0 && Pos0.y > Pos1.y) || (Front.m_Flags == ROTATION_90 && Pos0.x < Pos1.x) || (Front.m_Flags == ROTATION_180 && Pos0.y < Pos1.y) || (Front.m_Flags == ROTATION_270 && Pos0.x > Pos1.x)))
+			return true;
+	}
 	const int OffsetIndex = GetPureMapIndex(x + OffsetX, y + OffsetY);
-	return m_pTiles[OffsetIndex].m_Index == TILE_THROUGH || (m_pFront && m_pFront[OffsetIndex].m_Index == TILE_THROUGH);
+	return m_pTiles[OffsetIndex].m_Index == TILE_THROUGH || (m_FrontLayer.HasData() && m_FrontLayer.At(OffsetIndex).m_Index == TILE_THROUGH);
 }
 
 bool CCollision::IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const
 {
 	const int Index = GetPureMapIndex(x, y);
-	if(m_pTiles[Index].m_Index == TILE_THROUGH_ALL || (m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_ALL))
+	if(m_pTiles[Index].m_Index == TILE_THROUGH_ALL || (m_FrontLayer.HasData() && m_FrontLayer.At(Index).m_Index == TILE_THROUGH_ALL))
 		return true;
 	if(m_pTiles[Index].m_Index == TILE_THROUGH_DIR && ((m_pTiles[Index].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) ||
 								  (m_pTiles[Index].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) ||
 								  (m_pTiles[Index].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) ||
 								  (m_pTiles[Index].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
 		return true;
-	if(m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_DIR && ((m_pFront[Index].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) || (m_pFront[Index].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
-		return true;
+	if(m_FrontLayer.HasData())
+	{
+		const auto &Front = m_FrontLayer.At(Index);
+		if(Front.m_Index == TILE_THROUGH_DIR && ((Front.m_Flags == ROTATION_0 && Pos0.y < Pos1.y) || (Front.m_Flags == ROTATION_90 && Pos0.x > Pos1.x) || (Front.m_Flags == ROTATION_180 && Pos0.y > Pos1.y) || (Front.m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
+			return true;
+	}
 	return false;
 }
 
@@ -654,131 +704,142 @@ int CCollision::IsFrontNoLaser(int x, int y) const
 
 int CCollision::IsTeleport(int Index) const
 {
-	if(Index < 0 || !m_pTele)
+	if(Index < 0 || !m_TeleLayer.HasData())
 		return 0;
 
-	if(m_pTele[Index].m_Type == TILE_TELEIN)
-		return m_pTele[Index].m_Number;
+	const auto &Tele = m_TeleLayer.At(Index);
+	if(Tele.m_Type == TILE_TELEIN)
+		return Tele.m_Number;
 
 	return 0;
 }
 
 int CCollision::IsEvilTeleport(int Index) const
 {
-	if(Index < 0 || !m_pTele)
+	if(Index < 0 || !m_TeleLayer.HasData())
 		return 0;
 
-	if(m_pTele[Index].m_Type == TILE_TELEINEVIL)
-		return m_pTele[Index].m_Number;
+	const auto &Tele = m_TeleLayer.At(Index);
+	if(Tele.m_Type == TILE_TELEINEVIL)
+		return Tele.m_Number;
 
 	return 0;
 }
 
 bool CCollision::IsCheckTeleport(int Index) const
 {
-	if(Index < 0 || !m_pTele)
+	if(Index < 0 || !m_TeleLayer.HasData())
 		return false;
-	return m_pTele[Index].m_Type == TILE_TELECHECKIN;
+	return m_TeleLayer.At(Index).m_Type == TILE_TELECHECKIN;
 }
 
 bool CCollision::IsCheckEvilTeleport(int Index) const
 {
-	if(Index < 0 || !m_pTele)
+	if(Index < 0 || !m_TeleLayer.HasData())
 		return false;
-	return m_pTele[Index].m_Type == TILE_TELECHECKINEVIL;
+	return m_TeleLayer.At(Index).m_Type == TILE_TELECHECKINEVIL;
 }
 
 int CCollision::IsTeleCheckpoint(int Index) const
 {
-	if(Index < 0 || !m_pTele)
+	if(Index < 0 || !m_TeleLayer.HasData())
 		return 0;
 
-	if(m_pTele[Index].m_Type == TILE_TELECHECK)
-		return m_pTele[Index].m_Number;
+	const auto &Tele = m_TeleLayer.At(Index);
+	if(Tele.m_Type == TILE_TELECHECK)
+		return Tele.m_Number;
 
 	return 0;
 }
 
 int CCollision::IsTeleportWeapon(int Index) const
 {
-	if(Index < 0 || !m_pTele)
+	if(Index < 0 || !m_TeleLayer.HasData())
 		return 0;
 
-	if(m_pTele[Index].m_Type == TILE_TELEINWEAPON)
-		return m_pTele[Index].m_Number;
+	const auto &Tele = m_TeleLayer.At(Index);
+	if(Tele.m_Type == TILE_TELEINWEAPON)
+		return Tele.m_Number;
 
 	return 0;
 }
 
 int CCollision::IsTeleportHook(int Index) const
 {
-	if(Index < 0 || !m_pTele)
+	if(Index < 0 || !m_TeleLayer.HasData())
 		return 0;
 
-	if(m_pTele[Index].m_Type == TILE_TELEINHOOK)
-		return m_pTele[Index].m_Number;
+	const auto &Tele = m_TeleLayer.At(Index);
+	if(Tele.m_Type == TILE_TELEINHOOK)
+		return Tele.m_Number;
 
 	return 0;
 }
 
 bool CCollision::IsSpeedup(int Index) const
 {
-	dbg_assert(Index >= 0, "Invalid speedup index %d", Index);
-	return m_pSpeedup && m_pSpeedup[Index].m_Force > 0;
+	if(Index < 0 || !m_SpeedupLayer.HasData() || Index >= m_Height * m_Width)
+		return false;
+	return m_SpeedupLayer.At(Index).m_Force > 0;
 }
 
 int CCollision::IsTune(int Index) const
 {
-	if(Index < 0 || !m_pTune)
+	if(Index < 0 || !m_TuneLayer.HasData())
 		return 0;
 
-	if(m_pTune[Index].m_Type)
-		return m_pTune[Index].m_Number;
+	const auto &Tune = m_TuneLayer.At(Index);
+	if(Tune.m_Type != 0)
+		return Tune.m_Number;
 
 	return 0;
 }
 
 void CCollision::GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed, int *pType) const
 {
-	if(Index < 0 || !m_pSpeedup)
+	if(Index < 0 || !m_SpeedupLayer.HasData() || Index >= m_Height * m_Width)
 		return;
-	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
-	*pForce = m_pSpeedup[Index].m_Force;
-	*pType = m_pSpeedup[Index].m_Type;
+	const auto &Speedup = m_SpeedupLayer.At(Index);
+	float Angle = Speedup.m_Angle * (pi / 180.0f);
+	*pForce = Speedup.m_Force;
+	*pType = Speedup.m_Type;
 	*pDir = direction(Angle);
 	if(pMaxSpeed)
-		*pMaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
+		*pMaxSpeed = Speedup.m_MaxSpeed;
 }
 
 int CCollision::GetSwitchType(int Index) const
 {
-	if(Index < 0 || !m_pSwitch)
+	if(Index < 0 || !m_SwitchLayer.HasData())
 		return 0;
 
-	if(m_pSwitch[Index].m_Type > 0)
-		return m_pSwitch[Index].m_Type;
+	const auto &Switch = m_SwitchLayer.At(Index);
+	if(Switch.m_Type > 0)
+		return Switch.m_Type;
 
 	return 0;
 }
 
 int CCollision::GetSwitchNumber(int Index) const
 {
-	if(Index < 0 || !m_pSwitch)
+	if(Index < 0 || !m_SwitchLayer.HasData())
 		return 0;
 
-	if(m_pSwitch[Index].m_Type > 0 && m_pSwitch[Index].m_Number > 0 && m_pSwitch[Index].m_Number <= m_HighestSwitchNumber)
-		return m_pSwitch[Index].m_Number;
+	const auto &Switch = m_SwitchLayer.At(Index);
+	if(Switch.m_Type > 0 && Switch.m_Number > 0 && Switch.m_Number <= m_HighestSwitchNumber)
+		return Switch.m_Number;
 
 	return 0;
 }
 
 int CCollision::GetSwitchDelay(int Index) const
 {
-	if(Index < 0 || !m_pSwitch)
+	if(Index < 0 || !m_SwitchLayer.HasData())
 		return 0;
 
-	if(m_pSwitch[Index].m_Type > 0)
-		return m_pSwitch[Index].m_Delay;
+	const auto &Switch = m_SwitchLayer.At(Index);
+	if(Switch.m_Type > 0)
+		return Switch.m_Delay;
 
 	return 0;
 }
@@ -839,22 +900,38 @@ int CCollision::GetPureMapIndex(float x, float y) const
 
 bool CCollision::TileExists(int Index) const
 {
-	if(Index < 0)
+	if(Index < 0 || Index >= m_Height * m_Width)
 		return false;
 
 	if((m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_TELE_LASER_DISABLE) || (m_pTiles[Index].m_Index >= TILE_LFREEZE && m_pTiles[Index].m_Index <= TILE_LUNFREEZE))
 		return true;
-	if(m_pFront && ((m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index <= TILE_TELE_LASER_DISABLE) || (m_pFront[Index].m_Index >= TILE_LFREEZE && m_pFront[Index].m_Index <= TILE_LUNFREEZE)))
+	if(m_FrontLayer.HasData())
+	{
+		const CTile &FrontTile = m_FrontLayer.At(Index);
+		if((FrontTile.m_Index >= TILE_FREEZE && FrontTile.m_Index <= TILE_TELE_LASER_DISABLE) || (FrontTile.m_Index >= TILE_LFREEZE && FrontTile.m_Index <= TILE_LUNFREEZE))
+			return true;
+	}
+	if(m_TeleLayer.HasData())
+	{
+		const CTeleTile &TeleTile = m_TeleLayer.At(Index);
+		if(TeleTile.m_Type == TILE_TELEIN || TeleTile.m_Type == TILE_TELEINEVIL || TeleTile.m_Type == TILE_TELECHECKINEVIL || TeleTile.m_Type == TILE_TELECHECK || TeleTile.m_Type == TILE_TELECHECKIN)
+			return true;
+	}
+	if(m_SpeedupLayer.HasData())
+	{
+		const CSpeedupTile &SpeedupTile = m_SpeedupLayer.At(Index);
+		if(SpeedupTile.m_Force != 0 || SpeedupTile.m_MaxSpeed != 0 || SpeedupTile.m_Angle != 0)
+			return true;
+	}
+	if(!m_vDoors.empty())
+	{
+		const CDoorTile *pDoor = FindDoor(Index);
+		if(pDoor && pDoor->m_Index != 0)
+			return true;
+	}
+	if(m_SwitchLayer.HasData() && m_SwitchLayer.At(Index).m_Type != 0)
 		return true;
-	if(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECKINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
-		return true;
-	if(m_pSpeedup && m_pSpeedup[Index].m_Force > 0)
-		return true;
-	if(m_pDoor && m_pDoor[Index].m_Index)
-		return true;
-	if(m_pSwitch && m_pSwitch[Index].m_Type)
-		return true;
-	if(m_pTune && m_pTune[Index].m_Type)
+	if(m_TuneLayer.HasData() && m_TuneLayer.At(Index).m_Type != 0)
 		return true;
 	return TileExistsNext(Index);
 }
@@ -876,26 +953,38 @@ bool CCollision::TileExistsNext(int Index) const
 		return true;
 	if(m_pTiles[TileBelow].m_Index == TILE_STOPA || m_pTiles[TileAbove].m_Index == TILE_STOPA || ((m_pTiles[TileBelow].m_Index == TILE_STOPS || m_pTiles[TileAbove].m_Index == TILE_STOPS) && m_pTiles[TileBelow].m_Flags | ROTATION_180 | ROTATION_0))
 		return true;
-	if(m_pFront)
+	if(m_FrontLayer.HasData())
 	{
-		if(m_pFront[TileOnTheRight].m_Index == TILE_STOPA || m_pFront[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pFront[TileOnTheRight].m_Index == TILE_STOPS || m_pFront[TileOnTheLeft].m_Index == TILE_STOPS)))
+		const CTile &Right = m_FrontLayer.At(TileOnTheRight);
+		const CTile &Left = m_FrontLayer.At(TileOnTheLeft);
+		const CTile &Below = m_FrontLayer.At(TileBelow);
+		const CTile &Above = m_FrontLayer.At(TileAbove);
+		if(Right.m_Index == TILE_STOPA || Left.m_Index == TILE_STOPA || ((Right.m_Index == TILE_STOPS || Left.m_Index == TILE_STOPS)))
 			return true;
-		if(m_pFront[TileBelow].m_Index == TILE_STOPA || m_pFront[TileAbove].m_Index == TILE_STOPA || ((m_pFront[TileBelow].m_Index == TILE_STOPS || m_pFront[TileAbove].m_Index == TILE_STOPS) && m_pFront[TileBelow].m_Flags | ROTATION_180 | ROTATION_0))
+		if(Below.m_Index == TILE_STOPA || Above.m_Index == TILE_STOPA || ((Below.m_Index == TILE_STOPS || Above.m_Index == TILE_STOPS) && Below.m_Flags | ROTATION_180 | ROTATION_0))
 			return true;
-		if((m_pFront[TileOnTheRight].m_Index == TILE_STOP && m_pFront[TileOnTheRight].m_Flags == ROTATION_270) || (m_pFront[TileOnTheLeft].m_Index == TILE_STOP && m_pFront[TileOnTheLeft].m_Flags == ROTATION_90))
+		if((Right.m_Index == TILE_STOP && Right.m_Flags == ROTATION_270) || (Left.m_Index == TILE_STOP && Left.m_Flags == ROTATION_90))
 			return true;
-		if((m_pFront[TileBelow].m_Index == TILE_STOP && m_pFront[TileBelow].m_Flags == ROTATION_0) || (m_pFront[TileAbove].m_Index == TILE_STOP && m_pFront[TileAbove].m_Flags == ROTATION_180))
+		if((Below.m_Index == TILE_STOP && Below.m_Flags == ROTATION_0) || (Above.m_Index == TILE_STOP && Above.m_Flags == ROTATION_180))
 			return true;
 	}
-	if(m_pDoor)
+	if(!m_vDoors.empty())
 	{
-		if(m_pDoor[TileOnTheRight].m_Index == TILE_STOPA || m_pDoor[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pDoor[TileOnTheRight].m_Index == TILE_STOPS || m_pDoor[TileOnTheLeft].m_Index == TILE_STOPS)))
+		auto GetDoorOrEmpty = [this](int TileIdx) -> CDoorTile {
+			const CDoorTile *pDoor = FindDoor(TileIdx);
+			return pDoor ? *pDoor : CDoorTile{.m_Index = 0, .m_Flags = 0, .m_Number = 0};
+		};
+		CDoorTile Right = GetDoorOrEmpty(TileOnTheRight);
+		CDoorTile Left = GetDoorOrEmpty(TileOnTheLeft);
+		CDoorTile Below = GetDoorOrEmpty(TileBelow);
+		CDoorTile Above = GetDoorOrEmpty(TileAbove);
+		if(Right.m_Index == TILE_STOPA || Left.m_Index == TILE_STOPA || ((Right.m_Index == TILE_STOPS || Left.m_Index == TILE_STOPS)))
 			return true;
-		if(m_pDoor[TileBelow].m_Index == TILE_STOPA || m_pDoor[TileAbove].m_Index == TILE_STOPA || ((m_pDoor[TileBelow].m_Index == TILE_STOPS || m_pDoor[TileAbove].m_Index == TILE_STOPS) && m_pDoor[TileBelow].m_Flags | ROTATION_180 | ROTATION_0))
+		if(Below.m_Index == TILE_STOPA || Above.m_Index == TILE_STOPA || ((Below.m_Index == TILE_STOPS || Above.m_Index == TILE_STOPS) && Below.m_Flags | ROTATION_180 | ROTATION_0))
 			return true;
-		if((m_pDoor[TileOnTheRight].m_Index == TILE_STOP && m_pDoor[TileOnTheRight].m_Flags == ROTATION_270) || (m_pDoor[TileOnTheLeft].m_Index == TILE_STOP && m_pDoor[TileOnTheLeft].m_Flags == ROTATION_90))
+		if((Right.m_Index == TILE_STOP && Right.m_Flags == ROTATION_270) || (Left.m_Index == TILE_STOP && Left.m_Flags == ROTATION_90))
 			return true;
-		if((m_pDoor[TileBelow].m_Index == TILE_STOP && m_pDoor[TileBelow].m_Flags == ROTATION_0) || (m_pDoor[TileAbove].m_Index == TILE_STOP && m_pDoor[TileAbove].m_Flags == ROTATION_180))
+		if((Below.m_Index == TILE_STOP && Below.m_Flags == ROTATION_0) || (Above.m_Index == TILE_STOP && Above.m_Flags == ROTATION_180))
 			return true;
 	}
 	return false;
@@ -974,9 +1063,9 @@ int CCollision::GetTileIndex(int Index) const
 
 int CCollision::GetFrontTileIndex(int Index) const
 {
-	if(Index < 0 || !m_pFront)
+	if(Index < 0 || !m_FrontLayer.HasData())
 		return 0;
-	return m_pFront[Index].m_Index;
+	return m_FrontLayer.At(Index).m_Index;
 }
 
 int CCollision::GetTileFlags(int Index) const
@@ -988,9 +1077,9 @@ int CCollision::GetTileFlags(int Index) const
 
 int CCollision::GetFrontTileFlags(int Index) const
 {
-	if(Index < 0 || !m_pFront)
+	if(Index < 0 || !m_FrontLayer.HasData())
 		return 0;
-	return m_pFront[Index].m_Flags;
+	return m_FrontLayer.At(Index).m_Flags;
 }
 
 int CCollision::GetIndex(int Nx, int Ny) const
@@ -1007,8 +1096,8 @@ int CCollision::GetIndex(vec2 PrevPos, vec2 Pos) const
 		int Nx = std::clamp((int)Pos.x / 32, 0, m_Width - 1);
 		int Ny = std::clamp((int)Pos.y / 32, 0, m_Height - 1);
 
-		if((m_pTele) ||
-			(m_pSpeedup && m_pSpeedup[Ny * m_Width + Nx].m_Force > 0))
+		if(m_TeleLayer.HasData() ||
+			(m_SpeedupLayer.HasData() && m_SpeedupLayer.At(Nx, Ny).m_Force > 0))
 		{
 			return Ny * m_Width + Nx;
 		}
@@ -1021,8 +1110,8 @@ int CCollision::GetIndex(vec2 PrevPos, vec2 Pos) const
 		vec2 Tmp = mix(PrevPos, Pos, a);
 		int Nx = std::clamp((int)Tmp.x / 32, 0, m_Width - 1);
 		int Ny = std::clamp((int)Tmp.y / 32, 0, m_Height - 1);
-		if((m_pTele) ||
-			(m_pSpeedup && m_pSpeedup[Ny * m_Width + Nx].m_Force > 0))
+		if(m_TeleLayer.HasData() ||
+			(m_SpeedupLayer.HasData() && m_SpeedupLayer.At(Nx, Ny).m_Force > 0))
 		{
 			return Ny * m_Width + Nx;
 		}
@@ -1033,19 +1122,20 @@ int CCollision::GetIndex(vec2 PrevPos, vec2 Pos) const
 
 int CCollision::GetFrontIndex(int Nx, int Ny) const
 {
-	if(!m_pFront)
+	if(!m_FrontLayer.HasData())
 		return 0;
-	return m_pFront[Ny * m_Width + Nx].m_Index;
+	return m_FrontLayer.At(Nx, Ny).m_Index;
 }
 
 int CCollision::GetFrontTile(int x, int y) const
 {
-	if(!m_pFront)
+	if(!m_FrontLayer.HasData())
 		return 0;
 	int Nx = std::clamp(x / 32, 0, m_Width - 1);
 	int Ny = std::clamp(y / 32, 0, m_Height - 1);
-	if(m_pFront[Ny * m_Width + Nx].m_Index == TILE_DEATH || m_pFront[Ny * m_Width + Nx].m_Index == TILE_NOLASER)
-		return m_pFront[Ny * m_Width + Nx].m_Index;
+	const CTile &Tile = m_FrontLayer.At(Nx, Ny);
+	if(Tile.m_Index == TILE_DEATH || Tile.m_Index == TILE_NOLASER)
+		return Tile.m_Index;
 	else
 		return 0;
 }
@@ -1059,17 +1149,17 @@ int CCollision::Entity(int x, int y, int Layer) const
 	switch(Layer)
 	{
 	case LAYER_GAME:
-		return m_pTiles[Index].m_Index - ENTITY_OFFSET;
+		return m_pTiles ? m_pTiles[Index].m_Index - ENTITY_OFFSET : 0;
 	case LAYER_FRONT:
-		return m_pFront[Index].m_Index - ENTITY_OFFSET;
+		return m_FrontLayer.HasData() ? m_FrontLayer.At(Index).m_Index - ENTITY_OFFSET : 0;
 	case LAYER_SWITCH:
-		return m_pSwitch[Index].m_Type - ENTITY_OFFSET;
+		return m_SwitchLayer.HasData() ? m_SwitchLayer.At(Index).m_Type - ENTITY_OFFSET : 0;
 	case LAYER_TELE:
-		return m_pTele[Index].m_Type - ENTITY_OFFSET;
+		return m_TeleLayer.HasData() ? m_TeleLayer.At(Index).m_Type - ENTITY_OFFSET : 0;
 	case LAYER_SPEEDUP:
-		return m_pSpeedup[Index].m_Type - ENTITY_OFFSET;
+		return m_SpeedupLayer.HasData() ? m_SpeedupLayer.At(Index).m_Type - ENTITY_OFFSET : 0;
 	case LAYER_TUNE:
-		return m_pTune[Index].m_Type - ENTITY_OFFSET;
+		return m_TuneLayer.HasData() ? m_TuneLayer.At(Index).m_Type - ENTITY_OFFSET : 0;
 	default:
 		dbg_assert_failed("Invalid Layer: %d", Layer);
 	}
@@ -1085,26 +1175,47 @@ void CCollision::SetCollisionAt(float x, float y, int Index)
 
 void CCollision::SetDoorCollisionAt(float x, float y, unsigned char Type, unsigned char Flags, unsigned char Number)
 {
-	if(!m_pDoor)
-		return;
 	int Nx = std::clamp(round_to_int(x) / 32, 0, m_Width - 1);
 	int Ny = std::clamp(round_to_int(y) / 32, 0, m_Height - 1);
+	int Index = Ny * m_Width + Nx;
 
-	m_pDoor[Ny * m_Width + Nx].m_Index = Type;
-	m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
-	m_pDoor[Ny * m_Width + Nx].m_Number = Number;
+	auto It = std::lower_bound(m_vDoors.begin(), m_vDoors.end(), Index,
+		[](const std::pair<int, CDoorTile> &Elem, int Val) { return Elem.first < Val; });
+
+	if(Type == 0)
+	{
+		if(It != m_vDoors.end() && It->first == Index)
+		{
+			m_vDoors.erase(It);
+		}
+	}
+	else
+	{
+		if(It != m_vDoors.end() && It->first == Index)
+		{
+			It->second = CDoorTile{.m_Index = Type, .m_Flags = Flags, .m_Number = Number};
+		}
+		else
+		{
+			m_vDoors.insert(It, {Index, CDoorTile{.m_Index = Type, .m_Flags = Flags, .m_Number = Number}});
+		}
+	}
 }
 
 void CCollision::GetDoorTile(int Index, CDoorTile *pDoorTile) const
 {
-	if(!m_pDoor || Index < 0 || !m_pDoor[Index].m_Index)
-	{
-		pDoorTile->m_Index = 0;
-		pDoorTile->m_Flags = 0;
-		pDoorTile->m_Number = 0;
+	pDoorTile->m_Index = 0;
+	pDoorTile->m_Flags = 0;
+	pDoorTile->m_Number = 0;
+
+	if(Index < 0 || m_vDoors.empty())
 		return;
+
+	const CDoorTile *pDoor = FindDoor(Index);
+	if(pDoor && pDoor->m_Index != 0)
+	{
+		*pDoorTile = *pDoor;
 	}
-	*pDoorTile = m_pDoor[Index];
 }
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY)
@@ -1246,10 +1357,10 @@ int CCollision::IsTimeCheckpoint(int Index) const
 
 int CCollision::IsFrontTimeCheckpoint(int Index) const
 {
-	if(Index < 0 || !m_pFront)
+	if(Index < 0 || !m_FrontLayer.HasData())
 		return -1;
 
-	int z = m_pFront[Index].m_Index;
+	int z = m_FrontLayer.At(Index).m_Index;
 	if(z >= TILE_TIME_CHECKPOINT_FIRST && z <= TILE_TIME_CHECKPOINT_LAST)
 		return z - TILE_TIME_CHECKPOINT_FIRST;
 	return -1;

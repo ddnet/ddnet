@@ -7,16 +7,14 @@
 
 #include <engine/shared/protocol.h>
 
+#include <game/mapitems.h>
+#include <game/sparse_layer.h>
+
 #include <map>
+#include <utility>
 #include <vector>
 
-class CTile;
 class CLayers;
-class CTeleTile;
-class CSpeedupTile;
-class CSwitchTile;
-class CTuneTile;
-class CDoorTile;
 
 enum
 {
@@ -38,6 +36,7 @@ public:
 	~CCollision();
 
 	void Init(CLayers *pLayers);
+	void Init(CLayers *pLayers, bool UnloadRawData);
 	void Unload();
 	void FillAntibot(CAntibotMapData *pMapData) const;
 
@@ -115,11 +114,11 @@ public:
 
 	const CLayers *Layers() const { return m_pLayers; }
 	const CTile *GameLayer() const { return m_pTiles; }
-	const CTeleTile *TeleLayer() const { return m_pTele; }
-	const CSpeedupTile *SpeedupLayer() const { return m_pSpeedup; }
-	const CTile *FrontLayer() const { return m_pFront; }
-	const CSwitchTile *SwitchLayer() const { return m_pSwitch; }
-	const CTuneTile *TuneLayer() const { return m_pTune; }
+	const CSparseTileLayer<CTeleTile> *TeleLayer() const { return m_TeleLayer.HasData() ? &m_TeleLayer : nullptr; }
+	const CSparseTileLayer<CSpeedupTile> *SpeedupLayer() const { return m_SpeedupLayer.HasData() ? &m_SpeedupLayer : nullptr; }
+	const CSparseTileLayer<CTile> *FrontLayer() const { return m_FrontLayer.HasData() ? &m_FrontLayer : nullptr; }
+	const CSparseTileLayer<CSwitchTile> *SwitchLayer() const { return m_SwitchLayer.HasData() ? &m_SwitchLayer : nullptr; }
+	const CSparseTileLayer<CTuneTile> *TuneLayer() const { return m_TuneLayer.HasData() ? &m_TuneLayer : nullptr; }
 
 	int m_HighestSwitchNumber;
 
@@ -153,12 +152,14 @@ private:
 	int m_Height;
 
 	CTile *m_pTiles;
-	CTeleTile *m_pTele;
-	CSpeedupTile *m_pSpeedup;
-	CTile *m_pFront;
-	CSwitchTile *m_pSwitch;
-	CTuneTile *m_pTune;
-	CDoorTile *m_pDoor;
+	CSparseTileLayer<CTeleTile> m_TeleLayer;
+	CSparseTileLayer<CSpeedupTile> m_SpeedupLayer;
+	CSparseTileLayer<CTile> m_FrontLayer;
+	CSparseTileLayer<CSwitchTile> m_SwitchLayer;
+	CSparseTileLayer<CTuneTile> m_TuneLayer;
+	std::vector<std::pair<int, CDoorTile>> m_vDoors;
+
+	const CDoorTile *FindDoor(int Index) const;
 
 	// TILE_TELEIN
 	std::map<int, std::vector<vec2>> m_TeleIns;

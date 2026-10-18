@@ -46,6 +46,10 @@
 #include <game/version.h>
 
 #include <memory>
+
+#if defined(__GLIBC__)
+#include <malloc.h>
+#endif
 #include <vector>
 
 // Not thread-safe!
@@ -4138,7 +4142,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 	}
 
 	m_Layers.Init(Map(), false, false);
-	m_Collision.Init(&m_Layers);
+	m_Collision.Init(&m_Layers, true);
+#if defined(__GLIBC__)
+	malloc_trim(0);
+#endif
 	m_World.Init(&m_Collision, m_aTuningList);
 	m_MapBugs = CMapBugs::Create(Map()->BaseName(), Map()->Size(), Map()->Sha256());
 
@@ -4308,8 +4315,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 void CGameContext::CreateAllEntities(bool Initial)
 {
 	const CTile *pTiles = m_Collision.GameLayer();
-	const CTile *pFront = m_Collision.FrontLayer();
-	const CSwitchTile *pSwitch = m_Collision.SwitchLayer();
+	const CSparseTileLayer<CTile> *pFront = m_Collision.FrontLayer();
+	const CSparseTileLayer<CSwitchTile> *pSwitch = m_Collision.SwitchLayer();
 
 	for(int y = 0; y < m_Collision.GetHeight(); y++)
 	{
@@ -4353,7 +4360,8 @@ void CGameContext::CreateAllEntities(bool Initial)
 
 			if(pFront)
 			{
-				const int FrontIndex = pFront[Index].m_Index;
+				const CTile &FrontTile = pFront->At(x, y);
+				const int FrontIndex = FrontTile.m_Index;
 				if(FrontIndex == TILE_OLDLASER)
 				{
 					g_Config.m_SvOldLaser = 1;
@@ -4381,18 +4389,19 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(FrontIndex >= ENTITY_OFFSET)
 				{
-					m_pController->OnEntity(FrontIndex - ENTITY_OFFSET, x, y, LAYER_FRONT, pFront[Index].m_Flags, Initial);
+					m_pController->OnEntity(FrontIndex - ENTITY_OFFSET, x, y, LAYER_FRONT, FrontTile.m_Flags, Initial);
 				}
 			}
 
 			if(pSwitch)
 			{
-				const int SwitchType = pSwitch[Index].m_Type;
+				const CSwitchTile &SwitchTile = pSwitch->At(x, y);
+				const int SwitchType = SwitchTile.m_Type;
 				// TODO: Add off by default door here
 				// if(SwitchType == TILE_DOOR_OFF)
 				if(SwitchType >= ENTITY_OFFSET)
 				{
-					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number);
+					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, SwitchTile.m_Flags, Initial, SwitchTile.m_Number);
 				}
 			}
 		}
