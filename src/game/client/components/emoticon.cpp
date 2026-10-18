@@ -132,16 +132,12 @@ void CEmoticon::OnRender()
 	if(length(m_SelectorMouse) > 170.0f)
 		m_SelectorMouse = normalize(m_SelectorMouse) * 170.0f;
 
-	float SelectedAngle = angle(m_SelectorMouse) + 2 * pi / 24;
-	if(SelectedAngle < 0)
-		SelectedAngle += 2 * pi;
-
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
 	if(length(m_SelectorMouse) > 110.0f)
-		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * (float)NUM_EMOTICONS);
+		m_SelectedEmote = (int)(std::fmod(angle(m_SelectorMouse) + 2 * pi + pi / (int)NUM_EMOTICONS, 2 * pi) / (2 * pi) * (float)NUM_EMOTICONS);
 	else if(length(m_SelectorMouse) > 40.0f)
-		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * (float)NUM_EMOTES);
+		m_SelectedEyeEmote = (int)(std::fmod(angle(m_SelectorMouse) + 2 * pi + pi / (int)NUM_EMOTES, 2 * pi) / (2 * pi) * (float)NUM_EMOTES);
 
 	const vec2 ScreenCenter = Screen.Center();
 
