@@ -15,7 +15,8 @@
 
 CEmoticon::CEmoticon()
 {
-	CEmoticon::OnReset();
+	m_SelectorMouse = vec2(0.0f, 0.0f);
+	OnReset();
 }
 
 void CEmoticon::ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData)
