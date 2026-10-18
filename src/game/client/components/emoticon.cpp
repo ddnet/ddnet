@@ -4,6 +4,8 @@
 
 #include "chat.h"
 
+#include <base/dbg.h>
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
@@ -239,6 +241,8 @@ void CEmoticon::EyeEmote(int Emote)
 	case EMOTE_BLINK:
 		str_format(aBuf, sizeof(aBuf), "/emote blink %d", g_Config.m_ClEyeDuration);
 		break;
+	default:
+		dbg_assert_failed("Invalid Emote: %d", Emote);
 	}
 	GameClient()->m_Chat.SendChat(0, aBuf);
 }
