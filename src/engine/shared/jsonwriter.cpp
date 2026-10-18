@@ -215,7 +215,14 @@ void CJsonFileWriter::WriteInternal(const char *pStr, int Length)
 void CJsonStringWriter::WriteInternal(const char *pStr, int Length)
 {
 	dbg_assert(!m_RetrievedOutput, "Writer output has already been retrieved");
-	m_OutputString += Length < 0 ? pStr : std::string(pStr, Length);
+	if(Length < 0)
+	{
+		m_OutputString.append(pStr);
+	}
+	else
+	{
+		m_OutputString.append(pStr, Length);
+	}
 }
 
 std::string &&CJsonStringWriter::GetOutputString()
