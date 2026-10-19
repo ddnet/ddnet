@@ -618,8 +618,8 @@ void CServerBrowser::Filter()
 
 		if(Info.m_NumClients > 0)
 		{
-			auto Community = std::find_if(m_vCommunities.begin(), m_vCommunities.end(), [Info](const auto &Elem) {
-				return str_comp(Elem.Id(), Info.m_aCommunityId) == 0;
+			auto Community = std::find_if(m_vCommunities.begin(), m_vCommunities.end(), [pCommunityId = Info.m_aCommunityId](const auto &Elem) {
+				return str_comp(Elem.Id(), pCommunityId) == 0;
 			});
 			if(Community != m_vCommunities.end())
 			{
