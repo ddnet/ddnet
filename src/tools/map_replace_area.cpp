@@ -3,6 +3,7 @@
 #include <base/os.h>
 #include <base/str.h>
 
+#include <engine/map.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
@@ -30,19 +31,19 @@ public:
 };
 
 static bool ReplaceArea(IStorage *, const char[3][64], const float[][2][2]);
-static bool OpenMaps(IStorage *, const char[3][64], CDataFileReader[2], CDataFileWriter &);
-static void SaveOutputMap(CDataFileReader &, CDataFileWriter &);
-static bool CompareLayers(const char[3][64], CDataFileReader[2]);
-static void CompareGroups(const char[3][64], CDataFileReader[2]);
-static const CMapItemGroup *GetLayerGroup(CDataFileReader &, int);
+static bool OpenMaps(IStorage *, const char[3][64], IMap *[2], CDataFileWriter &);
+static void SaveOutputMap(IMap *, CDataFileWriter &);
+static bool CompareLayers(const char[3][64], IMap *[2]);
+static void CompareGroups(const char[3][64], IMap *[2]);
+static const CMapItemGroup *GetLayerGroup(IMap *, int);
 
-static void ReplaceAreaTiles(CDataFileReader[2], const float[][2][2], const CMapItemGroup *[2], CMapItemLayer *[2]);
+static void ReplaceAreaTiles(IMap *[2], const float[][2][2], const CMapItemGroup *[2], CMapItemLayer *[2]);
 static void RemoveDestinationTiles(CMapItemLayerTilemap *, CTile *, float[2][2]);
 static void ReplaceDestinationTiles(CMapItemLayerTilemap *[2], CTile *[2], float[2][2][2]);
 static bool AdaptVisibleAreas(const float[2][2][2], const CMapObject[2], float[2][2][2]);
 static bool AdaptReplaceableAreas(const float[2][2][2], const float[2][2][2], const CMapObject[2], float[2][2][2]);
 
-static void ReplaceAreaQuads(CDataFileReader[2], const float[][2][2], const CMapItemGroup *[2], CMapItemLayer *[2], int);
+static void ReplaceAreaQuads(IMap *[2], const float[][2][2], const CMapItemGroup *[2], CMapItemLayer *[2], int);
 static bool RemoveDestinationQuads(const float[2][2], const CQuad *, int, const CMapItemGroup *, CQuad *, int &);
 static bool InsertDestinationQuads(const float[2][2][2], const CQuad *, int, const CMapItemGroup *[2], CQuad *, int &);
 static bool AdaptVisiblePoint(const float[2][2][2], const float[2][2], const CMapObject[2], float[2]);
@@ -112,18 +113,20 @@ int main(int argc, const char *argv[])
 
 bool ReplaceArea(IStorage *pStorage, const char aaMapNames[3][64], const float aaaGameAreas[][2][2])
 {
-	CDataFileReader aInputMaps[2];
+	std::shared_ptr<IMap> pInputMap1 = CreateMap();
+	std::shared_ptr<IMap> pInputMap2 = CreateMap();
+	IMap *apInputMaps[2] = {pInputMap1.get(), pInputMap2.get()};
 	CDataFileWriter OutputMap;
 
-	if(!OpenMaps(pStorage, aaMapNames, aInputMaps, OutputMap))
+	if(!OpenMaps(pStorage, aaMapNames, apInputMaps, OutputMap))
 		return false;
-	if(!CompareLayers(aaMapNames, aInputMaps))
+	if(!CompareLayers(aaMapNames, apInputMaps))
 		return false;
-	CompareGroups(aaMapNames, aInputMaps);
+	CompareGroups(aaMapNames, apInputMaps);
 
 	int aLayersStart[2], LayersCount;
 	for(int i = 0; i < 2; i++)
-		aInputMaps[i].GetType(MAPITEMTYPE_LAYER, &aLayersStart[i], &LayersCount);
+		apInputMaps[i]->GetType(MAPITEMTYPE_LAYER, &aLayersStart[i], &LayersCount);
 
 	for(int i = 0; i < LayersCount; i++)
 	{
@@ -131,29 +134,29 @@ bool ReplaceArea(IStorage *pStorage, const char aaMapNames[3][64], const float a
 		CMapItemLayer *apItem[2];
 		for(int j = 0; j < 2; j++)
 		{
-			apLayerGroups[j] = GetLayerGroup(aInputMaps[j], i + 1);
-			apItem[j] = (CMapItemLayer *)aInputMaps[j].GetItem(aLayersStart[j] + i);
+			apLayerGroups[j] = GetLayerGroup(apInputMaps[j], i + 1);
+			apItem[j] = (CMapItemLayer *)apInputMaps[j]->GetItem(aLayersStart[j] + i);
 		}
 
 		if(!apLayerGroups[0] || !apLayerGroups[1])
 			continue;
 
 		if(apItem[0]->m_Type == LAYERTYPE_TILES)
-			ReplaceAreaTiles(aInputMaps, aaaGameAreas, apLayerGroups, apItem);
+			ReplaceAreaTiles(apInputMaps, aaaGameAreas, apLayerGroups, apItem);
 		else if(apItem[0]->m_Type == LAYERTYPE_QUADS)
-			ReplaceAreaQuads(aInputMaps, aaaGameAreas, apLayerGroups, apItem, aLayersStart[1] + i);
+			ReplaceAreaQuads(apInputMaps, aaaGameAreas, apLayerGroups, apItem, aLayersStart[1] + i);
 	}
 
-	SaveOutputMap(aInputMaps[1], OutputMap);
+	SaveOutputMap(apInputMaps[1], OutputMap);
 
 	return true;
 }
 
-bool OpenMaps(IStorage *pStorage, const char aaMapNames[3][64], CDataFileReader aInputMaps[2], CDataFileWriter &OutputMap)
+bool OpenMaps(IStorage *pStorage, const char aaMapNames[3][64], IMap *apInputMaps[2], CDataFileWriter &OutputMap)
 {
 	for(int i = 0; i < 2; i++)
 	{
-		if(!aInputMaps[i].Open(pStorage, aaMapNames[i], IStorage::TYPE_ABSOLUTE))
+		if(!apInputMaps[i]->Load(pStorage, aaMapNames[i], IStorage::TYPE_ABSOLUTE))
 		{
 			log_error(TOOL_NAME, "unable to open map '%s'", aaMapNames[i]);
 			return false;
@@ -169,13 +172,13 @@ bool OpenMaps(IStorage *pStorage, const char aaMapNames[3][64], CDataFileReader 
 	return true;
 }
 
-void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap)
+void SaveOutputMap(IMap *pInputMap, CDataFileWriter &OutputMap)
 {
-	for(int i = 0; i < InputMap.NumItems(); i++)
+	for(int i = 0; i < pInputMap->NumItems(); i++)
 	{
 		int Id, Type;
 		CUuid Uuid;
-		void *pItem = InputMap.GetItem(i, &Type, &Id, &Uuid);
+		void *pItem = pInputMap->GetItem(i, &Type, &Id, &Uuid);
 
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
@@ -186,25 +189,26 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap)
 		if(g_apNewItem[i])
 			pItem = g_apNewItem[i];
 
-		int Size = InputMap.GetItemSize(i);
+		int Size = pInputMap->GetItemSize(i);
 		OutputMap.AddItem(Type, Id, Size, pItem, &Uuid);
 	}
 
-	for(int i = 0; i < InputMap.NumData(); i++)
+	for(int i = 0; i < pInputMap->NumData(); i++)
 	{
-		void *pData = g_apNewData[i] ? g_apNewData[i] : InputMap.GetData(i);
-		int Size = g_aNewDataSize[i] ? g_aNewDataSize[i] : InputMap.GetDataSize(i);
+		void *pData = g_apNewData[i] ? g_apNewData[i] : pInputMap->GetData(i);
+		int Size = g_aNewDataSize[i] ? g_aNewDataSize[i] : pInputMap->GetDataSize(i);
 		OutputMap.AddData(Size, pData);
 	}
 
+	pInputMap->Unload();
 	OutputMap.Finish();
 }
 
-bool CompareLayers(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
+bool CompareLayers(const char aaMapNames[3][64], IMap *apInputMaps[2])
 {
 	int aStart[2], aNum[2];
 	for(int i = 0; i < 2; i++)
-		aInputMaps[i].GetType(MAPITEMTYPE_LAYER, &aStart[i], &aNum[i]);
+		apInputMaps[i]->GetType(MAPITEMTYPE_LAYER, &aStart[i], &aNum[i]);
 
 	if(aNum[0] != aNum[1])
 	{
@@ -218,7 +222,7 @@ bool CompareLayers(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 	{
 		CMapItemLayer *apItem[2];
 		for(int j = 0; j < 2; j++)
-			apItem[j] = (CMapItemLayer *)aInputMaps[j].GetItem(aStart[j] + i);
+			apItem[j] = (CMapItemLayer *)apInputMaps[j]->GetItem(aStart[j] + i);
 
 		if(apItem[0]->m_Type != apItem[1]->m_Type)
 		{
@@ -232,17 +236,17 @@ bool CompareLayers(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 	return true;
 }
 
-void CompareGroups(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
+void CompareGroups(const char aaMapNames[3][64], IMap *apInputMaps[2])
 {
 	int aStart[2], aNum[2];
 	for(int i = 0; i < 2; i++)
-		aInputMaps[i].GetType(MAPITEMTYPE_GROUP, &aStart[i], &aNum[i]);
+		apInputMaps[i]->GetType(MAPITEMTYPE_GROUP, &aStart[i], &aNum[i]);
 
 	for(int i = 0; i < std::max(aNum[0], aNum[1]); i++)
 	{
 		CMapItemGroup *apItem[2];
 		for(int j = 0; j < 2; j++)
-			apItem[j] = (CMapItemGroup *)aInputMaps[j].GetItem(aStart[j] + i);
+			apItem[j] = (CMapItemGroup *)apInputMaps[j]->GetItem(aStart[j] + i);
 
 		bool SameConfig = apItem[0]->m_ParallaxX == apItem[1]->m_ParallaxX && apItem[0]->m_ParallaxY == apItem[1]->m_ParallaxY && apItem[0]->m_OffsetX == apItem[1]->m_OffsetX && apItem[0]->m_OffsetY == apItem[1]->m_OffsetY && apItem[0]->m_UseClipping == apItem[1]->m_UseClipping && apItem[0]->m_ClipX == apItem[1]->m_ClipX && apItem[0]->m_ClipY == apItem[1]->m_ClipY && apItem[0]->m_ClipW == apItem[1]->m_ClipW && apItem[0]->m_ClipH == apItem[1]->m_ClipH;
 
@@ -251,14 +255,14 @@ void CompareGroups(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 	}
 }
 
-const CMapItemGroup *GetLayerGroup(CDataFileReader &InputMap, const int LayerNumber)
+const CMapItemGroup *GetLayerGroup(IMap *pInputMap, const int LayerNumber)
 {
 	int Start, Num;
-	InputMap.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
+	pInputMap->GetType(MAPITEMTYPE_GROUP, &Start, &Num);
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemGroup *pItem = (CMapItemGroup *)InputMap.GetItem(Start + i);
+		CMapItemGroup *pItem = (CMapItemGroup *)pInputMap->GetItem(Start + i);
 		if(LayerNumber >= pItem->m_StartLayer && LayerNumber <= pItem->m_StartLayer + pItem->m_NumLayers)
 			return pItem;
 	}
@@ -266,7 +270,7 @@ const CMapItemGroup *GetLayerGroup(CDataFileReader &InputMap, const int LayerNum
 	return nullptr;
 }
 
-void ReplaceAreaTiles(CDataFileReader aInputMaps[2], const float aaaGameAreas[][2][2], const CMapItemGroup *apLayerGroups[2], CMapItemLayer *apItem[2])
+void ReplaceAreaTiles(IMap *apInputMaps[2], const float aaaGameAreas[][2][2], const CMapItemGroup *apLayerGroups[2], CMapItemLayer *apItem[2])
 {
 	CMapItemLayerTilemap *apTilemap[2];
 	CTile *apTile[2];
@@ -276,7 +280,7 @@ void ReplaceAreaTiles(CDataFileReader aInputMaps[2], const float aaaGameAreas[][
 	for(int i = 0; i < 2; i++)
 	{
 		apTilemap[i] = (CMapItemLayerTilemap *)apItem[i];
-		apTile[i] = (CTile *)aInputMaps[i].GetData(apTilemap[i]->m_Data);
+		apTile[i] = (CTile *)apInputMaps[i]->GetData(apTilemap[i]->m_Data);
 		aObs[i] = CreateMapObject(apLayerGroups[i], 0, 0, apTilemap[i]->m_Width * 32, apTilemap[i]->m_Height * 32);
 	}
 
@@ -373,7 +377,7 @@ bool AdaptReplaceableAreas(const float aaaGameAreas[2][2][2], const float aaaVis
 	return true;
 }
 
-void ReplaceAreaQuads(CDataFileReader aInputMaps[2], const float aaaGameAreas[][2][2], const CMapItemGroup *apLayerGroups[2], CMapItemLayer *apItem[2], const int ItemNumber)
+void ReplaceAreaQuads(IMap *apInputMaps[2], const float aaaGameAreas[][2][2], const CMapItemGroup *apLayerGroups[2], CMapItemLayer *apItem[2], const int ItemNumber)
 {
 	CMapItemLayerQuads *apQuadLayer[2];
 	for(int i = 0; i < 2; i++)
@@ -381,7 +385,7 @@ void ReplaceAreaQuads(CDataFileReader aInputMaps[2], const float aaaGameAreas[][
 
 	CQuad *apQuads[3];
 	for(int i = 0; i < 2; i++)
-		apQuads[i] = (CQuad *)aInputMaps[i].GetDataSwapped(apQuadLayer[i]->m_Data);
+		apQuads[i] = (CQuad *)apInputMaps[i]->GetDataSwapped(apQuadLayer[i]->m_Data);
 
 	apQuads[2] = new CQuad[apQuadLayer[0]->m_NumQuads + apQuadLayer[1]->m_NumQuads];
 	int QuadsCounter = 0;
