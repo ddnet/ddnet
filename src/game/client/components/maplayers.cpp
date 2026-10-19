@@ -15,7 +15,6 @@ CMapLayers::CMapLayers(ERenderType Type, bool OnlineOnly)
 	// static parameters for ingame rendering
 	m_Params.m_RenderType = m_Type;
 	m_Params.m_RenderInvalidTiles = false;
-	m_Params.m_TileAndQuadBuffering = true;
 	m_Params.m_RenderTileBorder = true;
 }
 
