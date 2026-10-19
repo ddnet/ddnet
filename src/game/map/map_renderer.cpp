@@ -16,6 +16,11 @@ void CMapRenderer::Clear()
 	m_vpRenderLayers.clear();
 }
 
+void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional)
+{
+	Load(Type, pLayers, pMapImages, pEnvelopeEval, CallbackMapRendererInitOptional, true);
+}
+
 void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional, bool TileAndQuadBuffering)
 {
 	Clear();
