@@ -746,17 +746,29 @@ static void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR 
 
 void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) const
 {
-	const CServerInfo TmpInfo = pEntry->m_Info;
+	const TRISTATE Favorite = pEntry->m_Info.m_Favorite;
+	const TRISTATE FavoriteAllowPing = pEntry->m_Info.m_FavoriteAllowPing;
+	const int ServerIndex = pEntry->m_Info.m_ServerIndex;
+	const int NumAddresses = pEntry->m_Info.m_NumAddresses;
+	NETADDR aAddresses[MAX_SERVER_ADDRESSES];
+	mem_copy(aAddresses, pEntry->m_Info.m_aAddresses, sizeof(aAddresses));
+	char aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
+	char aCommunityCountry[CServerInfo::MAX_COMMUNITY_COUNTRY_LENGTH];
+	char aCommunityType[CServerInfo::MAX_COMMUNITY_TYPE_LENGTH];
+	str_copy(aCommunityId, pEntry->m_Info.m_aCommunityId);
+	str_copy(aCommunityCountry, pEntry->m_Info.m_aCommunityCountry);
+	str_copy(aCommunityType, pEntry->m_Info.m_aCommunityType);
+
 	pEntry->m_Info = Info;
-	pEntry->m_Info.m_Favorite = TmpInfo.m_Favorite;
-	pEntry->m_Info.m_FavoriteAllowPing = TmpInfo.m_FavoriteAllowPing;
-	pEntry->m_Info.m_ServerIndex = TmpInfo.m_ServerIndex;
-	mem_copy(pEntry->m_Info.m_aAddresses, TmpInfo.m_aAddresses, sizeof(pEntry->m_Info.m_aAddresses));
-	pEntry->m_Info.m_NumAddresses = TmpInfo.m_NumAddresses;
+	pEntry->m_Info.m_Favorite = Favorite;
+	pEntry->m_Info.m_FavoriteAllowPing = FavoriteAllowPing;
+	pEntry->m_Info.m_ServerIndex = ServerIndex;
+	mem_copy(pEntry->m_Info.m_aAddresses, aAddresses, sizeof(pEntry->m_Info.m_aAddresses));
+	pEntry->m_Info.m_NumAddresses = NumAddresses;
 	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
-	str_copy(pEntry->m_Info.m_aCommunityId, TmpInfo.m_aCommunityId);
-	str_copy(pEntry->m_Info.m_aCommunityCountry, TmpInfo.m_aCommunityCountry);
-	str_copy(pEntry->m_Info.m_aCommunityType, TmpInfo.m_aCommunityType);
+	str_copy(pEntry->m_Info.m_aCommunityId, aCommunityId);
+	str_copy(pEntry->m_Info.m_aCommunityCountry, aCommunityCountry);
+	str_copy(pEntry->m_Info.m_aCommunityType, aCommunityType);
 	UpdateServerRank(&pEntry->m_Info);
 	pEntry->m_Info.m_GametypeColor = CServerInfo::GametypeColor(pEntry->m_Info.m_aGameType);
 
