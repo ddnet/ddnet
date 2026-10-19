@@ -294,7 +294,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 	for(int i = 0; i < NumServers; i++)
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(i);
-		const CCommunity *pCommunity = ServerBrowser()->Community(pItem->m_aCommunityId);
 
 		if(vpServerBrowserUiElements[i] == nullptr)
 		{
@@ -347,6 +346,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 			}
 			else if(Id == COL_COMMUNITY)
 			{
+				const CCommunity *pCommunity = ServerBrowser()->Community(pItem->m_aCommunityId);
 				if(pCommunity != nullptr)
 				{
 					const CCommunityIcon *pIcon = m_CommunityIcons.Find(pCommunity->Id());
