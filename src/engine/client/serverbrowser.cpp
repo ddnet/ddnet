@@ -605,6 +605,8 @@ void CServerBrowser::Filter()
 			}
 		}
 
+		// We need to update the friends even if the server is filtered,
+		// because friends are shown regardless of the filter.
 		UpdateServerFriends(&Info);
 
 		if(!Filtered)
