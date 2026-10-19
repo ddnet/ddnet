@@ -1226,14 +1226,14 @@ void CServerBrowser::UpdateFromHttp()
 
 	for(int i = 0; i < NumServers; i++)
 	{
-		CServerInfo Info = m_pHttp->Server(i);
+		const CServerInfo &Info = m_pHttp->Server(i);
 		if(!Want(Info.m_aAddresses, Info.m_NumAddresses))
 		{
 			continue;
 		}
-		UpdateServerLatency(&Info, OwnLocation);
 		CServerEntry *pEntry = Add(Info.m_aAddresses, Info.m_NumAddresses);
 		SetInfo(pEntry, Info);
+		UpdateServerLatency(&pEntry->m_Info, OwnLocation);
 		pEntry->m_RequestIgnoreInfo = true;
 	}
 
