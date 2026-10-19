@@ -7,6 +7,8 @@
 
 #include <game/map/envelope_manager.h>
 
+#include <utility>
+
 const int LAYER_DEFAULT_TILESET = -1;
 
 void CMapRenderer::Clear()
@@ -18,7 +20,7 @@ void CMapRenderer::Clear()
 
 void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional)
 {
-	Load(Type, pLayers, pMapImages, pEnvelopeEval, CallbackMapRendererInitOptional, true);
+	Load(Type, pLayers, pMapImages, pEnvelopeEval, std::move(CallbackMapRendererInitOptional), true);
 }
 
 void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional, bool TileAndQuadBuffering)
