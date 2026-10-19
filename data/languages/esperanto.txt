@@ -1773,10 +1773,16 @@ Initializing map logic
 Sending initial client info
 == 
 
+Hold Shift to be more precise.
+== 
+
 Auto-sync player camera
 == 
 
 Match %d of %d
+== 
+
+Dummy is not connected
 == 
 
 [Important alert message]
@@ -2499,6 +2505,12 @@ Toggle dyncam
 Hammerfly dummy
 == 
 
+Teleport to cursor
+== 
+
+Teleport dummy to cursor
+== 
+
 Scoreboard cursor
 == 
 
@@ -2512,6 +2524,9 @@ Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Practice
 == 
 
 Controller jitter tolerance
@@ -2682,10 +2697,10 @@ Loading race demo files
 Super
 == 
 
-'%s' not bound.
+not bound
 == 
 
-Press '%s' to show cursor.
+Show cursor
 == 
 
 Auto

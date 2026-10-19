@@ -1433,6 +1433,9 @@ Team successfully saved by %s. The database connection failed, using generated s
 Save failed!
 == 
 
+Hold Shift to be more precise.
+== 
+
 Auto-sync player camera
 == 
 
@@ -1487,6 +1490,9 @@ Loading commands…
 == 
 
 Loading maps…
+== 
+
+Dummy is not connected
 == 
 
 Multi-View
@@ -2508,6 +2514,12 @@ Set all to Rifle
 Open the directory to add custom assets
 == 
 
+Teleport to cursor
+== 
+
+Teleport dummy to cursor
+== 
+
 Scoreboard cursor
 == 
 
@@ -2515,6 +2527,9 @@ Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Practice
 == 
 
 Custom
@@ -2652,10 +2667,10 @@ Download
 Team %d (%d/%d)
 == 
 
-'%s' not bound.
+not bound
 == 
 
-Press '%s' to show cursor.
+Show cursor
 == 
 
 Unmute

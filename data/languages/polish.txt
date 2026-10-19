@@ -2640,6 +2640,12 @@ Always predict frozen players
 No country flags match your filter criteria
 == Żadna flaga nie odpowiada twoim kryteriom
 
+Hold Shift to be more precise.
+== 
+
+Dummy is not connected
+== 
+
 [Important alert message]
 Tap to dismiss…
 == 
@@ -2700,11 +2706,20 @@ The extra menu with the given number is activated.
 Credits
 == 
 
+Teleport to cursor
+== 
+
+Teleport dummy to cursor
+== 
+
+Practice
+== 
+
 Join
 == 
 
-'%s' not bound.
+not bound
 == 
 
-Press '%s' to show cursor.
+Show cursor
 == 
