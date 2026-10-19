@@ -195,7 +195,17 @@ protected:
 			}
 		};
 
-		std::vector<CTileVisual> m_vTilesOfLayer;
+		class CRowVisual
+		{
+		public:
+			uint32_t m_TileOffset = 0;
+			uint32_t m_TileCount = 0;
+			uint16_t m_MinX = 0;
+			uint16_t m_MaxX = 0;
+		};
+
+		std::vector<CRowVisual> m_vRows;
+		std::vector<uint16_t> m_vDrawnX;
 
 		CTileVisual m_BorderTopLeft;
 		CTileVisual m_BorderTopRight;

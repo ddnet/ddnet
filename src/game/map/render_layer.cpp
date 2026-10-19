@@ -140,7 +140,8 @@ bool CRenderLayerTile::CTileLayerVisuals::Init(unsigned int Width, unsigned int 
 		if(Width >= std::numeric_limits<std::ptrdiff_t>::max() || Height >= std::numeric_limits<std::ptrdiff_t>::max())
 			return false;
 
-	m_vTilesOfLayer.resize((size_t)Height * (size_t)Width);
+	m_vRows.resize(Height);
+	m_vDrawnX.clear();
 
 	m_vBorderTop.resize(Width);
 	m_vBorderBottom.resize(Width);
@@ -283,9 +284,11 @@ CRenderLayerTile::CRenderLayerTile(int GroupId, int LayerId, int Flags, CMapItem
 
 void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals)
 {
-	CTileLayerVisuals &Visuals = pTileLayerVisuals ? *pTileLayerVisuals : m_VisualTiles.value();
-	if(Visuals.m_BufferContainerIndex == -1)
+	CTileLayerVisuals *pVisuals = pTileLayerVisuals ? pTileLayerVisuals : (m_VisualTiles.has_value() ? &m_VisualTiles.value() : nullptr);
+	if(!pVisuals || pVisuals->m_BufferContainerIndex == -1)
 		return; // no visuals were created
+
+	CTileLayerVisuals &Visuals = *pVisuals;
 
 	CScreenRect ScreenRect = Graphics()->GetScreen();
 
@@ -305,51 +308,112 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 		// make sure we have any width and height
 		if(X0 < X1 && Y0 < Y1)
 		{
-			// render all visible rows directly, because their start and end are are not offscreen
+			// render all visible rows directly, because their start and end are not offscreen
 			if(X0 == 0 && X1 == (size_t)Visuals.m_Width)
 			{
-				size_t StartIndex = Y0 * Visuals.m_Width;
-				size_t EndIndex = Y1 * Visuals.m_Width - 1;
-				const auto &Start = Visuals.m_vTilesOfLayer[StartIndex];
-				const auto &End = Visuals.m_vTilesOfLayer[EndIndex];
-				unsigned int NumVertices = ((End.IndexBufferByteOffset() - Start.IndexBufferByteOffset()) / sizeof(unsigned int)) + (End.DoDraw() ? 6lu : 0lu);
-
-				if(NumVertices)
+				size_t FirstTileIndex = 0;
+				size_t LastTileIndex = 0;
+				bool Found = false;
+				for(size_t RowIndex = Y0; RowIndex < Y1; ++RowIndex)
 				{
-					offset_ptr_size ByteOffset = (offset_ptr_size)Start.IndexBufferByteOffset();
-					Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, &ByteOffset, &NumVertices, 1);
+					if(Visuals.m_vRows[RowIndex].m_TileCount > 0)
+					{
+						FirstTileIndex = Visuals.m_vRows[RowIndex].m_TileOffset;
+						Found = true;
+						break;
+					}
+				}
+				if(Found)
+				{
+					for(size_t RowIndex = Y1; RowIndex > Y0; --RowIndex)
+					{
+						if(Visuals.m_vRows[RowIndex - 1].m_TileCount > 0)
+						{
+							LastTileIndex = Visuals.m_vRows[RowIndex - 1].m_TileOffset + Visuals.m_vRows[RowIndex - 1].m_TileCount;
+							break;
+						}
+					}
+					unsigned int NumVertices = (unsigned int)(LastTileIndex - FirstTileIndex) * 6;
+					if(NumVertices > 0)
+					{
+						offset_ptr_size ByteOffset = (offset_ptr_size)(FirstTileIndex * (6 * sizeof(unsigned int)));
+						Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, &ByteOffset, &NumVertices, 1);
+					}
 				}
 			}
 			// render slices of rows
 			else
 			{
-				// create the indice buffers we want to draw
-				std::vector<char *> vpIndexOffsets;
-				std::vector<unsigned int> vDrawCounts;
+				// Thread-local scratch vectors to avoid heap allocation thrashing every frame
+				static thread_local std::vector<char *> s_vpIndexOffsets;
+				static thread_local std::vector<unsigned int> s_vDrawCounts;
 
-				unsigned long long Reserve = Y1 - Y0 + 1;
+				s_vpIndexOffsets.clear();
+				s_vDrawCounts.clear();
 
-				vpIndexOffsets.reserve(Reserve);
-				vDrawCounts.reserve(Reserve);
+				const size_t Reserve = Y1 - Y0 + 1;
+				if(s_vpIndexOffsets.capacity() < Reserve)
+				{
+					s_vpIndexOffsets.reserve(Reserve);
+					s_vDrawCounts.reserve(Reserve);
+				}
+
+				size_t ExpectedNextTileIndex = 0;
+
 				for(size_t RowIndex = Y0; RowIndex < Y1; ++RowIndex)
 				{
-					size_t StartIndex = RowIndex * Visuals.m_Width + X0;
-					size_t EndIndex = RowIndex * Visuals.m_Width + (X1 - 1);
-					const auto &Start = Visuals.m_vTilesOfLayer[StartIndex];
-					const auto &End = Visuals.m_vTilesOfLayer[EndIndex];
-					dbg_assert(End.IndexBufferByteOffset() >= Start.IndexBufferByteOffset(), "Tile offsets are not monotone.");
-					unsigned int NumVertices = ((End.IndexBufferByteOffset() - Start.IndexBufferByteOffset()) / sizeof(unsigned int)) + (End.DoDraw() ? 6lu : 0lu);
+					const auto &Row = Visuals.m_vRows[RowIndex];
+					if(Row.m_TileCount == 0)
+						continue;
 
-					if(NumVertices)
+					// O(1) Fast-reject: row is entirely outside [X0, X1) without accessing m_vDrawnX
+					if(Row.m_MinX >= X1 || Row.m_MaxX < X0)
+						continue;
+
+					size_t TileIndex = 0;
+					size_t Count = 0;
+
+					// O(1) Fast-accept: entire row is visible on screen without accessing m_vDrawnX
+					if(Row.m_MinX >= X0 && Row.m_MaxX < X1)
 					{
-						vpIndexOffsets.push_back((offset_ptr_size)Start.IndexBufferByteOffset());
-						vDrawCounts.push_back(NumVertices);
+						TileIndex = Row.m_TileOffset;
+						Count = Row.m_TileCount;
+					}
+					else
+					{
+						const uint16_t *pBegin = &Visuals.m_vDrawnX[Row.m_TileOffset];
+						const uint16_t *pEnd = pBegin + Row.m_TileCount;
+
+						const uint16_t *pStart = (Row.m_MinX >= X0) ? pBegin : std::lower_bound(pBegin, pEnd, (uint16_t)X0);
+						const uint16_t *pStop = (Row.m_MaxX < X1) ? pEnd : std::lower_bound(pStart, pEnd, (uint16_t)X1);
+
+						Count = (size_t)(pStop - pStart);
+						TileIndex = Row.m_TileOffset + (size_t)(pStart - pBegin);
+					}
+
+					if(Count > 0)
+					{
+						const unsigned int NumVertices = (unsigned int)(Count * 6);
+
+						// Merge contiguous ranges in GPU index buffer across adjacent rows
+						if(!s_vpIndexOffsets.empty() && TileIndex == ExpectedNextTileIndex)
+						{
+							s_vDrawCounts.back() += NumVertices;
+						}
+						else
+						{
+							offset_ptr_size ByteOffset = (offset_ptr_size)(TileIndex * (6 * sizeof(unsigned int)));
+							s_vpIndexOffsets.push_back(ByteOffset);
+							s_vDrawCounts.push_back(NumVertices);
+						}
+
+						ExpectedNextTileIndex = TileIndex + Count;
 					}
 				}
 
-				if(!vpIndexOffsets.empty())
+				if(!s_vpIndexOffsets.empty())
 				{
-					Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, vpIndexOffsets.data(), vDrawCounts.data(), vpIndexOffsets.size());
+					Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, s_vpIndexOffsets.data(), s_vDrawCounts.data(), s_vpIndexOffsets.size());
 				}
 			}
 		}
@@ -464,6 +528,8 @@ void CRenderLayerTile::RenderTileBorder(const ColorRGBA &Color, int BorderX0, in
 
 void CRenderLayerTile::RenderKillTileBorder(const ColorRGBA &Color)
 {
+	if(!m_VisualTiles.has_value())
+		return;
 	CTileLayerVisuals &Visuals = m_VisualTiles.value();
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; // no visuals were created
@@ -537,7 +603,7 @@ void CRenderLayerTile::Render(const CRenderLayerParams &Params)
 {
 	UseTexture(GetTexture());
 	ColorRGBA Color = GetRenderColor(Params);
-	if(Graphics()->IsTileBufferingEnabled() && Params.m_TileAndQuadBuffering)
+	if(Graphics()->IsTileBufferingEnabled() && m_TileAndQuadBuffering)
 	{
 		RenderTileLayerWithTileBuffer(Color, Params);
 	}
@@ -754,6 +820,8 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 		return;
 	}
 
+	Visuals.m_vDrawnX.reserve(NumDrawnTiles);
+
 	auto WriteTile = [&](size_t TileOffsetIndex, unsigned char TileIndex, unsigned char Flags, int TileX, int TileY, bool SpeedupTile, int AngleRotate, const ivec2 &Offset = ivec2{0, 0}, int Scale = 32) {
 		dbg_assert(TileOffsetIndex < NumTotalTiles, "TileOffsetIndex exceeds NumTotalTiles");
 		if(TileOffsetIndex >= NumTotalTiles)
@@ -786,23 +854,29 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	size_t CurNormalTile = 0;
 	for(int TileY = 0; TileY < Height; ++TileY)
 	{
+		const uint32_t RowStartOffset = (uint32_t)Visuals.m_vDrawnX.size();
 		for(int TileX = 0; TileX < Width; ++TileX)
 		{
 			unsigned char Index = 0;
 			unsigned char Flags = 0;
 			int AngleRotate = -1;
 			GetTileData(&Index, &Flags, &AngleRotate, TileX, TileY, CurOverlay);
-
-			Visuals.m_vTilesOfLayer[TileY * Width + TileX].SetIndexBufferByteOffset((offset_ptr32)CurNormalTile);
 			if(Index > 0)
 			{
-				Visuals.m_vTilesOfLayer[TileY * Width + TileX].Draw(true);
 				WriteTile(CurNormalTile++, Index, Flags, TileX, TileY, AddAsSpeedup, AngleRotate);
+				Visuals.m_vDrawnX.push_back((uint16_t)TileX);
 			}
+		}
+		Visuals.m_vRows[TileY].m_TileOffset = RowStartOffset;
+		Visuals.m_vRows[TileY].m_TileCount = (uint32_t)(Visuals.m_vDrawnX.size() - RowStartOffset);
+		if(Visuals.m_vRows[TileY].m_TileCount > 0)
+		{
+			Visuals.m_vRows[TileY].m_MinX = Visuals.m_vDrawnX[RowStartOffset];
+			Visuals.m_vRows[TileY].m_MaxX = Visuals.m_vDrawnX.back();
 		}
 	}
 
-	size_t CurKillTile = CurNormalTile;
+	size_t CurKillTile = NumDrawnTiles;
 	if(IsGameLayer)
 	{
 		Visuals.m_BorderKillTile.SetIndexBufferByteOffset((offset_ptr32)CurKillTile);
@@ -817,33 +891,33 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 		int AngleRotate = -1;
 
 		GetTileData(&Index, &Flags, &AngleRotate, 0, 0, CurOverlay);
-		Visuals.m_BorderTopLeft.SetIndexBufferByteOffset((offset_ptr32)CurCorner);
 		if(Index > 0)
 		{
+			Visuals.m_BorderTopLeft.SetIndexBufferByteOffset((offset_ptr32)CurCorner);
 			Visuals.m_BorderTopLeft.Draw(true);
 			WriteTile(CurCorner++, Index, Flags, 0, 0, AddAsSpeedup, AngleRotate, ivec2{-32, -32});
 		}
 
 		GetTileData(&Index, &Flags, &AngleRotate, 0, Height - 1, CurOverlay);
-		Visuals.m_BorderBottomLeft.SetIndexBufferByteOffset((offset_ptr32)CurCorner);
 		if(Index > 0)
 		{
+			Visuals.m_BorderBottomLeft.SetIndexBufferByteOffset((offset_ptr32)CurCorner);
 			Visuals.m_BorderBottomLeft.Draw(true);
 			WriteTile(CurCorner++, Index, Flags, 0, 0, AddAsSpeedup, AngleRotate, ivec2{-32, 0});
 		}
 
 		GetTileData(&Index, &Flags, &AngleRotate, Width - 1, 0, CurOverlay);
-		Visuals.m_BorderTopRight.SetIndexBufferByteOffset((offset_ptr32)CurCorner);
 		if(Index > 0)
 		{
+			Visuals.m_BorderTopRight.SetIndexBufferByteOffset((offset_ptr32)CurCorner);
 			Visuals.m_BorderTopRight.Draw(true);
 			WriteTile(CurCorner++, Index, Flags, 0, 0, AddAsSpeedup, AngleRotate, ivec2{0, -32});
 		}
 
 		GetTileData(&Index, &Flags, &AngleRotate, Width - 1, Height - 1, CurOverlay);
-		Visuals.m_BorderBottomRight.SetIndexBufferByteOffset((offset_ptr32)CurCorner);
 		if(Index > 0)
 		{
+			Visuals.m_BorderBottomRight.SetIndexBufferByteOffset((offset_ptr32)CurCorner);
 			Visuals.m_BorderBottomRight.Draw(true);
 			WriteTile(CurCorner++, Index, Flags, 0, 0, AddAsSpeedup, AngleRotate, ivec2{0, 0});
 		}
@@ -956,6 +1030,19 @@ void CRenderLayerTile::Unload()
 void CRenderLayerTile::CTileLayerVisuals::Unload()
 {
 	Graphics()->DeleteBufferContainer(m_BufferContainerIndex);
+	m_BufferContainerIndex = -1;
+	m_vRows.clear();
+	m_vRows.shrink_to_fit();
+	m_vDrawnX.clear();
+	m_vDrawnX.shrink_to_fit();
+	m_vBorderTop.clear();
+	m_vBorderTop.shrink_to_fit();
+	m_vBorderBottom.clear();
+	m_vBorderBottom.shrink_to_fit();
+	m_vBorderLeft.clear();
+	m_vBorderLeft.shrink_to_fit();
+	m_vBorderRight.clear();
+	m_vBorderRight.shrink_to_fit();
 }
 
 int CRenderLayerTile::GetDataIndex() const
