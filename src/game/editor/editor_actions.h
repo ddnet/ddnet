@@ -410,12 +410,14 @@ class CEditorActionEnvelopeAdd : public IEditorAction
 {
 public:
 	CEditorActionEnvelopeAdd(CEditorMap *pMap, CEnvelope::EType EnvelopeType);
+	CEditorActionEnvelopeAdd(CEditorMap *pMap, std::shared_ptr<CEnvelope> pEnvelope);
 
 	void Undo() override;
 	void Redo() override;
 
 private:
 	CEnvelope::EType m_EnvelopeType;
+	std::shared_ptr<CEnvelope> m_pEnvelope;
 	int m_PreviousSelectedEnvelope;
 };
 
