@@ -16,6 +16,8 @@ void CLayers::Init(IMap *pMap, bool GameOnly, bool InitializeTilemapSkip)
 	Unload();
 
 	m_pMap = pMap;
+	// The collision and rendering keep raw pointers into the layer data, so it must stay loaded.
+	m_pMap->PinLayerData();
 	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 
