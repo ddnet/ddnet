@@ -462,15 +462,9 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 
 	// load map info
 	{
-		int Start, Num;
-		pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
-		for(int i = Start; i < Start + Num; i++)
+		const CMapItemInfoSettings *pItem = static_cast<const CMapItemInfoSettings *>(pMap->FindItem(MAPITEMTYPE_INFO, 0));
+		if(pItem != nullptr)
 		{
-			int ItemId;
-			CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &ItemId);
-			if(ItemId != 0)
-				continue;
-
 			const auto &&ReadStringInfo = [&](int Index, char *pBuffer, size_t BufferSize, const char *pErrorContext) {
 				const char *pStr = pMap->GetDataString(Index);
 				if(pStr == nullptr)
@@ -495,11 +489,13 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			if(!vpSettings.has_value())
 			{
 				ErrorHandler("Error: Failed to read settings from map info.");
-				break;
 			}
-			for(const char *pSetting : vpSettings.value())
+			else
 			{
-				m_vSettings.emplace_back(pSetting);
+				for(const char *pSetting : vpSettings.value())
+				{
+					m_vSettings.emplace_back(pSetting);
+				}
 			}
 		}
 	}
