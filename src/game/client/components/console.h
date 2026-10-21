@@ -173,6 +173,7 @@ class CGameConsole : public CComponent
 	static constexpr ColorRGBA ms_SearchSelectedColor = ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f);
 
 	int PossibleMaps(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr);
+	void PossibleSettings(const char *pStr, int FlagMask, IConsole::FPossibleCallback pfnCallback, void *pUser);
 
 	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
