@@ -2691,35 +2691,35 @@ No country flags match your filter criteria
 == Keine Länderflaggen stimmen mit dem Filter überein
 
 Hold Shift to be more precise.
-== 
+== Halte Shift gedrückt, um genauer zu navigieren.
 
 Dummy is not connected
-== 
+== Dummy ist nicht verbunden
 
 [Important alert message]
 Tap to dismiss…
-== 
+== Tippen zum Schließen …
 
 Initializing layers
-== 
+== Darstellungsebenen werden vorbereitet
 
 Credits
-== 
+== Mitwirkende
 
 Teleport to cursor
-== 
+== Zum Mauszeiger teleportieren
 
 Teleport dummy to cursor
-== 
+== Dummy zum Mauszeiger teleportieren
 
 Practice
-== 
+== Training
 
 Join
-== 
+== Beitreten
 
 not bound
-== 
+== nicht gebunden
 
 Show cursor
-== 
+== Zeige Mauszeiger
