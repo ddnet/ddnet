@@ -2661,6 +2661,12 @@ Mute emoticons
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
+Hold Shift to be more precise.
+== 
+
+Dummy is not connected
+== 
+
 [Important alert message]
 Tap to dismiss…
 == 
@@ -2680,6 +2686,15 @@ Virtual joystick which only aims and moves the mouse pointer relatively.
 == 
 
 Credits
+== 
+
+Teleport to cursor
+== 
+
+Teleport dummy to cursor
+== 
+
+Practice
 == 
 
 [AntiPing: predict other players]
@@ -2703,8 +2718,8 @@ No country flags match your filter criteria
 Join
 == 
 
-'%s' not bound.
+not bound
 == 
 
-Press '%s' to show cursor.
+Show cursor
 == 

@@ -1390,6 +1390,9 @@ Team successfully saved by %s. The database connection failed, using generated s
 Save failed!
 == 
 
+Hold Shift to be more precise.
+== 
+
 Auto-sync player camera
 == 
 
@@ -1444,6 +1447,9 @@ Loading commands…
 == 
 
 Loading maps…
+== 
+
+Dummy is not connected
 == 
 
 [Spectating]
@@ -2471,6 +2477,12 @@ Converse
 Chat command
 == 
 
+Teleport to cursor
+== 
+
+Teleport dummy to cursor
+== 
+
 Scoreboard cursor
 == 
 
@@ -2481,6 +2493,9 @@ Controller
 == 
 
 Dummy
+== 
+
+Practice
 == 
 
 Custom
@@ -2652,10 +2667,10 @@ Super
 Team %d (%d/%d)
 == 
 
-'%s' not bound.
+not bound
 == 
 
-Press '%s' to show cursor.
+Show cursor
 == 
 
 Unmute
