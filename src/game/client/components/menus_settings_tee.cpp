@@ -315,7 +315,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(DoButton_Menu(&s_aEyeButtons[CurrentEyeEmote], "", 0, &Button, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.0f, EyeButtonColor))
 			{
 				*pEmote = CurrentEyeEmote;
-				if((int)m_Dummy == g_Config.m_ClDummy)
+				if(GameClient()->m_GameInfo.m_AllowEyeWheel && (int)m_Dummy == g_Config.m_ClDummy)
 					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
 			}
 			Ui()->DoToolTip(&s_aEyeButtons[CurrentEyeEmote], &Button, Localize("Choose default eyes when joining a server"));
