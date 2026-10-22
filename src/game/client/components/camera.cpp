@@ -65,7 +65,7 @@ float CCamera::ZoomProgress(float CurrentTime) const
 void CCamera::ScaleZoom(float Factor)
 {
 	float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
-	ChangeZoom(CurrentTarget * Factor, GameClient()->m_Snap.m_SpecInfo.m_Active && GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
+	ChangeZoom(CurrentTarget * Factor, GameClient()->m_Snap.m_SpecInfo.m_Active && GameClient()->m_MultiView.IsActivated() ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
 
 	m_AutoSpecCamera = false;
 }
@@ -116,7 +116,7 @@ void CCamera::ResetAutoSpecCamera()
 void CCamera::UpdateCamera()
 {
 	// use hardcoded smooth camera for spectating unless player explicitly turn it off
-	bool CanUseCameraInfo = !GameClient()->m_MultiViewActivated;
+	bool CanUseCameraInfo = !GameClient()->m_MultiView.IsActivated();
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		// only follow mode have the correct camera info
@@ -156,7 +156,7 @@ void CCamera::UpdateCamera()
 	else if(!CanUseCameraInfo && CurrentZoom != m_UserZoomTarget)
 	{
 		// stop spectating player
-		if(!GameClient()->m_MultiViewActivated)
+		if(!GameClient()->m_MultiView.IsActivated())
 			ChangeZoom(m_UserZoomTarget, g_Config.m_ClSmoothZoomTime, false);
 		m_AutoSpecCameraZooming = false;
 
@@ -368,7 +368,7 @@ void CCamera::OnRender()
 			(m_CameraSmoothing && m_CameraSmoothingTarget != m_Center)) && // the target is moving during camera smoothing
 		!(!m_WasSpectating && m_Center != m_PrevCenter) && // dont smooth when starting to spectate
 		m_CamType != CAMTYPE_SPEC &&
-		!GameClient()->m_MultiViewActivated)
+		!GameClient()->m_MultiView.IsActivated())
 	{
 		float Now = Client()->LocalTime();
 		if(!m_CameraSmoothing)
@@ -439,8 +439,8 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->ScaleZoom(CCamera::ZoomStepsToValue(ZoomAmount));
 
-	if(pSelf->GameClient()->m_MultiViewActivated)
-		pSelf->GameClient()->m_MultiViewPersonalZoom += ZoomAmount;
+	if(pSelf->GameClient()->m_MultiView.IsActivated())
+		pSelf->GameClient()->m_MultiView.AddPersonalZoom(ZoomAmount);
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 {
@@ -453,8 +453,8 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->ScaleZoom(CCamera::ZoomStepsToValue(ZoomAmount));
 
-	if(pSelf->GameClient()->m_MultiViewActivated)
-		pSelf->GameClient()->m_MultiViewPersonalZoom += ZoomAmount;
+	if(pSelf->GameClient()->m_MultiView.IsActivated())
+		pSelf->GameClient()->m_MultiView.AddPersonalZoom(ZoomAmount);
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
@@ -467,14 +467,14 @@ void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 	float TargetLevel = !IsReset ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
 
 	if(!pSelf->CanUseAutoSpecCamera() || !pSelf->m_CanUseCameraInfo)
-		pSelf->ChangeZoom(CCamera::ZoomStepsToValue(TargetLevel - 10.0f), pSelf->GameClient()->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
+		pSelf->ChangeZoom(CCamera::ZoomStepsToValue(TargetLevel - 10.0f), pSelf->GameClient()->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiView.IsActivated() ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
 	else
 		pSelf->m_UserZoomTarget = CCamera::ZoomStepsToValue(TargetLevel - 10.0f);
 
 	pSelf->m_AutoSpecCamera = IsReset;
 
-	if(pSelf->GameClient()->m_MultiViewActivated && pSelf->GameClient()->m_Snap.m_SpecInfo.m_Active)
-		pSelf->GameClient()->m_MultiViewPersonalZoom = TargetLevel - 10.0f;
+	if(pSelf->GameClient()->m_MultiView.IsActivated() && pSelf->GameClient()->m_Snap.m_SpecInfo.m_Active)
+		pSelf->GameClient()->m_MultiView.SetPersonalZoom(TargetLevel - 10.0f);
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 {
