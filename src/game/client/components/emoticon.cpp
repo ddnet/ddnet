@@ -47,6 +47,7 @@ void CEmoticon::OnReset()
 	m_Active = false;
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
+	m_TouchState = CUi::CTouchState();
 	m_TouchPressedOutside = false;
 }
 
@@ -99,8 +100,7 @@ void CEmoticon::OnRender()
 
 	if(GameClient()->m_Snap.m_SpecInfo.m_Active || !GameClient()->m_Snap.m_pLocalCharacter)
 	{
-		m_Active = false;
-		m_WasActive = false;
+		OnRelease();
 		return;
 	}
 
