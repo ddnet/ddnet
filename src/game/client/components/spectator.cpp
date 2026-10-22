@@ -648,7 +648,7 @@ void CSpectator::SpectateClosest()
 	int NewSpectatorId = -1;
 
 	vec2 CurPosition = GameClient()->m_Camera.m_Center;
-	if(SpectatorId != SPEC_FREEVIEW)
+	if(SpectatorId != SPEC_FREEVIEW && Snap.m_aCharacters[SpectatorId].m_Active)
 	{
 		const CNetObj_Character &CurCharacter = Snap.m_aCharacters[SpectatorId].m_Cur;
 		CurPosition = vec2(CurCharacter.m_X, CurCharacter.m_Y);
