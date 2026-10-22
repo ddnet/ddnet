@@ -52,7 +52,7 @@ void CEmoticon::OnReset()
 
 void CEmoticon::OnRelease()
 {
-	m_Active = false;
+	OnReset();
 }
 
 bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
