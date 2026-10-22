@@ -247,7 +247,8 @@ void CSpectator::OnRender()
 		return;
 	}
 
-	if(!GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if((!GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK) ||
+		GameClient()->m_Scoreboard.IsActive())
 	{
 		OnRelease();
 		return;
