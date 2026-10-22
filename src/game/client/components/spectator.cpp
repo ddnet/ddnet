@@ -249,8 +249,7 @@ void CSpectator::OnRender()
 
 	if(!GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		m_Active = false;
-		m_WasActive = false;
+		OnRelease();
 		return;
 	}
 
@@ -597,6 +596,7 @@ void CSpectator::OnReset()
 	m_WasActive = false;
 	m_Active = false;
 	m_SelectedSpectatorId = NO_SELECTION;
+	m_TouchState = CUi::CTouchState();
 	m_MultiViewActivateDelay = 0.0f;
 }
 
