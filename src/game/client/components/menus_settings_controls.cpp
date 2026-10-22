@@ -790,7 +790,7 @@ void CMenus::ResetSettingsControls()
 
 	g_Config.m_InpMousesens = 200;
 	g_Config.m_UiMousesens = 200;
-	g_Config.m_ClMouseMaxDistance = 400;
+	g_Config.m_ClMouseMaxDistance = DefaultConfig::ClMouseMaxDistance;
 
 	g_Config.m_InpControllerEnable = 0;
 	g_Config.m_InpControllerGUID[0] = '\0';
