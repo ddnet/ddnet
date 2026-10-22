@@ -492,7 +492,8 @@ void CSpectator::OnRender()
 					if(GameClient()->m_MultiViewTeam == DDTeam)
 					{
 						GameClient()->m_aMultiViewId[m_SelectedSpectatorId] = !GameClient()->m_aMultiViewId[m_SelectedSpectatorId];
-						if(!GameClient()->m_aMultiViewId[GameClient()->m_Snap.m_SpecInfo.m_SpectatorId])
+						const int SpectatorId = GameClient()->m_Snap.m_SpecInfo.m_SpectatorId;
+						if(SpectatorId < 0 || !GameClient()->m_aMultiViewId[SpectatorId])
 						{
 							int NewClientId = GameClient()->FindFirstMultiViewId();
 							if(NewClientId < MAX_CLIENTS && NewClientId >= 0)
