@@ -98,7 +98,9 @@ void CEmoticon::OnRender()
 		return;
 	}
 
-	if(GameClient()->m_Snap.m_SpecInfo.m_Active || !GameClient()->m_Snap.m_pLocalCharacter)
+	if(GameClient()->m_Snap.m_SpecInfo.m_Active ||
+		!GameClient()->m_Snap.m_pLocalCharacter ||
+		GameClient()->m_Scoreboard.IsActive())
 	{
 		OnRelease();
 		return;
