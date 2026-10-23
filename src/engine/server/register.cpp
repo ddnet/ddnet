@@ -44,6 +44,7 @@ class CRegister : public IRegister
 	static bool ProtocolFromString(int *pResult, const char *pString);
 	static const char *ProtocolToSystem(int Protocol);
 	static IPRESOLVE ProtocolToIpresolve(int Protocol);
+	static int ProtocolToNetType(int Protocol);
 
 	static void ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -110,6 +111,7 @@ class CRegister : public IRegister
 	public:
 		int64_t m_PrevRegister = -1;
 		int64_t m_NextRegister = -1;
+		int m_ServerPort;
 
 		CProtocol(CRegister *pParent, int Protocol);
 		void OnToken(const char *pToken);
@@ -149,6 +151,8 @@ public:
 	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
 	void Update() override;
 	void OnConfigChange() override;
+	void SetServerPort(int NetType, int Port) override;
+	bool IsNetTypeEnabled(int NetType) const override;
 	bool OnPacket(const CNetChunk *pPacket) override;
 	void OnNewInfo(const char *pInfo) override;
 	void OnShutdown() override;
@@ -254,6 +258,18 @@ IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
 	dbg_assert_failed("invalid protocol");
 }
 
+int CRegister::ProtocolToNetType(int Protocol)
+{
+	switch(Protocol)
+	{
+	case PROTOCOL_TW6_IPV6: return NETTYPE_IPV6;
+	case PROTOCOL_TW6_IPV4: return NETTYPE_IPV4;
+	case PROTOCOL_TW7_IPV6: return NETTYPE_IPV6;
+	case PROTOCOL_TW7_IPV4: return NETTYPE_IPV4;
+	}
+	dbg_assert_failed("invalid protocol");
+}
+
 void CRegister::ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -269,7 +285,7 @@ void CRegister::CProtocol::SendRegister()
 	int64_t Freq = time_freq();
 
 	char aAddress[64];
-	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_ServerPort);
 
 	char aSecret[UUID_MAXSTRSIZE];
 	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
@@ -330,7 +346,7 @@ void CRegister::CProtocol::SendRegister()
 		RequestIndex = m_pShared->m_NumTotalRequests;
 		m_pShared->m_NumTotalRequests += 1;
 	}
-	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister), m_pParent->m_pHttp));
+	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister), m_pParent->m_pHttp));
 	m_NewChallengeToken = false;
 
 	m_PrevRegister = Now;
@@ -348,7 +364,7 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 	}
 
 	char aAddress[64];
-	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_ServerPort);
 
 	char aSecret[UUID_MAXSTRSIZE];
 	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
@@ -375,7 +391,8 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :
 	m_pParent(pParent),
 	m_Protocol(Protocol),
-	m_pShared(std::make_shared<CShared>(pParent->m_pGlobal))
+	m_pShared(std::make_shared<CShared>(pParent->m_pGlobal)),
+	m_ServerPort(pParent->m_ServerPort)
 {
 }
 
@@ -491,6 +508,7 @@ void CRegister::CProtocol::CJob::Run()
 		{
 			log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
 			log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
+			log_error(ProtocolToSystem(m_Protocol), "ERROR: if you are behind NAT, set sv_stun_server to discover the public port automatically.");
 		}
 		json_value_free(pJson);
 		if(m_Index > m_pShared->m_LatestResponseIndex)
@@ -571,6 +589,42 @@ void CRegister::Update()
 		}
 		m_aProtocols[i].Update();
 	}
+}
+
+void CRegister::SetServerPort(int NetType, int Port)
+{
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(ProtocolToNetType(i) != NetType)
+		{
+			continue;
+		}
+		CProtocol &Protocol = m_aProtocols[i];
+		if(Protocol.m_ServerPort == Port)
+		{
+			continue;
+		}
+		// Delete the old address from the master server if it was registered,
+		// otherwise the server would be listed with both ports until the old
+		// entry times out.
+		Protocol.SendDeleteIfRegistered(false);
+		Protocol.m_ServerPort = Port;
+		// Register again with the new port as soon as possible. The masterserver
+		// challenges the new address, which is handled by `OnPacket`.
+		Protocol.m_NextRegister = time_get();
+	}
+}
+
+bool CRegister::IsNetTypeEnabled(int NetType) const
+{
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(m_aProtocolEnabled[i] && ProtocolToNetType(i) == NetType)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void CRegister::OnConfigChange()
