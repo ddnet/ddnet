@@ -53,7 +53,6 @@ public:
 	float m_Zoom;
 	bool m_RenderText;
 	bool m_RenderInvalidTiles;
-	bool m_TileAndQuadBuffering;
 	bool m_RenderTileBorder;
 	bool m_DebugRenderGroupClips;
 	bool m_DebugRenderQuadClips;
@@ -65,7 +64,7 @@ class CRenderLayer : public CRenderComponent
 {
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
-	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional);
+	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional, bool TileAndQuadBuffering);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -86,6 +85,7 @@ protected:
 	virtual IGraphics::CTextureHandle GetTexture() const = 0;
 	virtual void InitCallback() const;
 
+	bool m_TileAndQuadBuffering = true;
 	class IMap *m_pMap = nullptr;
 	IMapImages *m_pMapImages = nullptr;
 	std::shared_ptr<CEnvelopeManager> m_pEnvelopeManager;
@@ -123,10 +123,10 @@ public:
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
 	void Init() override;
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional, bool TileAndQuadBuffering) override;
 
 	virtual int GetDataIndex() const;
-	bool IsValid() const override { return GetRawData() != nullptr; }
+	bool IsValid() const override;
 	void Unload() override;
 
 protected:
@@ -138,6 +138,7 @@ protected:
 	virtual void InitTileData();
 	virtual void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const;
 	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
+	virtual bool IsDesignLayer() const { return true; }
 	CTile *m_pTiles;
 
 private:
@@ -194,7 +195,17 @@ protected:
 			}
 		};
 
-		std::vector<CTileVisual> m_vTilesOfLayer;
+		class CRowVisual
+		{
+		public:
+			uint32_t m_TileOffset = 0;
+			uint32_t m_TileCount = 0;
+			uint16_t m_MinX = 0;
+			uint16_t m_MaxX = 0;
+		};
+
+		std::vector<CRowVisual> m_vRows;
+		std::vector<uint16_t> m_vDrawnX;
 
 		CTileVisual m_BorderTopLeft;
 		CTileVisual m_BorderTopRight;
@@ -232,7 +243,7 @@ class CRenderLayerQuads : public CRenderLayer
 {
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional, bool TileAndQuadBuffering) override;
 	void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
 	void Render(const CRenderLayerParams &Params) override;
@@ -293,6 +304,7 @@ public:
 protected:
 	ColorRGBA GetRenderColor(const CRenderLayerParams &Params) const override { return ColorRGBA(1.0f, 1.0f, 1.0f, Params.m_EntityOverlayVal / 100.0f); }
 	IGraphics::CTextureHandle GetTexture() const override;
+	bool IsDesignLayer() const override { return false; }
 };
 
 class CRenderLayerEntityGame final : public CRenderLayerEntityBase
