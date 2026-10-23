@@ -80,6 +80,9 @@ private:
 	float MeasureSettingsBindsHeight(EBindOptionGroup Group) const;
 	void RenderSettingsBinds(EBindOptionGroup Group, CUIRect View);
 
+	float MeasureSettingsGeneralHeight() const;
+	void RenderSettingsGeneral(CUIRect View);
+
 	float MeasureSettingsMouseHeight() const;
 	void RenderSettingsMouse(CUIRect View);
 
