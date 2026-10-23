@@ -393,7 +393,7 @@ int CDemoRecorder::Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilena
 	}
 	else if(pTargetFilename[0] != '\0')
 	{
-		if(!m_pStorage->RenameFile(m_aCurrentFilename, pTargetFilename, IStorage::TYPE_SAVE))
+		if(!m_pStorage->ReplaceFile(m_aCurrentFilename, pTargetFilename, IStorage::TYPE_SAVE))
 		{
 			log_error_color(DEMO_PRINT_COLOR, "demo_recorder", "Could not move demo file '%s' to '%s'.", m_aCurrentFilename, pTargetFilename);
 			return -1;
