@@ -3509,6 +3509,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/serverbrowser_ping_cache.cpp
     src/engine/client/serverbrowser_ping_cache.h
     src/engine/client/sqlite.cpp
+    src/engine/client/client.cpp
     src/game/client/components/censor.cpp
     src/game/client/components/censor.h
     # tidy-alphabetical-end
