@@ -3,26 +3,18 @@
 
 #include "layer_tiles.h"
 
-struct STuneTileStateChange
-{
-	bool m_Changed;
-	struct SData
-	{
-		int m_Number;
-		int m_Type;
-		int m_Index;
-	} m_Previous, m_Current;
-};
-
-class CLayerTune : public CLayerTiles
+class CLayerTune : public CLayerTiles, public CLayerTuneValues
 {
 public:
-	CLayerTune(CEditorMap *pMap, int w, int h);
+	CLayerTune(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId = 0);
 	CLayerTune(const CLayerTune &Other);
 	~CLayerTune() override;
 
-	CTuneTile *m_pTuneTile;
-	unsigned char m_TuningNumber;
+	CRenderTileSource<CTuneTile> TuneTilesForRender() const
+	{
+		return CRenderTileSource<CTuneTile>(m_TuneTiles);
+	}
+	unsigned char m_TuningNumber{};
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(EShiftDirection Direction) override;
@@ -39,18 +31,8 @@ public:
 	int m_GotoTuneOffset;
 	ivec2 m_GotoTuneLastPos;
 
-	EditorTileStateChangeHistory<STuneTileStateChange> m_History;
-	void ClearHistory() override
-	{
-		CLayerTiles::ClearHistory();
-		m_History.clear();
-	}
-
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
-
-private:
-	void RecordStateChange(int x, int y, STuneTileStateChange::SData Previous, STuneTileStateChange::SData Current);
 };
 
 #endif

@@ -2754,6 +2754,7 @@ if(CLIENT)
     lineinput.cpp
     lineinput.h
     multiview.cpp
+    number_input.h
     pickup_data.cpp
     pickup_data.h
     prediction/entities/character.cpp
@@ -2806,9 +2807,6 @@ if(CLIENT)
     component.h
     editor.cpp
     editor.h
-    editor_action.h
-    editor_actions.cpp
-    editor_actions.h
     editor_history.cpp
     editor_history.h
     editor_object.cpp
@@ -2816,8 +2814,6 @@ if(CLIENT)
     editor_props.cpp
     editor_server_settings.cpp
     editor_server_settings.h
-    editor_trackers.cpp
-    editor_trackers.h
     editor_ui.cpp
     editor_ui.h
     enums.h
@@ -2829,6 +2825,17 @@ if(CLIENT)
     file_browser.h
     font_typer.cpp
     font_typer.h
+    history/document_history.cpp
+    history/document_history.h
+    history/edit_coordinator.h
+    history/resource_blob.h
+    history/revision_history.h
+    history/save_job.cpp
+    history/save_job.h
+    history/save_state.h
+    history/shared_value.h
+    history/tile_plane.h
+    history/tile_projection.h
     layer_selector.cpp
     layer_selector.h
     map_grid.cpp
@@ -2838,6 +2845,14 @@ if(CLIENT)
     map_view.cpp
     map_view.h
     mapitems.h
+    mapitems/document_export.cpp
+    mapitems/document_export.h
+    mapitems/document_graph.cpp
+    mapitems/document_graph.h
+    mapitems/document_restore.cpp
+    mapitems/document_session.h
+    mapitems/document_values.h
+    mapitems/element_values.h
     mapitems/envelope.cpp
     mapitems/envelope.h
     mapitems/envelope_evaluator.cpp
@@ -2871,6 +2886,7 @@ if(CLIENT)
     mapitems/map_io.cpp
     mapitems/sound.cpp
     mapitems/sound.h
+    mapitems/tile_values.h
     popups.cpp
     prompt.cpp
     prompt.h
@@ -2883,8 +2899,6 @@ if(CLIENT)
     quick_action.h
     quick_actions.cpp
     quick_actions.h
-    references.cpp
-    references.h
     smooth_value.cpp
     smooth_value.h
     tile_art.cpp
@@ -2904,6 +2918,7 @@ if(CLIENT)
     render_layer.h
     render_map.cpp
     render_map.h
+    tile_cursor.h
     # tidy-alphabetical-end
   )
   set(GAME_GENERATED_CLIENT
@@ -3454,6 +3469,8 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     csv_test.cpp
     datafile_test.cpp
     dbg_test.cpp
+    editor_history.cpp
+    editor_save.cpp
     editor_test.cpp
     fs_test.cpp
     gameworld_test.cpp
@@ -3474,6 +3491,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     net_test.cpp
     netaddr_test.cpp
     network_test.cpp
+    number_input.cpp
     os_test.cpp
     packer_test.cpp
     prng_test.cpp
@@ -3511,6 +3529,10 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/sqlite.cpp
     src/game/client/components/censor.cpp
     src/game/client/components/censor.h
+    src/game/editor/history/save_job.cpp
+    src/game/editor/history/save_job.h
+    src/game/editor/mapitems/document_export.cpp
+    src/game/editor/mapitems/document_export.h
     # tidy-alphabetical-end
   )
 

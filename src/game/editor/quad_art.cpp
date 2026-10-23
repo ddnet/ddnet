@@ -1,7 +1,6 @@
 #include "quad_art.h"
 
 #include "editor.h"
-#include "editor_actions.h"
 
 #include <base/fs.h>
 #include <base/str.h>
@@ -104,10 +103,10 @@ void CQuadArt::MarkPixelAsVisited(const ivec2 &Pos, const ivec2 &Size)
 	}
 }
 
-CQuad CQuadArt::CreateNewQuad(const vec2 &Pos, const ivec2 &Size, const ColorRGBA &Color) const
+CQuadValues CQuadArt::CreateNewQuad(const vec2 &Pos, const ivec2 &Size, const ColorRGBA &Color) const
 {
-	CQuad Quad;
-	Quad.m_PosEnv = Quad.m_ColorEnv = -1;
+	CQuadValues Quad;
+	Quad.m_PosEnv = Quad.m_ColorEnv = {};
 	Quad.m_PosEnvOffset = Quad.m_ColorEnvOffset = 0;
 	int x = f2fx(Pos.x), y = f2fx(Pos.y), w = f2fx(Size.x / 2.f), h = f2fx(Size.y / 2.f);
 
@@ -163,20 +162,21 @@ bool CQuadArt::Create(std::shared_ptr<CLayerQuads> &pQuadLayer)
 			vec2 Pos(((x / (float)ImgPixelSize) + (Scale.x / 2.f)) * m_Parameters.m_QuadPixelSize,
 				((y / (float)ImgPixelSize) + (Scale.y / 2.f)) * m_Parameters.m_QuadPixelSize);
 
-			CQuad Quad = CreateNewQuad(Pos, Size, Pixel);
+			CQuadValues Quad = CreateNewQuad(Pos, Size, Pixel);
 			pQuadLayer->m_vQuads.emplace_back(Quad);
+			pQuadLayer->m_vQuads.back().m_Id = pQuadLayer->Map()->AllocateObjectId();
 		}
 	}
 	pQuadLayer->m_vQuads.shrink_to_fit();
 	return true;
 }
 
-void CEditorMap::AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parameters, bool IgnoreHistory)
+void CEditorMap::AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parameters)
 {
 	char aQuadArtName[IO_MAX_PATH_LENGTH];
 	fs_split_file_extension(fs_filename(Parameters.m_aFilename), aQuadArtName, sizeof(aQuadArtName));
 
-	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
+	std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>(this);
 	str_copy(pGroup->m_aName, aQuadArtName);
 	pGroup->m_UseClipping = true;
 	pGroup->m_ClipX = -1;
@@ -186,16 +186,16 @@ void CEditorMap::AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parame
 
 	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(this);
 	str_copy(pLayer->m_aName, aQuadArtName);
-	pGroup->AddLayer(pLayer);
+	pGroup->m_vpLayers.push_back(pLayer);
 	pLayer->m_Flags |= LAYERFLAG_DETAIL;
 
 	CQuadArt QuadArt(Parameters, std::move(Image));
 	QuadArt.Create(pLayer);
 
-	if(!IgnoreHistory)
-		m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(this, pGroup));
-
-	OnModify();
+	m_DocumentHistory.Edit(this, "Add quad art", editor_history::ECategory::MAP, [&] {
+		m_vpGroups.push_back(pGroup);
+		OnModify();
+	});
 }
 
 bool CEditor::CallbackAddQuadArt(const char *pFilepath, int StorageType, void *pUser)
@@ -300,7 +300,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuadArt(void *pContext, CUIRect View
 		}
 		else
 		{
-			pEditor->Map()->AddQuadArt(std::move(pEditor->m_QuadArtImageInfo), pEditor->m_QuadArtParameters, false);
+			pEditor->Map()->AddQuadArt(std::move(pEditor->m_QuadArtImageInfo), pEditor->m_QuadArtParameters);
 			pEditor->OnDialogClose();
 		}
 		return CUi::POPUP_CLOSE_CURRENT;

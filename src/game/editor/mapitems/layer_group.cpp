@@ -7,9 +7,10 @@
 
 #include <algorithm>
 
-CLayerGroup::CLayerGroup(CEditorMap *pMap) :
+CLayerGroup::CLayerGroup(CEditorMap *pMap, std::uint64_t RetainedId) :
 	CMapObject(pMap)
 {
+	m_Id = RetainedId ? RetainedId : Map()->AllocateObjectId();
 	m_vpLayers.clear();
 	m_aName[0] = 0;
 	m_Visible = true;
@@ -29,6 +30,8 @@ CLayerGroup::CLayerGroup(CEditorMap *pMap) :
 
 void CLayerGroup::OnAttach(CEditorMap *pMap)
 {
+	if(Map() != pMap)
+		m_Id = pMap->AllocateObjectId();
 	CMapObject::OnAttach(pMap);
 	for(const auto &pLayer : m_vpLayers)
 	{
@@ -187,26 +190,26 @@ void CLayerGroup::Clear()
 	m_vpLayers.clear();
 }
 
-void CLayerGroup::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
+void CLayerGroup::VisitImageReferences(const FDocumentReferenceFunction &ReferenceFunction)
 {
 	for(auto &pLayer : m_vpLayers)
 	{
-		pLayer->ModifyImageIndex(IndexModifyFunction);
+		pLayer->VisitImageReferences(ReferenceFunction);
 	}
 }
 
-void CLayerGroup::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
+void CLayerGroup::VisitEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction)
 {
 	for(auto &pLayer : m_vpLayers)
 	{
-		pLayer->ModifyEnvelopeIndex(IndexModifyFunction);
+		pLayer->VisitEnvelopeReferences(ReferenceFunction);
 	}
 }
 
-void CLayerGroup::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction)
+void CLayerGroup::VisitSoundReferences(const FDocumentReferenceFunction &ReferenceFunction)
 {
 	for(auto &pLayer : m_vpLayers)
 	{
-		pLayer->ModifySoundIndex(IndexModifyFunction);
+		pLayer->VisitSoundReferences(ReferenceFunction);
 	}
 }

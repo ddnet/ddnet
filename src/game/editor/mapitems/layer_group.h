@@ -8,29 +8,15 @@
 #include <memory>
 #include <vector>
 
-class CLayerGroup : public CMapObject
+class CLayerGroup : public CMapObject, public CLayerGroupValues
 {
 public:
 	std::vector<std::shared_ptr<CLayer>> m_vpLayers;
 
-	int m_OffsetX;
-	int m_OffsetY;
-
-	int m_ParallaxX;
-	int m_ParallaxY;
-
-	int m_UseClipping;
-	int m_ClipX;
-	int m_ClipY;
-	int m_ClipW;
-	int m_ClipH;
-
-	char m_aName[12];
-	bool m_GameGroup;
 	bool m_Visible;
 	bool m_Collapse;
 
-	explicit CLayerGroup(CEditorMap *pMap);
+	explicit CLayerGroup(CEditorMap *pMap, std::uint64_t RetainedId = 0);
 	void OnAttach(CEditorMap *pMap) override;
 
 	void Convert(CUIRect *pRect) const;
@@ -48,9 +34,9 @@ public:
 	bool IsEmpty() const;
 	void Clear();
 
-	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction);
-	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction);
-	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction);
+	void VisitImageReferences(const FDocumentReferenceFunction &ReferenceFunction);
+	void VisitEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction);
+	void VisitSoundReferences(const FDocumentReferenceFunction &ReferenceFunction);
 };
 
 #endif

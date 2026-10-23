@@ -6,7 +6,7 @@
 class CLayerGame : public CLayerTiles
 {
 public:
-	CLayerGame(CEditorMap *pMap, int w, int h);
+	CLayerGame(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId = 0);
 	~CLayerGame() override;
 
 	[[nodiscard]] CTile GetTile(int x, int y) const override;

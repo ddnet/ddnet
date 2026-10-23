@@ -7,7 +7,7 @@
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
-#include <game/editor/editor_actions.h>
+#include <game/editor/history/shared_value.h>
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/map.h>
 #include <game/mapitems.h>
@@ -50,8 +50,27 @@ CAutomapper::CAutomapper(CEditorMap *pMap) :
 {
 }
 
+void CAutomapper::SetDeferredSource(const char *pTileName)
+{
+	Unload();
+	str_copy(m_aSourceName, pTileName);
+}
+
+void CAutomapper::EnsureLoaded()
+{
+	if(!m_LoadAttempted && m_aSourceName[0] != '\0')
+	{
+		char aSourceName[sizeof(m_aSourceName)];
+		str_copy(aSourceName, m_aSourceName);
+		Load(aSourceName);
+	}
+}
+
 void CAutomapper::Load(const char *pTileName)
 {
+	const CStorageUpdate StorageUpdate(*this);
+	SetDeferredSource(pTileName);
+	m_LoadAttempted = true;
 	char aPath[IO_MAX_PATH_LENGTH];
 	str_format(aPath, sizeof(aPath), "editor/automap/%s.rules", pTileName);
 	if(!Storage()->FileExists(aPath, IStorage::TYPE_ALL))
@@ -364,7 +383,10 @@ void CAutomapper::Load(const char *pTileName)
 
 void CAutomapper::Unload()
 {
+	const CStorageUpdate StorageUpdate(*this);
 	m_FileLoaded = false;
+	m_LoadAttempted = false;
+	m_aSourceName[0] = '\0';
 	m_vConfigs.clear();
 }
 
@@ -386,116 +408,99 @@ const char *CAutomapper::GetConfigName(int Index) const
 {
 	if(Index < 0 || Index >= (int)m_vConfigs.size())
 	{
-		return "(unknown)";
+		return !m_LoadAttempted ? "(load rules to view)" : "(unknown)";
 	}
 	return m_vConfigs[Index].m_aName;
 }
 
 void CAutomapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed, int X, int Y, int Width, int Height)
 {
+	EnsureLoaded();
 	if(!m_FileLoaded || pLayer->m_Readonly || ConfigId < 0 || ConfigId >= (int)m_vConfigs.size())
 		return;
 
 	if(Width < 0)
-		Width = pLayer->m_Width;
+		Width = pLayer->Width();
 
 	if(Height < 0)
-		Height = pLayer->m_Height;
+		Height = pLayer->Height();
 
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
 
-	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
-	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
-	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
-	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
+	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, pLayer->Width());
+	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, pLayer->Height());
+	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, pLayer->Width());
+	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, pLayer->Height());
 
-	int UpdateFromX = std::clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_Width);
-	int UpdateFromY = std::clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_Height);
-	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
-	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
+	int UpdateFromX = std::clamp(X + 3 * pConf->m_StartX, 0, pLayer->Width());
+	int UpdateFromY = std::clamp(Y + 3 * pConf->m_StartY, 0, pLayer->Height());
+	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->Width());
+	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->Height());
 
-	CLayerTiles *pUpdateLayer = new CLayerTiles(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
-	CLayerTiles *pUpdateGame = new CLayerTiles(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+	auto pUpdateLayer = std::make_unique<CLayerTiles>(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+	auto pUpdateGame = std::make_unique<CLayerTiles>(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 
 	for(int y = UpdateFromY; y < UpdateToY; y++)
 	{
 		for(int x = UpdateFromX; x < UpdateToX; x++)
 		{
-			const CTile *pInLayer = &pLayer->m_pTiles[y * pLayer->m_Width + x];
-			CTile *pOutLayer = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
-			pOutLayer->m_Index = pInLayer->m_Index;
-			pOutLayer->m_Flags = pInLayer->m_Flags;
+			pUpdateLayer->m_Tiles.Set((y - UpdateFromY) * pUpdateLayer->Width() + x - UpdateFromX, pLayer->m_Tiles[y * pLayer->Width() + x]);
 
-			if(x >= pGameLayer->m_Width || y >= pGameLayer->m_Height)
+			if(x >= pGameLayer->Width() || y >= pGameLayer->Height())
 				continue;
 
-			const CTile *pInGame = &pGameLayer->m_pTiles[y * pGameLayer->m_Width + x];
-			CTile *pOutGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_Width + x - UpdateFromX];
-			pOutGame->m_Index = pInGame->m_Index;
-			pOutGame->m_Flags = pInGame->m_Flags;
+			pUpdateGame->m_Tiles.Set((y - UpdateFromY) * pUpdateGame->Width() + x - UpdateFromX, pGameLayer->m_Tiles[y * pGameLayer->Width() + x]);
 		}
 	}
 
-	Proceed(pUpdateLayer, pUpdateGame, ReferenceId, ConfigId, Seed, UpdateFromX, UpdateFromY);
+	Proceed(pUpdateLayer.get(), pUpdateGame.get(), ReferenceId, ConfigId, Seed, UpdateFromX, UpdateFromY);
 
 	for(int y = CommitFromY; y < CommitToY; y++)
 	{
 		for(int x = CommitFromX; x < CommitToX; x++)
 		{
-			const CTile *pInLayer = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
-			CTile *pOutLayer = &pLayer->m_pTiles[y * pLayer->m_Width + x];
-			CTile PreviousLayer = *pOutLayer;
-			pOutLayer->m_Index = pInLayer->m_Index;
-			pOutLayer->m_Flags = pInLayer->m_Flags;
-			pLayer->RecordStateChange(x, y, PreviousLayer, *pOutLayer);
+			const CTile NextLayer = pUpdateLayer->m_Tiles[(y - UpdateFromY) * pUpdateLayer->Width() + x - UpdateFromX];
+			pLayer->m_Tiles.Set(y * pLayer->Width() + x, NextLayer);
 
-			if(x >= pGameLayer->m_Width || y >= pGameLayer->m_Height)
+			if(x >= pGameLayer->Width() || y >= pGameLayer->Height())
 				continue;
 
-			const CTile *pInGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_Width + x - UpdateFromX];
-			CTile *pOutGame = &pGameLayer->m_pTiles[y * pGameLayer->m_Width + x];
-			CTile PreviousGame = *pOutGame;
-			pOutGame->m_Index = pInGame->m_Index;
-			pOutGame->m_Flags = pInGame->m_Flags;
-			pGameLayer->RecordStateChange(x, y, PreviousGame, *pOutGame);
+			const CTile NextGame = pUpdateGame->m_Tiles[(y - UpdateFromY) * pUpdateGame->Width() + x - UpdateFromX];
+			pGameLayer->m_Tiles.Set(y * pGameLayer->Width() + x, NextGame);
 		}
 	}
-
-	delete pUpdateLayer;
-	delete pUpdateGame;
 }
 
-void CAutomapper::AutoMap(CLayerTiles *pLayer, const CLayerTiles *pReadLayer, const CRun *pRun, size_t RunIndex, bool IsFilterable, int Seed, int SeedOffsetX, int SeedOffsetY) const
+void CAutomapper::AutoMap(CLayerTiles *pLayer, const CLayerTiles *pReadLayer, const CRun *pRun, std::size_t RunIndex, bool IsFilterable, int Seed, int SeedOffsetX, int SeedOffsetY) const
 {
-	const int LayerWidth = pLayer->m_Width;
-	const int LayerHeight = pLayer->m_Height;
+	const int LayerWidth = pLayer->Width();
+	const int LayerHeight = pLayer->Height();
 
 	for(int y = 0; y < LayerHeight; y++)
 	{
 		for(int x = 0; x < LayerWidth; x++)
 		{
-			CTile *pTile = &(pLayer->m_pTiles[y * LayerWidth + x]);
-			const CTile *pReadTile = &(pReadLayer->m_pTiles[y * LayerWidth + x]);
+			CTile Tile = pLayer->m_Tiles[y * LayerWidth + x];
 			pLayer->Map()->OnModify();
 
 			for(size_t i = 0; i < pRun->m_vIndexRules.size(); ++i)
 			{
 				const CIndexRule *pIndexRule = &pRun->m_vIndexRules[i];
-				if(pReadTile->m_Index == 0)
+				if(pReadLayer->m_Tiles[y * LayerWidth + x].m_Index == 0)
 				{
-					if(pTile->m_Index != 0 && IsFilterable) // TODO: This is a lazy workaround
+					if(Tile.m_Index != 0 && IsFilterable) // TODO: This is a lazy workaround
 					{
-						CTile Previous = *pTile;
-						pTile->m_Index = 0;
-						pTile->m_Flags = pIndexRule->m_Flag;
-						pLayer->RecordStateChange(x, y, Previous, *pTile);
+						Tile.m_Index = 0;
+						Tile.m_Flags = pIndexRule->m_Flag;
+						pLayer->m_Tiles.Set(y * LayerWidth + x, Tile);
+
 						continue;
 					}
 
 					if(pIndexRule->m_SkipEmpty) // skip empty tiles
 						continue;
 				}
-				if(pIndexRule->m_SkipFull && pReadTile->m_Index != 0) // skip full tiles
+				if(pIndexRule->m_SkipFull && pReadLayer->m_Tiles[y * LayerWidth + x].m_Index != 0) // skip full tiles
 					continue;
 
 				bool RespectRules = true;
@@ -509,8 +514,8 @@ void CAutomapper::AutoMap(CLayerTiles *pLayer, const CLayerTiles *pReadLayer, co
 					if(CheckX >= 0 && CheckX < LayerWidth && CheckY >= 0 && CheckY < LayerHeight)
 					{
 						int CheckTile = CheckY * LayerWidth + CheckX;
-						CheckIndex = pReadLayer->m_pTiles[CheckTile].m_Index;
-						CheckFlags = pReadLayer->m_pTiles[CheckTile].m_Flags & (TILEFLAG_ROTATE | TILEFLAG_XFLIP | TILEFLAG_YFLIP);
+						CheckIndex = pReadLayer->m_Tiles[CheckTile].m_Index;
+						CheckFlags = pReadLayer->m_Tiles[CheckTile].m_Flags & (TILEFLAG_ROTATE | TILEFLAG_XFLIP | TILEFLAG_YFLIP);
 					}
 					else
 					{
@@ -554,10 +559,9 @@ void CAutomapper::AutoMap(CLayerTiles *pLayer, const CLayerTiles *pReadLayer, co
 				if(RespectRules && PassesModuloCheck &&
 					(pIndexRule->m_RandomProbability >= 1.0f || HashLocation(Seed, RunIndex, i, x + SeedOffsetX, y + SeedOffsetY) < HASH_MAX * pIndexRule->m_RandomProbability))
 				{
-					CTile Previous = *pTile;
-					pTile->m_Index = pIndexRule->m_Id;
-					pTile->m_Flags = pIndexRule->m_Flag;
-					pLayer->RecordStateChange(x, y, Previous, *pTile);
+					Tile.m_Index = pIndexRule->m_Id;
+					Tile.m_Flags = pIndexRule->m_Flag;
+					pLayer->m_Tiles.Set(y * LayerWidth + x, Tile);
 				}
 			}
 		}
@@ -566,6 +570,7 @@ void CAutomapper::AutoMap(CLayerTiles *pLayer, const CLayerTiles *pReadLayer, co
 
 void CAutomapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed, int SeedOffsetX, int SeedOffsetY)
 {
+	EnsureLoaded();
 	if(!m_FileLoaded || pLayer->m_Readonly || ConfigId < 0 || ConfigId >= (int)m_vConfigs.size())
 		return;
 
@@ -573,10 +578,9 @@ void CAutomapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 		Seed = rand();
 
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
-	pLayer->ClearHistory();
 
-	const int LayerWidth = pLayer->m_Width;
-	const int LayerHeight = pLayer->m_Height;
+	const int LayerWidth = pLayer->Width();
+	const int LayerHeight = pLayer->Height();
 
 	static const int s_aTileIndex[] = {TILE_SOLID, TILE_DEATH, TILE_NOHOOK, TILE_FREEZE, TILE_UNFREEZE, TILE_DFREEZE, TILE_DUNFREEZE, TILE_LFREEZE, TILE_LUNFREEZE};
 
@@ -594,20 +598,17 @@ void CAutomapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 		{
 			std::unique_ptr<CLayerTiles> pCopiedLayer = std::make_unique<CLayerTiles>(pLayer->Map(), LayerWidth, LayerHeight);
 
-			int LoopWidth = IsFilterable ? std::min(pGameLayer->m_Width, LayerWidth) : LayerWidth;
-			int LoopHeight = IsFilterable ? std::min(pGameLayer->m_Height, LayerHeight) : LayerHeight;
+			int LoopWidth = IsFilterable ? std::min(pGameLayer->Width(), LayerWidth) : LayerWidth;
+			int LoopHeight = IsFilterable ? std::min(pGameLayer->Height(), LayerHeight) : LayerHeight;
 
 			for(int y = 0; y < LoopHeight; y++)
 			{
 				for(int x = 0; x < LoopWidth; x++)
 				{
-					const CTile *pIn = &pBuffer->m_pTiles[y * pBuffer->m_Width + x];
-					CTile *pOut = &pCopiedLayer->m_pTiles[y * LayerWidth + x];
-					if(h == 0 && ReferenceId >= 1 && pIn->m_Index != s_aTileIndex[ReferenceId - 1])
-						pOut->m_Index = 0;
-					else
-						pOut->m_Index = pIn->m_Index;
-					pOut->m_Flags = pIn->m_Flags;
+					CTile Tile = pBuffer->m_Tiles[y * pBuffer->Width() + x];
+					if(h == 0 && ReferenceId >= 1 && Tile.m_Index != s_aTileIndex[ReferenceId - 1])
+						Tile.m_Index = 0;
+					pCopiedLayer->m_Tiles.Set(y * LayerWidth + x, Tile);
 				}
 			}
 
@@ -618,4 +619,48 @@ void CAutomapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 			AutoMap(pLayer, pBuffer, pRun, h, IsFilterable, Seed, SeedOffsetX, SeedOffsetY);
 		}
 	}
+}
+
+void CAutomapper::Account(editor_history::CStorageUsage &Usage) const
+{
+	const auto AccountVector = [&](const auto &Values) { Usage.Add(Values.data(), Values.capacity() * sizeof(typename std::decay_t<decltype(Values)>::value_type)); };
+	AccountVector(m_vConfigs);
+	for(const auto &Config : m_vConfigs)
+	{
+		AccountVector(Config.m_vRuns);
+		for(const auto &Run : Config.m_vRuns)
+		{
+			AccountVector(Run.m_vIndexRules);
+			for(const auto &Index : Run.m_vIndexRules)
+			{
+				AccountVector(Index.m_vRules);
+				AccountVector(Index.m_vModuloRules);
+				for(const auto &Rule : Index.m_vRules)
+					AccountVector(Rule.m_vIndexList);
+			}
+		}
+	}
+}
+
+void CAutomapper::RefreshStorageBytes()
+{
+	m_StorageBytes = 0;
+	const auto AccountVector = [&](const auto &Values) { m_StorageBytes += Values.capacity() * sizeof(typename std::decay_t<decltype(Values)>::value_type); };
+	AccountVector(m_vConfigs);
+	for(const auto &Config : m_vConfigs)
+	{
+		AccountVector(Config.m_vRuns);
+		for(const auto &Run : Config.m_vRuns)
+		{
+			AccountVector(Run.m_vIndexRules);
+			for(const auto &Index : Run.m_vIndexRules)
+			{
+				AccountVector(Index.m_vRules);
+				AccountVector(Index.m_vModuloRules);
+				for(const auto &Rule : Index.m_vRules)
+					AccountVector(Rule.m_vIndexList);
+			}
+		}
+	}
+	Map()->m_DocumentHistory.InvalidateMemoryUsage();
 }

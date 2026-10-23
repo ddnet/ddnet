@@ -2,64 +2,48 @@
 
 #include <game/editor/editor.h>
 
-CLayerSpeedup::CLayerSpeedup(CEditorMap *pMap, int w, int h) :
-	CLayerTiles(pMap, w, h)
+CLayerSpeedup::CLayerSpeedup(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId) :
+	CLayerTiles(pMap, w, h, RetainedId)
 {
 	str_copy(m_aName, "Speedup");
 	m_HasSpeedup = true;
 
-	m_pSpeedupTile = new CSpeedupTile[w * h];
-	mem_zero(m_pSpeedupTile, (size_t)w * h * sizeof(CSpeedupTile));
+	m_SpeedupTiles.Resize(w, h);
 }
 
 CLayerSpeedup::CLayerSpeedup(const CLayerSpeedup &Other) :
-	CLayerTiles(Other)
+	CLayerTiles(Other),
+	CLayerSpeedupValues(Other)
 {
 	str_copy(m_aName, "Speedup copy");
 	m_HasSpeedup = true;
-
-	m_pSpeedupTile = new CSpeedupTile[m_Width * m_Height];
-	mem_copy(m_pSpeedupTile, Other.m_pSpeedupTile, (size_t)m_Width * m_Height * sizeof(CSpeedupTile));
 }
 
-CLayerSpeedup::~CLayerSpeedup()
-{
-	delete[] m_pSpeedupTile;
-}
+CLayerSpeedup::~CLayerSpeedup() = default;
 
 void CLayerSpeedup::Resize(int NewW, int NewH)
 {
-	// resize speedup data
-	CSpeedupTile *pNewSpeedupData = new CSpeedupTile[NewW * NewH];
-	mem_zero(pNewSpeedupData, (size_t)NewW * NewH * sizeof(CSpeedupTile));
-
-	// copy old data
-	for(int y = 0; y < std::min(NewH, m_Height); y++)
-		mem_copy(&pNewSpeedupData[y * NewW], &m_pSpeedupTile[y * m_Width], std::min(m_Width, NewW) * sizeof(CSpeedupTile));
-
-	// replace old
-	delete[] m_pSpeedupTile;
-	m_pSpeedupTile = pNewSpeedupData;
+	m_SpeedupTiles.Resize(NewW, NewH);
 
 	// resize tile data
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(Map()->m_pGameLayer->m_Width != NewW || Map()->m_pGameLayer->m_Height != NewH)
+	if(Map()->m_pGameLayer->Width() != NewW || Map()->m_pGameLayer->Height() != NewH)
 		Map()->m_pGameLayer->Resize(NewW, NewH);
 }
 
 void CLayerSpeedup::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
-	ShiftImpl(m_pSpeedupTile, Direction, Map()->m_ShiftBy);
+	ShiftImpl(m_SpeedupTiles, Direction, Map()->m_ShiftBy);
 }
 
 bool CLayerSpeedup::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < Height(); y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < Width(); x++)
 		{
 			const int Index = GetTile(x, y).m_Index;
 			if(Index == 0)
@@ -92,121 +76,81 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 
 	bool Destructive = Editor()->m_BrushDrawDestructive || pSpeedupLayer->IsEmpty();
 
-	for(int y = 0; y < pSpeedupLayer->m_Height; y++)
-		for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+	for(int y = 0; y < pSpeedupLayer->Height(); y++)
+		for(int x = 0; x < pSpeedupLayer->Width(); x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= Width() || fy < 0 || fy >= Height())
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = y * pSpeedupLayer->m_Width + x;
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = y * pSpeedupLayer->Width() + x;
+			const int TgtIndex = fy * Width() + fx;
 
-			SSpeedupTileStateChange::SData Previous{
-				m_pSpeedupTile[TgtIndex].m_Force,
-				m_pSpeedupTile[TgtIndex].m_Angle,
-				m_pSpeedupTile[TgtIndex].m_MaxSpeed,
-				m_pSpeedupTile[TgtIndex].m_Type,
-				m_pTiles[TgtIndex].m_Index};
-
-			if((Editor()->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(pSpeedupLayer->m_pTiles[SrcIndex].m_Index)) && pSpeedupLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
+			if((Editor()->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(pSpeedupLayer->m_Tiles[SrcIndex].m_Index)) && pSpeedupLayer->m_Tiles[SrcIndex].m_Index != TILE_AIR)
 			{
 				if(Editor()->m_SpeedupAngle != pSpeedupLayer->m_SpeedupAngle || Editor()->m_SpeedupForce != pSpeedupLayer->m_SpeedupForce || Editor()->m_SpeedupMaxSpeed != pSpeedupLayer->m_SpeedupMaxSpeed)
 				{
-					m_pSpeedupTile[TgtIndex].m_Force = Editor()->m_SpeedupForce;
-					m_pSpeedupTile[TgtIndex].m_MaxSpeed = Editor()->m_SpeedupMaxSpeed;
-					m_pSpeedupTile[TgtIndex].m_Angle = Editor()->m_SpeedupAngle;
-					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
-					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = Editor()->m_SpeedupForce; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = Editor()->m_SpeedupMaxSpeed; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = Editor()->m_SpeedupAngle; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Type = pSpeedupLayer->m_Tiles[SrcIndex].m_Index; });
+					m_Tiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Index = pSpeedupLayer->m_Tiles[SrcIndex].m_Index; });
 				}
-				else if(pSpeedupLayer->m_pSpeedupTile[SrcIndex].m_Force)
+				else if(pSpeedupLayer->m_SpeedupTiles[SrcIndex].m_Force)
 				{
-					m_pSpeedupTile[TgtIndex].m_Force = pSpeedupLayer->m_pSpeedupTile[SrcIndex].m_Force;
-					m_pSpeedupTile[TgtIndex].m_Angle = pSpeedupLayer->m_pSpeedupTile[SrcIndex].m_Angle;
-					m_pSpeedupTile[TgtIndex].m_MaxSpeed = pSpeedupLayer->m_pSpeedupTile[SrcIndex].m_MaxSpeed;
-					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
-					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = pSpeedupLayer->m_SpeedupTiles[SrcIndex].m_Force; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = pSpeedupLayer->m_SpeedupTiles[SrcIndex].m_Angle; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = pSpeedupLayer->m_SpeedupTiles[SrcIndex].m_MaxSpeed; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Type = pSpeedupLayer->m_Tiles[SrcIndex].m_Index; });
+					m_Tiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Index = pSpeedupLayer->m_Tiles[SrcIndex].m_Index; });
 				}
 				else if(Editor()->m_SpeedupForce)
 				{
-					m_pSpeedupTile[TgtIndex].m_Force = Editor()->m_SpeedupForce;
-					m_pSpeedupTile[TgtIndex].m_MaxSpeed = Editor()->m_SpeedupMaxSpeed;
-					m_pSpeedupTile[TgtIndex].m_Angle = Editor()->m_SpeedupAngle;
-					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
-					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = Editor()->m_SpeedupForce; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = Editor()->m_SpeedupMaxSpeed; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = Editor()->m_SpeedupAngle; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Type = pSpeedupLayer->m_Tiles[SrcIndex].m_Index; });
+					m_Tiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Index = pSpeedupLayer->m_Tiles[SrcIndex].m_Index; });
 				}
 				else
 				{
-					m_pSpeedupTile[TgtIndex].m_Force = 0;
-					m_pSpeedupTile[TgtIndex].m_MaxSpeed = 0;
-					m_pSpeedupTile[TgtIndex].m_Angle = 0;
-					m_pSpeedupTile[TgtIndex].m_Type = 0;
-					m_pTiles[TgtIndex].m_Index = 0;
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = 0; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = 0; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = 0; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Type = 0; });
+					m_Tiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Index = 0; });
 				}
 			}
 			else
 			{
-				m_pSpeedupTile[TgtIndex].m_Force = 0;
-				m_pSpeedupTile[TgtIndex].m_MaxSpeed = 0;
-				m_pSpeedupTile[TgtIndex].m_Angle = 0;
-				m_pSpeedupTile[TgtIndex].m_Type = 0;
-				m_pTiles[TgtIndex].m_Index = 0;
+				m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = 0; });
+				m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = 0; });
+				m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = 0; });
+				m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Type = 0; });
+				m_Tiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Index = 0; });
 
-				if(pSpeedupLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
+				if(pSpeedupLayer->m_Tiles[SrcIndex].m_Index != TILE_AIR)
 					ShowPreventUnusedTilesWarning();
 			}
-
-			SSpeedupTileStateChange::SData Current{
-				m_pSpeedupTile[TgtIndex].m_Force,
-				m_pSpeedupTile[TgtIndex].m_Angle,
-				m_pSpeedupTile[TgtIndex].m_MaxSpeed,
-				m_pSpeedupTile[TgtIndex].m_Type,
-				m_pTiles[TgtIndex].m_Index};
-
-			RecordStateChange(fx, fy, Previous, Current);
 		}
-	FlagModified(sx, sy, pSpeedupLayer->m_Width, pSpeedupLayer->m_Height);
-}
-
-void CLayerSpeedup::RecordStateChange(int x, int y, SSpeedupTileStateChange::SData Previous, SSpeedupTileStateChange::SData Current)
-{
-	if(!m_History[y][x].m_Changed)
-		m_History[y][x] = SSpeedupTileStateChange{true, Previous, Current};
-	else
-		m_History[y][x].m_Current = Current;
+	FlagModified(sx, sy, pSpeedupLayer->Width(), pSpeedupLayer->Height());
 }
 
 void CLayerSpeedup::BrushFlipX()
 {
 	CLayerTiles::BrushFlipX();
-	BrushFlipXImpl(m_pSpeedupTile);
-
-	auto &&AngleFlipX = [](auto &Number) {
-		Number = (180 - Number % 360 + 360) % 360;
-	};
-
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width; x++)
-			AngleFlipX(m_pSpeedupTile[y * m_Width + x].m_Angle);
+	FlipSpeedupTilesX(m_SpeedupTiles);
 }
 
 void CLayerSpeedup::BrushFlipY()
 {
 	CLayerTiles::BrushFlipY();
-	BrushFlipYImpl(m_pSpeedupTile);
-
-	auto &&AngleFlipY = [](auto &Number) {
-		Number = (360 - Number % 360 + 360) % 360;
-	};
-
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width; x++)
-			AngleFlipY(m_pSpeedupTile[y * m_Width + x].m_Angle);
+	FlipSpeedupTilesY(m_SpeedupTiles);
 }
 
 void CLayerSpeedup::BrushRotate(float Amount)
@@ -215,32 +159,10 @@ void CLayerSpeedup::BrushRotate(float Amount)
 	if(Rotation < 0)
 		Rotation += 4;
 
-	// 1 and 3 are both adjusted by 90, because for 3 the brush is also flipped
-	int Adjust = (Rotation == 0) ? 0 : ((Rotation == 2) ? 180 : 90);
-	auto &&AdjustAngle = [Adjust](auto &Number) {
-		Number = (Number + Adjust % 360 + 360) % 360;
-	};
-
 	if(Rotation == 1 || Rotation == 3)
 	{
-		// 90° rotation
-		CSpeedupTile *pTempData1 = new CSpeedupTile[m_Width * m_Height];
-		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pSpeedupTile, (size_t)m_Width * m_Height * sizeof(CSpeedupTile));
-		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
-		CSpeedupTile *pDst1 = m_pSpeedupTile;
-		CTile *pDst2 = m_pTiles;
-		for(int x = 0; x < m_Width; ++x)
-			for(int y = m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
-			{
-				AdjustAngle(pTempData1[y * m_Width + x].m_Angle);
-				*pDst1 = pTempData1[y * m_Width + x];
-				*pDst2 = pTempData2[y * m_Width + x];
-			}
-
-		std::swap(m_Width, m_Height);
-		delete[] pTempData1;
-		delete[] pTempData2;
+		RotateSpeedupTilesClockwise(m_SpeedupTiles);
+		m_Tiles.RotateClockwise();
 	}
 
 	if(Rotation == 2 || Rotation == 3)
@@ -273,73 +195,57 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= Width() || fy < 0 || fy >= Height())
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = Empty ? 0 : (y * pLt->Width() + x % pLt->Width()) % (pLt->Width() * pLt->Height());
+			const int TgtIndex = fy * Width() + fx;
 
-			SSpeedupTileStateChange::SData Previous{
-				m_pSpeedupTile[TgtIndex].m_Force,
-				m_pSpeedupTile[TgtIndex].m_Angle,
-				m_pSpeedupTile[TgtIndex].m_MaxSpeed,
-				m_pSpeedupTile[TgtIndex].m_Type,
-				m_pTiles[TgtIndex].m_Index};
-
-			if(Empty || (!Editor()->IsAllowPlaceUnusedTiles() && !IsValidSpeedupTile((pLt->m_pTiles[SrcIndex]).m_Index))) // no speed up tile chosen: reset
+			if(Empty || (!Editor()->IsAllowPlaceUnusedTiles() && !IsValidSpeedupTile((pLt->m_Tiles[SrcIndex]).m_Index))) // no speed up tile chosen: reset
 			{
-				m_pTiles[TgtIndex].m_Index = 0;
-				m_pSpeedupTile[TgtIndex].m_Force = 0;
-				m_pSpeedupTile[TgtIndex].m_Angle = 0;
-				m_pSpeedupTile[TgtIndex].m_MaxSpeed = 0;
-				m_pSpeedupTile[TgtIndex].m_Type = 0;
+				m_Tiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Index = 0; });
+				m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = 0; });
+				m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = 0; });
+				m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = 0; });
+				m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Type = 0; });
 
 				if(!Empty)
 					ShowPreventUnusedTilesWarning();
 			}
 			else
 			{
-				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
-				if(pLt->m_HasSpeedup && m_pTiles[TgtIndex].m_Index > 0)
+				m_Tiles.Set(TgtIndex, pLt->m_Tiles[SrcIndex]);
+				if(pLt->m_HasSpeedup && m_Tiles[TgtIndex].m_Index > 0)
 				{
-					m_pSpeedupTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Type = m_Tiles[TgtIndex].m_Index; });
 
-					if((pLt->m_pSpeedupTile[SrcIndex].m_Force == 0 && Editor()->m_SpeedupForce) || Editor()->m_SpeedupForce != pLt->m_SpeedupForce)
-						m_pSpeedupTile[TgtIndex].m_Force = Editor()->m_SpeedupForce;
+					if((pLt->m_SpeedupTiles[SrcIndex].m_Force == 0 && Editor()->m_SpeedupForce) || Editor()->m_SpeedupForce != pLt->m_SpeedupForce)
+						m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = Editor()->m_SpeedupForce; });
 					else
-						m_pSpeedupTile[TgtIndex].m_Force = pLt->m_pSpeedupTile[SrcIndex].m_Force;
+						m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = pLt->m_SpeedupTiles[SrcIndex].m_Force; });
 
-					if((pLt->m_pSpeedupTile[SrcIndex].m_Angle == 0 && Editor()->m_SpeedupAngle) || Editor()->m_SpeedupAngle != pLt->m_SpeedupAngle)
-						m_pSpeedupTile[TgtIndex].m_Angle = Editor()->m_SpeedupAngle;
+					if((pLt->m_SpeedupTiles[SrcIndex].m_Angle == 0 && Editor()->m_SpeedupAngle) || Editor()->m_SpeedupAngle != pLt->m_SpeedupAngle)
+						m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = Editor()->m_SpeedupAngle; });
 					else
-						m_pSpeedupTile[TgtIndex].m_Angle = pLt->m_pSpeedupTile[SrcIndex].m_Angle;
+						m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = pLt->m_SpeedupTiles[SrcIndex].m_Angle; });
 
-					if((pLt->m_pSpeedupTile[SrcIndex].m_MaxSpeed == 0 && Editor()->m_SpeedupMaxSpeed) || Editor()->m_SpeedupMaxSpeed != pLt->m_SpeedupMaxSpeed)
-						m_pSpeedupTile[TgtIndex].m_MaxSpeed = Editor()->m_SpeedupMaxSpeed;
+					if((pLt->m_SpeedupTiles[SrcIndex].m_MaxSpeed == 0 && Editor()->m_SpeedupMaxSpeed) || Editor()->m_SpeedupMaxSpeed != pLt->m_SpeedupMaxSpeed)
+						m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = Editor()->m_SpeedupMaxSpeed; });
 					else
-						m_pSpeedupTile[TgtIndex].m_MaxSpeed = pLt->m_pSpeedupTile[SrcIndex].m_MaxSpeed;
+						m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = pLt->m_SpeedupTiles[SrcIndex].m_MaxSpeed; });
 				}
 				else
 				{
-					m_pTiles[TgtIndex].m_Index = 0;
-					m_pSpeedupTile[TgtIndex].m_Force = 0;
-					m_pSpeedupTile[TgtIndex].m_Angle = 0;
-					m_pSpeedupTile[TgtIndex].m_MaxSpeed = 0;
-					m_pSpeedupTile[TgtIndex].m_Type = 0;
+					m_Tiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Index = 0; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Force = 0; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Angle = 0; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_MaxSpeed = 0; });
+					m_SpeedupTiles.Update(TgtIndex, [&](auto &Cell) { Cell.m_Type = 0; });
 				}
 			}
-
-			SSpeedupTileStateChange::SData Current{
-				m_pSpeedupTile[TgtIndex].m_Force,
-				m_pSpeedupTile[TgtIndex].m_Angle,
-				m_pSpeedupTile[TgtIndex].m_MaxSpeed,
-				m_pSpeedupTile[TgtIndex].m_Type,
-				m_pTiles[TgtIndex].m_Index};
-
-			RecordStateChange(fx, fy, Previous, Current);
 		}
 	}
 	FlagModified(sx, sy, w, h);

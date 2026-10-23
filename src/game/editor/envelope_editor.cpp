@@ -14,9 +14,8 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
+#include <game/client/number_input.h>
 #include <game/editor/editor.h>
-#include <game/editor/editor_actions.h>
-#include <game/editor/editor_trackers.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/map.h>
 
@@ -177,23 +176,26 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 		// redo button
 		ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
-		if(Editor()->DoButton_FontIcon(&m_RedoButtonId, FontIcon::REDO, Map()->m_EnvelopeEditorHistory.CanRedo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last action.", IGraphics::CORNER_R, 11.0f) == 1)
+		if(Editor()->DoButton_FontIcon(&m_RedoButtonId, FontIcon::REDO, Map()->m_DocumentHistory.CanRedo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last action.", IGraphics::CORNER_R, 11.0f) == 1)
 		{
-			Map()->m_EnvelopeEditorHistory.Redo();
+			Map()->m_DocumentHistory.Redo();
 		}
 
 		// undo button
 		ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 		ToolBar.VSplitRight(10.0f, &ToolBar, nullptr);
-		if(Editor()->DoButton_FontIcon(&m_UndoButtonId, FontIcon::UNDO, Map()->m_EnvelopeEditorHistory.CanUndo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last action.", IGraphics::CORNER_L, 11.0f) == 1)
+		if(Editor()->DoButton_FontIcon(&m_UndoButtonId, FontIcon::UNDO, Map()->m_DocumentHistory.CanUndo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last action.", IGraphics::CORNER_L, 11.0f) == 1)
 		{
-			Map()->m_EnvelopeEditorHistory.Undo();
+			Map()->m_DocumentHistory.Undo();
 		}
 
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		if(Editor()->DoButton_Editor(&m_NewSoundEnvelopeButtonId, "Sound+", 0, &Button, BUTTONFLAG_LEFT, "Create a new sound envelope."))
 		{
-			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::SOUND));
+			Map()->m_DocumentHistory.Edit(this, "Add sound envelope", editor_history::ECategory::ENVELOPE, [&] {
+				Map()->NewEnvelope(CEnvelope::EType::SOUND);
+				Map()->m_SelectedEnvelope = Map()->m_vpEnvelopes.size() - 1;
+			});
 			pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
 			CurrentEnvelopeSwitched = true;
 		}
@@ -202,7 +204,10 @@ void CEnvelopeEditor::Render(CUIRect View)
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		if(Editor()->DoButton_Editor(&m_NewColorEnvelopeButtonId, "Color+", 0, &Button, BUTTONFLAG_LEFT, "Create a new color envelope."))
 		{
-			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::COLOR));
+			Map()->m_DocumentHistory.Edit(this, "Add color envelope", editor_history::ECategory::ENVELOPE, [&] {
+				Map()->NewEnvelope(CEnvelope::EType::COLOR);
+				Map()->m_SelectedEnvelope = Map()->m_vpEnvelopes.size() - 1;
+			});
 			pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
 			CurrentEnvelopeSwitched = true;
 		}
@@ -211,7 +216,10 @@ void CEnvelopeEditor::Render(CUIRect View)
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		if(Editor()->DoButton_Editor(&m_NewPositionEnvelopeButtonId, "Pos.+", 0, &Button, BUTTONFLAG_LEFT, "Create a new position envelope."))
 		{
-			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::POSITION));
+			Map()->m_DocumentHistory.Edit(this, "Add position envelope", editor_history::ECategory::ENVELOPE, [&] {
+				Map()->NewEnvelope(CEnvelope::EType::POSITION);
+				Map()->m_SelectedEnvelope = Map()->m_vpEnvelopes.size() - 1;
+			});
 			pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
 			CurrentEnvelopeSwitched = true;
 		}
@@ -223,12 +231,13 @@ void CEnvelopeEditor::Render(CUIRect View)
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			if(Editor()->DoButton_Editor(&m_DeleteButtonId, "✗", 0, &Button, BUTTONFLAG_LEFT, "Delete this envelope."))
 			{
-				auto vpObjectReferences = Map()->DeleteEnvelope(Map()->m_SelectedEnvelope);
-				Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDelete>(Map(), Map()->m_SelectedEnvelope, vpObjectReferences, pEnvelope));
+				Map()->m_DocumentHistory.Edit(&m_DeleteButtonId, "Delete envelope", editor_history::ECategory::ENVELOPE, [&] {
+					Map()->DeleteEnvelope(Map()->m_SelectedEnvelope);
 
-				Map()->m_SelectedEnvelope = Map()->m_vpEnvelopes.empty() ? -1 : std::clamp(Map()->m_SelectedEnvelope, 0, (int)Map()->m_vpEnvelopes.size() - 1);
-				pEnvelope = Map()->m_vpEnvelopes.empty() ? nullptr : Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
-				Map()->OnModify();
+					Map()->m_SelectedEnvelope = Map()->m_vpEnvelopes.empty() ? -1 : std::clamp(Map()->m_SelectedEnvelope, 0, (int)Map()->m_vpEnvelopes.size() - 1);
+					pEnvelope = Map()->m_vpEnvelopes.empty() ? nullptr : Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
+					Map()->OnModify();
+				});
 			}
 		}
 
@@ -240,30 +249,32 @@ void CEnvelopeEditor::Render(CUIRect View)
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			if(Editor()->DoButton_Ex(&m_MoveRightButtonId, "→", (Map()->m_SelectedEnvelope >= (int)Map()->m_vpEnvelopes.size() - 1 ? -1 : 0), &Button, BUTTONFLAG_LEFT, "Move this envelope to the right.", IGraphics::CORNER_R))
 			{
-				int MoveTo = Map()->m_SelectedEnvelope + 1;
-				int MoveFrom = Map()->m_SelectedEnvelope;
-				Map()->m_SelectedEnvelope = Map()->MoveEnvelope(MoveFrom, MoveTo);
-				if(Map()->m_SelectedEnvelope != MoveFrom)
-				{
-					Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(Map(), Map()->m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, MoveFrom, Map()->m_SelectedEnvelope));
-					pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
-					Map()->OnModify();
-				}
+				Map()->m_DocumentHistory.Edit(&m_MoveRightButtonId, "Reorder envelope", editor_history::ECategory::ENVELOPE, [&] {
+					int MoveTo = Map()->m_SelectedEnvelope + 1;
+					int MoveFrom = Map()->m_SelectedEnvelope;
+					Map()->m_SelectedEnvelope = Map()->MoveEnvelope(MoveFrom, MoveTo);
+					if(Map()->m_SelectedEnvelope != MoveFrom)
+					{
+						pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
+						Map()->OnModify();
+					}
+				});
 			}
 
 			// Move left button
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			if(Editor()->DoButton_Ex(&m_MoveLeftButtonId, "←", (Map()->m_SelectedEnvelope <= 0 ? -1 : 0), &Button, BUTTONFLAG_LEFT, "Move this envelope to the left.", IGraphics::CORNER_L))
 			{
-				int MoveTo = Map()->m_SelectedEnvelope - 1;
-				int MoveFrom = Map()->m_SelectedEnvelope;
-				Map()->m_SelectedEnvelope = Map()->MoveEnvelope(MoveFrom, MoveTo);
-				if(Map()->m_SelectedEnvelope != MoveFrom)
-				{
-					Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(Map(), Map()->m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, MoveFrom, Map()->m_SelectedEnvelope));
-					pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
-					Map()->OnModify();
-				}
+				Map()->m_DocumentHistory.Edit(&m_MoveLeftButtonId, "Reorder envelope", editor_history::ECategory::ENVELOPE, [&] {
+					int MoveTo = Map()->m_SelectedEnvelope - 1;
+					int MoveFrom = Map()->m_SelectedEnvelope;
+					Map()->m_SelectedEnvelope = Map()->MoveEnvelope(MoveFrom, MoveTo);
+					if(Map()->m_SelectedEnvelope != MoveFrom)
+					{
+						pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
+						Map()->OnModify();
+					}
+				});
 			}
 
 			if(pEnvelope)
@@ -343,7 +354,7 @@ void CEnvelopeEditor::Render(CUIRect View)
 			ToolBar.VSplitLeft(ToolBar.w > ToolBar.h * 40 ? 80.0f : 60.0f, &Button, &ToolBar);
 
 			m_NameInput.SetBuffer(pEnvelope->m_aName, sizeof(pEnvelope->m_aName));
-			if(Editor()->DoEditBox(&m_NameInput, &Button, 10.0f, IGraphics::CORNER_ALL, "The name of the selected envelope."))
+			if(Editor()->DoDocumentEditBox(&m_NameInput, &Button, 10.0f, "Rename envelope", editor_history::ECategory::ENVELOPE))
 			{
 				Map()->OnModify();
 			}
@@ -476,11 +487,12 @@ void CEnvelopeEditor::Render(CUIRect View)
 					}
 
 					if(!TimeFound)
-						Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionAddEnvelopePoint>(Map(), Map()->m_SelectedEnvelope, FixedTime, Channels));
-
-					if(FixedTime < CFixedTime(0))
-						RemoveTimeOffsetEnvelope(pEnvelope);
-					Map()->OnModify();
+						Map()->m_DocumentHistory.Edit(this, "Add envelope point", editor_history::ECategory::ENVELOPE, [&] {
+							pEnvelope->AddPoint(FixedTime, {f2fx(Channels.r), f2fx(Channels.g), f2fx(Channels.b), f2fx(Channels.a)});
+							if(FixedTime < CFixedTime(0))
+								RemoveTimeOffsetEnvelope(pEnvelope);
+							Map()->OnModify();
+						});
 				}
 				m_EnvelopeEditorButtonUsed = -1;
 			}
@@ -794,13 +806,11 @@ void CEnvelopeEditor::Render(CUIRect View)
 					const int ButtonResult = Editor()->DoButton_Editor(pId, CurveTypeNameShort(pEnvelope->m_vPoints[i].m_Curvetype), 0, &CurveButton, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier).");
 					if(ButtonResult == 1)
 					{
-						const int PrevCurve = pEnvelope->m_vPoints[i].m_Curvetype;
-						const int Direction = Input()->ShiftIsPressed() ? -1 : 1;
-						pEnvelope->m_vPoints[i].m_Curvetype = (pEnvelope->m_vPoints[i].m_Curvetype + Direction + NUM_CURVETYPES) % NUM_CURVETYPES;
-
-						Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEditPoint>(Map(),
-							Map()->m_SelectedEnvelope, i, 0, CEditorActionEnvelopeEditPoint::EEditType::CURVE_TYPE, PrevCurve, pEnvelope->m_vPoints[i].m_Curvetype));
-						Map()->OnModify();
+						Map()->m_DocumentHistory.Edit(pId, "Change envelope curve", editor_history::ECategory::ENVELOPE, [&] {
+							const int Direction = Input()->ShiftIsPressed() ? -1 : 1;
+							pEnvelope->m_vPoints[i].m_Curvetype = (pEnvelope->m_vPoints[i].m_Curvetype + Direction + NUM_CURVETYPES) % NUM_CURVETYPES;
+							Map()->OnModify();
+						});
 					}
 					else if(ButtonResult == 2)
 					{
@@ -832,15 +842,7 @@ void CEnvelopeEditor::Render(CUIRect View)
 			};
 
 			if(m_Operation == EEnvelopeEditorOp::NONE)
-			{
 				UpdateHotEnvelopeObject(View, pEnvelope.get(), State.m_ActiveChannels);
-				if(!Ui()->MouseButton(0))
-					Map()->m_EnvOpTracker.Stop(false);
-			}
-			else
-			{
-				Map()->m_EnvOpTracker.Begin(m_Operation);
-			}
 
 			Ui()->ClipEnable(&View);
 			Graphics()->TextureClear();
@@ -894,88 +896,92 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 							if(m_Operation == EEnvelopeEditorOp::DRAG_POINT || m_Operation == EEnvelopeEditorOp::DRAG_POINT_X || m_Operation == EEnvelopeEditorOp::DRAG_POINT_Y)
 							{
-								if(Input()->ModifierIsPressed())
-								{
-									Ui()->SetMouseSlow(true);
-								}
-
-								if(Input()->ShiftIsPressed())
-								{
-									if(m_Operation == EEnvelopeEditorOp::DRAG_POINT || m_Operation == EEnvelopeEditorOp::DRAG_POINT_Y)
-									{
-										m_Operation = EEnvelopeEditorOp::DRAG_POINT_X;
-										m_vAccurateDragValuesX.clear();
-										for(auto [SelectedIndex, _] : Map()->m_vSelectedEnvelopePoints)
-											m_vAccurateDragValuesX.push_back(pEnvelope->m_vPoints[SelectedIndex].m_Time.GetInternal());
-									}
-									else
-									{
-										float DeltaX = ScreenToEnvelopeDeltaX(View, Ui()->MouseDeltaX()) * 1000.0f;
-
-										for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
+								if(Map()->m_DocumentHistory.Begin(this, "Move envelope points", editor_history::ECategory::ENVELOPE))
+									Map()->m_DocumentHistory.Update(this, [&] {
+										Map()->m_DocumentHistory.TrackPointer(this, Ui()->ActiveItem());
+										if(Input()->ModifierIsPressed())
 										{
-											int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
-											CFixedTime BoundLow = CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x));
-											CFixedTime BoundHigh = CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x + View.w));
-											for(int j = 0; j < SelectedIndex; j++)
-											{
-												if(!Map()->IsEnvPointSelected(j))
-													BoundLow = std::max(pEnvelope->m_vPoints[j].m_Time + CFixedTime(1), BoundLow);
-											}
-											for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
-											{
-												if(!Map()->IsEnvPointSelected(j))
-													BoundHigh = std::min(pEnvelope->m_vPoints[j].m_Time - CFixedTime(1), BoundHigh);
-											}
-
-											DeltaX = ClampDelta(m_vAccurateDragValuesX[k], DeltaX, BoundLow.GetInternal(), BoundHigh.GetInternal());
+											Ui()->SetMouseSlow(true);
 										}
-										for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
-										{
-											int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
-											m_vAccurateDragValuesX[k] += DeltaX;
-											pEnvelope->m_vPoints[SelectedIndex].m_Time = CFixedTime(std::round(m_vAccurateDragValuesX[k]));
-										}
-										for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
-										{
-											int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
-											if(SelectedIndex == 0 && pEnvelope->m_vPoints[SelectedIndex].m_Time != CFixedTime(0))
-											{
-												RemoveTimeOffsetEnvelope(pEnvelope);
-												float Offset = m_vAccurateDragValuesX[k];
-												for(auto &Value : m_vAccurateDragValuesX)
-													Value -= Offset;
-												break;
-											}
-										}
-									}
-								}
-								else
-								{
-									if(m_Operation == EEnvelopeEditorOp::DRAG_POINT || m_Operation == EEnvelopeEditorOp::DRAG_POINT_X)
-									{
-										m_Operation = EEnvelopeEditorOp::DRAG_POINT_Y;
-										m_vAccurateDragValuesY.clear();
-										for(auto [SelectedIndex, SelectedChannel] : Map()->m_vSelectedEnvelopePoints)
-											m_vAccurateDragValuesY.push_back(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel]);
-									}
-									else
-									{
-										float DeltaY = ScreenToEnvelopeDeltaY(View, Ui()->MouseDeltaY()) * 1024.0f;
-										for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
-										{
-											auto [SelectedIndex, SelectedChannel] = Map()->m_vSelectedEnvelopePoints[k];
-											m_vAccurateDragValuesY[k] -= DeltaY;
-											pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(m_vAccurateDragValuesY[k]);
 
-											if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
+										if(Input()->ShiftIsPressed())
+										{
+											if(m_Operation == EEnvelopeEditorOp::DRAG_POINT || m_Operation == EEnvelopeEditorOp::DRAG_POINT_Y)
 											{
-												pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
-												m_vAccurateDragValuesY[k] = std::clamp<float>(m_vAccurateDragValuesY[k], 0, 1024);
+												m_Operation = EEnvelopeEditorOp::DRAG_POINT_X;
+												m_vAccurateDragValuesX.clear();
+												for(auto [SelectedIndex, _] : Map()->m_vSelectedEnvelopePoints)
+													m_vAccurateDragValuesX.push_back(pEnvelope->m_vPoints[SelectedIndex].m_Time.GetInternal());
+											}
+											else
+											{
+												float DeltaX = ScreenToEnvelopeDeltaX(View, Ui()->MouseDeltaX()) * 1000.0f;
+
+												for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
+												{
+													int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
+													CFixedTime BoundLow = CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x));
+													CFixedTime BoundHigh = CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x + View.w));
+													for(int j = 0; j < SelectedIndex; j++)
+													{
+														if(!Map()->IsEnvPointSelected(j))
+															BoundLow = std::max(pEnvelope->m_vPoints[j].m_Time + CFixedTime(1), BoundLow);
+													}
+													for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
+													{
+														if(!Map()->IsEnvPointSelected(j))
+															BoundHigh = std::min(pEnvelope->m_vPoints[j].m_Time - CFixedTime(1), BoundHigh);
+													}
+
+													DeltaX = ClampDelta(m_vAccurateDragValuesX[k], DeltaX, BoundLow.GetInternal(), BoundHigh.GetInternal());
+												}
+												for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
+												{
+													int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
+													m_vAccurateDragValuesX[k] += DeltaX;
+													pEnvelope->m_vPoints[SelectedIndex].m_Time = CFixedTime(std::round(m_vAccurateDragValuesX[k]));
+												}
+												for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
+												{
+													int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
+													if(SelectedIndex == 0 && pEnvelope->m_vPoints[SelectedIndex].m_Time != CFixedTime(0))
+													{
+														RemoveTimeOffsetEnvelope(pEnvelope);
+														float Offset = m_vAccurateDragValuesX[k];
+														for(auto &Value : m_vAccurateDragValuesX)
+															Value -= Offset;
+														break;
+													}
+												}
 											}
 										}
-									}
-								}
+										else
+										{
+											if(m_Operation == EEnvelopeEditorOp::DRAG_POINT || m_Operation == EEnvelopeEditorOp::DRAG_POINT_X)
+											{
+												m_Operation = EEnvelopeEditorOp::DRAG_POINT_Y;
+												m_vAccurateDragValuesY.clear();
+												for(auto [SelectedIndex, SelectedChannel] : Map()->m_vSelectedEnvelopePoints)
+													m_vAccurateDragValuesY.push_back(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel]);
+											}
+											else
+											{
+												float DeltaY = ScreenToEnvelopeDeltaY(View, Ui()->MouseDeltaY()) * 1024.0f;
+												for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
+												{
+													auto [SelectedIndex, SelectedChannel] = Map()->m_vSelectedEnvelopePoints[k];
+													m_vAccurateDragValuesY[k] -= DeltaY;
+													pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(m_vAccurateDragValuesY[k]);
+
+													if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
+													{
+														pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
+														m_vAccurateDragValuesY[k] = std::clamp<float>(m_vAccurateDragValuesY[k], 0, 1024);
+													}
+												}
+											}
+										}
+									});
 							}
 
 							if(m_Operation == EEnvelopeEditorOp::CONTEXT_MENU)
@@ -1028,7 +1034,7 @@ void CEnvelopeEditor::Render(CUIRect View)
 							{
 								if(Input()->ShiftIsPressed())
 								{
-									Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionDeleteEnvelopePoint>(Map(), Map()->m_SelectedEnvelope, i));
+									DeletePoint(pEnvelope, i);
 								}
 								else
 								{
@@ -1103,20 +1109,24 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 								if(m_Operation == EEnvelopeEditorOp::DRAG_POINT)
 								{
-									if(Input()->ModifierIsPressed())
-									{
-										Ui()->SetMouseSlow(true);
-									}
+									if(Map()->m_DocumentHistory.Begin(this, "Move envelope points", editor_history::ECategory::ENVELOPE))
+										Map()->m_DocumentHistory.Update(this, [&] {
+											Map()->m_DocumentHistory.TrackPointer(this, Ui()->ActiveItem());
+											if(Input()->ModifierIsPressed())
+											{
+												Ui()->SetMouseSlow(true);
+											}
 
-									m_vAccurateDragValuesX[0] += ScreenToEnvelopeDeltaX(View, Ui()->MouseDeltaX()) * 1000.0f;
-									m_vAccurateDragValuesY[0] -= ScreenToEnvelopeDeltaY(View, Ui()->MouseDeltaY()) * 1024.0f;
+											m_vAccurateDragValuesX[0] += ScreenToEnvelopeDeltaX(View, Ui()->MouseDeltaX()) * 1000.0f;
+											m_vAccurateDragValuesY[0] -= ScreenToEnvelopeDeltaY(View, Ui()->MouseDeltaY()) * 1024.0f;
 
-									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = CFixedTime(std::round(m_vAccurateDragValuesX[0]));
-									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = std::round(m_vAccurateDragValuesY[0]);
+											pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = CFixedTime(std::round(m_vAccurateDragValuesX[0]));
+											pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = std::round(m_vAccurateDragValuesY[0]);
 
-									// clamp time value
-									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = std::clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c], CFixedTime(0), CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
-									m_vAccurateDragValuesX[0] = std::clamp<float>(m_vAccurateDragValuesX[0], 0, (CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time).GetInternal());
+											// clamp time value
+											pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = std::clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c], CFixedTime(0), CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
+											m_vAccurateDragValuesX[0] = std::clamp<float>(m_vAccurateDragValuesX[0], 0, (CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time).GetInternal());
+										});
 								}
 
 								if(m_Operation == EEnvelopeEditorOp::CONTEXT_MENU)
@@ -1160,9 +1170,11 @@ void CEnvelopeEditor::Render(CUIRect View)
 									if(Input()->ShiftIsPressed())
 									{
 										Map()->SelectTangentOutPoint(i, c);
-										pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = CFixedTime(0);
-										pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = 0.0f;
-										Map()->OnModify();
+										Map()->m_DocumentHistory.Edit(pId, "Reset envelope tangent", editor_history::ECategory::ENVELOPE, [&] {
+											pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = CFixedTime(0);
+											pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = 0.0f;
+											Map()->OnModify();
+										});
 									}
 									else
 									{
@@ -1234,20 +1246,24 @@ void CEnvelopeEditor::Render(CUIRect View)
 
 								if(m_Operation == EEnvelopeEditorOp::DRAG_POINT)
 								{
-									if(Input()->ModifierIsPressed())
-									{
-										Ui()->SetMouseSlow(true);
-									}
+									if(Map()->m_DocumentHistory.Begin(this, "Move envelope points", editor_history::ECategory::ENVELOPE))
+										Map()->m_DocumentHistory.Update(this, [&] {
+											Map()->m_DocumentHistory.TrackPointer(this, Ui()->ActiveItem());
+											if(Input()->ModifierIsPressed())
+											{
+												Ui()->SetMouseSlow(true);
+											}
 
-									m_vAccurateDragValuesX[0] += ScreenToEnvelopeDeltaX(View, Ui()->MouseDeltaX()) * 1000.0f;
-									m_vAccurateDragValuesY[0] -= ScreenToEnvelopeDeltaY(View, Ui()->MouseDeltaY()) * 1024.0f;
+											m_vAccurateDragValuesX[0] += ScreenToEnvelopeDeltaX(View, Ui()->MouseDeltaX()) * 1000.0f;
+											m_vAccurateDragValuesY[0] -= ScreenToEnvelopeDeltaY(View, Ui()->MouseDeltaY()) * 1024.0f;
 
-									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = CFixedTime(std::round(m_vAccurateDragValuesX[0]));
-									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = std::round(m_vAccurateDragValuesY[0]);
+											pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = CFixedTime(std::round(m_vAccurateDragValuesX[0]));
+											pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = std::round(m_vAccurateDragValuesY[0]);
 
-									// clamp time value
-									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = std::clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, CFixedTime(0));
-									m_vAccurateDragValuesX[0] = std::clamp<float>(m_vAccurateDragValuesX[0], (CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time).GetInternal(), 0);
+											// clamp time value
+											pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = std::clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, CFixedTime(0));
+											m_vAccurateDragValuesX[0] = std::clamp<float>(m_vAccurateDragValuesX[0], (CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time).GetInternal(), 0);
+										});
 								}
 
 								if(m_Operation == EEnvelopeEditorOp::CONTEXT_MENU)
@@ -1291,9 +1307,11 @@ void CEnvelopeEditor::Render(CUIRect View)
 									if(Input()->ShiftIsPressed())
 									{
 										Map()->SelectTangentInPoint(i, c);
-										pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = CFixedTime(0);
-										pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = 0.0f;
-										Map()->OnModify();
+										Map()->m_DocumentHistory.Edit(pId, "Reset envelope tangent", editor_history::ECategory::ENVELOPE, [&] {
+											pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = CFixedTime(0);
+											pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = 0.0f;
+											Map()->OnModify();
+										});
 									}
 									else
 									{
@@ -1320,6 +1338,8 @@ void CEnvelopeEditor::Render(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 			Ui()->ClipDisable();
+			if(m_Operation == EEnvelopeEditorOp::NONE && !Ui()->MouseButton(0))
+				Map()->m_DocumentHistory.Complete(this, editor_history::EEditCompletion::POINTER_RELEASE);
 		}
 
 		// handle scaling
@@ -1366,99 +1386,92 @@ void CEnvelopeEditor::Render(CUIRect View)
 			str_copy(Editor()->m_aTooltip, "Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise.");
 			Ui()->SetActiveItem(&m_ScaleOperationId); // Prevent other UI elements from being activated during scale operation
 			Editor()->m_ActiveEnvelopePreview = CEditor::EEnvelopePreview::SELECTED;
+			if(Map()->m_DocumentHistory.Begin(this, "Scale envelope points", editor_history::ECategory::ENVELOPE))
+				Map()->m_DocumentHistory.Update(this, [&] {
+					Map()->m_DocumentHistory.TrackPointer(this, Ui()->ActiveItem());
 
-			if(Input()->ModifierIsPressed())
-			{
-				Ui()->SetMouseSlow(true);
-			}
-
-			if(Input()->ShiftIsPressed())
-			{
-				m_ScaleFactor.x += Ui()->MouseDeltaX() / Graphics()->ScreenWidth() * 10.0f;
-				float Midpoint = Input()->AltIsPressed() ? m_Midpoint.x : 0.0f;
-				for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
-				{
-					int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
-					CFixedTime BoundLow = CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x));
-					CFixedTime BoundHigh = CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x + View.w));
-					for(int j = 0; j < SelectedIndex; j++)
+					if(Input()->ModifierIsPressed())
 					{
-						if(!Map()->IsEnvPointSelected(j))
-							BoundLow = std::max(pEnvelope->m_vPoints[j].m_Time + CFixedTime(1), BoundLow);
-					}
-					for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
-					{
-						if(!Map()->IsEnvPointSelected(j))
-							BoundHigh = std::min(pEnvelope->m_vPoints[j].m_Time - CFixedTime(1), BoundHigh);
+						Ui()->SetMouseSlow(true);
 					}
 
-					float Value = m_vInitialPositionsX[k];
-					float ScaleBoundLow = (BoundLow.GetInternal() - Midpoint) / (Value - Midpoint);
-					float ScaleBoundHigh = (BoundHigh.GetInternal() - Midpoint) / (Value - Midpoint);
-					float ScaleBoundMin = std::min(ScaleBoundLow, ScaleBoundHigh);
-					float ScaleBoundMax = std::max(ScaleBoundLow, ScaleBoundHigh);
-					m_ScaleFactor.x = std::clamp(m_ScaleFactor.x, ScaleBoundMin, ScaleBoundMax);
-				}
-
-				for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
-				{
-					int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
-					float ScaleMinimum = m_vInitialPositionsX[k] - Midpoint > CFixedTime(1).AsSeconds() ? CFixedTime(1).AsSeconds() / (m_vInitialPositionsX[k] - Midpoint) : 0.0f;
-					float ScaleFactor = std::max(ScaleMinimum, m_ScaleFactor.x);
-					pEnvelope->m_vPoints[SelectedIndex].m_Time = CFixedTime(std::round((m_vInitialPositionsX[k] - Midpoint) * ScaleFactor + Midpoint));
-				}
-				for(size_t k = 1; k < pEnvelope->m_vPoints.size(); k++)
-				{
-					if(pEnvelope->m_vPoints[k].m_Time <= pEnvelope->m_vPoints[k - 1].m_Time)
-						pEnvelope->m_vPoints[k].m_Time = pEnvelope->m_vPoints[k - 1].m_Time + CFixedTime(1);
-				}
-				for(auto [SelectedIndex, _] : Map()->m_vSelectedEnvelopePoints)
-				{
-					if(SelectedIndex == 0 && pEnvelope->m_vPoints[SelectedIndex].m_Time != CFixedTime(0))
+					if(Input()->ShiftIsPressed())
 					{
-						float Offset = pEnvelope->m_vPoints[0].m_Time.GetInternal();
-						RemoveTimeOffsetEnvelope(pEnvelope);
-						m_Midpoint.x -= Offset;
-						for(auto &Value : m_vInitialPositionsX)
-							Value -= Offset;
-						break;
+						m_ScaleFactor.x += Ui()->MouseDeltaX() / Graphics()->ScreenWidth() * 10.0f;
+						float Midpoint = Input()->AltIsPressed() ? m_Midpoint.x : 0.0f;
+						for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
+						{
+							int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
+							CFixedTime BoundLow = CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x));
+							CFixedTime BoundHigh = CFixedTime::FromSeconds(ScreenToEnvelopeX(View, View.x + View.w));
+							for(int j = 0; j < SelectedIndex; j++)
+							{
+								if(!Map()->IsEnvPointSelected(j))
+									BoundLow = std::max(pEnvelope->m_vPoints[j].m_Time + CFixedTime(1), BoundLow);
+							}
+							for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
+							{
+								if(!Map()->IsEnvPointSelected(j))
+									BoundHigh = std::min(pEnvelope->m_vPoints[j].m_Time - CFixedTime(1), BoundHigh);
+							}
+
+							float Value = m_vInitialPositionsX[k];
+							float ScaleBoundLow = (BoundLow.GetInternal() - Midpoint) / (Value - Midpoint);
+							float ScaleBoundHigh = (BoundHigh.GetInternal() - Midpoint) / (Value - Midpoint);
+							float ScaleBoundMin = std::min(ScaleBoundLow, ScaleBoundHigh);
+							float ScaleBoundMax = std::max(ScaleBoundLow, ScaleBoundHigh);
+							m_ScaleFactor.x = std::clamp(m_ScaleFactor.x, ScaleBoundMin, ScaleBoundMax);
+						}
+
+						for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
+						{
+							int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
+							float ScaleMinimum = m_vInitialPositionsX[k] - Midpoint > CFixedTime(1).AsSeconds() ? CFixedTime(1).AsSeconds() / (m_vInitialPositionsX[k] - Midpoint) : 0.0f;
+							float ScaleFactor = std::max(ScaleMinimum, m_ScaleFactor.x);
+							pEnvelope->m_vPoints[SelectedIndex].m_Time = CFixedTime(std::round((m_vInitialPositionsX[k] - Midpoint) * ScaleFactor + Midpoint));
+						}
+						for(size_t k = 1; k < pEnvelope->m_vPoints.size(); k++)
+						{
+							if(pEnvelope->m_vPoints[k].m_Time <= pEnvelope->m_vPoints[k - 1].m_Time)
+								pEnvelope->m_vPoints[k].m_Time = pEnvelope->m_vPoints[k - 1].m_Time + CFixedTime(1);
+						}
+						for(auto [SelectedIndex, _] : Map()->m_vSelectedEnvelopePoints)
+						{
+							if(SelectedIndex == 0 && pEnvelope->m_vPoints[SelectedIndex].m_Time != CFixedTime(0))
+							{
+								float Offset = pEnvelope->m_vPoints[0].m_Time.GetInternal();
+								RemoveTimeOffsetEnvelope(pEnvelope);
+								m_Midpoint.x -= Offset;
+								for(auto &Value : m_vInitialPositionsX)
+									Value -= Offset;
+								break;
+							}
+						}
 					}
-				}
-			}
-			else
-			{
-				m_ScaleFactor.y -= Ui()->MouseDeltaY() / Graphics()->ScreenHeight() * 10.0f;
-				for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
-				{
-					auto [SelectedIndex, SelectedChannel] = Map()->m_vSelectedEnvelopePoints[k];
-					if(Input()->AltIsPressed())
-						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round((m_vInitialPositionsY[k] - m_Midpoint.y) * m_ScaleFactor.y + m_Midpoint.y);
 					else
-						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(m_vInitialPositionsY[k] * m_ScaleFactor.y);
+					{
+						m_ScaleFactor.y -= Ui()->MouseDeltaY() / Graphics()->ScreenHeight() * 10.0f;
+						for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
+						{
+							auto [SelectedIndex, SelectedChannel] = Map()->m_vSelectedEnvelopePoints[k];
+							if(Input()->AltIsPressed())
+								pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round((m_vInitialPositionsY[k] - m_Midpoint.y) * m_ScaleFactor.y + m_Midpoint.y);
+							else
+								pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(m_vInitialPositionsY[k] * m_ScaleFactor.y);
 
-					if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
-						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
-				}
-			}
-
+							if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
+								pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
+						}
+					}
+				});
 			if(Ui()->MouseButton(0))
 			{
 				m_Operation = EEnvelopeEditorOp::NONE;
-				Map()->m_EnvOpTracker.Stop(false);
+				Map()->m_DocumentHistory.Complete(this, editor_history::EEditCompletion::POINTER_RELEASE);
 			}
 			else if(Ui()->MouseButton(1) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 			{
-				for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
-				{
-					int SelectedIndex = Map()->m_vSelectedEnvelopePoints[k].first;
-					pEnvelope->m_vPoints[SelectedIndex].m_Time = CFixedTime(std::round(m_vInitialPositionsX[k]));
-				}
-				for(size_t k = 0; k < Map()->m_vSelectedEnvelopePoints.size(); k++)
-				{
-					auto [SelectedIndex, SelectedChannel] = Map()->m_vSelectedEnvelopePoints[k];
-					pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(m_vInitialPositionsY[k]);
-				}
-				RemoveTimeOffsetEnvelope(pEnvelope);
+				Map()->m_DocumentHistory.Cancel(editor_history::EEditCancellation::ESCAPE);
 				m_Operation = EEnvelopeEditorOp::NONE;
 			}
 		}
@@ -2068,6 +2081,20 @@ float CEnvelopeEditor::ScreenToEnvelopeDeltaY(const CUIRect &View, float DeltaY)
 	return DeltaY / Graphics()->ScreenHeight() * Ui()->Screen()->h / View.h * Map()->m_EnvelopeEditorState.m_ZoomY.GetValue();
 }
 
+void CEnvelopeEditor::DeletePoint(const std::shared_ptr<CEnvelope> &pEnvelope, int Index)
+{
+	Map()->m_DocumentHistory.Edit(this, "Delete envelope point", editor_history::ECategory::ENVELOPE, [&] {
+		pEnvelope->m_vPoints.erase(pEnvelope->m_vPoints.begin() + Index);
+		std::erase_if(Map()->m_vSelectedEnvelopePoints, [Index](const auto &Point) { return Point.first == Index; });
+		for(auto &[SelectedIndex, Channel] : Map()->m_vSelectedEnvelopePoints)
+			if(SelectedIndex > Index)
+				--SelectedIndex;
+		Map()->m_SelectedTangentInPoint = {-1, -1};
+		Map()->m_SelectedTangentOutPoint = {-1, -1};
+		Map()->OnModify();
+	});
+}
+
 void CEnvelopeEditor::RemoveTimeOffsetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope)
 {
 	CFixedTime TimeOffset = pEnvelope->m_vPoints[0].m_Time;
@@ -2106,36 +2133,22 @@ CUi::EPopupMenuFunctionResult CEnvelopeEditor::CPopupEnvelopePoint::Render(void 
 
 		const auto SelectedPoint = pMap->m_vSelectedEnvelopePoints.front();
 		const int SelectedIndex = SelectedPoint.first;
-		auto *pValues = pEnvelope->m_vPoints[SelectedIndex].m_aValues;
 		const ColorRGBA Color = pEnvelope->m_vPoints[SelectedIndex].ColorValue();
+		pMap->m_DocumentHistory.TouchControl(&pPopupEnvelopePointContext->m_ColorPickerButtonId);
 		const auto &&SetColor = [&](ColorRGBA NewColor) {
 			if(Color == NewColor && pEditor->m_ColorPickerPopupContext.m_State == EEditState::EDITING)
 				return;
 
-			if(pEditor->m_ColorPickerPopupContext.m_State == EEditState::START || pEditor->m_ColorPickerPopupContext.m_State == EEditState::ONE_GO)
+			const auto EditState = pEditor->m_ColorPickerPopupContext.m_State;
+			if(pMap->m_DocumentHistory.BeginControl(&pPopupEnvelopePointContext->m_ColorPickerButtonId, "Edit envelope color", EditState, editor_history::ECategory::ENVELOPE))
 			{
-				for(int Channel = 0; Channel < 4; ++Channel)
-					pPopupEnvelopePointContext->m_aValues[Channel] = pValues[Channel];
+				pMap->m_DocumentHistory.Update(&pPopupEnvelopePointContext->m_ColorPickerButtonId, [&] {
+					pEnvelope->m_vPoints[SelectedIndex].SetColorValue(NewColor);
+					pMap->m_UpdateEnvPointInfo = true;
+					pMap->OnModify();
+				});
+				pMap->m_DocumentHistory.EndControl(&pPopupEnvelopePointContext->m_ColorPickerButtonId, EditState);
 			}
-
-			pEnvelope->m_vPoints[SelectedIndex].SetColorValue(NewColor);
-
-			if(pEditor->m_ColorPickerPopupContext.m_State == EEditState::END || pEditor->m_ColorPickerPopupContext.m_State == EEditState::ONE_GO)
-			{
-				std::vector<std::shared_ptr<IEditorAction>> vpActions(4);
-
-				for(int Channel = 0; Channel < 4; ++Channel)
-				{
-					vpActions[Channel] = std::make_shared<CEditorActionEnvelopeEditPoint>(pMap, pMap->m_SelectedEnvelope, SelectedIndex, Channel, CEditorActionEnvelopeEditPoint::EEditType::VALUE, pPopupEnvelopePointContext->m_aValues[Channel], f2fx(NewColor[Channel]));
-				}
-
-				char aDisplay[256];
-				str_format(aDisplay, sizeof(aDisplay), "Edit color of point %d of envelope %d", SelectedIndex, pMap->m_SelectedEnvelope);
-				pMap->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(pMap, vpActions, aDisplay));
-			}
-
-			pMap->m_UpdateEnvPointInfo = true;
-			pMap->OnModify();
 		};
 		pEditor->DoColorPickerButton(&pPopupEnvelopePointContext->m_ColorPickerButtonId, &EditBox, Color, SetColor);
 	}
@@ -2150,8 +2163,8 @@ CUi::EPopupMenuFunctionResult CEnvelopeEditor::CPopupEnvelopePoint::Render(void 
 		pPopupEnvelopePointContext->m_ValueInput.SetFloat(fx2f(CurrentValue));
 		pPopupEnvelopePointContext->m_TimeInput.SetFloat(CurrentTime.AsSeconds());
 
-		pPopupEnvelopePointContext->m_CurrentTime = pPopupEnvelopePointContext->m_TimeInput.GetFloat();
-		pPopupEnvelopePointContext->m_CurrentValue = pPopupEnvelopePointContext->m_ValueInput.GetFloat();
+		pPopupEnvelopePointContext->m_DraftFocused = false;
+		pPopupEnvelopePointContext->m_InvalidDraft = false;
 	}
 
 	View.HSplitTop(RowHeight, &Row, &View);
@@ -2167,50 +2180,64 @@ CUi::EPopupMenuFunctionResult CEnvelopeEditor::CPopupEnvelopePoint::Render(void 
 	pEditor->Ui()->DoLabel(&Label, "Time (in s):", RowHeight - 2.0f, TEXTALIGN_ML);
 	pEditor->DoEditBox(&pPopupEnvelopePointContext->m_TimeInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The time of the selected envelope point.");
 
-	if(pEditor->Input()->KeyIsPressed(KEY_RETURN) || pEditor->Input()->KeyIsPressed(KEY_KP_ENTER))
+	const bool Focused = pPopupEnvelopePointContext->m_ValueInput.IsActive() || pPopupEnvelopePointContext->m_TimeInput.IsActive();
+	if(Focused)
+		pEditor->m_pDocumentNumberInput = pPopupEnvelopePointContext->m_ValueInput.IsActive() ? &pPopupEnvelopePointContext->m_ValueInput : &pPopupEnvelopePointContext->m_TimeInput;
+	const bool Enter = Focused && (pEditor->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER));
+	const bool Blur = (pPopupEnvelopePointContext->m_DraftFocused && !Focused) || (Focused && pEditor->DocumentInputSettlementRequested());
+	if(Enter || Blur)
 	{
-		float CurrentTime = pPopupEnvelopePointContext->m_TimeInput.GetFloat();
-		float CurrentValue = pPopupEnvelopePointContext->m_ValueInput.GetFloat();
-		if(!(absolute(CurrentTime - pPopupEnvelopePointContext->m_CurrentTime) < 0.0001f && absolute(CurrentValue - pPopupEnvelopePointContext->m_CurrentValue) < 0.0001f))
+		const auto Time = ParseFloatDraft(pPopupEnvelopePointContext->m_TimeInput.GetString());
+		const auto Value = ParseFloatDraft(pPopupEnvelopePointContext->m_ValueInput.GetString());
+		// Bounds are checked before fixed-point conversion and tangent subtraction.
+		const bool Valid = Time && Value && static_cast<double>(*Time * 1000.0f) >= std::numeric_limits<int>::min() && static_cast<double>(*Time * 1000.0f) <= std::numeric_limits<int>::max() && static_cast<double>(*Value * 1024.0f) >= std::numeric_limits<int>::min() && static_cast<double>(*Value * 1024.0f) <= std::numeric_limits<int>::max();
+		pPopupEnvelopePointContext->m_InvalidDraft = !Valid;
+		if(Valid)
 		{
-			const auto &[OldTime, OldValue] = pMap->SelectedEnvelopeTimeAndValue();
-
-			if(pMap->IsTangentInSelected())
-			{
-				auto [SelectedIndex, SelectedChannel] = pMap->m_SelectedTangentInPoint;
-
-				pMap->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pMap, pMap->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::TANGENT_IN, OldTime, OldValue, CFixedTime::FromSeconds(CurrentTime), f2fx(CurrentValue)));
-				CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]).AsSeconds();
-			}
-			else if(pMap->IsTangentOutSelected())
-			{
-				auto [SelectedIndex, SelectedChannel] = pMap->m_SelectedTangentOutPoint;
-
-				pMap->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pMap, pMap->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::TANGENT_OUT, OldTime, OldValue, CFixedTime::FromSeconds(CurrentTime), f2fx(CurrentValue)));
-				CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]).AsSeconds();
-			}
-			else
-			{
-				auto [SelectedIndex, SelectedChannel] = pMap->m_vSelectedEnvelopePoints.front();
-				pMap->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pMap, pMap->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::POINT, OldTime, OldValue, CFixedTime::FromSeconds(CurrentTime), f2fx(CurrentValue)));
-
-				if(SelectedIndex != 0)
+			pMap->m_DocumentHistory.Edit(pContext, "Edit envelope point value", editor_history::ECategory::ENVELOPE, [&] {
+				const auto Selection = pMap->IsTangentInSelected() ? pMap->m_SelectedTangentInPoint : pMap->IsTangentOutSelected() ? pMap->m_SelectedTangentOutPoint :
+																		     pMap->m_vSelectedEnvelopePoints.front();
+				const auto [Index, Channel] = Selection;
+				auto &Point = pEnvelope->m_vPoints[Index];
+				const auto NewTime = CFixedTime::FromSeconds(*Time);
+				if(pMap->IsTangentSelected())
 				{
-					CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time.AsSeconds();
+					const auto Delta = std::clamp<int64_t>(static_cast<int64_t>(NewTime.GetInternal()) - Point.m_Time.GetInternal(), std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+					const int DeltaValue = static_cast<int>(std::clamp<int64_t>(static_cast<int64_t>(f2fx(*Value)) - Point.m_aValues[Channel], std::numeric_limits<int>::min(), std::numeric_limits<int>::max()));
+					if(pMap->IsTangentInSelected())
+					{
+						Point.m_Bezier.m_aInTangentDeltaX[Channel] = CFixedTime(static_cast<int>(std::min<int64_t>(Delta, 0)));
+						Point.m_Bezier.m_aInTangentDeltaY[Channel] = DeltaValue;
+					}
+					else
+					{
+						Point.m_Bezier.m_aOutTangentDeltaX[Channel] = CFixedTime(static_cast<int>(std::max<int64_t>(Delta, 0)));
+						Point.m_Bezier.m_aOutTangentDeltaY[Channel] = DeltaValue;
+					}
 				}
 				else
 				{
-					CurrentTime = 0.0f;
-					pEnvelope->m_vPoints[SelectedIndex].m_Time = CFixedTime(0);
+					Point.m_aValues[Channel] = f2fx(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4 ? std::clamp(*Value, 0.0f, 1.0f) : *Value);
+					Point.m_Time = Index == 0 ? CFixedTime(0) : NewTime;
+					if(Index > 0 && Point.m_Time < pEnvelope->m_vPoints[Index - 1].m_Time)
+						Point.m_Time = pEnvelope->m_vPoints[Index - 1].m_Time + CFixedTime(1);
+					if(Index > 0 && Index + 1 < static_cast<int>(pEnvelope->m_vPoints.size()) && Point.m_Time > pEnvelope->m_vPoints[Index + 1].m_Time)
+						Point.m_Time = pEnvelope->m_vPoints[Index + 1].m_Time - CFixedTime(1);
 				}
-			}
-
-			pPopupEnvelopePointContext->m_TimeInput.SetFloat(CFixedTime::FromSeconds(CurrentTime).AsSeconds());
-			pPopupEnvelopePointContext->m_ValueInput.SetFloat(fx2f(f2fx(CurrentValue)));
-
-			pPopupEnvelopePointContext->m_CurrentTime = pPopupEnvelopePointContext->m_TimeInput.GetFloat();
-			pPopupEnvelopePointContext->m_CurrentValue = pPopupEnvelopePointContext->m_ValueInput.GetFloat();
+				pMap->OnModify();
+			});
+			pPopupEnvelopePointContext->m_ValueInput.Deactivate();
+			pPopupEnvelopePointContext->m_TimeInput.Deactivate();
+			pMap->m_UpdateEnvPointInfo = true;
 		}
+		else if(Blur)
+			pMap->m_UpdateEnvPointInfo = true;
+	}
+	pPopupEnvelopePointContext->m_DraftFocused = pPopupEnvelopePointContext->m_ValueInput.IsActive() || pPopupEnvelopePointContext->m_TimeInput.IsActive();
+	if(pPopupEnvelopePointContext->m_InvalidDraft)
+	{
+		EditBox.DrawOutline(ColorRGBA(1.0f, 0.25f, 0.25f, 1.0f));
+		str_copy(pEditor->m_aTooltip, "Enter a complete finite number in the supported range.");
 	}
 
 	View.HSplitTop(6.0f, nullptr, &View);
@@ -2219,23 +2246,26 @@ CUi::EPopupMenuFunctionResult CEnvelopeEditor::CPopupEnvelopePoint::Render(void 
 	const char *pTooltip = pMap->IsTangentSelected() ? "Reset tangent point to default value." : "Delete current envelope point in all channels.";
 	if(pEditor->DoButton_Editor(&pPopupEnvelopePointContext->m_DeleteButtonId, pButtonText, 0, &Row, BUTTONFLAG_LEFT, pTooltip))
 	{
-		if(pMap->IsTangentInSelected())
+		if(pMap->IsTangentSelected())
 		{
-			auto [SelectedIndex, SelectedChannel] = pMap->m_SelectedTangentInPoint;
-			const auto &[OldTime, OldValue] = pMap->SelectedEnvelopeTimeAndValue();
-			pMap->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionResetEnvelopePointTangent>(pMap, pMap->m_SelectedEnvelope, SelectedIndex, SelectedChannel, true, OldTime, OldValue));
-		}
-		else if(pMap->IsTangentOutSelected())
-		{
-			auto [SelectedIndex, SelectedChannel] = pMap->m_SelectedTangentOutPoint;
-			const auto &[OldTime, OldValue] = pMap->SelectedEnvelopeTimeAndValue();
-			pMap->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionResetEnvelopePointTangent>(pMap, pMap->m_SelectedEnvelope, SelectedIndex, SelectedChannel, false, OldTime, OldValue));
+			pMap->m_DocumentHistory.Edit(pContext, "Reset envelope tangent", editor_history::ECategory::ENVELOPE, [&] {
+				const auto [Index, Channel] = pMap->IsTangentInSelected() ? pMap->m_SelectedTangentInPoint : pMap->m_SelectedTangentOutPoint;
+				auto &Point = pEnvelope->m_vPoints[Index];
+				if(pMap->IsTangentInSelected())
+				{
+					Point.m_Bezier.m_aInTangentDeltaX[Channel] = std::min(CFixedTime(0) - Point.m_Time, CFixedTime(0));
+					Point.m_Bezier.m_aInTangentDeltaY[Channel] = -Point.m_aValues[Channel];
+				}
+				else
+				{
+					Point.m_Bezier.m_aOutTangentDeltaX[Channel] = std::max(CFixedTime(0) - Point.m_Time, CFixedTime(0));
+					Point.m_Bezier.m_aOutTangentDeltaY[Channel] = -Point.m_aValues[Channel];
+				}
+				pMap->OnModify();
+			});
 		}
 		else
-		{
-			auto [SelectedIndex, SelectedChannel] = pMap->m_vSelectedEnvelopePoints.front();
-			pMap->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionDeleteEnvelopePoint>(pMap, pMap->m_SelectedEnvelope, SelectedIndex));
-		}
+			pEnvelopeEditor->DeletePoint(pEnvelope, pMap->m_vSelectedEnvelopePoints.front().first);
 
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
@@ -2283,53 +2313,47 @@ CUi::EPopupMenuFunctionResult CEnvelopeEditor::CPopupEnvelopePointCurveType::Ren
 	}
 
 	std::shared_ptr<CEnvelope> pEnvelope = pMap->m_vpEnvelopes.at(pMap->m_SelectedEnvelope);
-	std::vector<std::shared_ptr<IEditorAction>> vpActions;
-	for(int Channel = 0; Channel < pEnvelope->GetChannels(); Channel++)
-	{
-		int FirstSelectedIndex = pEnvelope->m_vPoints.size();
-		int LastSelectedIndex = -1;
-		for(auto [SelectedIndex, SelectedChannel] : pMap->m_vSelectedEnvelopePoints)
+	pMap->m_DocumentHistory.Edit(pContext, "Project envelope points", editor_history::ECategory::ENVELOPE, [&] {
+		for(int Channel = 0; Channel < pEnvelope->GetChannels(); Channel++)
 		{
-			if(SelectedChannel == Channel)
-			{
-				FirstSelectedIndex = std::min(FirstSelectedIndex, SelectedIndex);
-				LastSelectedIndex = std::max(LastSelectedIndex, SelectedIndex);
-			}
-		}
-
-		if(FirstSelectedIndex < (int)pEnvelope->m_vPoints.size() && LastSelectedIndex >= 0 && FirstSelectedIndex != LastSelectedIndex)
-		{
-			CEnvPoint FirstPoint = pEnvelope->m_vPoints[FirstSelectedIndex];
-			CEnvPoint LastPoint = pEnvelope->m_vPoints[LastSelectedIndex];
-
-			CEnvelope HelperEnvelope(1);
-			HelperEnvelope.AddPoint(FirstPoint.m_Time, {FirstPoint.m_aValues[Channel], 0, 0, 0});
-			HelperEnvelope.AddPoint(LastPoint.m_Time, {LastPoint.m_aValues[Channel], 0, 0, 0});
-			HelperEnvelope.m_vPoints[0].m_Curvetype = SelectedCurveType;
-
+			int FirstSelectedIndex = pEnvelope->m_vPoints.size();
+			int LastSelectedIndex = -1;
 			for(auto [SelectedIndex, SelectedChannel] : pMap->m_vSelectedEnvelopePoints)
 			{
-				if(SelectedChannel == Channel &&
-					SelectedIndex != FirstSelectedIndex &&
-					SelectedIndex != LastSelectedIndex)
+				if(SelectedChannel == Channel)
 				{
-					CEnvPoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
-					ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-					HelperEnvelope.Eval(CurrentPoint.m_Time.AsSeconds(), Channels, 1);
-					int PrevValue = CurrentPoint.m_aValues[Channel];
-					CurrentPoint.m_aValues[Channel] = f2fx(Channels.r);
-					vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPoint>(pMap, pMap->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEnvelopeEditPoint::EEditType::VALUE, PrevValue, CurrentPoint.m_aValues[Channel]));
+					FirstSelectedIndex = std::min(FirstSelectedIndex, SelectedIndex);
+					LastSelectedIndex = std::max(LastSelectedIndex, SelectedIndex);
+				}
+			}
+
+			if(FirstSelectedIndex < (int)pEnvelope->m_vPoints.size() && LastSelectedIndex >= 0 && FirstSelectedIndex != LastSelectedIndex)
+			{
+				CEnvPoint FirstPoint = pEnvelope->m_vPoints[FirstSelectedIndex];
+				CEnvPoint LastPoint = pEnvelope->m_vPoints[LastSelectedIndex];
+
+				CEnvelope HelperEnvelope(pMap, 1);
+				HelperEnvelope.AddPoint(FirstPoint.m_Time, {FirstPoint.m_aValues[Channel], 0, 0, 0});
+				HelperEnvelope.AddPoint(LastPoint.m_Time, {LastPoint.m_aValues[Channel], 0, 0, 0});
+				HelperEnvelope.m_vPoints[0].m_Curvetype = SelectedCurveType;
+
+				for(auto [SelectedIndex, SelectedChannel] : pMap->m_vSelectedEnvelopePoints)
+				{
+					if(SelectedChannel == Channel &&
+						SelectedIndex != FirstSelectedIndex &&
+						SelectedIndex != LastSelectedIndex)
+					{
+						CEnvPoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
+						ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+						HelperEnvelope.Eval(CurrentPoint.m_Time.AsSeconds(), Channels, 1);
+						CurrentPoint.m_aValues[Channel] = f2fx(Channels.r);
+					}
 				}
 			}
 		}
-	}
 
-	if(!vpActions.empty())
-	{
-		pMap->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(pMap, vpActions, "Project points"));
-	}
-
-	pMap->OnModify();
+		pMap->OnModify();
+	});
 	return CUi::POPUP_CLOSE_CURRENT;
 }
 
@@ -2362,11 +2386,10 @@ CUi::EPopupMenuFunctionResult CEnvelopeEditor::CPopupEnvelopeCurveType::Render(v
 			const int PrevCurve = SelectedPoint.m_Curvetype;
 			if(PrevCurve != Type)
 			{
-				SelectedPoint.m_Curvetype = Type;
-				pMap->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEditPoint>(
-					pMap, pMap->m_SelectedEnvelope, pPopupEnvelopeCurveTypeContext->m_SelectedPoint, 0,
-					CEditorActionEnvelopeEditPoint::EEditType::CURVE_TYPE, PrevCurve, SelectedPoint.m_Curvetype));
-				pMap->OnModify();
+				pMap->m_DocumentHistory.Edit(pContext, "Change envelope curve", editor_history::ECategory::ENVELOPE, [&] {
+					SelectedPoint.m_Curvetype = Type;
+					pMap->OnModify();
+				});
 				return CUi::POPUP_CLOSE_CURRENT;
 			}
 		}

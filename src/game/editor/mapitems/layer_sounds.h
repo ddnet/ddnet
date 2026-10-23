@@ -3,15 +3,16 @@
 
 #include "layer.h"
 
-class CLayerSounds : public CLayer
+class CLayerSounds : public CLayer, public CLayerSoundsValues
 {
 public:
-	explicit CLayerSounds(CEditorMap *pMap);
+	void OnAttach(CEditorMap *pMap) override;
+	explicit CLayerSounds(CEditorMap *pMap, std::uint64_t RetainedId = 0);
 	CLayerSounds(const CLayerSounds &Other);
 	~CLayerSounds() override;
 
 	void Render(const CEditorMap *pRenderMap) override;
-	CSoundSource *NewSource(int x, int y);
+	CSoundSourceValues *NewSource(int x, int y);
 
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
@@ -22,14 +23,11 @@ public:
 	bool IsEnvelopeUsed(int EnvelopeIndex) const override;
 	bool IsSoundUsed(int SoundIndex) const override;
 
-	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
-	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction) override;
+	void VisitEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction) override;
+	void VisitSoundReferences(const FDocumentReferenceFunction &ReferenceFunction) override;
 
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
-
-	int m_Sound;
-	std::vector<CSoundSource> m_vSources;
 };
 
 #endif

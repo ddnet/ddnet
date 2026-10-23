@@ -3,30 +3,20 @@
 
 #include "layer_tiles.h"
 
-struct SSpeedupTileStateChange
-{
-	bool m_Changed;
-	struct SData
-	{
-		int m_Force;
-		int m_Angle;
-		int m_MaxSpeed;
-		int m_Type;
-		int m_Index;
-	} m_Previous, m_Current;
-};
-
-class CLayerSpeedup : public CLayerTiles
+class CLayerSpeedup : public CLayerTiles, public CLayerSpeedupValues
 {
 public:
-	CLayerSpeedup(CEditorMap *pMap, int w, int h);
+	CLayerSpeedup(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId = 0);
 	CLayerSpeedup(const CLayerSpeedup &Other);
 	~CLayerSpeedup() override;
 
-	CSpeedupTile *m_pSpeedupTile;
-	int m_SpeedupForce;
-	int m_SpeedupMaxSpeed;
-	int m_SpeedupAngle;
+	CRenderTileSource<CSpeedupTile> SpeedupTilesForRender() const
+	{
+		return CRenderTileSource<CSpeedupTile>(m_SpeedupTiles);
+	}
+	int m_SpeedupForce{};
+	int m_SpeedupMaxSpeed{};
+	int m_SpeedupAngle{};
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(EShiftDirection Direction) override;
@@ -37,18 +27,8 @@ public:
 	void BrushRotate(float Amount) override;
 	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 
-	EditorTileStateChangeHistory<SSpeedupTileStateChange> m_History;
-	void ClearHistory() override
-	{
-		CLayerTiles::ClearHistory();
-		m_History.clear();
-	}
-
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
-
-private:
-	void RecordStateChange(int x, int y, SSpeedupTileStateChange::SData Previous, SSpeedupTileStateChange::SData Current);
 };
 
 #endif
