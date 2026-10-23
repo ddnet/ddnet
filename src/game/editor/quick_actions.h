@@ -481,6 +481,35 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"Run a local server with the current map and connect you to it.")
-
+REGISTER_QUICK_ACTION(
+	FontTyper,
+	"Enter font typer",
+	[&]() {
+		if(!Map()->m_FontTyperState.m_Active)
+		{
+			std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
+			const std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
+			if(!pLayer || !pGroup)
+				return;
+			vec2 Pos = Map()->m_MapViewState.m_WorldOffset;
+			Pos.x *= pGroup->m_ParallaxX / 100.0f;
+			Pos.y *= pGroup->m_ParallaxY / 100.0f;
+			Pos += vec2(pGroup->m_OffsetX, pGroup->m_OffsetY);
+			Map()->m_FontTyperState.TextModeOn(pLayer, Pos);
+		}
+		else
+		{
+			Map()->m_FontTyperState.TextModeOff(Map());
+		}
+	},
+	[&]() -> bool {
+		std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
+		return !pLayer || pLayer->m_Image == -1;
+	},
+	[&]() -> bool {
+		return Map()->m_FontTyperState.m_Active;
+	},
+	DEFAULT_BTN,
+	"[Ctrl+T] Enter the font typer mode that allows you to write numbers and letters from a font tile layer.")
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN
