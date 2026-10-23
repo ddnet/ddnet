@@ -27,6 +27,7 @@ class CDemoRecorder : public IDemoRecorder
 	int m_LastTickMarker;
 	int m_LastKeyFrame;
 	int m_FirstTick;
+	int m_LastFlushTick;
 
 	CSnapshotBuffer m_LastSnapshotData;
 	CSnapshotDelta *m_pSnapshotDelta;
@@ -39,7 +40,7 @@ class CDemoRecorder : public IDemoRecorder
 	DEMOFUNC_FILTER m_pfnFilter;
 	void *m_pUser;
 
-	void WriteTickMarker(int Tick, bool Keyframe);
+	bool WriteTickMarker(int Tick, bool Keyframe);
 	bool Write(int Type, const void *pData, int Size);
 
 public:
@@ -118,6 +119,12 @@ private:
 
 	IOHANDLE m_File;
 	int64_t m_MapOffset;
+	int64_t m_CompleteTickEnd;
+	int64_t m_ScanFileSize;
+	bool m_ScanComplete;
+	bool m_AtEndOfFile;
+	bool m_EofHadSnapshot;
+	bool m_AutoResume;
 	char m_aFilename[IO_MAX_PATH_LENGTH];
 	char m_aErrorMessage[256];
 	std::vector<CKeyFrame> m_vKeyFrames;
@@ -151,7 +158,7 @@ private:
 		CHUNKHEADER_EOF,
 	};
 	EReadChunkHeaderResult ReadChunkHeader(int *pType, int *pSize, int *pTick);
-	void DoTick();
+	bool DoTick(bool WaitForData);
 	enum class EScanFileResult
 	{
 		SUCCESS,

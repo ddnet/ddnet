@@ -1019,17 +1019,15 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::StopRecording()
 {
+	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
 	if(Server()->IsRecording(m_pPlayer->GetCid()))
 	{
-		CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
-
 		if(pData->m_RecordStopTick - Server()->Tick() <= Server()->TickSpeed() && pData->m_RecordStopTick != -1)
 			Server()->SaveDemo(m_pPlayer->GetCid(), pData->m_RecordFinishTime);
 		else
 			Server()->StopRecord(m_pPlayer->GetCid());
-
-		pData->m_RecordStopTick = -1;
 	}
+	pData->m_RecordStopTick = -1;
 }
 
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)

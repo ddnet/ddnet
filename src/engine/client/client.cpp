@@ -748,6 +748,9 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_DemoPlayer.Stop();
 	for(int Recorder = 0; Recorder < RECORDER_MAX; Recorder++)
 	{
+		// Race cleanup needs the finalization result when leaving the online state.
+		if(Recorder == RECORDER_RACE && State() == IClient::STATE_ONLINE)
+			continue;
 		DemoRecorder_Stop(Recorder);
 	}
 
@@ -4045,7 +4048,14 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		}
 
 		// Stop the recorder to correctly slice the demo after
-		DemoRecorder(RECORDER_REPLAYS)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
+		if(DemoRecorder(RECORDER_REPLAYS)->Stop(IDemoRecorder::EStopMode::KEEP_FILE) != 0)
+		{
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: could not finalize the replay recording.");
+			if(State() == IClient::STATE_ONLINE)
+				GameClient()->Echo(Localize("Failed saving the replay!"));
+			DemoRecorder_UpdateReplayRecorder();
+			return;
+		}
 
 		// Slice the demo to get only the last cl_replay_length seconds
 		const char *pSrc = DemoRecorder(RECORDER_REPLAYS)->CurrentFilename();
@@ -4064,12 +4074,13 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 	}
 }
 
-void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
+bool CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
 {
 	if(m_DemoPlayer.IsPlaying())
 	{
-		m_DemoEditor.Slice(m_DemoPlayer.Filename(), pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, pfnFilter, pUser);
+		return m_DemoEditor.Slice(m_DemoPlayer.Filename(), pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, pfnFilter, pUser);
 	}
+	return false;
 }
 
 const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
