@@ -151,6 +151,7 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 
 	Menu.HSplitBottom(5.0f, &Menu, nullptr); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
+	GameClient()->m_UiTutorial.SetTargetRect(CUiTutorial::ETarget::START_PLAY, Button);
 	static CButtonContainer s_PlayButton;
 	if(GameClient()->m_Menus.DoButton_Menu(&s_PlayButton, Localize("Play", "Start menu"), 0, &Button, BUTTONFLAG_LEFT, g_Config.m_ClShowStartMenuImages ? "play_game" : nullptr, IGraphics::CORNER_ALL, Rounding, 0.5f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || CheckHotKey(KEY_P))
 	{
@@ -268,5 +269,6 @@ bool CMenusStart::CheckHotKey(int Key) const
 {
 	return !Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && !Input()->AltIsPressed() && // no modifier
 	       Input()->KeyPress(Key) &&
-	       !GameClient()->m_GameConsole.IsActive();
+	       !GameClient()->m_GameConsole.IsActive() &&
+	       !GameClient()->m_UiTutorial.IsMenuOverlayVisible();
 }
