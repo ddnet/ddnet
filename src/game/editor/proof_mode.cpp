@@ -151,7 +151,7 @@ void CProofMode::RenderScreenSizes()
 			Graphics()->SetColor(1, 0, 0, 1);
 			for(int Pass = 0; Pass < 2; Pass++)
 			{
-				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
+				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f};
 				const ColorRGBA aColors[] = {ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f)};
 				float Zoom = IsModeMenu() ? 0.7f : 1.0f;
 				CScreenRect ScreenRect = Graphics()->MapScreenToWorld(
