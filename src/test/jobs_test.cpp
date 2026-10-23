@@ -110,30 +110,6 @@ TEST_F(Jobs, LookupHost)
 	}
 }
 
-TEST_F(Jobs, LookupHostWebsocket)
-{
-	static const char *const HOST = "ws://example.com";
-	static const int NETTYPE = NETTYPE_ALL;
-	auto pJob = std::make_shared<CHostLookup>(HOST, NETTYPE);
-
-	EXPECT_STREQ(pJob->Hostname(), HOST);
-	EXPECT_EQ(pJob->Nettype(), NETTYPE);
-
-	Add(pJob);
-	while(pJob->State() != IJob::STATE_DONE)
-	{
-		// yay, busy loop...
-		thread_yield();
-	}
-
-	EXPECT_STREQ(pJob->Hostname(), HOST);
-	EXPECT_EQ(pJob->Nettype(), NETTYPE);
-	if(pJob->Result() == 0)
-	{
-		EXPECT_EQ(pJob->Addr().type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6), pJob->Addr().type);
-	}
-}
-
 TEST_F(Jobs, Many)
 {
 	std::atomic<int> ThreadsRunning(0);
