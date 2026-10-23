@@ -5,6 +5,9 @@
 
 #include "camera.h"
 
+#include <base/dbg.h>
+#include <base/log.h>
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
@@ -101,7 +104,15 @@ void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->CanChangeSpectatorId())
 		return;
 
-	pSelf->Spectate(pResult->GetInteger(0));
+	const int SpectatorId = pResult->GetInteger(0);
+	if(SpectatorId != SPEC_FREEVIEW &&
+		SpectatorId != SPEC_FOLLOW &&
+		!in_range(SpectatorId, 0, (int)MAX_CLIENTS - 1))
+	{
+		log_error("spectator", "Invalid spectator ID: %d", SpectatorId);
+		return;
+	}
+	pSelf->Spectate(SpectatorId);
 }
 
 void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
@@ -142,7 +153,7 @@ void CSpectator::ConMultiView(IConsole::IResult *pResult, void *pUserData)
 CSpectator::CSpectator()
 {
 	m_SelectorMouse = vec2(0.0f, 0.0f);
-	CSpectator::OnReset();
+	OnReset();
 }
 
 void CSpectator::OnConsoleInit()
@@ -247,10 +258,10 @@ void CSpectator::OnRender()
 		return;
 	}
 
-	if(!GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if((!GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK) ||
+		GameClient()->m_Scoreboard.IsActive())
 	{
-		m_Active = false;
-		m_WasActive = false;
+		OnRelease();
 		return;
 	}
 
@@ -492,7 +503,8 @@ void CSpectator::OnRender()
 					if(GameClient()->m_MultiViewTeam == DDTeam)
 					{
 						GameClient()->m_aMultiViewId[m_SelectedSpectatorId] = !GameClient()->m_aMultiViewId[m_SelectedSpectatorId];
-						if(!GameClient()->m_aMultiViewId[GameClient()->m_Snap.m_SpecInfo.m_SpectatorId])
+						const int SpectatorId = GameClient()->m_Snap.m_SpecInfo.m_SpectatorId;
+						if(SpectatorId < 0 || !GameClient()->m_aMultiViewId[SpectatorId])
 						{
 							int NewClientId = GameClient()->FindFirstMultiViewId();
 							if(NewClientId < MAX_CLIENTS && NewClientId >= 0)
@@ -597,13 +609,17 @@ void CSpectator::OnReset()
 	m_WasActive = false;
 	m_Active = false;
 	m_SelectedSpectatorId = NO_SELECTION;
+	m_TouchState = CUi::CTouchState();
+	m_MultiViewActivateDelay = 0.0f;
 }
 
 void CSpectator::Spectate(int SpectatorId)
 {
+	dbg_assert(SpectatorId == SPEC_FREEVIEW || SpectatorId == SPEC_FOLLOW || in_range(SpectatorId, 0, (int)MAX_CLIENTS - 1), "Invalid SpectatorId: %d", SpectatorId);
+
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		GameClient()->m_DemoSpecId = std::clamp(SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+		GameClient()->m_DemoSpecId = SpectatorId;
 		// The tick must be rendered for the spectator mode to be updated, so we do it manually when demo playback is paused
 		// TODO: https://github.com/ddnet/ddnet/issues/11681
 		if(DemoPlayer()->BaseInfo()->m_Paused)
@@ -646,7 +662,7 @@ void CSpectator::SpectateClosest()
 	int NewSpectatorId = -1;
 
 	vec2 CurPosition = GameClient()->m_Camera.m_Center;
-	if(SpectatorId != SPEC_FREEVIEW)
+	if(SpectatorId != SPEC_FREEVIEW && Snap.m_aCharacters[SpectatorId].m_Active)
 	{
 		const CNetObj_Character &CurCharacter = Snap.m_aCharacters[SpectatorId].m_Cur;
 		CurPosition = vec2(CurCharacter.m_X, CurCharacter.m_Y);

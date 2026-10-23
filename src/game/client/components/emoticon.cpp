@@ -4,6 +4,8 @@
 
 #include "chat.h"
 
+#include <base/dbg.h>
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
@@ -15,7 +17,8 @@
 
 CEmoticon::CEmoticon()
 {
-	CEmoticon::OnReset();
+	m_SelectorMouse = vec2(0.0f, 0.0f);
+	OnReset();
 }
 
 void CEmoticon::ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData)
@@ -46,12 +49,13 @@ void CEmoticon::OnReset()
 	m_Active = false;
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
+	m_TouchState = CUi::CTouchState();
 	m_TouchPressedOutside = false;
 }
 
 void CEmoticon::OnRelease()
 {
-	m_Active = false;
+	OnReset();
 }
 
 bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
@@ -96,10 +100,11 @@ void CEmoticon::OnRender()
 		return;
 	}
 
-	if(GameClient()->m_Snap.m_SpecInfo.m_Active || !GameClient()->m_Snap.m_pLocalCharacter)
+	if(GameClient()->m_Snap.m_SpecInfo.m_Active ||
+		!GameClient()->m_Snap.m_pLocalCharacter ||
+		GameClient()->m_Scoreboard.IsActive())
 	{
-		m_Active = false;
-		m_WasActive = false;
+		OnRelease();
 		return;
 	}
 
@@ -131,16 +136,12 @@ void CEmoticon::OnRender()
 	if(length(m_SelectorMouse) > 170.0f)
 		m_SelectorMouse = normalize(m_SelectorMouse) * 170.0f;
 
-	float SelectedAngle = angle(m_SelectorMouse) + 2 * pi / 24;
-	if(SelectedAngle < 0)
-		SelectedAngle += 2 * pi;
-
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
 	if(length(m_SelectorMouse) > 110.0f)
-		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * (float)NUM_EMOTICONS);
+		m_SelectedEmote = (int)(std::fmod(angle(m_SelectorMouse) + 2 * pi + pi / (int)NUM_EMOTICONS, 2 * pi) / (2 * pi) * (float)NUM_EMOTICONS);
 	else if(length(m_SelectorMouse) > 40.0f)
-		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * (float)NUM_EMOTES);
+		m_SelectedEyeEmote = (int)(std::fmod(angle(m_SelectorMouse) + 2 * pi + pi / (int)NUM_EMOTES, 2 * pi) / (2 * pi) * (float)NUM_EMOTES);
 
 	const vec2 ScreenCenter = Screen.Center();
 
@@ -240,6 +241,8 @@ void CEmoticon::EyeEmote(int Emote)
 	case EMOTE_BLINK:
 		str_format(aBuf, sizeof(aBuf), "/emote blink %d", g_Config.m_ClEyeDuration);
 		break;
+	default:
+		dbg_assert_failed("Invalid Emote: %d", Emote);
 	}
 	GameClient()->m_Chat.SendChat(0, aBuf);
 }
