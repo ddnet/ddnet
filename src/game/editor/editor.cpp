@@ -1759,7 +1759,13 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		}
 	}
 	else
-		Graphics()->SetColor(0, 1, 0, 1);
+	{
+		const ColorRGBA QuadPivotColor = ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f);
+		if(Map()->IsQuadSelected(Index))
+			Graphics()->SetColor(color_invert(QuadPivotColor).WithAlpha(QuadPivotColor.a));
+		else
+			Graphics()->SetColor(QuadPivotColor);
+	}
 
 	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
@@ -1970,7 +1976,13 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 		}
 	}
 	else
-		Graphics()->SetColor(1, 0, 0, 1);
+	{
+		const ColorRGBA QuadPointColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
+		if(Map()->IsQuadPointSelected(QuadIndex, V))
+			Graphics()->SetColor(color_invert(QuadPointColor).WithAlpha(QuadPointColor.a));
+		else
+			Graphics()->SetColor(QuadPointColor);
+	}
 
 	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
