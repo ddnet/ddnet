@@ -5,6 +5,9 @@
 
 #include "camera.h"
 
+#include <base/dbg.h>
+#include <base/log.h>
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
@@ -101,7 +104,15 @@ void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->CanChangeSpectatorId())
 		return;
 
-	pSelf->Spectate(pResult->GetInteger(0));
+	const int SpectatorId = pResult->GetInteger(0);
+	if(SpectatorId != SPEC_FREEVIEW &&
+		SpectatorId != SPEC_FOLLOW &&
+		!in_range(SpectatorId, 0, (int)MAX_CLIENTS - 1))
+	{
+		log_error("spectator", "Invalid spectator ID: %d", SpectatorId);
+		return;
+	}
+	pSelf->Spectate(SpectatorId);
 }
 
 void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
@@ -604,9 +615,11 @@ void CSpectator::OnReset()
 
 void CSpectator::Spectate(int SpectatorId)
 {
+	dbg_assert(SpectatorId == SPEC_FREEVIEW || SpectatorId == SPEC_FOLLOW || in_range(SpectatorId, 0, (int)MAX_CLIENTS - 1), "Invalid SpectatorId: %d", SpectatorId);
+
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		GameClient()->m_DemoSpecId = std::clamp(SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+		GameClient()->m_DemoSpecId = SpectatorId;
 		// The tick must be rendered for the spectator mode to be updated, so we do it manually when demo playback is paused
 		// TODO: https://github.com/ddnet/ddnet/issues/11681
 		if(DemoPlayer()->BaseInfo()->m_Paused)
