@@ -120,6 +120,7 @@ void CPlayer::Reset()
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSE_NONE;
+	m_ForcePauseTime = 0;
 	m_DND = false;
 	m_Whispers = true;
 
@@ -244,6 +245,8 @@ void CPlayer::Tick()
 
 	if(!GameServer()->m_pController->IsGamePaused())
 	{
+		ProcessPause();
+
 		int EarliestRespawnTick = m_PreviousDieTick + Server()->TickSpeed() * 3;
 		int RespawnTick = std::max(m_DieTick, EarliestRespawnTick) + 2;
 		if(!m_pCharacter && RespawnTick <= Server()->Tick())
@@ -253,7 +256,6 @@ void CPlayer::Tick()
 		{
 			if(m_pCharacter->IsAlive())
 			{
-				ProcessPause();
 				if(!m_Paused)
 					m_ViewPos = m_pCharacter->m_Pos;
 			}
@@ -900,7 +902,7 @@ void CPlayer::ProcessPause()
 		GameServer()->SendChatTarget(m_ClientId, "The force pause timer is now over, you can exit with /spec");
 	}
 
-	if(m_Paused == PAUSE_SPEC && !m_pCharacter->IsPaused() && CanSpec())
+	if(m_Paused == PAUSE_SPEC && m_pCharacter && m_pCharacter->IsAlive() && !m_pCharacter->IsPaused() && CanSpec())
 	{
 		m_pCharacter->Pause(true);
 		GameServer()->CreateDeath(m_pCharacter->m_Pos, m_ClientId, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientId));
@@ -969,7 +971,7 @@ int CPlayer::Pause(int State, bool Force)
 
 int CPlayer::ForcePause(int Time)
 {
-	m_ForcePauseTime = Server()->Tick() + Server()->TickSpeed() * Time;
+	m_ForcePauseTime = Time > 0 ? Server()->Tick() + Server()->TickSpeed() * Time : 0;
 
 	if(g_Config.m_SvPauseMessages)
 	{
@@ -978,7 +980,7 @@ int CPlayer::ForcePause(int Time)
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 	}
 
-	return Pause(PAUSE_SPEC, true);
+	return Time > 0 ? Pause(PAUSE_SPEC, true) : m_Paused;
 }
 
 int CPlayer::IsPaused() const
