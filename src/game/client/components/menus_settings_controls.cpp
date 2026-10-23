@@ -564,7 +564,7 @@ void CMenusSettingsControls::RenderSettingsBinds(EBindOptionGroup Group, CUIRect
 
 float CMenusSettingsControls::MeasureSettingsMouseHeight() const
 {
-	return 2.0f * BUTTON_HEIGHT + BUTTON_SPACING;
+	return 3.0f * BUTTON_HEIGHT + 2.0f * BUTTON_SPACING;
 }
 
 void CMenusSettingsControls::RenderSettingsMouse(CUIRect View)
@@ -579,6 +579,12 @@ void CMenusSettingsControls::RenderSettingsMouse(CUIRect View)
 	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
 	Ui()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500,
 		&CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE | CUi::SCROLLBAR_OPTION_DELAYUPDATE);
+
+	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
+
+	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
+	Ui()->DoScrollbarOption(&g_Config.m_ClMouseMaxDistance, &g_Config.m_ClMouseMaxDistance, &Button, Localize("Cursor distance"), 1, 1000,
+		&CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
 }
 
 float CMenusSettingsControls::MeasureSettingsJoystickHeight() const
@@ -784,6 +790,7 @@ void CMenus::ResetSettingsControls()
 
 	g_Config.m_InpMousesens = 200;
 	g_Config.m_UiMousesens = 200;
+	g_Config.m_ClMouseMaxDistance = DefaultConfig::ClMouseMaxDistance;
 
 	g_Config.m_InpControllerEnable = 0;
 	g_Config.m_InpControllerGUID[0] = '\0';
