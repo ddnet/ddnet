@@ -2348,6 +2348,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   csv.h
   datafile.cpp
   datafile.h
+  ddnet_info.cpp
+  ddnet_info.h
   demo.cpp
   demo.h
   econ.cpp

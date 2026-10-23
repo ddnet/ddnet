@@ -43,6 +43,7 @@
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
+#include <engine/shared/ddnet_info.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
@@ -2621,24 +2622,17 @@ void CClient::LoadDDNetInfo()
 		m_Points = Points.u.integer;
 	}
 
-	const json_value &StunServersIpv6 = DDNetInfo["stun-servers-ipv6"];
-	if(StunServersIpv6.type == json_array && StunServersIpv6[0].type == json_string)
+	NETADDR StunServerIpv6;
+	if(StunServerFromInfoJson(DDNetInfo, NETTYPE_IPV6, &StunServerIpv6))
 	{
-		NETADDR Addr;
-		if(!net_addr_from_str(&Addr, StunServersIpv6[0]))
-		{
-			m_aNetClient[CONN_MAIN].FeedStunServer(Addr);
-		}
+		m_aNetClient[CONN_MAIN].FeedStunServer(StunServerIpv6);
 	}
-	const json_value &StunServersIpv4 = DDNetInfo["stun-servers-ipv4"];
-	if(StunServersIpv4.type == json_array && StunServersIpv4[0].type == json_string)
+	NETADDR StunServerIpv4;
+	if(StunServerFromInfoJson(DDNetInfo, NETTYPE_IPV4, &StunServerIpv4))
 	{
-		NETADDR Addr;
-		if(!net_addr_from_str(&Addr, StunServersIpv4[0]))
-		{
-			m_aNetClient[CONN_MAIN].FeedStunServer(Addr);
-		}
+		m_aNetClient[CONN_MAIN].FeedStunServer(StunServerIpv4);
 	}
+
 	const json_value &ConnectingIp = DDNetInfo["connecting-ip"];
 	if(ConnectingIp.type == json_string)
 	{

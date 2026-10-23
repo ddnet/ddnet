@@ -44,6 +44,7 @@ class CRegister : public IRegister
 	static bool ProtocolFromString(int *pResult, const char *pString);
 	static const char *ProtocolToSystem(int Protocol);
 	static IPRESOLVE ProtocolToIpresolve(int Protocol);
+	static int ProtocolToNetType(int Protocol);
 
 	static void ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -76,6 +77,7 @@ class CRegister : public IRegister
 		{
 			int m_Protocol;
 			int m_ServerPort;
+			bool m_SuggestStun;
 			int m_Index;
 			int m_InfoSerial;
 			std::shared_ptr<CShared> m_pShared;
@@ -84,9 +86,10 @@ class CRegister : public IRegister
 			void Run() override;
 
 		public:
-			CJob(int Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::shared_ptr<IHttpRequest> &&pRegister, IHttp *pHttp) :
+			CJob(int Protocol, int ServerPort, bool SuggestStun, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::shared_ptr<IHttpRequest> &&pRegister, IHttp *pHttp) :
 				m_Protocol(Protocol),
 				m_ServerPort(ServerPort),
+				m_SuggestStun(SuggestStun),
 				m_Index(Index),
 				m_InfoSerial(InfoSerial),
 				m_pShared(std::move(pShared)),
@@ -97,6 +100,13 @@ class CRegister : public IRegister
 			~CJob() override = default;
 		};
 
+		enum
+		{
+			// Seconds to wait for the master server's challenge before
+			// registering with the STUN port instead.
+			STUN_FALLBACK_SECONDS = 5,
+		};
+
 		CRegister *m_pParent;
 		int m_Protocol;
 
@@ -105,13 +115,38 @@ class CRegister : public IRegister
 		bool m_HaveChallengeToken = false;
 		char m_aChallengeToken[128] = {0};
 
+		// Port discovered via STUN, 0 if there is none.
+		int m_StunPort = 0;
+		// Whether we are registered with the STUN port instead of the configured one.
+		bool m_UsedStunPort = false;
+		// Whether the master server's challenge reached us.
+		bool m_ChallengeSeen = false;
+		// Response the challenge state above refers to, a newer one means that a
+		// new challenge is expected.
+		int m_ChallengeResponseIndex = -1;
+		// When to register with the STUN port, -1 if we are not waiting for a
+		// challenge.
+		int64_t m_FallbackTimeout = -1;
+
 		void CheckChallengeStatus();
+		void CheckStunFallback();
+		void UsePort(int Port);
 
 	public:
 		int64_t m_PrevRegister = -1;
 		int64_t m_NextRegister = -1;
+		int m_ServerPort;
 
 		CProtocol(CRegister *pParent, int Protocol);
+		void SetStunPort(int Port);
+		bool UsesStunPort() const
+		{
+			return m_UsedStunPort;
+		}
+		bool IsWaitingForStunFallback() const
+		{
+			return m_FallbackTimeout >= 0;
+		}
 		void OnToken(const char *pToken);
 		void SendRegister();
 		void SendDeleteIfRegistered(bool Shutdown);
@@ -149,6 +184,9 @@ public:
 	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
 	void Update() override;
 	void OnConfigChange() override;
+	void SetStunPort(int NetType, int Port) override;
+	bool IsNetTypeEnabled(int NetType) const override;
+	bool NeedsStunPort() const override;
 	bool OnPacket(const CNetChunk *pPacket) override;
 	void OnNewInfo(const char *pInfo) override;
 	void OnShutdown() override;
@@ -254,6 +292,18 @@ IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
 	dbg_assert_failed("invalid protocol");
 }
 
+int CRegister::ProtocolToNetType(int Protocol)
+{
+	switch(Protocol)
+	{
+	case PROTOCOL_TW6_IPV6: return NETTYPE_IPV6;
+	case PROTOCOL_TW6_IPV4: return NETTYPE_IPV4;
+	case PROTOCOL_TW7_IPV6: return NETTYPE_IPV6;
+	case PROTOCOL_TW7_IPV4: return NETTYPE_IPV4;
+	}
+	dbg_assert_failed("invalid protocol");
+}
+
 void CRegister::ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -269,7 +319,7 @@ void CRegister::CProtocol::SendRegister()
 	int64_t Freq = time_freq();
 
 	char aAddress[64];
-	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_ServerPort);
 
 	char aSecret[UUID_MAXSTRSIZE];
 	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
@@ -330,7 +380,7 @@ void CRegister::CProtocol::SendRegister()
 		RequestIndex = m_pShared->m_NumTotalRequests;
 		m_pShared->m_NumTotalRequests += 1;
 	}
-	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister), m_pParent->m_pHttp));
+	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_ServerPort, !m_UsedStunPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister), m_pParent->m_pHttp));
 	m_NewChallengeToken = false;
 
 	m_PrevRegister = Now;
@@ -348,7 +398,7 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 	}
 
 	char aAddress[64];
-	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_ServerPort);
 
 	char aSecret[UUID_MAXSTRSIZE];
 	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
@@ -375,8 +425,31 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :
 	m_pParent(pParent),
 	m_Protocol(Protocol),
-	m_pShared(std::make_shared<CShared>(pParent->m_pGlobal))
+	m_pShared(std::make_shared<CShared>(pParent->m_pGlobal)),
+	m_ServerPort(pParent->m_ServerPort)
 {
+}
+
+void CRegister::CProtocol::SetStunPort(int Port)
+{
+	m_StunPort = Port;
+}
+
+void CRegister::CProtocol::UsePort(int Port)
+{
+	if(m_ServerPort == Port)
+	{
+		return;
+	}
+	// Delete the old address from the master server, otherwise the server would
+	// be listed with both ports until the old entry times out.
+	SendDeleteIfRegistered(false);
+	m_ServerPort = Port;
+	// The master server will challenge the new address.
+	m_ChallengeSeen = false;
+	m_ChallengeResponseIndex = -1;
+	m_FallbackTimeout = -1;
+	m_NextRegister = time_get();
 }
 
 void CRegister::CProtocol::CheckChallengeStatus()
@@ -402,8 +475,54 @@ void CRegister::CProtocol::CheckChallengeStatus()
 	}
 }
 
+void CRegister::CProtocol::CheckStunFallback()
+{
+	if(m_StunPort == 0 || m_StunPort == m_ServerPort)
+	{
+		m_FallbackTimeout = -1;
+		return;
+	}
+	{
+		// Only if the master server answered our latest registration with
+		// `need_challenge`, i.e. it could not check the port we are registered
+		// with. Any other answer tells us nothing about whether we are reachable.
+		const CLockScope LockScope(m_pShared->m_Lock);
+		if(m_pShared->m_LatestResponseIndex != m_pShared->m_NumTotalRequests - 1 || m_pShared->m_LatestResponseStatus != STATUS_NEEDCHALLENGE)
+		{
+			m_FallbackTimeout = -1;
+			return;
+		}
+		if(m_ChallengeResponseIndex != m_pShared->m_LatestResponseIndex)
+		{
+			// A new challenge is expected, what we saw for the previous round does not count.
+			m_ChallengeResponseIndex = m_pShared->m_LatestResponseIndex;
+			m_ChallengeSeen = false;
+		}
+	}
+	if(m_ChallengeSeen)
+	{
+		// The master server reached us, so clients can reach us too.
+		m_FallbackTimeout = -1;
+		return;
+	}
+	if(m_FallbackTimeout < 0)
+	{
+		// Give the challenge the chance to arrive, we may be reachable all along.
+		m_FallbackTimeout = time_get() + STUN_FALLBACK_SECONDS * time_freq();
+		return;
+	}
+	if(time_get() < m_FallbackTimeout)
+	{
+		return;
+	}
+	log_info(ProtocolToSystem(m_Protocol), "the master server could not reach port %d, registering with port %d discovered via STUN instead", m_ServerPort, m_StunPort);
+	m_UsedStunPort = true;
+	UsePort(m_StunPort);
+}
+
 void CRegister::CProtocol::Update()
 {
+	CheckStunFallback();
 	CheckChallengeStatus();
 	if(time_get() >= m_NextRegister)
 	{
@@ -413,6 +532,7 @@ void CRegister::CProtocol::Update()
 
 void CRegister::CProtocol::OnToken(const char *pToken)
 {
+	m_ChallengeSeen = true;
 	m_NewChallengeToken = true;
 	m_HaveChallengeToken = true;
 	str_copy(m_aChallengeToken, pToken);
@@ -491,6 +611,10 @@ void CRegister::CProtocol::CJob::Run()
 		{
 			log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
 			log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
+			if(m_SuggestStun)
+			{
+				log_error(ProtocolToSystem(m_Protocol), "ERROR: if you are behind NAT, enable sv_stun_server to register the public port automatically.");
+			}
 		}
 		json_value_free(pJson);
 		if(m_Index > m_pShared->m_LatestResponseIndex)
@@ -571,6 +695,48 @@ void CRegister::Update()
 		}
 		m_aProtocols[i].Update();
 	}
+}
+
+void CRegister::SetStunPort(int NetType, int Port)
+{
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(ProtocolToNetType(i) != NetType)
+		{
+			continue;
+		}
+		m_aProtocols[i].SetStunPort(Port);
+	}
+}
+
+bool CRegister::NeedsStunPort() const
+{
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(!m_aProtocolEnabled[i])
+		{
+			continue;
+		}
+		// Either we may need a new port after a NAT rebind, or we are about to
+		// fall back to one, so the discovery should keep running.
+		if(m_aProtocols[i].UsesStunPort() || m_aProtocols[i].IsWaitingForStunFallback())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool CRegister::IsNetTypeEnabled(int NetType) const
+{
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(m_aProtocolEnabled[i] && ProtocolToNetType(i) == NetType)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void CRegister::OnConfigChange()

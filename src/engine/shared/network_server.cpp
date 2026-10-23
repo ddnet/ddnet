@@ -53,6 +53,8 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	if(!m_Socket)
 		return false;
 
+	m_pStun = std::make_unique<CStun>(m_Socket);
+
 	m_Address = BindAddr;
 	m_pNetBan = pNetBan;
 
@@ -94,8 +96,36 @@ void CNetServer::Close()
 	{
 		return;
 	}
+	m_pStun = nullptr;
 	net_udp_close(m_Socket);
 	m_Socket = nullptr;
+}
+
+void CNetServer::FeedStunServer(NETADDR StunServer)
+{
+	if(!m_pStun)
+	{
+		return;
+	}
+	m_pStun->FeedStunServer(StunServer);
+}
+
+void CNetServer::RefreshStun()
+{
+	if(!m_pStun)
+	{
+		return;
+	}
+	m_pStun->Refresh();
+}
+
+bool CNetServer::GetStunMappedAddress(int NetType, NETADDR *pMappedAddr) const
+{
+	if(!m_pStun)
+	{
+		return false;
+	}
+	return m_pStun->GetMappedAddress(NetType, pMappedAddr);
 }
 
 void CNetServer::Drop(int ClientId, const char *pReason)
@@ -111,6 +141,11 @@ void CNetServer::Drop(int ClientId, const char *pReason)
 void CNetServer::Update()
 {
 	m_NumRecvPackets = 0;
+
+	if(m_pStun)
+	{
+		m_pStun->Update();
+	}
 
 	const int64_t Now = time_get();
 	if(Now > m_BudgetStart + time_freq())
@@ -652,6 +687,13 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		if(Bytes <= 0)
 			break;
 		m_NumRecvPackets++;
+
+		// STUN responses are not DDNet packets, handle them separately before
+		// they are interpreted as such.
+		if(m_pStun && m_pStun->OnPacket(Addr, pData, Bytes))
+		{
+			continue;
+		}
 
 		// check if we just should drop the packet
 		char aBuf[128];

@@ -10,6 +10,7 @@
 #include <base/types.h>
 
 #include <array>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -217,6 +218,7 @@ class CStun
 		void Refresh();
 		void Update();
 		bool OnPacket(NETADDR Addr, unsigned char *pData, int DataSize);
+		bool GetMappedAddress(NETADDR *pMappedAddr);
 		CONNECTIVITY GetConnectivity(NETADDR *pGlobalAddr);
 	};
 	CProtocol m_aProtocols[2];
@@ -227,6 +229,7 @@ public:
 	void Refresh();
 	void Update();
 	bool OnPacket(NETADDR Addr, unsigned char *pData, int DataSize);
+	bool GetMappedAddress(int NetType, NETADDR *pMappedAddr);
 	CONNECTIVITY GetConnectivity(int NetType, NETADDR *pGlobalAddr);
 };
 
@@ -443,6 +446,7 @@ class CNetServer
 
 	NETADDR m_Address;
 	NETSOCKET m_Socket;
+	std::unique_ptr<CStun> m_pStun;
 	CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
 	int m_MaxClients = NET_MAX_CLIENTS;
@@ -519,6 +523,11 @@ public:
 	CNetBan *NetBan() const { return m_pNetBan; }
 	int NetType() const { return net_socket_type(m_Socket); }
 	int MaxClients() const { return m_MaxClients; }
+
+	// STUN
+	void FeedStunServer(NETADDR StunServer);
+	void RefreshStun();
+	bool GetStunMappedAddress(int NetType, NETADDR *pMappedAddr) const;
 
 	void SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token);
 
