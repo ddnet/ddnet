@@ -334,7 +334,11 @@ int main(int argc, const char **argv)
 	}
 
 	pMap->Unload();
-	Writer.Finish();
+	if(!Writer.Finish())
+	{
+		log_error(TOOL_NAME, "failed to write destination map");
+		return -1;
+	}
 
 	return 0;
 }
