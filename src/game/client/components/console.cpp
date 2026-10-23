@@ -105,6 +105,7 @@ static const CArgumentCompletionEntry gs_aArgumentCompletionEntries[] = {
 	{EArgumentCompletionType::SETTING, "reset", 0},
 	{EArgumentCompletionType::SETTING, "toggle", 0},
 	{EArgumentCompletionType::SETTING, "+toggle", 0},
+	{EArgumentCompletionType::SETTING, "echo_config", 0},
 	{EArgumentCompletionType::KEY, "bind", 0},
 	{EArgumentCompletionType::KEY, "binds", 0},
 	{EArgumentCompletionType::KEY, "unbind", 0},
