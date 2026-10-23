@@ -85,6 +85,20 @@ class CServer : public IServer
 
 	int m_PreviousDebugDummies = 0;
 
+	// STUN port discovery for the master server registration
+	bool m_StunEnabled = false;
+	bool m_StunFirstResultIpv4 = false;
+	bool m_StunFirstResultIpv6 = false;
+	bool m_StunWaitIpv4 = false;
+	bool m_StunWaitIpv6 = false;
+	bool m_StunServerFed = false;
+	int64_t m_StunDeadline = 0;
+	int64_t m_NextStunRefresh = -1;
+	std::shared_ptr<CHostLookup> m_pStunLookupIpv4;
+	std::shared_ptr<CHostLookup> m_pStunLookupIpv6;
+	int m_StunPortIpv4 = 0;
+	int m_StunPortIpv6 = 0;
+
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class CConfig *Config() { return m_pConfig; }
@@ -492,6 +506,7 @@ public:
 	static void ConchainReservedSlotsAuthLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainStunServerUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRegisterCommunityTokenRedact(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -522,6 +537,10 @@ public:
 	int *GetIdMap(int ClientId) override;
 	int *GetReverseIdMap(int ClientId) override;
 
+	void InitStun();
+	void ResetStunPorts();
+	void UpdateStun();
+	bool StunRegistrationReady() const;
 	void InitDnsbl(int ClientId);
 	bool DnsblWhite(int ClientId) override
 	{

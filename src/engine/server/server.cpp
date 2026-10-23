@@ -1284,6 +1284,189 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	return 0;
 }
 
+void CServer::ResetStunPorts()
+{
+	if(!m_pRegister)
+	{
+		return;
+	}
+	m_StunPortIpv4 = 0;
+	m_StunPortIpv6 = 0;
+	const int Port = Config()->m_SvRegisterPort > 0 ? Config()->m_SvRegisterPort : this->Port();
+	m_pRegister->SetServerPort(NETTYPE_IPV4, Port);
+	m_pRegister->SetServerPort(NETTYPE_IPV6, Port);
+}
+
+void CServer::InitStun()
+{
+	m_StunEnabled = false;
+	m_StunFirstResultIpv4 = false;
+	m_StunFirstResultIpv6 = false;
+	m_StunWaitIpv4 = false;
+	m_StunWaitIpv6 = false;
+	m_StunServerFed = false;
+	m_StunDeadline = 0;
+	m_NextStunRefresh = -1;
+	m_pStunLookupIpv4 = nullptr;
+	m_pStunLookupIpv6 = nullptr;
+
+	if(!Engine() || !m_pRegister)
+	{
+		return;
+	}
+
+	if(Config()->m_SvStunServer[0] == '\0')
+	{
+		ResetStunPorts();
+		return;
+	}
+	if(Config()->m_SvRegisterPort > 0)
+	{
+		log_warn("stun", "sv_register_port is set, ignoring sv_stun_server");
+		ResetStunPorts();
+		return;
+	}
+
+	m_StunEnabled = true;
+	// Give STUN a chance to answer before registering for the first time, but
+	// don't block the registration forever if the STUN server is unreachable.
+	m_StunDeadline = time_get() + Config()->m_SvStunServerDeadline * time_freq();
+
+	// Only resolve the address families that the server socket supports.
+	const int NetType = m_NetServer.NetType();
+	if(NetType & NETTYPE_IPV4)
+	{
+		m_pStunLookupIpv4 = std::make_shared<CHostLookup>(Config()->m_SvStunServer, NETTYPE_IPV4);
+		Engine()->AddJob(m_pStunLookupIpv4);
+	}
+	if(NetType & NETTYPE_IPV6)
+	{
+		m_pStunLookupIpv6 = std::make_shared<CHostLookup>(Config()->m_SvStunServer, NETTYPE_IPV6);
+		Engine()->AddJob(m_pStunLookupIpv6);
+	}
+	if(!m_pStunLookupIpv4 && !m_pStunLookupIpv6)
+	{
+		log_warn("stun", "the server socket supports neither IPv4 nor IPv6, disabling STUN");
+		m_StunEnabled = false;
+		ResetStunPorts();
+		return;
+	}
+
+	// Only wait for address families that are actually registered, so a
+	// missing IPv6 mapping does not delay an IPv4-only registration.
+	m_StunWaitIpv4 = m_pStunLookupIpv4 && m_pRegister->IsNetTypeEnabled(NETTYPE_IPV4);
+	m_StunWaitIpv6 = m_pStunLookupIpv6 && m_pRegister->IsNetTypeEnabled(NETTYPE_IPV6);
+
+	log_info("stun", "resolving stun server '%s'", Config()->m_SvStunServer);
+}
+
+void CServer::UpdateStun()
+{
+	if(!m_StunEnabled)
+	{
+		return;
+	}
+
+	// Feed the resolved STUN server addresses to the network server.
+	bool LookupsPending = false;
+	auto HandleLookup = [&](std::shared_ptr<CHostLookup> &pLookup, int NetType) {
+		if(!pLookup)
+		{
+			return;
+		}
+		if(pLookup->State() != IJob::STATE_DONE)
+		{
+			LookupsPending = true;
+			return;
+		}
+		bool Usable = false;
+		if(pLookup->Result() == 0)
+		{
+			const NETADDR Addr = pLookup->Addr();
+			if(Addr.port == 0)
+			{
+				log_warn("stun", "stun server '%s' has no port, expected 'host:port'", pLookup->Hostname());
+			}
+			else
+			{
+				m_NetServer.FeedStunServer(Addr);
+				m_StunServerFed = true;
+				Usable = true;
+			}
+		}
+		else
+		{
+			log_warn("stun", "could not resolve stun server '%s' for %s", pLookup->Hostname(), NetType == NETTYPE_IPV4 ? "IPv4" : "IPv6");
+		}
+		if(!Usable)
+		{
+			// No STUN answer can be expected for this address family, so do
+			// not delay the first registration because of it.
+			if(NetType == NETTYPE_IPV4)
+			{
+				m_StunWaitIpv4 = false;
+			}
+			else
+			{
+				m_StunWaitIpv6 = false;
+			}
+		}
+		pLookup = nullptr;
+	};
+	HandleLookup(m_pStunLookupIpv4, NETTYPE_IPV4);
+	HandleLookup(m_pStunLookupIpv6, NETTYPE_IPV6);
+	if(!LookupsPending && !m_StunServerFed)
+	{
+		log_error("stun", "could not resolve stun server '%s', disabling STUN", Config()->m_SvStunServer);
+		m_StunEnabled = false;
+		ResetStunPorts();
+		return;
+	}
+
+	if(Config()->m_SvStunServerRefreshRate > 0 && time_get() >= m_NextStunRefresh)
+	{
+		m_NextStunRefresh = time_get() + Config()->m_SvStunServerRefreshRate * time_freq();
+		m_NetServer.RefreshStun();
+	}
+
+	auto UpdatePortOnChange = [&](int NetType, bool &FirstResult, int &Port) {
+		NETADDR MappedAddr;
+		if(!m_NetServer.GetStunMappedAddress(NetType, &MappedAddr))
+		{
+			return;
+		}
+		FirstResult = true;
+
+		if(Port != MappedAddr.port)
+		{
+			char aAddr[NETADDR_MAXSTRSIZE];
+			net_addr_str(&MappedAddr, aAddr, sizeof(aAddr), true);
+			if(Port == 0)
+			{
+				log_info("stun", "discovered public address %s", aAddr);
+			}
+			else
+			{
+				log_info("stun", "updated public address %s", aAddr);
+			}
+			Port = MappedAddr.port;
+			m_pRegister->SetServerPort(NetType, MappedAddr.port);
+		}
+		else if(Port != 0)
+		{
+			log_trace("stun", "public address unchanged");
+		}
+	};
+	UpdatePortOnChange(NETTYPE_IPV4, m_StunFirstResultIpv4, m_StunPortIpv4);
+	UpdatePortOnChange(NETTYPE_IPV6, m_StunFirstResultIpv6, m_StunPortIpv6);
+}
+
+bool CServer::StunRegistrationReady() const
+{
+	// wait for ipv4 and ipv6
+	return (!m_StunWaitIpv4 || m_StunFirstResultIpv4) && (!m_StunWaitIpv6 || m_StunFirstResultIpv6);
+}
+
 void CServer::InitDnsbl(int ClientId)
 {
 	NETADDR Addr = *ClientAddr(ClientId);
@@ -3472,6 +3655,7 @@ int CServer::Run()
 	// process pending commands
 	m_pConsole->StoreCommands(false);
 	m_pRegister->OnConfigChange();
+	InitStun();
 
 	if(m_AuthManager.IsGenerated())
 	{
@@ -3648,7 +3832,11 @@ int CServer::Run()
 #endif
 
 				// master server stuff
-				m_pRegister->Update();
+				UpdateStun();
+				if(!m_StunEnabled || time_get() >= m_StunDeadline || StunRegistrationReady())
+				{
+					m_pRegister->Update();
+				}
 
 				if(m_ServerInfoNeedsUpdate)
 				{
@@ -4654,6 +4842,15 @@ void CServer::ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, I
 	}
 }
 
+void CServer::ConchainStunServerUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		static_cast<CServer *>(pUserData)->InitStun();
+	}
+}
+
 void CServer::ConchainRegisterCommunityTokenRedact(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	// community tokens look like this:
@@ -4793,6 +4990,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_reserved_slots_auth_level", ConchainReservedSlotsAuthLevel, this);
 	Console()->Chain("sv_map", ConchainMapUpdate, this);
 	Console()->Chain("sv_sixup", ConchainSixupUpdate, this);
+	Console()->Chain("sv_stun_server", ConchainStunServerUpdate, this);
 	Console()->Chain("sv_register_community_token", ConchainRegisterCommunityTokenRedact, nullptr);
 
 	Console()->Chain("loglevel", ConchainLoglevel, this);
