@@ -2670,56 +2670,56 @@ All
 == Все
 
 Hold Shift to be more precise.
-== 
+== Зажмите Shift для большей точности.
 
 Dummy is not connected
-== 
+== Дамми не подключён
 
 [Important alert message]
 Tap to dismiss…
-== 
+== Нажмите, чтобы закрыть…
 
 Initializing layers
-== 
+== Инициализация слоёв
 
 [Direct touch input]
 Relative aim
-== 
+== Относительное прицеливание
 
 [Predefined touch button behaviors]
 Joystick Relative Aim
-== 
+== Относительное прицеливание на джойстике
 
 Virtual joystick which only aims and moves the mouse pointer relatively.
 == 
 
 Credits
-== 
+== Авторы
 
 Teleport to cursor
-== 
+== Телепортация к курсору
 
 Teleport dummy to cursor
-== 
+== Телепортация дамми к курсору
 
 Practice
-== 
+== Режим практики
 
 [AntiPing: predict other players]
 Interact
-== 
+== Взаимодействие
 
 Always predict frozen players
-== 
+== Всегда предсказывать игроков во фризе
 
 No country flags match your filter criteria
-== 
+== Ни один флаг страны не подходит критериям ваших фильтров
 
 Join
-== 
+== Присоединиться
 
 not bound
 == 
 
 Show cursor
-== 
+== Показать курсор
