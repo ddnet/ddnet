@@ -354,6 +354,22 @@ REGISTER_QUICK_ACTION(
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS; },
 	"Toggle the server settings editor.")
 REGISTER_QUICK_ACTION(
+	Undo,
+	"Undo",
+	[&]() { Map()->m_EditorHistory.Undo(); },
+	[&]() -> bool { return !Map()->m_EditorHistory.CanUndo(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+Z] Undo the last action.")
+REGISTER_QUICK_ACTION(
+	Redo,
+	"Redo",
+	[&]() { Map()->m_EditorHistory.Redo(); },
+	[&]() -> bool { return !Map()->m_EditorHistory.CanRedo(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+Y] Redo the last undone action.")
+REGISTER_QUICK_ACTION(
 	History,
 	"History",
 	[&]() { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_HISTORY ? EXTRAEDITOR_NONE : EXTRAEDITOR_HISTORY; },
