@@ -501,6 +501,8 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize, c
 			Pos += Read;
 		}
 
+		Sample.m_FileSize = DataSize;
+
 		Sample.m_pData = pSampleData;
 		Sample.m_NumFrames = Pos;
 		Sample.m_Rate = 48000;
@@ -664,6 +666,8 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 			WavpackCloseFile(pContext);
 			return false;
 		}
+
+		Sample.m_FileSize = DataSize;
 
 		Sample.m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
 
@@ -881,6 +885,17 @@ void CSound::SetSampleCurrentTime(int SampleId, float Time)
 	}
 
 	pSample->m_PausedAt = pSample->m_NumFrames * Time;
+}
+
+size_t CSound::SampleFileSize(int SampleId)
+{
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid: %d", SampleId);
+
+	const CLockScope LockScope(m_SoundLock);
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded: %d", SampleId);
+	CSample *pSample = &m_aSamples[SampleId];
+
+	return pSample->m_FileSize;
 }
 
 void CSound::SetChannel(int ChannelId, float Vol, float Pan)

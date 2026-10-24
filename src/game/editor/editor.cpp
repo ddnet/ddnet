@@ -253,7 +253,7 @@ bool CEditor::CallbackCustomEntities(const char *pFilename, int StorageType, voi
 	return true;
 }
 
-void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId)
+void CEditor::DoAudioPreview(CUIRect &View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId)
 {
 	CUIRect Button, SeekBar;
 	// play/pause button
@@ -858,6 +858,11 @@ void CEditor::DoToolbarSounds(CUIRect ToolBar)
 	{
 		static int s_PlayPauseButton, s_StopButton, s_SeekBar = 0;
 		DoAudioPreview(ToolBarBottom, &s_PlayPauseButton, &s_StopButton, &s_SeekBar, m_ToolbarPreviewSound);
+
+		char aBuf[32];
+		str_format(aBuf, sizeof(aBuf), "- %.2f KB", Sound()->SampleFileSize(m_ToolbarPreviewSound) / 1024.0f);
+		ToolBarBottom.VSplitLeft(5.0f, nullptr, &ToolBarBottom);
+		Ui()->DoLabel(&ToolBarBottom, aBuf, 12.0f, TEXTALIGN_ML);
 	}
 }
 

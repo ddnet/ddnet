@@ -75,6 +75,8 @@ public:
 	virtual float GetSampleCurrentTime(int SampleId) = 0; // in s
 	virtual void SetSampleCurrentTime(int SampleId, float Time) = 0;
 
+	virtual size_t SampleFileSize(int SampleId) = 0; // in bytes
+
 	virtual void SetChannel(int ChannelId, float Volume, float Panning) = 0;
 	virtual void SetListenerPosition(vec2 Position) = 0;
 

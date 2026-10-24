@@ -568,6 +568,11 @@ void CFileBrowser::RenderFilePreview(CUIRect Preview)
 	{
 		if(m_PreviewState == EPreviewState::LOADED)
 		{
+			char aBuf[32];
+			str_format(aBuf, sizeof(aBuf), "%.2f KB", Sound()->SampleFileSize(m_PreviewSound) / 1024.0f);
+			Ui()->DoLabel(&Preview, aBuf, 12.0f, TEXTALIGN_LEFT);
+			Preview.HSplitTop(16.0f, nullptr, &Preview);
+
 			Preview.HSplitTop(20.0f, &Preview, nullptr);
 			Preview.VSplitLeft(Preview.h / 4.0f, nullptr, &Preview);
 			Editor()->DoAudioPreview(Preview, &m_ButtonPlayPauseId, &m_ButtonStopId, &m_SeekBarId, m_PreviewSound);

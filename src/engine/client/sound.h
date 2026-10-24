@@ -17,6 +17,8 @@ struct CSample
 	int m_Index;
 	int m_NextFreeSampleIndex;
 
+	size_t m_FileSize;
+
 	short *m_pData;
 	int m_NumFrames;
 	int m_Rate;
@@ -131,6 +133,8 @@ public:
 	float GetSampleTotalTime(int SampleId) override REQUIRES(!m_SoundLock); // in s
 	float GetSampleCurrentTime(int SampleId) override REQUIRES(!m_SoundLock); // in s
 	void SetSampleCurrentTime(int SampleId, float Time) override REQUIRES(!m_SoundLock);
+
+	size_t SampleFileSize(int SampleId) override REQUIRES(!m_SoundLock);
 
 	void SetChannel(int ChannelId, float Vol, float Pan) override REQUIRES(!m_SoundLock);
 	void SetListenerPosition(vec2 Position) override;

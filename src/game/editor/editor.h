@@ -697,7 +697,7 @@ public:
 	void ShowHelp();
 	void Exit();
 
-	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId);
+	void DoAudioPreview(CUIRect &View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId);
 
 	// DDRace
 
