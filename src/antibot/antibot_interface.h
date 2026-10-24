@@ -16,7 +16,9 @@ ANTIBOTAPI void AntibotRoundStart(CAntibotRoundData *pRoundData);
 ANTIBOTAPI void AntibotRoundEnd(void);
 ANTIBOTAPI void AntibotUpdateData(void);
 ANTIBOTAPI void AntibotDestroy(void);
-ANTIBOTAPI void AntibotConsoleCommand(const char *pCommand);
+// The ClientId can be -1 when the command comes from a config file
+// or from a econ/fifo connection
+ANTIBOTAPI void AntibotConsoleCommand(int ClientId, const char *pCommand);
 ANTIBOTAPI void AntibotOnPlayerInit(int ClientId);
 ANTIBOTAPI void AntibotOnPlayerDestroy(int ClientId);
 ANTIBOTAPI void AntibotOnSpawn(int ClientId);
