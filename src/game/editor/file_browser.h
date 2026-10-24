@@ -140,6 +140,7 @@ private:
 	int m_PreviewImageWidth = 0;
 	int m_PreviewImageHeight = 0;
 	int m_PreviewSound = -1;
+	size_t m_PreviewFileSize = 0;
 
 	// UI elements
 	CListBox m_ListBox;

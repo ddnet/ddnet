@@ -21,6 +21,7 @@ public:
 
 	bool Read(void *pData, size_t Size);
 	bool Error() const { return m_Error; }
+	size_t Size() const { return m_Size; }
 };
 
 class CByteBufferWriter

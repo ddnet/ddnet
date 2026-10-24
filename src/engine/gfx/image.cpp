@@ -15,11 +15,13 @@ CImageInfo &CImageInfo::operator=(CImageInfo &&Other)
 {
 	m_Width = Other.m_Width;
 	m_Height = Other.m_Height;
+	m_FileSize = Other.m_FileSize;
 	m_Format = Other.m_Format;
 	m_pData = Other.m_pData;
 	m_IsAllocated = Other.m_IsAllocated;
 	Other.m_Width = 0;
 	Other.m_Height = 0;
+	Other.m_FileSize = 0;
 	Other.m_Format = FORMAT_UNDEFINED;
 	Other.m_pData = nullptr;
 	Other.m_IsAllocated = false;
@@ -60,6 +62,7 @@ void CImageInfo::Free()
 	m_IsAllocated = false;
 	m_Width = 0;
 	m_Height = 0;
+	m_FileSize = 0;
 	m_Format = FORMAT_UNDEFINED;
 }
 
@@ -179,6 +182,7 @@ CImageInfo CImageInfo::DeepCopy() const
 	Copy.m_Width = m_Width;
 	Copy.m_Height = m_Height;
 	Copy.m_Format = m_Format;
+	Copy.m_FileSize = m_FileSize;
 	Copy.Allocate();
 	mem_copy(Copy.m_pData, m_pData, Size);
 	return Copy;

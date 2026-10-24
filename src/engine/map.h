@@ -22,6 +22,7 @@ public:
 	virtual ~IMap() = default;
 
 	virtual int GetDataSize(int Index) const = 0;
+	virtual int GetFileDataSize(int Index) const = 0;
 	virtual void *GetData(int Index) = 0;
 	virtual void *GetDataSwapped(int Index) = 0;
 	virtual const char *GetDataString(int Index) = 0;

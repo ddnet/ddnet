@@ -832,7 +832,7 @@ void CEditor::DoToolbarImages(CUIRect ToolBar)
 	if(pSelectedImage != nullptr)
 	{
 		char aLabel[64];
-		str_format(aLabel, sizeof(aLabel), "Size: %" PRIzu " × %" PRIzu, pSelectedImage->m_Width, pSelectedImage->m_Height);
+		str_format(aLabel, sizeof(aLabel), "Size: %" PRIzu " × %" PRIzu " (%.2f KB)", pSelectedImage->m_Width, pSelectedImage->m_Height, pSelectedImage->m_FileSize / 1024.0f);
 		Ui()->DoLabel(&ToolBarBottom, aLabel, 12.0f, TEXTALIGN_ML);
 	}
 }

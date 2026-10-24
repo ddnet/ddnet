@@ -25,6 +25,11 @@ int CMap::GetDataSize(int Index) const
 	return m_DataFile.GetDataSize(Index);
 }
 
+int CMap::GetFileDataSize(int Index) const
+{
+	return m_DataFile.GetFileDataSize(Index);
+}
+
 void *CMap::GetData(int Index)
 {
 	return m_DataFile.GetData(Index);

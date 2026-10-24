@@ -64,6 +64,11 @@ public:
 	size_t m_Height = 0;
 
 	/**
+	 * Image source file size, or compressed map data size for embedded images, in bytes.
+	 */
+	size_t m_FileSize = 0;
+
+	/**
 	 * Format of the image.
 	 *
 	 * @see EImageFormat

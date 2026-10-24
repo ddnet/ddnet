@@ -48,6 +48,7 @@ public:
 	IOHANDLE File() const;
 
 	int GetDataSize(int Index) const;
+	int GetFileDataSize(int Index) const;
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
 	const char *GetDataString(int Index);

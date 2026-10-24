@@ -778,6 +778,15 @@ int CDataFileReader::GetDataSize(int Index) const
 	return m_pDataFile->GetDataSize(Index);
 }
 
+int CDataFileReader::GetFileDataSize(int Index) const
+{
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
+	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
+		return 0;
+	return m_pDataFile->GetFileDataSize(Index);
+}
+
 void *CDataFileReader::GetData(int Index)
 {
 	dbg_assert(m_pDataFile != nullptr, "File not open");

@@ -578,6 +578,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			{
 				pImg->m_Width = pItem->m_Width;
 				pImg->m_Height = pItem->m_Height;
+				pImg->m_FileSize = pMap->GetFileDataSize(pItem->m_ImageData);
 				pImg->m_Format = CImageInfo::FORMAT_RGBA;
 
 				const void *pData = pMap->GetData(pItem->m_ImageData);
@@ -585,6 +586,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				{
 					pImg->m_Width = 0;
 					pImg->m_Height = 0;
+					pImg->m_FileSize = 0;
 					char aBuf[128];
 					str_format(aBuf, sizeof(aBuf), "Error: Failed to load data of image %d '%s'.", i, pImg->m_aName);
 					ErrorHandler(aBuf);

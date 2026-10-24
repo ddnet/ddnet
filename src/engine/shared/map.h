@@ -23,6 +23,7 @@ public:
 	~CMap() override;
 
 	int GetDataSize(int Index) const override;
+	int GetFileDataSize(int Index) const override;
 	void *GetData(int Index) override;
 	void *GetDataSwapped(int Index) override;
 	const char *GetDataString(int Index) override;

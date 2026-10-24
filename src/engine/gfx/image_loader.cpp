@@ -258,6 +258,7 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 		Image.m_Width = Width;
 		Image.m_Height = Height;
 		Image.m_Format = ImageFormatFromChannelCount(ColorChannelCount);
+		Image.m_FileSize = Reader.Size();
 		Image.Allocate();
 		for(size_t y = 0; y < Height; ++y)
 		{
