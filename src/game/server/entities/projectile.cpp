@@ -49,6 +49,7 @@ CProjectile::CProjectile(
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 	m_DDRaceTeam = m_Owner == -1 ? 0 : GameServer()->GetDDRaceTeam(m_Owner);
 	m_IsSolo = pOwnerChar && pOwnerChar->GetCore().m_Solo;
+	m_JetpackExhaust = m_Type == WEAPON_GUN && pOwnerChar && pOwnerChar->Core()->m_Jetpack && !pOwnerChar->Core()->m_HasTelegunGun;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -214,7 +215,8 @@ void CProjectile::Tick()
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_TeamMask);
+			if(!m_JetpackExhaust || (pOwnerChar && pOwnerChar->HasTelegunGun()))
+				GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_TeamMask);
 			m_MarkedForDestroy = true;
 			return;
 		}
@@ -334,6 +336,10 @@ CNetObj_DDNetProjectile CProjectile::NetInfo(int SnappingClient)
 	if(m_Freeze)
 	{
 		Flags |= PROJECTILEFLAG_FREEZE;
+	}
+	if(m_JetpackExhaust)
+	{
+		Flags |= PROJECTILEFLAG_JETPACK_EXHAUST;
 	}
 
 	int Owner = m_Owner;
