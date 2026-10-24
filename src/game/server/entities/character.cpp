@@ -241,6 +241,21 @@ void CCharacter::SetDeepFrozen(bool Active)
 	m_Core.m_DeepFrozen = Active;
 }
 
+void CCharacter::SetTelegunGun(bool Active)
+{
+	m_Core.m_HasTelegunGun = Active;
+}
+
+void CCharacter::SetTelegunGrenade(bool Active)
+{
+	m_Core.m_HasTelegunGrenade = Active;
+}
+
+void CCharacter::SetTelegunLaser(bool Active)
+{
+	m_Core.m_HasTelegunLaser = Active;
+}
+
 bool CCharacter::IsGrounded()
 {
 	if(Collision()->IsOnGround(m_Pos, GetProximityRadius()))
