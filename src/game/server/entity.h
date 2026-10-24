@@ -71,8 +71,6 @@ public: // TODO: Maybe make protected
 	CCollision *Collision() { return m_pCCollision; }
 
 	/* Getters */
-	CEntity *TypeNext() { return m_pNextTypeEntity; }
-	CEntity *TypePrev() { return m_pPrevTypeEntity; }
 	const vec2 &GetPos() const { return m_Pos; }
 	float GetProximityRadius() const { return m_ProximityRadius; }
 

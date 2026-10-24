@@ -89,8 +89,8 @@ void IGameController::DoActivityCheck()
 float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int ClientId)
 {
 	float Score = 0.0f;
-	CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
-	for(; pC; pC = (CCharacter *)pC->TypeNext())
+	CGameWorld::CEntityIterator Iterator(&GameServer()->m_World, CGameWorld::ENTTYPE_CHARACTER);
+	while(CCharacter *pC = static_cast<CCharacter *>(Iterator.Next()))
 	{
 		if(!pC->CanCollide(ClientId))
 			continue;
