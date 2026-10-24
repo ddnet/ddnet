@@ -1,4 +1,6 @@
-image: ubuntu:22.04
+# ubuntu:26.04 is pinned because libsdl3-dev is not packaged before Ubuntu 25.10.
+# Switch back to an LTS image once one ships SDL3.
+image: ubuntu:26.04
 
 stages:
   - test
@@ -12,7 +14,7 @@ build_cmake:
       pkg-config
       clang rustc
       cargo cmake ninja-build
-      libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev
+      libfreetype6-dev libnotify-dev libsdl3-dev libsqlite3-dev libvulkan-dev
       glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
       libx264-dev libpng-dev
       libcurl4 libcurl3-gnutls libcurl4-openssl-dev libcurlpp-dev
