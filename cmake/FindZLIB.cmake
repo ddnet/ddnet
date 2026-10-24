@@ -33,50 +33,18 @@ if(TARGET_OS STREQUAL "emscripten")
   if(ZLIB_LIBRARY AND ZLIB_INCLUDEDIR1 AND ZLIB_INCLUDEDIR2)
     set(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDEDIR1} ${ZLIB_INCLUDEDIR2})
     set(ZLIB_LIBRARIES ${ZLIB_LIBRARY})
+    set(ZLIB_BUNDLED OFF)
     set(ZLIB_FOUND TRUE)
   endif()
 endif()
 
 if(NOT ZLIB_FOUND)
+  # zlib-rs is linked in as part of our Rust code, so only need its headers
   set(ZLIB_BUNDLED ON)
-  set(ZLIB_SRC_DIR src/engine/external/zlib)
-  set_src(ZLIB_SRC GLOB ${ZLIB_SRC_DIR}
-    adler32.c
-    compress.c
-    crc32.c
-    crc32.h
-    deflate.c
-    deflate.h
-    gzclose.c
-    gzguts.h
-    gzlib.c
-    gzread.c
-    gzwrite.c
-    infback.c
-    inffast.c
-    inffast.h
-    inffixed.h
-    inflate.c
-    inflate.h
-    inftrees.c
-    inftrees.h
-    trees.c
-    trees.h
-    uncompr.c
-    zconf.h
-    zlib.h
-    zutil.c
-    zutil.h
-  )
-  add_library(zlib EXCLUDE_FROM_ALL OBJECT ${ZLIB_SRC})
-  set(ZLIB_INCLUDEDIR ${ZLIB_SRC_DIR})
-  target_include_directories(zlib PRIVATE ${ZLIB_INCLUDEDIR})
-
-  set(ZLIB_DEP $<TARGET_OBJECTS:zlib>)
+  set(ZLIB_DEP)
+  set(ZLIB_INCLUDEDIR src/engine/external/zlib)
   set(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDEDIR})
   set(ZLIB_LIBRARIES)
-
-  list(APPEND TARGETS_DEP zlib)
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(ZLIB DEFAULT_MSG ZLIB_INCLUDEDIR)
