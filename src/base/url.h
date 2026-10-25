@@ -13,6 +13,7 @@
 #include <optional>
 #include <regex>
 #include <string_view>
+#include <vector>
 
 // Max url length
 constexpr std::size_t URL_MAX_LENGTH = 2048;
@@ -80,9 +81,9 @@ std::vector<CUrlMatch> url_find_all(const char *pText, std::size_t Length);
 
 /**
  * Checks for a basic domain name.
- * Should answer the question: is `name` exactly "<word>.<tld>"?
- *   <tld>  : the part after the LAST dot; 2 or more ASCII letters (no digits, no hyphens)
- *   <word> : everything before it; one or more dot-separated labels made of letters, digits
+ * Should answer the question: is `name` exactly `<word>.<tld>`?
+ *   `<tld>`  : the part after the LAST dot; 2 or more ASCII letters (no digits, no hyphens)
+ *   `<word>` : everything before it; one or more dot-separated labels made of letters, digits
  *            and '-', none empty, none starting or ending with '-' ("example", "sub.example")
  * Case-insensitive. Anything else (spaces, '_', ':', '/', '@', non-ASCII, trailing dot, ...)
  * makes it invalid. The TLD is NOT looked up in kTlds, so "hf.cfg" is well-formed.
@@ -97,9 +98,9 @@ bool url_is_valid_domain_name(std::string_view Name);
 
 /**
  * Checks for a basic domain name.
- * Should answer the question: is `name` exactly "<word>.<tld>"?
- *   <tld>  : the part after the LAST dot; 2 or more ASCII letters (no digits, no hyphens)
- *   <word> : everything before it; one or more dot-separated labels made of letters, digits
+ * Should answer the question: is `name` exactly `<word>.<tld>`?
+ *   `<tld>`  : the part after the LAST dot; 2 or more ASCII letters (no digits, no hyphens)
+ *   `<word>` : everything before it; one or more dot-separated labels made of letters, digits
  *            and '-', none empty, none starting or ending with '-' ("example", "sub.example")
  * Case-insensitive. Anything else (spaces, '_', ':', '/', '@', non-ASCII, trailing dot, ...)
  * makes it invalid. The TLD is NOT looked up in kTlds, so "hf.cfg" is well-formed.

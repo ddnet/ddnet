@@ -4358,10 +4358,10 @@ void CClient::Con_UrlDisallowDomain(IConsole::IResult *pResult, void *pUserData)
 	const char *pDomainName = pResult->GetString(0);
 
 	int Index = -1;
-	for(int i = 0; i < pSelf->m_UrlAllowListCount && Index == -1; ++i)
+	for(size_t i = 0; i < pSelf->m_UrlAllowListCount && Index == -1; ++i)
 	{
 		if(str_utf8_comp_nocase(pSelf->m_aUrlAllowList[i].m_aName, pDomainName) == 0)
-			Index = i;
+			Index = (int)i;
 	}
 
 	if(Index == -1)
@@ -5529,7 +5529,7 @@ void CClient::OnConfigSave(IConfigManager *pConfigManager)
 	{
 		char aBuf[128];
 		const char *pEnd = aBuf + sizeof(aBuf) - 4;
-		for(int i = 0; i < m_UrlAllowListCount; ++i)
+		for(size_t i = 0; i < m_UrlAllowListCount; ++i)
 		{
 			str_copy(aBuf, "url_allow_domain ");
 
@@ -5779,7 +5779,7 @@ void CClient::UrlAllowDomain(const char *pDomainName)
 		return;
 	}
 
-	for(int i = 0; i < m_UrlAllowListCount; ++i)
+	for(size_t i = 0; i < m_UrlAllowListCount; ++i)
 	{
 		if(str_utf8_comp_nocase(m_aUrlAllowList[i].m_aName, pDomainName) == 0)
 			return; // don't add duplicates
