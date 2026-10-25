@@ -3581,22 +3581,20 @@ int CServer::Run()
 				GameServer()->OnPreTickTeehistorian();
 				UpdateDebugDummies(false);
 
+				const CClient::CInput *apInput[MAX_CLIENTS] = {};
 				for(int c = 0; c < MAX_CLIENTS; c++)
 				{
 					if(m_aClients[c].m_State != CClient::STATE_INGAME)
 						continue;
-					bool ClientHadInput = false;
-					for(auto &Input : m_aClients[c].m_aInputs)
+					for(const auto &Input : m_aClients[c].m_aInputs)
 					{
 						if(Input.m_GameTick == Tick() + 1)
 						{
-							GameServer()->OnClientPredictedEarlyInput(c, Input.m_aData);
-							ClientHadInput = true;
+							apInput[c] = &Input;
 							break;
 						}
 					}
-					if(!ClientHadInput)
-						GameServer()->OnClientPredictedEarlyInput(c, nullptr);
+					GameServer()->OnClientPredictedEarlyInput(c, apInput[c] == nullptr ? nullptr : apInput[c]->m_aData);
 				}
 
 				m_CurrentGameTick++;
@@ -3607,18 +3605,7 @@ int CServer::Run()
 				{
 					if(m_aClients[c].m_State != CClient::STATE_INGAME)
 						continue;
-					bool ClientHadInput = false;
-					for(auto &Input : m_aClients[c].m_aInputs)
-					{
-						if(Input.m_GameTick == Tick())
-						{
-							GameServer()->OnClientPredictedInput(c, Input.m_aData);
-							ClientHadInput = true;
-							break;
-						}
-					}
-					if(!ClientHadInput)
-						GameServer()->OnClientPredictedInput(c, nullptr);
+					GameServer()->OnClientPredictedInput(c, apInput[c] == nullptr ? nullptr : apInput[c]->m_aData);
 				}
 
 				GameServer()->OnTick();
