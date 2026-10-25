@@ -36,10 +36,7 @@ void CLayerQuads::Render(const CEditorMap *pRenderMap)
 		Graphics()->TextureClear();
 	}
 
-	Graphics()->BlendNone();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, &pRenderMap->m_EnvelopeEvaluator);
-	Graphics()->BlendNormal();
-	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, &pRenderMap->m_EnvelopeEvaluator);
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), &pRenderMap->m_EnvelopeEvaluator, 1.0f);
 }
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)

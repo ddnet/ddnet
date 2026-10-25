@@ -369,7 +369,7 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
 }
 
-void CRenderMap::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, const IEnvelopeEval *pEnvEval, float Alpha)
+void CRenderMap::ForceRenderQuads(CQuad *pQuads, int NumQuads, const IEnvelopeEval *pEnvEval, float Alpha)
 {
 	Graphics()->TrianglesBegin();
 	float Conv = 1 / 255.0f;
@@ -381,16 +381,6 @@ void CRenderMap::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, 
 		pEnvEval->EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4);
 
 		if(Color.a <= 0.0f)
-			continue;
-
-		bool Opaque = false;
-		/* TODO: Analyze quadtexture
-		if(a < 0.01f || (q->m_aColors[0].a < 0.01f && q->m_aColors[1].a < 0.01f && q->m_aColors[2].a < 0.01f && q->m_aColors[3].a < 0.01f))
-			Opaque = true;
-		*/
-		if(Opaque && !(RenderFlags & LAYERRENDERFLAG_OPAQUE))
-			continue;
-		if(!Opaque && !(RenderFlags & LAYERRENDERFLAG_TRANSPARENT))
 			continue;
 
 		Graphics()->QuadsSetSubsetFree(
