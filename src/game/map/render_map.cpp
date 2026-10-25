@@ -591,7 +591,7 @@ void CRenderMap::RenderTile(int x, int y, unsigned char Index, float Scale, Colo
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
+void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, vec2 Offset, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	CScreenRect ScreenRect = Graphics()->GetScreen();
 
@@ -609,10 +609,10 @@ void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRG
 
 	const bool ExtendTiles = (RenderFlags & TILERENDERFLAG_EXTEND) != 0;
 
-	int StartY = (int)(ScreenRect.m_TopLeft.y / Scale) - 1;
-	int StartX = (int)(ScreenRect.m_TopLeft.x / Scale) - 1;
-	int EndY = (int)(ScreenRect.m_BottomRight.y / Scale) + 1;
-	int EndX = (int)(ScreenRect.m_BottomRight.x / Scale) + 1;
+	int StartY = (int)((ScreenRect.m_TopLeft.y - Offset.y) / Scale) - 1;
+	int StartX = (int)((ScreenRect.m_TopLeft.x - Offset.x) / Scale) - 1;
+	int EndY = (int)((ScreenRect.m_BottomRight.y - Offset.y) / Scale) + 1;
+	int EndX = (int)((ScreenRect.m_BottomRight.x - Offset.x) / Scale) + 1;
 	if(!ExtendTiles)
 	{
 		StartY = std::max(0, StartY);
@@ -724,16 +724,19 @@ void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRG
 						y1 = Tmp;
 					}
 
+					float PosX = x * Scale + Offset.x;
+					float PosY = y * Scale + Offset.y;
+
 					if(Graphics()->HasTextureArraysSupport())
 					{
 						Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
-						IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
+						IGraphics::CQuadItem QuadItem(PosX, PosY, Scale, Scale);
 						Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
 					}
 					else
 					{
 						Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
-						IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
+						IGraphics::CQuadItem QuadItem(PosX, PosY, Scale, Scale);
 						Graphics()->QuadsDrawTL(&QuadItem, 1);
 					}
 				}

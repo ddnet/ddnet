@@ -72,10 +72,12 @@ public:
 	virtual bool DoRender(const CRenderLayerParams &Params) = 0;
 	virtual bool IsValid() const { return true; }
 	virtual bool IsGroup() const { return false; }
+	virtual bool SupportsPositionEnvelopeItem() const { return false; }
 	virtual void Unload() = 0;
 
 	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const;
 	int GetGroup() const { return m_GroupId; }
+	int GetLayer() const { return m_LayerId; }
 
 protected:
 	int m_GroupId;
@@ -127,7 +129,13 @@ public:
 
 	virtual int GetDataIndex() const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
+	bool SupportsPositionEnvelopeItem() const override { return true; }
 	void Unload() override;
+	void SetPositionEnvelope(int PositionEnvelope, int PositionEnvelopeOffset)
+	{
+		m_PosEnv = PositionEnvelope;
+		m_PosEnvOffset = PositionEnvelopeOffset;
+	}
 
 protected:
 	virtual void *GetRawData() const;
@@ -135,6 +143,7 @@ protected:
 	T *GetData() const;
 
 	virtual ColorRGBA GetRenderColor(const CRenderLayerParams &Params) const;
+	vec2 GetRenderOffset() const;
 	virtual void InitTileData();
 	virtual void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const;
 	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
@@ -216,16 +225,18 @@ protected:
 
 	void UploadTileData(std::optional<CTileLayerVisuals> &VisualsOptional, int CurOverlay, bool AddAsSpeedup, bool IsGameLayer = false);
 
-	virtual void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
-	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
+	virtual void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params);
+	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params);
 
-	void RenderTileLayer(const ColorRGBA &Color, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals = nullptr);
+	void RenderTileLayer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals = nullptr);
 	void RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1, CTileLayerVisuals *pTileLayerVisuals);
 	void RenderKillTileBorder(const ColorRGBA &Color);
 
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTiles;
 	CMapItemLayerTilemap *m_pLayerTilemap;
 	ColorRGBA m_Color;
+	int m_PosEnv;
+	int m_PosEnvOffset;
 };
 
 class CRenderLayerQuads : public CRenderLayer
@@ -289,6 +300,7 @@ public:
 	CRenderLayerEntityBase(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	~CRenderLayerEntityBase() override = default;
 	bool DoRender(const CRenderLayerParams &Params) override;
+	bool SupportsPositionEnvelopeItem() const override { return false; }
 
 protected:
 	ColorRGBA GetRenderColor(const CRenderLayerParams &Params) const override { return ColorRGBA(1.0f, 1.0f, 1.0f, Params.m_EntityOverlayVal / 100.0f); }
@@ -302,8 +314,8 @@ public:
 	void Init() override;
 
 protected:
-	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
 
 private:
 	ColorRGBA GetDeathBorderColor() const;
@@ -326,8 +338,8 @@ public:
 	void Unload() override;
 
 protected:
-	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
 
 private:
@@ -345,8 +357,8 @@ public:
 	void Unload() override;
 
 protected:
-	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
 	IGraphics::CTextureHandle GetTexture() const override;
 
@@ -366,8 +378,8 @@ public:
 	void Unload() override;
 
 protected:
-	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
 	IGraphics::CTextureHandle GetTexture() const override;
 
@@ -386,7 +398,7 @@ public:
 	void InitTileData() override;
 
 protected:
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const vec2 &Offset, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
 	IGraphics::CTextureHandle GetTexture() const override;
 
