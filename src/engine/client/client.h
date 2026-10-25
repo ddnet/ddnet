@@ -8,6 +8,7 @@
 
 #include <base/hash.h>
 #include <base/types.h>
+#include <base/url.h>
 
 #include <engine/client.h>
 #include <engine/client/checksum.h>
@@ -278,6 +279,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	// For DummyName function
 	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
 
+	CUrlDomainName m_aUrlAllowList[URL_ALLOWLIST_MAX_ENTRIES];
+    size_t m_UrlAllowListCount = 0;
+
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
+	void OnConfigSave(IConfigManager *pConfigManager);
+
 public:
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
@@ -460,6 +467,9 @@ public:
 	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData);
 	static void Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData);
+	static void Con_UrlAllowDomain(IConsole::IResult *pResult, void *pUserData);
+	static void Con_UrlDisallowDomain(IConsole::IResult *pResult, void *pUserData);
+	static void Con_UrlAllowList(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -542,7 +552,8 @@ public:
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	EConnectivity UdpConnectivity(int NetType) override;
 
-	bool ViewLink(const char *pLink) override;
+	bool ViewLink(const char *pLink, bool CheckLink) override;
+    inline bool ViewLink(const char* pLink) override;
 	bool ViewFile(const char *pFilename) override;
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -553,6 +564,9 @@ public:
 	std::optional<int> ShowMessageBox(const IGraphics::CMessageBox &MessageBox) override;
 	void GetGpuInfoString(char (&aGpuInfo)[512]) override;
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
+
+    void UrlAllowDomain(const char* pDomainName);
+    bool UrlIsAllowed(const char* pUrl) const;
 };
 
 #endif

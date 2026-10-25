@@ -402,7 +402,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(NameMatch.has_value())
 			{
 				const auto [MatchStart, MatchLength] = NameMatch.value();
-				Props.m_vColorSplits.emplace_back(MatchStart, MatchLength, ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f));
+				Props.m_vRichTextOptions.emplace_back(MatchStart, MatchLength, ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f));
 			}
 			Ui()->DoLabel(&Label, pSkinContainer->Name(), 12.0f, TEXTALIGN_ML, Props);
 		}

@@ -3171,6 +3171,8 @@ void CClient::InitInterfaces()
 #endif
 
 	m_pConfigManager->RegisterCallback(IFavorites::ConfigSaveCallback, m_pFavorites);
+	m_pConfigManager->RegisterCallback(ConfigSaveCallback, this);
+
 	m_Friends.Init();
 	m_Foes.Init(true);
 
@@ -4287,8 +4289,7 @@ void CClient::DemoRecorder_AddDemoMarker(int Recorder)
 	}
 }
 
-CDemoRecorder (&CClient::DemoRecorders())[RECORDER_MAX]
-{
+CDemoRecorder (&CClient::DemoRecorders()) [RECORDER_MAX] {
 	if(IsSixup())
 	{
 		return m_aDemoRecordersSixup;
@@ -4341,6 +4342,44 @@ void CClient::Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData)
 	int Seconds = pResult->GetInteger(0);
 	const char *pFilename = pResult->GetString(1);
 	pSelf->BenchmarkQuit(Seconds, pFilename);
+}
+
+void CClient::Con_UrlAllowDomain(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	const char *pDomainName = pResult->GetString(0);
+	pSelf->UrlAllowDomain(pDomainName);
+}
+
+void CClient::Con_UrlDisallowDomain(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	const char *pDomainName = pResult->GetString(0);
+
+	int Index = -1;
+	for(int i = 0; i < pSelf->m_UrlAllowListCount && Index == -1; ++i)
+	{
+		if(str_utf8_comp_nocase(pSelf->m_aUrlAllowList[i].m_aName, pDomainName) == 0)
+			Index = i;
+	}
+
+	if(Index == -1)
+	{
+		log_warn("url", "This domain name is already excluded");
+		return;
+	}
+
+	mem_move(&pSelf->m_aUrlAllowList[Index], &pSelf->m_aUrlAllowList[Index + 1], sizeof(CUrlDomainName) * (pSelf->m_UrlAllowListCount - (Index + 1)));
+	--pSelf->m_UrlAllowListCount;
+}
+
+void CClient::Con_UrlAllowList(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	for(size_t i = 0; i < pSelf->m_UrlAllowListCount; ++i)
+	{
+		log_info("url", "%s", pSelf->m_aUrlAllowList[i].m_aName);
+	}
 }
 
 void CClient::BenchmarkQuit(int Seconds, const char *pFilename)
@@ -4681,6 +4720,10 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Register("save_replay", "?i[length] ?r[filename]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 	m_pConsole->Register("benchmark_quit", "i[seconds] r[file]", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_BenchmarkQuit, this, "Benchmark frame times for number of seconds to file, then quit");
+
+	m_pConsole->Register("url_allow_domain", "?s[domain]", CFGFLAG_CLIENT, Con_UrlAllowDomain, this, "Add a domain to trusted domains that can be safely opened");
+	m_pConsole->Register("url_disallow_domain", "?s[domain]", CFGFLAG_CLIENT, Con_UrlDisallowDomain, this, "Remove a domain from trusted domains that can be safely opened");
+	m_pConsole->Register("url_allow_list", "", CFGFLAG_CLIENT, Con_UrlAllowList, this, "List trusted domains that can be safely opened");
 
 	RustVersionRegister(*m_pConsole);
 
@@ -5192,16 +5235,37 @@ int main(int argc, const char **argv)
 		pConsole->ExecuteFile(AUTOEXEC_FILE, IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 
-	if(g_Config.m_ClConfigVersion < 1)
+	// Config migrations
 	{
-		if(g_Config.m_ClAntiPing == 0)
+		if(g_Config.m_ClConfigVersion < 1)
 		{
-			g_Config.m_ClAntiPingPlayers = 1;
-			g_Config.m_ClAntiPingGrenade = 1;
-			g_Config.m_ClAntiPingWeapons = 1;
+			if(g_Config.m_ClAntiPing == 0)
+			{
+				g_Config.m_ClAntiPingPlayers = 1;
+				g_Config.m_ClAntiPingGrenade = 1;
+				g_Config.m_ClAntiPingWeapons = 1;
+			}
 		}
+
+		// add default allowed urls
+		if(g_Config.m_ClConfigVersion < 2)
+		{
+			static const char *s_apDefaultAllowedDomains[] = {
+				"ddnet.org",
+				"ddnet.tw",
+				"github.com",
+				"teeworlds.com",
+				"discord.com",
+				"google.com",
+				"youtube.com",
+			};
+
+			for(const auto *pDomainName : s_apDefaultAllowedDomains)
+				pClient->UrlAllowDomain(pDomainName);
+		}
+
+		g_Config.m_ClConfigVersion = 2;
 	}
-	g_Config.m_ClConfigVersion = 1;
 
 	// parse the command line arguments
 	pConsole->SetUnknownCommandCallback(UnknownArgumentCallback, pClient);
@@ -5450,6 +5514,34 @@ int CClient::PredictionMargin() const
 	return m_ServerCapabilities.m_SyncWeaponInput ? g_Config.m_ClPredictionMargin : 10;
 }
 
+void CClient::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
+{
+	((CClient *)pUserData)->OnConfigSave(pConfigManager);
+}
+
+void CClient::OnConfigSave(IConfigManager *pConfigManager)
+{
+	// General configuration save for the client that doesn't use config variable
+	// and don't belong to a separate component
+
+	// url related commands
+	{
+		char aBuf[128];
+		const char *pEnd = aBuf + sizeof(aBuf) - 4;
+		for(int i = 0; i < m_UrlAllowListCount; ++i)
+		{
+			str_copy(aBuf, "url_allow_domain ");
+
+			str_append(aBuf, "\"");
+			char *pDst = aBuf + str_length(aBuf);
+			str_escape(&pDst, m_aUrlAllowList[i].m_aName, pEnd);
+			str_append(aBuf, "\"");
+
+			pConfigManager->WriteLine(aBuf);
+		}
+	}
+}
+
 IClient::EConnectivity CClient::UdpConnectivity(int NetType)
 {
 	static const int NETTYPES[2] = {NETTYPE_IPV6, NETTYPE_IPV4};
@@ -5513,14 +5605,25 @@ static bool ViewLinkImpl(const char *pLink)
 #endif
 }
 
-bool CClient::ViewLink(const char *pLink)
+bool CClient::ViewLink(const char *pLink, bool CheckLink)
 {
+	if(CheckLink && !UrlIsAllowed(pLink))
+	{
+		log_error("client", "Failed to open link '%s': domain name not allowed", pLink);
+		return false;
+	}
+
 	if(!str_startswith(pLink, "https://"))
 	{
 		log_error("client", "Failed to open link '%s': only https-links are allowed", pLink);
 		return false;
 	}
 	return ViewLinkImpl(pLink);
+}
+
+inline bool CClient::ViewLink(const char *pLink)
+{
+	return ViewLink(pLink, false);
 }
 
 bool CClient::ViewFile(const char *pFilename)
@@ -5659,4 +5762,49 @@ void CClient::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr
 {
 	m_pFileLogger = pFileLogger;
 	m_pStdoutLogger = pStdoutLogger;
+}
+
+void CClient::UrlAllowDomain(const char *pDomainName)
+{
+	if(m_UrlAllowListCount >= URL_ALLOWLIST_MAX_ENTRIES)
+	{
+		log_error("url", "Error: maximum number of allowed domains reached");
+		return;
+	}
+
+	if(!pDomainName)
+	{
+		log_error("url", "Domain name cannot be empty");
+		return;
+	}
+
+	for(int i = 0; i < m_UrlAllowListCount; ++i)
+	{
+		if(str_utf8_comp_nocase(m_aUrlAllowList[i].m_aName, pDomainName) == 0)
+			return; // don't add duplicates
+	}
+
+	const auto i = m_UrlAllowListCount;
+	const auto DomainNameLength = str_length(pDomainName);
+	if(!url_is_valid_domain_name(pDomainName, DomainNameLength))
+	{
+		log_error("url", "Invalid domain name");
+		return;
+	}
+
+	str_copy(m_aUrlAllowList[i].m_aName, pDomainName);
+	m_aUrlAllowList[i].m_Length = DomainNameLength;
+
+	m_UrlAllowListCount++;
+}
+
+bool CClient::UrlIsAllowed(const char *pUrl) const
+{
+	for(size_t i = 0; i < m_UrlAllowListCount; ++i)
+	{
+		if(url_check_domain_name(pUrl, m_aUrlAllowList[i].m_aName))
+			return true;
+	}
+
+	return false;
 }
