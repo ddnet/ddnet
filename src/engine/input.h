@@ -45,11 +45,11 @@ public:
 		CURSOR_JOYSTICK,
 	};
 
-    // System cursors
+	// System cursors
 	enum class EMouseCursorType
 	{
-        DEFAULT,
-        HAND,
+		DEFAULT,
+		HAND,
 		TEXT,
 	};
 
@@ -118,7 +118,7 @@ public:
 	virtual void SetActiveJoystick(size_t Index) = 0;
 
 	// mouse
-    virtual void SetMouseCursor(EMouseCursorType CursorType) = 0;
+	virtual void SetMouseCursor(EMouseCursorType CursorType) = 0;
 	virtual vec2 NativeMousePos() const = 0;
 	virtual bool NativeMousePressed(int Index) const = 0;
 	virtual void MouseModeRelative() = 0;

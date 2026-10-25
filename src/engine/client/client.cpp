@@ -4289,7 +4289,8 @@ void CClient::DemoRecorder_AddDemoMarker(int Recorder)
 	}
 }
 
-CDemoRecorder (&CClient::DemoRecorders()) [RECORDER_MAX] {
+CDemoRecorder (&CClient::DemoRecorders())[RECORDER_MAX]
+{
 	if(IsSixup())
 	{
 		return m_aDemoRecordersSixup;

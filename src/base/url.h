@@ -29,7 +29,8 @@ public:
 	bool m_HasScheme; // has protocol scheme
 
 	CUrlMatch() = default;
-	CUrlMatch(size_t Offset, size_t Length, bool HasScheme) : m_Offset(Offset), m_Length(Length), m_HasScheme(HasScheme) {}
+	CUrlMatch(size_t Offset, size_t Length, bool HasScheme) :
+		m_Offset(Offset), m_Length(Length), m_HasScheme(HasScheme) {}
 };
 
 // Domain name representation storing the data & its length
@@ -39,39 +40,40 @@ public:
 	char m_aName[URL_MAX_LENGTH];
 	size_t m_Length;
 
-	CUrlDomainName() : m_aName(), m_Length(0) {}
+	CUrlDomainName() :
+		m_aName(), m_Length(0) {}
 };
 
 /**
  * Finds all url in a given text.
- * 
+ *
  * @ingroup Url
- * 
- * @param Text The text to parse 
- * 
+ *
+ * @param Text The text to parse
+ *
  * @return A vector of @link CUrlMatch @endlink containing metadata for all found matches
  */
 std::vector<CUrlMatch> url_find_all(std::string_view Text);
 
 /**
  * Finds all url in a given text.
- * 
+ *
  * @ingroup Url
- * 
- * @param pText The text to parse 
- * 
+ *
+ * @param pText The text to parse
+ *
  * @return A vector of @link CUrlMatch @endlink containing metadata for all found matches
  */
 std::vector<CUrlMatch> url_find_all(const char *pText);
 
 /**
  * Finds all url in a given text.
- * 
+ *
  * @ingroup Url
- * 
- * @param pText The text to parse 
+ *
+ * @param pText The text to parse
  * @param Length The effective length of the text
- * 
+ *
  * @return A vector of @link CUrlMatch @endlink containing metadata for all found matches
  */
 std::vector<CUrlMatch> url_find_all(const char *pText, std::size_t Length);
@@ -84,11 +86,11 @@ std::vector<CUrlMatch> url_find_all(const char *pText, std::size_t Length);
  *            and '-', none empty, none starting or ending with '-' ("example", "sub.example")
  * Case-insensitive. Anything else (spaces, '_', ':', '/', '@', non-ASCII, trailing dot, ...)
  * makes it invalid. The TLD is NOT looked up in kTlds, so "hf.cfg" is well-formed.
- * 
+ *
  * @ingroup Url
- * 
+ *
  * @param Name The name to check
- * 
+ *
  * @return True if `Name` answers the above question
  */
 bool url_is_valid_domain_name(std::string_view Name);
@@ -101,12 +103,12 @@ bool url_is_valid_domain_name(std::string_view Name);
  *            and '-', none empty, none starting or ending with '-' ("example", "sub.example")
  * Case-insensitive. Anything else (spaces, '_', ':', '/', '@', non-ASCII, trailing dot, ...)
  * makes it invalid. The TLD is NOT looked up in kTlds, so "hf.cfg" is well-formed.
- * 
+ *
  * @ingroup Url
- * 
+ *
  * @param pName The name to check
  * @param Length The effective length of `pName`
- * 
+ *
  * @return True if `pName` answers the above question
  */
 bool url_is_valid_domain_name(const char *pName, std::size_t Length);
@@ -117,7 +119,7 @@ bool url_is_valid_domain_name(const char *pName, std::size_t Length);
  *   url_check_domain_name("https://www.youtube.com/watch?v=abc&t=12#a=b", "youtube.com") -> true
  *   url_check_domain_name("https://evilsite.com", "site.com")                            -> false (label boundary)
  *   url_check_domain_name("https://site.com@evil.com", "site.com")                       -> false (host is evil.com)
- * 
+ *
  * Details:
  *   - case-insensitive; one trailing dot ("site.com.") is ignored on both arguments
  *   - pDomainName must itself be a valid "<word>.<tld>" name (see url_is_valid_domainname),
@@ -129,12 +131,12 @@ bool url_is_valid_domain_name(const char *pName, std::size_t Length);
  *     an optional ":port" is allowed, and the host itself must be a valid domain name
  *     (no '%', '_', spaces, non-ASCII: pass IDNs in punycode "xn--" form)
  *   - whitespace or control characters anywhere in pUrl -> false; null pointers -> false
- * 
+ *
  * @ingroup Url
- * 
+ *
  * @param pUrl The full url to check
  * @param pDomainName The domain name to compare against
- * 
+ *
  * @return True if the host of the full URL `pUrl` is `pDomainName` or one of its subdomains.
  */
 bool url_check_domain_name(const char *pUrl, const char *pDomainName);
