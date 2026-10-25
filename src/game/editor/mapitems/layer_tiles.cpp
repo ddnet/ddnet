@@ -117,10 +117,15 @@ void CLayerTiles::SetTileIgnoreHistory(int x, int y, CTile Tile) const
 
 void CLayerTiles::RecordStateChange(int x, int y, CTile Previous, CTile Tile)
 {
-	if(!m_TilesHistory[y][x].m_Changed)
-		m_TilesHistory[y][x] = STileStateChange{true, Previous, Tile};
+	STileStateChange &Change = m_TilesHistory[y][x];
+	if(!Change.m_Changed)
+	{
+		Change = STileStateChange{true, Previous, Tile};
+	}
 	else
-		m_TilesHistory[y][x].m_Current = Tile;
+	{
+		Change.m_Current = Tile;
+	}
 }
 
 void CLayerTiles::PrepareForSave()
