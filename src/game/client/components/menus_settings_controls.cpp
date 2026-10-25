@@ -583,8 +583,9 @@ void CMenusSettingsControls::RenderSettingsMouse(CUIRect View)
 	View.HSplitTop(BUTTON_SPACING, nullptr, &View);
 
 	View.HSplitTop(BUTTON_HEIGHT, &Button, &View);
-	Ui()->DoScrollbarOption(&g_Config.m_ClMouseMaxDistance, &g_Config.m_ClMouseMaxDistance, &Button, Localize("Cursor distance"), 1, 1000,
+	Ui()->DoScrollbarOption(&g_Config.m_ClMouseMaxDistance, &g_Config.m_ClMouseMaxDistance, &Button, Localize("Max. crosshair distance"), 1, 1000,
 		&CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
+	Ui()->DoToolTip(&g_Config.m_ClMouseMaxDistance, &Button, Localize("The maximum distance from the crosshair to the Tee"));
 }
 
 float CMenusSettingsControls::MeasureSettingsJoystickHeight() const
@@ -790,7 +791,7 @@ void CMenus::ResetSettingsControls()
 
 	g_Config.m_InpMousesens = 200;
 	g_Config.m_UiMousesens = 200;
-	g_Config.m_ClMouseMaxDistance = 400;
+	g_Config.m_ClMouseMaxDistance = DefaultConfig::ClMouseMaxDistance;
 
 	g_Config.m_InpControllerEnable = 0;
 	g_Config.m_InpControllerGUID[0] = '\0';
