@@ -11,6 +11,7 @@
 #include <base/mem.h>
 #include <base/str.h>
 #include <base/time.h>
+#include <base/url.h>
 
 #include <engine/client/keyboard.h>
 #include <engine/console.h>
@@ -31,6 +32,7 @@
 #include <game/version.h>
 
 #include <iterator>
+#include <regex>
 
 static constexpr float FONT_SIZE = 10.0f;
 static constexpr float LINE_SPACING = 1.0f;
@@ -270,6 +272,8 @@ CGameConsole::CInstance::CInstance(int Type)
 				SearchMatch.m_EntryLine += pEntry->m_LineCount;
 			}
 		}
+		// Remove associated details
+		m_EntryDetails.erase(pEntry->m_Id);
 	});
 
 	m_Input.SetClipboardLineCallback([this](const char *pStr) {
@@ -281,6 +285,8 @@ CGameConsole::CInstance::CInstance(int Type)
 
 	m_CurrentMatchIndex = -1;
 	m_aCurrentSearchString[0] = '\0';
+
+	m_EntryDetails = {};
 }
 
 void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
@@ -299,6 +305,7 @@ void CGameConsole::CInstance::ClearBacklog()
 
 	m_Backlog.Init();
 	m_BacklogCurLine = 0;
+	m_IdCounter = 0;
 	ClearSearch();
 }
 
@@ -788,7 +795,10 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA Pr
 	pEntry->m_PrintColor = PrintColor;
 	pEntry->m_Length = Len;
 	pEntry->m_LineCount = -1;
+	pEntry->m_Id = m_IdCounter.fetch_add(1, std::memory_order_relaxed);
 	str_copy(pEntry->m_aText, pLine, Len + 1);
+
+	m_EntryDetails[pEntry->m_Id].m_vUrls = url_find_all(pLine, Len);
 }
 
 int CGameConsole::CInstance::GetLinesToScroll(int Direction, int LinesToScroll)
@@ -990,6 +1000,72 @@ void CGameConsole::CInstance::UpdateSearch()
 	}
 }
 
+void CGameConsole::CInstance::OnClick(vec2 MousePos)
+{
+	// find entry we clicked
+	const auto *pEntry = GetEntryAt(MousePos);
+	if(!pEntry)
+		return;
+
+	// find the text character index we clicked within the line entry
+	const char *pText = pEntry->m_aText;
+
+	CUIRect Screen = *m_pGameConsole->Ui()->Screen();
+	CTextCursor Cursor;
+	Cursor.SetPosition(vec2(0.0f, pEntry->m_RealPosY));
+	Cursor.m_FontSize = FONT_SIZE;
+	Cursor.m_LineWidth = Screen.w - 10.0f;
+	Cursor.m_MaxLines = pEntry->m_LineCount;
+	Cursor.m_LineSpacing = LINE_SPACING;
+	Cursor.m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
+	Cursor.m_RequestCharacterDetails = true;
+
+	m_pGameConsole->TextRender()->TextEx(&Cursor, pText, -1);
+	int CharacterIndex = Cursor.CharacterDetails().GetCharacterIndex(MousePos);
+	if(CharacterIndex < 0)
+		return;
+
+	// find url at CharacterIndex
+	const auto &vUrls = m_EntryDetails.at(pEntry->m_Id).m_vUrls;
+	const auto pUrl = std::find_if(vUrls.begin(), vUrls.end(), [CharacterIndex](const CUrlMatch &UrlMatch) {
+		return UrlMatch.m_Offset <= CharacterIndex && CharacterIndex <= UrlMatch.m_Offset + UrlMatch.m_Length;
+	});
+	if(pUrl == vUrls.end())
+		return;
+
+	char aUrl[URL_MAX_LENGTH];
+	const char *pUrlStart = aUrl;
+	str_truncate(aUrl, sizeof(aUrl), pText + pUrl->m_Offset, pUrl->m_Length);
+
+	// open it!
+	// append https:// by default if no scheme specified
+	if(!pUrl->m_HasScheme)
+	{
+		char aHttpsUrl[URL_MAX_LENGTH];
+		pUrlStart = aHttpsUrl;
+		str_format(aHttpsUrl, sizeof(aHttpsUrl), "https://%s", aUrl);
+	}
+
+	m_pGameConsole->Client()->ViewLink(pUrlStart, true);
+}
+
+CGameConsole::CInstance::CBacklogEntry *CGameConsole::CInstance::GetEntryAt(vec2 Position)
+{
+	const float LineHeight = m_pGameConsole->GetLineHeight();
+	//return std::find_if(m_Backlog.First(), m_Backlog.Last(), [LineHeight, Position](const CBacklogEntry &Entry) {
+	//	return Entry.m_RealPosY <= Position.y && Position.y <= Entry.m_RealPosY + LineHeight;
+	//});
+	for(CBacklogEntry *pEntry = m_Backlog.Last(); pEntry; pEntry = m_Backlog.Prev(pEntry))
+	{
+		if(pEntry->m_RealPosY <= Position.y && Position.y <= pEntry->m_RealPosY + LineHeight * pEntry->m_LineCount)
+		{
+			return pEntry;
+		}
+	}
+
+	return nullptr;
+}
+
 void CGameConsole::CInstance::Dump()
 {
 	char aTimestamp[20];
@@ -1172,6 +1248,11 @@ bool CGameConsole::DoButton(const CUIRect &Rect, const char *pIcon, vec2 MousePo
 	return m_ConsoleState == CONSOLE_OPEN && Released && PressedInside && MouseInside;
 }
 
+inline float CGameConsole::GetLineHeight()
+{
+	return TextRender()->TextBoundingBox(FONT_SIZE, " ", -1, -1.0f, LINE_SPACING).m_H;
+}
+
 void CGameConsole::OnRender()
 {
 	CUIRect Screen = *Ui()->Screen();
@@ -1247,9 +1328,28 @@ void CGameConsole::OnRender()
 	Graphics()->QuadsDrawTL(&QuadItemShadow, 1);
 	Graphics()->QuadsEnd();
 
+	const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
+	const vec2 ScreenSize = vec2(Screen.w, Screen.h);
+	Ui()->UpdateTouchState(m_TouchState);
+	const auto &&GetMousePosition = [&]() -> vec2 {
+		if(m_TouchState.m_PrimaryPressed)
+		{
+			return m_TouchState.m_PrimaryPosition * ScreenSize;
+		}
+		else
+		{
+			return Input()->NativeMousePos() / WindowSize * ScreenSize;
+		}
+	};
+
+	auto MouseCursorType = IInput::EMouseCursorType::DEFAULT;
+
+	if(GetMousePosition().y <= ConsoleHeight)
+		MouseCursorType = IInput::EMouseCursorType::TEXT;
+
 	{
 		// Get height of 1 line
-		const float LineHeight = TextRender()->TextBoundingBox(FONT_SIZE, " ", -1, -1.0f, LINE_SPACING).m_H;
+		const float LineHeight = GetLineHeight();
 
 		const float RowHeight = FONT_SIZE * 2.0f;
 
@@ -1269,20 +1369,8 @@ void CGameConsole::OnRender()
 		TextRender()->TextEx(&PromptCursor, aPrompt);
 
 		// check if mouse is pressed
-		const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
-		const vec2 ScreenSize = vec2(Screen.w, Screen.h);
-		Ui()->UpdateTouchState(m_TouchState);
-		const auto &&GetMousePosition = [&]() -> vec2 {
-			if(m_TouchState.m_PrimaryPressed)
-			{
-				return m_TouchState.m_PrimaryPosition * ScreenSize;
-			}
-			else
-			{
-				return Input()->NativeMousePos() / WindowSize * ScreenSize;
-			}
-		};
 		bool ButtonReleased = false;
+		bool WasMouseReleased = false;
 		if(!pConsole->m_MouseIsPress)
 		{
 			// Keep the text selection suppressed until the frame after the buttons were released.
@@ -1298,15 +1386,32 @@ void CGameConsole::OnRender()
 		{
 			pConsole->m_MouseIsPress = false;
 			ButtonReleased = m_ButtonPressed;
-			if(m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y > ConsoleHeight + 1.0f && pConsole->m_MouseRelease.y > ConsoleHeight + 1.0f) // for border
-				Toggle(m_ConsoleType);
+			WasMouseReleased = true;
 		}
 		if(pConsole->m_MouseIsPress)
 		{
 			pConsole->m_MouseRelease = GetMousePosition();
+			if(pConsole->m_CurSelStart == pConsole->m_CurSelEnd)
+				pConsole->m_HasSelection = false;
 		}
 		// The touch fingers are already gone when the buttons are released, so use the last position while pressed.
 		const vec2 ButtonMousePosition = ButtonReleased ? pConsole->m_MouseRelease : GetMousePosition();
+
+		if(m_ConsoleState == CONSOLE_OPEN && WasMouseReleased)
+		{
+			bool Outside = pConsole->m_MousePress.y > ConsoleHeight + 1.0f && pConsole->m_MouseRelease.y > ConsoleHeight + 1.0f; // for border
+
+			// Close console if outside click
+			if(Outside)
+			{
+				Toggle(m_ConsoleType);
+			}
+			else
+			{
+				if(!pConsole->m_HasSelection)
+					pConsole->OnClick(ButtonMousePosition);
+			}
+		}
 
 		// Buttons in the top row of the console, handled before the text selection below.
 		// Add another button by splitting one more rect from the button bar.
@@ -1505,6 +1610,8 @@ void CGameConsole::OnRender()
 			if(pEntry->m_LineCount == -1)
 				pConsole->UpdateEntryTextAttributes(pEntry);
 
+			pEntry->m_RealPosY = -1;
+
 			LineNum += pEntry->m_LineCount;
 			if(LineNum < pConsole->m_BacklogLastActiveLine)
 			{
@@ -1536,11 +1643,14 @@ void CGameConsole::OnRender()
 			if(Outside && !CanRenderOneLine)
 				break;
 
+			// update real Y position of entry
+			pEntry->m_RealPosY = y - OffsetY;
+
 			const int LinesNotRendered = pEntry->m_LineCount - std::min((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
 			pConsole->m_LinesRendered -= LinesNotRendered;
 
 			CTextCursor EntryCursor;
-			EntryCursor.SetPosition(vec2(0.0f, y - OffsetY));
+			EntryCursor.SetPosition(vec2(0.0f, pEntry->m_RealPosY));
 			EntryCursor.m_FontSize = FONT_SIZE;
 			EntryCursor.m_LineWidth = Screen.w - 10.0f;
 			EntryCursor.m_MaxLines = pEntry->m_LineCount;
@@ -1549,6 +1659,43 @@ void CGameConsole::OnRender()
 			EntryCursor.m_PressMouse = pConsole->m_MousePress;
 			EntryCursor.m_ReleaseMouse = pConsole->m_MouseRelease;
 
+			// check if we hover one of the lines
+			const auto MousePos = GetMousePosition();
+			bool IsHoveringLine = pEntry->m_RealPosY <= MousePos.y && MousePos.y <= pEntry->m_RealPosY + LineHeight * pEntry->m_LineCount;
+
+			const auto &EntryDetails = pConsole->m_EntryDetails.at(pEntry->m_Id);
+			if(!EntryDetails.m_vUrls.empty())
+			{
+				// compute character positions only if we have urls & hovering the current line
+				std::optional<CTextCharacterDetails> CharacterDetails;
+				if(IsHoveringLine)
+				{
+					CTextCursor Cursor = EntryCursor;
+					Cursor.m_Flags = 0;
+					Cursor.m_RequestCharacterDetails = IsHoveringLine;
+					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+					CharacterDetails = std::move(Cursor.CharacterDetails());
+				}
+
+				for(const auto &UrlMatch : EntryDetails.m_vUrls)
+				{
+					bool IsHoveringLink = false;
+					if(CharacterDetails)
+					{
+						const auto CharIndex = (*CharacterDetails).GetCharacterIndex(MousePos);
+						IsHoveringLink = UrlMatch.m_Offset <= CharIndex && CharIndex <= UrlMatch.m_Offset + UrlMatch.m_Length;
+					}
+
+					if(IsHoveringLink)
+						MouseCursorType = IInput::EMouseCursorType::HAND;
+
+					EntryCursor.AddRichTextOption(SRichTextOption(UrlMatch.m_Offset,
+						UrlMatch.m_Length,
+						IsHoveringLink ? ms_UrlColorHover : ms_UrlColor,
+						true));
+				}
+			}
+
 			if(pConsole->m_Searching && pConsole->m_CurrentMatchIndex != -1)
 			{
 				std::vector<CInstance::SSearchMatch> vMatches;
@@ -1556,19 +1703,20 @@ void CGameConsole::OnRender()
 
 				auto CurrentSelectedOccurrence = pConsole->m_vSearchMatches[pConsole->m_CurrentMatchIndex];
 
-				EntryCursor.m_vColorSplits.reserve(vMatches.size());
+				EntryCursor.m_vRichTextOptions.reserve(vMatches.size());
 				for(const auto &Match : vMatches)
 				{
 					bool IsSelected = CurrentSelectedOccurrence.m_EntryLine == Match.m_EntryLine && CurrentSelectedOccurrence.m_Pos == Match.m_Pos;
-					EntryCursor.m_vColorSplits.emplace_back(
-						Match.m_Pos,
+					EntryCursor.AddRichTextOption(SRichTextOption(Match.m_Pos,
 						pConsole->m_Input.GetLength(),
-						IsSelected ? ms_SearchSelectedColor : ms_SearchHighlightColor);
+						IsSelected ? ms_SearchSelectedColor : ms_SearchHighlightColor,
+						std::nullopt // inherit underline
+						));
 				}
 			}
 
 			TextRender()->TextEx(&EntryCursor, pEntry->m_aText, -1);
-			EntryCursor.m_vColorSplits = {};
+			EntryCursor.m_vRichTextOptions = {};
 
 			if(EntryCursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 			{
@@ -1652,6 +1800,9 @@ void CGameConsole::OnRender()
 		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
 		TextRender()->Text(ButtonBar.x + ButtonBar.w - TextRender()->TextWidth(FONT_SIZE, aBuf) - 10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
 	}
+
+	if(m_ConsoleState == CONSOLE_OPEN)
+		Input()->SetMouseCursor(MouseCursorType);
 }
 
 void CGameConsole::OnMessage(int MsgType, void *pRawMsg)

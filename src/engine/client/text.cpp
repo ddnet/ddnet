@@ -854,11 +854,18 @@ struct STextCharQuad
 	STextCharQuadVertex m_aVertices[4];
 };
 
+struct SColoredQuadItem
+{
+	IGraphics::CQuadItem m_Quad;
+	ColorRGBA m_Color;
+};
+
 struct SStringInfo
 {
 	int m_QuadBufferObjectIndex;
 	int m_QuadBufferContainerIndex;
 	int m_SelectionQuadContainerIndex;
+	int m_RichTextQuadContainerIndex;
 
 	std::vector<STextCharQuad> m_vCharacterQuads;
 };
@@ -902,7 +909,7 @@ struct STextContainer
 
 	void Reset()
 	{
-		m_StringInfo.m_QuadBufferObjectIndex = m_StringInfo.m_QuadBufferContainerIndex = m_StringInfo.m_SelectionQuadContainerIndex = -1;
+		m_StringInfo.m_QuadBufferObjectIndex = m_StringInfo.m_QuadBufferContainerIndex = m_StringInfo.m_SelectionQuadContainerIndex = m_StringInfo.m_RichTextQuadContainerIndex = -1;
 		m_StringInfo.m_vCharacterQuads.clear();
 
 		m_AlignedStartX = m_AlignedStartY = m_X = m_Y = 0.0f;
@@ -926,6 +933,93 @@ struct STextContainer
 	}
 };
 
+void CTextCursor::AddRichTextOption(const SRichTextOption &Option)
+{
+	if(Option.m_CharIndex < 0 || Option.m_Length < -1 || Option.m_Length == 0 ||
+		Option.m_Length > std::numeric_limits<int>::max() - Option.m_CharIndex)
+		return;
+
+	// Ordered, non-overlapping additions only need an append.
+	if(m_vRichTextOptions.empty() ||
+		(m_vRichTextOptions.back().m_Length != -1 &&
+			(int64_t)m_vRichTextOptions.back().m_CharIndex + m_vRichTextOptions.back().m_Length <= Option.m_CharIndex))
+	{
+		m_vRichTextOptions.push_back(Option);
+		return;
+	}
+
+	// Copy before modifying the vector: Option may refer to one of its entries.
+	const SRichTextOption NewOption = Option;
+	const int64_t EndOfText = std::numeric_limits<int64_t>::max();
+	auto GetEnd = [EndOfText](const SRichTextOption &Opt) -> int64_t {
+		return Opt.m_Length == -1 ? EndOfText : (int64_t)Opt.m_CharIndex + Opt.m_Length;
+	};
+	const int64_t Start = NewOption.m_CharIndex;
+	const int64_t End = GetEnd(NewOption);
+
+	// Existing options are sorted, non-overlapping half-open ranges.
+	const auto First = std::lower_bound(m_vRichTextOptions.begin(), m_vRichTextOptions.end(), Start,
+		[&](const SRichTextOption &Opt, int64_t Position) { return GetEnd(Opt) <= Position; });
+	const auto Last = std::lower_bound(First, m_vRichTextOptions.end(), End,
+		[](const SRichTextOption &Opt, int64_t Position) { return Opt.m_CharIndex < Position; });
+	if(First == Last)
+	{
+		m_vRichTextOptions.insert(First, NewOption);
+		return;
+	}
+
+	const size_t FirstIndex = First - m_vRichTextOptions.begin();
+	const size_t LastIndex = Last - m_vRichTextOptions.begin();
+	size_t ExtraSegments = (First->m_CharIndex < Start ? 1 : 0) + (GetEnd(*(Last - 1)) > End ? 1 : 0);
+	int64_t PreviousEnd = Start;
+	for(auto It = First; It != Last; ++It)
+	{
+		if(PreviousEnd < It->m_CharIndex)
+			++ExtraSegments;
+		PreviousEnd = GetEnd(*It);
+	}
+	if(PreviousEnd < End)
+		++ExtraSegments;
+
+	if(ExtraSegments != 0)
+	{
+		const size_t OldSize = m_vRichTextOptions.size();
+		m_vRichTextOptions.resize(OldSize + ExtraSegments, NewOption);
+		std::move_backward(m_vRichTextOptions.begin() + LastIndex, m_vRichTextOptions.begin() + OldSize, m_vRichTextOptions.end());
+	}
+
+	// Write backwards so expanding a range never overwrites unread options.
+	size_t WriteIndex = LastIndex + ExtraSegments;
+	auto WriteSegment = [&](const SRichTextOption &Source, int64_t SegmentStart, int64_t SegmentEnd) {
+		if(SegmentStart >= SegmentEnd)
+			return;
+		SRichTextOption &Segment = m_vRichTextOptions[--WriteIndex];
+		Segment = Source;
+		Segment.m_CharIndex = static_cast<int>(SegmentStart);
+		Segment.m_Length = SegmentEnd == EndOfText ? -1 : static_cast<int>(SegmentEnd - SegmentStart);
+	};
+	int64_t NextEnd = End;
+	for(size_t Index = LastIndex; Index > FirstIndex;)
+	{
+		const SRichTextOption OldOption = m_vRichTextOptions[--Index];
+		const int64_t OptStart = OldOption.m_CharIndex;
+		const int64_t OptEnd = GetEnd(OldOption);
+		const int64_t OverlapStart = std::max(OptStart, Start);
+		const int64_t OverlapEnd = std::min(OptEnd, End);
+
+		WriteSegment(OldOption, OverlapEnd, OptEnd);
+		WriteSegment(NewOption, OverlapEnd, NextEnd);
+		SRichTextOption MergedOption = NewOption;
+		if(!MergedOption.m_Underline.has_value())
+			MergedOption.m_Underline = OldOption.m_Underline;
+		WriteSegment(MergedOption, OverlapStart, OverlapEnd);
+		WriteSegment(OldOption, OptStart, OverlapStart);
+		NextEnd = OverlapStart;
+	}
+	WriteSegment(NewOption, Start, NextEnd);
+	dbg_assert(WriteIndex == FirstIndex, "Rich text segment count mismatch");
+}
+
 float CTextCursor::Height() const
 {
 	return m_LineCount * (m_AlignedFontSize + m_AlignedLineSpacing);
@@ -942,6 +1036,11 @@ void CTextCursor::SetPosition(vec2 Position)
 	m_StartY = Position.y;
 	m_X = Position.x;
 	m_Y = Position.y;
+}
+
+const CTextCharacterDetails &CTextCursor::CharacterDetails() const
+{
+	return m_CharacterDetails;
 }
 
 struct SFontLanguageVariant
@@ -1487,7 +1586,7 @@ public:
 
 		const bool IsRendered = (pCursor->m_Flags & TEXTFLAG_RENDER) != 0;
 
-		if(TextContainer.m_StringInfo.m_vCharacterQuads.empty() && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
+		if(TextContainer.m_StringInfo.m_vCharacterQuads.empty() && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && TextContainer.m_StringInfo.m_RichTextQuadContainerIndex == -1 && IsRendered)
 		{
 			FreeTextContainer(TextContainerIndex);
 			return false;
@@ -1565,6 +1664,7 @@ public:
 		const float CursorOuterInnerDiff = (CursorOuterWidth - CursorInnerWidth) / 2;
 
 		std::vector<IGraphics::CQuadItem> vSelectionQuads;
+		std::vector<SColoredQuadItem> vRichTextQuads;
 		int SelectionQuadLine = -1;
 		bool SelectionStarted = false;
 		bool SelectionUsedPress = false;
@@ -1656,7 +1756,7 @@ public:
 		const SGlyph *pLastGlyph = nullptr;
 		bool GotNewLineLast = false;
 
-		int ColorOption = 0;
+		int RichTextOption = 0;
 
 		while(pCurrent < pEnd && pCurrent != pEllipsis)
 		{
@@ -1827,24 +1927,25 @@ public:
 					const float CharX = (DrawX + CharKerning) + BearingX;
 					const float CharY = TmpY - BearingY;
 
-					// Check if we have any color split
-					ColorRGBA Color = m_Color;
-					if(ColorOption < (int)pCursor->m_vColorSplits.size())
+					// Check if we have any rich text option
+					SRichTextOption *pCurrentOptions = nullptr;
+					if(RichTextOption < (int)pCursor->m_vRichTextOptions.size())
 					{
-						STextColorSplit &Split = pCursor->m_vColorSplits.at(ColorOption);
-						if(PrevCharCount >= Split.m_CharIndex && (Split.m_Length == -1 || PrevCharCount < Split.m_CharIndex + Split.m_Length))
-							Color = Split.m_Color;
-						if(Split.m_Length != -1 && PrevCharCount >= (Split.m_CharIndex + Split.m_Length - 1))
+						SRichTextOption &Option = pCursor->m_vRichTextOptions.at(RichTextOption);
+						if(PrevCharCount >= Option.m_CharIndex && (Option.m_Length == -1 || PrevCharCount <= Option.m_CharIndex + Option.m_Length - 1))
+							pCurrentOptions = &Option;
+						if(Option.m_Length != -1 && PrevCharCount > (Option.m_CharIndex + Option.m_Length - 1))
 						{
-							ColorOption++;
-							if(ColorOption < (int)pCursor->m_vColorSplits.size())
-							{ // Handle splits that are
-								Split = pCursor->m_vColorSplits.at(ColorOption);
-								if(PrevCharCount >= Split.m_CharIndex)
-									Color = Split.m_Color;
+							RichTextOption++;
+							if(RichTextOption < (int)pCursor->m_vRichTextOptions.size())
+							{
+								Option = pCursor->m_vRichTextOptions.at(RichTextOption);
+								if(PrevCharCount >= Option.m_CharIndex)
+									pCurrentOptions = &Option;
 							}
 						}
 					}
+					ColorRGBA Color = pCurrentOptions ? pCurrentOptions->m_Color : m_Color;
 
 					// don't add text that isn't drawn, the color overwrite is used for that
 					if(Color.a != 0.f && IsRendered)
@@ -1887,6 +1988,29 @@ public:
 						TextCharQuad.m_aVertices[3].m_Color.g = (unsigned char)(Color.g * 255.f);
 						TextCharQuad.m_aVertices[3].m_Color.b = (unsigned char)(Color.b * 255.f);
 						TextCharQuad.m_aVertices[3].m_Color.a = (unsigned char)(Color.a * 255.f);
+
+						if(pCurrentOptions)
+						{
+							// Add underline quad
+							if(pCurrentOptions->m_Underline)
+							{
+								vRichTextQuads.emplace_back();
+								auto &UnderlineQuad = vRichTextQuads.back();
+								UnderlineQuad.m_Color = Color;
+								UnderlineQuad.m_Quad = IGraphics::CQuadItem(CharX, DrawY + pCursor->m_AlignedFontSize, CharWidth, 0.5f);
+							}
+						}
+					}
+
+					// fill glyph/character details if requested
+					if(pCursor->m_RequestCharacterDetails)
+					{
+						pCursor->m_CharacterDetails.m_vCharactersInfo.emplace_back();
+						auto &Info = pCursor->m_CharacterDetails.m_vCharactersInfo.back();
+						Info.m_X = CharX;
+						Info.m_Y = DrawY;
+						Info.m_W = CharWidth;
+						Info.m_H = pCursor->m_AlignedFontSize;
 					}
 
 					// calculate the full width from the last selection point to the end of this selection draw on screen
@@ -2072,6 +2196,22 @@ public:
 			}
 		}
 
+		if(IsRendered && !vRichTextQuads.empty())
+		{
+			if(TextContainer.m_StringInfo.m_RichTextQuadContainerIndex == -1)
+				TextContainer.m_StringInfo.m_RichTextQuadContainerIndex = Graphics()->CreateQuadContainer(false);
+			else if(IsRendered)
+				Graphics()->QuadContainerReset(TextContainer.m_StringInfo.m_RichTextQuadContainerIndex);
+
+			for(const auto &RichTextQuad : vRichTextQuads)
+			{
+				Graphics()->SetColor(RichTextQuad.m_Color);
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_RichTextQuadContainerIndex, &RichTextQuad.m_Quad, 1);
+			}
+			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_RichTextQuadContainerIndex);
+		}
+
 		// even if no text is drawn the cursor position will be adjusted
 		pCursor->m_X = DrawX;
 		pCursor->m_Y = DrawY;
@@ -2118,6 +2258,7 @@ public:
 		if(Graphics()->IsTextBufferingEnabled())
 			Graphics()->DeleteBufferContainer(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, true);
 		Graphics()->DeleteQuadContainer(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
+		Graphics()->DeleteQuadContainer(TextContainer.m_StringInfo.m_RichTextQuadContainerIndex);
 		FreeTextContainer(TextContainerIndex);
 	}
 
@@ -2224,6 +2365,12 @@ public:
 					m_CursorRenderTime = time_get_nanoseconds();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
+		}
+
+		if(TextContainer.m_StringInfo.m_RichTextQuadContainerIndex != -1)
+		{
+			Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_RichTextQuadContainerIndex, 0, -1, 0, 0);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}
 

@@ -45,6 +45,14 @@ public:
 		CURSOR_JOYSTICK,
 	};
 
+    // System cursors
+	enum class EMouseCursorType
+	{
+        DEFAULT,
+        HAND,
+		TEXT,
+	};
+
 	// events
 	virtual void ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const = 0;
 	/**
@@ -110,6 +118,7 @@ public:
 	virtual void SetActiveJoystick(size_t Index) = 0;
 
 	// mouse
+    virtual void SetMouseCursor(EMouseCursorType CursorType) = 0;
 	virtual vec2 NativeMousePos() const = 0;
 	virtual bool NativeMousePressed(int Index) const = 0;
 	virtual void MouseModeRelative() = 0;

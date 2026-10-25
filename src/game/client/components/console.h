@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_CONSOLE_H
 
 #include <base/lock.h>
+#include <base/url.h>
 
 #include <engine/console.h>
 #include <engine/shared/ringbuffer.h>
@@ -11,6 +12,8 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 #include <game/client/ui.h>
+
+#include <atomic>
 
 enum
 {
@@ -30,17 +33,24 @@ class CGameConsole : public CComponent
 	public:
 		struct CBacklogEntry
 		{
+			size_t m_Id;
+			float m_RealPosY;
 			float m_YOffset;
 			int m_LineCount;
 			ColorRGBA m_PrintColor;
 			size_t m_Length;
 			char m_aText[1];
 		};
+		struct CEntryTextDetail
+		{
+			std::vector<CUrlMatch> m_vUrls;
+		};
 		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
 		CLock m_BacklogPendingLock;
 		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_BacklogPending GUARDED_BY(m_BacklogPendingLock);
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
+		std::unordered_map<size_t, CEntryTextDetail> m_EntryDetails;
 
 		CLineInputBuffered<IConsole::CMDLINE_LENGTH> m_Input;
 		const char *m_pName;
@@ -57,6 +67,7 @@ class CGameConsole : public CComponent
 		vec2 m_MouseRelease = vec2(0.0f, 0.0f);
 		int m_CurSelStart = 0;
 		int m_CurSelEnd = 0;
+		int m_CurChar = 0;
 		bool m_HasSelection = false;
 		int m_NewLineCounter = 0;
 
@@ -143,6 +154,10 @@ class CGameConsole : public CComponent
 		void SetSearching(bool Searching);
 		void ClearSearch();
 		void UpdateSearch();
+		void OnClick(vec2 MousePos);
+		CBacklogEntry *GetEntryAt(vec2 Position);
+
+		std::atomic<size_t> m_IdCounter;
 
 		friend class CGameConsole;
 	};
@@ -169,8 +184,12 @@ class CGameConsole : public CComponent
 
 	bool DoButton(const CUIRect &Rect, const char *pIcon, vec2 MousePosition, bool Released);
 
+	inline float GetLineHeight();
+
 	static constexpr ColorRGBA ms_SearchHighlightColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
 	static constexpr ColorRGBA ms_SearchSelectedColor = ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f);
+	static constexpr ColorRGBA ms_UrlColor = ColorRGBA(0.4f, 0.7f, 1.0f, 1.0f);
+	static constexpr ColorRGBA ms_UrlColorHover = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 
 	int PossibleMaps(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr);
 	void PossibleSettings(const char *pStr, int FlagMask, IConsole::FPossibleCallback pfnCallback, void *pUser);

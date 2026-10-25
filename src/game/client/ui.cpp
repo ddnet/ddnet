@@ -84,8 +84,8 @@ void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int
 
 void SLabelProperties::SetColor(const ColorRGBA &Color)
 {
-	m_vColorSplits.clear();
-	m_vColorSplits.emplace_back(0, -1, Color);
+	m_vRichTextOptions.clear();
+	m_vRichTextOptions.emplace_back(0, -1, Color);
 }
 
 /********************************************************
@@ -820,7 +820,7 @@ CLabelResult CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, i
 	Cursor.SetPosition(CursorPos);
 	Cursor.m_FontSize = Size;
 	Cursor.m_Flags |= Flags;
-	Cursor.m_vColorSplits = LabelProps.m_vColorSplits;
+	Cursor.m_vRichTextOptions = LabelProps.m_vRichTextOptions;
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	TextRender()->TextEx(&Cursor, pText, -1);
 	if(Cursor.m_Truncated && LabelProps.m_pTooltipId)
@@ -937,7 +937,7 @@ CLabelResult CUi::DoLabel_AutoLineSize(const char *pText, float FontSize, int Al
 	return DoLabel(&LabelRect, pText, FontSize, Align);
 }
 
-bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<STextColorSplit> &vColorSplits)
+bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<SRichTextOption> &vColorSplits)
 {
 	const bool Inside = MouseHovered(pRect);
 	const bool Active = m_pLastActiveItem == pLineInput;
@@ -1044,7 +1044,7 @@ bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	return Changed;
 }
 
-bool CUi::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<STextColorSplit> &vColorSplits)
+bool CUi::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<SRichTextOption> &vColorSplits)
 {
 	CUIRect EditBox, ClearButton;
 	pRect->VSplitRight(pRect->h, &EditBox, &ClearButton);
