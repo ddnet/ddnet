@@ -116,7 +116,8 @@ struct SRichTextOption
 	SRichTextOption(int CharIndex, int Length, const ColorRGBA &Color, std::optional<bool> Underline) :
 		m_CharIndex(CharIndex), m_Length(Length), m_Color(Color), m_Underline(Underline) {}
 
-	SRichTextOption(int CharIndex, int Length, const ColorRGBA &Color) : SRichTextOption(CharIndex, Length, Color, std::nullopt) {}
+	SRichTextOption(int CharIndex, int Length, const ColorRGBA &Color) :
+		SRichTextOption(CharIndex, Length, Color, std::nullopt) {}
 };
 
 class CTextCharacterDetails

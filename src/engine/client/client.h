@@ -280,7 +280,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
 
 	CUrlDomainName m_aUrlAllowList[URL_ALLOWLIST_MAX_ENTRIES];
-    size_t m_UrlAllowListCount = 0;
+	size_t m_UrlAllowListCount = 0;
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 	void OnConfigSave(IConfigManager *pConfigManager);
@@ -553,7 +553,7 @@ public:
 	EConnectivity UdpConnectivity(int NetType) override;
 
 	bool ViewLink(const char *pLink, bool CheckLink) override;
-    inline bool ViewLink(const char* pLink) override;
+	inline bool ViewLink(const char *pLink) override;
 	bool ViewFile(const char *pFilename) override;
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -565,8 +565,8 @@ public:
 	void GetGpuInfoString(char (&aGpuInfo)[512]) override;
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 
-    void UrlAllowDomain(const char* pDomainName);
-    bool UrlIsAllowed(const char* pUrl) const;
+	void UrlAllowDomain(const char *pDomainName);
+	bool UrlIsAllowed(const char *pUrl) const;
 };
 
 #endif

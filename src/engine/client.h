@@ -367,14 +367,14 @@ public:
 	 * Opens a link in the browser.
 	 *
 	 * @param pLink The link to open in a browser.
-     * @param CheckLink Should the link be checked against allowed domains
+	 * @param CheckLink Should the link be checked against allowed domains
 	 *
 	 * @return `true` on success, `false` on failure.
 	 *
 	 * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
 	 */
 	virtual bool ViewLink(const char *pLink, bool CheckLink) = 0;
-    virtual bool ViewLink(const char *pLink) = 0;
+	virtual bool ViewLink(const char *pLink) = 0;
 	/**
 	 * Opens a file or directory with the default program.
 	 *
