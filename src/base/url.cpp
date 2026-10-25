@@ -666,7 +666,7 @@ inline static bool url_blocks_start(char c) noexcept
 }
 
 // Checks if the TLDs is one of URL_ALLOWED_TLDS
-inline bool is_known_tld(const char *pTld, size_t TldLength)
+static bool is_known_tld(const char *pTld, size_t TldLength)
 {
 	static const std::unordered_set<std::string_view> set(std::begin(URL_ALLOWED_TLDS), std::end(URL_ALLOWED_TLDS));
 	char aBuf[64]; // TLDs are at most 63 characters
@@ -677,11 +677,11 @@ inline bool is_known_tld(const char *pTld, size_t TldLength)
 }
 
 // Check if a regex candidate really looks like a URL
-inline bool url_is_plausible(std::string_view m, bool *pHasScheme)
+static bool url_is_plausible(std::string_view m, bool *pHasScheme)
 {
+	bool HasScheme = false;
 	if(!pHasScheme)
 	{
-		bool HasScheme = false;
 		pHasScheme = &HasScheme;
 	}
 
@@ -736,7 +736,7 @@ inline bool url_is_plausible(std::string_view m, bool *pHasScheme)
 //
 // The pattern is compiled once (thread-safe since C++11); matching with a const
 // std::regex is thread-safe. Case-insensitive, so [a-z] also covers A-Z.
-const std::regex &url_regex()
+static const std::regex &url_regex()
 {
 	static const std::regex re(
 		// 1) Optional scheme: http:// or https://
@@ -802,7 +802,7 @@ std::vector<CUrlMatch> url_find_all(std::string_view Text)
 		for(std::cregex_iterator It(pFirst, pLast, Regex), end; It != end && vResult.size() < URL_MAX_RESULTS; ++It)
 		{
 			const std::cmatch &m = *It;
-			if(m.length() == 0)
+			if(m[0].first == m[0].second)
 				continue;
 			const std::size_t Start = TokBegin + static_cast<std::size_t>(m.position());
 			// Reject matches that start mid-token (e-mail address, "my_site.com", ...).
@@ -811,7 +811,7 @@ std::vector<CUrlMatch> url_find_all(std::string_view Text)
 			bool HasScheme;
 			if(!url_is_plausible(std::string_view(Text.data() + Start, static_cast<std::size_t>(m.length())), &HasScheme))
 				continue;
-			vResult.push_back(CUrlMatch{Start, static_cast<std::size_t>(m.length()), HasScheme});
+			vResult.emplace_back(Start, static_cast<std::size_t>(m.length()), HasScheme);
 		}
 	}
 	return vResult;
@@ -916,8 +916,8 @@ bool url_check_domain_name(const char *pUrl, const char *pDomainName)
 		if(WellFormed)
 		{ // otherwise "://" belongs to the path/query: no scheme
 			bool Web = false;
-			for(std::string_view Allowed : {"http", "https"})
-				Web = Web || (Scheme.size() == Allowed.size() && str_startswith_nocase(Scheme.data(), Allowed.data()));
+			for(const char *pAllowed : {"http", "https"})
+				Web = Web || (Scheme.size() == (size_t)str_length(pAllowed) && str_comp_nocase_num(Scheme.data(), pAllowed, Scheme.size()) == 0);
 			if(!Web)
 				return false;
 			Url.remove_prefix(Sep + 3);

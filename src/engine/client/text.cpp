@@ -951,7 +951,7 @@ void CTextCursor::AddRichTextOption(const SRichTextOption &Option)
 	// Copy before modifying the vector: Option may refer to one of its entries.
 	const SRichTextOption NewOption = Option;
 	const int64_t EndOfText = std::numeric_limits<int64_t>::max();
-	auto GetEnd = [EndOfText](const SRichTextOption &Opt) -> int64_t {
+	auto GetEnd = [](const SRichTextOption &Opt) -> int64_t {
 		return Opt.m_Length == -1 ? EndOfText : (int64_t)Opt.m_CharIndex + Opt.m_Length;
 	};
 	const int64_t Start = NewOption.m_CharIndex;

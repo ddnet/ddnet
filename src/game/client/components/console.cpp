@@ -1028,7 +1028,7 @@ void CGameConsole::CInstance::OnClick(vec2 MousePos)
 	// find url at CharacterIndex
 	const auto &vUrls = m_EntryDetails.at(pEntry->m_Id).m_vUrls;
 	const auto pUrl = std::find_if(vUrls.begin(), vUrls.end(), [CharacterIndex](const CUrlMatch &UrlMatch) {
-		return UrlMatch.m_Offset <= CharacterIndex && CharacterIndex <= UrlMatch.m_Offset + UrlMatch.m_Length;
+		return UrlMatch.m_Offset <= (size_t)CharacterIndex && (size_t)CharacterIndex <= UrlMatch.m_Offset + UrlMatch.m_Length;
 	});
 	if(pUrl == vUrls.end())
 		return;
@@ -1039,9 +1039,9 @@ void CGameConsole::CInstance::OnClick(vec2 MousePos)
 
 	// open it!
 	// append https:// by default if no scheme specified
+	char aHttpsUrl[URL_MAX_LENGTH];
 	if(!pUrl->m_HasScheme)
 	{
-		char aHttpsUrl[URL_MAX_LENGTH];
 		pUrlStart = aHttpsUrl;
 		str_format(aHttpsUrl, sizeof(aHttpsUrl), "https://%s", aUrl);
 	}
@@ -1674,7 +1674,7 @@ void CGameConsole::OnRender()
 					Cursor.m_Flags = 0;
 					Cursor.m_RequestCharacterDetails = IsHoveringLine;
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-					CharacterDetails = std::move(Cursor.CharacterDetails());
+					CharacterDetails = Cursor.CharacterDetails();
 				}
 
 				for(const auto &UrlMatch : EntryDetails.m_vUrls)
@@ -1683,7 +1683,7 @@ void CGameConsole::OnRender()
 					if(CharacterDetails)
 					{
 						const auto CharIndex = (*CharacterDetails).GetCharacterIndex(MousePos);
-						IsHoveringLink = UrlMatch.m_Offset <= CharIndex && CharIndex <= UrlMatch.m_Offset + UrlMatch.m_Length;
+						IsHoveringLink = CharIndex >= 0 && UrlMatch.m_Offset <= (size_t)CharIndex && (size_t)CharIndex <= UrlMatch.m_Offset + UrlMatch.m_Length;
 					}
 
 					if(IsHoveringLink)

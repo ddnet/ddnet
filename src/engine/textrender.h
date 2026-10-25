@@ -10,6 +10,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 enum
 {
@@ -111,7 +112,7 @@ struct SRichTextOption
 	int m_CharIndex; // Which index within the text should the split occur
 	int m_Length; // How long is the split
 	ColorRGBA m_Color; // The color the text should be starting from m_CharIndex
-	std::optional<bool> m_Underline; // Wether or not the text should be underlined, if omitted it will be inherited from any existing option
+	std::optional<bool> m_Underline; // Whether or not the text should be underlined, if omitted it will be inherited from any existing option
 
 	SRichTextOption(int CharIndex, int Length, const ColorRGBA &Color, std::optional<bool> Underline) :
 		m_CharIndex(CharIndex), m_Length(Length), m_Color(Color), m_Underline(Underline) {}
@@ -125,14 +126,14 @@ class CTextCharacterDetails
 public:
 	std::optional<STextBoundingBox> GetCharacterBox(int CharacterIndex) const
 	{
-		if(CharacterIndex < 0 || CharacterIndex >= m_vCharactersInfo.size())
+		if(CharacterIndex < 0 || (size_t)CharacterIndex >= m_vCharactersInfo.size())
 			return std::nullopt;
 		return m_vCharactersInfo.at(CharacterIndex);
 	}
 
 	int GetCharacterIndex(vec2 Position) const
 	{
-		for(int CharIndex = 0; CharIndex < m_vCharactersInfo.size(); CharIndex++)
+		for(int CharIndex = 0; (size_t)CharIndex < m_vCharactersInfo.size(); CharIndex++)
 		{
 			const auto &CharacterBox = m_vCharactersInfo.at(CharIndex);
 			if(CharacterBox.Inside(Position.x, Position.y))
