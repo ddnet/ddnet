@@ -568,7 +568,8 @@ public:
 
 	void DoQuadEnvelopes(const CLayerQuads *pLayerQuads);
 	void DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex);
-	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v);
+
+	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v, bool &HasSelectableQuad);
 	void UpdateHotQuadPoint(const CLayerQuads *pLayer);
 
 	void DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index);
@@ -601,7 +602,7 @@ public:
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarImages(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
-	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
+	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index, bool CornerSelectable);
 	void PreparePointDrag(const CQuad *pQuad, int QuadIndex, int PointIndex);
 	void DoPointDrag(CQuad *pQuad, int QuadIndex, int PointIndex, ivec2 Offset);
 	EAxis GetDragAxis(ivec2 Offset) const;
