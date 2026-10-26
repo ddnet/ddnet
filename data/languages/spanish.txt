@@ -110,7 +110,7 @@ Dynamic Camera
 == Cámara dinámica
 
 Emoticon
-== Emoticon
+== Emoticón
 
 Error
 == Error
@@ -134,7 +134,7 @@ Folder
 == Carpeta
 
 Force vote
-== Forzar
+== Forzar voto
 
 Free-View
 == Vista libre
@@ -155,7 +155,7 @@ Game paused
 == Juego en Pausa
 
 Game type
-== Modo
+== Modo de juego
 
 Game types:
 == Tipos de juego:
@@ -458,7 +458,7 @@ News
 == Noticias
 
 Join game
-== Unirse
+== Unirse al juego
 
 FSAA samples
 == Muestras FSAA
@@ -2691,35 +2691,35 @@ No country flags match your filter criteria
 == Ninguna bandera coincide con tu criterio de filtrado
 
 Hold Shift to be more precise.
-== 
+== Mantén pulsado Shift para ser más preciso.
 
 Dummy is not connected
-== 
+== El Dummy no está conectado
 
 [Important alert message]
 Tap to dismiss…
-== 
+== Pulsar para cancelar…
 
 Initializing layers
-== 
+== Inicializando capas
 
 Credits
-== 
+== Créditos
 
 Teleport to cursor
-== 
+== Teletransportarse al cursor
 
 Teleport dummy to cursor
-== 
+== Teletransportar dummy al cursor
 
 Practice
-== 
+== Práctica
 
 Join
-== 
+== Unirse
 
 not bound
-== 
+== no bindeado
 
 Show cursor
-== 
+== Mostrar cursor
