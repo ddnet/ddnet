@@ -3,29 +3,19 @@
 
 #include "layer_tiles.h"
 
-struct SSwitchTileStateChange
-{
-	bool m_Changed;
-	struct SData
-	{
-		int m_Number;
-		int m_Type;
-		int m_Flags;
-		int m_Delay;
-		int m_Index;
-	} m_Previous, m_Current;
-};
-
-class CLayerSwitch : public CLayerTiles
+class CLayerSwitch : public CLayerTiles, public CLayerSwitchValues
 {
 public:
-	CLayerSwitch(CEditorMap *pMap, int w, int h);
+	CLayerSwitch(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId = 0);
 	CLayerSwitch(const CLayerSwitch &Other);
 	~CLayerSwitch() override;
 
-	CSwitchTile *m_pSwitchTile;
-	unsigned char m_SwitchNumber;
-	unsigned char m_SwitchDelay;
+	CRenderTileSource<CSwitchTile> SwitchTilesForRender() const
+	{
+		return CRenderTileSource<CSwitchTile>(m_SwitchTiles);
+	}
+	unsigned char m_SwitchNumber{};
+	unsigned char m_SwitchDelay{};
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(EShiftDirection Direction) override;
@@ -42,18 +32,8 @@ public:
 	int m_GotoSwitchOffset;
 	ivec2 m_GotoSwitchLastPos;
 
-	EditorTileStateChangeHistory<SSwitchTileStateChange> m_History;
-	void ClearHistory() override
-	{
-		CLayerTiles::ClearHistory();
-		m_History.clear();
-	}
-
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
-
-private:
-	void RecordStateChange(int x, int y, SSwitchTileStateChange::SData Previous, SSwitchTileStateChange::SData Current);
 };
 
 #endif

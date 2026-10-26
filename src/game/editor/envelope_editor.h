@@ -6,12 +6,24 @@
 
 #include <game/client/ui.h>
 #include <game/editor/component.h>
-#include <game/editor/editor_trackers.h>
 #include <game/editor/smooth_value.h>
 #include <game/mapitems.h>
 
 #include <memory>
 #include <vector>
+
+enum class EEnvelopeEditorOp
+{
+	NONE = 0,
+	SELECT,
+	DRAG_POINT,
+	DRAG_POINT_X,
+	DRAG_POINT_Y,
+	CONTEXT_MENU,
+	BOX_SELECT,
+	DRAG_TIME_BAR,
+	SCALE,
+};
 
 class CEnvelope;
 
@@ -35,6 +47,7 @@ public:
 	bool IsPointOperationActive() const;
 
 private:
+	void DeletePoint(const std::shared_ptr<CEnvelope> &pEnvelope, int Index);
 	void RenderColorBar(CUIRect ColorBar, const std::shared_ptr<CEnvelope> &pEnvelope);
 	void RenderPointTimeTooltip(CUIRect View, int PointIndex, const std::shared_ptr<CEnvelope> &pEnvelope);
 	void RenderPointValueTooltip(CUIRect View, int PointIndex, const std::shared_ptr<CEnvelope> &pEnvelope);
@@ -98,11 +111,10 @@ private:
 		static CUi::EPopupMenuFunctionResult Render(void *pContext, CUIRect View, bool Active);
 
 	private:
-		int m_aValues[4] = {0};
 		CLineInputNumber m_ValueInput;
 		CLineInputNumber m_TimeInput;
-		float m_CurrentTime = 0.0f;
-		float m_CurrentValue = 0.0f;
+		bool m_DraftFocused = false;
+		bool m_InvalidDraft = false;
 		const char m_ColorPickerButtonId = 0;
 		const char m_DeleteButtonId = 0;
 	};

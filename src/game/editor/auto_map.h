@@ -3,7 +3,13 @@
 
 #include <game/editor/map_object.h>
 
+#include <cstddef>
 #include <vector>
+
+namespace editor_history
+{
+	class CStorageUsage;
+}
 
 class CAutomapper : public CMapObject
 {
@@ -75,6 +81,12 @@ public:
 	explicit CAutomapper(CEditorMap *pMap);
 
 	void Load(const char *pTileName);
+	// Restoring document values never reads tool inputs. Rules are loaded on
+	// the next explicit configuration choice or automapper operation.
+	void SetDeferredSource(const char *pTileName);
+	void EnsureLoaded();
+	void Account(editor_history::CStorageUsage &Usage) const;
+	std::size_t StorageBytes() const { return m_StorageBytes; }
 	void Unload();
 	int CheckIndexFlag(int Flag, const char *pFlag, bool CheckNone) const;
 	void ProceedLocalized(class CLayerTiles *pLayer, class CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
@@ -82,13 +94,26 @@ public:
 	int ConfigNamesNum() const { return m_vConfigs.size(); }
 	const char *GetConfigName(int Index) const;
 
-	bool IsLoaded() const { return m_FileLoaded; }
+	bool IsLoaded() const { return m_FileLoaded || (!m_LoadAttempted && m_aSourceName[0] != '\0'); }
 
 private:
-	void AutoMap(class CLayerTiles *pLayer, const class CLayerTiles *pReadLayer, const CRun *pRun, size_t RunIndex, bool IsFilterable, int Seed, int SeedOffsetX, int SeedOffsetY) const;
+	void RefreshStorageBytes();
+	class CStorageUpdate
+	{
+		CAutomapper &m_Owner;
+
+	public:
+		explicit CStorageUpdate(CAutomapper &Owner) :
+			m_Owner(Owner) {}
+		~CStorageUpdate() { m_Owner.RefreshStorageBytes(); }
+	};
+	std::size_t m_StorageBytes = 0;
+	void AutoMap(class CLayerTiles *pLayer, const class CLayerTiles *pReadLayer, const CRun *pRun, std::size_t RunIndex, bool IsFilterable, int Seed, int SeedOffsetX, int SeedOffsetY) const;
 
 	std::vector<CConfiguration> m_vConfigs;
 	bool m_FileLoaded = false;
+	bool m_LoadAttempted = false;
+	char m_aSourceName[128] = {};
 };
 
 #endif

@@ -4,7 +4,6 @@
 #include "editor.h"
 
 #include "auto_map.h"
-#include "editor_actions.h"
 
 #include <base/color.h>
 #include <base/dbg.h>
@@ -25,6 +24,7 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
+#include <engine/shared/filecollection.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
@@ -43,6 +43,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <iterator>
 #include <limits>
 #include <tuple>
@@ -87,20 +88,12 @@ bool CEditor::IsVanillaImage(const char *pImage)
 bool CEditor::CallbackOpenMap(const char *pFilename, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	if(pEditor->Load(pFilename, StorageType))
-	{
-		pEditor->Map()->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_FileBrowser.IsValidSaveFilename();
+	const bool ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_FileBrowser.IsValidSaveFilename();
+	return pEditor->LoadWithCallback(pFilename, StorageType, [pEditor, ValidSaveFilename] {
+		pEditor->Map()->m_ValidSaveFilename = ValidSaveFilename;
 		if(pEditor->m_Dialog == DIALOG_FILE)
-		{
 			pEditor->OnDialogClose();
-		}
-		return true;
-	}
-	else
-	{
-		pEditor->ShowFileDialogError("Failed to load map from file '%s'.", pFilename);
-		return false;
-	}
+	});
 }
 
 bool CEditor::CallbackAppendMap(const char *pFilename, int StorageType, void *pUser)
@@ -110,7 +103,7 @@ bool CEditor::CallbackAppendMap(const char *pFilename, int StorageType, void *pU
 		pEditor->ShowFileDialogError("%s", pErrorMessage);
 		log_error("editor/append", "%s", pErrorMessage);
 	};
-	if(pEditor->Map()->Append(pFilename, StorageType, false, ErrorHandler))
+	if(pEditor->Map()->Append(pFilename, StorageType, ErrorHandler))
 	{
 		pEditor->OnDialogClose();
 		return true;
@@ -130,20 +123,11 @@ bool CEditor::CallbackSaveMap(const char *pFilename, int StorageType, void *pUse
 	const bool CloseAfterSave = pEditor->m_CloseMapAfterSave;
 	pEditor->m_CloseMapAfterSave = false;
 
-	// Save map to specified file
-	if(pEditor->Save(pFilename))
+	// Bind close-after-save before a numeric draft can defer the request.
+	pEditor->Map()->m_CloseOnSave = CloseAfterSave;
+	if(!pEditor->Save(pFilename))
 	{
-		if(pEditor->Map()->m_aFilename != pFilename)
-		{
-			str_copy(pEditor->Map()->m_aFilename, pFilename);
-		}
-		pEditor->Map()->m_ValidSaveFilename = true;
-		pEditor->Map()->m_Modified = false;
-		pEditor->UpdateMapDisplayNames();
-		pEditor->Map()->m_CloseOnSave = CloseAfterSave;
-	}
-	else
-	{
+		pEditor->Map()->m_CloseOnSave = false;
 		pEditor->ShowFileDialogError("Failed to save map to file '%s'.", pFilename);
 		return false;
 	}
@@ -170,7 +154,11 @@ bool CEditor::CallbackSaveCopyMap(const char *pFilename, int StorageType, void *
 
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 
-	if(pEditor->Save(pFilename))
+	const auto ErrorHandler = [pEditor](const char *pErrorMessage) {
+		pEditor->ShowFileDialogError("%s", pErrorMessage);
+		log_error("editor/save", "%s", pErrorMessage);
+	};
+	if(pEditor->Map()->SaveWithKind(pFilename, editor_history::ESaveKind::COPY, ErrorHandler))
 	{
 		pEditor->OnDialogClose();
 		return true;
@@ -190,7 +178,7 @@ bool CEditor::CallbackSaveImage(const char *pFilename, int StorageType, void *pU
 
 	std::shared_ptr<CEditorImage> pImg = pEditor->Map()->SelectedImage();
 
-	if(CImageLoader::SavePng(pEditor->Storage()->OpenFile(pFilename, IOFLAG_WRITE, StorageType), pFilename, *pImg))
+	if(CImageLoader::SavePng(pEditor->Storage()->OpenFile(pFilename, IOFLAG_WRITE, StorageType), pFilename, pImg->ImageCopy()))
 	{
 		pEditor->OnDialogClose();
 		return true;
@@ -213,7 +201,7 @@ bool CEditor::CallbackSaveSound(const char *pFilename, int StorageType, void *pU
 	IOHANDLE File = pEditor->Storage()->OpenFile(pFilename, IOFLAG_WRITE, StorageType);
 	if(File)
 	{
-		io_write(File, pSound->m_pData, pSound->m_DataSize);
+		io_write(File, pSound->Data(), pSound->DataSize());
 		io_close(File);
 		pEditor->OnDialogClose();
 		return true;
@@ -364,7 +352,7 @@ void CEditor::DoMapTabs(CUIRect MapTabs)
 			CUIRect CloseButton;
 			MapButton.VSplitRight(18.0f, &MapButton, &CloseButton);
 
-			const bool Saving = IsSaving(pMap->m_aFilename);
+			const bool Saving = IsSavingMap(*pMap);
 
 			char aTooltip[256];
 			str_format(aTooltip, sizeof(aTooltip), "Select map '%s'.", pMap->m_aFilename[0] == '\0' ? "unnamed" : pMap->m_aFilename);
@@ -388,9 +376,8 @@ void CEditor::DoMapTabs(CUIRect MapTabs)
 
 			if(TabButtonResult == 1)
 			{
-				m_SelectedMap = Index;
+				SelectMap(Index);
 				m_MapTabsScrollRegion.ScrollHere();
-				Reset();
 			}
 			else if(TabButtonResult == 2 || CloseButtonResult == 2)
 			{
@@ -434,14 +421,13 @@ void CEditor::DoMapTabs(CUIRect MapTabs)
 		{
 			if(Input()->ShiftIsPressed())
 			{
-				m_SelectedMap = m_SelectedMap == 0 ? m_vpMaps.size() - 1 : m_SelectedMap - 1;
+				SelectMap(m_SelectedMap == 0 ? m_vpMaps.size() - 1 : m_SelectedMap - 1);
 			}
 			else
 			{
-				m_SelectedMap = m_SelectedMap == m_vpMaps.size() - 1 ? 0 : m_SelectedMap + 1;
+				SelectMap(m_SelectedMap == m_vpMaps.size() - 1 ? 0 : m_SelectedMap + 1);
 			}
 			m_MapTabsRevealSelected = true;
-			Reset();
 		}
 	}
 }
@@ -602,16 +588,16 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// undo/redo group
 		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static int s_UndoButton = 0;
-		if(DoButton_FontIcon(&s_UndoButton, FontIcon::UNDO, Map()->m_EditorHistory.CanUndo() - 1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last action.", IGraphics::CORNER_L))
+		if(DoButton_FontIcon(&s_UndoButton, FontIcon::UNDO, Map()->m_DocumentHistory.CanUndo() - 1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last action.", IGraphics::CORNER_L))
 		{
-			Map()->m_EditorHistory.Undo();
+			Map()->m_DocumentHistory.Undo();
 		}
 
 		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static int s_RedoButton = 0;
-		if(DoButton_FontIcon(&s_RedoButton, FontIcon::REDO, Map()->m_EditorHistory.CanRedo() - 1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last action.", IGraphics::CORNER_R))
+		if(DoButton_FontIcon(&s_RedoButton, FontIcon::REDO, Map()->m_DocumentHistory.CanRedo() - 1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last action.", IGraphics::CORNER_R))
 		{
-			Map()->m_EditorHistory.Redo();
+			Map()->m_DocumentHistory.Redo();
 		}
 
 		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
@@ -869,7 +855,7 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
 }
 
-void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
+void CEditor::DoSoundSource(int LayerIndex, CSoundSourceValues *pSource, int Index)
 {
 	static ESoundSourceOp s_Operation = ESoundSourceOp::NONE;
 
@@ -878,30 +864,23 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
-	if(s_Operation == ESoundSourceOp::NONE)
-	{
-		if(!Ui()->MouseButton(0))
-			Map()->m_SoundSourceOperationTracker.End();
-	}
-
 	if(Ui()->CheckActiveItem(pSource))
 	{
-		if(s_Operation != ESoundSourceOp::NONE)
-		{
-			Map()->m_SoundSourceOperationTracker.Begin(pSource, s_Operation, LayerIndex);
-		}
-
 		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == ESoundSourceOp::MOVE)
 			{
-				vec2 Pos = MapView()->MouseWorldPos();
-				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-				{
-					MapView()->MapGrid()->SnapToGrid(Pos);
-				}
-				pSource->m_Position.x = f2fx(Pos.x);
-				pSource->m_Position.y = f2fx(Pos.y);
+				if(Map()->m_DocumentHistory.Begin(pSource, "Move sound source", editor_history::ECategory::MAP))
+					Map()->m_DocumentHistory.Update(pSource, [&] {
+						Map()->m_DocumentHistory.TrackPointer(pSource, pSource);
+						vec2 Pos = MapView()->MouseWorldPos();
+						if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
+						{
+							MapView()->MapGrid()->SnapToGrid(Pos);
+						}
+						pSource->m_Position.x = f2fx(Pos.x);
+						pSource->m_Position.y = f2fx(Pos.y);
+					});
 			}
 		}
 
@@ -923,6 +902,7 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 		{
 			if(!Ui()->MouseButton(0))
 			{
+				Map()->m_DocumentHistory.Complete(pSource, editor_history::EEditCompletion::POINTER_RELEASE);
 				Ui()->DisableMouseLock();
 				s_Operation = ESoundSourceOp::NONE;
 				Ui()->SetActiveItem(nullptr);
@@ -978,7 +958,7 @@ void CEditor::UpdateHotSoundSource(const CLayerSounds *pLayer)
 		}
 	};
 
-	for(const CSoundSource &Source : pLayer->m_vSources)
+	for(const CSoundSourceValues &Source : pLayer->m_vSources)
 	{
 		UpdateMinimum(vec2(fx2f(Source.m_Position.x), fx2f(Source.m_Position.y)), &Source);
 	}
@@ -989,12 +969,12 @@ void CEditor::UpdateHotSoundSource(const CLayerSounds *pLayer)
 	}
 }
 
-void CEditor::PreparePointDrag(const CQuad *pQuad, int QuadIndex, int PointIndex)
+void CEditor::PreparePointDrag(const CQuadValues *pQuad, int QuadIndex, int PointIndex)
 {
 	m_QuadDragOriginalPoints[QuadIndex][PointIndex] = pQuad->m_aPoints[PointIndex];
 }
 
-void CEditor::DoPointDrag(CQuad *pQuad, int QuadIndex, int PointIndex, ivec2 Offset)
+void CEditor::DoPointDrag(CQuadValues *pQuad, int QuadIndex, int PointIndex, ivec2 Offset)
 {
 	pQuad->m_aPoints[PointIndex] = m_QuadDragOriginalPoints[QuadIndex][PointIndex] + Offset;
 }
@@ -1032,7 +1012,7 @@ void CEditor::DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, ivec2 Offset, std::vector<SAlignmentInfo> &vAlignments, bool Append) const
+void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer, CQuadValues *pQuad, int QuadIndex, int PointIndex, ivec2 Offset, std::vector<SAlignmentInfo> &vAlignments, bool Append) const
 {
 	if(!Append)
 		vAlignments.clear();
@@ -1163,7 +1143,7 @@ void CEditor::ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer
 
 	for(int Selected : Map()->m_vSelectedQuads)
 	{
-		CQuad *pQuad = &pLayer->m_vQuads[Selected];
+		CQuadValues *pQuad = &pLayer->m_vQuads[Selected];
 
 		if(!Pivot)
 		{
@@ -1385,7 +1365,7 @@ void CEditor::QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxi
 	};
 	for(int Selected : Map()->m_vSelectedQuads)
 	{
-		CQuad *pQuad = &pLayer->m_vQuads[Selected];
+		CQuadValues *pQuad = &pLayer->m_vQuads[Selected];
 		for(int i = 0; i < 4; i++)
 		{
 			auto *pPoint = &pQuad->m_aPoints[i];
@@ -1442,20 +1422,20 @@ void CEditor::ApplyAxisAlignment(ivec2 &Offset) const
 	Offset.y = ((Axis == EAxis::NONE || Axis == EAxis::Y) ? Offset.y : 0);
 }
 
-static CColor AverageColor(const std::vector<CQuad *> &vpQuads)
+static CColor AverageColor(const std::vector<CQuadValues *> &vpQuads)
 {
 	CColor Average = {0, 0, 0, 0};
-	for(CQuad *pQuad : vpQuads)
+	for(CQuadValues *pQuad : vpQuads)
 	{
 		for(CColor Color : pQuad->m_aColors)
 		{
 			Average += Color;
 		}
 	}
-	return Average / std::size(CQuad{}.m_aColors) / vpQuads.size();
+	return Average / std::size(CQuadValues{}.m_aColors) / vpQuads.size();
 }
 
-void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index)
+void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuadValues *pQuad, int Index)
 {
 	enum
 	{
@@ -1523,7 +1503,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 						// When moving, we need to save the original position of all selected pivots
 						for(int Selected : Map()->m_vSelectedQuads)
 						{
-							const CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
+							const CQuadValues *pCurrentQuad = &pLayer->m_vQuads[Selected];
 							PreparePointDrag(pCurrentQuad, Selected, 4);
 						}
 					}
@@ -1533,7 +1513,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 						// When moving, we need to save the original position of all selected quads points
 						for(int Selected : Map()->m_vSelectedQuads)
 						{
-							const CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
+							const CQuadValues *pCurrentQuad = &pLayer->m_vQuads[Selected];
 							for(size_t v = 0; v < 5; v++)
 								PreparePointDrag(pCurrentQuad, Selected, v);
 						}
@@ -1547,55 +1527,61 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 			// check if we only should move pivot
 			if(s_Operation == OP_MOVE_PIVOT)
 			{
-				Map()->m_QuadTracker.BeginQuadTrack(pLayer, Map()->m_vSelectedQuads, -1, LayerIndex);
+				if(Map()->m_DocumentHistory.Begin(pId, "Transform quads", editor_history::ECategory::MAP))
+					Map()->m_DocumentHistory.Update(pId, [&] {
+						Map()->m_DocumentHistory.TrackPointer(pId, pId);
+						s_LastOffset = GetDragOffset(); // Update offset
+						ApplyAxisAlignment(s_LastOffset); // Apply axis alignment to the offset
 
-				s_LastOffset = GetDragOffset(); // Update offset
-				ApplyAxisAlignment(s_LastOffset); // Apply axis alignment to the offset
+						ComputePointsAlignments(pLayer, true, s_LastOffset, s_PivotAlignments);
+						ApplyAlignments(s_PivotAlignments, s_LastOffset);
 
-				ComputePointsAlignments(pLayer, true, s_LastOffset, s_PivotAlignments);
-				ApplyAlignments(s_PivotAlignments, s_LastOffset);
-
-				for(auto &Selected : Map()->m_vSelectedQuads)
-				{
-					CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
-					DoPointDrag(pCurrentQuad, Selected, 4, s_LastOffset);
-				}
+						for(auto &Selected : Map()->m_vSelectedQuads)
+						{
+							CQuadValues *pCurrentQuad = &pLayer->m_vQuads[Selected];
+							DoPointDrag(pCurrentQuad, Selected, 4, s_LastOffset);
+						}
+					});
 			}
 			else if(s_Operation == OP_MOVE_ALL)
 			{
-				Map()->m_QuadTracker.BeginQuadTrack(pLayer, Map()->m_vSelectedQuads, -1, LayerIndex);
+				if(Map()->m_DocumentHistory.Begin(pId, "Transform quads", editor_history::ECategory::MAP))
+					Map()->m_DocumentHistory.Update(pId, [&] {
+						Map()->m_DocumentHistory.TrackPointer(pId, pId);
+						// Compute drag offset
+						s_LastOffset = GetDragOffset();
+						ApplyAxisAlignment(s_LastOffset);
 
-				// Compute drag offset
-				s_LastOffset = GetDragOffset();
-				ApplyAxisAlignment(s_LastOffset);
-
-				// Then compute possible alignments with the selection AABB
-				ComputeAABBAlignments(pLayer, s_SelectionAABB, s_LastOffset, s_vAABBAlignments);
-				// Apply alignments before drag
-				ApplyAlignments(s_vAABBAlignments, s_LastOffset);
-				// Then do the drag
-				for(int Selected : Map()->m_vSelectedQuads)
-				{
-					CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
-					for(int v = 0; v < 5; v++)
-						DoPointDrag(pCurrentQuad, Selected, v, s_LastOffset);
-				}
+						// Then compute possible alignments with the selection AABB
+						ComputeAABBAlignments(pLayer, s_SelectionAABB, s_LastOffset, s_vAABBAlignments);
+						// Apply alignments before drag
+						ApplyAlignments(s_vAABBAlignments, s_LastOffset);
+						// Then do the drag
+						for(int Selected : Map()->m_vSelectedQuads)
+						{
+							CQuadValues *pCurrentQuad = &pLayer->m_vQuads[Selected];
+							for(int v = 0; v < 5; v++)
+								DoPointDrag(pCurrentQuad, Selected, v, s_LastOffset);
+						}
+					});
 			}
 			else if(s_Operation == OP_ROTATE)
 			{
-				Map()->m_QuadTracker.BeginQuadTrack(pLayer, Map()->m_vSelectedQuads, -1, LayerIndex);
+				if(Map()->m_DocumentHistory.Begin(pId, "Transform quads", editor_history::ECategory::MAP))
+					Map()->m_DocumentHistory.Update(pId, [&] {
+						Map()->m_DocumentHistory.TrackPointer(pId, pId);
+						for(size_t i = 0; i < Map()->m_vSelectedQuads.size(); ++i)
+						{
+							CQuadValues *pCurrentQuad = &pLayer->m_vQuads[Map()->m_vSelectedQuads[i]];
+							for(int v = 0; v < 4; v++)
+							{
+								pCurrentQuad->m_aPoints[v] = s_vvRotatePoints[i][v];
+								Rotate(&pCurrentQuad->m_aPoints[4], &pCurrentQuad->m_aPoints[v], s_RotateAngle);
+							}
+						}
 
-				for(size_t i = 0; i < Map()->m_vSelectedQuads.size(); ++i)
-				{
-					CQuad *pCurrentQuad = &pLayer->m_vQuads[Map()->m_vSelectedQuads[i]];
-					for(int v = 0; v < 4; v++)
-					{
-						pCurrentQuad->m_aPoints[v] = s_vvRotatePoints[i][v];
-						Rotate(&pCurrentQuad->m_aPoints[4], &pCurrentQuad->m_aPoints[v], s_RotateAngle);
-					}
-				}
-
-				s_RotateAngle += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.0001f : 0.002f);
+						s_RotateAngle += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.0001f : 0.002f);
+					});
 			}
 		}
 
@@ -1657,7 +1643,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 				Ui()->DisableMouseLock();
 				s_Operation = OP_NONE;
 				Ui()->SetActiveItem(nullptr);
-				Map()->m_QuadTracker.EndQuadTrack();
+				Map()->m_DocumentHistory.Complete(pId, editor_history::EEditCompletion::POINTER_RELEASE);
 			}
 			else if(Ui()->MouseButton(1))
 			{
@@ -1665,13 +1651,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 				s_Operation = OP_NONE;
 				Ui()->SetActiveItem(nullptr);
 
-				// Reset points to old position
-				for(size_t i = 0; i < Map()->m_vSelectedQuads.size(); ++i)
-				{
-					CQuad *pCurrentQuad = &pLayer->m_vQuads[Map()->m_vSelectedQuads[i]];
-					for(int v = 0; v < 4; v++)
-						pCurrentQuad->m_aPoints[v] = s_vvRotatePoints[i][v];
-				}
+				Map()->m_DocumentHistory.Cancel(editor_history::EEditCancellation::ESCAPE);
 			}
 		}
 		else
@@ -1687,7 +1667,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 				}
 				else if(s_Operation == OP_MOVE_PIVOT || s_Operation == OP_MOVE_ALL)
 				{
-					Map()->m_QuadTracker.EndQuadTrack();
+					Map()->m_DocumentHistory.Complete(pId, editor_history::EEditCompletion::POINTER_RELEASE);
 				}
 
 				Ui()->DisableMouseLock();
@@ -1714,7 +1694,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		s_vvRotatePoints.resize(Map()->m_vSelectedQuads.size());
 		for(size_t i = 0; i < Map()->m_vSelectedQuads.size(); ++i)
 		{
-			CQuad *pCurrentQuad = &pLayer->m_vQuads[Map()->m_vSelectedQuads[i]];
+			CQuadValues *pCurrentQuad = &pLayer->m_vQuads[Map()->m_vSelectedQuads[i]];
 
 			s_vvRotatePoints[i].resize(4);
 			s_vvRotatePoints[i][0] = pCurrentQuad->m_aPoints[0];
@@ -1773,7 +1753,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int V)
+void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuadValues *pQuad, int QuadIndex, int V)
 {
 	const void *pId = &pQuad->m_aPoints[V];
 	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[V].x), fx2f(pQuad->m_aPoints[V].y));
@@ -1845,51 +1825,52 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 			if(s_Operation == OP_MOVEPOINT)
 			{
-				Map()->m_QuadTracker.BeginQuadTrack(pLayer, Map()->m_vSelectedQuads, -1, LayerIndex);
+				if(Map()->m_DocumentHistory.Begin(pId, "Transform quads", editor_history::ECategory::MAP))
+					Map()->m_DocumentHistory.Update(pId, [&] {
+						Map()->m_DocumentHistory.TrackPointer(pId, pId);
+						s_LastOffset = GetDragOffset(); // Update offset
+						ApplyAxisAlignment(s_LastOffset); // Apply axis alignment to offset
 
-				s_LastOffset = GetDragOffset(); // Update offset
-				ApplyAxisAlignment(s_LastOffset); // Apply axis alignment to offset
+						ComputePointsAlignments(pLayer, false, s_LastOffset, s_Alignments);
+						ApplyAlignments(s_Alignments, s_LastOffset);
 
-				ComputePointsAlignments(pLayer, false, s_LastOffset, s_Alignments);
-				ApplyAlignments(s_Alignments, s_LastOffset);
-
-				for(int Selected : Map()->m_vSelectedQuads)
-				{
-					for(int m = 0; m < 4; m++)
-					{
-						if(Map()->IsQuadPointSelected(Selected, m))
+						for(int Selected : Map()->m_vSelectedQuads)
 						{
-							DoPointDrag(&pLayer->m_vQuads[Selected], Selected, m, s_LastOffset);
+							for(int m = 0; m < 4; m++)
+							{
+								if(Map()->IsQuadPointSelected(Selected, m))
+								{
+									DoPointDrag(&pLayer->m_vQuads[Selected], Selected, m, s_LastOffset);
+								}
+							}
 						}
-					}
-				}
+					});
 			}
 			else if(s_Operation == OP_MOVEUV)
 			{
-				int SelectedPoints = (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3);
+				if(Map()->m_DocumentHistory.Begin(pId, "Move quad texture", editor_history::ECategory::MAP))
+					Map()->m_DocumentHistory.Update(pId, [&] {
+						Map()->m_DocumentHistory.TrackPointer(pId, pId);
 
-				Map()->m_QuadTracker.BeginQuadPointPropTrack(pLayer, Map()->m_vSelectedQuads, SelectedPoints, -1, LayerIndex);
-				Map()->m_QuadTracker.AddQuadPointPropTrack(EQuadPointProp::TEX_U);
-				Map()->m_QuadTracker.AddQuadPointPropTrack(EQuadPointProp::TEX_V);
-
-				for(int Selected : Map()->m_vSelectedQuads)
-				{
-					CQuad *pSelectedQuad = &pLayer->m_vQuads[Selected];
-					for(int m = 0; m < 4; m++)
-					{
-						if(Map()->IsQuadPointSelected(Selected, m))
+						for(int Selected : Map()->m_vSelectedQuads)
 						{
-							// 0,2;1,3 - line x
-							// 0,1;2,3 - line y
+							CQuadValues *pSelectedQuad = &pLayer->m_vQuads[Selected];
+							for(int m = 0; m < 4; m++)
+							{
+								if(Map()->IsQuadPointSelected(Selected, m))
+								{
+									// 0,2;1,3 - line x
+									// 0,1;2,3 - line y
 
-							pSelectedQuad->m_aTexcoords[m].x += f2fx(MapView()->MouseDeltaWorld().x * 0.001f);
-							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(MapView()->MouseDeltaWorld().x * 0.001f);
+									pSelectedQuad->m_aTexcoords[m].x += f2fx(MapView()->MouseDeltaWorld().x * 0.001f);
+									pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(MapView()->MouseDeltaWorld().x * 0.001f);
 
-							pSelectedQuad->m_aTexcoords[m].y += f2fx(MapView()->MouseDeltaWorld().y * 0.001f);
-							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(MapView()->MouseDeltaWorld().y * 0.001f);
+									pSelectedQuad->m_aTexcoords[m].y += f2fx(MapView()->MouseDeltaWorld().y * 0.001f);
+									pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(MapView()->MouseDeltaWorld().y * 0.001f);
+								}
+							}
 						}
-					}
-				}
+					});
 			}
 		}
 
@@ -1940,11 +1921,11 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 				if(s_Operation == OP_MOVEPOINT)
 				{
-					Map()->m_QuadTracker.EndQuadTrack();
+					Map()->m_DocumentHistory.Complete(pId, editor_history::EEditCompletion::POINTER_RELEASE);
 				}
 				else if(s_Operation == OP_MOVEUV)
 				{
-					Map()->m_QuadTracker.EndQuadPointPropTrackAll();
+					Map()->m_DocumentHistory.Complete(pId, editor_history::EEditCompletion::POINTER_RELEASE);
 				}
 
 				Ui()->DisableMouseLock();
@@ -1994,28 +1975,28 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 void CEditor::DoQuadEnvelopes(const CLayerQuads *pLayerQuads)
 {
-	const std::vector<CQuad> &vQuads = pLayerQuads->m_vQuads;
+	const std::vector<CQuadValues> &vQuads = pLayerQuads->m_vQuads;
 	if(vQuads.empty())
 	{
 		return;
 	}
 
-	std::vector<std::pair<const CQuad *, CEnvelope *>> vQuadsWithEnvelopes;
+	std::vector<std::pair<const CQuadValues *, CEnvelope *>> vQuadsWithEnvelopes;
 	vQuadsWithEnvelopes.reserve(vQuads.size());
 	for(const auto &Quad : vQuads)
 	{
 		if(m_ActiveEnvelopePreview != EEnvelopePreview::ALL &&
-			!(m_ActiveEnvelopePreview == EEnvelopePreview::SELECTED && Quad.m_PosEnv == Map()->m_SelectedEnvelope))
+			!(m_ActiveEnvelopePreview == EEnvelopePreview::SELECTED && Map()->EnvelopeIndex(Quad.m_PosEnv) == Map()->m_SelectedEnvelope))
 		{
 			continue;
 		}
-		if(Quad.m_PosEnv < 0 ||
-			Quad.m_PosEnv >= (int)Map()->m_vpEnvelopes.size() ||
-			Map()->m_vpEnvelopes[Quad.m_PosEnv]->m_vPoints.empty())
+		if(Map()->EnvelopeIndex(Quad.m_PosEnv) < 0 ||
+			Map()->EnvelopeIndex(Quad.m_PosEnv) >= (int)Map()->m_vpEnvelopes.size() ||
+			Map()->m_vpEnvelopes[Map()->EnvelopeIndex(Quad.m_PosEnv)]->m_vPoints.empty())
 		{
 			continue;
 		}
-		vQuadsWithEnvelopes.emplace_back(&Quad, Map()->m_vpEnvelopes[Quad.m_PosEnv].get());
+		vQuadsWithEnvelopes.emplace_back(&Quad, Map()->m_vpEnvelopes[Map()->EnvelopeIndex(Quad.m_PosEnv)].get());
 	}
 	if(vQuadsWithEnvelopes.empty())
 	{
@@ -2083,9 +2064,9 @@ void CEditor::DoQuadEnvelopes(const CLayerQuads *pLayerQuads)
 	Graphics()->LinesBatchEnd(&LineItemBatch);
 
 	// Draw quads at points
-	if(pLayerQuads->m_Image >= 0 && pLayerQuads->m_Image < (int)Map()->m_vpImages.size())
+	if(Map()->ImageIndex(pLayerQuads->m_Image) >= 0 && Map()->ImageIndex(pLayerQuads->m_Image) < (int)Map()->m_vpImages.size())
 	{
-		Graphics()->TextureSet(Map()->m_vpImages[pLayerQuads->m_Image]->m_Texture);
+		Graphics()->TextureSet(Map()->m_vpImages[Map()->ImageIndex(pLayerQuads->m_Image)]->m_Texture);
 	}
 	else
 	{
@@ -2101,8 +2082,8 @@ void CEditor::DoQuadEnvelopes(const CLayerQuads *pLayerQuads)
 			const float Rotation = fx2f(EnvPoint.m_aValues[2]) / 180.0f * pi;
 
 			const float Alpha =
-				((Map()->m_SelectedQuadEnvelope == pQuad->m_PosEnv && Map()->m_SelectedQuadEnvelopePoint == (int)PointIndex) ||
-					(m_EnvelopeEditor.IsPointOperationActive() && Map()->m_SelectedEnvelope == pQuad->m_PosEnv && Map()->IsEnvPointSelected(PointIndex))) ?
+				((Map()->m_SelectedQuadEnvelope == Map()->EnvelopeIndex(pQuad->m_PosEnv) && Map()->m_SelectedQuadEnvelopePoint == (int)PointIndex) ||
+					(m_EnvelopeEditor.IsPointOperationActive() && Map()->m_SelectedEnvelope == Map()->EnvelopeIndex(pQuad->m_PosEnv) && Map()->IsEnvPointSelected(PointIndex))) ?
 					0.65f :
 					0.35f;
 			Graphics()->SetColor4(
@@ -2155,7 +2136,7 @@ void CEditor::DoQuadEnvelopes(const CLayerQuads *pLayerQuads)
 	Graphics()->QuadsEnd();
 }
 
-void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex)
+void CEditor::DoQuadEnvPoint(const CQuadValues *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex)
 {
 	CEnvPoint_runtime *pPoint = &pEnvelope->m_vPoints[PointIndex];
 	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[4].x) + fx2f(pPoint->m_aValues[0]), fx2f(pQuad->m_aPoints[4].y) + fx2f(pPoint->m_aValues[1]));
@@ -2165,25 +2146,30 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 	{
 		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
-			if(m_QuadEnvelopePointOperation == EQuadEnvelopePointOperation::MOVE)
-			{
-				vec2 Pos = MapView()->MouseWorldPos();
-				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-				{
-					MapView()->MapGrid()->SnapToGrid(Pos);
-				}
-				pPoint->m_aValues[0] = f2fx(Pos.x) - pQuad->m_aPoints[4].x;
-				pPoint->m_aValues[1] = f2fx(Pos.y) - pQuad->m_aPoints[4].y;
-			}
-			else if(m_QuadEnvelopePointOperation == EQuadEnvelopePointOperation::ROTATE)
-			{
-				pPoint->m_aValues[2] += 10 * Ui()->MouseDeltaX();
-			}
+			if(Map()->m_DocumentHistory.Begin(pPoint, "Transform envelope point", editor_history::ECategory::ENVELOPE))
+				Map()->m_DocumentHistory.Update(pPoint, [&] {
+					Map()->m_DocumentHistory.TrackPointer(pPoint, pPoint);
+					if(m_QuadEnvelopePointOperation == EQuadEnvelopePointOperation::MOVE)
+					{
+						vec2 Pos = MapView()->MouseWorldPos();
+						if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
+						{
+							MapView()->MapGrid()->SnapToGrid(Pos);
+						}
+						pPoint->m_aValues[0] = f2fx(Pos.x) - pQuad->m_aPoints[4].x;
+						pPoint->m_aValues[1] = f2fx(Pos.y) - pQuad->m_aPoints[4].y;
+					}
+					else if(m_QuadEnvelopePointOperation == EQuadEnvelopePointOperation::ROTATE)
+					{
+						pPoint->m_aValues[2] += 10 * Ui()->MouseDeltaX();
+					}
+				});
 		}
 
 		if(!Ui()->MouseButton(0))
 		{
 			Ui()->DisableMouseLock();
+			Map()->m_DocumentHistory.Complete(pPoint, CEditorDocumentHistory::ECompletion::POINTER_RELEASE);
 			m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 			Ui()->SetActiveItem(nullptr);
 			Map()->m_SelectedQuadEnvelope = -1;
@@ -2191,7 +2177,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 		}
 		else
 		{
-			Map()->m_SelectedQuadEnvelope = pQuad->m_PosEnv;
+			Map()->m_SelectedQuadEnvelope = Map()->EnvelopeIndex(pQuad->m_PosEnv);
 			Map()->m_SelectedQuadEnvelopePoint = PointIndex;
 		}
 
@@ -2214,7 +2200,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 				m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::MOVE;
 			}
 			Map()->SelectQuad(QuadIndex);
-			Map()->m_SelectedQuadEnvelope = pQuad->m_PosEnv;
+			Map()->m_SelectedQuadEnvelope = Map()->EnvelopeIndex(pQuad->m_PosEnv);
 			Map()->m_SelectedQuadEnvelopePoint = PointIndex;
 			Ui()->SetActiveItem(pPoint);
 		}
@@ -2251,14 +2237,14 @@ void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer)
 		return false;
 	};
 
-	for(const CQuad &Quad : pLayer->m_vQuads)
+	for(const auto &Quad : pLayer->m_vQuads)
 	{
 		if(m_ShowEnvelopePreview &&
 			m_ActiveEnvelopePreview != EEnvelopePreview::NONE &&
-			Quad.m_PosEnv >= 0 &&
-			Quad.m_PosEnv < (int)Map()->m_vpEnvelopes.size())
+			Map()->EnvelopeIndex(Quad.m_PosEnv) >= 0 &&
+			Map()->EnvelopeIndex(Quad.m_PosEnv) < (int)Map()->m_vpEnvelopes.size())
 		{
-			for(const auto &EnvPoint : Map()->m_vpEnvelopes[Quad.m_PosEnv]->m_vPoints)
+			for(const auto &EnvPoint : Map()->m_vpEnvelopes[Map()->EnvelopeIndex(Quad.m_PosEnv)]->m_vPoints)
 			{
 				const vec2 Position = vec2(fx2f(Quad.m_aPoints[4].x) + fx2f(EnvPoint.m_aValues[0]), fx2f(Quad.m_aPoints[4].y) + fx2f(EnvPoint.m_aValues[1]));
 				if(UpdateMinimum(Position, &EnvPoint) && Ui()->ActiveItem() == nullptr)
@@ -2293,7 +2279,7 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 		if(ButtonResult == 1)
 		{
 			std::string Clipboard = Input()->GetClipboardText();
-			if(Clipboard[0] == '#' || Clipboard[0] == '$') // ignore leading # (web color format) and $ (console color format)
+			if(!Clipboard.empty() && (Clipboard[0] == '#' || Clipboard[0] == '$')) // ignore leading # (web color format) and $ (console color format)
 				Clipboard = Clipboard.substr(1);
 			if(str_isallnum_hex(Clipboard.c_str()))
 			{
@@ -2324,20 +2310,34 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 		Ui()->ShowPopupColorPicker(Ui()->MouseX(), Ui()->MouseY(), &m_ColorPickerPopupContext);
 	}
 
+	if(m_pColorPickerPopupActiveId != pId)
+		return;
 	if(Ui()->IsPopupOpen(&m_ColorPickerPopupContext))
 	{
-		if(m_pColorPickerPopupActiveId == pId)
+		if(m_ColorPickerPopupContext.m_State == EEditState::CANCELLED)
+		{
+			SetColor(Color);
+			Ui()->ClosePopupMenu(&m_ColorPickerPopupContext);
+			m_pColorPickerPopupActiveId = nullptr;
+			m_ColorPickerEditing = false;
+		}
+		else if(m_ColorPickerEditing || Color != m_ColorPickerPopupContext.m_RgbaColor)
+		{
+			m_ColorPickerPopupContext.m_State = m_ColorPickerEditing ? EEditState::EDITING : EEditState::START;
+			m_ColorPickerEditing = true;
 			SetColor(m_ColorPickerPopupContext.m_RgbaColor);
+		}
 	}
 	else
 	{
 		m_pColorPickerPopupActiveId = nullptr;
-		if(m_ColorPickerPopupContext.m_State == EEditState::EDITING)
+		if(m_ColorPickerEditing)
 		{
 			m_ColorPickerPopupContext.m_State = EEditState::END;
 			SetColor(m_ColorPickerPopupContext.m_RgbaColor);
-			m_ColorPickerPopupContext.m_State = EEditState::NONE;
 		}
+		m_ColorPickerEditing = false;
+		m_ColorPickerPopupContext.m_State = EEditState::NONE;
 	}
 }
 
@@ -2350,13 +2350,10 @@ bool CEditor::IsAllowPlaceUnusedTiles() const
 void CEditor::CRenderLayersState::Reset()
 {
 	m_Operation = ELayerOperation::NONE;
-	m_PreviousOperation = ELayerOperation::NONE;
 	m_pDraggedButton = nullptr;
 	m_InitialMouseY = 0.0f;
 	m_InitialCutHeight = 0.0f;
 	m_ScrollToSelectionNext = false;
-	m_InitialGroupIndex = 0;
-	m_vInitialLayerIndices.clear();
 	m_LayerPopupContext = {};
 }
 
@@ -2389,7 +2386,6 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	auto SetOperation = [&](ELayerOperation Operation) {
 		if(Operation != State.m_Operation)
 		{
-			State.m_PreviousOperation = State.m_Operation;
 			State.m_Operation = Operation;
 			if(Operation == ELayerOperation::NONE)
 			{
@@ -2691,17 +2687,17 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_TILES)
 				{
 					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pTiles->m_Image >= 0 ? Map()->m_vpImages[pTiles->m_Image]->m_aName : "Tiles");
+					str_copy(aBuf, Map()->ImageIndex(pTiles->m_Image) >= 0 ? Map()->m_vpImages[Map()->ImageIndex(pTiles->m_Image)]->m_aName : "Tiles");
 				}
 				else if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_QUADS)
 				{
 					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pQuads->m_Image >= 0 ? Map()->m_vpImages[pQuads->m_Image]->m_aName : "Quads");
+					str_copy(aBuf, Map()->ImageIndex(pQuads->m_Image) >= 0 ? Map()->m_vpImages[Map()->ImageIndex(pQuads->m_Image)]->m_aName : "Quads");
 				}
 				else if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_SOUNDS)
 				{
 					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pSounds->m_Sound >= 0 ? Map()->m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds");
+					str_copy(aBuf, Map()->SoundIndex(pSounds->m_Sound) >= 0 ? Map()->m_vpSounds[Map()->SoundIndex(pSounds->m_Sound)]->m_aName : "Sounds");
 				}
 			}
 
@@ -2853,73 +2849,75 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		ScrollRegion.AddRect(TmpSlot, false);
 	}
 
-	if(MoveLayers && 1 <= GroupAfterDraggedLayer && GroupAfterDraggedLayer <= (int)Map()->m_vpGroups.size())
-	{
-		std::vector<std::shared_ptr<CLayer>> &vpNewGroupLayers = Map()->m_vpGroups[GroupAfterDraggedLayer - 1]->m_vpLayers;
-		if(0 <= LayerAfterDraggedLayer && LayerAfterDraggedLayer <= (int)vpNewGroupLayers.size())
+	Map()->m_DocumentHistory.Update(&State, [&] {
+		if(MoveLayers && 1 <= GroupAfterDraggedLayer && GroupAfterDraggedLayer <= (int)Map()->m_vpGroups.size())
 		{
-			std::vector<std::shared_ptr<CLayer>> vpSelectedLayers;
-			std::vector<std::shared_ptr<CLayer>> &vpSelectedGroupLayers = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers;
-			std::shared_ptr<CLayer> pNextLayer = nullptr;
-			if(LayerAfterDraggedLayer < (int)vpNewGroupLayers.size())
-				pNextLayer = vpNewGroupLayers[LayerAfterDraggedLayer];
-
-			std::sort(Map()->m_vSelectedLayers.begin(), Map()->m_vSelectedLayers.end(), std::greater<>());
-			for(int k : Map()->m_vSelectedLayers)
+			std::vector<std::shared_ptr<CLayer>> &vpNewGroupLayers = Map()->m_vpGroups[GroupAfterDraggedLayer - 1]->m_vpLayers;
+			if(0 <= LayerAfterDraggedLayer && LayerAfterDraggedLayer <= (int)vpNewGroupLayers.size())
 			{
-				vpSelectedLayers.insert(vpSelectedLayers.begin(), vpSelectedGroupLayers[k]);
+				std::vector<std::shared_ptr<CLayer>> vpSelectedLayers;
+				std::vector<std::shared_ptr<CLayer>> &vpSelectedGroupLayers = Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers;
+				std::shared_ptr<CLayer> pNextLayer = nullptr;
+				if(LayerAfterDraggedLayer < (int)vpNewGroupLayers.size())
+					pNextLayer = vpNewGroupLayers[LayerAfterDraggedLayer];
+
+				std::sort(Map()->m_vSelectedLayers.begin(), Map()->m_vSelectedLayers.end(), std::greater<>());
+				for(int k : Map()->m_vSelectedLayers)
+				{
+					vpSelectedLayers.insert(vpSelectedLayers.begin(), vpSelectedGroupLayers[k]);
+				}
+				for(int k : Map()->m_vSelectedLayers)
+				{
+					vpSelectedGroupLayers.erase(vpSelectedGroupLayers.begin() + k);
+				}
+
+				auto InsertPosition = std::find(vpNewGroupLayers.begin(), vpNewGroupLayers.end(), pNextLayer);
+				int InsertPositionIndex = InsertPosition - vpNewGroupLayers.begin();
+				vpNewGroupLayers.insert(InsertPosition, vpSelectedLayers.begin(), vpSelectedLayers.end());
+
+				int NumSelectedLayers = Map()->m_vSelectedLayers.size();
+				Map()->m_vSelectedLayers.clear();
+				for(int i = 0; i < NumSelectedLayers; i++)
+					Map()->m_vSelectedLayers.push_back(InsertPositionIndex + i);
+
+				Map()->m_SelectedGroup = GroupAfterDraggedLayer - 1;
+				Map()->OnModify();
 			}
-			for(int k : Map()->m_vSelectedLayers)
-			{
-				vpSelectedGroupLayers.erase(vpSelectedGroupLayers.begin() + k);
-			}
+		}
 
-			auto InsertPosition = std::find(vpNewGroupLayers.begin(), vpNewGroupLayers.end(), pNextLayer);
-			int InsertPositionIndex = InsertPosition - vpNewGroupLayers.begin();
-			vpNewGroupLayers.insert(InsertPosition, vpSelectedLayers.begin(), vpSelectedLayers.end());
+		if(MoveGroup && 0 <= GroupAfterDraggedLayer && GroupAfterDraggedLayer <= (int)Map()->m_vpGroups.size())
+		{
+			std::shared_ptr<CLayerGroup> pSelectedGroup = Map()->m_vpGroups[Map()->m_SelectedGroup];
+			std::shared_ptr<CLayerGroup> pNextGroup = nullptr;
+			if(GroupAfterDraggedLayer < (int)Map()->m_vpGroups.size())
+				pNextGroup = Map()->m_vpGroups[GroupAfterDraggedLayer];
 
-			int NumSelectedLayers = Map()->m_vSelectedLayers.size();
-			Map()->m_vSelectedLayers.clear();
-			for(int i = 0; i < NumSelectedLayers; i++)
-				Map()->m_vSelectedLayers.push_back(InsertPositionIndex + i);
+			Map()->m_vpGroups.erase(Map()->m_vpGroups.begin() + Map()->m_SelectedGroup);
 
-			Map()->m_SelectedGroup = GroupAfterDraggedLayer - 1;
+			auto InsertPosition = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), pNextGroup);
+			Map()->m_vpGroups.insert(InsertPosition, pSelectedGroup);
+
+			auto Pos = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), pSelectedGroup);
+			Map()->m_SelectedGroup = Pos - Map()->m_vpGroups.begin();
+
 			Map()->OnModify();
 		}
-	}
-
-	if(MoveGroup && 0 <= GroupAfterDraggedLayer && GroupAfterDraggedLayer <= (int)Map()->m_vpGroups.size())
-	{
-		std::shared_ptr<CLayerGroup> pSelectedGroup = Map()->m_vpGroups[Map()->m_SelectedGroup];
-		std::shared_ptr<CLayerGroup> pNextGroup = nullptr;
-		if(GroupAfterDraggedLayer < (int)Map()->m_vpGroups.size())
-			pNextGroup = Map()->m_vpGroups[GroupAfterDraggedLayer];
-
-		Map()->m_vpGroups.erase(Map()->m_vpGroups.begin() + Map()->m_SelectedGroup);
-
-		auto InsertPosition = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), pNextGroup);
-		Map()->m_vpGroups.insert(InsertPosition, pSelectedGroup);
-
-		auto Pos = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), pSelectedGroup);
-		Map()->m_SelectedGroup = Pos - Map()->m_vpGroups.begin();
-
-		Map()->OnModify();
-	}
+	});
 
 	if(MoveLayers || MoveGroup)
 	{
+		Map()->m_DocumentHistory.Complete(&State, CEditorDocumentHistory::ECompletion::POINTER_RELEASE);
 		SetOperation(ELayerOperation::NONE);
 	}
 	if(StartDragLayer)
 	{
-		SetOperation(ELayerOperation::LAYER_DRAG);
-		State.m_InitialGroupIndex = Map()->m_SelectedGroup;
-		State.m_vInitialLayerIndices = std::vector(Map()->m_vSelectedLayers);
+		if(Map()->m_DocumentHistory.Begin(&State, "Move layers", editor_history::ECategory::MAP))
+			SetOperation(ELayerOperation::LAYER_DRAG);
 	}
 	if(StartDragGroup)
 	{
-		State.m_InitialGroupIndex = Map()->m_SelectedGroup;
-		SetOperation(ELayerOperation::GROUP_DRAG);
+		if(Map()->m_DocumentHistory.Begin(&State, "Move group", editor_history::ECategory::MAP))
+			SetOperation(ELayerOperation::GROUP_DRAG);
 	}
 
 	if(State.m_Operation == ELayerOperation::LAYER_DRAG || State.m_Operation == ELayerOperation::GROUP_DRAG)
@@ -3004,35 +3002,8 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 	ScrollRegion.End();
 
-	if(State.m_Operation == ELayerOperation::NONE)
-	{
-		if(State.m_PreviousOperation == ELayerOperation::GROUP_DRAG)
-		{
-			State.m_PreviousOperation = ELayerOperation::NONE;
-			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditGroupProp>(Map(), Map()->m_SelectedGroup, EGroupProp::ORDER, State.m_InitialGroupIndex, Map()->m_SelectedGroup));
-		}
-		else if(State.m_PreviousOperation == ELayerOperation::LAYER_DRAG)
-		{
-			if(State.m_InitialGroupIndex != Map()->m_SelectedGroup)
-			{
-				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditLayersGroupAndOrder>(Map(), State.m_InitialGroupIndex, State.m_vInitialLayerIndices, Map()->m_SelectedGroup, Map()->m_vSelectedLayers));
-			}
-			else
-			{
-				std::vector<std::shared_ptr<IEditorAction>> vpActions;
-				std::vector<int> vLayerIndices = Map()->m_vSelectedLayers;
-				std::sort(vLayerIndices.begin(), vLayerIndices.end());
-				std::sort(State.m_vInitialLayerIndices.begin(), State.m_vInitialLayerIndices.end());
-				for(int k = 0; k < (int)vLayerIndices.size(); k++)
-				{
-					int LayerIndex = vLayerIndices[k];
-					vpActions.push_back(std::make_shared<CEditorActionEditLayerProp>(Map(), Map()->m_SelectedGroup, LayerIndex, ELayerProp::ORDER, State.m_vInitialLayerIndices[k], LayerIndex));
-				}
-				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Map(), vpActions, nullptr, true));
-			}
-			State.m_PreviousOperation = ELayerOperation::NONE;
-		}
-	}
+	if(State.m_Operation == ELayerOperation::NONE && Map()->m_DocumentHistory.Owns(&State))
+		Map()->m_DocumentHistory.Cancel(CEditorDocumentHistory::ECancellation::CAPTURE_LOST);
 }
 
 bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDuplicate)
@@ -3052,6 +3023,7 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 		}
 	}
 
+	auto pOldImage = Map()->SelectedImage();
 	CImageInfo ImgInfo;
 	if(!Graphics()->LoadPng(ImgInfo, pFilename, StorageType))
 	{
@@ -3059,23 +3031,26 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 		return false;
 	}
 
-	std::shared_ptr<CEditorImage> pImg = Map()->SelectedImage();
-	pImg->CEditorImage::Free();
+	auto pImg = std::make_shared<CEditorImage>(Map(), pOldImage->m_Id);
+	ConvertToRgba(ImgInfo);
+	DilateImage(ImgInfo);
 	*pImg = std::move(ImgInfo);
 	str_copy(pImg->m_aName, aBuf);
-	pImg->m_External = IsVanillaImage(pImg->m_aName);
-
-	ConvertToRgba(*pImg);
-	DilateImage(*pImg);
+	pImg->m_External = CheckDuplicate ? IsVanillaImage(pImg->m_aName) : pOldImage->m_External;
 
 	pImg->m_Automapper.Load(pImg->m_aName);
 	int TextureLoadFlag = Graphics()->TextureLoadFlags();
 	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFilename);
+	pImg->m_Texture = Graphics()->LoadTextureRaw(pImg->ImageCopy(), TextureLoadFlag, pFilename);
 
-	Map()->SortImages();
-	Map()->SelectImage(pImg);
+	if(!Map()->m_DocumentHistory.Edit(this, "Replace image", editor_history::ECategory::MAP, [&] {
+		   Map()->m_vpImages[Map()->m_SelectedImage] = pImg;
+		   Map()->SortImages();
+		   Map()->SelectImage(pImg);
+		   Map()->OnModify();
+	   }))
+		return false;
 	OnDialogClose();
 	return true;
 }
@@ -3116,22 +3091,25 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 	}
 
 	std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(pEditor->Map());
+	ConvertToRgba(ImgInfo);
+	DilateImage(ImgInfo);
 	*pImg = std::move(ImgInfo);
 
 	pImg->m_External = IsVanillaImage(aBuf);
 
-	ConvertToRgba(*pImg);
-	DilateImage(*pImg);
-
 	int TextureLoadFlag = pEditor->Graphics()->TextureLoadFlags();
 	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFilename);
+	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(pImg->ImageCopy(), TextureLoadFlag, pFilename);
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_Automapper.Load(pImg->m_aName);
-	pEditor->Map()->m_vpImages.push_back(pImg);
-	pEditor->Map()->SortImages();
-	pEditor->Map()->SelectImage(pImg);
+	if(!pEditor->Map()->m_DocumentHistory.Edit(pEditor, "Add image", editor_history::ECategory::MAP, [&] {
+		   pEditor->Map()->m_vpImages.push_back(pImg);
+		   pEditor->Map()->SortImages();
+		   pEditor->Map()->SelectImage(pImg);
+		   pEditor->Map()->OnModify();
+	   }))
+		return false;
 	pEditor->OnDialogClose();
 	return true;
 }
@@ -3168,24 +3146,28 @@ bool CEditor::AddSound(const char *pFilename, int StorageType, void *pUser)
 		return false;
 	}
 
+	std::unique_ptr<void, decltype(&free)> pInput(pData, free);
+	editor_history::CResourceBlob Content(std::span<const std::uint8_t>(static_cast<const std::uint8_t *>(pData), DataSize));
+	auto pSound = std::make_shared<CEditorSound>(pEditor->Map());
 	// load sound
-	const int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, DataSize, true, pFilename);
+	const int SoundId = pEditor->Sound()->LoadOpusFromMem(Content.Bytes().data(), Content.Bytes().size(), true, pFilename);
 	if(SoundId == -1)
 	{
-		free(pData);
 		pEditor->ShowFileDialogError("Failed to load sound from file '%s'.", pFilename);
 		return false;
 	}
 
 	// add sound
-	std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(pEditor->Map());
 	pSound->m_SoundId = SoundId;
-	pSound->m_DataSize = DataSize;
-	pSound->m_pData = pData;
+	pSound->m_Content = std::move(Content);
 	str_copy(pSound->m_aName, aBuf);
-	pEditor->Map()->m_vpSounds.push_back(pSound);
+	if(!pEditor->Map()->m_DocumentHistory.Edit(pEditor, "Add sound", editor_history::ECategory::MAP, [&] {
+		   pEditor->Map()->m_vpSounds.push_back(pSound);
 
-	pEditor->Map()->SelectSound(pSound);
+		   pEditor->Map()->SelectSound(pSound);
+		   pEditor->Map()->OnModify();
+	   }))
+		return false;
 	pEditor->OnDialogClose();
 	return true;
 }
@@ -3207,6 +3189,7 @@ bool CEditor::ReplaceSound(const char *pFilename, int StorageType, bool CheckDup
 		}
 	}
 
+	auto pOldSound = Map()->SelectedSound();
 	// load external
 	void *pData;
 	unsigned DataSize;
@@ -3216,33 +3199,28 @@ bool CEditor::ReplaceSound(const char *pFilename, int StorageType, bool CheckDup
 		return false;
 	}
 
+	std::unique_ptr<void, decltype(&free)> pInput(pData, free);
+	editor_history::CResourceBlob Content(std::span<const std::uint8_t>(static_cast<const std::uint8_t *>(pData), DataSize));
+	auto pSound = std::make_shared<CEditorSound>(Map(), pOldSound->m_Id);
 	// load sound
-	const int SoundId = Sound()->LoadOpusFromMem(pData, DataSize, true, pFilename);
+	const int SoundId = Sound()->LoadOpusFromMem(Content.Bytes().data(), Content.Bytes().size(), true, pFilename);
 	if(SoundId == -1)
 	{
-		free(pData);
 		ShowFileDialogError("Failed to load sound from file '%s'.", pFilename);
 		return false;
 	}
 
-	std::shared_ptr<CEditorSound> pSound = Map()->SelectedSound();
-
-	if(m_ToolbarPreviewSound == pSound->m_SoundId)
-	{
-		m_ToolbarPreviewSound = SoundId;
-	}
-
-	// unload sample
-	Sound()->UnloadSample(pSound->m_SoundId);
-	free(pSound->m_pData);
-
-	// replace sound
 	str_copy(pSound->m_aName, aBuf);
 	pSound->m_SoundId = SoundId;
-	pSound->m_pData = pData;
-	pSound->m_DataSize = DataSize;
-
-	Map()->SelectSound(pSound);
+	pSound->m_Content = std::move(Content);
+	if(!Map()->m_DocumentHistory.Edit(this, "Replace sound", editor_history::ECategory::MAP, [&] {
+		   if(m_ToolbarPreviewSound == pOldSound->m_SoundId)
+			   m_ToolbarPreviewSound = pSound->m_SoundId;
+		   Map()->m_vpSounds[Map()->m_SelectedSound] = pSound;
+		   Map()->SelectSound(pSound);
+		   Map()->OnModify();
+	   }))
+		return false;
 	OnDialogClose();
 	return true;
 }
@@ -3301,12 +3279,12 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 				continue;
 			Slot.HSplitTop(RowHeight, &Slot, nullptr);
 
-			const bool ImageUsed = std::any_of(Map()->m_vpGroups.cbegin(), Map()->m_vpGroups.cend(), [i](const auto &pGroup) {
-				return std::any_of(pGroup->m_vpLayers.cbegin(), pGroup->m_vpLayers.cend(), [i](const auto &pLayer) {
+			const bool ImageUsed = std::any_of(Map()->m_vpGroups.cbegin(), Map()->m_vpGroups.cend(), [this, i](const auto &pGroup) {
+				return std::any_of(pGroup->m_vpLayers.cbegin(), pGroup->m_vpLayers.cend(), [this, i](const auto &pLayer) {
 					if(pLayer->m_Type == LAYERTYPE_QUADS)
-						return std::static_pointer_cast<CLayerQuads>(pLayer)->m_Image == i;
+						return Map()->ImageIndex(std::static_pointer_cast<CLayerQuads>(pLayer)->m_Image) == i;
 					else if(pLayer->m_Type == LAYERTYPE_TILES)
-						return std::static_pointer_cast<CLayerTiles>(pLayer)->m_Image == i;
+						return Map()->ImageIndex(std::static_pointer_cast<CLayerTiles>(pLayer)->m_Image) == i;
 					return false;
 				});
 			});
@@ -3424,10 +3402,10 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 			continue;
 		Slot.HSplitTop(RowHeight, &Slot, nullptr);
 
-		const bool SoundUsed = std::any_of(Map()->m_vpGroups.cbegin(), Map()->m_vpGroups.cend(), [i](const auto &pGroup) {
-			return std::any_of(pGroup->m_vpLayers.cbegin(), pGroup->m_vpLayers.cend(), [i](const auto &pLayer) {
+		const bool SoundUsed = std::any_of(Map()->m_vpGroups.cbegin(), Map()->m_vpGroups.cend(), [this, i](const auto &pGroup) {
+			return std::any_of(pGroup->m_vpLayers.cbegin(), pGroup->m_vpLayers.cend(), [this, i](const auto &pLayer) {
 				if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-					return std::static_pointer_cast<CLayerSounds>(pLayer)->m_Sound == i;
+					return Map()->SoundIndex(std::static_pointer_cast<CLayerSounds>(pLayer)->m_Sound) == i;
 				return false;
 			});
 		});
@@ -3490,15 +3468,16 @@ void CEditor::ShowFileDialogError(const char *pFormat, ...)
 	CUi::SMessagePopupContext *pContext;
 	if(ContextIterator != m_PopupMessageContexts.end())
 	{
-		pContext = ContextIterator->second;
+		pContext = ContextIterator->second.get();
 		Ui()->ClosePopupMenu(pContext);
 	}
 	else
 	{
-		pContext = new CUi::SMessagePopupContext();
+		auto pOwnedContext = std::make_unique<CUi::SMessagePopupContext>();
+		pContext = pOwnedContext.get();
 		pContext->ErrorColor();
 		str_copy(pContext->m_aMessage, aMessage);
-		m_PopupMessageContexts[pContext->m_aMessage] = pContext;
+		m_PopupMessageContexts.emplace(pContext->m_aMessage, std::move(pOwnedContext));
 	}
 	Ui()->ShowPopupMessage(Ui()->MouseX(), Ui()->MouseY(), pContext);
 }
@@ -3543,30 +3522,30 @@ void CEditor::RenderModebar(CUIRect View)
 		static int s_LayersButton = 0;
 		if(DoButton_FontIcon(&s_LayersButton, FontIcon::LAYER_GROUP, m_Mode == MODE_LAYERS, &ModeButton, BUTTONFLAG_LEFT, "Go to layers management.", IGraphics::CORNER_L))
 		{
-			m_Mode = MODE_LAYERS;
+			SwitchTool([this] { m_Mode = MODE_LAYERS; });
 		}
 
 		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_ImagesButton = 0;
 		if(DoButton_FontIcon(&s_ImagesButton, FontIcon::IMAGE, m_Mode == MODE_IMAGES, &ModeButton, BUTTONFLAG_LEFT, "Go to images management.", IGraphics::CORNER_NONE))
 		{
-			m_Mode = MODE_IMAGES;
+			SwitchTool([this] { m_Mode = MODE_IMAGES; });
 		}
 
 		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_SoundsButton = 0;
 		if(DoButton_FontIcon(&s_SoundsButton, FontIcon::MUSIC, m_Mode == MODE_SOUNDS, &ModeButton, BUTTONFLAG_LEFT, "Go to sounds management.", IGraphics::CORNER_R))
 		{
-			m_Mode = MODE_SOUNDS;
+			SwitchTool([this] { m_Mode = MODE_SOUNDS; });
 		}
 
 		if(Input()->KeyPress(KEY_LEFT) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 		{
-			m_Mode = (m_Mode + NUM_MODES - 1) % NUM_MODES;
+			SwitchTool([this] { m_Mode = (m_Mode + NUM_MODES - 1) % NUM_MODES; });
 		}
 		else if(Input()->KeyPress(KEY_RIGHT) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 		{
-			m_Mode = (m_Mode + 1) % NUM_MODES;
+			SwitchTool([this] { m_Mode = (m_Mode + 1) % NUM_MODES; });
 		}
 	}
 }
@@ -3727,8 +3706,8 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	static int s_CloseButton = 0;
 	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, BUTTONFLAG_LEFT, "[Escape] Exit from the editor."))
 	{
-		OnClose();
-		g_Config.m_ClEditor = 0;
+		if(OnClose())
+			g_Config.m_ClEditor = 0;
 	}
 }
 
@@ -3750,8 +3729,8 @@ void CEditor::Exit()
 	}
 	else
 	{
-		OnClose();
-		g_Config.m_ClEditor = 0;
+		if(OnClose())
+			g_Config.m_ClEditor = 0;
 	}
 }
 
@@ -3800,15 +3779,6 @@ void CEditor::Render()
 
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 	{
-		// handle undo/redo hotkeys
-		if(Ui()->CheckActiveItem(nullptr))
-		{
-			if(Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed() && !Input()->ShiftIsPressed())
-				ActiveHistory().Undo();
-			if((Input()->KeyPress(KEY_Y) && Input()->ModifierIsPressed()) || (Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed() && Input()->ShiftIsPressed()))
-				ActiveHistory().Redo();
-		}
-
 		// handle brush save/load hotkeys
 		for(int i = KEY_1; i <= KEY_0; i++)
 		{
@@ -4067,8 +4037,8 @@ void CEditor::Render()
 
 	if(m_Dialog == DIALOG_NONE && !m_PopupEventActivated && Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 	{
-		OnClose();
-		g_Config.m_ClEditor = 0;
+		if(OnClose())
+			g_Config.m_ClEditor = 0;
 	}
 
 	// The tooltip can be set in popup menus so we have to render the tooltip after the popup menus.
@@ -4156,12 +4126,8 @@ void CEditor::FreeDynamicPopupMenus()
 	auto Iterator = m_PopupMessageContexts.begin();
 	while(Iterator != m_PopupMessageContexts.end())
 	{
-		if(!Ui()->IsPopupOpen(Iterator->second))
-		{
-			CUi::SMessagePopupContext *pContext = Iterator->second;
+		if(!Ui()->IsPopupOpen(Iterator->second.get()))
 			Iterator = m_PopupMessageContexts.erase(Iterator);
-			delete pContext;
-		}
 		else
 			++Iterator;
 	}
@@ -4294,29 +4260,29 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 	{
 		const CLayerSwitch &SwitchLayer = static_cast<const CLayerSwitch &>(TilesLayer);
 		GetTile = [&](int x, int y) -> std::tuple<unsigned char, unsigned char> {
-			const CSwitchTile Tile = SwitchLayer.m_pSwitchTile[y * SwitchLayer.m_Width + x];
+			const CSwitchTile Tile = SwitchLayer.m_SwitchTiles[y * SwitchLayer.Width() + x];
 			return {Tile.m_Type - ENTITY_OFFSET, Tile.m_Flags};
 		};
 		GetIndexChecked = [&](int x, int y) -> unsigned char {
-			if(x < 0 || y < 0 || x >= SwitchLayer.m_Width || y >= SwitchLayer.m_Height)
+			if(x < 0 || y < 0 || x >= SwitchLayer.Width() || y >= SwitchLayer.Height())
 			{
 				return 0;
 			}
-			return SwitchLayer.m_pSwitchTile[y * SwitchLayer.m_Width + x].m_Type - ENTITY_OFFSET;
+			return SwitchLayer.m_SwitchTiles[y * SwitchLayer.Width() + x].m_Type - ENTITY_OFFSET;
 		};
 	}
 	else
 	{
 		GetTile = [&](int x, int y) -> std::tuple<unsigned char, unsigned char> {
-			const CTile Tile = TilesLayer.m_pTiles[y * TilesLayer.m_Width + x];
+			const CTile Tile = TilesLayer.m_Tiles[y * TilesLayer.Width() + x];
 			return {Tile.m_Index - ENTITY_OFFSET, Tile.m_Flags};
 		};
 		GetIndexChecked = [&](int x, int y) -> unsigned char {
-			if(x < 0 || y < 0 || x >= TilesLayer.m_Width || y >= TilesLayer.m_Height)
+			if(x < 0 || y < 0 || x >= TilesLayer.Width() || y >= TilesLayer.Height())
 			{
 				return 0;
 			}
-			return TilesLayer.m_pTiles[y * TilesLayer.m_Width + x].m_Index - ENTITY_OFFSET;
+			return TilesLayer.m_Tiles[y * TilesLayer.Width() + x].m_Index - ENTITY_OFFSET;
 		};
 	}
 
@@ -4327,9 +4293,9 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 	CScreenRect ScreenRect = Group.Mapping();
 	const int ExtraBorder = 9; // doors extend beyond the tile on which they are placed
 	const int StartX = std::max(0, (int)std::floor(ScreenRect.m_TopLeft.x / TileSize) - ExtraBorder);
-	const int EndX = std::min(TilesLayer.m_Width, (int)std::ceil(ScreenRect.m_BottomRight.x / TileSize) + ExtraBorder);
+	const int EndX = std::min(TilesLayer.Width(), (int)std::ceil(ScreenRect.m_BottomRight.x / TileSize) + ExtraBorder);
 	const int StartY = std::max(0, (int)std::floor(ScreenRect.m_TopLeft.y / TileSize) - ExtraBorder);
-	const int EndY = std::min(TilesLayer.m_Height, (int)std::ceil(ScreenRect.m_BottomRight.y / TileSize) + ExtraBorder);
+	const int EndY = std::min(TilesLayer.Height(), (int)std::ceil(ScreenRect.m_BottomRight.y / TileSize) + ExtraBorder);
 	for(int y = StartY; y < EndY; y++)
 	{
 		for(int x = StartX; x < EndX; x++)
@@ -4490,10 +4456,66 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 	}
 }
 
+bool CEditor::DocumentNumberInputActive() const
+{
+	return m_UI.ValueSelectorTextActive() || m_ValueSelector.m_pTextId != nullptr || (m_pDocumentNumberInput && m_pDocumentNumberInput->IsActive());
+}
+
+void CEditor::DeferDocumentAction(CEditorMap *pMap, std::function<void()> Action)
+{
+	m_vDeferredDocumentActions.push_back({pMap->Lifetime(), std::move(Action)});
+	m_SettleDocumentInput = true;
+}
+
+void CEditor::SwitchTool(std::function<void()> Action)
+{
+	if(DocumentNumberInputActive() || Map()->m_DocumentHistory.Pending())
+	{
+		DeferDocumentAction(Map(), [this, DeferredAction = std::move(Action)]() mutable { SwitchTool(std::move(DeferredAction)); });
+		return;
+	}
+	FinishDocumentText(true);
+	if(!Map()->m_DocumentHistory.CompleteActive(CEditorDocumentHistory::ECompletion::TOOL_SWITCH))
+		return;
+	Reset();
+	Action();
+}
+
+void CEditor::SelectMap(size_t Index)
+{
+	if(Index == m_SelectedMap || Index >= m_vpMaps.size())
+		return;
+	if(DocumentNumberInputActive() || Map()->m_DocumentHistory.Pending())
+	{
+		const auto TargetLifetime = m_vpMaps[Index]->Lifetime();
+		DeferDocumentAction(Map(), [this, TargetLifetime] {
+			const auto It = std::find_if(m_vpMaps.begin(), m_vpMaps.end(), [TargetLifetime](const auto &pMap) { return pMap->HasLifetime(TargetLifetime); });
+			if(It != m_vpMaps.end())
+				SelectMap(It - m_vpMaps.begin());
+		});
+		return;
+	}
+	FinishDocumentText(true);
+	if(!Map()->m_DocumentHistory.CompleteActive(CEditorDocumentHistory::ECompletion::TOOL_SWITCH))
+		return;
+	Reset();
+	m_SelectedMap = Index;
+	m_MapTabsRevealSelected = true;
+}
+
 void CEditor::Reset()
 {
+	FinishDocumentText(false);
+	for(const auto &pMap : m_vpMaps)
+		if(!pMap->m_DocumentHistory.Publishing())
+			pMap->m_DocumentHistory.Cancel(CEditorDocumentHistory::ECancellation::OWNER_DESTROYED);
+	m_ColorPickerEditing = false;
+	m_pColorPickerPopupActiveId = nullptr;
+	m_ColorPickerPopupContext.m_State = EEditState::NONE;
+	m_ValueSelector.Reset();
+	m_pDocumentNumberInput = nullptr;
 	Ui()->ClosePopupMenus();
-	Ui()->SetActiveItem(nullptr);
+	Ui()->ClearObjectReferences();
 
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnReset();
@@ -4507,6 +4529,14 @@ void CEditor::Reset()
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
 	m_RenderLayersState.Reset();
+	if(!m_vpMaps.empty())
+	{
+		Map()->m_FontTyperState.Reset();
+		Map()->m_QuadKnifeState.Reset();
+		Map()->m_MapViewState.m_ActiveOp = CMapView::EActiveOp::NONE;
+	}
+	if(m_Dialog == DIALOG_PSEUDO_FONT_TYPER)
+		m_Dialog = DIALOG_NONE;
 }
 
 void CEditor::AddDefaultMap()
@@ -4521,7 +4551,24 @@ void CEditor::AddDefaultMap()
 
 void CEditor::CloseMap(size_t Index, bool Confirm)
 {
-	if(IsSaving(m_vpMaps[Index]->m_aFilename))
+	if(Index >= m_vpMaps.size())
+		return;
+	if(DocumentNumberInputActive() || Map()->m_DocumentHistory.Pending() || m_vpMaps[Index]->m_DocumentHistory.Pending())
+	{
+		const auto TargetLifetime = m_vpMaps[Index]->Lifetime();
+		DeferDocumentAction(Map(), [this, TargetLifetime, Confirm] {
+			const auto It = std::find_if(m_vpMaps.begin(), m_vpMaps.end(), [TargetLifetime](const auto &pMap) { return pMap->HasLifetime(TargetLifetime); });
+			if(It != m_vpMaps.end())
+				CloseMap(It - m_vpMaps.begin(), Confirm);
+		});
+		return;
+	}
+	if(Index == m_SelectedMap)
+		FinishDocumentText(true);
+	if(!m_vpMaps[Index]->m_DocumentHistory.CompleteActive(CEditorDocumentHistory::ECompletion::DOCUMENT_CLOSE))
+		return;
+
+	if(IsSavingMap(*m_vpMaps[Index]))
 	{
 		return;
 	}
@@ -4530,9 +4577,7 @@ void CEditor::CloseMap(size_t Index, bool Confirm)
 	{
 		if(Index != m_SelectedMap)
 		{
-			m_SelectedMap = Index;
-			m_MapTabsRevealSelected = true;
-			Reset();
+			SelectMap(Index);
 		}
 		m_PopupEventType = CEditor::POPEVENT_CLOSE_MAP;
 		m_PopupEventActivated = true;
@@ -4614,8 +4659,34 @@ void CEditor::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_UI.Init(Kernel());
-	m_UI.SetPopupMenuClosedCallback([this]() {
+	m_UI.SetPopupMenuClosedCallback([this](CUi::EPopupCloseReason Reason) {
 		m_PopupEventWasActivated = false;
+		if(Reason == CUi::EPopupCloseReason::CANCEL)
+		{
+			FinishDocumentText(false);
+			if(DocumentNumberInputActive())
+			{
+				if(!m_vpMaps.empty())
+				{
+					Map()->m_DocumentHistory.Cancel(CEditorDocumentHistory::ECancellation::OWNER_DESTROYED);
+					Map()->m_UpdateEnvPointInfo = true;
+				}
+				m_ValueSelector.Reset();
+				Ui()->ResetValueSelector();
+				if(m_pDocumentNumberInput)
+					m_pDocumentNumberInput->Deactivate();
+				m_pDocumentNumberInput = nullptr;
+			}
+		}
+		if(m_pColorPickerPopupActiveId && !Ui()->IsPopupOpen(&m_ColorPickerPopupContext) && Reason == CUi::EPopupCloseReason::CANCEL)
+		{
+			if(m_ColorPickerEditing && !m_vpMaps.empty())
+				Map()->m_DocumentHistory.Cancel(CEditorDocumentHistory::ECancellation::OWNER_DESTROYED);
+			m_ColorPickerEditing = false;
+			m_pColorPickerPopupActiveId = nullptr;
+			m_ColorPickerPopupContext.m_State = EEditState::CANCELLED;
+			Ui()->ResetValueSelector();
+		}
 	});
 	m_UI.SetDispatchInputCallback([this](const IInput::CEvent &Event) {
 		OnInput(Event);
@@ -4748,32 +4819,45 @@ void CEditor::HandleAutosave()
 	}
 }
 
+void CEditor::QueueWriterFinishJob(const std::shared_ptr<CDataFileWriterFinishJob> &pJob)
+{
+	m_WriterFinishJobs.push_back(pJob);
+	Engine()->AddJob(pJob);
+}
+
 void CEditor::HandleWriterFinishJobs()
 {
 	if(m_WriterFinishJobs.empty())
 		return;
 
 	std::shared_ptr<CDataFileWriterFinishJob> pJob = m_WriterFinishJobs.front();
-	if(!pJob->Done())
+	if(pJob->State() != IJob::STATE_DONE)
 		return;
 	m_WriterFinishJobs.pop_front();
 
 	const char *pErrorMessage = pJob->ErrorMessage();
+	auto MapIt = std::find_if(m_vpMaps.begin(), m_vpMaps.end(), [&](const std::unique_ptr<CEditorMap> &pMap) {
+		return pMap->OwnsSave(pJob->Ticket());
+	});
+	if(MapIt != m_vpMaps.end() && (*MapIt)->CompleteSave(pJob->Ticket(), pErrorMessage[0] == '\0'))
+		UpdateMapDisplayNames();
 	if(pErrorMessage[0] != '\0')
 	{
 		ShowFileDialogError("%s", pErrorMessage);
 		return;
 	}
 
-	auto MapIt = std::find_if(m_vpMaps.begin(), m_vpMaps.end(), [&](const std::unique_ptr<CEditorMap> &pMap) {
-		return str_comp(pMap->m_aFilename, pJob->RealFilename()) == 0;
-	});
+	if(pJob->Ticket().Kind() == editor_history::ESaveKind::AUTOMATIC && pJob->AutosaveMax() > 0 && !pJob->AutosaveName().empty())
+	{
+		CFileCollection AutosavedMaps;
+		AutosavedMaps.Init(Storage(), "maps/auto", pJob->AutosaveName().c_str(), ".map", pJob->AutosaveMax());
+	}
+
 	if(MapIt != m_vpMaps.end())
 	{
 		const auto &pMap = *MapIt;
-		if(pMap->m_CloseOnSave)
+		if(pMap->m_CloseOnSave && !pMap->m_Modified && pJob->Ticket().Kind() == editor_history::ESaveKind::MANUAL)
 		{
-			dbg_assert(!pMap->m_Modified, "Map to be closed was modified, should be prevented in OnModify");
 			CloseMap(MapIt - m_vpMaps.begin(), false);
 		}
 	}
@@ -4794,29 +4878,25 @@ void CEditor::HandleWriterFinishJobs()
 
 bool CEditor::IsSaving(const char *pFilename) const
 {
+	return std::any_of(m_WriterFinishJobs.begin(), m_WriterFinishJobs.end(), [&](const auto &pJob) {
+		return str_comp(pFilename, pJob->RealFilename()) == 0;
+	});
+}
+
+bool CEditor::IsSavingMap(const CEditorMap &Map) const
+{
 	return std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [&](const std::shared_ptr<CDataFileWriterFinishJob> &Job) {
-		return str_comp(pFilename, Job->RealFilename()) == 0;
+		return Map.OwnsSave(Job->Ticket());
 	});
 }
 
 void CEditor::UpdateMapDisplayNames()
 {
-	std::unordered_map<std::string, int> Occurrences;
-	for(const auto &pMap : m_vpMaps)
+	// Tab publication and successful saves must not fail while updating labels.
+	// Open tab counts are small; count matching names without allocating a cache.
+	for(size_t Index = 0; Index < m_vpMaps.size(); ++Index)
 	{
-		auto It = Occurrences.find(pMap->m_aFilename);
-		if(It == Occurrences.end())
-		{
-			Occurrences.emplace(pMap->m_aFilename, 1);
-		}
-		else
-		{
-			It->second++;
-		}
-	}
-	std::unordered_map<std::string, int> Counts;
-	for(const auto &pMap : m_vpMaps)
-	{
+		const auto &pMap = m_vpMaps[Index];
 		if(pMap->m_aFilename[0] == '\0')
 		{
 			str_copy(pMap->m_aDisplayName, "Unnamed");
@@ -4827,30 +4907,38 @@ void CEditor::UpdateMapDisplayNames()
 			fs_split_file_extension(fs_filename(pMap->m_aFilename), pMap->m_aDisplayName, sizeof(pMap->m_aDisplayName));
 			str_copy(pMap->m_aAutosaveName, pMap->m_aDisplayName);
 		}
-		if(Occurrences[pMap->m_aFilename] <= 1)
-		{
+		int Occurrences = 0;
+		int Ordinal = 0;
+		for(size_t Other = 0; Other < m_vpMaps.size(); ++Other)
+			if(str_comp(pMap->m_aFilename, m_vpMaps[Other]->m_aFilename) == 0)
+			{
+				++Occurrences;
+				if(Other <= Index)
+					++Ordinal;
+			}
+		if(Occurrences <= 1)
 			continue;
-		}
-
-		auto Count = Counts.find(pMap->m_aFilename);
-		if(Count == Counts.end())
-		{
-			Count = Counts.emplace(pMap->m_aFilename, 1).first;
-		}
-		else
-		{
-			Count->second++;
-		}
 		char aNum[16];
-		str_format(aNum, sizeof(aNum), " (%d)", Count->second);
+		str_format(aNum, sizeof(aNum), " (%d)", Ordinal);
 		str_append(pMap->m_aDisplayName, aNum);
-		str_format(aNum, sizeof(aNum), "_%02d", Count->second);
+		str_format(aNum, sizeof(aNum), "_%02d", Ordinal);
 		str_append(pMap->m_aAutosaveName, aNum);
 	}
 }
 
 void CEditor::OnUpdate()
 {
+	if(!Kernel()->RequestInterface<IEngineGraphics>()->WindowActive())
+	{
+		// Forced closure also discards envelope fields that do not own an edit
+		// until blur/Enter. They must not apply a stale draft on focus return.
+		Ui()->ClosePopupMenus();
+		FinishDocumentText(false);
+		for(const auto &pMap : m_vpMaps)
+			pMap->m_DocumentHistory.Cancel(CEditorDocumentHistory::ECancellation::FOCUS_LOST);
+		Ui()->SetActiveItem(nullptr);
+		Ui()->DisableMouseLock();
+	}
 	CUIElementBase::Init(Ui()); // update static pointer because game and editor use separate UI
 
 	m_pContainerPannedLast = m_pContainerPanned;
@@ -4881,6 +4969,51 @@ void CEditor::OnUpdate()
 
 void CEditor::OnInput(const IInput::CEvent &Event)
 {
+	if((Event.m_Flags & IInput::FLAG_RELEASE) != 0)
+		for(const auto &pMap : m_vpMaps)
+			pMap->m_DocumentHistory.KeyReleased(Event.m_Key);
+	if(m_pDocumentTextInput && m_pDocumentTextInput->IsActive())
+	{
+		if((Event.m_Flags & IInput::FLAG_RELEASE) != 0)
+			for(CEditorComponent &Component : m_vComponents)
+				Component.OnInput(Event);
+		if((Event.m_Flags & IInput::FLAG_PRESS) != 0 && (Event.m_Key == KEY_ESCAPE || Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
+		{
+			FinishDocumentText(Event.m_Key != KEY_ESCAPE);
+			Ui()->SetActiveItem(nullptr);
+			return;
+		}
+		m_pDocumentTextMap->m_DocumentHistory.Update(m_pDocumentTextInput, [&] { Ui()->OnInput(Event); });
+		return;
+	}
+	if(CLineInput::GetActiveInput())
+	{
+		if((Event.m_Flags & IInput::FLAG_RELEASE) != 0)
+			for(CEditorComponent &Component : m_vComponents)
+				Component.OnInput(Event);
+		Ui()->OnInput(Event);
+		return;
+	}
+	if((Event.m_Flags & IInput::FLAG_PRESS) != 0 && (Event.m_Flags & IInput::FLAG_REPEAT) == 0 && Input()->ModifierIsPressed() &&
+		(Event.m_Key == KEY_Z || Event.m_Key == KEY_Y) &&
+		(m_Dialog == DIALOG_NONE || m_Dialog == DIALOG_PSEUDO_FONT_TYPER || Map()->m_DocumentHistory.Active()))
+	{
+		if(Event.m_Key == KEY_Y || Input()->ShiftIsPressed())
+			ActiveHistory().Redo();
+		else
+			ActiveHistory().Undo();
+		return;
+	}
+	if((Event.m_Flags & IInput::FLAG_PRESS) != 0 && Event.m_Key == KEY_ESCAPE && CLineInput::GetActiveInput() == nullptr && Map()->m_DocumentHistory.Active())
+	{
+		Map()->m_DocumentHistory.Cancel(CEditorDocumentHistory::ECancellation::ESCAPE);
+		Ui()->SetActiveItem(nullptr);
+		Ui()->DisableMouseLock();
+		m_ColorPickerEditing = false;
+		m_pColorPickerPopupActiveId = nullptr;
+		Ui()->ClosePopupMenus();
+		return;
+	}
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Event.m_Key == KEY_F1)
 	{
 		if((Event.m_Flags & IInput::FLAG_PRESS) != 0 && (Event.m_Flags & IInput::FLAG_REPEAT) == 0)
@@ -4902,6 +5035,12 @@ void CEditor::OnInput(const IInput::CEvent &Event)
 
 void CEditor::OnRender()
 {
+	for(const auto &pMap : m_vpMaps)
+		pMap->m_DocumentHistory.StartFrame();
+	m_DocumentTextRendered = false;
+	const bool SettlePopupInput = m_SettleDocumentInput && Ui()->ValueSelectorTextActive();
+	if(SettlePopupInput)
+		Ui()->SettleValueSelectorText();
 	Ui()->SetMouseSlow(false);
 
 	// toggle gui
@@ -4941,6 +5080,48 @@ void CEditor::OnRender()
 		Ui()->DebugRender(2.0f, Ui()->Screen()->h - 27.0f);
 
 	Ui()->FinishCheck();
+	if(m_pDocumentTextInput && !m_DocumentTextRendered)
+		FinishDocumentText(false);
+	// Restoration can replace layers and their elements. Render/UI callbacks must
+	// return before publishing, so they cannot keep using previous-state pointers.
+	for(const auto &pMap : m_vpMaps)
+	{
+		pMap->m_DocumentHistory.FinishFrame();
+		pMap->m_DocumentHistory.PublishAtSafePoint();
+	}
+	if(SettlePopupInput && Ui()->ValueSelectorTextActive())
+	{
+		Map()->m_DocumentHistory.Cancel(CEditorDocumentHistory::ECancellation::OWNER_DESTROYED);
+		Ui()->ResetValueSelector();
+	}
+	// Popup controls render after their owning properties. Give the accepted
+	// value one following frame to reach its document owner before saving/switching.
+	if(m_SettleDocumentInput && !SettlePopupInput)
+	{
+		// A hidden/destroyed numeric owner cannot apply a value. Its draft is cancelled.
+		if(DocumentNumberInputActive())
+		{
+			Map()->m_DocumentHistory.Cancel(CEditorDocumentHistory::ECancellation::INVALID_INPUT);
+			m_ValueSelector.Reset();
+			Ui()->ResetValueSelector();
+			if(m_pDocumentNumberInput)
+				m_pDocumentNumberInput->Deactivate();
+			Map()->m_DocumentHistory.PublishAtSafePoint();
+		}
+		m_SettleDocumentInput = false;
+		auto vActions = std::move(m_vDeferredDocumentActions);
+		m_vDeferredDocumentActions.clear();
+		for(auto &Action : vActions)
+		{
+			const auto It = std::find_if(m_vpMaps.begin(), m_vpMaps.end(), [&](const auto &pMap) { return pMap->HasLifetime(Action.m_Lifetime); });
+			if(It == m_vpMaps.end())
+				continue;
+			if((*It)->m_DocumentHistory.Pending())
+				DeferDocumentAction(It->get(), std::move(Action.m_Action));
+			else
+				Action.m_Action();
+		}
+	}
 	Ui()->ClearHotkeys();
 	Input()->Clear();
 
@@ -4962,14 +5143,24 @@ void CEditor::OnWindowResize()
 	Ui()->OnWindowResize();
 }
 
-void CEditor::OnClose()
+bool CEditor::OnClose()
 {
+	if(!m_vpMaps.empty() && (DocumentNumberInputActive() || Map()->m_DocumentHistory.Pending()))
+	{
+		DeferDocumentAction(Map(), [this] { if(OnClose()) g_Config.m_ClEditor = 0; });
+		return false;
+	}
+	FinishDocumentText(true);
+	if(!m_vpMaps.empty() && !Map()->m_DocumentHistory.CompleteActive(CEditorDocumentHistory::ECompletion::TOOL_SWITCH))
+		return false;
 	m_ColorPipetteActive = false;
 
 	if(m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 		Sound()->Pause(m_ToolbarPreviewSound);
 
+	Reset();
 	m_FileBrowser.OnEditorClose();
+	return true;
 }
 
 void CEditor::OnDialogClose()
@@ -4982,28 +5173,22 @@ void CEditor::OnDialogClose()
 void CEditor::LoadIngameMap()
 {
 	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
-
-	if(Load(pGameClient->Map()->Path(), IStorage::TYPE_SAVE))
-	{
-		Map()->m_ValidSaveFilename = !str_startswith(pGameClient->Map()->Path(), "downloadedmaps/");
-	}
-	else
-	{
-		Load(pGameClient->Map()->Path(), IStorage::TYPE_ALL);
-		Map()->m_ValidSaveFilename = false;
-	}
-
-	vec2 Center = pGameClient->m_Camera.m_Center;
-	MapView()->SetWorldOffset(Center);
+	const std::string Filename = pGameClient->Map()->Path();
+	const vec2 Center = pGameClient->m_Camera.m_Center;
+	const bool ValidSaveFilename = !str_startswith(Filename.c_str(), "downloadedmaps/");
+	if(!LoadWithCallback(Filename.c_str(), IStorage::TYPE_SAVE, [this, Center, ValidSaveFilename] {
+		   Map()->m_ValidSaveFilename = ValidSaveFilename;
+		   MapView()->SetWorldOffset(Center);
+	   }))
+		LoadWithCallback(Filename.c_str(), IStorage::TYPE_ALL, [this, Center] {
+			Map()->m_ValidSaveFilename = false;
+			MapView()->SetWorldOffset(Center);
+		});
+	// NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks): LoadWithCallback owns the callback, including deferred loads.
 }
 
 bool CEditor::Save(const char *pFilename)
 {
-	if(IsSaving(pFilename))
-	{
-		return false;
-	}
-
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
 		log_error("editor/save", "%s", pErrorMessage);
@@ -5019,27 +5204,39 @@ bool CEditor::HandleMapDrop(const char *pFilename, int StorageType)
 
 bool CEditor::Load(const char *pFilename, int StorageType)
 {
-	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
+	return LoadWithCallback(pFilename, StorageType, {});
+}
+
+bool CEditor::LoadWithCallback(const char *pFilename, int StorageType, std::function<void()> OnLoaded)
+{
+	const auto ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
 		log_error("editor/load", "%s", pErrorMessage);
 	};
-
-	Reset();
-	std::unique_ptr<CEditorMap> pNewMap = std::make_unique<CEditorMap>(this);
-	const bool Result = pNewMap->Load(pFilename, StorageType, std::move(ErrorHandler));
-	if(Result)
-	{
-		m_vpMaps.push_back(std::move(pNewMap));
+	// Prepare the new document before settling the old one. A delayed switch must
+	// apply filename validity and camera setup to that new document, not the tab
+	// that happens to be selected when the request is first made.
+	auto pNewMap = std::make_unique<CEditorMap>(this);
+	if(!pNewMap->Load(pFilename, StorageType, ErrorHandler))
+		return false;
+	auto ppPrepared = std::make_shared<std::unique_ptr<CEditorMap>>(std::move(pNewMap));
+	auto Publish = [this, ppPrepared, AfterLoad = std::move(OnLoaded)] {
+		m_vpMaps.push_back(std::move(*ppPrepared));
 		m_SelectedMap = m_vpMaps.size() - 1;
 		m_MapTabsRevealSelected = true;
 		UpdateMapDisplayNames();
-
+		if(AfterLoad)
+			AfterLoad();
 		for(CEditorComponent &Component : m_vComponents)
 			Component.OnMapLoad();
-
 		log_info("editor/load", "Loaded map '%s'", Map()->m_aFilename);
-	}
-	return Result;
+	};
+	std::function<void()> Action = std::move(Publish);
+	if(m_vpMaps.empty())
+		Action();
+	else
+		SwitchTool(std::move(Action));
+	return true;
 }
 
 CEditorMap *CEditor::Map()
@@ -5054,20 +5251,9 @@ const CEditorMap *CEditor::Map() const
 	return m_vpMaps[m_SelectedMap].get();
 }
 
-CEditorHistory &CEditor::ActiveHistory()
+CEditorDocumentHistory &CEditor::ActiveHistory()
 {
-	if(m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS)
-	{
-		return Map()->m_ServerSettingsHistory;
-	}
-	else if(m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES)
-	{
-		return Map()->m_EnvelopeEditorHistory;
-	}
-	else
-	{
-		return Map()->m_EditorHistory;
-	}
+	return Map()->m_DocumentHistory;
 }
 
 void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int AdjustValue)
@@ -5105,31 +5291,31 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 			const int NextFreeTeleNumber = UseNextFree ? Map()->m_pTeleLayer->FindNextFreeNumber(false) : 0;
 			const int NextFreeCheckpointNumber = UseNextFree ? Map()->m_pTeleLayer->FindNextFreeNumber(true) : 0;
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
-			for(int y = 0; y < pTeleLayer->m_Height; y++)
+			for(int y = 0; y < pTeleLayer->Height(); y++)
 			{
-				for(int x = 0; x < pTeleLayer->m_Width; x++)
+				for(int x = 0; x < pTeleLayer->Width(); x++)
 				{
-					int i = y * pTeleLayer->m_Width + x;
-					if(!IsValidTeleTile(pTeleLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pTeleLayer->m_pTeleTile[i].m_Number))
+					int i = y * pTeleLayer->Width() + x;
+					if(!IsValidTeleTile(pTeleLayer->m_Tiles[i].m_Index) || (!UseNextFree && !pTeleLayer->m_TeleTiles[i].m_Number))
 						continue;
 
 					if(UseNextFree)
 					{
-						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
-							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCheckpointNumber;
-						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
-							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
+						if(IsTeleTileCheckpoint(pTeleLayer->m_Tiles[i].m_Index))
+							pTeleLayer->m_TeleTiles.Update(i, [&](auto &Cell) { Cell.m_Number = NextFreeCheckpointNumber; });
+						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_Tiles[i].m_Index))
+							pTeleLayer->m_TeleTiles.Update(i, [&](auto &Cell) { Cell.m_Number = NextFreeTeleNumber; });
 					}
 					else if(AdjustValue == 0)
 					{
-						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
-							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleCheckpointNumber;
-						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
-							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumber;
+						if(IsTeleTileCheckpoint(pTeleLayer->m_Tiles[i].m_Index))
+							pTeleLayer->m_TeleTiles.Update(i, [&](auto &Cell) { Cell.m_Number = m_TeleCheckpointNumber; });
+						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_Tiles[i].m_Index))
+							pTeleLayer->m_TeleTiles.Update(i, [&](auto &Cell) { Cell.m_Number = m_TeleNumber; });
 					}
 					else if(AdjustModifiers == 0)
 					{
-						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number, 1, 255);
+						pTeleLayer->m_TeleTiles.Update(i, [&](auto &Cell) { AdjustNumber(Cell.m_Number, 1, 255); });
 					}
 				}
 			}
@@ -5138,21 +5324,21 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 		{
 			const int NextFreeNumber = UseNextFree ? Map()->m_pTuneLayer->FindNextFreeNumber() : 0;
 			std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
-			for(int y = 0; y < pTuneLayer->m_Height; y++)
+			for(int y = 0; y < pTuneLayer->Height(); y++)
 			{
-				for(int x = 0; x < pTuneLayer->m_Width; x++)
+				for(int x = 0; x < pTuneLayer->Width(); x++)
 				{
-					int i = y * pTuneLayer->m_Width + x;
-					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pTuneLayer->m_pTuneTile[i].m_Number))
+					int i = y * pTuneLayer->Width() + x;
+					if(!IsValidTuneTile(pTuneLayer->m_Tiles[i].m_Index) || (!UseNextFree && !pTuneLayer->m_TuneTiles[i].m_Number))
 						continue;
 
 					if(UseNextFree)
 					{
-						pTuneLayer->m_pTuneTile[i].m_Number = NextFreeNumber;
+						pTuneLayer->m_TuneTiles.Update(i, [&](auto &Cell) { Cell.m_Number = NextFreeNumber; });
 					}
 					else if(AdjustModifiers == 0)
 					{
-						AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number, 1, 255);
+						pTuneLayer->m_TuneTiles.Update(i, [&](auto &Cell) { AdjustNumber(Cell.m_Number, 1, 255); });
 					}
 				}
 			}
@@ -5161,25 +5347,25 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 		{
 			const int NextFreeNumber = UseNextFree ? Map()->m_pSwitchLayer->FindNextFreeNumber() : 0;
 			std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
-			for(int y = 0; y < pSwitchLayer->m_Height; y++)
+			for(int y = 0; y < pSwitchLayer->Height(); y++)
 			{
-				for(int x = 0; x < pSwitchLayer->m_Width; x++)
+				for(int x = 0; x < pSwitchLayer->Width(); x++)
 				{
-					int i = y * pSwitchLayer->m_Width + x;
-					if(!IsValidSwitchTile(pSwitchLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pSwitchLayer->m_pSwitchTile[i].m_Number))
+					int i = y * pSwitchLayer->Width() + x;
+					if(!IsValidSwitchTile(pSwitchLayer->m_Tiles[i].m_Index) || (!UseNextFree && !pSwitchLayer->m_SwitchTiles[i].m_Number))
 						continue;
 
 					if(UseNextFree)
 					{
-						pSwitchLayer->m_pSwitchTile[i].m_Number = NextFreeNumber;
+						pSwitchLayer->m_SwitchTiles.Update(i, [&](auto &Cell) { Cell.m_Number = NextFreeNumber; });
 					}
 					else if(AdjustModifiers == 0)
 					{
-						AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Number, 1, 255);
+						pSwitchLayer->m_SwitchTiles.Update(i, [&](auto &Cell) { AdjustNumber(Cell.m_Number, 1, 255); });
 					}
 					else if(AdjustModifiers == 1)
 					{
-						AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Delay, 0, 255);
+						pSwitchLayer->m_SwitchTiles.Update(i, [&](auto &Cell) { AdjustNumber(Cell.m_Delay, 0, 255); });
 					}
 				}
 			}
@@ -5187,30 +5373,30 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 		else if(pLayerTiles->m_HasSpeedup && !UseNextFree)
 		{
 			std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
-			for(int y = 0; y < pSpeedupLayer->m_Height; y++)
+			for(int y = 0; y < pSpeedupLayer->Height(); y++)
 			{
-				for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+				for(int x = 0; x < pSpeedupLayer->Width(); x++)
 				{
-					int i = y * pSpeedupLayer->m_Width + x;
-					if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
+					int i = y * pSpeedupLayer->Width() + x;
+					if(!IsValidSpeedupTile(pSpeedupLayer->m_Tiles[i].m_Index))
 						continue;
 
 					if(AdjustValue == 0)
 					{
-						pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
+						pSpeedupLayer->m_SpeedupTiles.Update(i, [&](auto &Cell) { Cell.m_Angle = m_SpeedupAngle; });
 						pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
 					}
 					else if(AdjustModifiers == 0)
 					{
-						AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 0, 359);
+						pSpeedupLayer->m_SpeedupTiles.Update(i, [&](auto &Cell) { AdjustNumber(Cell.m_Angle, 0, 359); });
 					}
 					else if(AdjustModifiers == 1)
 					{
-						AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Force, 1, 255);
+						pSpeedupLayer->m_SpeedupTiles.Update(i, [&](auto &Cell) { AdjustNumber(Cell.m_Force, 1, 255); });
 					}
 					else if(AdjustModifiers == 2)
 					{
-						AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_MaxSpeed, 0, 255);
+						pSpeedupLayer->m_SpeedupTiles.Update(i, [&](auto &Cell) { AdjustNumber(Cell.m_MaxSpeed, 0, 255); });
 					}
 				}
 			}
@@ -5218,4 +5404,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int
 	}
 }
 
-IEditor *CreateEditor() { return new CEditor; }
+IEditor *CreateEditor()
+{
+	return new CEditor;
+}

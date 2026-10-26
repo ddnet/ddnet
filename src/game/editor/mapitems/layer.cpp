@@ -1,21 +1,32 @@
 #include "layer.h"
 
+#include "map.h"
+
 #include <base/str.h>
 
 #include <game/mapitems.h>
 
-CLayer::CLayer(CEditorMap *pMap, int Type) :
-	CMapObject(pMap),
-	m_Type(Type)
+CLayer::CLayer(CEditorMap *pMap, int Type, std::uint64_t RetainedId) :
+	CMapObject(pMap)
 {
+	m_Id = RetainedId ? RetainedId : Map()->AllocateObjectId();
+	m_Type = Type;
 }
 
 CLayer::CLayer(const CLayer &Other) :
-	CMapObject(Other)
+	CMapObject(Other),
+	CLayerValues(Other)
 {
-	m_Type = Other.m_Type;
-	str_copy(m_aName, Other.m_aName);
-	m_Flags = Other.m_Flags;
+	m_Id = Map()->AllocateObjectId();
 	m_Readonly = false;
 	m_Visible = true;
+}
+
+void CLayer::OnAttach(CEditorMap *pMap)
+{
+	if(Map() != pMap)
+	{
+		m_Id = pMap->AllocateObjectId();
+	}
+	CMapObject::OnAttach(pMap);
 }

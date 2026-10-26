@@ -3,27 +3,19 @@
 
 #include "layer_tiles.h"
 
-struct STeleTileStateChange
-{
-	bool m_Changed;
-	struct SData
-	{
-		int m_Number;
-		int m_Type;
-		int m_Index;
-	} m_Previous, m_Current;
-};
-
-class CLayerTele : public CLayerTiles
+class CLayerTele : public CLayerTiles, public CLayerTeleValues
 {
 public:
-	CLayerTele(CEditorMap *pMap, int w, int h);
+	CLayerTele(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId = 0);
 	CLayerTele(const CLayerTele &Other);
 	~CLayerTele() override;
 
-	CTeleTile *m_pTeleTile;
-	unsigned char m_TeleNumber;
-	unsigned char m_TeleCheckpointNumber;
+	CRenderTileSource<CTeleTile> TeleTilesForRender() const
+	{
+		return CRenderTileSource<CTeleTile>(m_TeleTiles);
+	}
+	unsigned char m_TeleNumber{};
+	unsigned char m_TeleCheckpointNumber{};
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(EShiftDirection Direction) override;
@@ -40,19 +32,10 @@ public:
 	int m_GotoTeleOffset;
 	ivec2 m_GotoTeleLastPos;
 
-	EditorTileStateChangeHistory<STeleTileStateChange> m_History;
-	void ClearHistory() override
-	{
-		CLayerTiles::ClearHistory();
-		m_History.clear();
-	}
-
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
 
 private:
-	void RecordStateChange(int x, int y, STeleTileStateChange::SData Previous, STeleTileStateChange::SData Current);
-
 	friend class CLayerTiles;
 };
 

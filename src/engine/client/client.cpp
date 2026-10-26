@@ -3396,9 +3396,10 @@ void CClient::Run()
 
 		if(CtrlShiftKey(KEY_E, LastE))
 		{
-			if(g_Config.m_ClEditor)
-				m_pEditor->OnClose();
-			g_Config.m_ClEditor = g_Config.m_ClEditor ^ 1;
+			if(!g_Config.m_ClEditor)
+				g_Config.m_ClEditor = 1;
+			else if(m_pEditor->OnClose())
+				g_Config.m_ClEditor = 0;
 		}
 
 		bool Inactive = false;

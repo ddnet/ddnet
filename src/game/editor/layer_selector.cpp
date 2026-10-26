@@ -90,9 +90,9 @@ void CLayerSelector::UpdateHoveredTiles()
 			int x = r.x;
 			int y = r.y;
 
-			if(x < 0 || x >= pTiles->m_Width)
+			if(x < 0 || x >= pTiles->Width())
 				continue;
-			if(y < 0 || y >= pTiles->m_Height)
+			if(y < 0 || y >= pTiles->Height())
 				continue;
 
 			if(pTiles->GetTile(x, y).m_Index > 0)

@@ -1,7 +1,7 @@
 #include <game/editor/editor.h>
 
-CLayerFront::CLayerFront(CEditorMap *pMap, int w, int h) :
-	CLayerTiles(pMap, w, h)
+CLayerFront::CLayerFront(CEditorMap *pMap, int w, int h, std::uint64_t RetainedId) :
+	CLayerTiles(pMap, w, h, RetainedId)
 {
 	str_copy(m_aName, "Front");
 	m_HasFront = true;
@@ -34,15 +34,15 @@ void CLayerFront::Resize(int NewW, int NewH)
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(Map()->m_pGameLayer->m_Width != NewW || Map()->m_pGameLayer->m_Height != NewH)
+	if(Map()->m_pGameLayer->Width() != NewW || Map()->m_pGameLayer->Height() != NewH)
 		Map()->m_pGameLayer->Resize(NewW, NewH);
 }
 
 bool CLayerFront::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < Height(); y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < Width(); x++)
 		{
 			const int Index = GetTile(x, y).m_Index;
 			if(Index == 0)

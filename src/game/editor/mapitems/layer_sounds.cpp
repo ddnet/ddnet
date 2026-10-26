@@ -3,22 +3,22 @@
 #include <generated/client_data.h>
 
 #include <game/editor/editor.h>
-#include <game/editor/editor_actions.h>
 
 static const float s_SourceVisualSize = 32.0f;
 
-CLayerSounds::CLayerSounds(CEditorMap *pMap) :
-	CLayer(pMap, LAYERTYPE_SOUNDS)
+CLayerSounds::CLayerSounds(CEditorMap *pMap, std::uint64_t RetainedId) :
+	CLayer(pMap, LAYERTYPE_SOUNDS, RetainedId)
 {
 	m_aName[0] = '\0';
-	m_Sound = -1;
+	m_Sound = Map()->SoundReference(-1);
 }
 
 CLayerSounds::CLayerSounds(const CLayerSounds &Other) :
-	CLayer(Other)
+	CLayer(Other),
+	CLayerSoundsValues(Other)
 {
-	m_Sound = Other.m_Sound;
-	m_vSources = Other.m_vSources;
+	for(auto &Source : m_vSources)
+		Source.m_Id = Map()->AllocateObjectId();
 }
 
 CLayerSounds::~CLayerSounds() = default;
@@ -34,7 +34,7 @@ void CLayerSounds::Render(const CEditorMap *pRenderMap)
 	for(const auto &Source : m_vSources)
 	{
 		ColorRGBA Offset = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		pRenderMap->m_EnvelopeEvaluator.EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2);
+		pRenderMap->m_EnvelopeEvaluator.EnvelopeEval(Source.m_PosEnvOffset, pRenderMap->EnvelopeIndex(Source.m_PosEnv), Offset, 2);
 		const vec2 Position = vec2(fx2f(Source.m_Position.x) + Offset.r, fx2f(Source.m_Position.y) + Offset.g);
 		const float Falloff = Source.m_Falloff / 255.0f;
 
@@ -74,7 +74,7 @@ void CLayerSounds::Render(const CEditorMap *pRenderMap)
 	for(const auto &Source : m_vSources)
 	{
 		ColorRGBA Offset = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		pRenderMap->m_EnvelopeEvaluator.EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2);
+		pRenderMap->m_EnvelopeEvaluator.EnvelopeEval(Source.m_PosEnvOffset, pRenderMap->EnvelopeIndex(Source.m_PosEnv), Offset, 2);
 		const vec2 Position = vec2(fx2f(Source.m_Position.x) + Offset.r, fx2f(Source.m_Position.y) + Offset.g);
 		Graphics()->DrawSprite(Position.x, Position.y, Editor()->MapView()->ScaleLength(s_SourceVisualSize));
 	}
@@ -82,12 +82,13 @@ void CLayerSounds::Render(const CEditorMap *pRenderMap)
 	Graphics()->QuadsEnd();
 }
 
-CSoundSource *CLayerSounds::NewSource(int x, int y)
+CSoundSourceValues *CLayerSounds::NewSource(int x, int y)
 {
 	Map()->OnModify();
 
 	m_vSources.emplace_back();
-	CSoundSource *pSource = &m_vSources[m_vSources.size() - 1];
+	m_vSources.back().m_Id = Map()->AllocateObjectId();
+	CSoundSourceValues *pSource = &m_vSources[m_vSources.size() - 1];
 
 	pSource->m_Position.x = f2fx(x);
 	pSource->m_Position.y = f2fx(y);
@@ -96,9 +97,9 @@ CSoundSource *CLayerSounds::NewSource(int x, int y)
 	pSource->m_Pan = 1;
 	pSource->m_TimeDelay = 0;
 
-	pSource->m_PosEnv = -1;
+	pSource->m_PosEnv = Map()->EnvelopeReference(-1);
 	pSource->m_PosEnvOffset = 0;
-	pSource->m_SoundEnv = -1;
+	pSource->m_SoundEnv = Map()->EnvelopeReference(-1);
 	pSource->m_SoundEnvOffset = 0;
 
 	pSource->m_Falloff = 80;
@@ -128,7 +129,8 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 		if(SourceX > Rect.x && SourceX < Rect.x + Rect.w && SourceY > Rect.y && SourceY < Rect.y + Rect.h)
 		{
-			CSoundSource NewSource = Source;
+			CSoundSourceValues NewSource = Source;
+			NewSource.m_Id = pGrabbed->Map()->AllocateObjectId();
 			NewSource.m_Position.x -= f2fx(Rect.x);
 			NewSource.m_Position.y -= f2fx(Rect.y);
 
@@ -142,24 +144,22 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 void CLayerSounds::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 {
 	CLayerSounds *pSoundLayer = static_cast<CLayerSounds *>(pBrush);
-	std::vector<CSoundSource> vAddedSources;
 	for(const auto &Source : pSoundLayer->m_vSources)
 	{
-		CSoundSource NewSource = Source;
+		CSoundSourceValues NewSource = Source;
+		NewSource.m_Id = Map()->AllocateObjectId();
 		NewSource.m_Position.x += f2fx(WorldPos.x);
 		NewSource.m_Position.y += f2fx(WorldPos.y);
 
 		m_vSources.push_back(NewSource);
-		vAddedSources.push_back(NewSource);
 	}
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionSoundPlace>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], vAddedSources));
 	Map()->OnModify();
 }
 
 CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 {
 	CProperty aProps[] = {
-		{"Sound", m_Sound, PROPTYPE_SOUND, -1, 0},
+		{"Sound", Map()->SoundIndex(m_Sound), PROPTYPE_SOUND, -1, 0},
 		{nullptr},
 	};
 
@@ -171,17 +171,19 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 		Map()->OnModify();
 	}
 
-	Map()->m_LayerSoundsPropTracker.Begin(this, Prop, State);
-
-	if(Prop == ELayerSoundsProp::SOUND)
+	if(Map()->m_DocumentHistory.BeginControl(s_aIds, "Edit sound layer", State))
 	{
-		if(NewVal >= 0)
-			m_Sound = NewVal % Map()->m_vpSounds.size();
-		else
-			m_Sound = -1;
+		Map()->m_DocumentHistory.Update(s_aIds, [&] {
+			if(Prop == ELayerSoundsProp::SOUND)
+			{
+				if(NewVal >= 0)
+					m_Sound = Map()->SoundReference(NewVal % Map()->m_vpSounds.size());
+				else
+					m_Sound = Map()->SoundReference(-1);
+			}
+		});
+		Map()->m_DocumentHistory.EndControl(s_aIds, State);
 	}
-
-	Map()->m_LayerSoundsPropTracker.End(Prop, State);
 
 	return CUi::POPUP_KEEP_OPEN;
 }
@@ -189,26 +191,26 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 bool CLayerSounds::IsEnvelopeUsed(int EnvelopeIndex) const
 {
 	return std::any_of(m_vSources.begin(), m_vSources.end(), [&](const auto &Source) {
-		return Source.m_PosEnv == EnvelopeIndex || Source.m_SoundEnv == EnvelopeIndex;
+		return Map()->EnvelopeIndex(Source.m_PosEnv) == EnvelopeIndex || Map()->EnvelopeIndex(Source.m_SoundEnv) == EnvelopeIndex;
 	});
 }
 
 bool CLayerSounds::IsSoundUsed(int SoundIndex) const
 {
-	return m_Sound == SoundIndex;
+	return Map()->SoundIndex(m_Sound) == SoundIndex;
 }
 
-void CLayerSounds::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction)
+void CLayerSounds::VisitSoundReferences(const FDocumentReferenceFunction &ReferenceFunction)
 {
-	IndexModifyFunction(&m_Sound);
+	ReferenceFunction(m_Sound);
 }
 
-void CLayerSounds::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
+void CLayerSounds::VisitEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction)
 {
 	for(auto &Source : m_vSources)
 	{
-		IndexModifyFunction(&Source.m_SoundEnv);
-		IndexModifyFunction(&Source.m_PosEnv);
+		ReferenceFunction(Source.m_SoundEnv);
+		ReferenceFunction(Source.m_PosEnv);
 	}
 }
 
@@ -220,4 +222,14 @@ std::shared_ptr<CLayer> CLayerSounds::Duplicate() const
 const char *CLayerSounds::TypeName() const
 {
 	return "sounds";
+}
+
+void CLayerSounds::OnAttach(CEditorMap *pMap)
+{
+	if(Map() != pMap)
+	{
+		for(auto &Element : m_vSources)
+			Element.m_Id = pMap->AllocateObjectId();
+	}
+	CLayer::OnAttach(pMap);
 }

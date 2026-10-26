@@ -10,12 +10,16 @@
 
 #include <game/editor/editor_history.h>
 #include <game/editor/editor_server_settings.h>
-#include <game/editor/editor_trackers.h>
 #include <game/editor/editor_ui.h>
 #include <game/editor/envelope_editor.h>
 #include <game/editor/font_typer.h>
+#include <game/editor/history/document_history.h>
+#include <game/editor/history/save_job.h>
 #include <game/editor/map_grid.h>
 #include <game/editor/map_view.h>
+#include <game/editor/mapitems/document_export.h>
+#include <game/editor/mapitems/document_graph.h>
+#include <game/editor/mapitems/document_session.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/envelope_evaluator.h>
 #include <game/editor/mapitems/layer.h>
@@ -39,28 +43,11 @@ class CLayerSpeedup;
 class CLayerSwitch;
 class CLayerTele;
 class CLayerTune;
-class CQuad;
-class IEditorEnvelopeReference;
-
-class CDataFileWriterFinishJob : public IJob
-{
-	IStorage *m_pStorage;
-	char m_aRealFilename[IO_MAX_PATH_LENGTH];
-	char m_aTempFilename[IO_MAX_PATH_LENGTH];
-	char m_aErrorMessage[2 * IO_MAX_PATH_LENGTH + 128];
-	CDataFileWriter m_Writer;
-
-	void Run() override;
-
-public:
-	CDataFileWriterFinishJob(IStorage *pStorage, const char *pRealFilename, const char *pTempFilename, CDataFileWriter &&Writer);
-	const char *RealFilename() const { return m_aRealFilename; }
-	const char *ErrorMessage() const { return m_aErrorMessage; }
-};
+class CQuadValues;
 
 using FErrorHandler = std::function<void(const char *pErrorMessage)>;
 
-class CEditorMap
+class CEditorMap : public CMapValues
 {
 public:
 	explicit CEditorMap(CEditor *pEditor);
@@ -92,8 +79,29 @@ public:
 	bool m_ModifiedAuto;
 	float m_LastModifiedTime;
 	float m_LastSaveTime;
+	std::uint64_t AllocateObjectId();
+	/** Copy authoritative values, reuse equal records from pPrevious, then validate. */
+	std::optional<CEditorDocumentValues> CaptureDocument(const CEditorDocumentValues *pPrevious, std::string &Error) const;
+	/** Remember session choices before a transaction can remove an object. */
+	void RememberDocumentSession();
+	void PruneDocumentSession(std::span<const CEditorDocumentValues *const> RetainedDocuments);
+	/** Prepare and replace runtime bindings; prior-state UI callbacks must have returned. */
+	bool RestoreDocumentAtSafePoint(const CEditorDocumentValues &Document, const FErrorHandler &ErrorHandler);
+	/** Modification timing/presentation only: does not capture or create a history entry. */
 	void OnModify();
+	template<typename TUsage>
+	void VisitLiveStorage(TUsage &Usage) const;
+	void AccountLiveStorage(editor_history::CStorageUsage &Usage) const;
+	void AccountRuntimeCaches(editor_history::CStorageUsage &Usage) const;
+	void ObserveLiveStorage(editor_history::CStorageObservation &Observation) const;
+	void ObserveRuntimeCaches(editor_history::CStorageObservation &Observation) const;
 	void ResetModifiedState();
+	/** Refresh dirty presentation from history/save markers; does not capture the map. */
+	bool RefreshSavedState();
+	std::weak_ptr<const CEditorSaveState> Lifetime() const { return m_pSaveState; }
+	bool HasLifetime(const std::weak_ptr<const CEditorSaveState> &Lifetime) const { return Lifetime.lock() == m_pSaveState; }
+	bool OwnsSave(const CEditorSaveState::CTicket &Ticket) const { return m_pSaveState->Owns(Ticket); }
+	bool CompleteSave(const CEditorSaveState::CTicket &Ticket, bool Success);
 
 	// UI elements
 	char m_TabSelectButtonId;
@@ -103,7 +111,6 @@ public:
 	std::vector<std::shared_ptr<CEditorImage>> m_vpImages;
 	std::vector<std::shared_ptr<CEnvelope>> m_vpEnvelopes;
 	std::vector<std::shared_ptr<CEditorSound>> m_vpSounds;
-	std::vector<CEditorMapSetting> m_vSettings;
 
 	std::shared_ptr<CLayerGroup> m_pGameGroup;
 	std::shared_ptr<CLayerGame> m_pGameLayer;
@@ -113,36 +120,11 @@ public:
 	std::shared_ptr<CLayerSwitch> m_pSwitchLayer;
 	std::shared_ptr<CLayerTune> m_pTuneLayer;
 
-	class CMapInfo
-	{
-	public:
-		char m_aAuthor[32];
-		char m_aVersion[16];
-		char m_aCredits[128];
-		char m_aLicense[32];
-
-		void Reset();
-		void Copy(const CMapInfo &Source);
-	};
-	CMapInfo m_MapInfo;
+	using CMapInfo = CMapInfoValues;
 	CMapInfo m_MapInfoTmp;
 
 	// Undo/Redo
-	CEditorHistory m_EditorHistory;
-	CEditorHistory m_ServerSettingsHistory;
-	CEditorHistory m_EnvelopeEditorHistory;
-	CQuadEditTracker m_QuadTracker;
-	CEnvelopeEditorOperationTracker m_EnvOpTracker;
-	CLayerGroupPropTracker m_LayerGroupPropTracker;
-	CLayerPropTracker m_LayerPropTracker;
-	CLayerTilesCommonPropTracker m_LayerTilesCommonPropTracker;
-	CLayerTilesPropTracker m_LayerTilesPropTracker;
-	CLayerQuadsPropTracker m_LayerQuadPropTracker;
-	CLayerSoundsPropTracker m_LayerSoundsPropTracker;
-	CSoundSourceOperationTracker m_SoundSourceOperationTracker;
-	CSoundSourcePropTracker m_SoundSourcePropTracker;
-	CSoundSourceRectShapePropTracker m_SoundSourceRectShapePropTracker;
-	CSoundSourceCircleShapePropTracker m_SoundSourceCircleShapePropTracker;
+	CEditorDocumentHistory m_DocumentHistory;
 
 	// Selections
 	int m_SelectedGroup;
@@ -182,15 +164,22 @@ public:
 	void CheckIntegrity();
 
 	// Indices
-	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction);
-	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction);
-	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction);
+	int ImageIndex(CDocumentReference Reference) const;
+	int SoundIndex(CDocumentReference Reference) const;
+	int EnvelopeIndex(CDocumentReference Reference) const;
+	CDocumentReference ImageReference(int Index) const;
+	CDocumentReference SoundReference(int Index) const;
+	CDocumentReference EnvelopeReference(int Index) const;
+	void VisitImageReferences(const FDocumentReferenceFunction &ReferenceFunction);
+	void VisitAllEnvelopeReferences(const FDocumentReferenceFunction &ReferenceFunction);
+	void VisitSoundReferences(const FDocumentReferenceFunction &ReferenceFunction);
 
 	// I/O
 	bool Save(const char *pFilename, const FErrorHandler &ErrorHandler);
+	bool SaveWithKind(const char *pFilename, editor_history::ESaveKind Kind, const FErrorHandler &ErrorHandler);
 	bool PerformPreSaveSanityChecks(const FErrorHandler &ErrorHandler);
 	bool Load(const char *pFilename, int StorageType, const FErrorHandler &ErrorHandler);
-	bool Append(const char *pFilename, int StorageType, bool IgnoreHistory, const FErrorHandler &ErrorHandler);
+	bool Append(const char *pFilename, int StorageType, const FErrorHandler &ErrorHandler);
 	void PerformSanityChecks(const FErrorHandler &ErrorHandler);
 	bool PerformAutosave(const FErrorHandler &ErrorHandler);
 
@@ -217,7 +206,7 @@ public:
 	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
 
 	// Quads
-	std::vector<CQuad *> SelectedQuads();
+	std::vector<CQuadValues *> SelectedQuads();
 	bool IsQuadSelected(int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
 	void SelectQuad(int Index);
@@ -232,12 +221,9 @@ public:
 
 	// Envelopes
 	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type);
-	void InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope);
-	void UpdateEnvelopeReferences(int Index, std::shared_ptr<CEnvelope> &pEnvelope, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpEditorObjectReferences);
-	std::vector<std::shared_ptr<IEditorEnvelopeReference>> DeleteEnvelope(int Index);
+	void DeleteEnvelope(int Index);
 	int MoveEnvelope(int IndexFrom, int IndexTo);
-	template<typename F>
-	std::vector<std::shared_ptr<IEditorEnvelopeReference>> VisitEnvelopeReferences(F &&Visitor);
+
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 	void RemoveUnusedEnvelopes();
 
@@ -272,15 +258,23 @@ public:
 	void SelectNextSound();
 	void SelectPreviousSound();
 	bool IsSoundUsed(int SoundIndex) const;
-	CSoundSource *SelectedSoundSource() const;
+	CSoundSourceValues *SelectedSoundSource() const;
 
 	void PlaceBorderTiles();
 
-	void AddTileArt(CImageInfo &&Image, const char *pFilename, bool IgnoreHistory);
+	void AddTileArt(CImageInfo &&Image, const char *pFilename);
 
-	void AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parameters, bool IgnoreHistory);
+	void AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parameters);
 
 private:
+	friend class CEditorDocumentHistory;
+	CDocumentIdentityAllocator m_ObjectIds;
+	CDocumentSessionValues m_DocumentSession;
+	std::shared_ptr<CEditorSaveState> m_pSaveState = std::make_shared<CEditorSaveState>();
+	CEditorDocumentFingerprint m_FingerprintCache;
+	std::shared_ptr<const CEditorDocumentValues> m_pLastCapturedDocument;
+	std::shared_ptr<const CEditorDocumentValues> CaptureSavedDocument(std::string &Error);
+	bool InitializeLoadedSaveState();
 	CEditor *m_pEditor;
 };
 

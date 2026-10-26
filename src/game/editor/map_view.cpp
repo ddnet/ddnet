@@ -7,7 +7,6 @@
 #include <engine/shared/config.h>
 
 #include <game/client/ui.h>
-#include <game/editor/editor_actions.h>
 #include <game/editor/explanations.h>
 
 void CMapView::CState::Reset(CEditor *pEditor)
@@ -365,26 +364,29 @@ void CMapView::Render(CUIRect View)
 				{
 					if(!Editor()->m_pBrush->IsEmpty())
 					{
-						// draw with brush
-						for(size_t k = 0; k < NumEditLayers; k++)
-						{
-							size_t BrushIndex = k % Editor()->m_pBrush->m_vpLayers.size();
-							if(apEditLayers[k].second->m_Type == Editor()->m_pBrush->m_vpLayers[BrushIndex]->m_Type)
+						Map()->m_DocumentHistory.Update(this, [&] {
+							Map()->m_DocumentHistory.TrackPointer(this, this);
+							// draw with brush
+							for(size_t k = 0; k < NumEditLayers; k++)
 							{
-								if(apEditLayers[k].second->m_Type == LAYERTYPE_TILES)
+								size_t BrushIndex = k % Editor()->m_pBrush->m_vpLayers.size();
+								if(apEditLayers[k].second->m_Type == Editor()->m_pBrush->m_vpLayers[BrushIndex]->m_Type)
 								{
-									std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(apEditLayers[k].second);
-									std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(Editor()->m_pBrush->m_vpLayers[BrushIndex]);
+									if(apEditLayers[k].second->m_Type == LAYERTYPE_TILES)
+									{
+										std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(apEditLayers[k].second);
+										std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(Editor()->m_pBrush->m_vpLayers[BrushIndex]);
 
-									if((!pLayer->m_HasTele || pBrushLayer->m_HasTele) && (!pLayer->m_HasSpeedup || pBrushLayer->m_HasSpeedup) && (!pLayer->m_HasFront || pBrushLayer->m_HasFront) && (!pLayer->m_HasGame || pBrushLayer->m_HasGame) && (!pLayer->m_HasSwitch || pBrushLayer->m_HasSwitch) && (!pLayer->m_HasTune || pBrushLayer->m_HasTune))
-										pLayer->BrushDraw(pBrushLayer.get(), vec2(wx, wy));
-								}
-								else
-								{
-									apEditLayers[k].second->BrushDraw(Editor()->m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
+										if((!pLayer->m_HasTele || pBrushLayer->m_HasTele) && (!pLayer->m_HasSpeedup || pBrushLayer->m_HasSpeedup) && (!pLayer->m_HasFront || pBrushLayer->m_HasFront) && (!pLayer->m_HasGame || pBrushLayer->m_HasGame) && (!pLayer->m_HasSwitch || pBrushLayer->m_HasSwitch) && (!pLayer->m_HasTune || pBrushLayer->m_HasTune))
+											pLayer->BrushDraw(pBrushLayer.get(), vec2(wx, wy));
+									}
+									else
+									{
+										apEditLayers[k].second->BrushDraw(Editor()->m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
+									}
 								}
 							}
-						}
+						});
 					}
 				}
 				else if(Map()->m_MapViewState.m_ActiveOp == EActiveOp::BRUSH_GRAB)
@@ -397,7 +399,7 @@ void CMapView::Render(CUIRect View)
 							Map()->DeselectQuads();
 							for(size_t i = 0; i < pQuadLayer->m_vQuads.size(); i++)
 							{
-								const CQuad &Quad = pQuadLayer->m_vQuads[i];
+								const CQuadValues &Quad = pQuadLayer->m_vQuads[i];
 								vec2 Position = vec2(fx2f(Quad.m_aPoints[4].x), fx2f(Quad.m_aPoints[4].y));
 								if(r.Inside(Position) && !Map()->IsQuadSelected(i))
 									Map()->ToggleSelectQuad(i);
@@ -430,16 +432,17 @@ void CMapView::Render(CUIRect View)
 				{
 					if(!Ui()->MouseButton(0))
 					{
-						for(size_t k = 0; k < NumEditLayers; k++)
-						{
-							size_t BrushIndex = k;
-							if(Editor()->m_pBrush->m_vpLayers.size() != NumEditLayers)
-								BrushIndex = 0;
-							std::shared_ptr<CLayer> pBrush = Editor()->m_pBrush->IsEmpty() ? nullptr : Editor()->m_pBrush->m_vpLayers[BrushIndex];
-							apEditLayers[k].second->FillSelection(Editor()->m_pBrush->IsEmpty(), pBrush.get(), r);
-						}
-						std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
-						Map()->m_EditorHistory.RecordAction(Action);
+						Map()->m_DocumentHistory.Update(this, [&] {
+							Map()->m_DocumentHistory.TrackPointer(this, this);
+							for(size_t k = 0; k < NumEditLayers; k++)
+							{
+								size_t BrushIndex = k;
+								if(Editor()->m_pBrush->m_vpLayers.size() != NumEditLayers)
+									BrushIndex = 0;
+								std::shared_ptr<CLayer> pBrush = Editor()->m_pBrush->IsEmpty() ? nullptr : Editor()->m_pBrush->m_vpLayers[BrushIndex];
+								apEditLayers[k].second->FillSelection(Editor()->m_pBrush->IsEmpty(), pBrush.get(), r);
+							}
+						});
 					}
 					else
 					{
@@ -464,22 +467,25 @@ void CMapView::Render(CUIRect View)
 
 					if(Editor()->m_pBrush->IsEmpty())
 						Map()->m_MapViewState.m_ActiveOp = EActiveOp::BRUSH_GRAB;
-					else
+					else if(Map()->m_DocumentHistory.Begin(this, "Brush stroke", editor_history::ECategory::MAP))
 					{
 						Map()->m_MapViewState.m_ActiveOp = EActiveOp::BRUSH_DRAW;
-						for(size_t k = 0; k < NumEditLayers; k++)
-						{
-							size_t BrushIndex = k;
-							if(Editor()->m_pBrush->m_vpLayers.size() != NumEditLayers)
-								BrushIndex = 0;
+						Map()->m_DocumentHistory.Update(this, [&] {
+							Map()->m_DocumentHistory.TrackPointer(this, this);
+							for(size_t k = 0; k < NumEditLayers; k++)
+							{
+								size_t BrushIndex = k;
+								if(Editor()->m_pBrush->m_vpLayers.size() != NumEditLayers)
+									BrushIndex = 0;
 
-							if(apEditLayers[k].second->m_Type == Editor()->m_pBrush->m_vpLayers[BrushIndex]->m_Type)
-								apEditLayers[k].second->BrushPlace(Editor()->m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
-						}
+								if(apEditLayers[k].second->m_Type == Editor()->m_pBrush->m_vpLayers[BrushIndex]->m_Type)
+									apEditLayers[k].second->BrushPlace(Editor()->m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
+							}
+						});
 					}
 
 					std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-					if(Input()->ShiftIsPressed() && pLayer)
+					if(Input()->ShiftIsPressed() && pLayer && Map()->m_DocumentHistory.Begin(this, "Fill selection", editor_history::ECategory::MAP))
 						Map()->m_MapViewState.m_ActiveOp = EActiveOp::BRUSH_PAINT;
 				}
 
@@ -666,13 +672,7 @@ void CMapView::Render(CUIRect View)
 		// release mouse
 		if(!Ui()->MouseButton(0))
 		{
-			if(Map()->m_MapViewState.m_ActiveOp == EActiveOp::BRUSH_DRAW)
-			{
-				std::shared_ptr<IEditorAction> pAction = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
-
-				if(!pAction->IsEmpty()) // Avoid recording tile draw action when placing quads only
-					Map()->m_EditorHistory.RecordAction(pAction);
-			}
+			Map()->m_DocumentHistory.Complete(this, editor_history::EEditCompletion::POINTER_RELEASE);
 
 			Map()->m_MapViewState.m_ActiveOp = EActiveOp::NONE;
 			Ui()->SetActiveItem(nullptr);
