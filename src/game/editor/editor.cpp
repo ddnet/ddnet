@@ -602,16 +602,16 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// undo/redo group
 		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static int s_UndoButton = 0;
-		if(DoButton_FontIcon(&s_UndoButton, FontIcon::UNDO, Map()->m_EditorHistory.CanUndo() - 1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last action.", IGraphics::CORNER_L))
+		if(DoButton_FontIcon(&s_UndoButton, FontIcon::UNDO, m_QuickActionUndo.Disabled() ? -1 : 0, &Button, BUTTONFLAG_LEFT, m_QuickActionUndo.Description(), IGraphics::CORNER_L))
 		{
-			Map()->m_EditorHistory.Undo();
+			m_QuickActionUndo.Call();
 		}
 
 		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static int s_RedoButton = 0;
-		if(DoButton_FontIcon(&s_RedoButton, FontIcon::REDO, Map()->m_EditorHistory.CanRedo() - 1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last action.", IGraphics::CORNER_R))
+		if(DoButton_FontIcon(&s_RedoButton, FontIcon::REDO, m_QuickActionRedo.Disabled() ? -1 : 0, &Button, BUTTONFLAG_LEFT, m_QuickActionRedo.Description(), IGraphics::CORNER_R))
 		{
-			Map()->m_EditorHistory.Redo();
+			m_QuickActionRedo.Call();
 		}
 
 		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
