@@ -152,6 +152,8 @@ void CLayerTiles::MakePalette() const
 void CLayerTiles::Render(const CEditorMap *pRenderMap)
 {
 	IGraphics::CTextureHandle Texture;
+	bool RenderOpaque = false;
+	ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 	if(m_HasGame)
 	{
 		Texture = Editor()->GetEntitiesTexture();
@@ -176,24 +178,39 @@ void CLayerTiles::Render(const CEditorMap *pRenderMap)
 	{
 		Texture = Editor()->GetTuneTexture();
 	}
-	else if(m_Image >= 0 && (size_t)m_Image < pRenderMap->m_vpImages.size())
+	else
 	{
-		const auto &pImage = pRenderMap->m_vpImages[m_Image];
-		if(pImage->m_Width % 16 == 0 && pImage->m_Height % 16 == 0)
+		if(m_Image >= 0 && (size_t)m_Image < pRenderMap->m_vpImages.size())
 		{
-			Texture = pImage->m_Texture;
+			const auto &pImage = pRenderMap->m_vpImages[m_Image];
+			if(pImage->m_Width % 16 == 0 && pImage->m_Height % 16 == 0)
+			{
+				Texture = pImage->m_Texture;
+			}
+			RenderOpaque = true;
+		}
+
+		ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		pRenderMap->m_EnvelopeEvaluator.EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4);
+		Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f).Multiply(ColorEnv);
+		if(Color.a <= 254.0f / 255.0f)
+		{
+			RenderOpaque = false;
 		}
 	}
 	Graphics()->TextureSet(Texture);
 
-	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	pRenderMap->m_EnvelopeEvaluator.EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4);
-	const ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f).Multiply(ColorEnv);
-
-	Graphics()->BlendNone();
-	Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE);
-	Graphics()->BlendNormal();
-	Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
+	if(RenderOpaque)
+	{
+		Graphics()->BlendNone();
+		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE);
+		Graphics()->BlendNormal();
+		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
+	}
+	else
+	{
+		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, 0);
+	}
 
 	// Render DDRace Layers
 	if(m_RenderOverlays)

@@ -314,6 +314,10 @@ class CRenderLayerEntityFront final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntityFront(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
+	void Init() override;
+
+protected:
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 };
 
 class CRenderLayerEntityTele final : public CRenderLayerEntityBase
