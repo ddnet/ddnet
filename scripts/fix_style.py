@@ -16,7 +16,8 @@ def recursive_file_list(path):
 	return result
 
 
-IGNORE_FILES = []
+IGNORE_FILEPATHS = []
+IGNORE_FILENAMES = ["CMakeCCompilerId.c", "CMakeCXXCompilerId.cpp"]
 IGNORE_DIRS = [
 	"src/game/generated",
 	"src/rust-bridge",
@@ -26,8 +27,11 @@ IGNORE_DIRS = [
 def filter_ignored(filenames):
 	result = []
 	for filename in filenames:
+		if os.path.basename(filename) in IGNORE_FILENAMES:
+			continue
+
 		real_filename = os.path.realpath(filename)
-		if real_filename not in [os.path.realpath(ignore_file) for ignore_file in IGNORE_FILES] and not any(real_filename.startswith(os.path.realpath(subdir) + os.path.sep) for subdir in IGNORE_DIRS):
+		if real_filename not in [os.path.realpath(ignore_file) for ignore_file in IGNORE_FILEPATHS] and not any(real_filename.startswith(os.path.realpath(subdir) + os.path.sep) for subdir in IGNORE_DIRS):
 			result.append(filename)
 
 	return result
