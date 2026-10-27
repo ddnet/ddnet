@@ -25,13 +25,16 @@ IGNORE_DIRS = [
 
 
 def filter_ignored(filenames):
+	real_ignore_filepaths = {os.path.realpath(ignore_filepath) for ignore_filepath in IGNORE_FILEPATHS}
+	real_ignore_dirs = tuple(os.path.realpath(subdir) + os.path.sep for subdir in IGNORE_DIRS)
+
 	result = []
 	for filename in filenames:
 		if os.path.basename(filename) in IGNORE_FILENAMES:
 			continue
 
 		real_filename = os.path.realpath(filename)
-		if real_filename not in [os.path.realpath(ignore_file) for ignore_file in IGNORE_FILEPATHS] and not any(real_filename.startswith(os.path.realpath(subdir) + os.path.sep) for subdir in IGNORE_DIRS):
+		if real_filename not in real_ignore_filepaths and not real_filename.startswith(real_ignore_dirs):
 			result.append(filename)
 
 	return result
