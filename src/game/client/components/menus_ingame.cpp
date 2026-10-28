@@ -1183,7 +1183,8 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	}
 	Ui()->DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
 
-	const int MaxPage = PAGE_FAVORITES + ServerBrowser()->FavoriteCommunities().size();
+	const std::vector<const CCommunity *> vpFavoriteCommunities = ServerBrowser()->FavoriteCommunities();
+	const int MaxPage = PAGE_FAVORITES + vpFavoriteCommunities.size();
 	if(
 		!Ui()->IsPopupOpen() &&
 		CLineInput::GetActiveInput() == nullptr &&
@@ -1207,7 +1208,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	size_t FavoriteCommunityIndex = 0;
 	static CButtonContainer s_aFavoriteCommunityButtons[5];
 	static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)PAGE_FAVORITE_COMMUNITY_5 - PAGE_FAVORITE_COMMUNITY_1 + 1);
-	for(const CCommunity *pCommunity : ServerBrowser()->FavoriteCommunities())
+	for(const CCommunity *pCommunity : vpFavoriteCommunities)
 	{
 		TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 		const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
