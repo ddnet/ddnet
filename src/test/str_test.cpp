@@ -2,6 +2,7 @@
 #include <base/str.h>
 #include <base/windows.h>
 
+#include <engine/client/client.h>
 #include <engine/server/server.h>
 
 #include <game/gamecore.h>
@@ -1498,3 +1499,30 @@ TEST(Str, WindowsUtf8WideConversion)
 	}
 }
 #endif
+
+TEST(Str, AllowedOrigin)
+{
+	EXPECT_TRUE(CClient::IsAllowedOrigin("*", "127.0.0.1"));
+	EXPECT_TRUE(CClient::IsAllowedOrigin("*", "mars"));
+
+	EXPECT_FALSE(CClient::IsAllowedOrigin("", "127.0.0.1"));
+	EXPECT_FALSE(CClient::IsAllowedOrigin("", "mars"));
+
+	EXPECT_FALSE(CClient::IsAllowedOrigin("127.0.0.1", ""));
+	EXPECT_TRUE(CClient::IsAllowedOrigin("*", ""));
+	EXPECT_FALSE(CClient::IsAllowedOrigin("**", ""));
+
+	EXPECT_TRUE(CClient::IsAllowedOrigin("127.0.0.1,mars", "127.0.0.1"));
+	EXPECT_TRUE(CClient::IsAllowedOrigin("127.0.0.1,mars", "mars"));
+	EXPECT_TRUE(CClient::IsAllowedOrigin("127.0.0.1,,,mars,,192.168.178.78,,,", "mars"));
+
+	EXPECT_FALSE(CClient::IsAllowedOrigin("127.0.0.1,mars", "127.0.0.2"));
+	EXPECT_FALSE(CClient::IsAllowedOrigin("127.0.0.1,mars", "venus"));
+
+	EXPECT_TRUE(CClient::IsAllowedOrigin("127.0.0.1", "127.0.0.1"));
+	EXPECT_TRUE(CClient::IsAllowedOrigin("127.0.0.1,192.168.178.78", "127.0.0.1"));
+
+	// origin can not contain port
+	EXPECT_FALSE(CClient::IsAllowedOrigin("127.0.0.1", "127.0.0.1:8303"));
+	EXPECT_FALSE(CClient::IsAllowedOrigin("127.0.0.1,192.168.178.78", "127.0.0.1:8303"));
+}

@@ -346,6 +346,7 @@ public:
 	virtual void Kick(int ClientId, const char *pReason) = 0;
 	virtual void Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason) = 0;
 	virtual void RedirectClient(int ClientId, int Port) = 0;
+	virtual void RedirectClient(int ClientId, const char *pAddr, const char *pPassword, CUuid SessionId, const char *pMetadata) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
 	virtual void ReloadMap() = 0;
 
