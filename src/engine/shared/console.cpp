@@ -753,7 +753,10 @@ bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure,
 			return false;
 	}
 	if(!m_pStorage)
+	{
+		log_error("console", "Storage is not initialized");
 		return false;
+	}
 
 	// push this one to the stack
 	CExecFile ThisFile;
