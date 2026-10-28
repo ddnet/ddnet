@@ -175,10 +175,15 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 
 void CLayerSpeedup::RecordStateChange(int x, int y, SSpeedupTileStateChange::SData Previous, SSpeedupTileStateChange::SData Current)
 {
-	if(!m_History[y][x].m_Changed)
-		m_History[y][x] = SSpeedupTileStateChange{true, Previous, Current};
+	SSpeedupTileStateChange &Change = m_History[y][x];
+	if(Change.m_Changed)
+	{
+		Change.m_Current = Current;
+	}
 	else
-		m_History[y][x].m_Current = Current;
+	{
+		Change = SSpeedupTileStateChange{true, Previous, Current};
+	}
 }
 
 void CLayerSpeedup::BrushFlipX()

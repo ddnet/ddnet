@@ -166,10 +166,15 @@ void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 
 void CLayerTune::RecordStateChange(int x, int y, STuneTileStateChange::SData Previous, STuneTileStateChange::SData Current)
 {
-	if(!m_History[y][x].m_Changed)
-		m_History[y][x] = STuneTileStateChange{true, Previous, Current};
+	STuneTileStateChange &Change = m_History[y][x];
+	if(Change.m_Changed)
+	{
+		Change.m_Current = Current;
+	}
 	else
-		m_History[y][x].m_Current = Current;
+	{
+		Change = STuneTileStateChange{true, Previous, Current};
+	}
 }
 
 void CLayerTune::BrushFlipX()
