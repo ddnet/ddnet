@@ -11,7 +11,7 @@ class CEnvelopeState : public CComponent, public IEnvelopeEval
 {
 public:
 	CEnvelopeState() :
-		m_pEnvelopePoints(nullptr), m_pMap(nullptr) {}
+		m_pEnvelopePoints(nullptr) {}
 	CEnvelopeState(IMap *pMap, bool OnlineOnly);
 	void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) const override;
 
@@ -19,7 +19,6 @@ public:
 
 private:
 	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
-	IMap *m_pMap;
 	bool m_OnlineOnly;
 };
 

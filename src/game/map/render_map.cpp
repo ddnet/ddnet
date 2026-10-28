@@ -57,14 +57,15 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap)
 	bool FoundBezierEnvelope = false;
 	int EnvelopeStart, EnvelopeNum;
 	pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvelopeStart, &EnvelopeNum);
+	m_vpEnvelopes.reserve(EnvelopeNum);
 	for(int EnvelopeIndex = 0; EnvelopeIndex < EnvelopeNum; EnvelopeIndex++)
 	{
-		CMapItemEnvelope *pEnvelope = static_cast<CMapItemEnvelope *>(pMap->GetItem(EnvelopeStart + EnvelopeIndex));
+		const CMapItemEnvelope *pEnvelope = static_cast<const CMapItemEnvelope *>(pMap->GetItem(EnvelopeStart + EnvelopeIndex));
 		if(pEnvelope->m_Version >= CMapItemEnvelope::VERSION_TEEWORLDS_BEZIER)
 		{
 			FoundBezierEnvelope = true;
-			break;
 		}
+		m_vpEnvelopes.push_back(pEnvelope);
 	}
 
 	if(FoundBezierEnvelope)
@@ -104,6 +105,11 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap)
 	}
 
 	SetPointsRange(0, m_NumPointsMax);
+}
+
+const std::vector<const CMapItemEnvelope *> &CMapBasedEnvelopePointAccess::Envelopes() const
+{
+	return m_vpEnvelopes;
 }
 
 void CMapBasedEnvelopePointAccess::SetPointsRange(int StartPoint, int NumPoints)
