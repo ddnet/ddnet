@@ -167,13 +167,13 @@ void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 void CLayerTune::RecordStateChange(int x, int y, STuneTileStateChange::SData Previous, STuneTileStateChange::SData Current)
 {
 	STuneTileStateChange &Change = m_History[y][x];
-	if(!Change.m_Changed)
+	if(Change.m_Changed)
 	{
-		Change = STuneTileStateChange{true, Previous, Current};
+		Change.m_Current = Current;
 	}
 	else
 	{
-		Change.m_Current = Current;
+		Change = STuneTileStateChange{true, Previous, Current};
 	}
 }
 

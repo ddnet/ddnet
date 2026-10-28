@@ -178,13 +178,13 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 void CLayerSwitch::RecordStateChange(int x, int y, SSwitchTileStateChange::SData Previous, SSwitchTileStateChange::SData Current)
 {
 	SSwitchTileStateChange &Change = m_History[y][x];
-	if(!Change.m_Changed)
+	if(Change.m_Changed)
 	{
-		Change = SSwitchTileStateChange{true, Previous, Current};
+		Change.m_Current = Current;
 	}
 	else
 	{
-		Change.m_Current = Current;
+		Change = SSwitchTileStateChange{true, Previous, Current};
 	}
 }
 
