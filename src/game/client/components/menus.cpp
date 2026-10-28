@@ -24,6 +24,9 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+#include <engine/http.h>
+#include <engine/shared/json.h>
+#include <engine/engine.h>
 
 #include <generated/client_data.h>
 #include <generated/protocol.h>
