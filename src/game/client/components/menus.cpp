@@ -946,6 +946,12 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	std::replace(BodyStr.begin(), BodyStr.end(), '\n', ' ');
 	log_warn("client", "%s: %s", pTopic, BodyStr.c_str());
 
+	const IClient::EClientState ClientState = Client()->State();
+	if(ClientState == IClient::STATE_ONLINE || ClientState == IClient::STATE_DEMOPLAYBACK)
+	{
+		return;
+	}
+
 	Ui()->SetActiveItem(nullptr);
 
 	str_copy(m_aMessageTopic, pTopic);
