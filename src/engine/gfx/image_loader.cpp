@@ -161,29 +161,25 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 
 	// Written after setjmp and read by Cleanup after longjmp, which is only defined for volatile locals
 	volatile png_bytepp pRowPointers = nullptr;
-	volatile size_t Height = 0;
-	const auto &&Cleanup = [&]() {
-		if(pRowPointers != nullptr)
-		{
-			for(size_t y = 0; y < Height; ++y)
-			{
-				delete[] pRowPointers[y];
-			}
-		}
+	const auto &&Cleanup = [&](bool Success) {
 		delete[] pRowPointers;
 		png_destroy_info_struct(pPngStruct, &pPngInfo);
 		png_destroy_read_struct(&pPngStruct, nullptr, nullptr);
+		if(!Success)
+		{
+			Image.Free();
+		}
 	};
 	if(setjmp(UserErrorStruct.m_JmpBuf))
 	{
-		Cleanup();
+		Cleanup(false);
 		return false;
 	}
 
 	png_byte aSignature[8];
 	if(!Reader.Read(aSignature, sizeof(aSignature)) || png_sig_cmp(aSignature, 0, sizeof(aSignature)) != 0)
 	{
-		Cleanup();
+		Cleanup(false);
 		log_error("png", "file is not a valid PNG file (signature mismatch).");
 		return false;
 	}
@@ -196,12 +192,12 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 	if(Reader.Error())
 	{
 		// error already logged
-		Cleanup();
+		Cleanup(false);
 		return false;
 	}
 
 	const size_t Width = png_get_image_width(pPngStruct, pPngInfo);
-	Height = png_get_image_height(pPngStruct, pPngInfo);
+	const size_t Height = png_get_image_height(pPngStruct, pPngInfo);
 	const png_byte BitDepth = png_get_bit_depth(pPngStruct, pPngInfo);
 	const int ColorType = png_get_color_type(pPngStruct, pPngInfo);
 	const int Incompatible = PngliteIncompatibility(pPngStruct, pPngInfo);
@@ -209,7 +205,7 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 	if(Width == 0 || Height == 0)
 	{
 		log_error("png", "image has width (%" PRIzu ") or height (%" PRIzu ") of 0.", Width, Height);
-		Cleanup();
+		Cleanup(false);
 		return false;
 	}
 
@@ -220,7 +216,7 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 	else if(BitDepth > 8 || BitDepth == 0)
 	{
 		log_error("png", "bit depth %d not supported.", BitDepth);
-		Cleanup();
+		Cleanup(false);
 		return false;
 	}
 
@@ -245,30 +241,25 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 	const size_t BytesInRow = png_get_rowbytes(pPngStruct, pPngInfo);
 	dbg_assert(BytesInRow == Width * ColorChannelCount, "bytes in row incorrect.");
 
+	Image.m_Width = Width;
+	Image.m_Height = Height;
+	Image.m_Format = ImageFormatFromChannelCount(ColorChannelCount);
+	Image.Allocate();
+
 	pRowPointers = new png_bytep[Height];
 	for(size_t y = 0; y < Height; ++y)
 	{
-		pRowPointers[y] = new png_byte[BytesInRow];
+		pRowPointers[y] = &Image.m_pData[y * BytesInRow];
 	}
-
 	png_read_image(pPngStruct, pRowPointers);
 
-	if(!Reader.Error())
+	const bool Success = !Reader.Error();
+	if(Success)
 	{
-		Image.m_Width = Width;
-		Image.m_Height = Height;
-		Image.m_Format = ImageFormatFromChannelCount(ColorChannelCount);
-		Image.Allocate();
-		for(size_t y = 0; y < Height; ++y)
-		{
-			mem_copy(&Image.m_pData[y * BytesInRow], pRowPointers[y], BytesInRow);
-		}
 		PngliteIncompatible = Incompatible;
 	}
-
-	Cleanup();
-
-	return !Reader.Error();
+	Cleanup(Success);
+	return Success;
 }
 
 bool CImageLoader::LoadPng(IOHANDLE File, const char *pFilename, CImageInfo &Image, int &PngliteIncompatible)
