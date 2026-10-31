@@ -112,7 +112,7 @@ function make_cmake() {
 		cmake_targets="--target png_static"
 		cmake_arguments+=("-DPNG_SHARED=OFF")
 	elif [[ "${TARGET_LIBRARY}" == "sdl" ]]; then
-		cmake_targets="--target SDL2-static sdl_headers_copy"
+		cmake_targets="--target SDL3-static"
 		cmake_arguments+=("-DSDL_STATIC=ON")
 		if [[ "${TARGET_PLATFORM}" == "android" ]]; then
 			# Compile without support for hidapi and libusb

@@ -4,6 +4,8 @@ Name=DDNet
 GenericName=Platform Game
 Exec=DDNet %u
 Icon=ddnet
+# Must match the app identifier passed to SDL_SetAppMetadata
+StartupWMClass=org.ddnet.client
 Terminal=false
 Keywords=game;multiplayer;
 Categories=Game;ArcadeGame;
