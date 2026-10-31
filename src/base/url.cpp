@@ -657,8 +657,8 @@ constexpr std::string_view URL_ALLOWED_TLDS[] = {
 	"wien",
 };
 
-CUrlMatch::CUrlMatch(size_t Offset, size_t Length, bool HasScheme, const char *pText, std::string_view DomainName) :
-	m_Offset(Offset), m_Length(Length), m_HasScheme(HasScheme)
+CUrlMatch::CUrlMatch(size_t OffsetChar, size_t OffsetBytes, size_t Length, bool HasScheme, const char *pText, std::string_view DomainName) :
+	m_OffsetChar(OffsetChar), m_OffsetBytes(OffsetBytes), m_Length(Length), m_HasScheme(HasScheme)
 {
 	str_copy(m_aText, pText);
 	str_copy(m_aDomainName, DomainName.data(), DomainName.length() + 1);
@@ -887,7 +887,7 @@ std::vector<CUrlMatch> url_find_all(std::string_view Text)
 			std::string_view UrlText(Text.data() + Start, static_cast<std::size_t>(m.length()));
 			if(!url_is_plausible(UrlText, &HasScheme, &DomainName))
 				continue;
-			vResult.emplace_back(Start, static_cast<std::size_t>(m.length()), HasScheme, UrlText.data(), DomainName);
+			vResult.emplace_back(str_utf8_offset_bytes_to_chars(Text.data(), Start), Start, static_cast<std::size_t>(m.length()), HasScheme, UrlText.data(), DomainName);
 		}
 	}
 	return vResult;
