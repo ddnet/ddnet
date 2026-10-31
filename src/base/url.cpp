@@ -780,7 +780,7 @@ static bool url_is_plausible(std::string_view m, bool *pHasScheme, std::string_v
 		return false;
 
 	bool Trusted =
-		pUrl[HostLength - 1] >= '0' && pUrl[HostLength - 1] <= '9' // IPv4 (validated by the regex)
+		(pUrl[HostLength - 1] >= '0' && pUrl[HostLength - 1] <= '9') // IPv4 (validated by the regex)
 		|| *pHasScheme // explicit scheme: trust it
 		|| str_startswith_nocase(pUrl, "www.") // "www." prefix: trust it
 		;
