@@ -64,6 +64,8 @@ class CHud : public CComponent
 	ESpeedChange m_aLastPlayerSpeedChange[2];
 	STextContainerIndex m_aPlayerPositionContainers[2];
 	float m_aPlayerPrevPosition[2];
+	STextContainerIndex m_PlayerCheckpointTextContainerIndex;
+	int m_PlayerPrevCheckpoint;
 
 	void RenderCursor();
 
@@ -83,6 +85,7 @@ class CHud : public CComponent
 	void RenderMovementInformation();
 
 	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, float &PrevValue);
+	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, int Value, int &PrevValue);
 	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y);
 
 	class CMovementInformation
