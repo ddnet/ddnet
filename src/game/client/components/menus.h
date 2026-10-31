@@ -6,6 +6,7 @@
 #include <base/bytes.h>
 #include <base/str.h>
 #include <base/types.h>
+#include <base/url.h>
 #include <base/vmath.h>
 
 #include <engine/console.h>
@@ -26,7 +27,6 @@
 #include <game/client/ui.h>
 #include <game/voting.h>
 
-#include <base/url.h>
 #include <chrono>
 #include <optional>
 #include <vector>
@@ -666,7 +666,7 @@ protected:
 	{
 	public:
 		CUrlMatch m_Url;
-        bool m_Check;
+		bool m_Check;
 	};
 	static void ShowLinkWarning(void *pContext, CMenus *pSelf);
 
