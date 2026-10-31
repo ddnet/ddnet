@@ -161,6 +161,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Scoreboard,
 					      &m_Statboard,
 					      &m_Motd,
+					      &m_UiTutorial,
 					      &m_Menus,
 					      &m_KeyBinder,
 					      &m_GameConsole,
@@ -176,6 +177,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Spectator,
 						  &m_Emoticon,
 						  &m_ImportantAlert,
+						  &m_UiTutorial, // can block input to the menus while a step is shown
 						  &m_Menus,
 						  &m_Controls,
 						  &m_TouchControls,
