@@ -218,7 +218,7 @@ struct SLabelProperties
 	bool m_EllipsisAtEnd = false;
 	bool m_EnableWidthCheck = true;
 	float m_MinimumFontSize = 5.0f;
-	std::vector<STextColorSplit> m_vColorSplits;
+	std::vector<SRichTextOption> m_vRichTextOptions;
 	void *m_pTooltipId = nullptr;
 
 	void SetColor(const ColorRGBA &Color);
@@ -659,7 +659,7 @@ public:
 	 *
 	 * @return true if the value of the input field changed since the last call.
 	 */
-	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<STextColorSplit> &vColorSplits = {});
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<SRichTextOption> &vColorSplits = {});
 
 	/**
 	 * Creates an input field with a clear [x] button attached to it.
@@ -677,7 +677,7 @@ public:
 	 *
 	 * @return true if the value of the input field changed since the last call.
 	 */
-	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<STextColorSplit> &vColorSplits = {});
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<SRichTextOption> &vColorSplits = {});
 
 	/**
 	 * Creates an input field with a search icon and a clear [x] button attached to it.

@@ -6,6 +6,7 @@
 #include <base/bytes.h>
 #include <base/str.h>
 #include <base/types.h>
+#include <base/url.h>
 #include <base/vmath.h>
 
 #include <engine/console.h>
@@ -29,6 +30,10 @@
 #include <chrono>
 #include <optional>
 #include <vector>
+
+class IMenusPopupContext
+{
+};
 
 class CMenus : public CComponent
 {
@@ -226,6 +231,7 @@ protected:
 		int m_NextPopup;
 		FPopupButtonCallback m_pfnCallback;
 	} m_aPopupButtons[NUM_BUTTONS];
+	std::shared_ptr<IMenusPopupContext> m_pPopupContext;
 
 	void PopupMessage(const char *pTitle, const char *pMessage,
 		const char *pButtonLabel, int NextPopup = POPUP_NONE, FPopupButtonCallback pfnButtonCallback = &CMenus::DefaultButtonCallback);
@@ -656,6 +662,14 @@ protected:
 
 	IGraphics::CTextureHandle m_TextureBlob;
 
+	class CLinkWarningPopupContext final : public IMenusPopupContext
+	{
+	public:
+		CUrlMatch m_Url;
+		bool m_Check;
+	};
+	static void ShowLinkWarning(void *pContext, CMenus *pSelf);
+
 public:
 	void RenderBackground();
 
@@ -831,6 +845,7 @@ public:
 		POPUP_RESTART,
 		POPUP_WARNING,
 		POPUP_SAVE_SKIN,
+		POPUP_LINK_WARNING,
 	};
 
 	enum

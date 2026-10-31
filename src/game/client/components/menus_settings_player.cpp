@@ -153,7 +153,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			if(Entry.m_NameMatch.has_value())
 			{
 				const auto [MatchStart, MatchLength] = Entry.m_NameMatch.value();
-				Props.m_vColorSplits.emplace_back(MatchStart, MatchLength, ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f));
+				Props.m_vRichTextOptions.emplace_back(MatchStart, MatchLength, ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f));
 			}
 			Ui()->DoLabel(&Label, Entry.m_pFlag->m_aCountryCodeString, 10.0f, TEXTALIGN_MC, Props);
 		}

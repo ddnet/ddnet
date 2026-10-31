@@ -266,7 +266,7 @@ public:
 		virtual void Reset();
 		void GetCommandHelpText(char *pStr, int Length) const;
 		bool Valid() const;
-		void ColorArguments(std::vector<STextColorSplit> &vColorSplits) const;
+		void ColorArguments(std::vector<SRichTextOption> &vColorSplits) const;
 
 		bool m_AllowUnknownCommands;
 		SEditBoxDropdownContext m_DropdownContext;

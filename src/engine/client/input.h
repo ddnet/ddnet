@@ -9,6 +9,7 @@
 
 #include <SDL_events.h>
 #include <SDL_joystick.h>
+#include <SDL_mouse.h>
 
 #include <string>
 #include <vector>
@@ -77,6 +78,8 @@ private:
 	bool m_InputGrabbed;
 
 	bool m_MouseFocus;
+	SDL_Cursor *m_pCurrentCursor = nullptr;
+	SDL_SystemCursor m_CursorType = SDL_SYSTEM_CURSOR_ARROW;
 
 	// IME support
 	std::string m_CompositionString;
@@ -115,6 +118,7 @@ private:
 
 public:
 	CInput();
+	~CInput() override;
 
 	void Init() override;
 	int Update() override;
@@ -136,6 +140,7 @@ public:
 	CJoystick *GetActiveJoystick() override { return m_pActiveJoystick; }
 	void SetActiveJoystick(size_t Index) override;
 
+	void SetMouseCursor(EMouseCursorType CursorType) override;
 	bool MouseRelative(float *pX, float *pY) override;
 	void MouseModeAbsolute() override;
 	void MouseModeRelative() override;

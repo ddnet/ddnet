@@ -93,6 +93,13 @@ CInput::CInput()
 	m_aDropFile[0] = '\0';
 }
 
+CInput::~CInput()
+{
+	// SDL frees all cursors when the video subsystem shuts down.
+	if(SDL_WasInit(SDL_INIT_VIDEO))
+		SDL_FreeCursor(m_pCurrentCursor);
+}
+
 void CInput::Init()
 {
 	StopTextInput();
@@ -272,6 +279,40 @@ bool CInput::CJoystick::Absolute(float *pX, float *pY)
 		return true;
 	}
 	return false;
+}
+
+void CInput::SetMouseCursor(EMouseCursorType CursorType)
+{
+	SDL_SystemCursor SDLCursorType;
+	switch(CursorType)
+	{
+	case IInput::EMouseCursorType::DEFAULT:
+		SDLCursorType = SDL_SYSTEM_CURSOR_ARROW;
+		break;
+	case IInput::EMouseCursorType::HAND:
+		SDLCursorType = SDL_SYSTEM_CURSOR_HAND;
+		break;
+	case IInput::EMouseCursorType::TEXT:
+		SDLCursorType = SDL_SYSTEM_CURSOR_IBEAM;
+		break;
+	default:
+		return;
+	}
+
+	if(m_pCurrentCursor && m_CursorType == SDLCursorType)
+		return;
+
+	SDL_Cursor *pCursor = SDL_CreateSystemCursor(SDLCursorType);
+	if(!pCursor)
+	{
+		log_error("input", "Could not create system cursor: %s", SDL_GetError());
+		return;
+	}
+
+	SDL_SetCursor(pCursor);
+	SDL_FreeCursor(m_pCurrentCursor);
+	m_pCurrentCursor = pCursor;
+	m_CursorType = SDLCursorType;
 }
 
 bool CInput::MouseRelative(float *pX, float *pY)
