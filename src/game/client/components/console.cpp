@@ -1028,14 +1028,14 @@ void CGameConsole::CInstance::OnClick(vec2 MousePos)
 	// find url at CharacterIndex
 	const auto &vUrls = m_EntryDetails.at(pEntry->m_Id).m_vUrls;
 	const auto pUrl = std::find_if(vUrls.begin(), vUrls.end(), [CharacterIndex](const CUrlMatch &UrlMatch) {
-		return UrlMatch.m_Offset <= (size_t)CharacterIndex && (size_t)CharacterIndex <= UrlMatch.m_Offset + UrlMatch.m_Length;
+		return UrlMatch.m_OffsetChar <= (size_t)CharacterIndex && (size_t)CharacterIndex <= UrlMatch.m_OffsetChar + UrlMatch.m_Length;
 	});
 	if(pUrl == vUrls.end())
 		return;
 
 	char aUrl[URL_MAX_LENGTH];
 	const char *pUrlStart = aUrl;
-	str_truncate(aUrl, sizeof(aUrl), pText + pUrl->m_Offset, pUrl->m_Length);
+	str_truncate(aUrl, sizeof(aUrl), pText + pUrl->m_OffsetBytes, pUrl->m_Length);
 
 	// open it!
 	// append https:// by default if no scheme specified
@@ -1257,6 +1257,7 @@ void CGameConsole::OnRender()
 {
 	CUIRect Screen = *Ui()->Screen();
 	CInstance *pConsole = CurrentConsole();
+	static vec2 s_LastMousePos;
 
 	const float MaxConsoleHeight = Screen.h * 3 / 5.0f;
 	float Progress = (Client()->GlobalTime() - (m_StateChangeEnd - m_StateChangeDuration)) / m_StateChangeDuration;
@@ -1409,7 +1410,7 @@ void CGameConsole::OnRender()
 			else
 			{
 				if(!pConsole->m_HasSelection)
-					pConsole->OnClick(ButtonMousePosition);
+					pConsole->OnClick(s_LastMousePos);
 			}
 		}
 
@@ -1683,13 +1684,13 @@ void CGameConsole::OnRender()
 					if(CharacterDetails)
 					{
 						const auto CharIndex = (*CharacterDetails).GetCharacterIndex(MousePos);
-						IsHoveringLink = CharIndex >= 0 && UrlMatch.m_Offset <= (size_t)CharIndex && (size_t)CharIndex <= UrlMatch.m_Offset + UrlMatch.m_Length;
+						IsHoveringLink = CharIndex >= 0 && UrlMatch.m_OffsetChar <= (size_t)CharIndex && (size_t)CharIndex <= UrlMatch.m_OffsetChar + UrlMatch.m_Length;
 					}
 
 					if(IsHoveringLink)
 						MouseCursorType = IInput::EMouseCursorType::HAND;
 
-					EntryCursor.AddRichTextOption(SRichTextOption(UrlMatch.m_Offset,
+					EntryCursor.AddRichTextOption(SRichTextOption(UrlMatch.m_OffsetBytes,
 						UrlMatch.m_Length,
 						IsHoveringLink ? ms_UrlColorHover : ms_UrlColor,
 						true));
@@ -1802,7 +1803,10 @@ void CGameConsole::OnRender()
 	}
 
 	if(m_ConsoleState == CONSOLE_OPEN)
+	{
+		s_LastMousePos = GetMousePosition();
 		Input()->SetMouseCursor(MouseCursorType);
+	}
 }
 
 void CGameConsole::OnMessage(int MsgType, void *pRawMsg)

@@ -25,14 +25,15 @@ constexpr std::size_t URL_ALLOWLIST_MAX_ENTRIES = 128;
 class CUrlMatch
 {
 public:
-	std::size_t m_Offset; // index of the first character in the input
+	std::size_t m_OffsetChar; // index of the first character in the input (NOT in bytes)
+	std::size_t m_OffsetBytes; // index of the first character in the input
 	std::size_t m_Length; // number of characters
 	bool m_HasScheme; // has protocol scheme
 	char m_aText[URL_MAX_LENGTH]; // Raw text
 	char m_aDomainName[URL_MAX_LENGTH]; // domain name
 
 	CUrlMatch() = default;
-	CUrlMatch(size_t Offset, size_t Length, bool HasScheme, const char *pText, std::string_view DomainName);
+	CUrlMatch(size_t OffsetChar, size_t OffsetBytes, size_t Length, bool HasScheme, const char *pText, std::string_view DomainName);
 };
 
 // Domain name representation storing the data & its length

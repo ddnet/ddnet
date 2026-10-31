@@ -572,7 +572,7 @@ public:
 	void UrlAllowDomain(const char *pDomainName) override;
 	bool UrlIsAllowed(const char *pUrl) const;
 
-	void RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler);
+	void RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler) override;
 };
 
 #endif
