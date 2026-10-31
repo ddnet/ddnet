@@ -112,6 +112,16 @@ bool CStun::CProtocol::OnPacket(NETADDR Addr, unsigned char *pData, int DataSize
 	return true;
 }
 
+bool CStun::CProtocol::GetMappedAddress(NETADDR *pMappedAddr)
+{
+	if(!m_HaveAddr)
+	{
+		return false;
+	}
+	*pMappedAddr = m_Addr;
+	return true;
+}
+
 CONNECTIVITY CStun::CProtocol::GetConnectivity(NETADDR *pGlobalAddr)
 {
 	if(!m_HaveStunServer)
@@ -179,6 +189,16 @@ bool CStun::OnPacket(NETADDR Addr, unsigned char *pData, int DataSize)
 		return false;
 	}
 	return m_aProtocols[Index].OnPacket(Addr, pData, DataSize);
+}
+
+bool CStun::GetMappedAddress(int NetType, NETADDR *pMappedAddr)
+{
+	int Index = IndexFromNetType(NetType);
+	if(Index < 0)
+	{
+		return false;
+	}
+	return m_aProtocols[Index].GetMappedAddress(pMappedAddr);
 }
 
 CONNECTIVITY CStun::GetConnectivity(int NetType, NETADDR *pGlobalAddr)
