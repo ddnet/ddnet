@@ -1406,7 +1406,7 @@ inline float CHud::GetMovementInformationBoxHeight()
 {
 	if(GameClient()->m_Snap.m_SpecInfo.m_Active && (GameClient()->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW || GameClient()->m_aClients[GameClient()->m_Snap.m_SpecInfo.m_SpectatorId].m_SpecCharPresent))
 		return g_Config.m_ClShowhudPlayerPosition ? 3.0f * MOVEMENT_INFORMATION_LINE_HEIGHT + 2.0f : 0.0f;
-	float BoxHeight = 3.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerAngle + g_Config.m_ClShowhudPlayerCheckpoint);
+	float BoxHeight = 3.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerAngle + g_Config.m_ClShowhudPlayerCheckpoint);
 	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle || g_Config.m_ClShowhudPlayerCheckpoint)
 	{
 		BoxHeight += 2.0f;
@@ -1577,8 +1577,6 @@ void CHud::RenderMovementInformation()
 	if(g_Config.m_ClShowhudPlayerAngle)
 	{
 		TextRender()->Text(LeftX, y, Fontsize, Localize("Angle:"), -1.0f);
-		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
-
 		UpdateMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, Fontsize, Info.m_Angle, m_PlayerPrevAngle);
 		RenderMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, TextRender()->DefaultTextColor(), RightX, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
@@ -1587,8 +1585,6 @@ void CHud::RenderMovementInformation()
 	if(g_Config.m_ClShowhudPlayerCheckpoint)
 	{
 		TextRender()->Text(LeftX, y, Fontsize, Localize("Checkpoint:"), -1.0f);
-		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
-
 		// The predicted world is not updated while spectating, so the checkpoint comes from the snapshot.
 		int Checkpoint = -1;
 		if(ClientId >= 0 && GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedData)
