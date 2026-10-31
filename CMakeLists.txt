@@ -2454,6 +2454,7 @@ set_src(GAME_SHARED GLOB src/game
   prng.cpp
   prng.h
   race_state.h
+  sparse_layer.h
   team_state.h
   teamscore.cpp
   teamscore.h
@@ -3484,6 +3485,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     serverbrowser_test.cpp
     serverinfo_test.cpp
     snapshot_test.cpp
+    sparse_layer_test.cpp
     str_test.cpp
     swap_endian_test.cpp
     teehistorian_test.cpp
