@@ -4190,6 +4190,9 @@ void CServer::StartRecord(int ClientId)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", GameServer()->Map()->BaseName(), m_NetServer.Address().port, ClientId);
+		// Do not overwrite a partial recording retained after an I/O error.
+		for(int Index = 1; Storage()->FileExists(aFilename, IStorage::TYPE_SAVE); Index++)
+			str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp_%d.demo", GameServer()->Map()->BaseName(), m_NetServer.Address().port, ClientId, Index);
 		m_aDemoRecorder[ClientId].Start(
 			Storage(),
 			aFilename,
