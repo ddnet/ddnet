@@ -377,6 +377,49 @@ int str_comp_num(const char *a, const char *b, int num)
 	return strncmp(a, b, num);
 }
 
+static int NextVersionComponent(const char **ppStr)
+{
+	int Value = 0;
+	while(**ppStr >= '0' && **ppStr <= '9')
+	{
+		Value = Value * 10 + (**ppStr - '0');
+		(*ppStr)++;
+	}
+	return Value;
+}
+
+int str_comp_version(const char *a, const char *b)
+{
+	while(true)
+	{
+		const int ComponentA = NextVersionComponent(&a);
+		const int ComponentB = NextVersionComponent(&b);
+		if(ComponentA != ComponentB)
+			return ComponentA < ComponentB ? -1 : 1;
+
+		const bool MoreA = (*a == '.');
+		const bool MoreB = (*b == '.');
+		if(!MoreA && !MoreB)
+			break;
+		if(MoreA)
+			a++;
+		if(MoreB)
+			b++;
+	}
+
+	// handle suffixes, i.e. release candidates like 20.1-rc1
+	const bool HasSuffixA = (*a != '\0');
+	const bool HasSuffixB = (*b != '\0');
+	if(HasSuffixA != HasSuffixB)
+		return HasSuffixA ? -1 : 1;
+	if(HasSuffixA)
+	{
+		int SuffixCompValue = str_comp_filenames(a, b);
+		return std::clamp(SuffixCompValue, -1, 1);
+	}
+	return 0;
+}
+
 const char *str_startswith_nocase(const char *str, const char *prefix)
 {
 	int prefixl = str_length(prefix);

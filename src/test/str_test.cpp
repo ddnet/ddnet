@@ -480,6 +480,48 @@ TEST(Str, EndswithNocase)
 		str_length(ABCDEFG) - str_length(DEFG));
 }
 
+TEST(Str, CompVersion)
+{
+	auto Expect = [](const char *pA, const char *pB, int ExpectedCompValue) {
+		const int Result = str_comp_version(pA, pB);
+		EXPECT_EQ(Result, ExpectedCompValue) << pA << " vs " << pB;
+	};
+
+	// equal
+	Expect("20.2", "20.2", 0);
+	Expect("17.0.1", "17.0.1", 0);
+	Expect("20", "20.0", 0); // missing trailing component counts as 0
+	Expect("20.0", "20", 0);
+	Expect("", "", 0);
+
+	// newer / older, compared numerically per component
+	Expect("20.2", "20.1", 1);
+	Expect("20.1", "20.2", -1);
+	Expect("21", "20.9", 1);
+	Expect("4.10", "4.5", 1); // numeric, not lexicographic
+	Expect("4.5", "4.10", -1);
+	Expect("17.0.1", "17.0", 1);
+	Expect("17.0", "17.0.1", -1);
+
+	// a pre-release suffix is older than the matching release, newer than the
+	// previous release, and only equal to itself
+	Expect("20.2-rc1", "20.2-rc1", 0);
+	Expect("20.2-rc1", "20.2", -1);
+	Expect("20.2", "20.2-rc1", 1);
+	Expect("20.1", "20.2-rc1", -1);
+	Expect("20.2-rc1", "20.1", 1);
+	Expect("20.3-rc1", "20.2", 1);
+	Expect("20.2.0-rc1", "20.2", -1);
+
+	// distinct pre-releases
+	Expect("20.2-rc1", "20.2-rc2", -1);
+	Expect("20.2-rc2", "20.2-rc10", -1);
+
+	// empty string is older than any positive component
+	Expect("", "1", -1);
+	Expect("1", "", 1);
+}
+
 TEST(Str, HexEncode)
 {
 	char aOut[64];
