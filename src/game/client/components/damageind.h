@@ -7,6 +7,8 @@
 
 #include <game/client/component.h>
 
+#include <vector>
+
 class CDamageInd : public CComponent
 {
 	struct CItem
@@ -20,16 +22,14 @@ class CDamageInd : public CComponent
 
 	enum
 	{
-		MAX_ITEMS = 64,
+		MAX_ITEMS = 1024,
 	};
 
-	CItem m_aItems[MAX_ITEMS];
-	int m_NumItems;
-
-	int m_DmgIndQuadContainerIndex;
+	std::vector<CItem> m_vItems;
+	float m_ExpandSize;
+	int m_DamageIndQuadContainerIndex;
 
 public:
-	CDamageInd();
 	int Sizeof() const override { return sizeof(*this); }
 
 	void Create(vec2 Pos, vec2 Dir, float Alpha);
