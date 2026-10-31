@@ -7,6 +7,8 @@
 
 #include <game/map/envelope_manager.h>
 
+#include <utility>
+
 const int LAYER_DEFAULT_TILESET = -1;
 
 void CMapRenderer::Clear()
@@ -17,6 +19,11 @@ void CMapRenderer::Clear()
 }
 
 void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional)
+{
+	Load(Type, pLayers, pMapImages, pEnvelopeEval, std::move(CallbackMapRendererInitOptional), true);
+}
+
+void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImages, const IEnvelopeEval *pEnvelopeEval, std::optional<FCallbackMapRendererInit> CallbackMapRendererInitOptional, bool TileAndQuadBuffering)
 {
 	Clear();
 
@@ -36,7 +43,7 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 			};
 		}
 
-		pRenderLayerGroup->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, CallbackLayerInitOptional);
+		pRenderLayerGroup->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, CallbackLayerInitOptional, TileAndQuadBuffering);
 		if(!pRenderLayerGroup->IsValid())
 		{
 			log_error("map_renderer", "error group was null, group number = %d, total groups = %d", GroupId, pLayers->NumGroups());
@@ -140,7 +147,7 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 			// just ignore invalid layers from rendering
 			if(pRenderLayer)
 			{
-				pRenderLayer->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, CallbackLayerInitOptional);
+				pRenderLayer->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, CallbackLayerInitOptional, TileAndQuadBuffering);
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();
