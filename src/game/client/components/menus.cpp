@@ -2070,10 +2070,10 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Box.HSplitBottom(24.0f, &Box, &ButtonBar);
 		ButtonBar.VMargin(100.0f, &ButtonBar);
 
-        CUIRect Checkbox;
-        Box.HSplitBottom(24.0f, &Box, nullptr);
+		CUIRect Checkbox;
+		Box.HSplitBottom(24.0f, &Box, nullptr);
 		Box.HSplitBottom(24.0f, &Box, &Checkbox);
-        Checkbox.VMargin(20.0f, &Checkbox);
+		Checkbox.VMargin(20.0f, &Checkbox);
 
 		CUIRect CancelButton, ConfirmButton;
 		ButtonBar.VSplitMid(&CancelButton, &ConfirmButton, 40.0f);
@@ -2720,7 +2720,7 @@ void CMenus::JoinTutorial()
 
 void CMenus::ShowLinkWarning(void *pContext, CMenus *pSelf)
 {
-    pSelf->m_pPopupContext.reset();
+	pSelf->m_pPopupContext.reset();
 	const char *pLink = (const char *)pContext;
 	auto vUrls = url_find_all((const char *)pContext);
 

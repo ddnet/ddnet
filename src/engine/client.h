@@ -395,7 +395,7 @@ public:
 	 */
 	virtual bool ViewFile(const char *pFilename) = 0;
 
-    virtual void UrlAllowDomain(const char *pDomainName) = 0;
+	virtual void UrlAllowDomain(const char *pDomainName) = 0;
 
 #if defined(CONF_FAMILY_WINDOWS)
 	virtual void ShellRegister() = 0;
