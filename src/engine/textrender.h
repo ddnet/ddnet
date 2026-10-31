@@ -145,7 +145,7 @@ public:
 	friend class CTextRender;
 
 private:
-	std::vector<STextBoundingBox> m_vCharactersInfo = {};
+	std::vector<STextBoundingBox> m_vCharactersInfo;
 };
 
 class CTextCursor

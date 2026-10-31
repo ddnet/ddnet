@@ -36,6 +36,8 @@ enum
 };
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
+//typedef void (*FEventHandler)(void *pContext);
+using FEventHandler = std::function<void(void *pContext)>;
 struct CChecksumData;
 
 class IClient : public IInterface
@@ -73,6 +75,11 @@ public:
 		LOADING_DEMO,
 		SENDING_READY,
 		GETTING_READY,
+	};
+
+	enum class EEventId
+	{
+		LINK_WARNING
 	};
 
 	enum class ELoadingCallbackDetail
@@ -388,6 +395,8 @@ public:
 	 */
 	virtual bool ViewFile(const char *pFilename) = 0;
 
+    virtual void UrlAllowDomain(const char *pDomainName) = 0;
+
 #if defined(CONF_FAMILY_WINDOWS)
 	virtual void ShellRegister() = 0;
 	virtual void ShellUnregister() = 0;
@@ -395,6 +404,8 @@ public:
 
 	virtual std::optional<int> ShowMessageBox(const IGraphics::CMessageBox &MessageBox) = 0;
 	virtual void GetGpuInfoString(char (&aGpuInfo)[512]) = 0;
+
+	virtual void RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler) = 0;
 };
 
 class IGameClient : public IInterface

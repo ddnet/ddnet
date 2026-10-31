@@ -28,10 +28,11 @@ public:
 	std::size_t m_Offset; // index of the first character in the input
 	std::size_t m_Length; // number of characters
 	bool m_HasScheme; // has protocol scheme
+	char m_aText[URL_MAX_LENGTH]; // Raw text
+	char m_aDomainName[URL_MAX_LENGTH]; // domain name
 
 	CUrlMatch() = default;
-	CUrlMatch(size_t Offset, size_t Length, bool HasScheme) :
-		m_Offset(Offset), m_Length(Length), m_HasScheme(HasScheme) {}
+	CUrlMatch(size_t Offset, size_t Length, bool HasScheme, const char *pText, std::string_view DomainName);
 };
 
 // Domain name representation storing the data & its length
