@@ -30,6 +30,7 @@
 #include <deque>
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 
 class CDemoEdit;
 class IDemoRecorder;
@@ -278,6 +279,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	// For DummyName function
 	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
+
+	std::unordered_map<EEventId, std::vector<FEventHandler>> m_EventHandlers;
+	void TriggerEvent(EEventId EventId, void *pContext);
 
 	CUrlDomainName m_aUrlAllowList[URL_ALLOWLIST_MAX_ENTRIES];
 	size_t m_UrlAllowListCount = 0;
@@ -565,8 +569,10 @@ public:
 	void GetGpuInfoString(char (&aGpuInfo)[512]) override;
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 
-	void UrlAllowDomain(const char *pDomainName);
+	void UrlAllowDomain(const char *pDomainName) override;
 	bool UrlIsAllowed(const char *pUrl) const;
+
+	void RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler);
 };
 
 #endif

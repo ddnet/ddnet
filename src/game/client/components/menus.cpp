@@ -9,6 +9,7 @@
 #include <base/log.h>
 #include <base/str.h>
 #include <base/time.h>
+#include <base/url.h>
 #include <base/vmath.h>
 
 #include <engine/client.h>
@@ -41,6 +42,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <functional>
 #include <vector>
 
 using namespace std::chrono_literals;
@@ -876,6 +878,8 @@ void CMenus::OnInit()
 	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->QuadContainerAddSprite(m_DirectionQuadContainerIndex, 0.f, 0.f, 22.f);
 	Graphics()->QuadContainerUpload(m_DirectionQuadContainerIndex);
+
+	Client()->RegisterEventHandler(IClient::EEventId::LINK_WARNING, std::bind(ShowLinkWarning, std::placeholders::_1, this));
 }
 
 void CMenus::ConchainBackgroundEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -1271,6 +1275,14 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	{
 		pTitle = Localize("Save skin");
 		pExtraText = Localize("Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.");
+	}
+	else if(m_Popup == POPUP_LINK_WARNING)
+	{
+		TopAlign = true;
+		pTitle = Localize("Open external link");
+		const auto Link = std::static_pointer_cast<CLinkWarningPopupContext>(m_pPopupContext)->m_Url;
+		str_format(aBuf, sizeof(aBuf), Localize("You are about to open the following external link:\n%s\n\nDo you wish to continue?"), Link.m_aText);
+		pExtraText = aBuf;
 	}
 
 	CUIRect Box, Part;
@@ -2048,6 +2060,47 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Ui()->DoLabel(&Label, Localize("Name"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoClearableEditBox(&m_SkinNameInput, &TextBox, 12.0f);
 	}
+	else if(m_Popup == POPUP_LINK_WARNING)
+	{
+		const auto pContext = std::static_pointer_cast<CLinkWarningPopupContext>(m_pPopupContext);
+		const auto &Url = pContext->m_Url;
+
+		CUIRect ButtonBar;
+		Box.HSplitBottom(20.0f, &Box, nullptr);
+		Box.HSplitBottom(24.0f, &Box, &ButtonBar);
+		ButtonBar.VMargin(100.0f, &ButtonBar);
+
+        CUIRect Checkbox;
+        Box.HSplitBottom(24.0f, &Box, nullptr);
+		Box.HSplitBottom(24.0f, &Box, &Checkbox);
+        Checkbox.VMargin(20.0f, &Checkbox);
+
+		CUIRect CancelButton, ConfirmButton;
+		ButtonBar.VSplitMid(&CancelButton, &ConfirmButton, 40.0f);
+
+		str_format(aBuf, sizeof(aBuf), Localize("Always trust links from domain %s"), Url.m_aDomainName);
+		if(DoButton_CheckBox(&pContext->m_Check, aBuf, pContext->m_Check, &Checkbox))
+		{
+			pContext->m_Check = !pContext->m_Check;
+		}
+
+		static CButtonContainer s_ButtonCancel;
+		if(DoButton_Menu(&s_ButtonCancel, Localize("Cancel"), 0, &CancelButton) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+		{
+			log_warn("client", "Failed to open link '%s': domain name '%s' not allowed", Url.m_aText, Url.m_aDomainName);
+			m_Popup = POPUP_NONE;
+		}
+
+		static CButtonContainer s_ButtonConfirm;
+		if(DoButton_Menu(&s_ButtonConfirm, Localize("Open link"), 0, &ConfirmButton) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER))
+		{
+			if(pContext->m_Check)
+				Client()->UrlAllowDomain(Url.m_aDomainName);
+
+			Client()->ViewLink(Url.m_aText, false);
+			m_Popup = POPUP_NONE;
+		}
+	}
 	else
 	{
 		Box.HSplitBottom(20.f, &Box, &Part);
@@ -2064,7 +2117,11 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	}
 
 	if(m_Popup == POPUP_NONE)
+	{
 		Ui()->SetActiveItem(nullptr);
+		if(m_pPopupContext)
+			m_pPopupContext.reset();
+	}
 }
 
 void CMenus::RenderPopupConnecting(CUIRect Screen)
@@ -2659,4 +2716,22 @@ void CMenus::JoinTutorial()
 	m_JoinTutorial.m_TriedRefresh = false;
 	m_JoinTutorial.m_LocalServerState = CJoinTutorial::ELocalServerState::NOT_TRIED;
 	m_JoinTutorial.m_StateChange = time_get_nanoseconds();
+}
+
+void CMenus::ShowLinkWarning(void *pContext, CMenus *pSelf)
+{
+    pSelf->m_pPopupContext.reset();
+	const char *pLink = (const char *)pContext;
+	auto vUrls = url_find_all((const char *)pContext);
+
+	if(vUrls.empty())
+	{
+		log_warn("url", "Invalid link: '%s'", pLink);
+		return;
+	}
+
+	pSelf->m_Popup = POPUP_LINK_WARNING;
+	auto pWarningContext = std::make_shared<CLinkWarningPopupContext>();
+	pWarningContext->m_Url = std::move(vUrls.front());
+	pSelf->m_pPopupContext = pWarningContext;
 }

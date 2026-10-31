@@ -657,6 +657,13 @@ constexpr std::string_view URL_ALLOWED_TLDS[] = {
 	"wien",
 };
 
+CUrlMatch::CUrlMatch(size_t Offset, size_t Length, bool HasScheme, const char *pText, std::string_view DomainName) :
+	m_Offset(Offset), m_Length(Length), m_HasScheme(HasScheme)
+{
+	str_copy(m_aText, pText);
+	str_copy(m_aDomainName, DomainName.data(), DomainName.length() + 1);
+}
+
 // Characters that mean a match starting right after them is really the middle of
 // another token (e.g. "user@example.com", "my_site.com", "foo-bar.com").
 inline static bool url_blocks_start(char c) noexcept
@@ -676,8 +683,67 @@ static bool is_known_tld(const char *pTld, size_t TldLength)
 	return set.find(std::string_view(aBuf, TldLength)) != set.end();
 }
 
+static bool url_is_valid_domain_name(std::string_view Name, std::string_view *pDomainName)
+{
+	auto is_alpha = [](char c) noexcept { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); };
+	auto is_digit = [](char c) noexcept { return c >= '0' && c <= '9'; };
+
+	const std::size_t DotPos = Name.rfind('.');
+	if(DotPos == std::string_view::npos)
+		return false; // no "<word>.<tld>" shape
+	const std::string_view Word = Name.substr(0, DotPos);
+	const std::string_view Tld = Name.substr(DotPos + 1);
+
+	if(Tld.size() < 2)
+		return false;
+	for(char c : Tld)
+		if(!is_alpha(c))
+			return false;
+
+	if(Word.empty())
+		return false;
+
+	std::size_t LabelLength = 0; // length of the label being read
+	char prev = '.';
+	std::size_t Offset = 0;
+	for(char c : Word)
+	{
+		if(c == '.')
+		{
+			if(LabelLength == 0 || prev == '-')
+				return false; // empty label, or label ends with '-'
+			Offset += LabelLength + 1;
+			LabelLength = 0;
+		}
+		else if(is_alpha(c) || is_digit(c))
+		{
+			++LabelLength;
+		}
+		else if(c == '-')
+		{
+			if(LabelLength == 0)
+				return false; // label starts with '-'
+			++LabelLength;
+		}
+		else
+		{
+			return false; // space, '_', '/', ':', non-ASCII, NUL, ...
+		}
+		prev = c;
+	}
+
+	// last label non-empty, not ending in '-'
+	if(LabelLength == 0 || prev == '-')
+		return false;
+
+	if(pDomainName)
+		*pDomainName = std::string_view(Name.data() + Offset, LabelLength + Tld.length() + 1);
+
+	return true;
+}
+
 // Check if a regex candidate really looks like a URL
-static bool url_is_plausible(std::string_view m, bool *pHasScheme)
+static bool url_is_plausible(std::string_view m, bool *pHasScheme, std::string_view *pDomainName)
 {
 	bool HasScheme = false;
 	if(!pHasScheme)
@@ -687,22 +753,23 @@ static bool url_is_plausible(std::string_view m, bool *pHasScheme)
 
 	*pHasScheme = false;
 	const char *pUrl = m.data();
+	size_t HostLength = m.length();
 	for(const char *pScheme : {"https://", "http://"})
 	{
 		const char *pUrlNoScheme = str_startswith_nocase(pUrl, pScheme);
 		if(pUrlNoScheme)
 		{
+			HostLength = pUrl + HostLength - pUrlNoScheme;
 			pUrl = pUrlNoScheme;
 			*pHasScheme = true;
 			break;
 		}
 	}
 
-	size_t HostLength = m.length();
 	for(const char *pNeedle : {":", "/", "?", "#"})
 	{
 		const char *pHostEnd = str_utf8_find_nocase(pUrl, pNeedle);
-		if(pHostEnd)
+		if(pHostEnd && pHostEnd < pUrl + HostLength)
 		{
 			HostLength = pHostEnd - pUrl;
 			break;
@@ -712,21 +779,28 @@ static bool url_is_plausible(std::string_view m, bool *pHasScheme)
 	if(HostLength == 0)
 		return false;
 
-	if(pUrl[HostLength - 1] >= '0' && pUrl[HostLength - 1] <= '9')
-		return true; // IPv4 (validated by the regex)
-	if(*pHasScheme)
-		return true; // explicit scheme: trust it
-	if(str_startswith_nocase(pUrl, "www."))
-		return true; // "www." prefix: trust it
+	bool Trusted =
+		pUrl[HostLength - 1] >= '0' && pUrl[HostLength - 1] <= '9' // IPv4 (validated by the regex)
+		|| *pHasScheme // explicit scheme: trust it
+		|| str_startswith_nocase(pUrl, "www.") // "www." prefix: trust it
+		;
 
-	char aBuf[URL_MAX_LENGTH];
-	str_utf8_truncate(aBuf, sizeof(aBuf), pUrl, HostLength);
-	const char *pDot = str_utf8_find_nocase(aBuf, ".");
-	if(!pDot)
+	std::string_view Host(pUrl, HostLength);
+	const std::size_t DotPos = Host.rfind('.');
+
+	if(!Trusted)
+	{
+		if(DotPos != std::string_view::npos)
+		{
+			size_t TldLength = HostLength - (DotPos + 1);
+			Trusted = is_known_tld(pUrl + DotPos + 1, TldLength);
+		}
+	}
+
+	if(!url_is_valid_domain_name(Host, pDomainName))
 		return false;
 
-	size_t TldLength = HostLength - (pDot - aBuf + 1);
-	return is_known_tld(pDot + 1, TldLength);
+	return Trusted;
 }
 
 // URL detection regex: finds anything *shaped* like a URL. Whether it really is one
@@ -809,9 +883,11 @@ std::vector<CUrlMatch> url_find_all(std::string_view Text)
 			if(Start > 0 && url_blocks_start(Text[Start - 1]))
 				continue;
 			bool HasScheme;
-			if(!url_is_plausible(std::string_view(Text.data() + Start, static_cast<std::size_t>(m.length())), &HasScheme))
+			std::string_view DomainName;
+			std::string_view UrlText(Text.data() + Start, static_cast<std::size_t>(m.length()));
+			if(!url_is_plausible(UrlText, &HasScheme, &DomainName))
 				continue;
-			vResult.emplace_back(Start, static_cast<std::size_t>(m.length()), HasScheme);
+			vResult.emplace_back(Start, static_cast<std::size_t>(m.length()), HasScheme, UrlText.data(), DomainName);
 		}
 	}
 	return vResult;
@@ -831,51 +907,7 @@ std::vector<CUrlMatch> url_find_all(const char *pText, std::size_t Length)
 
 bool url_is_valid_domain_name(std::string_view Name)
 {
-	auto is_alpha = [](char c) noexcept { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); };
-	auto is_digit = [](char c) noexcept { return c >= '0' && c <= '9'; };
-
-	const std::size_t DotPos = Name.rfind('.');
-	if(DotPos == std::string_view::npos)
-		return false; // no "<word>.<tld>" shape
-	const std::string_view Word = Name.substr(0, DotPos);
-	const std::string_view Tld = Name.substr(DotPos + 1);
-
-	if(Tld.size() < 2)
-		return false;
-	for(char c : Tld)
-		if(!is_alpha(c))
-			return false;
-
-	if(Word.empty())
-		return false;
-
-	std::size_t LabelLength = 0; // length of the label being read
-	char prev = '.';
-	for(char c : Word)
-	{
-		if(c == '.')
-		{
-			if(LabelLength == 0 || prev == '-')
-				return false; // empty label, or label ends with '-'
-			LabelLength = 0;
-		}
-		else if(is_alpha(c) || is_digit(c))
-		{
-			++LabelLength;
-		}
-		else if(c == '-')
-		{
-			if(LabelLength == 0)
-				return false; // label starts with '-'
-			++LabelLength;
-		}
-		else
-		{
-			return false; // space, '_', '/', ':', non-ASCII, NUL, ...
-		}
-		prev = c;
-	}
-	return LabelLength > 0 && prev != '-'; // last label non-empty, not ending in '-'
+	return url_is_valid_domain_name(Name, nullptr);
 }
 
 bool url_is_valid_domain_name(const char *pName, std::size_t Length)

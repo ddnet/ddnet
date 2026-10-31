@@ -5515,6 +5515,20 @@ int CClient::PredictionMargin() const
 	return m_ServerCapabilities.m_SyncWeaponInput ? g_Config.m_ClPredictionMargin : 10;
 }
 
+void CClient::TriggerEvent(EEventId EventId, void *pContext)
+{
+	const auto pList = m_EventHandlers.find(EventId);
+	if(pList == m_EventHandlers.end())
+		return;
+
+	for(const auto &fnHandler : pList->second)
+	{
+		if(!fnHandler)
+			continue;
+		fnHandler(pContext);
+	}
+}
+
 void CClient::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	((CClient *)pUserData)->OnConfigSave(pConfigManager);
@@ -5610,7 +5624,7 @@ bool CClient::ViewLink(const char *pLink, bool CheckLink)
 {
 	if(CheckLink && !UrlIsAllowed(pLink))
 	{
-		log_error("client", "Failed to open link '%s': domain name not allowed", pLink);
+		TriggerEvent(EEventId::LINK_WARNING, (void *)pLink);
 		return false;
 	}
 
@@ -5808,4 +5822,13 @@ bool CClient::UrlIsAllowed(const char *pUrl) const
 	}
 
 	return false;
+}
+
+void CClient::RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler)
+{
+	auto pList = m_EventHandlers.find(EventId);
+	if(pList == m_EventHandlers.end())
+		m_EventHandlers[EventId].push_back(std::move(fnHandler));
+	else
+		pList->second.push_back(std::move(fnHandler));
 }
