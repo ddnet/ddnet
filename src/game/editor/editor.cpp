@@ -1455,7 +1455,7 @@ static CColor AverageColor(const std::vector<CQuad *> &vpQuads)
 	return Average / std::size(CQuad{}.m_aColors) / vpQuads.size();
 }
 
-void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index)
+void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index, bool CornerSelectable)
 {
 	enum
 	{
@@ -1495,9 +1495,10 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		return ivec2(f2fx(Pos.x) - s_OriginalPosition.x, f2fx(Pos.y) - s_OriginalPosition.y);
 	};
 
+	bool QuadSelectable = false;
 	const bool QuadSelected = Map()->IsQuadSelected(Index);
 	// draw selection background
-	if(QuadSelected)
+	if(QuadSelected || CornerSelectable)
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
 		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
@@ -1727,8 +1728,13 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	{
 		m_pUiGotContext = pId;
 
-		Graphics()->SetColor(1, 1, 1, 1);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Shift+right click to delete.");
+		QuadSelectable = true;
+		// draw black outline to prevent white on white
+		Graphics()->SetColor(0, 0, 0, 1);
+		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 12.5f * MapView()->MouseWorldScale(), 12.5f * MapView()->MouseWorldScale());
+		Graphics()->QuadsDraw(&QuadItem, 1);
+		Graphics()->SetColor(1, 1, 1, 1);
 
 		if(Ui()->MouseButton(0))
 		{
@@ -1769,11 +1775,12 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 			Graphics()->SetColor(QuadPivotColor);
 	}
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
+	float QuadScale = QuadSelectable ? 10.0f : 5.0f;
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, QuadScale * MapView()->MouseWorldScale(), QuadScale * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int V)
+void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int V, bool &HasSelectableQuad)
 {
 	const void *pId = &pQuad->m_aPoints[V];
 	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[V].x), fx2f(pQuad->m_aPoints[V].y));
@@ -1811,6 +1818,8 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 		}
 		return ivec2(f2fx(Pos.x) - s_OriginalPoint.x, f2fx(Pos.y) - s_OriginalPoint.y);
 	};
+
+	bool QuadSelectable = false;
 
 	if(Ui()->CheckActiveItem(pId))
 	{
@@ -1958,8 +1967,13 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	{
 		m_pUiGotContext = pId;
 
-		Graphics()->SetColor(1, 1, 1, 1);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move the texture. Hold alt to ignore grid.");
+		QuadSelectable = true;
+		// draw black outline to prevent white on white
+		Graphics()->SetColor(0, 0, 0, 1);
+		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 12.5f * MapView()->MouseWorldScale(), 12.5f * MapView()->MouseWorldScale());
+		Graphics()->QuadsDraw(&QuadItem, 1);
+		Graphics()->SetColor(1, 1, 1, 1);
 
 		if(Ui()->MouseButton(0))
 		{
@@ -1988,7 +2002,13 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 			Graphics()->SetColor(QuadPointColor);
 	}
 
-	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
+	float QuadScale = 5.0f;
+	if(QuadSelectable)
+	{
+		HasSelectableQuad = true;
+		QuadScale = 10.0f;
+	}
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, QuadScale * MapView()->MouseWorldScale(), QuadScale * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
