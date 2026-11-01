@@ -284,6 +284,7 @@ public:
 		SORT_NAME - Sort by name.
 		SORT_PING - Sort by ping.
 		SORT_MAP - Sort by map.
+		SORT_STARS - Sort by star count.
 		SORT_GAMETYPE - Sort by game type. DM, TDM etc.
 		SORT_NUMPLAYERS - Sort after how many players there are on the server.
 		SORT_NUMFRIENDS - Sort after how many friends there are on the server.
@@ -294,6 +295,7 @@ public:
 		SORT_NAME = 0,
 		SORT_PING,
 		SORT_MAP,
+		SORT_STARS,
 		SORT_GAMETYPE,
 		SORT_NUMPLAYERS,
 		SORT_NUMFRIENDS,
