@@ -295,6 +295,48 @@ bool CUpdater::ReplaceServer()
 	return Success;
 }
 
+static bool IsManifestValid(const json_value *pVersions)
+{
+	if(!pVersions || pVersions->type != json_array)
+	{
+		log_error("updater", "Update manifest could not be parsed");
+		return false;
+	}
+	int ManifestLength = json_array_length(pVersions);
+	if(ManifestLength == 0)
+	{
+		log_error("updater", "Update manifest is empty");
+		return false;
+	}
+
+	const char *pPrev = nullptr;
+	for(int VersionId = 0; VersionId < ManifestLength; ++VersionId)
+	{
+		const json_value *pEntry = json_array_get(pVersions, VersionId);
+		if(!pEntry || pEntry->type != json_object)
+			continue;
+		const char *pVersion = json_string_get(json_object_get(pEntry, "version"));
+		if(!pVersion)
+			continue;
+
+		if(pPrev != nullptr)
+		{
+			int VersionComp = str_comp_version(pPrev, pVersion);
+			if(VersionComp < 0)
+			{
+				log_error("updater", "Update manifest is not sorted newest-to-oldest: '%s' precedes '%s'", pPrev, pVersion);
+				return false;
+			}
+			else if(VersionComp == 0)
+			{
+				log_warn("updater", "Could not determine order of '%s' and '%s'", pPrev, pVersion);
+			}
+		}
+		pPrev = pVersion;
+	}
+	return true;
+}
+
 void CUpdater::ParseUpdate()
 {
 	char aPath[IO_MAX_PATH_LENGTH];
@@ -306,7 +348,7 @@ void CUpdater::ParseUpdate()
 	json_value *pVersions = JsonParse((json_char *)pBuf, Length);
 	free(pBuf);
 
-	if(!pVersions || pVersions->type != json_array)
+	if(!IsManifestValid(pVersions))
 	{
 		json_value_free(pVersions);
 		return;
@@ -315,9 +357,9 @@ void CUpdater::ParseUpdate()
 	// if we're already downloading a file, or it's been deleted in the latest version, we skip it if it comes up again
 	std::unordered_set<std::string> SkipSet;
 
-	for(int i = 0; i < json_array_length(pVersions); i++)
+	for(int VersionId = 0; VersionId < json_array_length(pVersions); VersionId++)
 	{
-		const json_value *pCurrent = json_array_get(pVersions, i);
+		const json_value *pCurrent = json_array_get(pVersions, VersionId);
 		if(!pCurrent || pCurrent->type != json_object)
 			continue;
 
@@ -325,8 +367,24 @@ void CUpdater::ParseUpdate()
 		if(!pVersion)
 			continue;
 
-		if(str_comp(pVersion, GAME_RELEASE_VERSION) == 0)
+		// older versions don't need to be applied
+		int VersionComp = str_comp_version(pVersion, GAME_RELEASE_VERSION);
+		if(VersionComp == 0)
+		{
 			break;
+		}
+		else if(VersionComp < 0)
+		{
+			if(SkipSet.empty())
+			{
+				log_warn("updater", "Current client appears to be newer than newest listed download");
+			}
+			else
+			{
+				log_info("updater", "Current client appears to be not part of the listed downloads");
+			}
+			break;
+		}
 
 		if(json_boolean_get(json_object_get(pCurrent, "client")))
 			m_ClientUpdate = true;
@@ -336,9 +394,9 @@ void CUpdater::ParseUpdate()
 		const json_value *pDownload = json_object_get(pCurrent, "download");
 		if(pDownload && pDownload->type == json_array)
 		{
-			for(int j = 0; j < json_array_length(pDownload); j++)
+			for(int DownloadId = 0; DownloadId < json_array_length(pDownload); DownloadId++)
 			{
-				const char *pName = json_string_get(json_array_get(pDownload, j));
+				const char *pName = json_string_get(json_array_get(pDownload, DownloadId));
 				if(!pName || !IsAllowedUpdaterPath(pName))
 				{
 					log_error("updater", "Update manifest contains invalid path to download: '%s'", pName == nullptr ? "(not a string)" : pName);
@@ -355,9 +413,9 @@ void CUpdater::ParseUpdate()
 		const json_value *pRemove = json_object_get(pCurrent, "remove");
 		if(pRemove && pRemove->type == json_array)
 		{
-			for(int j = 0; j < json_array_length(pRemove); j++)
+			for(int RemoveId = 0; RemoveId < json_array_length(pRemove); RemoveId++)
 			{
-				const char *pName = json_string_get(json_array_get(pRemove, j));
+				const char *pName = json_string_get(json_array_get(pRemove, RemoveId));
 				if(!pName || !IsAllowedUpdaterPath(pName))
 				{
 					log_error("updater", "Update manifest contains invalid path to remove: '%s'", pName == nullptr ? "(not a string)" : pName);

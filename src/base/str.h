@@ -432,6 +432,27 @@ int str_comp(const char *a, const char *b);
 int str_comp_num(const char *a, const char *b, int num);
 
 /**
+ * Compares two version strings, e.g. `20.2` or `17.0.1`.
+ *
+ * @ingroup Strings
+ *
+ * @param a Version string to compare.
+ * @param b Version string to compare.
+ *
+ * @return `-1` if version a is older than version b.
+ * @return `0` if version a is equal to version b.
+ * @return `1` if version a is newer than version b.
+ *
+ * @remark Components are compared numerically, so `4.10` is newer than `4.5`.
+ * @remark A missing trailing component counts as `0`, so `20` equals `20.0`.
+ * @remark A non-numeric suffix marks a pre-release, which is older than the
+ *         matching release, so `20.2-rc1` is older than `20.2`. Distinct
+ *         suffixes are compared alphanumerically, so `20.2-rc1` < `20.2-rc2`.
+ * @remark The strings are treated as null-terminated strings.
+ */
+int str_comp_version(const char *a, const char *b);
+
+/**
  * Checks case insensitive whether the string begins with a certain prefix.
  *
  * @ingroup Strings
