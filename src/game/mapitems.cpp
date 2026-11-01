@@ -198,3 +198,16 @@ CColor UnpackColor(int PackedColor)
 	Color.a = PackedColor & 0xFF;
 	return Color;
 }
+
+void RotatePoints(const ivec2 &Center, ivec2 *pPoints, size_t NumPoints, float Rotation)
+{
+	const float Cos = std::cos(Rotation);
+	const float Sin = std::sin(Rotation);
+	for(size_t i = 0; i < NumPoints; i++)
+	{
+		ivec2 &Point = pPoints[i];
+		const ivec2 Offset = Point - Center;
+		Point.x = (int)(Offset.x * Cos - Offset.y * Sin + Center.x);
+		Point.y = (int)(Offset.x * Sin + Offset.y * Cos + Center.y);
+	}
+}

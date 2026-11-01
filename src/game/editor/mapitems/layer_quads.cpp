@@ -188,14 +188,6 @@ void CLayerQuads::BrushFlipY()
 	Map()->OnModify();
 }
 
-static void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
-{
-	float x = pPoint->x - pCenter->x;
-	float y = pPoint->y - pCenter->y;
-	pPoint->x = x * std::cos(Rotation) - y * std::sin(Rotation) + pCenter->x;
-	pPoint->y = x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y;
-}
-
 void CLayerQuads::BrushRotate(float Amount)
 {
 	vec2 Center;
@@ -203,15 +195,11 @@ void CLayerQuads::BrushRotate(float Amount)
 	Center.x /= 2;
 	Center.y /= 2;
 
+	const ivec2 CenterFixed = ivec2(f2fx(Center.x), f2fx(Center.y));
+
 	for(auto &Quad : m_vQuads)
 	{
-		for(auto &Point : Quad.m_aPoints)
-		{
-			vec2 Pos(fx2f(Point.x), fx2f(Point.y));
-			Rotate(&Center, &Pos, Amount);
-			Point.x = f2fx(Pos.x);
-			Point.y = f2fx(Pos.y);
-		}
+		RotatePoints(CenterFixed, Quad.m_aPoints, std::size(Quad.m_aPoints), Amount);
 	}
 }
 

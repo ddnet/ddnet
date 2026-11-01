@@ -711,4 +711,6 @@ bool IsCreditsTile(int TileIndex);
 int PackColor(const CColor &Color);
 CColor UnpackColor(int PackedColor);
 
+void RotatePoints(const ivec2 &Center, ivec2 *pPoints, size_t NumPoints, float Rotation);
+
 #endif
