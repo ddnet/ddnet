@@ -1171,6 +1171,11 @@ TEST(Str, ValidFilename)
 	EXPECT_TRUE(str_valid_filename("Auxiliary"));
 	EXPECT_TRUE(str_valid_filename("Null"));
 	EXPECT_TRUE(str_valid_filename("Null.txt"));
+	// reserved names not allowed if followed by space before period
+	EXPECT_FALSE(str_valid_filename("con .txt"));
+	EXPECT_FALSE(str_valid_filename("con .tar.gz"));
+	EXPECT_TRUE(str_valid_filename("COM1 abc"));
+	EXPECT_TRUE(str_valid_filename("COM1 abc.txt"));
 }
 
 TEST(Str, CleanWhitespaces)

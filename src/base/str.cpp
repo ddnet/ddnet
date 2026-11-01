@@ -250,8 +250,10 @@ bool str_valid_filename(const char *str)
 		"LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³"};
 	return std::none_of(std::begin(RESERVED_NAMES), std::end(RESERVED_NAMES), [str](const char *reserved_name) {
 		const char *prefix = str_startswith_nocase(str, reserved_name);
-		// reserved name not allowed when it makes up the entire filename or when followed by period
-		return prefix != nullptr && (prefix[0] == '\0' || prefix[0] == '.');
+		// reserved name not allowed when it makes up the entire filename, when followed by period,
+		// or when followed by space and period
+		return prefix != nullptr &&
+		       (prefix[0] == '\0' || prefix[0] == '.' || (prefix[0] == ' ' && prefix[1] == '.'));
 	});
 }
 
