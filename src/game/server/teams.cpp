@@ -1292,6 +1292,10 @@ void CGameTeams::OnCharacterSpawn(int ClientId)
 		if(!m_aTeamFlock[Team])
 			CheckTeamFinished(Team);
 	}
+
+	CPlayer *pPlayer = GetPlayer(ClientId);
+	if(!g_Config.m_SvPauseable && pPlayer->IsPaused() == -1 * CPlayer::PAUSE_SPEC && !IsPractice(m_Core.Team(ClientId)))
+		pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
 }
 
 void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
