@@ -218,6 +218,34 @@ std::optional<std::vector<int>> CGameContext::ClientsForVictim(int ClientId, con
 			vClientIds.emplace_back(i);
 		}
 	}
+	else if(!str_comp(pVictim, "view"))
+	{
+		if(!CheckClientId(ClientId))
+			return std::nullopt;
+
+		CPlayer *pPlayer = pSelf->m_apPlayers[ClientId];
+		if(!pPlayer)
+			return std::nullopt;
+
+		const vec2 ShowDistance = pPlayer->m_ShowDistance;
+		const int MaxClients = pSelf->Server()->MaxClients();
+		for(int i = 0; i < MaxClients; i++)
+		{
+			if(!pSelf->Server()->ClientIngame(i))
+				continue;
+
+			CCharacter *pChr = pSelf->GetPlayerChar(i);
+			if(!pChr)
+				continue;
+
+			vec2 CheckPos = pChr->GetPos();
+			const vec2 Delta = pPlayer->GetViewPos() - CheckPos;
+			if(absolute(Delta.x) > ShowDistance.x / 2.0f || absolute(Delta.y) > ShowDistance.y / 2.0f)
+				continue;
+
+			vClientIds.emplace_back(i);
+		}
+	}
 	else
 	{
 		return std::nullopt;
