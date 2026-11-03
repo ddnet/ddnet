@@ -1009,6 +1009,10 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	default:
 		dbg_assert_failed("Invalid primitive type: %d", (int)pCommand->m_PrimType);
 	};
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 #endif
 }
 
