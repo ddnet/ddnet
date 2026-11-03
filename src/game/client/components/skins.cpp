@@ -108,10 +108,16 @@ void CSkins::CSkinContainer::RequestLoad()
 	{
 		if(m_UsageEntryIterator.has_value())
 		{
-			m_pSkins->m_SkinsUsageList.erase(m_UsageEntryIterator.value());
+			if(m_UsageEntryIterator.value() != m_pSkins->m_SkinsUsageList.begin())
+			{
+				m_pSkins->m_SkinsUsageList.splice(m_pSkins->m_SkinsUsageList.begin(), m_pSkins->m_SkinsUsageList, m_UsageEntryIterator.value());
+			}
 		}
-		m_pSkins->m_SkinsUsageList.emplace_front(Name());
-		m_UsageEntryIterator = m_pSkins->m_SkinsUsageList.begin();
+		else
+		{
+			m_pSkins->m_SkinsUsageList.emplace_front(Name());
+			m_UsageEntryIterator = m_pSkins->m_SkinsUsageList.begin();
+		}
 	}
 }
 
