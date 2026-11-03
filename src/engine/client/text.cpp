@@ -1466,6 +1466,8 @@ public:
 
 		TextContainerIndex.Reset();
 		TextContainerIndex.m_Index = GetFreeTextContainerIndex();
+		if((m_RenderFlags & TEXT_RENDER_FLAG_ONE_TIME_USE) == 0)
+			TextContainerIndex.m_UseCount = std::make_shared<STextContainerUsages>();
 
 		CScreenRect ScreenRect = Graphics()->GetScreen();
 
@@ -2340,7 +2342,7 @@ public:
 	{
 		for(auto *pTextContainer : m_vpTextContainers)
 		{
-			if(pTextContainer->m_ContainerIndex.Valid() && pTextContainer->m_ContainerIndex.m_UseCount.use_count() <= 1)
+			if(pTextContainer->m_ContainerIndex.Valid() && pTextContainer->m_ContainerIndex.m_UseCount != nullptr && pTextContainer->m_ContainerIndex.m_UseCount.use_count() <= 1)
 			{
 				log_error("textrender", "Found non empty text container with index %d with %" PRIzu " quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, pTextContainer->m_StringInfo.m_vCharacterQuads.size(), pTextContainer->m_aDebugText);
 				dbg_assert_failed("Text container was forgotten by the implementation (the index was overwritten).");
@@ -2356,7 +2358,7 @@ public:
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
 				log_error("textrender", "Found non empty text container with index %d with %" PRIzu " quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, pTextContainer->m_StringInfo.m_vCharacterQuads.size(), pTextContainer->m_aDebugText);
-				log_error("textrender", "The text container index was in use by %d ", (int)pTextContainer->m_ContainerIndex.m_UseCount.use_count());
+				log_error("textrender", "The text container index was in use by %d ", pTextContainer->m_ContainerIndex.m_UseCount != nullptr ? (int)pTextContainer->m_ContainerIndex.m_UseCount.use_count() : 0);
 				HasNonEmptyTextContainer = true;
 			}
 		}
