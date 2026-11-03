@@ -9,6 +9,7 @@
 #include <array>
 #include <chrono>
 #include <memory>
+#include <vector>
 
 enum
 {
@@ -33,6 +34,7 @@ public:
 
 class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
 {
+	std::vector<const CMapItemEnvelope *> m_vpEnvelopes;
 	int m_StartPoint;
 	int m_NumPoints;
 	int m_NumPointsMax;
@@ -42,6 +44,7 @@ class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
 
 public:
 	CMapBasedEnvelopePointAccess(class IMap *pMap);
+	const std::vector<const CMapItemEnvelope *> &Envelopes() const;
 	void SetPointsRange(int StartPoint, int NumPoints);
 	int StartPoint() const;
 	int NumPoints() const override;

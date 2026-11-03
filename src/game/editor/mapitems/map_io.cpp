@@ -1006,11 +1006,9 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 	{
 		const CMapBasedEnvelopePointAccess EnvelopePoints(pMap.get());
 
-		int EnvelopeStart, EnvelopeNum;
-		pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvelopeStart, &EnvelopeNum);
-		for(int EnvelopeIndex = 0; EnvelopeIndex < EnvelopeNum; EnvelopeIndex++)
+		int EnvelopeIndex = 0;
+		for(const CMapItemEnvelope *pItem : EnvelopePoints.Envelopes())
 		{
-			CMapItemEnvelope *pItem = (CMapItemEnvelope *)pMap->GetItem(EnvelopeStart + EnvelopeIndex);
 			int Channels = pItem->m_Channels;
 			if(Channels <= 0 || Channels == 2 || Channels > CEnvPoint::MAX_CHANNELS)
 			{
@@ -1040,6 +1038,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			m_vpEnvelopes.push_back(pEnvelope);
 			if(pItem->m_Version >= 2)
 				pEnvelope->m_Synchronized = pItem->m_Synchronized;
+			EnvelopeIndex++;
 		}
 	}
 
