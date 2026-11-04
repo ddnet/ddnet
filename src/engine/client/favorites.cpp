@@ -44,7 +44,7 @@ void CFavorites::OnConfigSave(IConfigManager *pConfigManager)
 		}
 		for(int i = 0; i < Entry.m_NumAddrs; i++)
 		{
-			char aAddr[NETADDR_MAXSTRSIZE];
+			char aAddr[NETADDR_MAXSTRSIZE + 16];
 			char aBuffer[128];
 			net_addr_str(&Entry.m_aAddrs[i], aBuffer, sizeof(aBuffer), true);
 
