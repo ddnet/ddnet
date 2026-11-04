@@ -167,6 +167,7 @@ void CFavorites::Add(const NETADDR *pAddrs, int NumAddrs)
 		{
 			if(pEntry->m_aAddrs[j] == pAddrs[i])
 			{
+				m_ByAddr.erase(pAddrs[i]);
 				pEntry->m_aAddrs[j] = pEntry->m_aAddrs[pEntry->m_NumAddrs - 1];
 				pEntry->m_NumAddrs -= 1;
 				break;
