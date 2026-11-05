@@ -39,6 +39,6 @@ enum
 };
 
 void RegisterUuids(CUuidManager *pManager);
-int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker);
+int UnpackMessageId(int *pId, bool *pSys, CUnpacker *pUnpacker, CMsgPacker *pPacker);
 
 #endif // ENGINE_SHARED_PROTOCOL_EX_H

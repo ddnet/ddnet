@@ -17,11 +17,10 @@ void RegisterUuids(CUuidManager *pManager)
 #undef UUID
 }
 
-int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
+int UnpackMessageId(int *pId, bool *pSys, CUnpacker *pUnpacker, CMsgPacker *pPacker)
 {
 	*pId = 0;
 	*pSys = false;
-	mem_zero(pUuid, sizeof(*pUuid));
 
 	int MsgId = pUnpacker->GetInt();
 
@@ -43,7 +42,7 @@ int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CM
 		return UNPACKMESSAGE_OK;
 	}
 
-	*pId = g_UuidManager.UnpackUuid(pUnpacker, pUuid);
+	*pId = g_UuidManager.UnpackUuid(pUnpacker);
 
 	if(*pId == UUID_INVALID || *pId == UUID_UNKNOWN)
 	{
