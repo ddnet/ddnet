@@ -6,9 +6,7 @@
 #include <base/mem.h>
 #include <base/str.h>
 
-#ifndef BACKEND_NO_SDL
 #include <engine/client/backend_sdl.h>
-#endif
 #include <engine/graphics.h>
 
 #include <cstdint>
