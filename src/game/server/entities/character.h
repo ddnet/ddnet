@@ -63,6 +63,9 @@ public:
 	void SetHookHitDisabled(bool HookHitDisabled);
 	void SetLiveFrozen(bool Active);
 	void SetDeepFrozen(bool Active);
+	void SetTelegunGun(bool Active);
+	void SetTelegunGrenade(bool Active);
+	void SetTelegunLaser(bool Active);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 
