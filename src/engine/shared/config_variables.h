@@ -27,18 +27,18 @@ MACRO_CONFIG_INT(ClAntiPingPreInput, cl_antiping_preinput, 1, 0, 1, CFGFLAG_CLIE
 MACRO_CONFIG_INT(ClPredictionMargin, cl_prediction_margin, 10, 1, 300, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Prediction margin in ms (adds latency, can reduce lag from ping jumps)")
 MACRO_CONFIG_INT(ClSubTickAiming, cl_sub_tick_aiming, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Send aiming data at sub-tick accuracy")
 #if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_IOS)
-MACRO_CONFIG_INT(ClTouchControls, cl_touch_controls, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable ingame touch controls")
+MACRO_CONFIG_INT(ClTouchControls, cl_touch_controls, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE_LOCAL, "Enable ingame touch controls")
 #else
-MACRO_CONFIG_INT(ClTouchControls, cl_touch_controls, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable ingame touch controls")
+MACRO_CONFIG_INT(ClTouchControls, cl_touch_controls, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE_LOCAL, "Enable ingame touch controls")
 #endif
 #if defined(CONF_PLATFORM_IOS)
 // iOS has neither a back button nor a keyboard to press the escape-key with.
-MACRO_CONFIG_INT(ClBackButton, cl_back_button, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show draggable virtual back button")
+MACRO_CONFIG_INT(ClBackButton, cl_back_button, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE_LOCAL, "Show draggable virtual back button")
 #else
-MACRO_CONFIG_INT(ClBackButton, cl_back_button, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show draggable virtual back button")
+MACRO_CONFIG_INT(ClBackButton, cl_back_button, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE_LOCAL, "Show draggable virtual back button")
 #endif
-MACRO_CONFIG_INT(ClBackButtonX, cl_back_button_x, 5000, 0, 1000000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Relative X position of the draggable back button")
-MACRO_CONFIG_INT(ClBackButtonY, cl_back_button_y, 5000, 0, 1000000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Relative Y position of the draggable back button")
+MACRO_CONFIG_INT(ClBackButtonX, cl_back_button_x, 5000, 0, 1000000, CFGFLAG_CLIENT | CFGFLAG_SAVE_LOCAL, "Relative X position of the draggable back button")
+MACRO_CONFIG_INT(ClBackButtonY, cl_back_button_y, 5000, 0, 1000000, CFGFLAG_CLIENT | CFGFLAG_SAVE_LOCAL, "Relative Y position of the draggable back button")
 
 MACRO_CONFIG_INT(ClNamePlates, cl_nameplates, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show name plates")
 MACRO_CONFIG_INT(ClNamePlatesAlways, cl_nameplates_always, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Always show name plates regardless of distance")
@@ -338,8 +338,8 @@ MACRO_CONFIG_INT(ConsoleOutputLevel, console_output_level, 0, -3, 2, CFGFLAG_SAV
 MACRO_CONFIG_INT(ConsoleEnableColors, console_enable_colors, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Enable colors in console output")
 
 MACRO_CONFIG_INT(ClSaveSettings, cl_save_settings, 1, 0, 1, CFGFLAG_CLIENT, "Write the settings file on exit")
-MACRO_CONFIG_INT(ClRefreshRate, cl_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Update rate for the game (in Hz)")
-MACRO_CONFIG_INT(ClRefreshRateInactive, cl_refresh_rate_inactive, 120, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Update rate for the game when the window is inactive (in Hz)")
+MACRO_CONFIG_INT(ClRefreshRate, cl_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Update rate for the game (in Hz)")
+MACRO_CONFIG_INT(ClRefreshRateInactive, cl_refresh_rate_inactive, 120, 0, 10000, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Update rate for the game when the window is inactive (in Hz)")
 MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "Open the map editor")
 MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Skin filtering string")
 MACRO_CONFIG_INT(ClEditorMaxHistory, cl_editor_max_history, 50, 1, 500, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Maximum number of undo actions in the editor history (not shared between editor, envelope editor and server settings editor)")
@@ -381,7 +381,7 @@ MACRO_CONFIG_INT(BrFilterLogin, br_filter_login, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG
 
 MACRO_CONFIG_INT(BrIndicateFinished, br_indicate_finished, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show whether you have finished a DDNet map (transmits your player name to info.ddnet.org/info)")
 MACRO_CONFIG_STR(BrLocation, br_location, 16, "auto", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Override location for ping estimation, available: auto, af, as, as:cn, eu, na, oc, sa (Automatic, Africa, Asia, China, Europe, North America, Oceania/Australia, South America")
-MACRO_CONFIG_STR(BrCachedBestServerinfoUrl, br_cached_best_serverinfo_url, 256, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Do not set this variable, instead create a ddnet-serverlist-urls.cfg next to settings_ddnet.cfg to specify all possible serverlist URLs")
+MACRO_CONFIG_STR(BrCachedBestServerinfoUrl, br_cached_best_serverinfo_url, 256, "", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Do not set this variable, instead create a ddnet-serverlist-urls.cfg next to settings_ddnet.cfg to specify all possible serverlist URLs")
 
 MACRO_CONFIG_INT(BrSort, br_sort, 4, 0, 256, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sorting column in server browser")
 MACRO_CONFIG_INT(BrSortOrder, br_sort_order, 2, 0, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sorting order in server browser")
@@ -394,15 +394,15 @@ MACRO_CONFIG_INT(BrDemoFetchInfo, br_demo_fetch_info, 0, 0, 1, CFGFLAG_SAVE | CF
 MACRO_CONFIG_INT(GhSort, gh_sort, 1, 0, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sorting column in ghost list")
 MACRO_CONFIG_INT(GhSortOrder, gh_sort_order, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sorting order in ghost list")
 
-MACRO_CONFIG_INT(SndBufferSize, snd_buffer_size, 512, 128, 32768, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound buffer size (may cause delay if large)")
-MACRO_CONFIG_INT(SndRate, snd_rate, 48000, 5512, 384000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound mixing rate")
+MACRO_CONFIG_INT(SndBufferSize, snd_buffer_size, 512, 128, 32768, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Sound buffer size (may cause delay if large)")
+MACRO_CONFIG_INT(SndRate, snd_rate, 48000, 5512, 384000, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Sound mixing rate")
 MACRO_CONFIG_INT(SndEnable, snd_enable, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound enable")
 MACRO_CONFIG_INT(SndMusic, snd_enable_music, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Play background music")
-MACRO_CONFIG_INT(SndVolume, snd_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound volume")
-MACRO_CONFIG_INT(SndChatVolume, snd_chat_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Chat sound volume")
-MACRO_CONFIG_INT(SndGameVolume, snd_game_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Game sound volume")
-MACRO_CONFIG_INT(SndMapVolume, snd_ambient_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Map Sound sound volume")
-MACRO_CONFIG_INT(SndBackgroundMusicVolume, snd_background_music_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Background music sound volume")
+MACRO_CONFIG_INT(SndVolume, snd_volume, 30, 0, 100, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Sound volume")
+MACRO_CONFIG_INT(SndChatVolume, snd_chat_volume, 30, 0, 100, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Chat sound volume")
+MACRO_CONFIG_INT(SndGameVolume, snd_game_volume, 30, 0, 100, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Game sound volume")
+MACRO_CONFIG_INT(SndMapVolume, snd_ambient_volume, 30, 0, 100, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Map Sound sound volume")
+MACRO_CONFIG_INT(SndBackgroundMusicVolume, snd_background_music_volume, 30, 0, 100, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Background music sound volume")
 
 MACRO_CONFIG_INT(SndNonactiveMute, snd_nonactive_mute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Mute sounds when window is not active")
 MACRO_CONFIG_INT(SndGame, snd_game, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable game sounds")
@@ -413,50 +413,50 @@ MACRO_CONFIG_INT(SndTeamChat, snd_team_chat, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLI
 MACRO_CONFIG_INT(SndServerMessage, snd_servermessage, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable server message sound")
 MACRO_CONFIG_INT(SndHighlight, snd_highlight, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable highlighted chat sound")
 
-MACRO_CONFIG_INT(GfxScreen, gfx_screen, 0, 0, 15, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen index")
-MACRO_CONFIG_INT(GfxScreenWidth, gfx_screen_width, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen resolution width (only in pure fullscreen mode)")
-MACRO_CONFIG_INT(GfxScreenHeight, gfx_screen_height, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen resolution height (only in pure fullscreen mode)")
-MACRO_CONFIG_INT(GfxScreenRefreshRate, gfx_screen_refresh_rate, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Refresh rate for the screen (in Hz; only in pure fullscreen mode)")
+MACRO_CONFIG_INT(GfxScreen, gfx_screen, 0, 0, 15, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Screen index")
+MACRO_CONFIG_INT(GfxScreenWidth, gfx_screen_width, 0, 0, 0, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Screen resolution width (only in pure fullscreen mode)")
+MACRO_CONFIG_INT(GfxScreenHeight, gfx_screen_height, 0, 0, 0, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Screen resolution height (only in pure fullscreen mode)")
+MACRO_CONFIG_INT(GfxScreenRefreshRate, gfx_screen_refresh_rate, 0, 0, 0, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Refresh rate for the screen (in Hz; only in pure fullscreen mode)")
 
 #if !defined(CONF_PLATFORM_MACOS)
-MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
+MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 0, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
 #if !defined(CONF_PLATFORM_EMSCRIPTEN)
-MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 1, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen, 3=windowed fullscreen")
+MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 1, 0, 3, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen, 3=windowed fullscreen")
 #else
-MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 0, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen, 3=windowed fullscreen")
+MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 0, 0, 3, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen, 3=windowed fullscreen")
 #endif
 #else
-MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
-MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 0, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen, 3=windowed fullscreen")
+MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 1, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
+MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 0, 0, 3, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen, 3=windowed fullscreen")
 #endif
-MACRO_CONFIG_INT(GfxVsync, gfx_vsync, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Vertical sync (may cause delay)")
+MACRO_CONFIG_INT(GfxVsync, gfx_vsync, 0, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Vertical sync (may cause delay)")
 MACRO_CONFIG_INT(GfxDisplayAllVideoModes, gfx_display_all_video_modes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show all video modes")
 MACRO_CONFIG_INT(GfxHighDetail, gfx_high_detail, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "High detail")
-MACRO_CONFIG_INT(GfxFsaaSamples, gfx_fsaa_samples, 0, 0, 64, CFGFLAG_SAVE | CFGFLAG_CLIENT, "FSAA samples (may cause delay)")
-MACRO_CONFIG_INT(GfxRefreshRate, gfx_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Refresh rate for rendering frames (in Hz; limited by cl_refresh_rate)")
+MACRO_CONFIG_INT(GfxFsaaSamples, gfx_fsaa_samples, 0, 0, 64, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "FSAA samples (may cause delay)")
+MACRO_CONFIG_INT(GfxRefreshRate, gfx_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Refresh rate for rendering frames (in Hz; limited by cl_refresh_rate)")
 MACRO_CONFIG_INT(GfxBackgroundRender, gfx_backgroundrender, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Render graphics when window is in background")
-MACRO_CONFIG_INT(GfxTextOverlay, gfx_text_overlay, 10, 1, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Stop rendering textoverlay in editor or with entities: high value = less details = more speed")
-MACRO_CONFIG_INT(GfxAsyncRenderOld, gfx_asyncrender_old, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "During an update cycle, skip the render cycle, if the render cycle would need to wait for the previous render cycle to finish")
-MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Render quads as triangles (fixes quad coloring on some GPUs)")
+MACRO_CONFIG_INT(GfxTextOverlay, gfx_text_overlay, 10, 1, 100, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Stop rendering textoverlay in editor or with entities: high value = less details = more speed")
+MACRO_CONFIG_INT(GfxAsyncRenderOld, gfx_asyncrender_old, 1, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "During an update cycle, skip the render cycle, if the render cycle would need to wait for the previous render cycle to finish")
+MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Render quads as triangles (fixes quad coloring on some GPUs)")
 
 MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 200, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Mouse sensitivity")
-MACRO_CONFIG_INT(InpTranslatedKeys, inp_translated_keys, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Translate keys before interpreting them, respects keyboard layouts")
-MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ignored keyboard modifier mask")
+MACRO_CONFIG_INT(InpTranslatedKeys, inp_translated_keys, 0, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Translate keys before interpreting them, respects keyboard layouts")
+MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Ignored keyboard modifier mask")
 #if defined(CONF_FAMILY_WINDOWS)
-MACRO_CONFIG_INT(InpImeNativeUi, inp_ime_native_ui, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use native UI for IME (may cause IME to not work in fullscreen mode) (changing requires restart)")
+MACRO_CONFIG_INT(InpImeNativeUi, inp_ime_native_ui, 0, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Use native UI for IME (may cause IME to not work in fullscreen mode) (changing requires restart)")
 #endif
 
-MACRO_CONFIG_INT(InpControllerEnable, inp_controller_enable, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable controller")
-MACRO_CONFIG_STR(InpControllerGUID, inp_controller_guid, 34, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller GUID which uniquely identifies the active controller")
+MACRO_CONFIG_INT(InpControllerEnable, inp_controller_enable, 0, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Enable controller")
+MACRO_CONFIG_STR(InpControllerGUID, inp_controller_guid, 34, "", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Controller GUID which uniquely identifies the active controller")
 MACRO_CONFIG_INT(InpControllerAbsolute, inp_controller_absolute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable absolute controller aiming ingame")
 MACRO_CONFIG_INT(InpControllerSens, inp_controller_sens, 100, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ingame controller sensitivity")
-MACRO_CONFIG_INT(InpControllerX, inp_controller_x, 0, 0, 12, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller axis that controls X axis of cursor")
-MACRO_CONFIG_INT(InpControllerY, inp_controller_y, 1, 0, 12, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller axis that controls Y axis of cursor")
-MACRO_CONFIG_INT(InpControllerTolerance, inp_controller_tolerance, 5, 0, 50, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller axis tolerance to account for jitter")
+MACRO_CONFIG_INT(InpControllerX, inp_controller_x, 0, 0, 12, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Controller axis that controls X axis of cursor")
+MACRO_CONFIG_INT(InpControllerY, inp_controller_y, 1, 0, 12, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Controller axis that controls Y axis of cursor")
+MACRO_CONFIG_INT(InpControllerTolerance, inp_controller_tolerance, 5, 0, 50, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Controller axis tolerance to account for jitter")
 
-MACRO_CONFIG_INT(ClPort, cl_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for client connections to server (0 to choose a random port, 1024 or higher to set a manual port)")
-MACRO_CONFIG_INT(ClDummyPort, cl_dummy_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for dummy connections to server (0 to choose a random port, 1024 or higher to set a manual port)")
-MACRO_CONFIG_INT(ClContactPort, cl_contact_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for serverinfo connections to server (0 to choose a random port, 1024 or higher to set a manual port)")
+MACRO_CONFIG_INT(ClPort, cl_port, 0, 0, 65535, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Port to use for client connections to server (0 to choose a random port, 1024 or higher to set a manual port)")
+MACRO_CONFIG_INT(ClDummyPort, cl_dummy_port, 0, 0, 65535, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Port to use for dummy connections to server (0 to choose a random port, 1024 or higher to set a manual port)")
+MACRO_CONFIG_INT(ClContactPort, cl_contact_port, 0, 0, 65535, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Port to use for serverinfo connections to server (0 to choose a random port, 1024 or higher to set a manual port)")
 
 MACRO_CONFIG_STR(SvName, sv_name, 128, "unnamed server", CFGFLAG_SERVER, "Server name")
 MACRO_CONFIG_STR(Bindaddr, bindaddr, 128, "", CFGFLAG_CLIENT | CFGFLAG_SERVER, "Address to bind the client/server to")
@@ -752,7 +752,7 @@ MACRO_CONFIG_INT(ClDirectionSize, cl_direction_size, 30, -50, 100, CFGFLAG_SAVE 
 MACRO_CONFIG_INT(ClOldGunPosition, cl_old_gun_position, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Tees hold gun a bit higher like in TW 0.6.1 and older")
 MACRO_CONFIG_INT(ClConfirmDisconnectTime, cl_confirm_disconnect_time, 20, -1, 1440, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Confirmation popup before disconnecting after game time (in minutes, -1 to turn off, 0 to always turn on)")
 MACRO_CONFIG_INT(ClConfirmQuitTime, cl_confirm_quit_time, 20, -1, 1440, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Confirmation popup before quitting after game time (in minutes, -1 to turn off, 0 to always turn on)")
-MACRO_CONFIG_STR(ClTimeoutSeed, cl_timeout_seed, 64, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Timeout seed")
+MACRO_CONFIG_STR(ClTimeoutSeed, cl_timeout_seed, 64, "", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Timeout seed")
 MACRO_CONFIG_STR(ClInputFifo, cl_input_fifo, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Fifo file (non-Windows) or Named Pipe (Windows) to use as input for client console")
 MACRO_CONFIG_INT(ClConfigVersion, cl_config_version, 0, 0, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The config version. Helps newer clients fix bugs with older configs.")
 
@@ -765,39 +765,39 @@ MACRO_CONFIG_INT(ClDemoKeyboardShortcuts, cl_demo_keyboard_shortcuts, 1, 0, 1, C
 
 // graphic library
 #if !defined(CONF_ARCH_IA32) && !defined(CONF_PLATFORM_MACOS)
-MACRO_CONFIG_INT(GfxGLMajor, gfx_gl_major, 1, 1, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Graphic library major version")
+MACRO_CONFIG_INT(GfxGLMajor, gfx_gl_major, 1, 1, 10, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Graphic library major version")
 #elif !defined(CONF_ARCH_IA32)
-MACRO_CONFIG_INT(GfxGLMajor, gfx_gl_major, 3, 1, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Graphic library major version")
+MACRO_CONFIG_INT(GfxGLMajor, gfx_gl_major, 3, 1, 10, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Graphic library major version")
 #else
-MACRO_CONFIG_INT(GfxGLMajor, gfx_gl_major, 1, 1, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Graphic library major version")
+MACRO_CONFIG_INT(GfxGLMajor, gfx_gl_major, 1, 1, 10, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Graphic library major version")
 #endif
 #if !defined(CONF_PLATFORM_MACOS)
-MACRO_CONFIG_INT(GfxGLMinor, gfx_gl_minor, 1, 0, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Graphic library minor version")
+MACRO_CONFIG_INT(GfxGLMinor, gfx_gl_minor, 1, 0, 10, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Graphic library minor version")
 #else
-MACRO_CONFIG_INT(GfxGLMinor, gfx_gl_minor, 3, 0, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Graphic library minor version")
+MACRO_CONFIG_INT(GfxGLMinor, gfx_gl_minor, 3, 0, 10, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Graphic library minor version")
 #endif
-MACRO_CONFIG_INT(GfxGLPatch, gfx_gl_patch, 0, 0, 10, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Graphic library patch version")
+MACRO_CONFIG_INT(GfxGLPatch, gfx_gl_patch, 0, 0, 10, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Graphic library patch version")
 
 // float multiplied with 1000
-MACRO_CONFIG_INT(GfxGLTextureLODBIAS, gfx_gl_texture_lod_bias, -500, -15000, 15000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "The lod bias for graphic library texture sampling multiplied by 1000")
+MACRO_CONFIG_INT(GfxGLTextureLODBIAS, gfx_gl_texture_lod_bias, -500, -15000, 15000, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "The lod bias for graphic library texture sampling multiplied by 1000")
 
-MACRO_CONFIG_INT(Gfx3DTextureAnalysisRan, gfx_3d_texture_analysis_ran, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ran an analyzer to check if sampling 3D/2D array textures works correctly")
-MACRO_CONFIG_STR(Gfx3DTextureAnalysisRenderer, gfx_3d_texture_analysis_renderer, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The renderer on which the analysis was performed")
-MACRO_CONFIG_STR(Gfx3DTextureAnalysisVersion, gfx_3d_texture_analysis_version, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The version on which the analysis was performed")
+MACRO_CONFIG_INT(Gfx3DTextureAnalysisRan, gfx_3d_texture_analysis_ran, 0, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Ran an analyzer to check if sampling 3D/2D array textures works correctly")
+MACRO_CONFIG_STR(Gfx3DTextureAnalysisRenderer, gfx_3d_texture_analysis_renderer, 128, "", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "The renderer on which the analysis was performed")
+MACRO_CONFIG_STR(Gfx3DTextureAnalysisVersion, gfx_3d_texture_analysis_version, 128, "", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "The version on which the analysis was performed")
 
-MACRO_CONFIG_STR(GfxGpuName, gfx_gpu_name, 256, "auto", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The GPU's name, which will be selected by the backend. (if supported by the backend)")
+MACRO_CONFIG_STR(GfxGpuName, gfx_gpu_name, 256, "auto", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "The GPU's name, which will be selected by the backend. (if supported by the backend)")
 #if defined(CONF_PLATFORM_ANDROID)
-MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "GLES", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The backend to use (e.g. GLES or Vulkan)")
+MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "GLES", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "The backend to use (e.g. GLES or Vulkan)")
 #elif defined(CONF_PLATFORM_EMSCRIPTEN) || defined(CONF_PLATFORM_IOS)
-MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "GLES", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The backend to use (e.g. GLES)")
+MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "GLES", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "The backend to use (e.g. GLES)")
 #elif !defined(CONF_ARCH_IA32) && !defined(CONF_PLATFORM_MACOS)
-MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "Vulkan", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The backend to use (e.g. OpenGL or Vulkan)")
+MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "Vulkan", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "The backend to use (e.g. OpenGL or Vulkan)")
 #else
-MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "OpenGL", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The backend to use (e.g. OpenGL or Vulkan)")
+MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "OpenGL", CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "The backend to use (e.g. OpenGL or Vulkan)")
 #endif
-MACRO_CONFIG_INT(GfxRenderThreadCount, gfx_render_thread_count, 3, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Number of threads the backend can use for rendering. (note: the value can be ignored by the backend)")
+MACRO_CONFIG_INT(GfxRenderThreadCount, gfx_render_thread_count, 3, 0, 0, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "Number of threads the backend can use for rendering. (note: the value can be ignored by the backend)")
 
-MACRO_CONFIG_INT(GfxDriverIsBlocked, gfx_driver_is_blocked, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "If 1, the current driver is in a blocked error state.")
+MACRO_CONFIG_INT(GfxDriverIsBlocked, gfx_driver_is_blocked, 0, 0, 1, CFGFLAG_SAVE_LOCAL | CFGFLAG_CLIENT, "If 1, the current driver is in a blocked error state.")
 
 MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "At which FPS the videorecorder should record demos.")
 

@@ -399,69 +399,85 @@ bool CConfigManager::Save()
 	if(!m_pStorage || !g_Config.m_ClSaveSettings)
 		return true;
 
-	char aConfigFileTmp[IO_MAX_PATH_LENGTH];
-	m_ConfigFile = m_pStorage->OpenFile(IStorage::FormatTmpPath(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE), IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	const auto SaveConfigFile = [this](const char *pFilename, bool Local) {
+		char aConfigFileTmp[IO_MAX_PATH_LENGTH];
+		m_ConfigFile = m_pStorage->OpenFile(IStorage::FormatTmpPath(aConfigFileTmp, sizeof(aConfigFileTmp), pFilename), IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
-	if(!m_ConfigFile)
-	{
-		log_error("config", "ERROR: opening %s failed", aConfigFileTmp);
-		return false;
-	}
-
-	m_Failed = false;
-
-	char aLineBuf[2048];
-	for(const SConfigVariable *pVariable : m_vpAllVariables)
-	{
-		if((pVariable->m_Flags & CFGFLAG_SAVE) != 0 && !pVariable->IsDefault())
+		if(!m_ConfigFile)
 		{
-			pVariable->Serialize(aLineBuf, sizeof(aLineBuf));
-			WriteLine(aLineBuf);
+			log_error("config", "ERROR: opening %s failed", aConfigFileTmp);
+			return false;
 		}
-	}
 
-	for(const auto &Callback : m_vCallbacks)
-	{
-		Callback.m_pfnFunc(this, Callback.m_pUserData);
-	}
+		m_Failed = false;
 
-	for(const char *pCommand : m_vpUnknownCommands)
-	{
-		WriteLine(pCommand);
-	}
+		char aLineBuf[2048];
+		for(const SConfigVariable *pVariable : m_vpAllVariables)
+		{
+			const auto SaveFlag = Local ? CFGFLAG_SAVE_LOCAL : CFGFLAG_SAVE;
+			if((pVariable->m_Flags & SaveFlag) != 0 && !pVariable->IsDefault())
+			{
+				pVariable->Serialize(aLineBuf, sizeof(aLineBuf));
+				WriteLine(aLineBuf);
+			}
+		}
 
-	if(m_Failed)
-	{
-		log_error("config", "ERROR: writing to %s failed", aConfigFileTmp);
-	}
+		if(Local)
+		{
+			if(!m_vpUnknownCommands.empty())
+			{
+				WriteLine("# Unknown commands");
+				for(const char *pCommand : m_vpUnknownCommands)
+				{
+					WriteLine(pCommand);
+				}
+			}
+		}
+		else
+		{
+			for(const auto &Callback : m_vCallbacks)
+			{
+				Callback.m_pfnFunc(this, Callback.m_pUserData);
+			}
+			WriteLine("exec " CONFIG_LOCAL_FILE);
+		}
 
-	if(io_sync(m_ConfigFile) != 0)
-	{
-		m_Failed = true;
-		log_error("config", "ERROR: synchronizing %s failed", aConfigFileTmp);
-	}
+		if(m_Failed)
+		{
+			log_error("config", "ERROR: writing to %s failed", aConfigFileTmp);
+		}
 
-	if(io_close(m_ConfigFile) != 0)
-	{
-		m_Failed = true;
-		log_error("config", "ERROR: closing %s failed", aConfigFileTmp);
-	}
+		if(io_sync(m_ConfigFile) != 0)
+		{
+			m_Failed = true;
+			log_error("config", "ERROR: synchronizing %s failed", aConfigFileTmp);
+		}
 
-	m_ConfigFile = nullptr;
+		if(io_close(m_ConfigFile) != 0)
+		{
+			m_Failed = true;
+			log_error("config", "ERROR: closing %s failed", aConfigFileTmp);
+		}
 
-	if(m_Failed)
-	{
-		return false;
-	}
+		m_ConfigFile = nullptr;
 
-	if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
-	{
-		log_error("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
-		return false;
-	}
+		if(m_Failed)
+		{
+			return false;
+		}
 
-	log_info("config", "saved to " CONFIG_FILE);
-	return true;
+		if(!m_pStorage->RenameFile(aConfigFileTmp, pFilename, IStorage::TYPE_SAVE))
+		{
+			log_error("config", "ERROR: renaming %s to %s failed", aConfigFileTmp, pFilename);
+			return false;
+		}
+
+		log_info("config", "saved to %s", pFilename);
+		return true;
+	};
+
+	return SaveConfigFile(CONFIG_FILE, false) &&
+	       SaveConfigFile(CONFIG_LOCAL_FILE, true);
 }
 
 void CConfigManager::RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
