@@ -152,9 +152,8 @@ public:
 
 		int Msg;
 		bool Sys;
-		CUuid Uuid;
 
-		int Result = UnpackMessageId(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+		int Result = UnpackMessageId(&Msg, &Sys, &Unpacker, &Packer);
 		if(Result == UNPACKMESSAGE_ERROR)
 			return;
 
