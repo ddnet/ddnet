@@ -2289,6 +2289,8 @@ set_src(BASE GLOB_RECURSE src/base
   unicode/tolower.cpp
   unicode/tolower_data.cpp
   unicode/tolower_data.h
+  url.cpp
+  url.h
   vmath.h
   windows.cpp
   windows.h
