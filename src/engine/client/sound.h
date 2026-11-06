@@ -7,8 +7,8 @@
 
 #include <engine/sound.h>
 
-#include <SDL_audio.h>
-#include <SDL_events.h>
+#include <SDL3/SDL_audio.h>
+#include <SDL3/SDL_events.h>
 
 #include <atomic>
 
@@ -71,7 +71,7 @@ class CSound : public IEngineSound
 
 	bool m_SoundEnabled = false;
 	SDL_AudioSpec m_AudioSpec = {};
-	SDL_AudioDeviceID m_Device = 0;
+	SDL_AudioStream *m_pDevice = nullptr;
 	bool m_DevicePaused = false;
 	std::atomic<bool> m_DeviceChanged = false;
 	CLock m_SoundLock;
@@ -95,13 +95,15 @@ class CSound : public IEngineSound
 	IStorage *m_pStorage = nullptr;
 
 	int *m_pMixBuffer = nullptr;
+	// Preallocated so the audio callback does not put a config sized buffer on its stack
+	short *m_pCallbackBuffer = nullptr;
 	int64_t m_PlaybackTime = 0;
 
 	CSample *AllocSample() REQUIRES(!m_SoundLock);
 	void RateConvert(CSample &Sample) const;
 
-	static int SDLCALL HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent);
-	bool OpenDevice(bool AllowFrequencyChange);
+	static bool SDLCALL HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent);
+	bool OpenDevice();
 	void CloseDevice();
 	void UpdateDevice() REQUIRES(!m_SoundLock);
 	bool HasAudioOutput() const;
@@ -154,6 +156,7 @@ public:
 
 	int MixingRate() const override { return m_MixingRate; }
 	void Mix(short *pFinalOut, unsigned Frames) override REQUIRES(!m_SoundLock);
+	void FillAudioStream(SDL_AudioStream *pStream, int AdditionalAmount) REQUIRES(!m_SoundLock);
 
 	void PauseAudioDevice() override;
 	void UnpauseAudioDevice() override;

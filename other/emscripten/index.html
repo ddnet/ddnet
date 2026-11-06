@@ -251,19 +251,25 @@
 				// Force stop audio processing because the client does not do so when force quit on
 				// assertion errors and segmentation faults. This would otherwise cause many error
 				// messages to be emitted when audio processing continues after the runtime exited.
-				var SDL2 = Module['SDL2'];
-				if (SDL2.audio !== undefined) {
-					if (SDL2.audio.scriptProcessorNode !== undefined) {
-						SDL2.audio.scriptProcessorNode.disconnect();
+				var SDL3 = Module['SDL3'];
+				if (SDL3 !== undefined) {
+					for (const AudioName of ['audio_playback', 'audio_recording']) {
+						const Audio = SDL3[AudioName];
+						if (Audio === undefined) {
+							continue;
+						}
+						if (Audio.scriptProcessorNode !== undefined) {
+							Audio.scriptProcessorNode.disconnect();
+						}
+						if (Audio.silenceTimer !== undefined) {
+							clearInterval(Audio.silenceTimer);
+						}
+						SDL3[AudioName] = undefined;
 					}
-					if (SDL2.audio.silenceTimer !== undefined) {
-						clearInterval(SDL2.audio.silenceTimer);
+					if (SDL3.audioContext !== undefined) {
+						SDL3.audioContext.close();
+						SDL3.audioContext = undefined;
 					}
-					SDL2.audio = undefined;
-				}
-				if (SDL2.audioContext !== undefined) {
-					SDL2.audioContext.close();
-					SDL2.audioContext = undefined;
 				}
 				// Force quit the client on errors, because the runtime does not exit otherwise, which
 				// would cause tests using `emrun` to time out and prevent `onExit` from being invoked.

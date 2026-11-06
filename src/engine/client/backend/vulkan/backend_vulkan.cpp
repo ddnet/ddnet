@@ -16,8 +16,8 @@
 #include <engine/shared/localization.h>
 #include <engine/storage.h>
 
-#include <SDL_video.h>
-#include <SDL_vulkan.h>
+#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_vulkan.h>
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
 
@@ -3545,17 +3545,11 @@ public:
 	 * VULKAN SETUP CODE
 	 ************************/
 
-	[[nodiscard]] bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions)
+	[[nodiscard]] bool GetVulkanExtensions(std::vector<std::string> &vVKExtensions)
 	{
-		unsigned int ExtCount = 0;
-		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, nullptr))
-		{
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get instance extensions from SDL.");
-			return false;
-		}
-
-		std::vector<const char *> vExtensionList(ExtCount);
-		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, vExtensionList.data()))
+		uint32_t ExtCount;
+		const char *const *ppExtensionList = SDL_Vulkan_GetInstanceExtensions(&ExtCount);
+		if(!ppExtensionList)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get instance extensions from SDL.");
 			return false;
@@ -3564,7 +3558,7 @@ public:
 		vVKExtensions.reserve(ExtCount);
 		for(uint32_t i = 0; i < ExtCount; i++)
 		{
-			vVKExtensions.emplace_back(vExtensionList[i]);
+			vVKExtensions.emplace_back(ppExtensionList[i]);
 		}
 
 		return true;
@@ -4079,7 +4073,7 @@ public:
 
 	[[nodiscard]] bool CreateSurface(SDL_Window *pWindow)
 	{
-		if(!SDL_Vulkan_CreateSurface(pWindow, m_VKInstance, &m_VKPresentSurface))
+		if(!SDL_Vulkan_CreateSurface(pWindow, m_VKInstance, nullptr, &m_VKPresentSurface))
 		{
 			log_error("gfx/vulkan", "Failed to create surface. SDL error: %s", SDL_GetError());
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Creating a Vulkan surface for the SDL window failed.");
@@ -5721,7 +5715,7 @@ public:
 		m_CanvasWidth = CanvasWidth;
 		m_CanvasHeight = CanvasHeight;
 
-		if(!GetVulkanExtensions(pWindow, vVKExtensions))
+		if(!GetVulkanExtensions(vVKExtensions))
 			return -1;
 
 		if(!GetVulkanLayers(vVKLayers))
