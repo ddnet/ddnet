@@ -17,6 +17,7 @@
 static constexpr const char *DEFAULT_SAVED_RCON_USER = "local-server";
 
 #define CONFIG_FILE "settings_ddnet.cfg"
+#define CONFIG_LOCAL_FILE "settings_ddnet_local.cfg"
 #define AUTOEXEC_FILE "autoexec.cfg"
 #define AUTOEXEC_CLIENT_FILE "autoexec_client.cfg"
 #define AUTOEXEC_SERVER_FILE "autoexec_server.cfg"
@@ -96,6 +97,8 @@ enum
 	CFGFLAG_COLALPHA = 1 << 12,
 	CFGFLAG_INSENSITIVE = 1 << 13,
 	CMDFLAG_PRACTICE = 1 << 14,
+	// Saved to CONFIG_LOCAL_FILE instead of CONFIG_FILE.
+	CFGFLAG_SAVE_LOCAL = 1 << 15,
 };
 
 #ifdef CONF_DEBUG
