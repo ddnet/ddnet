@@ -10,6 +10,7 @@
 #include <base/windows.h>
 
 #include <cerrno>
+#include <cstdlib>
 #include <cstring>
 
 #if defined(CONF_FAMILY_UNIX)
@@ -19,7 +20,6 @@
 
 #include <cctype> // tolower
 #include <cstdio> // rename
-#include <cstdlib> // getenv
 #elif defined(CONF_FAMILY_WINDOWS)
 #include <io.h>
 #include <shlobj.h> // SHGetKnownFolderPath
@@ -619,6 +619,80 @@ int fs_rename(const char *oldname, const char *newname)
 		return 0;
 	}
 	log_error("filesystem", "Failed to rename file '%s' to '%s' (%d '%s')", oldname, newname, errno, strerror(errno));
+	return 1;
+#endif
+}
+
+int fs_replace_file(const char *oldname, const char *newname)
+{
+	if(fs_is_dir(oldname))
+	{
+		log_error("filesystem", "Failed to replace file '%s': source '%s' is a directory", newname, oldname);
+		return 1;
+	}
+#if defined(CONF_FAMILY_WINDOWS)
+	const std::wstring wide_oldname = windows_utf8_to_wide(oldname);
+	const std::wstring wide_newname = windows_utf8_to_wide(newname);
+	if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0)
+		return 0;
+	DWORD error = GetLastError();
+	if(error == ERROR_ACCESS_DENIED)
+	{
+		// MoveFileEx cannot replace an open destination, even when its readers
+		// allow deletion. Try the non-destructive POSIX rename on newer Windows.
+		// Declare the extended layout locally to keep our Vista SDK target.
+		struct CFileRenameInfoEx
+		{
+			DWORD m_Flags;
+			HANDLE m_RootDirectory;
+			DWORD m_FileNameLength;
+			WCHAR m_aFileName[1];
+		};
+		constexpr auto FileRenameInfoEx = static_cast<FILE_INFO_BY_HANDLE_CLASS>(22);
+		constexpr DWORD ReplaceIfExists = 0x1;
+		constexpr DWORD PosixSemantics = 0x2;
+		if(wide_newname.size() > (MAXDWORD - sizeof(CFileRenameInfoEx)) / sizeof(WCHAR))
+		{
+			error = ERROR_FILENAME_EXCED_RANGE;
+		}
+		else
+		{
+			const size_t BufferSize = sizeof(CFileRenameInfoEx) + wide_newname.size() * sizeof(WCHAR);
+			HANDLE File = CreateFileW(wide_oldname.c_str(), DELETE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
+			if(File == INVALID_HANDLE_VALUE)
+			{
+				error = GetLastError();
+			}
+			else
+			{
+				auto *pInfo = static_cast<CFileRenameInfoEx *>(malloc(BufferSize));
+				if(pInfo == nullptr)
+				{
+					error = ERROR_NOT_ENOUGH_MEMORY;
+				}
+				else
+				{
+					pInfo->m_Flags = ReplaceIfExists | PosixSemantics;
+					pInfo->m_RootDirectory = nullptr;
+					pInfo->m_FileNameLength = static_cast<DWORD>(wide_newname.size() * sizeof(WCHAR));
+					memcpy(pInfo->m_aFileName, wide_newname.c_str(), (wide_newname.size() + 1) * sizeof(WCHAR));
+					const BOOL Success = SetFileInformationByHandle(File, FileRenameInfoEx, pInfo, static_cast<DWORD>(BufferSize));
+					error = Success ? ERROR_SUCCESS : GetLastError();
+					free(pInfo);
+				}
+				CloseHandle(File);
+				if(error == ERROR_SUCCESS)
+					return 0;
+			}
+		}
+	}
+	log_error("filesystem", "Failed to replace file '%s' with '%s' (%ld '%s')", newname, oldname, error, windows_format_system_message(error).c_str());
+	SetLastError(error);
+	return 1;
+#else
+	if(rename(oldname, newname) == 0)
+		return 0;
+	log_error("filesystem", "Failed to replace file '%s' with '%s' (%d '%s')", newname, oldname, errno, strerror(errno));
 	return 1;
 #endif
 }

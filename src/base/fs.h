@@ -277,6 +277,25 @@ void fs_normalize_path(char *path);
 [[nodiscard]] int fs_rename(const char *oldname, const char *newname);
 
 /**
+ * Replaces a destination file with a prepared file on the same filesystem.
+ * Unlike @link fs_rename @endlink, never deletes the destination before a failed retry.
+ *
+ * @ingroup Filesystem
+ *
+ * @param oldname The complete path of the prepared file.
+ * @param newname The complete path to replace or create.
+ *
+ * @return `0` on success, `1` on failure. A failure preserves the destination.
+ *
+ * @remark Does not fall back to copying across filesystems.
+ * @remark Returns an error if the source path names a directory.
+ * @remark Replacing an open destination on Windows requires filesystem support
+ * for POSIX rename semantics and readers that allow deletion. Otherwise it fails
+ * without deleting the destination.
+ */
+[[nodiscard]] int fs_replace_file(const char *oldname, const char *newname);
+
+/**
  * Gets the creation and the last modification date of a file or directory.
  *
  * @ingroup Filesystem
