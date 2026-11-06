@@ -173,13 +173,16 @@ struct STextContainerUsages
 
 struct STextContainerIndex
 {
-	int m_Index;
-	std::shared_ptr<STextContainerUsages> m_UseCount =
-		std::make_shared<STextContainerUsages>(STextContainerUsages());
+	int m_Index = -1;
+	std::shared_ptr<STextContainerUsages> m_UseCount = nullptr;
 
 	STextContainerIndex() { Reset(); }
 	bool Valid() const { return m_Index >= 0; }
-	void Reset() { m_Index = -1; }
+	void Reset()
+	{
+		m_Index = -1;
+		m_UseCount.reset();
+	}
 };
 
 struct STextSizeProperties
