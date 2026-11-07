@@ -25,7 +25,7 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake graphviz ninja-build python3-clang -y
+        sudo apt-get install shellcheck tidy pkg-config cmake graphviz ninja-build python3-clang -y
         rustup default stable
         pip3 install "ruff>=0.16,<0.17"
 
@@ -124,7 +124,7 @@ jobs:
 
     - name: Check commands & settings export
       run: |
-        echo "<!DOCTYPE html><html><head><title></title></head><body>" > settingscommands.html
+        echo "<!DOCTYPE html><html><head><title>Settings &amp; Commands</title></head><body>" > settingscommands.html
         scripts/export_settings_commands_table.py >> settingscommands.html
         echo "</body></html>" >> settingscommands.html
         tidy -errors --drop-empty-elements false settingscommands.html

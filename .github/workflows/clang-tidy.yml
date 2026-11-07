@@ -26,6 +26,9 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install \
+          clang-20 \
+          clang-format-20 \
+          clang-tidy-20 \
           cmake \
           libavcodec-dev \
           libavformat-dev \
@@ -41,6 +44,7 @@ jobs:
           libswscale-dev \
           libwebsockets-dev \
           libx264-dev \
+          lld-20 \
           ninja-build \
           pkg-config \
           -y
@@ -59,16 +63,9 @@ jobs:
               src/masterping
               ./
 
-    - name: Install Clang 20
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget gnupg lsb-release
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh 20 all
-
     - name: Build with clang-tidy
       run: |
+        clang-tidy-20 --version
         mkdir clang-tidy
         cd clang-tidy
         TIDY_FLAGS="-Werror"
