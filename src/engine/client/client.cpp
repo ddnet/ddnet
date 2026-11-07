@@ -5217,14 +5217,10 @@ int main(int argc, const char **argv)
 		// add default allowed urls
 		if(g_Config.m_ClConfigVersion < 2)
 		{
+			// Only explicitly allow ddnet.org, other domains will have to be manually allowed to prevent
+			// automatic malware download
 			static const char *s_apDefaultAllowedDomains[] = {
 				"ddnet.org",
-				"ddnet.tw",
-				"github.com",
-				"teeworlds.com",
-				"discord.com",
-				"google.com",
-				"youtube.com",
 			};
 
 			for(const auto *pDomainName : s_apDefaultAllowedDomains)
