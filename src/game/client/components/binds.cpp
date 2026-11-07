@@ -260,6 +260,132 @@ void CBinds::GetKey(const char *pBindStr, char *pBuf, size_t BufSize) const
 	}
 }
 
+// How well a bind matches a command.
+enum class EBindMatch
+{
+	NONE = 0,
+	PARTIAL = 1, // "chat" matches "chat all" partially
+	COMPOSITE = 2, // "chat" matches "+spectate; chat" as composite
+	EXACT = 3, // "chat" matches "chat" exactly
+};
+
+class CTrimmedString
+{
+public:
+	const char *m_pStr;
+	int m_Length;
+};
+
+CTrimmedString TrimString(const char *pStr, int Length)
+{
+	while(Length > 0 && str_isspace(*pStr))
+	{
+		pStr++;
+		Length--;
+	}
+	while(Length > 0 && str_isspace(pStr[Length - 1]))
+	{
+		Length--;
+	}
+	return {pStr, Length};
+}
+
+template<typename F>
+static void ForEachCommandInBind(const char *pBind, F &&Callback)
+{
+	bool InString = false;
+	bool IsEscaping = false;
+	const char *pCommandStart = pBind;
+	for(const char *p = pBind;; p++)
+	{
+		if(*p == '\0')
+		{
+			Callback(pCommandStart, p - pCommandStart);
+			return;
+		}
+		// skip escaped characters like in "\""
+		if(IsEscaping)
+		{
+			IsEscaping = false;
+			continue;
+		}
+		if(*p == '\\' && InString)
+		{
+			IsEscaping = true;
+			continue;
+		}
+		// echo "+scoreboard" should not match +scoreboard
+		if(*p == '"')
+		{
+			InString = !InString;
+			continue;
+		}
+		if(!InString && *p == ';')
+		{
+			Callback(pCommandStart, p - pCommandStart);
+			pCommandStart = p + 1;
+		}
+	}
+}
+
+static EBindMatch MatchBindCommand(const char *pBind, const char *pCommand)
+{
+	const CTrimmedString Command = TrimString(pCommand, str_length(pCommand));
+	if(Command.m_Length == 0)
+		return EBindMatch::NONE;
+
+	int NumCommands = 0;
+	bool Exact = false;
+	bool Partial = false;
+	ForEachCommandInBind(pBind, [&](const char *pBindCommand, int BindCommandLength) {
+		const CTrimmedString Trimmed = TrimString(pBindCommand, BindCommandLength);
+		if(Trimmed.m_Length == 0)
+			return;
+		NumCommands++;
+		if(Trimmed.m_Length < Command.m_Length ||
+			str_comp_num(Trimmed.m_pStr, Command.m_pStr, Command.m_Length) != 0)
+			return;
+		if(Trimmed.m_Length == Command.m_Length)
+			Exact = true;
+		else if(str_isspace(Trimmed.m_pStr[Command.m_Length]))
+			Partial = true;
+	});
+	if(Exact)
+		return NumCommands == 1 ? EBindMatch::EXACT : EBindMatch::COMPOSITE;
+	return Partial ? EBindMatch::PARTIAL : EBindMatch::NONE;
+}
+
+void CBinds::FindKeyByCommand(const char *pCommand, char *pBuf, size_t BufSize) const
+{
+	pBuf[0] = '\0';
+	EBindMatch BestMatch = EBindMatch::NONE;
+	int BestModifier = KeyModifier::NONE;
+	int BestKey = KEY_UNKNOWN;
+	for(int Modifier = KeyModifier::NONE; Modifier < KeyModifier::COMBINATION_COUNT; Modifier++)
+	{
+		for(int KeyId = KEY_FIRST; KeyId < KEY_LAST; KeyId++)
+		{
+			const char *pBind = Get(KeyId, Modifier);
+			if(!pBind[0])
+				continue;
+			const EBindMatch Match = MatchBindCommand(pBind, pCommand);
+			if(Match > BestMatch)
+			{
+				BestMatch = Match;
+				BestModifier = Modifier;
+				BestKey = KeyId;
+				if(Match == EBindMatch::EXACT) // can't find a better match
+				{
+					GetKeyBindName(KeyId, Modifier, pBuf, BufSize);
+					return;
+				}
+			}
+		}
+	}
+	if(BestMatch != EBindMatch::NONE)
+		GetKeyBindName(BestKey, BestModifier, pBuf, BufSize);
+}
+
 void CBinds::SetDefaults()
 {
 	UnbindAll();
