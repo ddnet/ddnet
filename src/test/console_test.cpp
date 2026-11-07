@@ -2,9 +2,11 @@
 
 #include <base/color.h>
 #include <base/io.h>
+#include <base/logger.h>
 #include <base/str.h>
 #include <base/types.h>
 
+#include <engine/client/url_allowlist.h>
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/kernel.h>
@@ -14,6 +16,117 @@
 #include <game/version.h>
 
 #include <gtest/gtest.h>
+
+#include <string>
+
+class CConsoleUrl : public ::testing::Test, public ILogger
+{
+protected:
+	CUrlAllowList m_AllowList;
+	std::unique_ptr<IConsole> m_pConsole = CreateConsole(CFGFLAG_CLIENT);
+	std::vector<std::string> m_vMessages;
+	CLogScope m_LogScope{this};
+
+	void SetUp() override
+	{
+		m_AllowList.InitConsole(m_pConsole.get());
+	}
+
+	void Log(const CLogMessage *pMessage) override
+	{
+		if(str_comp(pMessage->m_aSystem, "url") == 0)
+			m_vMessages.emplace_back(pMessage->Message());
+	}
+};
+
+TEST_F(CConsoleUrl, ClientCommandRegistration)
+{
+	for(const char *pName : {"url_allow_domain", "url_disallow_domain", "url_allow_list"})
+	{
+		EXPECT_NE(m_pConsole->GetCommandInfo(pName, CFGFLAG_CLIENT, false), nullptr);
+		EXPECT_EQ(m_pConsole->GetCommandInfo(pName, CFGFLAG_SERVER, false), nullptr);
+	}
+}
+
+TEST_F(CConsoleUrl, AllowDomainAndDeduplicate)
+{
+	m_pConsole->ExecuteLine("url_allow_domain \"Example.COM\"", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	m_pConsole->ExecuteLine("url_allow_domain example.com", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_TRUE(m_AllowList.IsAllowed("https://sub.example.com/path"));
+	EXPECT_FALSE(m_AllowList.IsAllowed("https://notexample.com"));
+	EXPECT_FALSE(m_AllowList.IsAllowed("https://example.com@evil.org"));
+	m_pConsole->ExecuteLine("url_allow_list", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	ASSERT_EQ(m_vMessages.size(), 1u);
+	EXPECT_EQ(m_vMessages[0], "Example.COM");
+	m_pConsole->ExecuteLine("url_disallow_domain EXAMPLE.com", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_FALSE(m_AllowList.IsAllowed("https://example.com"));
+}
+
+TEST_F(CConsoleUrl, DisallowDomainAndList)
+{
+	m_pConsole->ExecuteLine("url_allow_domain first.com; url_allow_domain middle.org; url_allow_domain last.net", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	m_pConsole->ExecuteLine("url_disallow_domain MIDDLE.org", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_TRUE(m_AllowList.IsAllowed("https://first.com"));
+	EXPECT_FALSE(m_AllowList.IsAllowed("https://middle.org"));
+	EXPECT_TRUE(m_AllowList.IsAllowed("https://last.net"));
+	m_pConsole->ExecuteLine("url_allow_list", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_EQ(m_vMessages, (std::vector<std::string>{"first.com", "last.net"}));
+	m_pConsole->ExecuteLine("url_disallow_domain first.com; url_disallow_domain last.net", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	m_pConsole->ExecuteLine("url_disallow_domain missing.com", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	m_pConsole->ExecuteLine("url_disallow_domain", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	m_vMessages.clear();
+	m_pConsole->ExecuteLine("url_allow_list", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_TRUE(m_vMessages.empty());
+}
+
+TEST_F(CConsoleUrl, RejectInvalidDomains)
+{
+	for(const char *pCommand : {
+		    "url_allow_domain", "url_allow_domain \"\"", "url_allow_domain \"two words.com\"",
+		    "url_allow_domain https://example.com", "url_allow_domain user@example.com",
+		    "url_allow_domain example..com", "url_allow_domain -example.com"})
+	{
+		SCOPED_TRACE(pCommand);
+		m_pConsole->ExecuteLine(pCommand, IConsole::CLIENT_ID_UNSPECIFIED, true);
+		EXPECT_FALSE(m_AllowList.IsAllowed("https://example.com"));
+	}
+	m_vMessages.clear();
+	m_pConsole->ExecuteLine("url_allow_list", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_TRUE(m_vMessages.empty());
+	m_pConsole->ExecuteLine("url_allow_domain example.dev", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_TRUE(m_AllowList.IsAllowed("https://example.dev"));
+}
+
+TEST_F(CConsoleUrl, RejectOversizedDomain)
+{
+	std::string Domain;
+	while(Domain.size() < URL_MAX_LENGTH)
+		Domain += std::string(63, 'a') + ".";
+	Domain += "com";
+	m_AllowList.AllowDomain(Domain.c_str());
+	m_vMessages.clear();
+	m_pConsole->ExecuteLine("url_allow_list", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_TRUE(m_vMessages.empty());
+}
+
+TEST_F(CConsoleUrl, CapacityAndReuse)
+{
+	for(size_t i = 0; i < URL_ALLOWLIST_MAX_ENTRIES; ++i)
+	{
+		char aCommand[64];
+		str_format(aCommand, sizeof(aCommand), "url_allow_domain site%zu.com", i);
+		m_pConsole->ExecuteLine(aCommand, IConsole::CLIENT_ID_UNSPECIFIED, true);
+	}
+	m_pConsole->ExecuteLine("url_allow_domain overflow.com", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_FALSE(m_AllowList.IsAllowed("https://overflow.com"));
+	m_pConsole->ExecuteLine("url_disallow_domain site0.com", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	m_pConsole->ExecuteLine("url_allow_domain overflow.com", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_TRUE(m_AllowList.IsAllowed("https://overflow.com"));
+	EXPECT_FALSE(m_AllowList.IsAllowed("https://site0.com"));
+	m_vMessages.clear();
+	m_pConsole->ExecuteLine("url_allow_list", IConsole::CLIENT_ID_UNSPECIFIED, true);
+	EXPECT_EQ(m_vMessages.size(), URL_ALLOWLIST_MAX_ENTRIES);
+}
 
 TEST(Console, CreateAndExecuteEcho)
 {

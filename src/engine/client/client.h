@@ -8,7 +8,6 @@
 
 #include <base/hash.h>
 #include <base/types.h>
-#include <base/url.h>
 
 #include <engine/client.h>
 #include <engine/client/checksum.h>
@@ -16,6 +15,7 @@
 #include <engine/client/ghost.h>
 #include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
+#include <engine/client/url_allowlist.h>
 #include <engine/editor.h>
 #include <engine/graphics.h>
 #include <engine/http.h>
@@ -283,8 +283,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::unordered_map<EEventId, std::vector<FEventHandler>> m_EventHandlers;
 	void TriggerEvent(EEventId EventId, void *pContext);
 
-	CUrlDomainName m_aUrlAllowList[URL_ALLOWLIST_MAX_ENTRIES];
-	size_t m_UrlAllowListCount = 0;
+	CUrlAllowList m_UrlAllowList;
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 	void OnConfigSave(IConfigManager *pConfigManager);
@@ -471,9 +470,6 @@ public:
 	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData);
 	static void Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData);
-	static void Con_UrlAllowDomain(IConsole::IResult *pResult, void *pUserData);
-	static void Con_UrlDisallowDomain(IConsole::IResult *pResult, void *pUserData);
-	static void Con_UrlAllowList(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -570,7 +566,6 @@ public:
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 
 	void UrlAllowDomain(const char *pDomainName) override;
-	bool UrlIsAllowed(const char *pUrl) const;
 
 	void RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler) override;
 };

@@ -4349,44 +4349,6 @@ void CClient::Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData)
 	pSelf->BenchmarkQuit(Seconds, pFilename);
 }
 
-void CClient::Con_UrlAllowDomain(IConsole::IResult *pResult, void *pUserData)
-{
-	CClient *pSelf = (CClient *)pUserData;
-	const char *pDomainName = pResult->GetString(0);
-	pSelf->UrlAllowDomain(pDomainName);
-}
-
-void CClient::Con_UrlDisallowDomain(IConsole::IResult *pResult, void *pUserData)
-{
-	CClient *pSelf = (CClient *)pUserData;
-	const char *pDomainName = pResult->GetString(0);
-
-	int Index = -1;
-	for(size_t i = 0; i < pSelf->m_UrlAllowListCount && Index == -1; ++i)
-	{
-		if(str_utf8_comp_nocase(pSelf->m_aUrlAllowList[i].m_aName, pDomainName) == 0)
-			Index = (int)i;
-	}
-
-	if(Index == -1)
-	{
-		log_warn("url", "This domain name is already excluded");
-		return;
-	}
-
-	mem_move(&pSelf->m_aUrlAllowList[Index], &pSelf->m_aUrlAllowList[Index + 1], sizeof(CUrlDomainName) * (pSelf->m_UrlAllowListCount - (Index + 1)));
-	--pSelf->m_UrlAllowListCount;
-}
-
-void CClient::Con_UrlAllowList(IConsole::IResult *pResult, void *pUserData)
-{
-	CClient *pSelf = (CClient *)pUserData;
-	for(size_t i = 0; i < pSelf->m_UrlAllowListCount; ++i)
-	{
-		log_info("url", "%s", pSelf->m_aUrlAllowList[i].m_aName);
-	}
-}
-
 void CClient::BenchmarkQuit(int Seconds, const char *pFilename)
 {
 	m_BenchmarkFile = Storage()->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE);
@@ -4728,9 +4690,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("save_replay", "?i[length] ?r[filename]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 	m_pConsole->Register("benchmark_quit", "i[seconds] r[file]", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_BenchmarkQuit, this, "Benchmark frame times for number of seconds to file, then quit");
 
-	m_pConsole->Register("url_allow_domain", "?s[domain]", CFGFLAG_CLIENT, Con_UrlAllowDomain, this, "Add a domain to trusted domains that can be safely opened");
-	m_pConsole->Register("url_disallow_domain", "?s[domain]", CFGFLAG_CLIENT, Con_UrlDisallowDomain, this, "Remove a domain from trusted domains that can be safely opened");
-	m_pConsole->Register("url_allow_list", "", CFGFLAG_CLIENT, Con_UrlAllowList, this, "List trusted domains that can be safely opened");
+	m_UrlAllowList.InitConsole(m_pConsole);
 
 	RustVersionRegister(*m_pConsole);
 
@@ -5545,22 +5505,7 @@ void CClient::OnConfigSave(IConfigManager *pConfigManager)
 	// General configuration save for the client that doesn't use config variable
 	// and don't belong to a separate component
 
-	// url related commands
-	{
-		char aBuf[128];
-		const char *pEnd = aBuf + sizeof(aBuf) - 4;
-		for(size_t i = 0; i < m_UrlAllowListCount; ++i)
-		{
-			str_copy(aBuf, "url_allow_domain ");
-
-			str_append(aBuf, "\"");
-			char *pDst = aBuf + str_length(aBuf);
-			str_escape(&pDst, m_aUrlAllowList[i].m_aName, pEnd);
-			str_append(aBuf, "\"");
-
-			pConfigManager->WriteLine(aBuf);
-		}
-	}
+	m_UrlAllowList.Save(pConfigManager);
 }
 
 IClient::EConnectivity CClient::UdpConnectivity(int NetType)
@@ -5628,7 +5573,7 @@ static bool ViewLinkImpl(const char *pLink)
 
 bool CClient::ViewLink(const char *pLink, bool CheckLink)
 {
-	if(CheckLink && !UrlIsAllowed(pLink))
+	if(CheckLink && !m_UrlAllowList.IsAllowed(pLink))
 	{
 		TriggerEvent(EEventId::LINK_WARNING, (void *)pLink);
 		return false;
@@ -5787,47 +5732,7 @@ void CClient::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr
 
 void CClient::UrlAllowDomain(const char *pDomainName)
 {
-	if(m_UrlAllowListCount >= URL_ALLOWLIST_MAX_ENTRIES)
-	{
-		log_error("url", "Error: maximum number of allowed domains reached");
-		return;
-	}
-
-	if(!pDomainName)
-	{
-		log_error("url", "Domain name cannot be empty");
-		return;
-	}
-
-	for(size_t i = 0; i < m_UrlAllowListCount; ++i)
-	{
-		if(str_utf8_comp_nocase(m_aUrlAllowList[i].m_aName, pDomainName) == 0)
-			return; // don't add duplicates
-	}
-
-	const auto i = m_UrlAllowListCount;
-	const auto DomainNameLength = str_length(pDomainName);
-	if(!url_is_valid_domain_name(pDomainName, DomainNameLength))
-	{
-		log_error("url", "Invalid domain name");
-		return;
-	}
-
-	str_copy(m_aUrlAllowList[i].m_aName, pDomainName);
-	m_aUrlAllowList[i].m_Length = DomainNameLength;
-
-	m_UrlAllowListCount++;
-}
-
-bool CClient::UrlIsAllowed(const char *pUrl) const
-{
-	for(size_t i = 0; i < m_UrlAllowListCount; ++i)
-	{
-		if(url_check_domain_name(pUrl, m_aUrlAllowList[i].m_aName))
-			return true;
-	}
-
-	return false;
+	m_UrlAllowList.AllowDomain(pDomainName);
 }
 
 void CClient::RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler)

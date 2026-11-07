@@ -7,11 +7,7 @@
  * @defgroup Url Url
  */
 
-#include <cctype>
 #include <cstddef>
-#include <cstring>
-#include <optional>
-#include <regex>
 #include <string_view>
 #include <vector>
 
@@ -48,7 +44,7 @@ public:
 };
 
 /**
- * Finds all url in a given text.
+ * Finds HTTP(S), www. and bare com/org/net URLs in a given text.
  *
  * @ingroup Url
  *
@@ -59,7 +55,7 @@ public:
 std::vector<CUrlMatch> url_find_all(std::string_view Text);
 
 /**
- * Finds all url in a given text.
+ * Finds HTTP(S), www. and bare com/org/net URLs in a given text.
  *
  * @ingroup Url
  *
@@ -70,7 +66,7 @@ std::vector<CUrlMatch> url_find_all(std::string_view Text);
 std::vector<CUrlMatch> url_find_all(const char *pText);
 
 /**
- * Finds all url in a given text.
+ * Finds HTTP(S), www. and bare com/org/net URLs in a given text.
  *
  * @ingroup Url
  *
@@ -84,11 +80,11 @@ std::vector<CUrlMatch> url_find_all(const char *pText, std::size_t Length);
 /**
  * Checks for a basic domain name.
  * Should answer the question: is `name` exactly `<word>.<tld>`?
- *   `<tld>`  : the part after the LAST dot; 2 or more ASCII letters (no digits, no hyphens)
+ *   `<tld>`  : the part after the LAST dot; 2-63 ASCII letters (no digits, no hyphens)
  *   `<word>` : everything before it; one or more dot-separated labels made of letters, digits
- *            and '-', none empty, none starting or ending with '-' ("example", "sub.example")
+ *            and '-', 1-63 characters each, none starting or ending with '-' ("example", "sub.example")
  * Case-insensitive. Anything else (spaces, '_', ':', '/', '@', non-ASCII, trailing dot, ...)
- * makes it invalid. The TLD is NOT looked up in kTlds, so "hf.cfg" is well-formed.
+ * makes it invalid. The TLD is NOT restricted to common TLDs, so "hf.cfg" is well-formed.
  *
  * @ingroup Url
  *
@@ -101,11 +97,11 @@ bool url_is_valid_domain_name(std::string_view Name);
 /**
  * Checks for a basic domain name.
  * Should answer the question: is `name` exactly `<word>.<tld>`?
- *   `<tld>`  : the part after the LAST dot; 2 or more ASCII letters (no digits, no hyphens)
+ *   `<tld>`  : the part after the LAST dot; 2-63 ASCII letters (no digits, no hyphens)
  *   `<word>` : everything before it; one or more dot-separated labels made of letters, digits
- *            and '-', none empty, none starting or ending with '-' ("example", "sub.example")
+ *            and '-', 1-63 characters each, none starting or ending with '-' ("example", "sub.example")
  * Case-insensitive. Anything else (spaces, '_', ':', '/', '@', non-ASCII, trailing dot, ...)
- * makes it invalid. The TLD is NOT looked up in kTlds, so "hf.cfg" is well-formed.
+ * makes it invalid. The TLD is NOT restricted to common TLDs, so "hf.cfg" is well-formed.
  *
  * @ingroup Url
  *
@@ -125,9 +121,9 @@ bool url_is_valid_domain_name(const char *pName, std::size_t Length);
  *
  * Details:
  *   - case-insensitive; one trailing dot ("site.com.") is ignored on both arguments
- *   - pDomainName must itself be a valid "<word>.<tld>" name (see url_is_valid_domainname),
+ *   - pDomainName must itself be a valid "<word>.<tld>" name (see url_is_valid_domain_name),
  *     so "com" or "" can never match everything
- *   - the scheme is optional; if present it must be http, https, ftp, ftps, ws or wss
+ *   - the scheme is optional; if present it must be http or https
  *     (so "javascript://site.com/..." is rejected); user-info ("user:pw@") is only skipped
  *     when a scheme is present, so e-mail addresses ("x@site.com") do not match
  *   - the host ends at the first '/', '?', '#' or '\' (browsers treat '\' like '/'),

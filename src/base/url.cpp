@@ -2,738 +2,89 @@
 
 #include "str.h"
 
-#include <unordered_set>
+#include <algorithm>
 
-// ---------------------------------------------------------------------------
-// Allowed TLDs for URLs written WITHOUT a scheme. Lower-case, 2..63 letters, unique.
-//
-// Deliberately NOT listed, because they are also very common file extensions
-// (they are still accepted with a scheme or a "www." prefix):
-//   py md sh rs cc so pl pm ps ml mk sv tf zip mov mobi
-// ---------------------------------------------------------------------------
-constexpr std::string_view URL_ALLOWED_TLDS[] = {
-	// --- country codes ---
-	"ac",
-	"ad",
-	"ae",
-	"af",
-	"ag",
-	"ai",
-	"al",
-	"am",
-	"ao",
-	"aq",
-	"ar",
-	"as",
-	"at",
-	"au",
-	"aw",
-	"ax",
-	"az",
-	"ba",
-	"bb",
-	"bd",
-	"be",
-	"bf",
-	"bg",
-	"bh",
-	"bi",
-	"bj",
-	"bm",
-	"bn",
-	"bo",
-	"br",
-	"bs",
-	"bt",
-	"bw",
-	"by",
-	"bz",
-	"ca",
-	"cd",
-	"cf",
-	"cg",
-	"ch",
-	"ci",
-	"ck",
-	"cl",
-	"cm",
-	"cn",
-	"co",
-	"cr",
-	"cu",
-	"cv",
-	"cw",
-	"cx",
-	"cy",
-	"cz",
-	"de",
-	"dj",
-	"dk",
-	"dm",
-	"do",
-	"dz",
-	"ec",
-	"ee",
-	"eg",
-	"er",
-	"es",
-	"et",
-	"eu",
-	"fi",
-	"fj",
-	"fk",
-	"fm",
-	"fo",
-	"fr",
-	"ga",
-	"gd",
-	"ge",
-	"gf",
-	"gg",
-	"gh",
-	"gi",
-	"gl",
-	"gm",
-	"gn",
-	"gp",
-	"gq",
-	"gr",
-	"gs",
-	"gt",
-	"gu",
-	"gw",
-	"gy",
-	"hk",
-	"hm",
-	"hn",
-	"hr",
-	"ht",
-	"hu",
-	"id",
-	"ie",
-	"il",
-	"im",
-	"in",
-	"io",
-	"iq",
-	"ir",
-	"is",
-	"it",
-	"je",
-	"jm",
-	"jo",
-	"jp",
-	"ke",
-	"kg",
-	"kh",
-	"ki",
-	"km",
-	"kn",
-	"kp",
-	"kr",
-	"kw",
-	"ky",
-	"kz",
-	"la",
-	"lb",
-	"lc",
-	"li",
-	"lk",
-	"lr",
-	"ls",
-	"lt",
-	"lu",
-	"lv",
-	"ly",
-	"ma",
-	"mc",
-	"me",
-	"mg",
-	"mh",
-	"mm",
-	"mn",
-	"mo",
-	"mp",
-	"mq",
-	"mr",
-	"ms",
-	"mt",
-	"mu",
-	"mv",
-	"mw",
-	"mx",
-	"my",
-	"mz",
-	"na",
-	"nc",
-	"ne",
-	"nf",
-	"ng",
-	"ni",
-	"nl",
-	"no",
-	"np",
-	"nr",
-	"nu",
-	"nz",
-	"om",
-	"pa",
-	"pe",
-	"pf",
-	"pg",
-	"ph",
-	"pk",
-	"pn",
-	"pr",
-	"pt",
-	"pw",
-	"qa",
-	"re",
-	"ro",
-	"ru",
-	"rw",
-	"sa",
-	"sb",
-	"sc",
-	"sd",
-	"se",
-	"sg",
-	"si",
-	"sk",
-	"sl",
-	"sm",
-	"sn",
-	"sr",
-	"ss",
-	"st",
-	"su",
-	"sx",
-	"sy",
-	"sz",
-	"tc",
-	"td",
-	"tg",
-	"th",
-	"tj",
-	"tk",
-	"tl",
-	"tm",
-	"tn",
-	"to",
-	"tr",
-	"tt",
-	"tv",
-	"tw",
-	"tz",
-	"ua",
-	"ug",
-	"uk",
-	"us",
-	"uy",
-	"uz",
-	"va",
-	"vc",
-	"ve",
-	"vg",
-	"vi",
-	"vn",
-	"vu",
-	"wf",
-	"ws",
-	"ye",
-	"yt",
-	"za",
-	"zm",
-	"zw",
-	// --- classic / sponsored ---
-	"com",
-	"org",
-	"net",
-	"edu",
-	"gov",
-	"mil",
-	"int",
-	"info",
-	"biz",
-	"name",
-	"pro",
-	"asia",
-	"tel",
-	"travel",
-	"jobs",
-	"museum",
-	"coop",
-	"aero",
-	"cat",
-	"post",
-	"xxx",
-	// --- popular generic TLDs ---
-	"academy",
-	"accountant",
-	"accountants",
-	"actor",
-	"agency",
-	"airforce",
-	"apartments",
-	"app",
-	"art",
-	"attorney",
-	"auction",
-	"audio",
-	"auto",
-	"bar",
-	"bargains",
-	"bike",
-	"bingo",
-	"bio",
-	"black",
-	"blog",
-	"blue",
-	"boutique",
-	"build",
-	"builders",
-	"business",
-	"buzz",
-	"cafe",
-	"camera",
-	"camp",
-	"capital",
-	"car",
-	"cards",
-	"care",
-	"careers",
-	"cash",
-	"casino",
-	"catering",
-	"center",
-	"ceo",
-	"chat",
-	"cheap",
-	"church",
-	"city",
-	"claims",
-	"cleaning",
-	"click",
-	"clinic",
-	"clothing",
-	"cloud",
-	"club",
-	"coach",
-	"codes",
-	"coffee",
-	"college",
-	"community",
-	"company",
-	"computer",
-	"condos",
-	"construction",
-	"consulting",
-	"contractors",
-	"cooking",
-	"cool",
-	"coupons",
-	"courses",
-	"credit",
-	"creditcard",
-	"cricket",
-	"cruises",
-	"dance",
-	"date",
-	"dating",
-	"deals",
-	"degree",
-	"delivery",
-	"democrat",
-	"dental",
-	"dentist",
-	"design",
-	"dev",
-	"diamonds",
-	"diet",
-	"digital",
-	"direct",
-	"directory",
-	"discount",
-	"doctor",
-	"dog",
-	"domains",
-	"download",
-	"earth",
-	"eco",
-	"education",
-	"email",
-	"energy",
-	"engineer",
-	"engineering",
-	"enterprises",
-	"equipment",
-	"estate",
-	"events",
-	"exchange",
-	"expert",
-	"exposed",
-	"express",
-	"fail",
-	"faith",
-	"family",
-	"fan",
-	"fans",
-	"farm",
-	"fashion",
-	"finance",
-	"financial",
-	"fish",
-	"fishing",
-	"fit",
-	"fitness",
-	"flights",
-	"florist",
-	"flowers",
-	"fly",
-	"food",
-	"football",
-	"forsale",
-	"foundation",
-	"fun",
-	"fund",
-	"furniture",
-	"futbol",
-	"fyi",
-	"gallery",
-	"game",
-	"games",
-	"garden",
-	"gift",
-	"gifts",
-	"gives",
-	"glass",
-	"global",
-	"gmbh",
-	"gold",
-	"golf",
-	"graphics",
-	"gratis",
-	"green",
-	"gripe",
-	"group",
-	"guide",
-	"guitars",
-	"guru",
-	"haus",
-	"health",
-	"healthcare",
-	"help",
-	"hockey",
-	"holdings",
-	"holiday",
-	"homes",
-	"horse",
-	"hospital",
-	"host",
-	"hosting",
-	"house",
-	"how",
-	"immo",
-	"immobilien",
-	"inc",
-	"industries",
-	"ink",
-	"institute",
-	"insure",
-	"insurance",
-	"international",
-	"investments",
-	"irish",
-	"jewelry",
-	"juegos",
-	"kaufen",
-	"kim",
-	"kitchen",
-	"kiwi",
-	"land",
-	"lawyer",
-	"lease",
-	"legal",
-	"lgbt",
-	"life",
-	"lighting",
-	"limited",
-	"limo",
-	"link",
-	"live",
-	"llc",
-	"loan",
-	"loans",
-	"lol",
-	"london",
-	"love",
-	"ltd",
-	"luxury",
-	"maison",
-	"management",
-	"market",
-	"marketing",
-	"markets",
-	"mba",
-	"media",
-	"memorial",
-	"men",
-	"menu",
-	"moda",
-	"mom",
-	"money",
-	"mortgage",
-	"movie",
-	"network",
-	"news",
-	"ninja",
-	"nyc",
-	"observer",
-	"one",
-	"onl",
-	"online",
-	"ooo",
-	"organic",
-	"page",
-	"paris",
-	"partners",
-	"parts",
-	"party",
-	"pet",
-	"photo",
-	"photography",
-	"photos",
-	"physio",
-	"pics",
-	"pictures",
-	"pink",
-	"pizza",
-	"place",
-	"plumbing",
-	"plus",
-	"poker",
-	"press",
-	"productions",
-	"properties",
-	"property",
-	"pub",
-	"qpon",
-	"quebec",
-	"racing",
-	"recipes",
-	"red",
-	"rehab",
-	"reise",
-	"reisen",
-	"rent",
-	"rentals",
-	"repair",
-	"report",
-	"republican",
-	"rest",
-	"restaurant",
-	"review",
-	"reviews",
-	"rich",
-	"rip",
-	"rocks",
-	"rodeo",
-	"run",
-	"sale",
-	"salon",
-	"sarl",
-	"school",
-	"schule",
-	"science",
-	"security",
-	"services",
-	"sex",
-	"sexy",
-	"shiksha",
-	"shoes",
-	"shop",
-	"shopping",
-	"show",
-	"singles",
-	"site",
-	"ski",
-	"soccer",
-	"social",
-	"software",
-	"solar",
-	"solutions",
-	"soy",
-	"space",
-	"sport",
-	"store",
-	"stream",
-	"studio",
-	"study",
-	"style",
-	"sucks",
-	"supplies",
-	"supply",
-	"support",
-	"surf",
-	"surgery",
-	"systems",
-	"tax",
-	"taxi",
-	"team",
-	"tech",
-	"technology",
-	"tennis",
-	"theater",
-	"tienda",
-	"tips",
-	"tires",
-	"today",
-	"tokyo",
-	"tools",
-	"top",
-	"tours",
-	"town",
-	"toys",
-	"trade",
-	"trading",
-	"training",
-	"tube",
-	"university",
-	"uno",
-	"vacations",
-	"vegas",
-	"ventures",
-	"vet",
-	"viajes",
-	"video",
-	"villas",
-	"vin",
-	"vip",
-	"vision",
-	"vodka",
-	"vote",
-	"voting",
-	"voyage",
-	"wang",
-	"watch",
-	"webcam",
-	"web",
-	"website",
-	"wed",
-	"wedding",
-	"wiki",
-	"win",
-	"wine",
-	"work",
-	"works",
-	"world",
-	"wtf",
-	"xin",
-	"xyz",
-	"yoga",
-	"zone",
-	// --- regional / city ---
-	"africa",
-	"alsace",
-	"amsterdam",
-	"bayern",
-	"berlin",
-	"brussels",
-	"bzh",
-	"cologne",
-	"cymru",
-	"eus",
-	"gal",
-	"hamburg",
-	"istanbul",
-	"koeln",
-	"miami",
-	"moscow",
-	"scot",
-	"swiss",
-	"tirol",
-	"vlaanderen",
-	"wales",
-	"wien",
-};
+constexpr std::size_t DOMAIN_LABEL_MAX_LENGTH = 63; // DNS limit for each dot-separated label.
+constexpr std::size_t TLD_MIN_LENGTH = 2;
+constexpr std::size_t PORT_MAX_DIGITS = 5;
+constexpr unsigned char FIRST_NON_ASCII_BYTE = 0x80; // Bytes with the high bit set are not ASCII.
+constexpr char ASCII_DELETE = 0x7f;
 
 CUrlMatch::CUrlMatch(size_t OffsetChar, size_t OffsetBytes, size_t Length, bool HasScheme, const char *pText, std::string_view DomainName) :
 	m_OffsetChar(OffsetChar), m_OffsetBytes(OffsetBytes), m_Length(Length), m_HasScheme(HasScheme)
 {
-	str_copy(m_aText, pText);
-	str_copy(m_aDomainName, DomainName.data(), DomainName.length() + 1);
+	str_truncate(m_aText, sizeof(m_aText), pText, std::min(Length, sizeof(m_aText) - 1));
+	str_truncate(m_aDomainName, sizeof(m_aDomainName), DomainName.data(), std::min(DomainName.size(), sizeof(m_aDomainName) - 1));
 }
 
-// Characters that mean a match starting right after them is really the middle of
-// another token (e.g. "user@example.com", "my_site.com", "foo-bar.com").
-inline static bool url_blocks_start(char c) noexcept
+static bool url_is_alpha(char c)
 {
-	const unsigned char u = static_cast<unsigned char>(c);
-	return std::isalnum(u) || c == '_' || c == '-' || c == '@' || c == '.' || c == '%';
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-// Checks if the TLDs is one of URL_ALLOWED_TLDS
-static bool is_known_tld(const char *pTld, size_t TldLength)
+// Do not detect suffixes of email addresses, invalid hosts or unsupported schemes.
+static bool url_blocks_start(char c)
 {
-	static const std::unordered_set<std::string_view> set(std::begin(URL_ALLOWED_TLDS), std::end(URL_ALLOWED_TLDS));
-	char aBuf[64]; // TLDs are at most 63 characters
-	if(TldLength < 2 || TldLength >= sizeof(aBuf))
-		return false;
-	str_utf8_tolower(pTld, aBuf, TldLength + 1);
-	return set.find(std::string_view(aBuf, TldLength)) != set.end();
+	return url_is_alpha(c) || str_isnum(c) || c == '_' || c == '-' || c == '@' || c == '.' || c == '%' || c == '/' || c == '\\' || static_cast<unsigned char>(c) >= FIRST_NON_ASCII_BYTE;
+}
+
+static bool is_known_tld(std::string_view Tld)
+{
+	for(std::string_view AllowedTld : {"com", "org", "net"})
+		if(Tld.size() == AllowedTld.size() && str_comp_nocase_num(Tld.data(), AllowedTld.data(), AllowedTld.size()) == 0)
+			return true;
+	return false;
 }
 
 static bool url_is_valid_domain_name(std::string_view Name, std::string_view *pDomainName)
 {
-	auto is_alpha = [](char c) noexcept { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); };
-	auto is_digit = [](char c) noexcept { return c >= '0' && c <= '9'; };
-
 	const std::size_t DotPos = Name.rfind('.');
 	if(DotPos == std::string_view::npos)
-		return false; // no "<word>.<tld>" shape
+		return false; // No "<word>.<tld>" shape
+
 	const std::string_view Word = Name.substr(0, DotPos);
 	const std::string_view Tld = Name.substr(DotPos + 1);
 
-	if(Tld.size() < 2)
+	if(Tld.size() < TLD_MIN_LENGTH || Tld.size() > DOMAIN_LABEL_MAX_LENGTH)
 		return false;
 	for(char c : Tld)
-		if(!is_alpha(c))
+		if(!url_is_alpha(c))
 			return false;
 
 	if(Word.empty())
 		return false;
 
-	std::size_t LabelLength = 0; // length of the label being read
+	std::size_t LabelLength = 0; // Length of the label being read
 	char prev = '.';
 	std::size_t Offset = 0;
 	for(char c : Word)
 	{
 		if(c == '.')
 		{
-			if(LabelLength == 0 || prev == '-')
-				return false; // empty label, or label ends with '-'
+			if(LabelLength == 0 || LabelLength > DOMAIN_LABEL_MAX_LENGTH || prev == '-')
+				return false; // Empty label, or label ends with '-'
 			Offset += LabelLength + 1;
 			LabelLength = 0;
 		}
-		else if(is_alpha(c) || is_digit(c))
+		else if(url_is_alpha(c) || str_isnum(c))
 		{
 			++LabelLength;
 		}
 		else if(c == '-')
 		{
 			if(LabelLength == 0)
-				return false; // label starts with '-'
+				return false; // Label starts with '-'
 			++LabelLength;
 		}
 		else
 		{
-			return false; // space, '_', '/', ':', non-ASCII, NUL, ...
+			return false; // Space, '_', '/', ':', non-ASCII, NUL, ...
 		}
 		prev = c;
 	}
 
-	// last label non-empty, not ending in '-'
-	if(LabelLength == 0 || prev == '-')
+	// Last label non-empty, not ending in '-'
+	if(LabelLength == 0 || LabelLength > DOMAIN_LABEL_MAX_LENGTH || prev == '-')
 		return false;
 
 	if(pDomainName)
@@ -742,160 +93,107 @@ static bool url_is_valid_domain_name(std::string_view Name, std::string_view *pD
 	return true;
 }
 
-// Check if a regex candidate really looks like a URL
-static bool url_is_plausible(std::string_view m, bool *pHasScheme, std::string_view *pDomainName)
-{
-	bool HasScheme = false;
-	if(!pHasScheme)
-	{
-		pHasScheme = &HasScheme;
-	}
-
-	*pHasScheme = false;
-	const char *pUrl = m.data();
-	size_t HostLength = m.length();
-	for(const char *pScheme : {"https://", "http://"})
-	{
-		const char *pUrlNoScheme = str_startswith_nocase(pUrl, pScheme);
-		if(pUrlNoScheme)
-		{
-			HostLength = pUrl + HostLength - pUrlNoScheme;
-			pUrl = pUrlNoScheme;
-			*pHasScheme = true;
-			break;
-		}
-	}
-
-	for(const char *pNeedle : {":", "/", "?", "#"})
-	{
-		const char *pHostEnd = str_utf8_find_nocase(pUrl, pNeedle);
-		if(pHostEnd && pHostEnd < pUrl + HostLength)
-		{
-			HostLength = pHostEnd - pUrl;
-			break;
-		}
-	}
-
-	if(HostLength == 0)
-		return false;
-
-	bool Trusted =
-		(pUrl[HostLength - 1] >= '0' && pUrl[HostLength - 1] <= '9') // IPv4 (validated by the regex)
-		|| *pHasScheme // explicit scheme: trust it
-		|| str_startswith_nocase(pUrl, "www.") // "www." prefix: trust it
-		;
-
-	std::string_view Host(pUrl, HostLength);
-	const std::size_t DotPos = Host.rfind('.');
-
-	if(!Trusted)
-	{
-		if(DotPos != std::string_view::npos)
-		{
-			size_t TldLength = HostLength - (DotPos + 1);
-			Trusted = is_known_tld(pUrl + DotPos + 1, TldLength);
-		}
-	}
-
-	if(!url_is_valid_domain_name(Host, pDomainName))
-		return false;
-
-	return Trusted;
-}
-
-// URL detection regex: finds anything *shaped* like a URL. Whether it really is one
-// (known TLD, ...) is decided afterwards by `url_is_plausible()`.
-//
-//   [scheme://]  host  [:port]  [/path | ?query | #fragment]
-//
-// The pattern is compiled once (thread-safe since C++11); matching with a const
-// std::regex is thread-safe. Case-insensitive, so [a-z] also covers A-Z.
-static const std::regex &url_regex()
-{
-	static const std::regex re(
-		// 1) Optional scheme: http:// or https://
-		//    (?:...) is a non-capturing group; `s?` makes the "s" of https optional.
-		R"re((?:(?:https?):\/\/)?)re"
-
-		// 2) Host: either an IPv4 address or a domain name (the `|` between the two parts below).
-		//    2a) IPv4: three "octet." groups followed by a final octet.
-		//        An octet is 0-255:  25[0-5]       -> 250-255
-		//                            2[0-4][0-9]   -> 200-249
-		//                            1?[0-9]{1,2}  -> 0-199 (optional leading 1, then 1-2 digits)
-		R"re((?:(?:(?:25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})|)re"
-		//    2b) Domain name: one or more labels followed by a dot, then the TLD.
-		//        A label is 1-63 chars of [a-z0-9-] that neither starts nor ends with '-':
-		//          [a-z0-9] (?: [a-z0-9-]{0,61} [a-z0-9] )?
-		//        The TLD is 2-63 letters. (Which TLDs are accepted without a scheme is
-		//        decided later by is_plausible_url(), not here.)
-		R"re((?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}))re"
-
-		// 3) Host boundary: negative lookahead. The host must not be followed by more name
-		//    characters, so "1.2.3.456" and "file.txt1" give no partial match ("1.2.3.45", "file.tx").
-		R"re((?![a-z0-9_-]))re"
-
-		// 4) Optional port: ':' followed by 1-5 digits. A bare "example.com:" does not
-		//    include the colon.
-		R"re((?::[0-9]{1,5})?)re"
-
-		// 5) Optional path / query / fragment. It must begin with '/', '?' or '#', and
-		//    consists of two parts so that it cannot END in trailing punctuation:
-		//      [\/?#]                          first char
-		//      [a-z0-9_.~%:=\-?&#+@\[\]\/]*    any run of URL characters (includes . ? : etc.)
-		//      [a-z0-9_~%=\-#+\/\]]            final char: no '.', '?', ':', '&', '@', ...
-		//    so "example.com/page." or "(example.com/page)." yield "example.com/page".
-		//    ')' ',' ';' '<' '>' quotes and whitespace are not URL characters here.
-		R"re((?:[\/?#](?:[a-z0-9_.~%:=\-?&#+@\[\]\/]*[a-z0-9_~%=\-#+\/\]])?)?)re",
-		std::regex::ECMAScript | std::regex::icase | std::regex::optimize);
-	return re;
-}
-
 std::vector<CUrlMatch> url_find_all(std::string_view Text)
 {
 	std::vector<CUrlMatch> vResult;
-	const std::regex &Regex = url_regex();
-	const std::size_t n = Text.size();
-	constexpr std::size_t MaxTokenLength = 2 * URL_MAX_LENGTH;
-
-	std::size_t i = 0;
-	while(i < n && vResult.size() < URL_MAX_RESULTS)
+	std::size_t Pos = 0;
+	std::size_t OffsetBytes = 0;
+	std::size_t OffsetChars = 0;
+	while(Pos < Text.size() && vResult.size() < URL_MAX_RESULTS)
 	{
-		while(i < n && str_isspace(Text[i]))
-			++i; // skip separators
-		const std::size_t TokBegin = i;
-		while(i < n && !str_isspace(Text[i]))
-			++i; // consume one token
-		const std::size_t TokEnd = i;
-		if(TokEnd == TokBegin)
-			break;
-		if(TokEnd - TokBegin > MaxTokenLength)
+		// Start only at a token boundary, never in the middle of another host
+		const std::size_t Start = Pos++;
+		if(!(url_is_alpha(Text[Start]) || str_isnum(Text[Start])) || (Start > 0 && url_blocks_start(Text[Start - 1])))
 			continue;
 
-		const char *const pFirst = Text.data() + TokBegin;
-		const char *const pLast = Text.data() + TokEnd;
-		for(std::cregex_iterator It(pFirst, pLast, Regex), end; It != end && vResult.size() < URL_MAX_RESULTS; ++It)
+		std::size_t HostStart = Start;
+		for(const char *pScheme : {"https://", "http://"})
 		{
-			const std::cmatch &m = *It;
-			if(m[0].first == m[0].second)
-				continue;
-			const std::size_t Start = TokBegin + static_cast<std::size_t>(m.position());
-			// Reject matches that start mid-token (e-mail address, "my_site.com", ...).
-			if(Start > 0 && url_blocks_start(Text[Start - 1]))
-				continue;
-			bool HasScheme;
-			std::string_view DomainName;
-			std::string_view UrlText(Text.data() + Start, static_cast<std::size_t>(m.length()));
-			if(!url_is_plausible(UrlText, &HasScheme, &DomainName))
-				continue;
-			vResult.emplace_back(str_utf8_offset_bytes_to_chars(Text.data(), Start), Start, static_cast<std::size_t>(m.length()), HasScheme, UrlText.data(), DomainName);
+			const std::size_t Length = str_length(pScheme);
+			if(Text.size() - Start >= Length && str_comp_nocase_num(Text.data() + Start, pScheme, Length) == 0)
+			{
+				HostStart += Length;
+				break;
+			}
 		}
+
+		const bool HasScheme = HostStart != Start;
+
+		std::size_t End = HostStart;
+		while(End < Text.size() && (url_is_alpha(Text[End]) || str_isnum(Text[End]) || Text[End] == '-' || Text[End] == '.'))
+			++End;
+
+		Pos = std::max(Pos, End);
+
+		// A final dot belongs to the surrounding sentence, not the host
+		std::size_t HostEnd = End;
+		while(HostEnd > HostStart && Text[HostEnd - 1] == '.')
+			--HostEnd;
+
+		const std::string_view Host = Text.substr(HostStart, HostEnd - HostStart);
+		std::string_view DomainName;
+		if(!url_is_valid_domain_name(Host, &DomainName))
+			continue;
+
+		// Reject a valid-looking prefix of an invalid host or user-info section
+		if(End < Text.size() && (Text[End] == '_' || Text[End] == '@' || Text[End] == '%' || static_cast<unsigned char>(Text[End]) >= FIRST_NON_ASCII_BYTE))
+			continue;
+
+		constexpr std::string_view WwwPrefix = "www.";
+		const bool HasWww = Host.size() >= WwwPrefix.size() && str_comp_nocase_num(Host.data(), WwwPrefix.data(), WwwPrefix.size()) == 0;
+		// Only bare domains need a common TLD to distinguish them from filenames
+		if(!HasScheme && !HasWww && !is_known_tld(Host.substr(Host.rfind('.') + 1)))
+			continue;
+
+		End = HostEnd;
+		if(End < Text.size() && Text[End] == ':')
+		{
+			const std::size_t PortStart = End + 1; // Skip the colon
+			std::size_t PortEnd = PortStart;
+			while(PortEnd < Text.size() && str_isnum(Text[PortEnd]))
+				++PortEnd;
+			const std::size_t PortLength = PortEnd - PortStart;
+			const bool HasInvalidPortSuffix = PortLength > 0 && PortEnd < Text.size() &&
+							  (url_is_alpha(Text[PortEnd]) || Text[PortEnd] == '_' || Text[PortEnd] == '-' || Text[PortEnd] == '@' || Text[PortEnd] == '%' || static_cast<unsigned char>(Text[PortEnd]) >= FIRST_NON_ASCII_BYTE);
+			// Reject the whole candidate instead of truncating a long or malformed port
+			if(PortLength > PORT_MAX_DIGITS || HasInvalidPortSuffix)
+			{
+				Pos = PortEnd;
+				continue;
+			}
+			if(PortLength > 0)
+				End = PortEnd;
+		}
+		if(End < Text.size() && (Text[End] == '/' || Text[End] == '?' || Text[End] == '#'))
+		{
+			const std::size_t PathStart = End++;
+			while(End < Text.size() && (url_is_alpha(Text[End]) || str_isnum(Text[End]) || std::string_view("_.~%:=-?&#+@[]/").find(Text[End]) != std::string_view::npos))
+				++End;
+			Pos = End;
+			// Trim sentence punctuation, keeping the initial '/', '?' or '#'
+			while(End > PathStart + 1 && std::string_view(".?:&@[").find(Text[End - 1]) != std::string_view::npos)
+				--End;
+		}
+
+		Pos = std::max(Pos, End);
+
+		const std::size_t Length = End - Start;
+		if(Length >= URL_MAX_LENGTH)
+			continue;
+
+		// Count each part of the prefix once, even when a line has many links
+		OffsetChars += str_utf8_offset_bytes_to_chars(Text.data() + OffsetBytes, Start - OffsetBytes);
+		OffsetBytes = Start;
+
+		vResult.emplace_back(OffsetChars, Start, Length, HasScheme, Text.data() + Start, DomainName);
 	}
+
 	return vResult;
 }
 
 std::vector<CUrlMatch> url_find_all(const char *pText)
 {
-	return url_find_all(pText, str_length(pText));
+	return pText ? url_find_all(pText, str_length(pText)) : std::vector<CUrlMatch>{};
 }
 
 std::vector<CUrlMatch> url_find_all(const char *pText, std::size_t Length)
@@ -915,8 +213,7 @@ bool url_is_valid_domain_name(const char *pName, std::size_t Length)
 	return pName && url_is_valid_domain_name(std::string_view(pName, Length));
 }
 
-// helper function
-static inline char ascii_lower(char c) noexcept { return (c >= 'A' && c <= 'Z') ? static_cast<char>(c + 32) : c; }
+static inline char ascii_lower(char c) noexcept { return (c >= 'A' && c <= 'Z') ? static_cast<char>(c + ('a' - 'A')) : c; }
 
 bool url_check_domain_name(const char *pUrl, const char *pDomainName)
 {
@@ -930,13 +227,15 @@ bool url_check_domain_name(const char *pUrl, const char *pDomainName)
 	if(!url_is_valid_domain_name(Domain))
 		return false;
 
+	// Spaces and ASCII control characters are never valid inside a URL
 	for(char c : Url)
-		if(static_cast<unsigned char>(c) <= 0x20 || c == 0x7f)
+		if(static_cast<unsigned char>(c) <= ' ' || c == ASCII_DELETE)
 			return false;
 
-	// Optional scheme "<alpha>[alnum+-.]*://", restricted to web schemes.
+	// Optional scheme "<alpha>[alnum+-.]*://", restricted to web schemes
+	constexpr std::string_view SchemeSeparator = "://";
 	bool HasScheme = false;
-	if(const std::size_t Sep = Url.find("://"); Sep != NPOS && Sep > 0)
+	if(const std::size_t Sep = Url.find(SchemeSeparator); Sep != NPOS && Sep > 0)
 	{
 		const std::string_view Scheme = Url.substr(0, Sep);
 		bool WellFormed = (ascii_lower(Scheme[0]) >= 'a' && ascii_lower(Scheme[0]) <= 'z');
@@ -946,18 +245,18 @@ bool url_check_domain_name(const char *pUrl, const char *pDomainName)
 			WellFormed = WellFormed && ((l >= 'a' && l <= 'z') || (l >= '0' && l <= '9') || l == '+' || l == '-' || l == '.');
 		}
 		if(WellFormed)
-		{ // otherwise "://" belongs to the path/query: no scheme
+		{ // Otherwise "://" belongs to the path/query: no scheme
 			bool Web = false;
 			for(const char *pAllowed : {"http", "https"})
 				Web = Web || (Scheme.size() == (size_t)str_length(pAllowed) && str_comp_nocase_num(Scheme.data(), pAllowed, Scheme.size()) == 0);
 			if(!Web)
 				return false;
-			Url.remove_prefix(Sep + 3);
+			Url.remove_prefix(Sep + SchemeSeparator.size());
 			HasScheme = true;
 		}
 	}
 
-	// Authority = everything up to the first '/', '?', '#' or '\'.
+	// Authority = everything up to the first '/', '?', '#' or '\'
 	std::string_view Host = Url.substr(0, Url.find_first_of("/?#\\"));
 	if(HasScheme)
 	{
@@ -965,9 +264,9 @@ bool url_check_domain_name(const char *pUrl, const char *pDomainName)
 			Host.remove_prefix(at + 1); // user-info
 	}
 	if(const std::size_t Colon = Host.rfind(':'); Colon != NPOS)
-	{ // port: digits only
+	{ // Port: digits only
 		const std::string_view Port = Host.substr(Colon + 1);
-		if(Port.size() > 5)
+		if(Port.size() > PORT_MAX_DIGITS)
 			return false;
 		for(char c : Port)
 			if(c < '0' || c > '9')
@@ -979,7 +278,7 @@ bool url_check_domain_name(const char *pUrl, const char *pDomainName)
 	if(!url_is_valid_domain_name(Host))
 		return false;
 
-	// host must end with `domain`, and the match must start on a label boundary.
+	// Host must end with `domain`, and the match must start on a label boundary
 	if(Host.size() < Domain.size())
 		return false;
 	const std::size_t Offset = Host.size() - Domain.size();
