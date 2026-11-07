@@ -1,6 +1,7 @@
 #ifndef ENGINE_SHARED_UUID_MANAGER_H
 #define ENGINE_SHARED_UUID_MANAGER_H
 
+#include <cstdint>
 #include <vector>
 
 class CUuid
