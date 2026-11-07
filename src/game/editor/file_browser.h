@@ -16,6 +16,7 @@
 class CFileBrowser : public CEditorComponent
 {
 public:
+	void OnInit(CEditor *pEditor) override;
 	enum class EFileType
 	{
 		MAP,
