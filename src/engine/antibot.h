@@ -30,6 +30,7 @@ class IEngineAntibot : public IAntibot
 	MACRO_INTERFACE("engineantibot")
 public:
 	virtual void Init() = 0;
+	virtual void Reload() = 0;
 
 	// Hooks
 	virtual void OnEngineTick() = 0;
