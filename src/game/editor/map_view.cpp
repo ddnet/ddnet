@@ -542,17 +542,61 @@ void CMapView::Render(CUIRect View)
 						}
 						else
 						{
-							Editor()->UpdateHotQuadPoint(pLayer.get());
-
 							Graphics()->TextureClear();
 							Graphics()->QuadsBegin();
-							for(size_t i = 0; i < pLayer->m_vQuads.size(); i++)
-							{
-								for(int v = 0; v < 4; v++)
-									Editor()->DoQuadPoint(LayerIndex, pLayer, &pLayer->m_vQuads[i], i, v);
 
-								Editor()->DoQuad(LayerIndex, pLayer, &pLayer->m_vQuads[i], i);
+							// Interactions, i.e. selection, deletions, move operations
+							for(size_t QuadIndex = 0; QuadIndex < pLayer->m_vQuads.size(); QuadIndex++)
+							{
+								Editor()->DoQuadPivotInteraction(LayerIndex, pLayer, &pLayer->m_vQuads[QuadIndex], QuadIndex);
 							}
+
+							for(size_t QuadIndex = 0; QuadIndex < pLayer->m_vQuads.size(); QuadIndex++)
+							{
+								for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
+								{
+									Editor()->DoQuadPointInteraction(LayerIndex, pLayer, &pLayer->m_vQuads[QuadIndex], QuadIndex, CornerIndex);
+								}
+							}
+
+							// buffer selection, so this is not searched up over and over again
+							const size_t NumQuads = pLayer->m_vQuads.size();
+							std::vector<bool> vQuadSelected(NumQuads, false);
+							for(int Selected : Map()->m_vSelectedQuads)
+							{
+								if(Selected >= 0 && Selected < (int)NumQuads)
+								{
+									vQuadSelected[Selected] = true;
+								}
+							}
+
+							// Compute the hot item for the next frame from the final
+							// selection and positions, preferring selected quads on ties.
+							Editor()->UpdateHotQuadPoint(pLayer.get(), vQuadSelected);
+
+							// Draw unselected handles before selected ones
+							for(bool Selected : {false, true})
+							{
+								for(size_t QuadIndex = 0; QuadIndex < NumQuads; QuadIndex++)
+								{
+									if(vQuadSelected[QuadIndex] == Selected)
+									{
+										Editor()->DrawQuadPivotHandle(&pLayer->m_vQuads[QuadIndex], Selected);
+									}
+								}
+
+								for(size_t QuadIndex = 0; QuadIndex < NumQuads; QuadIndex++)
+								{
+									if(vQuadSelected[QuadIndex] == Selected)
+									{
+										for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
+										{
+											Editor()->DrawQuadPointHandle(&pLayer->m_vQuads[QuadIndex], CornerIndex, Selected);
+										}
+									}
+								}
+							}
+
 							Graphics()->QuadsEnd();
 						}
 					}
