@@ -14,6 +14,7 @@ CUrlMatch::CUrlMatch(size_t OffsetChar, size_t OffsetBytes, size_t Length, bool 
 	m_OffsetChar(OffsetChar), m_OffsetBytes(OffsetBytes), m_Length(Length), m_HasScheme(HasScheme)
 {
 	str_truncate(m_aText, sizeof(m_aText), pText, std::min(Length, sizeof(m_aText) - 1));
+	// NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage): Copy length is bounded by both the view and destination.
 	str_truncate(m_aDomainName, sizeof(m_aDomainName), DomainName.data(), std::min(DomainName.size(), sizeof(m_aDomainName) - 1));
 }
 
@@ -30,10 +31,11 @@ static bool url_blocks_start(char c)
 
 static bool is_known_tld(std::string_view Tld)
 {
-	for(std::string_view AllowedTld : {"com", "org", "net"})
-		if(Tld.size() == AllowedTld.size() && str_comp_nocase_num(Tld.data(), AllowedTld.data(), AllowedTld.size()) == 0)
-			return true;
-	return false;
+	static constexpr std::string_view aAllowedTlds[] = {"com", "org", "net"};
+	return std::any_of(std::begin(aAllowedTlds), std::end(aAllowedTlds), [Tld](std::string_view AllowedTld) {
+		// NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage): Both views have the same length and the comparison is bounded.
+		return Tld.size() == AllowedTld.size() && str_comp_nocase_num(Tld.data(), AllowedTld.data(), Tld.size()) == 0;
+	});
 }
 
 static bool url_is_valid_domain_name(std::string_view Name, std::string_view *pDomainName)
@@ -140,6 +142,7 @@ std::vector<CUrlMatch> url_find_all(std::string_view Text)
 			continue;
 
 		constexpr std::string_view WwwPrefix = "www.";
+		// NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage): Host length is checked before comparing only the prefix.
 		const bool HasWww = Host.size() >= WwwPrefix.size() && str_comp_nocase_num(Host.data(), WwwPrefix.data(), WwwPrefix.size()) == 0;
 		// Only bare domains need a common TLD to distinguish them from filenames
 		if(!HasScheme && !HasWww && !is_known_tld(Host.substr(Host.rfind('.') + 1)))

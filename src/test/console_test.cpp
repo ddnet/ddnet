@@ -114,7 +114,7 @@ TEST_F(CConsoleUrl, CapacityAndReuse)
 	for(size_t i = 0; i < URL_ALLOWLIST_MAX_ENTRIES; ++i)
 	{
 		char aCommand[64];
-		str_format(aCommand, sizeof(aCommand), "url_allow_domain site%zu.com", i);
+		str_format(aCommand, sizeof(aCommand), "url_allow_domain site%d.com", static_cast<int>(i));
 		m_pConsole->ExecuteLine(aCommand, IConsole::CLIENT_ID_UNSPECIFIED, true);
 	}
 	m_pConsole->ExecuteLine("url_allow_domain overflow.com", IConsole::CLIENT_ID_UNSPECIFIED, true);

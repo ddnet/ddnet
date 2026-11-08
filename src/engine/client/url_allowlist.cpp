@@ -72,7 +72,6 @@ void CUrlAllowList::AllowDomain(const char *pDomainName)
 			return; // don't add duplicates
 	}
 
-	const auto i = m_UrlAllowListCount;
 	const size_t DomainNameLength = str_length(pDomainName);
 	if(DomainNameLength >= URL_MAX_LENGTH || !url_is_valid_domain_name(pDomainName, DomainNameLength))
 	{
@@ -80,8 +79,8 @@ void CUrlAllowList::AllowDomain(const char *pDomainName)
 		return;
 	}
 
-	str_copy(m_aUrlAllowList[i].m_aName, pDomainName);
-	m_aUrlAllowList[i].m_Length = DomainNameLength;
+	str_copy(m_aUrlAllowList[m_UrlAllowListCount].m_aName, pDomainName);
+	m_aUrlAllowList[m_UrlAllowListCount].m_Length = DomainNameLength;
 
 	m_UrlAllowListCount++;
 }
