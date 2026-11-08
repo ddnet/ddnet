@@ -104,9 +104,9 @@ public:
 	bool IsValid() const override { return m_pGroup != nullptr; }
 	bool IsGroup() const override { return true; }
 	void Unload() override {}
-	void InitCallback() const override;
 
 protected:
+	void InitCallback() const override;
 	IGraphics::CTextureHandle GetTexture() const override
 	{
 		return IGraphics::CTextureHandle();
@@ -328,10 +328,10 @@ public:
 	CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	void Init() override;
-	void InitTileData() override;
 	void Unload() override;
 
 protected:
+	void InitTileData() override;
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
@@ -347,10 +347,10 @@ public:
 	CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	void Init() override;
-	void InitTileData() override;
 	void Unload() override;
 
 protected:
+	void InitTileData() override;
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
@@ -368,10 +368,10 @@ public:
 	CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	void Init() override;
-	void InitTileData() override;
 	void Unload() override;
 
 protected:
+	void InitTileData() override;
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
@@ -389,9 +389,9 @@ public:
 	CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	void Init() override;
-	void InitTileData() override;
 
 protected:
+	void InitTileData() override;
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
 	IGraphics::CTextureHandle GetTexture() const override;
