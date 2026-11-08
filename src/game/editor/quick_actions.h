@@ -158,6 +158,14 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"Add a new group.")
 REGISTER_QUICK_ACTION(
+	ToggleCollapseAllGroups,
+	"Collapse/expand all groups",
+	[&]() { ToggleCollapseAllGroups(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Collapse all groups, or expand them all if they are already collapsed.")
+REGISTER_QUICK_ACTION(
 	ResetZoom,
 	"Reset zoom",
 	[&]() { MapView()->ResetZoom(); },
