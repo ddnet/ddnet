@@ -196,6 +196,28 @@ void CEditor::GotoPosition()
 	Ui()->SetActiveItem(nullptr);
 }
 
+bool CEditor::AreAllGroupsCollapsed() const
+{
+	for(const auto &pGroup : Map()->m_vpGroups)
+	{
+		if(!pGroup->m_vpLayers.empty() && !pGroup->m_Collapse)
+			return false;
+	}
+	return true;
+}
+
+void CEditor::ToggleCollapseAllGroups()
+{
+	const bool Expand = AreAllGroupsCollapsed();
+	for(const auto &pGroup : Map()->m_vpGroups)
+	{
+		if(Expand)
+			pGroup->m_Collapse = false;
+		else if(!pGroup->m_vpLayers.empty())
+			pGroup->m_Collapse = true;
+	}
+}
+
 void CEditor::DeleteSelectedLayer()
 {
 	std::shared_ptr<CLayer> pCurrentLayer = Map()->SelectedLayer(0);
