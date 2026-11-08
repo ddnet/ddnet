@@ -1775,7 +1775,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		return;
 	}
 
-	if(Config()->m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
+	if(Config()->m_SvNetlimit && (Msg != NETMSG_REQUEST_MAP_DATA || m_aClients[ClientId].m_State != CClient::STATE_CONNECTING))
 	{
 		int64_t Now = time_get();
 		int64_t Diff = Now - m_aClients[ClientId].m_TrafficSince;
@@ -1843,7 +1843,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_REQUEST_MAP_DATA)
 		{
-			if(m_aClients[ClientId].m_State < CClient::STATE_CONNECTING)
+			if(m_aClients[ClientId].m_State != CClient::STATE_CONNECTING)
 				return;
 
 			if(m_aClients[ClientId].m_Sixup)
