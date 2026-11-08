@@ -136,7 +136,9 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 		{
 			m_HandlingNewBind = true;
 			const auto &&OnKeyPress = [&](int Mask) {
-				Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][Event.m_Key], IConsole::CLIENT_ID_UNSPECIFIED);
+				// Have to copy bind because it can unbind itself during ExecuteLineStroked
+				const std::string BindCopy = m_aapKeyBindings[Mask][Event.m_Key];
+				Console()->ExecuteLineStroked(1, BindCopy.c_str(), IConsole::CLIENT_ID_UNSPECIFIED);
 				m_vActiveBinds.emplace_back(Event.m_Key, Mask);
 			};
 
@@ -160,7 +162,9 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 			// Have to check for nullptr again because the previous execute can unbind itself
 			if(m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key])
 			{
-				Console()->ExecuteLineStroked(1, m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key], IConsole::CLIENT_ID_UNSPECIFIED);
+				// Have to copy bind because it can unbind itself during ExecuteLineStroked
+				const std::string BindCopy = m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key];
+				Console()->ExecuteLineStroked(1, BindCopy.c_str(), IConsole::CLIENT_ID_UNSPECIFIED);
 			}
 			Handled = true;
 		}
@@ -182,7 +186,9 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 			{
 				return;
 			}
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Bind.m_ModifierMask][Bind.m_Key], IConsole::CLIENT_ID_UNSPECIFIED);
+			// Have to copy bind because it can unbind itself during ExecuteLineStroked
+			const std::string BindCopy = m_aapKeyBindings[Bind.m_ModifierMask][Bind.m_Key];
+			Console()->ExecuteLineStroked(0, BindCopy.c_str(), IConsole::CLIENT_ID_UNSPECIFIED);
 		};
 
 		// Release active bind that uses this primary key
