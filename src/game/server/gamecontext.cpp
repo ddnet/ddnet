@@ -864,11 +864,17 @@ void CGameContext::SendModeratorAlert(int ToClientId, const char *pMessage)
 	dbg_assert(in_range(ToClientId, 0, MAX_CLIENTS - 1), "SendImportantAlert ToClientId invalid: %d", ToClientId);
 	dbg_assert(m_apPlayers[ToClientId] != nullptr, "Client not online: %d", ToClientId);
 
-	if(m_apPlayers[ToClientId]->GetClientVersion() >= VERSION_DDNET_IMPORTANT_ALERT)
+	const int ClientVersion = m_apPlayers[ToClientId]->GetClientVersion();
+	if(ClientVersion >= VERSION_DDNET_IMPORTANT_ALERT)
 	{
 		CNetMsg_Sv_ModeratorAlert Msg;
 		Msg.m_pMessage = pMessage;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ToClientId);
+
+		if(ClientVersion < VERSION_DDNET_IMPORTANT_ALERT_DUMMY_FIXED)
+		{
+			log_info("moderator_alert", "Notice: player uses an old client version and may not see moderator alerts: %s (ID %d)", Server()->ClientName(ToClientId), ToClientId);
+		}
 	}
 	else
 	{
