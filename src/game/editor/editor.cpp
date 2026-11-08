@@ -2968,27 +2968,12 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	LayersBox.HSplitTop(RowHeight + 1.0f, &CollapseAllButton, &LayersBox);
 	if(ScrollRegion.AddRect(CollapseAllButton))
 	{
-		size_t TotalCollapsed = 0;
-		for(const auto &pGroup : Map()->m_vpGroups)
-		{
-			if(pGroup->m_vpLayers.empty() || pGroup->m_Collapse)
-			{
-				TotalCollapsed++;
-			}
-		}
-
-		const char *pActionText = TotalCollapsed == Map()->m_vpGroups.size() ? "Expand all" : "Collapse all";
+		const char *pActionText = AreAllGroupsCollapsed() ? "Expand all" : "Collapse all";
 
 		CollapseAllButton.HSplitTop(RowHeight, &CollapseAllButton, nullptr);
-		if(DoButton_Editor(&State.m_CollapseAllButtonId, pActionText, 0, &CollapseAllButton, BUTTONFLAG_LEFT, "Expand or collapse all groups."))
+		if(DoButton_Editor(&State.m_CollapseAllButtonId, pActionText, 0, &CollapseAllButton, BUTTONFLAG_LEFT, m_QuickActionToggleCollapseAllGroups.Description()))
 		{
-			for(const auto &pGroup : Map()->m_vpGroups)
-			{
-				if(TotalCollapsed == Map()->m_vpGroups.size())
-					pGroup->m_Collapse = false;
-				else if(!pGroup->m_vpLayers.empty())
-					pGroup->m_Collapse = true;
-			}
+			m_QuickActionToggleCollapseAllGroups.Call();
 		}
 	}
 
