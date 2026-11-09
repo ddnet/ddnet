@@ -375,11 +375,6 @@ public:
 	typedef EPopupMenuFunctionResult (*FPopupMenuFunction)(void *pContext, CUIRect View, bool Active);
 
 	/**
-	 * Callback that is called when one or more popups are closed.
-	 */
-	typedef std::function<void()> FPopupMenuClosedCallback;
-
-	/**
 	 * Represents the aggregated state of current touch events to control a user interface.
 	 */
 	class CTouchState
@@ -482,7 +477,6 @@ private:
 		FPopupMenuFunction m_pfnFunc;
 	};
 	std::vector<SPopupMenu> m_vPopupMenus;
-	FPopupMenuClosedCallback m_pfnPopupMenuClosedCallback = nullptr;
 
 	static CUi::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
@@ -743,7 +737,6 @@ public:
 	bool IsPopupOpen() const;
 	bool IsPopupOpen(const SPopupMenuId *pId) const;
 	bool IsPopupHovered() const;
-	void SetPopupMenuClosedCallback(FPopupMenuClosedCallback pfnCallback);
 
 	struct SMessagePopupContext : public SPopupMenuId
 	{

@@ -3984,7 +3984,6 @@ void CEditor::Render()
 		constexpr float PopupHeight = 150.0f;
 		Ui()->DoPopupMenu(&s_PopupEventId, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, this, PopupEvent);
 		m_PopupEventActivated = false;
-		m_PopupEventWasActivated = true;
 	}
 
 	if(m_Dialog == DIALOG_NONE && !Ui()->IsPopupHovered() && Ui()->MouseInside(&View))
@@ -4613,9 +4612,6 @@ void CEditor::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_UI.Init(Kernel());
-	m_UI.SetPopupMenuClosedCallback([this]() {
-		m_PopupEventWasActivated = false;
-	});
 	m_UI.SetDispatchInputCallback([this](const IInput::CEvent &Event) {
 		OnInput(Event);
 	});
