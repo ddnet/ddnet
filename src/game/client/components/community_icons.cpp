@@ -22,6 +22,7 @@ CCommunityIcons::CCommunityIconDownloadJob::CCommunityIconDownloadJob(CCommunity
 	m_pHttpRequest->WriteToFile(pCommunityIcons->Storage(), m_aPath, IStorage::TYPE_SAVE);
 	m_pHttpRequest->ExpectSha256(Sha256);
 	m_pHttpRequest->Timeout(CTimeout{0, 0, 0, 0});
+	m_pHttpRequest->SkipByFileTime(false); // Always re-download.
 	m_pHttpRequest->LogProgress(HTTPLOG::FAILURE);
 }
 
