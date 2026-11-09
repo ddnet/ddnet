@@ -840,7 +840,7 @@ static int priv_net_create_socket(int domain, int type, const NETADDR *bindaddr,
 
 #if defined(CONF_FAMILY_UNIX)
 	// On TCP sockets set SO_REUSEADDR to fix port rebind on restart
-	if(domain == AF_INET && type == SOCK_STREAM)
+	if(type == SOCK_STREAM)
 	{
 		int reuse_addr = 1;
 		if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char *)&reuse_addr, sizeof(reuse_addr)) != 0)
