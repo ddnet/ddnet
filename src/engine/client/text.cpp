@@ -2342,10 +2342,14 @@ public:
 	{
 		for(auto *pTextContainer : m_vpTextContainers)
 		{
-			if(pTextContainer->m_ContainerIndex.Valid() && pTextContainer->m_ContainerIndex.m_UseCount != nullptr && pTextContainer->m_ContainerIndex.m_UseCount.use_count() <= 1)
+			if(pTextContainer->m_ContainerIndex.Valid())
 			{
-				log_error("textrender", "Found non empty text container with index %d with %" PRIzu " quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, pTextContainer->m_StringInfo.m_vCharacterQuads.size(), pTextContainer->m_aDebugText);
-				dbg_assert_failed("Text container was forgotten by the implementation (the index was overwritten).");
+				dbg_assert(pTextContainer->m_ContainerIndex.m_UseCount != nullptr, "Text container must not be one-time use.");
+				if(pTextContainer->m_ContainerIndex.m_UseCount.use_count() <= 1)
+				{
+					log_error("textrender", "Found non empty text container with index %d with %" PRIzu " quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, pTextContainer->m_StringInfo.m_vCharacterQuads.size(), pTextContainer->m_aDebugText);
+					dbg_assert_failed("Text container was forgotten by the implementation (the index was overwritten).");
+				}
 			}
 		}
 	}
@@ -2358,7 +2362,8 @@ public:
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
 				log_error("textrender", "Found non empty text container with index %d with %" PRIzu " quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, pTextContainer->m_StringInfo.m_vCharacterQuads.size(), pTextContainer->m_aDebugText);
-				log_error("textrender", "The text container index was in use by %d ", pTextContainer->m_ContainerIndex.m_UseCount != nullptr ? (int)pTextContainer->m_ContainerIndex.m_UseCount.use_count() : 0);
+				dbg_assert(pTextContainer->m_ContainerIndex.m_UseCount != nullptr, "Text container must not be one-time use.");
+				log_error("textrender", "The text container index was in use by %d ", (int)pTextContainer->m_ContainerIndex.m_UseCount.use_count());
 				HasNonEmptyTextContainer = true;
 			}
 		}
