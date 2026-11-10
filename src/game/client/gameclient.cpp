@@ -566,7 +566,16 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 			m_DummyInput.m_WantedWeapon = WEAPON_HAMMER + 1;
 		}
 
-		const vec2 Dir = m_LocalCharacterPos - m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
+		const int DummyId = m_aLocalIds[!g_Config.m_ClDummy];
+		vec2 Dir = m_LocalCharacterPos - m_aClients[DummyId].m_Predicted.m_Pos;
+		// After a snapshot update, m_LocalCharacterPos holds the snapshot position until the next render.
+		if(m_NewTick && Predict() && PredictDummy() && m_PredictedWorld.GameTick() > Client()->GameTick(g_Config.m_ClDummy))
+		{
+			const CCharacter *pLocalChar = m_PredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
+			const CCharacter *pDummyChar = m_PredictedWorld.GetCharacterById(DummyId);
+			if(pLocalChar && pDummyChar)
+				Dir = pLocalChar->Core()->m_Pos - pDummyChar->Core()->m_Pos;
+		}
 		m_HammerInput.m_TargetX = (int)Dir.x;
 		m_HammerInput.m_TargetY = (int)Dir.y;
 
