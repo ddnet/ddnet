@@ -907,7 +907,7 @@ void CScoreboard::RenderMouseHint(CUIRect MouseHint)
 	constexpr float KeycapRadius = 3.5f;
 
 	char aKey[64];
-	GameClient()->m_Binds.GetKey(SCOREBOARD_CURSOR_BIND_NAME, aKey, sizeof(aKey));
+	GameClient()->m_Binds.FindKeyByCommand(SCOREBOARD_CURSOR_BIND_NAME, aKey, sizeof(aKey));
 
 	char aHint[128];
 	if(!aKey[0])
