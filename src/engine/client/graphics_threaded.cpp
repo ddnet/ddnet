@@ -1572,10 +1572,15 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 
 	if(QuadDrawNum == -1)
+	{
 		QuadDrawNum = (int)Container.m_vQuads.size() - QuadOffset;
-
-	if((int)Container.m_vQuads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
+	}
+	if(QuadDrawNum == 0)
+	{
 		return;
+	}
+	dbg_assert(QuadOffset >= 0 && QuadDrawNum > 0 && QuadOffset + QuadDrawNum <= (int)Container.m_vQuads.size(),
+		"Invalid quad container rendered: QuadOffset=%d QuadDrawNum=%d NumQuads=%d", QuadOffset, QuadDrawNum, (int)Container.m_vQuads.size());
 
 	if(IsQuadContainerBufferingEnabled())
 	{
@@ -1628,11 +1633,16 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 {
 	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 
-	if((int)Container.m_vQuads.size() < QuadOffset + 1)
-		return;
-
 	if(QuadDrawNum == -1)
+	{
 		QuadDrawNum = (int)Container.m_vQuads.size() - QuadOffset;
+	}
+	if(QuadDrawNum == 0)
+	{
+		return;
+	}
+	dbg_assert(QuadOffset >= 0 && QuadDrawNum > 0 && QuadOffset + QuadDrawNum <= (int)Container.m_vQuads.size(),
+		"Invalid quad container rendered: QuadOffset=%d QuadDrawNum=%d NumQuads=%d", QuadOffset, QuadDrawNum, (int)Container.m_vQuads.size());
 
 	if(IsQuadContainerBufferingEnabled())
 	{
