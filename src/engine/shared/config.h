@@ -96,6 +96,8 @@ enum
 	CFGFLAG_COLALPHA = 1 << 12,
 	CFGFLAG_INSENSITIVE = 1 << 13,
 	CMDFLAG_PRACTICE = 1 << 14,
+	// Command output is only a response to the invoker, not logged nor shown to other rcon clients
+	CMDFLAG_RESPONSE = 1 << 15,
 };
 
 #ifdef CONF_DEBUG
