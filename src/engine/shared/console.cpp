@@ -425,6 +425,59 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 	}
 }
 
+class CParsedCommand
+{
+public:
+	const char *m_pStart = nullptr;
+	const char *m_pEnd = nullptr;
+	const char *m_pNextPart = nullptr;
+
+	size_t Length() const { return m_pStart != nullptr && m_pEnd != nullptr ? (m_pEnd - m_pStart) + 1 : 0; }
+};
+
+static CParsedCommand ParseCommand(const char *pStr, bool InterpretSemicolons)
+{
+	CParsedCommand ParsedCommand;
+	ParsedCommand.m_pStart = pStr;
+	ParsedCommand.m_pEnd = pStr;
+	ParsedCommand.m_pNextPart = nullptr;
+
+	bool InString = false;
+	bool IsEscaping = false;
+
+	while(*ParsedCommand.m_pEnd)
+	{
+		if(IsEscaping)
+		{
+			IsEscaping = false;
+		}
+		else if(*ParsedCommand.m_pEnd == '"')
+		{
+			InString = !InString;
+		}
+		else if(InString && *ParsedCommand.m_pEnd == '\\') // escape sequences
+		{
+			IsEscaping = true;
+		}
+
+		if(!InString && InterpretSemicolons)
+		{
+			if(*ParsedCommand.m_pEnd == ';') // command separator
+			{
+				ParsedCommand.m_pNextPart = ParsedCommand.m_pEnd + 1;
+				break;
+			}
+			else if(*ParsedCommand.m_pEnd == '#') // comment, no need to do anything more
+			{
+				break;
+			}
+		}
+
+		ParsedCommand.m_pEnd++;
+	}
+	return ParsedCommand;
+}
+
 bool CConsole::LineIsValid(const char *pStr)
 {
 	if(!pStr || *pStr == 0)
@@ -433,50 +486,16 @@ bool CConsole::LineIsValid(const char *pStr)
 	do
 	{
 		CResult Result(IConsole::CLIENT_ID_UNSPECIFIED);
-		const char *pEnd = pStr;
-		const char *pNextPart = nullptr;
-		bool InString = false;
-		bool IsEscaping = false;
+		CParsedCommand ParsedCommand = ParseCommand(pStr, false);
 
-		while(*pEnd)
-		{
-			if(IsEscaping)
-			{
-				IsEscaping = false;
-			}
-			else if(*pEnd == '"')
-			{
-				InString = !InString;
-			}
-			else if(InString && *pEnd == '\\') // escape sequences
-			{
-				IsEscaping = true;
-			}
-
-			if(!InString)
-			{
-				if(*pEnd == ';') // command separator
-				{
-					pNextPart = pEnd + 1;
-					break;
-				}
-				else if(*pEnd == '#') // comment, no need to do anything more
-				{
-					break;
-				}
-			}
-
-			pEnd++;
-		}
-
-		if(ParseStart(&Result, pStr, (pEnd - pStr) + 1) != 0)
+		if(ParseStart(&Result, ParsedCommand.m_pStart, ParsedCommand.Length()) != 0)
 			return false;
 
 		CCommand *pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 		if(!pCommand || ParseArgs(&Result, pCommand->m_pParams))
 			return false;
 
-		pStr = pNextPart;
+		pStr = ParsedCommand.m_pNextPart;
 	} while(pStr && *pStr);
 
 	return true;
@@ -493,50 +512,16 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 	while(pStr && *pStr)
 	{
 		CResult Result(ClientId);
-		const char *pEnd = pStr;
-		const char *pNextPart = nullptr;
-		bool InString = false;
-		bool IsEscaping = false;
+		CParsedCommand ParsedCommand = ParseCommand(pStr, InterpretSemicolons);
 
-		while(*pEnd)
-		{
-			if(IsEscaping)
-			{
-				IsEscaping = false;
-			}
-			else if(*pEnd == '"')
-			{
-				InString = !InString;
-			}
-			else if(InString && *pEnd == '\\') // escape sequences
-			{
-				IsEscaping = true;
-			}
-
-			if(!InString && InterpretSemicolons)
-			{
-				if(*pEnd == ';') // command separator
-				{
-					pNextPart = pEnd + 1;
-					break;
-				}
-				else if(*pEnd == '#') // comment, no need to do anything more
-				{
-					break;
-				}
-			}
-
-			pEnd++;
-		}
-
-		if(ParseStart(&Result, pStr, (pEnd - pStr) + 1) != 0)
+		if(ParseStart(&Result, ParsedCommand.m_pStart, ParsedCommand.Length()) != 0)
 			return;
 
 		if(!*Result.m_pCommand)
 		{
-			if(pNextPart)
+			if(ParsedCommand.m_pNextPart)
 			{
-				pStr = pNextPart;
+				pStr = ParsedCommand.m_pNextPart;
 				continue;
 			}
 			return;
@@ -548,128 +533,11 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 		else
 			pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
-		if(pCommand)
-		{
-			if(ClientId == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
-			{
-				if(Stroke)
-				{
-					char aBuf[CMDLINE_LENGTH + 64];
-					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", Result.m_pCommand);
-					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-				}
-			}
-			else if(ClientId == IConsole::CLIENT_ID_NO_GAME && pCommand->m_Flags & CFGFLAG_GAME)
-			{
-				if(Stroke)
-				{
-					char aBuf[CMDLINE_LENGTH + 64];
-					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
-					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
-					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-				}
-			}
-			else if(CanUseCommand(Result.m_ClientId, pCommand))
-			{
-				int IsStrokeCommand = 0;
-				if(Result.m_pCommand[0] == '+')
-				{
-					// insert the stroke direction token
-					Result.AddArgument(m_apStrokeStr[Stroke]);
-					IsStrokeCommand = 1;
-				}
-
-				if(Stroke || IsStrokeCommand)
-				{
-					if(int Error = ParseArgs(&Result, pCommand->m_pParams))
-					{
-						char aBuf[CMDLINE_LENGTH + 64];
-						if(Error == PARSEARGS_INVALID_INTEGER)
-							str_format(aBuf, sizeof(aBuf), "%s is not a valid integer.", Result.GetString(Result.NumArguments() - 1));
-						else if(Error == PARSEARGS_INVALID_COLOR)
-							str_format(aBuf, sizeof(aBuf), "%s is not a valid color.", Result.GetString(Result.NumArguments() - 1));
-						else if(Error == PARSEARGS_INVALID_FLOAT)
-							str_format(aBuf, sizeof(aBuf), "%s is not a valid decimal number.", Result.GetString(Result.NumArguments() - 1));
-						else
-							str_format(aBuf, sizeof(aBuf), "Invalid arguments. Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
-						Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-					}
-					else if(m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
-					{
-						m_vExecutionQueue.emplace_back(pCommand, Result);
-					}
-					else
-					{
-						if(pCommand->m_Flags & CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
-						{
-							Print(OUTPUT_LEVEL_STANDARD, "console", "Test commands aren't allowed, enable them with 'sv_test_cmds 1' in your initial config.");
-							return;
-						}
-
-						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags & CFGFLAG_NONTEEHISTORIC))
-						{
-							m_pfnTeeHistorianCommandCallback(ClientId, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
-						}
-
-						int FanOutSlot = -1;
-						std::vector<int> vFanOutIds;
-						for(unsigned Slot = 0; Slot < Result.m_vVictims.size(); Slot++)
-						{
-							if(!Result.m_vVictims[Slot].m_aSpecialVictim[0])
-								continue;
-							std::optional<std::vector<int>> Victims;
-							if(m_pfnGetVictimsCommandCallback)
-								Victims = m_pfnGetVictimsCommandCallback(ClientId, Result.m_vVictims[Slot].m_aSpecialVictim, m_pGetVictimsCommandUserData);
-							if(!Victims.has_value())
-							{
-								log_error("console", "Invalid victim '%s'", Result.m_vVictims[Slot].m_aSpecialVictim);
-								return;
-							}
-							if(Victims->size() != 1 && FanOutSlot >= 0)
-							{
-								log_error("console", "Only one parameter may target multiple clients");
-								return;
-							}
-							if(Victims->size() == 1)
-								Result.SetVictim(Slot, Victims->front());
-							else
-							{
-								FanOutSlot = Slot;
-								vFanOutIds = std::move(Victims.value());
-							}
-						}
-
-						if(FanOutSlot < 0)
-						{
-							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
-						}
-						else
-						{
-							for(const int VictimId : vFanOutIds)
-							{
-								Result.SetVictim(FanOutSlot, VictimId);
-								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
-							}
-						}
-
-						if(pCommand->m_Flags & CMDFLAG_TEST)
-							m_Cheated = true;
-					}
-				}
-			}
-			else if(Stroke)
-			{
-				char aBuf[CMDLINE_LENGTH + 32];
-				str_format(aBuf, sizeof(aBuf), "Access for command %s denied.", Result.m_pCommand);
-				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			}
-		}
-		else if(Stroke)
+		if(!pCommand)
 		{
 			// Pass the original string to the unknown command callback instead of the parsed command, as the latter
 			// ends at the first whitespace, which breaks for unknown commands (filenames) containing spaces.
-			if(!m_pfnUnknownCommandCallback(pStr, m_pUnknownCommandUserdata))
+			if(Stroke && !m_pfnUnknownCommandCallback(pStr, m_pUnknownCommandUserdata))
 			{
 				char aBuf[CMDLINE_LENGTH + 32];
 				if(m_FlagMask & CFGFLAG_CHAT)
@@ -678,9 +546,125 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 					str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
 				Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 			}
+			pStr = ParsedCommand.m_pNextPart;
+			continue;
+		}
+		ExecuteCommand(Stroke, pCommand, ClientId, &Result);
+		pStr = ParsedCommand.m_pNextPart;
+	}
+}
+
+void CConsole::ExecuteCommand(int Stroke, CCommand *pCommand, int ClientId, CResult *pResult)
+{
+	if(ClientId == IConsole::CLIENT_ID_NO_GAME)
+	{
+		if(!Stroke)
+			return;
+		char aBuf[CMDLINE_LENGTH + 64];
+		if(pCommand->m_Flags & CFGFLAG_GAME)
+		{
+			str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", pResult->m_pCommand);
+			Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
+			Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", pResult->m_pCommand);
+			Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		}
+	}
+	else if(CanUseCommand(pResult->m_ClientId, pCommand))
+	{
+		int IsStrokeCommand = 0;
+		if(pResult->m_pCommand[0] == '+')
+		{
+			// insert the stroke direction token
+			pResult->AddArgument(m_apStrokeStr[Stroke]);
+			IsStrokeCommand = 1;
 		}
 
-		pStr = pNextPart;
+		if(!Stroke && !IsStrokeCommand)
+			return;
+
+		if(int Error = ParseArgs(pResult, pCommand->m_pParams))
+		{
+			char aBuf[CMDLINE_LENGTH + 64];
+			if(Error == PARSEARGS_INVALID_INTEGER)
+				str_format(aBuf, sizeof(aBuf), "%s is not a valid integer.", pResult->GetString(pResult->NumArguments() - 1));
+			else if(Error == PARSEARGS_INVALID_COLOR)
+				str_format(aBuf, sizeof(aBuf), "%s is not a valid color.", pResult->GetString(pResult->NumArguments() - 1));
+			else if(Error == PARSEARGS_INVALID_FLOAT)
+				str_format(aBuf, sizeof(aBuf), "%s is not a valid decimal number.", pResult->GetString(pResult->NumArguments() - 1));
+			else
+				str_format(aBuf, sizeof(aBuf), "Invalid arguments. Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
+			Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+		}
+		else if(m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
+		{
+			m_vExecutionQueue.emplace_back(pCommand, *pResult);
+		}
+		else if(pCommand->m_Flags & CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
+		{
+			Print(OUTPUT_LEVEL_STANDARD, "console", "Test commands aren't allowed, enable them with 'sv_test_cmds 1' in your initial config.");
+		}
+		else
+		{
+			if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags & CFGFLAG_NONTEEHISTORIC))
+			{
+				m_pfnTeeHistorianCommandCallback(ClientId, m_FlagMask, pCommand->m_pName, pResult, m_pTeeHistorianCommandUserdata);
+			}
+
+			int FanOutSlot = -1;
+			std::vector<int> vFanOutIds;
+			for(unsigned Slot = 0; Slot < pResult->m_vVictims.size(); Slot++)
+			{
+				if(!pResult->m_vVictims[Slot].m_aSpecialVictim[0])
+					continue;
+				std::optional<std::vector<int>> Victims;
+				if(m_pfnGetVictimsCommandCallback)
+					Victims = m_pfnGetVictimsCommandCallback(ClientId, pResult->m_vVictims[Slot].m_aSpecialVictim, m_pGetVictimsCommandUserData);
+				if(!Victims.has_value())
+				{
+					log_error("console", "Invalid victim '%s'", pResult->m_vVictims[Slot].m_aSpecialVictim);
+					return;
+				}
+				if(Victims->size() != 1 && FanOutSlot >= 0)
+				{
+					log_error("console", "Only one parameter may target multiple clients");
+					return;
+				}
+				if(Victims->size() == 1)
+					pResult->SetVictim(Slot, Victims->front());
+				else
+				{
+					FanOutSlot = Slot;
+					vFanOutIds = std::move(Victims.value());
+				}
+			}
+
+			if(FanOutSlot < 0)
+			{
+				pCommand->m_pfnCallback(pResult, pCommand->m_pUserData);
+			}
+			else
+			{
+				for(const int VictimId : vFanOutIds)
+				{
+					pResult->SetVictim(FanOutSlot, VictimId);
+					pCommand->m_pfnCallback(pResult, pCommand->m_pUserData);
+				}
+			}
+
+			if(pCommand->m_Flags & CMDFLAG_TEST)
+				m_Cheated = true;
+		}
+	}
+	else if(Stroke)
+	{
+		char aBuf[CMDLINE_LENGTH + 32];
+		str_format(aBuf, sizeof(aBuf), "Access for command %s denied.", pResult->m_pCommand);
+		Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }
 
