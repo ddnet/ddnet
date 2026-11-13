@@ -52,6 +52,8 @@ public:
 	// returns false if the tee could not be parsed or contains invalid values
 	bool FromString(const char *pString, int MembersCount);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
+	// clears the hook target if it is no longer part of the save, only used for practice saves
+	void DropHookedPlayerIfMissing(const CSaveTeam *pTeam);
 	bool IsHooking() const;
 	vec2 GetPos() const { return m_Pos; }
 	const char *GetName() const { return m_aName; }
@@ -190,6 +192,9 @@ public:
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientId, int NumPlayer, char *pMessage, int MessageLen) const;
 	ESaveResult Save(CGameContext *pGameServer, int Team, bool Dry = false, bool Force = false);
 	bool Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong, bool IgnorePlayers = false);
+
+	// remove a client from a save, only used for practice saves
+	void RemoveClient(int ClientId);
 
 	CSaveTee *m_pSavedTees = nullptr;
 
