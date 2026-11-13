@@ -961,6 +961,226 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	std::vector<std::unique_ptr<SRenderThread>> m_vpRenderThreads;
 
 private:
+	class IPresentTarget
+	{
+	public:
+		virtual ~IPresentTarget() = default;
+		[[nodiscard]] virtual bool GetInstanceExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions) = 0;
+		virtual void AddDeviceExtensions(std::set<std::string> &OurExt) const = 0;
+		[[nodiscard]] virtual bool CreateSurface(SDL_Window *pWindow) = 0;
+		virtual void DestroySurface() = 0;
+		[[nodiscard]] virtual bool CreateImages(VkSwapchainKHR &OldSwapChain) = 0;
+		virtual void DestroyImages(bool ForceDestroy) = 0;
+		[[nodiscard]] virtual bool SupportsRecreate() const = 0;
+		[[nodiscard]] virtual VkResult AcquireNextImage(uint32_t &ImageIndex) = 0;
+		[[nodiscard]] virtual bool SubmitAndPresent(VkSubmitInfo &SubmitInfo) = 0;
+		virtual VkImageLayout PresentedImageLayout() const = 0;
+	};
+
+	class CSwapChainTarget final : public IPresentTarget
+	{
+	public:
+		explicit CSwapChainTarget(CCommandProcessorFragment_Vulkan &Backend) :
+			m_Backend(Backend)
+		{
+		}
+
+		[[nodiscard]] bool GetInstanceExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions) override
+		{
+			return m_Backend.GetVulkanExtensions(pWindow, vVKExtensions);
+		}
+
+		void AddDeviceExtensions(std::set<std::string> &OurExt) const override
+		{
+			OurExt.emplace(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		}
+
+		[[nodiscard]] bool CreateSurface(SDL_Window *pWindow) override
+		{
+			return m_Backend.CreateSurface(pWindow);
+		}
+
+		void DestroySurface() override
+		{
+			m_Backend.DestroySurface();
+		}
+
+		[[nodiscard]] bool CreateImages(VkSwapchainKHR &OldSwapChain) override
+		{
+			return m_Backend.CreateSwapChain(OldSwapChain) && m_Backend.GetSwapChainImageHandles();
+		}
+
+		void DestroyImages(bool ForceDestroy) override
+		{
+			m_Backend.ClearSwapChainImageHandles();
+			m_Backend.DestroySwapChain(ForceDestroy);
+		}
+
+		[[nodiscard]] bool SupportsRecreate() const override
+		{
+			return true;
+		}
+
+		[[nodiscard]] VkResult AcquireNextImage(uint32_t &ImageIndex) override
+		{
+			return vkAcquireNextImageKHR(m_Backend.m_VKDevice, m_Backend.m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_Backend.m_AcquireImageSemaphore, VK_NULL_HANDLE, &ImageIndex);
+		}
+
+		[[nodiscard]] bool SubmitAndPresent(VkSubmitInfo &SubmitInfo) override
+		{
+			std::array<VkSemaphore, 1> aWaitSemaphores = {m_Backend.m_AcquireImageSemaphore};
+			std::array<VkPipelineStageFlags, 1> aWaitStages = {(VkPipelineStageFlags)VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+			SubmitInfo.waitSemaphoreCount = aWaitSemaphores.size();
+			SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
+			SubmitInfo.pWaitDstStageMask = aWaitStages.data();
+
+			std::array<VkSemaphore, 1> aSignalSemaphores = {m_Backend.m_vQueueSubmitSemaphores[m_Backend.m_CurImageIndex]};
+			SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
+			SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
+
+			if(!m_Backend.QueueSubmitFrame(SubmitInfo))
+				return false;
+
+			std::swap(m_Backend.m_vBusyAcquireImageSemaphores[m_Backend.m_CurImageIndex], m_Backend.m_AcquireImageSemaphore);
+
+			m_Backend.m_LastPresentedSwapChainImageIndex = m_Backend.m_CurImageIndex;
+
+			VkPresentInfoKHR PresentInfo{};
+			PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+			PresentInfo.waitSemaphoreCount = aSignalSemaphores.size();
+			PresentInfo.pWaitSemaphores = aSignalSemaphores.data();
+
+			std::array<VkSwapchainKHR, 1> aSwapChains = {m_Backend.m_VKSwapChain};
+			PresentInfo.swapchainCount = aSwapChains.size();
+			PresentInfo.pSwapchains = aSwapChains.data();
+
+			PresentInfo.pImageIndices = &m_Backend.m_CurImageIndex;
+
+			VkResult QueuePresentRes = vkQueuePresentKHR(m_Backend.m_VKPresentQueue, &PresentInfo);
+			if(QueuePresentRes != VK_SUCCESS && QueuePresentRes != VK_SUBOPTIMAL_KHR)
+			{
+				const char *pCritErrorMsg = m_Backend.CheckVulkanCriticalError(QueuePresentRes);
+				if(pCritErrorMsg != nullptr)
+				{
+					m_Backend.SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Presenting graphics queue failed.", pCritErrorMsg);
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		VkImageLayout PresentedImageLayout() const override
+		{
+			return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		}
+
+	private:
+		CCommandProcessorFragment_Vulkan &m_Backend;
+	};
+
+	class COffscreenTarget final : public IPresentTarget
+	{
+	public:
+		explicit COffscreenTarget(CCommandProcessorFragment_Vulkan &Backend) :
+			m_Backend(Backend)
+		{
+		}
+
+		[[nodiscard]] bool GetInstanceExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions) override
+		{
+			vVKExtensions.clear();
+			return true;
+		}
+
+		void AddDeviceExtensions(std::set<std::string> &OurExt) const override
+		{
+		}
+
+		[[nodiscard]] bool CreateSurface(SDL_Window *pWindow) override
+		{
+			return true;
+		}
+
+		void DestroySurface() override
+		{
+		}
+
+		[[nodiscard]] bool CreateImages(VkSwapchainKHR &OldSwapChain) override
+		{
+			m_Backend.m_VKSurfFormat.format = VK_FORMAT_R8G8B8A8_UNORM;
+			m_Backend.m_VKSurfFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+
+			VkSurfaceCapabilitiesKHR CanvasCapabilities{};
+			CanvasCapabilities.currentExtent = {m_Backend.m_CanvasWidth, m_Backend.m_CanvasHeight};
+			m_Backend.m_VKSwapImgAndViewportExtent = m_Backend.GetSwapImageSize(CanvasCapabilities);
+
+			m_Backend.m_SwapChainImageCount = 2;
+
+			VkImageUsageFlags UsageFlags = 0;
+			for(const auto &ImgUsage : m_Backend.OurImageUsages())
+				UsageFlags |= ImgUsage;
+
+			m_Backend.m_vSwapChainImages.resize(m_Backend.m_SwapChainImageCount);
+			m_vImageMemory.resize(m_Backend.m_SwapChainImageCount);
+			for(uint32_t i = 0; i < m_Backend.m_SwapChainImageCount; ++i)
+			{
+				if(!m_Backend.CreateImage(m_Backend.m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_Backend.m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_Backend.m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_Backend.m_vSwapChainImages[i], m_vImageMemory[i], UsageFlags))
+					return false;
+			}
+
+			return true;
+		}
+
+		void DestroyImages(bool ForceDestroy) override
+		{
+			for(size_t i = 0; i < m_Backend.m_vSwapChainImages.size(); ++i)
+			{
+				vkDestroyImage(m_Backend.m_VKDevice, m_Backend.m_vSwapChainImages[i], nullptr);
+				m_Backend.FreeImageMemBlock(m_vImageMemory[i]);
+			}
+			m_vImageMemory.clear();
+			m_Backend.ClearSwapChainImageHandles();
+		}
+
+		// Canvas resizes and V-Sync or multi-sampling changes are not applied to these images.
+		[[nodiscard]] bool SupportsRecreate() const override
+		{
+			return false;
+		}
+
+		[[nodiscard]] VkResult AcquireNextImage(uint32_t &ImageIndex) override
+		{
+			ImageIndex = (uint32_t)(m_Backend.m_CurFrame % m_Backend.m_SwapChainImageCount);
+			return VK_SUCCESS;
+		}
+
+		[[nodiscard]] bool SubmitAndPresent(VkSubmitInfo &SubmitInfo) override
+		{
+			if(!m_Backend.QueueSubmitFrame(SubmitInfo))
+				return false;
+			m_Backend.m_LastPresentedSwapChainImageIndex = m_Backend.m_CurImageIndex;
+			return true;
+		}
+
+		VkImageLayout PresentedImageLayout() const override
+		{
+			return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		}
+
+	private:
+		CCommandProcessorFragment_Vulkan &m_Backend;
+		std::vector<SMemoryImageBlock<IMAGE_BUFFER_CACHE_ID>> m_vImageMemory;
+	};
+
+	static std::unique_ptr<IPresentTarget> CreatePresentTarget(CCommandProcessorFragment_Vulkan &Backend, const CVulkanCapabilities &Capabilities)
+	{
+		if(Capabilities.m_Headless)
+			return std::make_unique<COffscreenTarget>(Backend);
+		return std::make_unique<CSwapChainTarget>(Backend);
+	}
+
 	std::vector<VkImageView> m_vSwapChainImageViewList;
 	std::vector<SSwapChainMultiSampleImage> m_vSwapChainMultiSamplingImages;
 	std::vector<VkFramebuffer> m_vFramebufferList;
@@ -1055,6 +1275,8 @@ private:
 	uint32_t m_CanvasHeight;
 
 	SDL_Window *m_pWindow;
+	const CVulkanCapabilities m_Capabilities;
+	const std::unique_ptr<IPresentTarget> m_pPresentTarget;
 
 	std::array<float, 4> m_aClearColor = {0, 0, 0, 0};
 
@@ -1478,11 +1700,15 @@ protected:
 			VkCommandBuffer &CommandBuffer = *pCommandBuffer;
 
 			auto &SwapImg = m_vSwapChainImages[m_LastPresentedSwapChainImageIndex];
+			const VkImageLayout PresentedLayout = m_pPresentTarget->PresentedImageLayout();
 
 			if(!ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL))
 				return false;
-			if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL))
-				return false;
+			if(PresentedLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+			{
+				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, PresentedLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL))
+					return false;
+			}
 
 			// If source and destination support blit we'll blit as this also does automatic format conversion (e.g. from BGR to RGB)
 			if(m_OptimalSwapChainImageBlitting && m_LinearRGBAImageBlitting)
@@ -1530,8 +1756,11 @@ protected:
 
 			if(!ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL))
 				return false;
-			if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR))
-				return false;
+			if(PresentedLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+			{
+				if(!ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, PresentedLayout))
+					return false;
+			}
 
 			vkEndCommandBuffer(CommandBuffer);
 			m_vUsedMemoryCommandBuffer[m_CurImageIndex] = false;
@@ -2276,6 +2505,24 @@ protected:
 		ShrinkUnusedCaches();
 	}
 
+	[[nodiscard]] bool QueueSubmitFrame(const VkSubmitInfo &SubmitInfo)
+	{
+		vkResetFences(m_VKDevice, 1, &m_vQueueSubmitFences[m_CurImageIndex]);
+
+		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vQueueSubmitFences[m_CurImageIndex]);
+		if(QueueSubmitRes != VK_SUCCESS)
+		{
+			const char *pCritErrorMsg = CheckVulkanCriticalError(QueueSubmitRes);
+			if(pCritErrorMsg != nullptr)
+			{
+				SetError(EGfxErrorType::GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED, "Submitting to graphics queue failed.", pCritErrorMsg);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	[[nodiscard]] bool WaitFrame()
 	{
 		FinishRenderThreads();
@@ -2347,57 +2594,7 @@ protected:
 			m_vUsedMemoryCommandBuffer[m_CurImageIndex] = false;
 		}
 
-		std::array<VkSemaphore, 1> aWaitSemaphores = {m_AcquireImageSemaphore};
-		std::array<VkPipelineStageFlags, 1> aWaitStages = {(VkPipelineStageFlags)VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-		SubmitInfo.waitSemaphoreCount = aWaitSemaphores.size();
-		SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
-		SubmitInfo.pWaitDstStageMask = aWaitStages.data();
-
-		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vQueueSubmitSemaphores[m_CurImageIndex]};
-		SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
-		SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
-
-		vkResetFences(m_VKDevice, 1, &m_vQueueSubmitFences[m_CurImageIndex]);
-
-		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vQueueSubmitFences[m_CurImageIndex]);
-		if(QueueSubmitRes != VK_SUCCESS)
-		{
-			const char *pCritErrorMsg = CheckVulkanCriticalError(QueueSubmitRes);
-			if(pCritErrorMsg != nullptr)
-			{
-				SetError(EGfxErrorType::GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED, "Submitting to graphics queue failed.", pCritErrorMsg);
-				return false;
-			}
-		}
-
-		std::swap(m_vBusyAcquireImageSemaphores[m_CurImageIndex], m_AcquireImageSemaphore);
-
-		VkPresentInfoKHR PresentInfo{};
-		PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-		PresentInfo.waitSemaphoreCount = aSignalSemaphores.size();
-		PresentInfo.pWaitSemaphores = aSignalSemaphores.data();
-
-		std::array<VkSwapchainKHR, 1> aSwapChains = {m_VKSwapChain};
-		PresentInfo.swapchainCount = aSwapChains.size();
-		PresentInfo.pSwapchains = aSwapChains.data();
-
-		PresentInfo.pImageIndices = &m_CurImageIndex;
-
-		m_LastPresentedSwapChainImageIndex = m_CurImageIndex;
-
-		VkResult QueuePresentRes = vkQueuePresentKHR(m_VKPresentQueue, &PresentInfo);
-		if(QueuePresentRes != VK_SUCCESS && QueuePresentRes != VK_SUBOPTIMAL_KHR)
-		{
-			const char *pCritErrorMsg = CheckVulkanCriticalError(QueuePresentRes);
-			if(pCritErrorMsg != nullptr)
-			{
-				SetError(EGfxErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Presenting graphics queue failed.", pCritErrorMsg);
-				return false;
-			}
-		}
-
-		return true;
+		return m_pPresentTarget->SubmitAndPresent(SubmitInfo);
 	}
 
 	[[nodiscard]] bool PrepareFrame()
@@ -2412,7 +2609,7 @@ protected:
 			RecreateSwapChain();
 		}
 
-		auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_AcquireImageSemaphore, VK_NULL_HANDLE, &m_CurImageIndex);
+		auto AcqResult = m_pPresentTarget->AcquireNextImage(m_CurImageIndex);
 		if(AcqResult != VK_SUCCESS)
 		{
 			if(AcqResult == VK_ERROR_OUT_OF_DATE_KHR || m_RecreateSwapChain)
@@ -3536,7 +3733,9 @@ protected:
 	}
 
 public:
-	CCommandProcessorFragment_Vulkan()
+	explicit CCommandProcessorFragment_Vulkan(const CVulkanCapabilities &Capabilities) :
+		m_Capabilities(Capabilities),
+		m_pPresentTarget(CreatePresentTarget(*this, Capabilities))
 	{
 		m_vTextures.reserve(CCommandBuffer::MAX_TEXTURES);
 	}
@@ -3587,7 +3786,7 @@ public:
 	std::set<std::string> OurDeviceExtensions()
 	{
 		std::set<std::string> OurExt;
-		OurExt.emplace(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		m_pPresentTarget->AddDeviceExtensions(OurExt);
 #ifdef VK_EXT_device_fault
 		// Only used when actually supported by the device (see device creation);
 		// enables detailed diagnostics after a VK_ERROR_DEVICE_LOST.
@@ -4536,7 +4735,7 @@ public:
 		ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		ColorAttachment.finalLayout = m_pPresentTarget->PresentedImageLayout();
 
 		VkAttachmentReference MultiSamplingColorAttachmentRef{};
 		MultiSamplingColorAttachmentRef.attachment = 0;
@@ -5559,9 +5758,7 @@ public:
 		DestroyMultiSamplerImageAttachments();
 
 		DestroyImageViews();
-		ClearSwapChainImageHandles();
-
-		DestroySwapChain(ForceSwapChainDestruct);
+		m_pPresentTarget->DestroyImages(ForceSwapChainDestruct);
 
 		m_SwapchainCreated = false;
 	}
@@ -5656,7 +5853,7 @@ public:
 	{
 		if(m_VKInstance != VK_NULL_HANDLE)
 		{
-			DestroySurface();
+			m_pPresentTarget->DestroySurface();
 			vkDestroyDevice(m_VKDevice, nullptr);
 
 			if(g_Config.m_DbgGfx == DEBUG_GFX_MODE_MINIMUM || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL)
@@ -5670,6 +5867,9 @@ public:
 
 	int RecreateSwapChain()
 	{
+		if(!m_pPresentTarget->SupportsRecreate())
+			return 0;
+
 		int Ret = 0;
 		vkDeviceWaitIdle(m_VKDevice);
 
@@ -5715,13 +5915,15 @@ public:
 
 	int InitVulkanSDL(SDL_Window *pWindow, uint32_t CanvasWidth, uint32_t CanvasHeight, char *pRendererString, char *pVendorString, char *pVersionString)
 	{
+		dbg_assert(!m_Capabilities.m_Headless || pWindow == nullptr, "headless init got a window");
+
 		std::vector<std::string> vVKExtensions;
 		std::vector<std::string> vVKLayers;
 
 		m_CanvasWidth = CanvasWidth;
 		m_CanvasHeight = CanvasHeight;
 
-		if(!GetVulkanExtensions(pWindow, vVKExtensions))
+		if(!m_pPresentTarget->GetInstanceExtensions(pWindow, vVKExtensions))
 			return -1;
 
 		if(!GetVulkanLayers(vVKLayers))
@@ -5748,7 +5950,7 @@ public:
 
 		GetDeviceQueue();
 
-		if(!CreateSurface(pWindow))
+		if(!m_pPresentTarget->CreateSurface(pWindow))
 			return -1;
 
 		return 0;
@@ -6157,10 +6359,7 @@ public:
 	int InitVulkanSwapChain(VkSwapchainKHR &OldSwapChain)
 	{
 		OldSwapChain = VK_NULL_HANDLE;
-		if(!CreateSwapChain(OldSwapChain))
-			return -1;
-
-		if(!GetSwapChainImageHandles())
+		if(!m_pPresentTarget->CreateImages(OldSwapChain))
 			return -1;
 
 		if(!CreateImageViews())
@@ -7791,9 +7990,9 @@ public:
 	}
 };
 
-CCommandProcessorFragment_GLBase *CreateVulkanCommandProcessorFragment()
+CCommandProcessorFragment_GLBase *CreateVulkanCommandProcessorFragment(const CVulkanCapabilities &Capabilities)
 {
-	return new CCommandProcessorFragment_Vulkan();
+	return new CCommandProcessorFragment_Vulkan(Capabilities);
 }
 
 #endif
