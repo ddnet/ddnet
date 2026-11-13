@@ -2290,6 +2290,8 @@ set_src(BASE GLOB_RECURSE src/base
   unicode/tolower.cpp
   unicode/tolower_data.cpp
   unicode/tolower_data.h
+  url.cpp
+  url.h
   vmath.h
   windows.cpp
   windows.h
@@ -2631,6 +2633,8 @@ if(CLIENT)
     text.cpp
     updater.cpp
     updater.h
+    url_allowlist.cpp
+    url_allowlist.h
     video.cpp
     video.h
     warning.cpp
@@ -3495,6 +3499,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     time_test.cpp
     timestamp_test.cpp
     unix_test.cpp
+    url_test.cpp
     uuid_test.cpp
     vmath_test.cpp
     windows_test.cpp
@@ -3511,6 +3516,8 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/serverbrowser_ping_cache.cpp
     src/engine/client/serverbrowser_ping_cache.h
     src/engine/client/sqlite.cpp
+    src/engine/client/url_allowlist.cpp
+    src/engine/client/url_allowlist.h
     src/game/client/components/censor.cpp
     src/game/client/components/censor.h
     # tidy-alphabetical-end
