@@ -887,7 +887,7 @@ void CHud::RenderPlayerState(const int ClientId)
 		}
 		else
 		{
-			TotalJumpsToDisplay = AvailableJumpsToDisplay = absolute(GameClient()->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Jumps);
+			TotalJumpsToDisplay = AvailableJumpsToDisplay = std::clamp(absolute(GameClient()->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Jumps), 0, 10);
 		}
 
 		// render available and used jumps
