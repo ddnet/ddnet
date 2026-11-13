@@ -2723,3 +2723,24 @@ not bound
 
 Show cursor
 == 
+
+Nothing playing
+== Nada reproduciéndose
+
+System media
+== Medios del sistema
+
+Unknown title
+== Título desconocido
+
+Show system media controls in scoreboard
+== Mostrar controles multimedia del sistema en el marcador
+
+Media play/pause
+== Reproducir/pausar multimedia
+
+Media next track
+== Pista siguiente
+
+Media previous track
+== Pista anterior

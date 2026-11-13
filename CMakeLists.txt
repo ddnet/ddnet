@@ -800,6 +800,9 @@ endif()
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32.lib winmm.lib imm32.lib)
+  if(MSVC)
+    list(APPEND PLATFORM_CLIENT_LIBS runtimeobject.lib oleaut32.lib) # C++/WinRT for media control
+  endif()
   set(PLATFORM_LIBS)
   list(APPEND PLATFORM_LIBS shlwapi.lib) # PathIsRelativeW
   list(APPEND PLATFORM_LIBS version.lib) # GetFileVersionInfoSizeW
@@ -2318,6 +2321,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   kernel.h
   keys.h
   map.h
+  media_control.h
   message.h
   notifications.h
   rust.h
@@ -2613,6 +2617,9 @@ if(CLIENT)
     keyboard.h
     keynames.cpp
     keynames.h
+    media_control.cpp
+    media_control.h
+    media_control_windows.cpp
     notifications.cpp
     notifications.h
     serverbrowser.cpp
@@ -2697,6 +2704,8 @@ if(CLIENT)
     components/maplayers.h
     components/mapsounds.cpp
     components/mapsounds.h
+    components/media_widget.cpp
+    components/media_widget.h
     components/menu_background.cpp
     components/menu_background.h
     components/menus.cpp

@@ -53,6 +53,7 @@
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
+#include "components/media_widget.h"
 #include "components/menu_background.h"
 #include "components/menus.h"
 #include "components/motd.h"
@@ -171,6 +172,7 @@ public:
 	CControls m_Controls;
 	CEffects m_Effects;
 	CScoreboard m_Scoreboard;
+	CMediaWidget m_MediaWidget;
 	CStatboard m_Statboard;
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;

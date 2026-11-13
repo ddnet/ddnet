@@ -158,6 +158,7 @@ void CGameClient::OnConsoleInit()
 					      &m_ImportantAlert,
 					      &m_DebugHud,
 					      &m_TouchControls,
+					      &m_MediaWidget, // doesn't render anything on its own, the scoreboard renders it
 					      &m_Scoreboard,
 					      &m_Statboard,
 					      &m_Motd,

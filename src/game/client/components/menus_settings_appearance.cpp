@@ -106,6 +106,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		static CButtonContainer s_AuthedColor, s_SameClanColor;
 		DoLine_ColorPicker(&s_AuthedColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Authed name color in scoreboard"), &g_Config.m_ClAuthedPlayerColor, GreenDefault, false);
 		DoLine_ColorPicker(&s_SameClanColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScoreboardMedia, Localize("Show system media controls in scoreboard"), &g_Config.m_ClScoreboardMedia, &LeftView, LineSize);
 
 		// ***** DDRace HUD ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("DDRace HUD"), HeadlineFontSize,

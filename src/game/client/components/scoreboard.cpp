@@ -17,6 +17,7 @@
 
 #include <game/client/animstate.h>
 #include <game/client/components/countryflags.h>
+#include <game/client/components/media_widget.h>
 #include <game/client/components/motd.h>
 #include <game/client/components/statboard.h>
 #include <game/client/gameclient.h>
@@ -959,7 +960,7 @@ void CScoreboard::RenderMouseHint(CUIRect MouseHint)
 	Ui()->DoLabel(&Chip, pChipText, FontSize, TEXTALIGN_MC);
 }
 
-void CScoreboard::RenderRecordingNotification(float x)
+void CScoreboard::RenderRecordingNotification(float x, float MaxRight)
 {
 	char aBuf[512] = "";
 
@@ -988,6 +989,8 @@ void CScoreboard::RenderRecordingNotification(float x)
 	constexpr float Gap = 5.0f;
 
 	CUIRect Rect = {x, 0.0f, TextRender()->TextWidth(FontSize, aBuf) + 30.0f, 25.0f};
+	// move to the left if there is not enough space
+	Rect.x = std::max(std::min(Rect.x, MaxRight - Rect.w), 0.0f);
 	Rect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_B, ROUNDING);
 	Rect.VSplitLeft(CircleSize, nullptr, &Rect);
 	Rect.VSplitRight(Gap, &Rect, nullptr);
@@ -1191,7 +1194,17 @@ void CScoreboard::OnRender()
 		RenderMouseHint(MouseHint);
 	}
 
-	RenderRecordingNotification((Screen.w / 7) * 4 + 10);
+	float RecordingNotificationMaxRight = Screen.w;
+	if(g_Config.m_ClScoreboardMedia)
+	{
+		// top right corner, in the free space above the scoreboard
+		constexpr float MediaWidgetMargin = 5.0f;
+		const CUIRect MediaCard = {Screen.w - CMediaWidget::WIDTH - MediaWidgetMargin, MediaWidgetMargin, CMediaWidget::WIDTH, CMediaWidget::HEIGHT};
+		GameClient()->m_MediaWidget.Render(MediaCard, m_MouseUnlocked);
+		RecordingNotificationMaxRight = MediaCard.x - MediaWidgetMargin;
+	}
+
+	RenderRecordingNotification((Screen.w / 7) * 4 + 10, RecordingNotificationMaxRight);
 
 	if(!GameClient()->m_Menus.IsActive() && !GameClient()->m_Chat.IsActive())
 	{

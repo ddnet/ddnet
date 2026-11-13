@@ -320,6 +320,7 @@ MACRO_CONFIG_INT(ClVideoX264Preset, cl_video_preset, 5, 0, 9, CFGFLAG_CLIENT | C
 // debug
 MACRO_CONFIG_INT(DbgDummies, dbg_dummies, 0, 0, SERVER_MAX_CLIENTS, CFGFLAG_DEBUG_SERVER, "Add debug dummies to server (Debug build only)")
 
+MACRO_CONFIG_INT(DbgMediaMock, dbg_media_mock, 0, 0, 1, CFGFLAG_CLIENT, "Simulate a media player for the scoreboard media controls on platforms without media control support")
 MACRO_CONFIG_INT(DbgTuning, dbg_tuning, 0, 0, 2, CFGFLAG_CLIENT, "Display information about the tuning parameters that affect the own player (0 = off, 1 = show changed, 2 = show all)")
 
 MACRO_CONFIG_STR(PlayerName, player_name, 16, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Name of the player")
@@ -652,6 +653,7 @@ MACRO_CONFIG_INT(ConnTimeoutProtection, conn_timeout_protection, 1000, 5, 10000,
 MACRO_CONFIG_INT(ConnResendRequestsPerSecond, conn_resend_requests_per_second, 10, 0, 1000, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Maximum number of resend requests of a peer that are answered per second, one answer resends everything that is not acked yet (0 for no limit)")
 MACRO_CONFIG_INT(ClShowIds, cl_show_ids, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to show client IDs in scoreboard, chat and spectator menu")
 MACRO_CONFIG_INT(ClScoreboardOnDeath, cl_scoreboard_on_death, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to show scoreboard after death or not")
+MACRO_CONFIG_INT(ClScoreboardMedia, cl_scoreboard_media, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to show system media controls in the scoreboard")
 MACRO_CONFIG_INT(ClAutoRaceRecord, cl_auto_race_record, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Save the best demo of each race")
 MACRO_CONFIG_INT(ClReplays, cl_replays, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable/disable replays")
 MACRO_CONFIG_INT(ClReplayLength, cl_replay_length, 30, 10, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Set the default length of the replays")

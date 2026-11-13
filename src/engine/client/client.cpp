@@ -38,6 +38,7 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/map.h>
+#include <engine/media_control.h>
 #include <engine/notifications.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/assertion_logger.h>
@@ -5156,6 +5157,9 @@ int main(int argc, const char **argv)
 	INotifications *pNotifications = CreateNotifications();
 	pKernel->RegisterInterface(pNotifications);
 
+	IMediaControl *pMediaControl = CreateMediaControl();
+	pKernel->RegisterInterface(pMediaControl);
+
 	pKernel->RegisterInterface(CreateEditor(), false);
 	pKernel->RegisterInterface(CreateFavorites().release());
 	pKernel->RegisterInterface(CreateGameClient());
@@ -5164,6 +5168,7 @@ int main(int argc, const char **argv)
 	pConsole->Init();
 	pConfigManager->Init();
 	pNotifications->Init(GAME_NAME " Client");
+	pMediaControl->Init();
 
 	// register all console commands
 	pClient->RegisterCommands();
