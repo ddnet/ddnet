@@ -1,12 +1,19 @@
 #include "test.h"
 
+#include <base/detect.h>
+#include <base/io.h>
+#include <base/str.h>
+
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
 #include <game/mapitems_ex.h>
 
 #include <gtest/gtest.h>
+#include <zlib.h>
 
+#include <cstring>
+#include <limits>
 #include <memory>
 
 TEST(Datafile, ExtendedType)
@@ -27,9 +34,9 @@ TEST(Datafile, ExtendedType)
 		CDataFileWriter Writer;
 		ASSERT_TRUE(Writer.Open(pStorage.get(), Info.m_aFilename));
 
-		Writer.AddItem(MAPITEMTYPE_TEST, 0x8000, sizeof(ItemTest), &ItemTest);
+		EXPECT_NE(Writer.AddItem(MAPITEMTYPE_TEST, 0x8000, sizeof(ItemTest), &ItemTest), CDataFileWriter::WRITER_ERROR);
 
-		Writer.Finish();
+		EXPECT_TRUE(Writer.Finish());
 	}
 
 	{
@@ -78,6 +85,7 @@ TEST(Datafile, StringData)
 		ASSERT_TRUE(Writer.Open(pStorage.get(), Info.m_aFilename));
 
 		EXPECT_EQ(Writer.AddDataString(""), -1); // Empty string is not added
+		EXPECT_FALSE(Writer.Failed());
 		EXPECT_EQ(Writer.AddDataString("Abc"), 0);
 		EXPECT_EQ(Writer.AddDataString("DDNet最好了"), 1);
 		EXPECT_EQ(Writer.AddDataString("aβい🐘"), 2);
@@ -86,7 +94,7 @@ TEST(Datafile, StringData)
 		EXPECT_EQ(Writer.AddData(5, "xyz\xff\0"), 5); // Truncated UTF-8
 		EXPECT_EQ(Writer.AddData(4, "XYZ\xff"), 6); // Truncated UTF-8 and not zero-terminated
 
-		Writer.Finish();
+		EXPECT_TRUE(Writer.Finish());
 	}
 
 	{
@@ -111,4 +119,101 @@ TEST(Datafile, StringData)
 	{
 		pStorage->RemoveFile(Info.m_aFilename, IStorage::TYPE_SAVE);
 	}
+}
+
+#if defined(CONF_PLATFORM_LINUX)
+TEST(Datafile, WriteAndCloseFailuresAreSticky)
+{
+	CTestInfo Info;
+	const auto pStorage = Info.CreateTestStorage();
+	ASSERT_NE(pStorage, nullptr);
+	IOHANDLE File = pStorage->OpenFile("preserved.map", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	ASSERT_NE(File, nullptr);
+	ASSERT_EQ(io_write(File, "original", 8), 8u);
+	ASSERT_EQ(io_close(File), 0);
+	for(size_t ItemSize : {0, 65536})
+	{
+		CDataFileWriter Writer;
+		ASSERT_TRUE(Writer.Open(pStorage.get(), "/dev/full", IStorage::TYPE_ABSOLUTE));
+		// An empty file fails on the buffered close; a large item also forces a short write.
+		if(ItemSize > 0)
+		{
+			const std::vector<int> vItem(ItemSize / sizeof(int));
+			ASSERT_EQ(Writer.AddItem(0, 0, ItemSize, vItem.data()), 0);
+		}
+		EXPECT_FALSE(Writer.Finish());
+		EXPECT_TRUE(Writer.Failed());
+		const int Item = 42;
+		EXPECT_EQ(Writer.AddData(sizeof(Item), &Item), CDataFileWriter::WRITER_ERROR);
+		EXPECT_EQ(Writer.AddDataSwapped(sizeof(Item), &Item), CDataFileWriter::WRITER_ERROR);
+		EXPECT_EQ(Writer.AddDataString("failed"), CDataFileWriter::WRITER_ERROR);
+		EXPECT_EQ(Writer.AddItem(0, 0, sizeof(Item), &Item), CDataFileWriter::WRITER_ERROR);
+		EXPECT_EQ(Writer.AddItem(MAPITEMTYPE_TEST, 0, sizeof(Item), &Item), CDataFileWriter::WRITER_ERROR);
+		const CUuid Uuid = {};
+		EXPECT_EQ(Writer.AddItem(-1, 0, sizeof(Item), &Item, &Uuid), CDataFileWriter::WRITER_ERROR);
+		// Callers may collect data before Open; failure must not truncate their destination.
+		EXPECT_FALSE(Writer.Open(pStorage.get(), "preserved.map"));
+	}
+	char *pContents = pStorage->ReadFileStr("preserved.map", IStorage::TYPE_SAVE);
+	ASSERT_NE(pContents, nullptr);
+	EXPECT_STREQ(pContents, "original");
+	free(pContents);
+	Info.m_DeleteTestStorageFilesOnSuccess = true;
+}
+#endif
+
+TEST(Datafile, InvalidDataArgumentsAssert)
+{
+	CDataFileWriter Writer;
+	const int Item = 0;
+	EXPECT_DEATH({ Writer.AddData(0, &Item); }, "");
+	EXPECT_DEATH({ Writer.AddData(sizeof(Item), nullptr); }, "");
+	EXPECT_DEATH({ Writer.AddData(static_cast<size_t>(std::numeric_limits<int>::max()) + 1, &Item); }, "");
+	EXPECT_DEATH({ Writer.AddDataSwapped(1, &Item); }, "");
+}
+
+TEST(Datafile, EagerCompressionMatchesDeferredAndCompress2)
+{
+	CTestInfo Info;
+	const auto pStorage = Info.CreateTestStorage();
+	ASSERT_NE(pStorage, nullptr);
+	std::vector<unsigned char> vData(300000);
+	unsigned State = 17;
+	for(auto &DataByte : vData)
+	{
+		State = State * 1664525u + 1013904223u;
+		DataByte = State >> 24;
+	}
+	for(bool Eager : {false, true})
+	{
+		CDataFileWriter Writer;
+		ASSERT_TRUE(Writer.Open(pStorage.get(), Eager ? "eager" : "deferred"));
+		if(Eager)
+			Writer.SetEagerCompression();
+		EXPECT_EQ(Writer.AddData(vData.size(), vData.data()), 0);
+		EXPECT_EQ(Writer.AddDataString("highly compressible second block"), 1);
+		ASSERT_TRUE(Writer.Finish());
+	}
+	void *pDeferred, *pEager;
+	unsigned DeferredSize, EagerSize;
+	ASSERT_TRUE(pStorage->ReadFile("deferred", IStorage::TYPE_SAVE, &pDeferred, &DeferredSize));
+	ASSERT_TRUE(pStorage->ReadFile("eager", IStorage::TYPE_SAVE, &pEager, &EagerSize));
+	ASSERT_EQ(DeferredSize, EagerSize);
+	EXPECT_EQ(memcmp(pDeferred, pEager, EagerSize), 0);
+	// Independent zlib oracle: 36-byte header plus two offset/size pairs.
+	uLongf CompressedSize = compressBound(vData.size());
+	std::vector<unsigned char> vCompressed(CompressedSize);
+	ASSERT_EQ(compress2(vCompressed.data(), &CompressedSize, vData.data(), vData.size(), Z_DEFAULT_COMPRESSION), Z_OK);
+	ASSERT_GE(EagerSize, 52u + CompressedSize);
+	EXPECT_EQ(memcmp(static_cast<unsigned char *>(pEager) + 52, vCompressed.data(), CompressedSize), 0);
+	CDataFileReader Reader;
+	ASSERT_TRUE(Reader.Open(pStorage.get(), "eager", IStorage::TYPE_SAVE));
+	ASSERT_EQ(Reader.NumData(), 2);
+	ASSERT_EQ(Reader.GetDataSize(0), vData.size());
+	EXPECT_EQ(memcmp(Reader.GetData(0), vData.data(), vData.size()), 0);
+	EXPECT_STREQ(Reader.GetDataString(1), "highly compressible second block");
+	Reader.Close();
+	free(pDeferred);
+	free(pEager);
+	Info.m_DeleteTestStorageFilesOnSuccess = true;
 }

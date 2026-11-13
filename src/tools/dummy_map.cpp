@@ -73,7 +73,11 @@ static void CreateEmptyMap(IStorage *pStorage)
 	Layer.m_Data = Writer.AddData(sizeof(aTiles), &aTiles);
 	Writer.AddItem(MAPITEMTYPE_LAYER, 1, sizeof(Layer), &Layer);
 
-	Writer.Finish();
+	if(!Writer.Finish())
+	{
+		log_error(TOOL_NAME, "Failed to write map '%s'", pMapName);
+		return;
+	}
 
 	log_info(TOOL_NAME, "Dummy map written to '%s'", pMapName);
 

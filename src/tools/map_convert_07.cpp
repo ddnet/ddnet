@@ -222,6 +222,10 @@ int main(int argc, const char **argv)
 	}
 
 	pMap->Unload();
-	Writer.Finish();
+	if(!Writer.Finish())
+	{
+		log_error(TOOL_NAME, "failed to write destination map. filename='%s'", aDestFilename);
+		return -1;
+	}
 	return Success ? 0 : -1;
 }
