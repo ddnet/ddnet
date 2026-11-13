@@ -723,6 +723,14 @@ public:
 
 	enum
 	{
+		UI_TOOLBOX_PAGE_FILTERS = 0,
+		UI_TOOLBOX_PAGE_INFO,
+		UI_TOOLBOX_PAGE_FRIENDS,
+		NUM_UI_TOOLBOX_PAGES,
+	};
+
+	enum
+	{
 		BIG_TAB_NEWS = 0,
 		BIG_TAB_INTERNET,
 		BIG_TAB_LAN,
@@ -846,6 +854,7 @@ public:
 	void SetShowStart(bool ShowStart);
 	void ShowQuitPopup();
 	void JoinTutorial();
+	void SelectServer(const char *pAddress);
 	void Connect(const char *pAddress);
 
 private:
