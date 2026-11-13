@@ -917,11 +917,19 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	{
 		char aPath[IO_MAX_PATH_LENGTH];
 		str_format(aPath, sizeof(aPath), "%s/%s.demo", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
+		if(!Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat))
+		{
+			s_ConfirmPopupContext.Reset();
+			static CUi::SMessagePopupContext s_MessagePopupContext;
+			s_MessagePopupContext.ErrorColor();
+			str_copy(s_MessagePopupContext.m_aMessage, Localize("Failed to save demo"));
+			Ui()->ShowPopupMessage(Ui()->MouseX(), OkButton.y + OkButton.h + 5.0f, &s_MessagePopupContext);
+			return;
+		}
 		str_copy(m_aCurrentDemoSelectionName, m_DemoSliceInput.GetString());
 		if(str_endswith(m_aCurrentDemoSelectionName, ".demo"))
 			m_aCurrentDemoSelectionName[str_length(m_aCurrentDemoSelectionName) - str_length(".demo")] = '\0';
 
-		Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
 		DemolistPopulate();
 		DemolistOnUpdate(false);
 		m_DemoPlayerState = DEMOPLAYER_NONE;

@@ -234,7 +234,10 @@ void CGameTeams::Tick()
 	{
 		CPlayerData *pData = GameServer()->Score()->PlayerData(i);
 		if(!Server()->IsRecording(i))
+		{
+			pData->m_RecordStopTick = -1;
 			continue;
+		}
 
 		if(Now >= pData->m_RecordStopTick && pData->m_RecordStopTick != -1)
 		{
