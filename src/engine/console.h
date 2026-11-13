@@ -53,14 +53,6 @@ public:
 		FILE_RECURSION_LIMIT = 16,
 	};
 
-	enum class EAccessLevel
-	{
-		ADMIN,
-		MODERATOR,
-		HELPER,
-		USER,
-	};
-
 	// TODO: rework this interface to reduce the amount of virtual calls
 	class IResult
 	{
@@ -98,7 +90,6 @@ public:
 		// Whether any parameter of this command is a client id, see `Register`
 		virtual bool TakesClientId() const = 0;
 		virtual int Flags() const = 0;
-		virtual EAccessLevel GetAccessLevel() const = 0;
 	};
 
 	typedef std::optional<std::vector<int>> (*FGetVictimsCommandCallback)(int ClientId, const char *pVictim, void *pUser);
