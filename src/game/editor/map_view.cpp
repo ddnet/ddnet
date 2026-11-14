@@ -548,10 +548,11 @@ void CMapView::Render(CUIRect View)
 							Graphics()->QuadsBegin();
 							for(size_t i = 0; i < pLayer->m_vQuads.size(); i++)
 							{
+								bool HasSelectableQuad = false;
 								for(int v = 0; v < 4; v++)
-									Editor()->DoQuadPoint(LayerIndex, pLayer, &pLayer->m_vQuads[i], i, v);
+									Editor()->DoQuadPoint(LayerIndex, pLayer, &pLayer->m_vQuads[i], i, v, HasSelectableQuad);
 
-								Editor()->DoQuad(LayerIndex, pLayer, &pLayer->m_vQuads[i], i);
+								Editor()->DoQuad(LayerIndex, pLayer, &pLayer->m_vQuads[i], i, HasSelectableQuad);
 							}
 							Graphics()->QuadsEnd();
 						}
