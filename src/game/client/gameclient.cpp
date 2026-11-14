@@ -4265,35 +4265,24 @@ void CGameClient::LoadMapSettings()
 	}
 
 	// Load map tunings
-	int Start, Num;
-	Map()->GetType(MAPITEMTYPE_INFO, &Start, &Num);
-	for(int i = Start; i < Start + Num; i++)
+	const CMapItemInfoSettings *pSettingsItem = static_cast<const CMapItemInfoSettings *>(Map()->FindItem(MAPITEMTYPE_INFO, 0));
+	if(pSettingsItem == nullptr)
 	{
-		int ItemId;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Map()->GetItem(i, nullptr, &ItemId);
-		int ItemSize = Map()->GetItemSize(i);
-		if(!pItem || ItemId != 0)
-			continue;
-
-		if(ItemSize < (int)sizeof(CMapItemInfoSettings))
-			break;
-		if(!(pItem->m_Settings > -1))
-			break;
-
-		int Size = Map()->GetDataSize(pItem->m_Settings);
-		char *pSettings = (char *)Map()->GetData(pItem->m_Settings);
-		char *pNext = pSettings;
-		Console()->SetUnknownCommandCallback(UnknownMapSettingCallback, nullptr);
-		while(pNext < pSettings + Size)
-		{
-			int StrSize = str_length(pNext) + 1;
-			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
-			pNext += StrSize;
-		}
-		Console()->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
-		Map()->UnloadData(pItem->m_Settings);
-		break;
+		return;
 	}
+	const std::optional<std::vector<const char *>> vpSettings = Map()->GetDataStringArray(pSettingsItem->m_Settings);
+	if(!vpSettings.has_value())
+	{
+		log_error("client", "Map settings are invalid.");
+		return;
+	}
+	Console()->SetUnknownCommandCallback(UnknownMapSettingCallback, nullptr);
+	for(const char *pSetting : vpSettings.value())
+	{
+		Console()->ExecuteLine(pSetting, IConsole::CLIENT_ID_GAME);
+	}
+	Console()->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
+	Map()->UnloadData(pSettingsItem->m_Settings);
 }
 
 void CGameClient::ConTuneParam(IConsole::IResult *pResult, void *pUserData)

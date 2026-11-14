@@ -26,6 +26,7 @@ public:
 	void *GetData(int Index) override;
 	void *GetDataSwapped(int Index) override;
 	const char *GetDataString(int Index) override;
+	std::optional<std::vector<const char *>> GetDataStringArray(int Index) override;
 	void UnloadData(int Index) override;
 	int NumData() const override;
 
@@ -51,6 +52,7 @@ public:
 
 private:
 	static bool ValidateMapVersion(CDataFileReader &NewDataFile);
+	static bool UpgradeAndValidateInfoItems(CDataFileReader &NewDataFile);
 	static bool ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
 	bool UpgradeAndValidateTilesLayerItem(CDataFileReader &NewDataFile, int GroupIndex, int LayerIndex,
 		CMapItemLayerTilemap_v2 *pLayerTilemapBase, int LayerItemIndex, size_t LayerItemSize);

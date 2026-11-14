@@ -4452,6 +4452,11 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		// No map-specific config, just return.
 		return true;
 	}
+	std::vector<const char *> vpConfigLines;
+	while(const char *pLine = LineReader.Get())
+	{
+		vpConfigLines.push_back(pLine);
+	}
 
 	std::shared_ptr<IMap> pImportedMap = CreateMap();
 	if(!pImportedMap->Load(g_Config.m_SvMap, Storage(), pNewMapName, IStorage::TYPE_ALL))
@@ -4460,73 +4465,59 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		return false;
 	}
 
-	std::vector<const char *> vpLines;
-	int TotalLength = 0;
-	while(const char *pLine = LineReader.Get())
+	const CMapItemInfoSettings *pSettingsItem = static_cast<CMapItemInfoSettings *>(pImportedMap->FindItem(MAPITEMTYPE_INFO, 0));
+	if(pSettingsItem == nullptr)
 	{
-		vpLines.push_back(pLine);
-		TotalLength += str_length(pLine) + 1;
+		if(vpConfigLines.empty())
+		{
+			// Configs coincide, just return.
+			return true;
+		}
 	}
-
-	char *pSettings = (char *)malloc(std::max(1, TotalLength));
-	int Offset = 0;
-	for(const char *pLine : vpLines)
+	else
 	{
-		int Length = str_length(pLine) + 1;
-		mem_copy(pSettings + Offset, pLine, Length);
-		Offset += Length;
+		const std::optional<std::vector<const char *>> vpMapLines = pImportedMap->GetDataStringArray(pSettingsItem->m_Settings);
+		if(!vpMapLines.has_value())
+		{
+			log_error("mapchange", "Failed to read settings from map '%s'", pNewMapName);
+			return false;
+		}
+		if((vpConfigLines.empty() && vpMapLines.value().size() == 1 && vpMapLines.value().front()[0] == '\0') ||
+			std::equal(vpConfigLines.begin(), vpConfigLines.end(), vpMapLines.value().begin(), vpMapLines.value().end(),
+				[&](const char *pConfigLine, const char *pMapLine) { return str_comp(pConfigLine, pMapLine) == 0; }))
+		{
+			// Configs coincide, just return.
+			return true;
+		}
+		pImportedMap->UnloadData(pSettingsItem->m_Settings);
+		if(vpConfigLines.empty())
+		{
+			// An empty string array would be packed as index -1, but we need to preserve the
+			// original data indices below so we instead pack an array of an empty string.
+			vpConfigLines = {""};
+		}
 	}
 
 	CDataFileWriter Writer;
 
-	int SettingsIndex = pImportedMap->NumData();
-	bool FoundInfo = false;
-	for(int i = 0; i < pImportedMap->NumItems(); i++)
+	for(int ItemIndex = 0; ItemIndex < pImportedMap->NumItems(); ItemIndex++)
 	{
-		int TypeId;
-		int ItemId;
-		void *pData = pImportedMap->GetItem(i, &TypeId, &ItemId);
-		int Size = pImportedMap->GetItemSize(i);
-		CMapItemInfoSettings MapInfo;
-		if(TypeId == MAPITEMTYPE_INFO && ItemId == 0)
+		int Type, Id;
+		CUuid Uuid;
+		const void *pItem = pImportedMap->GetItem(ItemIndex, &Type, &Id, &Uuid);
+
+		// Filter ITEMTYPE_EX items, they will be automatically added again.
+		if(Type == ITEMTYPE_EX)
 		{
-			FoundInfo = true;
-			if(Size >= (int)sizeof(CMapItemInfoSettings))
-			{
-				CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
-				if(pInfo->m_Settings > -1)
-				{
-					SettingsIndex = pInfo->m_Settings;
-					char *pMapSettings = (char *)pImportedMap->GetData(SettingsIndex);
-					int DataSize = pImportedMap->GetDataSize(SettingsIndex);
-					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
-					{
-						// Configs coincide, no need to update map.
-						free(pSettings);
-						return true;
-					}
-					pImportedMap->UnloadData(pInfo->m_Settings);
-				}
-				else
-				{
-					MapInfo = *pInfo;
-					MapInfo.m_Settings = SettingsIndex;
-					pData = &MapInfo;
-					Size = sizeof(MapInfo);
-				}
-			}
-			else
-			{
-				*(CMapItemInfo *)&MapInfo = *(CMapItemInfo *)pData;
-				MapInfo.m_Settings = SettingsIndex;
-				pData = &MapInfo;
-				Size = sizeof(MapInfo);
-			}
+			continue;
 		}
-		Writer.AddItem(TypeId, ItemId, Size, pData);
+
+		const int Size = pImportedMap->GetItemSize(ItemIndex);
+		Writer.AddItem(Type, Id, Size, pItem, &Uuid);
 	}
 
-	if(!FoundInfo)
+	const int NewSettingsDataIndex = pImportedMap->NumData();
+	if(pSettingsItem == nullptr)
 	{
 		CMapItemInfoSettings Info;
 		Info.m_Version = 1;
@@ -4534,24 +4525,23 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		Info.m_MapVersion = -1;
 		Info.m_Credits = -1;
 		Info.m_License = -1;
-		Info.m_Settings = SettingsIndex;
+		Info.m_Settings = NewSettingsDataIndex;
 		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Info), &Info);
 	}
 
-	for(int i = 0; i < pImportedMap->NumData() || i == SettingsIndex; i++)
+	for(int DataIndex = 0; DataIndex < pImportedMap->NumData() || DataIndex == NewSettingsDataIndex; DataIndex++)
 	{
-		if(i == SettingsIndex)
+		if(DataIndex == NewSettingsDataIndex)
 		{
-			Writer.AddData(TotalLength, pSettings);
+			dbg_assert(Writer.AddDataStringArray(vpConfigLines) == DataIndex, "Data indices mismatch");
 			continue;
 		}
-		const void *pData = pImportedMap->GetData(i);
-		const int Size = pImportedMap->GetDataSize(i);
-		Writer.AddData(Size, pData);
-		pImportedMap->UnloadData(i);
+		const void *pData = pImportedMap->GetData(DataIndex);
+		const int Size = pImportedMap->GetDataSize(DataIndex);
+		dbg_assert(Writer.AddData(Size, pData) == DataIndex, "Data indices mismatch");
+		pImportedMap->UnloadData(DataIndex);
 	}
 
-	free(pSettings);
 	pImportedMap->Unload();
 
 	char aTemp[IO_MAX_PATH_LENGTH];
@@ -4608,38 +4598,27 @@ void CGameContext::OnShutdown(void *pPersistentData)
 
 void CGameContext::LoadMapSettings()
 {
-	IMap *pMap = Map();
-	int Start, Num;
-	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
-	for(int i = Start; i < Start + Num; i++)
+	const CMapItemInfoSettings *pSettingsItem = static_cast<const CMapItemInfoSettings *>(Map()->FindItem(MAPITEMTYPE_INFO, 0));
+	if(pSettingsItem == nullptr)
 	{
-		int ItemId;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &ItemId);
-		int ItemSize = pMap->GetItemSize(i);
-		if(!pItem || ItemId != 0)
-			continue;
-
-		if(ItemSize < (int)sizeof(CMapItemInfoSettings))
-			break;
-		if(!(pItem->m_Settings > -1))
-			break;
-
-		int Size = pMap->GetDataSize(pItem->m_Settings);
-		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
-		char *pNext = pSettings;
-		while(pNext < pSettings + Size)
-		{
-			int StrSize = str_length(pNext) + 1;
-			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
-			pNext += StrSize;
-		}
-		pMap->UnloadData(pItem->m_Settings);
-		break;
+		return;
 	}
 
-	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "maps/%s.map.cfg", g_Config.m_SvMap);
-	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
+	const std::optional<std::vector<const char *>> vpSettings = Map()->GetDataStringArray(pSettingsItem->m_Settings);
+	if(!vpSettings.has_value())
+	{
+		log_error("server", "Map settings are invalid.");
+		return;
+	}
+	for(const char *pSetting : vpSettings.value())
+	{
+		Console()->ExecuteLine(pSetting, IConsole::CLIENT_ID_GAME);
+	}
+	Map()->UnloadData(pSettingsItem->m_Settings);
+
+	char aConfigPath[IO_MAX_PATH_LENGTH];
+	str_format(aConfigPath, sizeof(aConfigPath), "maps/%s.map.cfg", g_Config.m_SvMap);
+	Console()->ExecuteFile(aConfigPath, IConsole::CLIENT_ID_NO_GAME);
 }
 
 void CGameContext::OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo)
