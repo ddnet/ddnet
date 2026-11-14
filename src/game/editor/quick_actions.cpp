@@ -218,7 +218,7 @@ void CEditor::DeleteSelectedLayer()
 		Map()->m_pTuneLayer = nullptr;
 	Map()->m_vpGroups[Map()->m_SelectedGroup]->DeleteLayer(Map()->m_vSelectedLayers[0]);
 
-	Map()->SelectPreviousLayer();
+	Map()->SelectPreviousLayer(false);
 }
 
 void CEditor::TestMapLocally()
