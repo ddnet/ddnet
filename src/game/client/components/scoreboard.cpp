@@ -25,7 +25,6 @@
 
 // Horizontal spacing of the scoreboard contents, both to its edges and between columns
 static constexpr float MARGIN = 10.0f;
-static constexpr const char *SCOREBOARD_CURSOR_BIND_NAME = "toggle_scoreboard_cursor";
 static constexpr float ROUNDING = 7.5f;
 static constexpr ColorRGBA BACKGROUND_COLOR(0.0f, 0.0f, 0.0f, 0.5f);
 
@@ -111,7 +110,7 @@ void CScoreboard::ConToggleScoreboardCursor(IConsole::IResult *pResult, void *pU
 void CScoreboard::OnConsoleInit()
 {
 	Console()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard");
-	Console()->Register(SCOREBOARD_CURSOR_BIND_NAME, "", CFGFLAG_CLIENT, ConToggleScoreboardCursor, this, "Toggle scoreboard cursor");
+	Console()->Register("toggle_scoreboard_cursor", "", CFGFLAG_CLIENT, ConToggleScoreboardCursor, this, "Toggle scoreboard cursor");
 }
 
 void CScoreboard::OnInit()
@@ -907,7 +906,7 @@ void CScoreboard::RenderMouseHint(CUIRect MouseHint)
 	constexpr float KeycapRadius = 3.5f;
 
 	char aKey[64];
-	GameClient()->m_Binds.GetKey(SCOREBOARD_CURSOR_BIND_NAME, aKey, sizeof(aKey));
+	GameClient()->m_Binds.GetKey("toggle_scoreboard_cursor", aKey, sizeof(aKey));
 
 	char aHint[128];
 	if(!aKey[0])
@@ -920,7 +919,7 @@ void CScoreboard::RenderMouseHint(CUIRect MouseHint)
 	}
 
 	const bool HasKeycap = aKey[0] != '\0';
-	const char *pChipText = HasKeycap ? aKey : SCOREBOARD_CURSOR_BIND_NAME;
+	const char *pChipText = HasKeycap ? aKey : "toggle_scoreboard_cursor";
 	const float TextWidth = TextRender()->TextWidth(FontSize, aHint, -1);
 	const float ChipWidth = TextRender()->TextWidth(FontSize, pChipText, -1) + 2 * KeycapPaddingX;
 	const float ContentWidth = ChipWidth + TextKeycapGap + TextWidth;
