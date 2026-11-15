@@ -12,7 +12,6 @@
 
 #include <game/client/animstate.h>
 #include <game/client/components/chat.h>
-#include <game/client/components/effects.h>
 #include <game/client/components/items.h>
 #include <game/client/components/mapimages.h>
 #include <game/client/components/nameplates.h>
@@ -968,7 +967,6 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 		TeeRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
 		TeeRenderInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, EMOTE_PAIN, vec2(1, 0), From);
-		GameClient()->m_Effects.FreezingFlakes(From, vec2(32, 32), 1.0f);
 		break;
 	}
 	default:
