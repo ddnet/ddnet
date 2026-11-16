@@ -2691,35 +2691,35 @@ No country flags match your filter criteria
 == Nenhuma bandeira de país corresponde aos seus critérios de filtro
 
 Hold Shift to be more precise.
-== 
+== Mantenha Shift pressionado para ser mais preciso.
 
 Dummy is not connected
-== 
+== Dummy não está conectado
 
 [Important alert message]
 Tap to dismiss…
-== 
+== Toque para descartar…
 
 Initializing layers
-== 
+== Inicializando camadas
 
 Credits
-== 
+== Créditos
 
 Teleport to cursor
-== 
+== Teleportar para cursor
 
 Teleport dummy to cursor
-== 
+== Teleportar dummy para cursor
 
 Practice
-== 
+== Praticar
 
 Join
-== 
+== Entrar
 
 not bound
-== 
+== não associado
 
 Show cursor
-== 
+== Mostrar cursor
