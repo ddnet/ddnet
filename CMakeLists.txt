@@ -630,7 +630,14 @@ if(UNIX)
 endif()
 find_package(Threads)
 find_package(Wavpack)
-if(WEBSOCKETS)
+if(TARGET_OS STREQUAL "emscripten" AND SERVER)
+  # The server only supports WebSockets with Emscripten. They are implemented
+  # with JavaScript, see src/engine/shared/websockets_emscripten.cpp.
+  set(WEBSOCKETS ON)
+  set(WEBSOCKETS_FOUND ON)
+  set(WEBSOCKETS_LIBRARIES)
+  set(WEBSOCKETS_INCLUDE_DIRS)
+elseif(WEBSOCKETS)
   find_package(Websockets)
 else()
   set(WEBSOCKETS_LIBRARIES)
@@ -891,7 +898,12 @@ elseif(TARGET_OS STREQUAL "emscripten")
   find_package(OpenGL)
   set(PLATFORM_CLIENT_LIBS GL)
   set(PLATFORM_CLIENT_INCLUDE_DIRS "")
-  set(CMAKE_EXECUTABLE_SUFFIX ".html")
+  if(CLIENT)
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+  else()
+    # The server is an ES module, which is loaded by the scripts in other/emscripten/server
+    set(CMAKE_EXECUTABLE_SUFFIX ".mjs")
+  endif()
   set(PLATFORM_CLIENT)
   set(PLATFORM_LIBS)
   list(APPEND PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
@@ -2095,10 +2107,21 @@ set(COPY_FILES
   ${WEBSOCKETS_COPY_FILES}
   # tidy-alphabetical-end
 )
-if(TARGET_OS STREQUAL "emscripten")
+if(TARGET_OS STREQUAL "emscripten" AND CLIENT)
   list(APPEND COPY_FILES other/emscripten/background.png)
   list(APPEND COPY_FILES other/emscripten/index.html)
   list(APPEND COPY_FILES other/icons/DDNet.ico)
+endif()
+if(TARGET_OS STREQUAL "emscripten" AND SERVER)
+  list(APPEND COPY_FILES
+    # tidy-alphabetical-start
+    other/emscripten/server/empty.mjs
+    other/emscripten/server/package.json
+    other/emscripten/server/server.mjs
+    other/emscripten/server/worker.mjs
+    other/emscripten/server/wrangler.toml
+    # tidy-alphabetical-end
+  )
 endif()
 file(COPY ${COPY_FILES} DESTINATION .)
 
@@ -2422,6 +2445,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   video.h
   websockets.cpp
   websockets.h
+  websockets_emscripten.cpp
   # tidy-alphabetical-end
 )
 set_src(ENGINE_GFX GLOB src/engine/gfx
@@ -3271,6 +3295,12 @@ if(SERVER)
       PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
   target_link_libraries(game-server ${LIBS_SERVER})
+  if(TARGET_OS STREQUAL "emscripten")
+    # WebSocket server implemented with JavaScript, see src/engine/shared/websockets_emscripten.cpp
+    set(WEBSOCKETS_EMSCRIPTEN_LIBRARY "${PROJECT_SOURCE_DIR}/src/engine/shared/websockets_emscripten.js")
+    target_link_options(game-server PRIVATE "SHELL:--js-library ${WEBSOCKETS_EMSCRIPTEN_LIBRARY}")
+    set_property(TARGET game-server APPEND PROPERTY LINK_DEPENDS ${WEBSOCKETS_EMSCRIPTEN_LIBRARY})
+  endif()
   list(APPEND TARGETS_OWN game-server)
   list(APPEND TARGETS_LINK game-server)
 
@@ -3785,7 +3815,7 @@ list(APPEND CPACK_TARGETS ${TARGET_TOOLS})
 if(STEAMAPI_KIND STREQUAL SHARED)
   list(APPEND CPACK_TARGETS ${TARGET_STEAMAPI})
 endif()
-if(TARGET_OS STREQUAL "emscripten")
+if(TARGET_OS STREQUAL "emscripten" AND CLIENT)
   set(CPACK_DIRS)
 else()
   set(CPACK_DIRS data)
@@ -3795,7 +3825,7 @@ set(CPACK_FILES
   license.txt
   ${COPY_FILES}
 )
-if(NOT TARGET_OS STREQUAL "emscripten")
+if(NOT(TARGET_OS STREQUAL "emscripten" AND CLIENT))
   list(APPEND CPACK_FILES storage.cfg)
 endif()
 
@@ -4045,11 +4075,15 @@ foreach(ext zip tar.gz tar.xz)
     list(APPEND COPY_DIR_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${TMPDIR}/${dir})
   endforeach()
   foreach(target ${CPACK_TARGETS})
-    if(TARGET_OS STREQUAL "emscripten")
+    if(TARGET_OS STREQUAL "emscripten" AND target STREQUAL "game-client")
       # The main target with Emscripten is the .html file, but we instead want the .data, .js and .wasm files and use our own index.html
       list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/$<TARGET_FILE_BASE_NAME:game-client>.data ${TMPDIR}/)
       list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/$<TARGET_FILE_BASE_NAME:game-client>.js ${TMPDIR}/)
       list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/$<TARGET_FILE_BASE_NAME:game-client>.wasm ${TMPDIR}/)
+    elseif(TARGET_OS STREQUAL "emscripten")
+      # The .mjs file of the server needs the .wasm file
+      list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${TMPDIR}/)
+      list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/$<TARGET_FILE_BASE_NAME:${target}>.wasm ${TMPDIR}/)
     else()
       list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${TMPDIR}/)
     endif()
@@ -4164,7 +4198,7 @@ foreach(target ${TARGETS})
   if(ENABLE_PIE)
     set_property(TARGET ${target} PROPERTY POSITION_INDEPENDENT_CODE TRUE)
   endif()
-  if(TARGET_OS STREQUAL "emscripten")
+  if(TARGET_OS STREQUAL "emscripten" AND target STREQUAL "game-client")
     # Preload data directory into the filesystem
     target_link_options(${target} PRIVATE --preload-file data)
   endif()

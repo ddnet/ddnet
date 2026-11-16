@@ -3,42 +3,65 @@ if(NOT DEFINED ENV{EMSDK})
 endif()
 
 set(WASM_CXX_FLAGS "")
-set(WASM_LINKER_FLAGS "")
+set(WASM_LINKER_FLAGS "-s LLD_REPORT_UNDEFINED")
 
-# Enable pthreads. Use thread pool of fixed sized, as workers cannot be created while our code is running.
-set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -pthread")
-set(WASM_LINKER_FLAGS "-s LLD_REPORT_UNDEFINED -s USE_PTHREADS=1 -pthread")
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE=10")
-# Abort if we try to create too many threads, instead of likely causing a deadlock in our code.
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE_STRICT=2")
-# TODO: Not supported in SDL2 currently. May also require `OFFSCREENCANVAS_SUPPORT` and/or `OFFSCREEN_FRAMEBUFFER` but canvas/context cannot be proxied to the thread.
-#set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PROXY_TO_PTHREAD=1")
-# Bad, but we sometimes need to block on the main thread because PROXY_TO_PTHREAD is not supported yet.
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ALLOW_BLOCKING_ON_MAIN_THREAD=1")
+if(CLIENT)
+  # Enable pthreads. Use thread pool of fixed sized, as workers cannot be created while our code is running.
+  set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -pthread")
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s USE_PTHREADS=1 -pthread")
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE=10")
+  # Abort if we try to create too many threads, instead of likely causing a deadlock in our code.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE_STRICT=2")
+  # TODO: Not supported in SDL2 currently. May also require `OFFSCREENCANVAS_SUPPORT` and/or `OFFSCREEN_FRAMEBUFFER` but canvas/context cannot be proxied to the thread.
+  #set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PROXY_TO_PTHREAD=1")
+  # Bad, but we sometimes need to block on the main thread because PROXY_TO_PTHREAD is not supported yet.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ALLOW_BLOCKING_ON_MAIN_THREAD=1")
+
+  # Support for persistent file storage in IndexedDB.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -lidbfs.js")
+
+  # TODO: Networking not supported. Full socket proxying is also blocked by PROXY_TO_PTHREAD not being supported.
+  #set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -lwebsocket.js -s PROXY_POSIX_SOCKETS=1")
+
+  # Use a WebGL2 compatible GLES3 implementation.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s USE_WEBGL2=1")
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FULL_ES3=1")
+
+  # Make sure C callback functions are available to JS.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\\$autoResumeAudioContext,\\$dynCall]")
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_FUNCTIONS=_main,_EmscriptenCallbackDropFile,_EmscriptenCallbackQuit,_EmscriptenCallbackQuitForce")
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_RUNTIME_METHODS=callMain,ccall")
+
+  # TODO: Without `--no-check-features` compilation fails with `--shared-memory is disallowed by "cxx.o" because it was not compiled with 'atomics' or 'bulk-memory' features.`
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s SHARED_MEMORY=1 -Wl,--no-check-features")
+else()
+  # The server is built without pthreads, as threads are not available in Cloudflare Workers.
+  # It is built as an ES module that is instantiated by the scripts in `other/emscripten/server`,
+  # which run it with Node.js or in a Cloudflare Durable Object.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s MODULARIZE=1 -s EXPORT_ES6=1 -s EXPORT_NAME=createServer")
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ENVIRONMENT=node,web")
+  # Code cannot be generated at runtime in Cloudflare Workers.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s DYNAMIC_EXECUTION=0")
+  # Support for mounting the host filesystem with Node.js.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -lnodefs.js")
+  # The host scripts use `raise` to request a graceful shutdown.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_FUNCTIONS=_main,_raise")
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_RUNTIME_METHODS=ENV,FS")
+  # The bundled libraries are compiled with pthreads but they do not create threads.
+  set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -Wl,--no-check-features")
+endif()
 
 # Ensure execution ends after main() returns, so global destructors and Module.onExit are invoked.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXIT_RUNTIME=1")
 
 # Filesystem support for loading files with C API functions.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FILESYSTEM=1 -s FORCE_FILESYSTEM=1")
-# Support for persistent file storage in IndexedDB.
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -lidbfs.js")
-
-# TODO: Networking not supported. Full socket proxying is also blocked by PROXY_TO_PTHREAD not being supported.
-#set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -lwebsocket.js -s PROXY_POSIX_SOCKETS=1")
 
 # Enable Fetch API for HTTP requests
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FETCH=1")
 
-# Use Web Assembly & a WebGL2 compatible GLES3 implementation.
+# Use Web Assembly.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s WASM=1")
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s USE_WEBGL2=1")
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FULL_ES3=1")
-
-# Make sure C callback functions are available to JS.
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\\$autoResumeAudioContext,\\$dynCall]")
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_FUNCTIONS=_main,_EmscriptenCallbackDropFile,_EmscriptenCallbackQuit,_EmscriptenCallbackQuitForce")
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_RUNTIME_METHODS=callMain,ccall")
 
 # Very important: use same stack size that other platforms have, as the default of 64 KiB that Emscripten uses is too small for our code and causes stack overflows.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s STACK_SIZE=1MB")
@@ -46,8 +69,6 @@ set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s STACK_SIZE=1MB")
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
 # Maximum of ~2 GiB with WASM32. Using more with WASM64 isn't well supported yet.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s MAXIMUM_MEMORY=2000MB")
-# TODO: Without `--no-check-features` compilation fails with `--shared-memory is disallowed by "cxx.o" because it was not compiled with 'atomics' or 'bulk-memory' features.`
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s SHARED_MEMORY=1 -Wl,--no-check-features")
 
 # Very important: allow SDL2 and our code to call Emscripten functions to yield control to the browser main thread.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ASYNCIFY=1")
@@ -62,11 +83,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ASSERTIONS=2")
 	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s STACK_OVERFLOW_CHECK=2")
 	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s SAFE_HEAP=1")
-	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s GL_ASSERTIONS=1")
 	# TODO: With `emmalloc-memvalidate` launch fails with `Assertion failed: multithreadingLock == 1, at: /emsdk/emscripten/system/lib/emmalloc.c,407,validate_memory_regions`
 	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s MALLOC=emmalloc-debug")
-	# Support stdout/stderr being captured by emrun tool. Not enabled in release mode because it tries to send the output with POST requests to `stdio.html`.
-	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} --emrun")
+	if(CLIENT)
+		set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s GL_ASSERTIONS=1")
+		# Support stdout/stderr being captured by emrun tool. Not enabled in release mode because it tries to send the output with POST requests to `stdio.html`.
+		set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} --emrun")
+	endif()
 else()
 	# Will drastically reduce code size but also increases compile and link time significantly.
 	set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -O3")

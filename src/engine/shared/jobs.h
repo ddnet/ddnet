@@ -153,6 +153,7 @@ class CJobPool
 
 	static void WorkerThread(void *pUser) NO_THREAD_SAFETY_ANALYSIS;
 	void RunLoop() NO_THREAD_SAFETY_ANALYSIS;
+	void RunJob(const std::shared_ptr<IJob> &pJob) REQUIRES(!m_LockRunning);
 
 public:
 	CJobPool();
@@ -161,7 +162,8 @@ public:
 	/**
 	 * Initializes the job pool with the given number of worker threads.
 	 *
-	 * @param NumThreads The number of worker threads.
+	 * @param NumThreads The number of worker threads. If this is `0`, jobs are run
+	 * synchronously when they are added.
 	 *
 	 * @remark Must be called on the main thread.
 	 */
@@ -183,6 +185,6 @@ public:
 	 * @remark If the job pool is already shutting down, no additional jobs
 	 * will be enqueue anymore. Abortable jobs will immediately be aborted.
 	 */
-	void Add(std::shared_ptr<IJob> pJob) REQUIRES(!m_Lock);
+	void Add(std::shared_ptr<IJob> pJob) REQUIRES(!m_Lock) REQUIRES(!m_LockRunning);
 };
 #endif

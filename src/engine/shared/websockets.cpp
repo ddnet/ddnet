@@ -1,6 +1,6 @@
-#if defined(CONF_WEBSOCKETS)
-
 #include "websockets.h"
+
+#if defined(CONF_WEBSOCKETS) && !defined(CONF_PLATFORM_EMSCRIPTEN)
 
 #include <base/dbg.h>
 #include <base/log.h>

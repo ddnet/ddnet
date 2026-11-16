@@ -470,7 +470,12 @@ MACRO_CONFIG_INT(SvMaxClientsPerIp, sv_max_clients_per_ip, 4, 1, SERVER_MAX_CLIE
 MACRO_CONFIG_INT(SvHighBandwidth, sv_high_bandwidth, 0, 0, 1, CFGFLAG_SERVER, "Use high bandwidth mode. Doubles the bandwidth required for the server. LAN use only")
 MACRO_CONFIG_INT(SvPreInput, sv_preinput, 1, 0, 1, CFGFLAG_SERVER, "Sends client inputs to other clients before their correct tick. Increases the bandwidth required for the server")
 MACRO_CONFIG_INT(SvMaxPreInputsPerTick, sv_max_preinputs_per_tick, 8, 0, 1000, CFGFLAG_SERVER, "Maximum number of inputs per tick and client that are sent on to the other clients as preinput (0 for no limit)")
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+// The master server cannot list servers which are only reachable with WebSockets
+MACRO_CONFIG_STR(SvRegister, sv_register, 16, "0", CFGFLAG_SERVER, "Register server with master server for public listing, can also accept a comma-separated list of protocols to register on, like 'ipv4,ipv6'")
+#else
 MACRO_CONFIG_STR(SvRegister, sv_register, 16, "1", CFGFLAG_SERVER, "Register server with master server for public listing, can also accept a comma-separated list of protocols to register on, like 'ipv4,ipv6'")
+#endif
 MACRO_CONFIG_STR(SvRegisterExtra, sv_register_extra, 256, "", CFGFLAG_SERVER, "Extra headers to send to the register endpoint, comma-separated 'Header: Value' pairs")
 MACRO_CONFIG_STR(SvRegisterUrl, sv_register_url, 128, "https://master1.ddnet.org/ddnet/15/register", CFGFLAG_SERVER, "Masterserver URL to register to")
 MACRO_CONFIG_INT(SvRegisterPort, sv_register_port, 0, 0, 65535, CFGFLAG_SERVER, "Port for the master server to register the server with, useful if you are behind NAT, otherwise you only need sv_port")

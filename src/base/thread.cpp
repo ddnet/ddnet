@@ -81,7 +81,7 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 #endif
 		pthread_t id;
 		dbg_assert(pthread_create(&id, &attr, thread_run, data) == 0, "pthread_create failure");
-#if defined(CONF_PLATFORM_EMSCRIPTEN)
+#if defined(CONF_PLATFORM_EMSCRIPTEN) && !defined(CONF_NO_THREADS)
 		// Return control to the browser's main thread to allow the pthread to be started,
 		// otherwise we deadlock when waiting for a thread immediately after starting it.
 		emscripten_sleep(0);
@@ -114,7 +114,7 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 
 void thread_wait(void *thread)
 {
-#if defined(CONF_PLATFORM_EMSCRIPTEN)
+#if defined(CONF_PLATFORM_EMSCRIPTEN) && !defined(CONF_NO_THREADS)
 	// TODO: Remove this workaround when https://github.com/emscripten-core/emscripten/issues/9910 is fixed.
 	while(true)
 	{

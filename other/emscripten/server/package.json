@@ -1,0 +1,17 @@
+{
+	"name": "ddnet-server",
+	"private": true,
+	"description": "DDNet server compiled with Emscripten, which runs with Node.js or in a Cloudflare Durable Object",
+	"type": "module",
+	"scripts": {
+		"start": "node server.mjs",
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy"
+	},
+	"dependencies": {
+		"ws": "^8.18.0"
+	},
+	"devDependencies": {
+		"wrangler": "^4.0.0"
+	}
+}

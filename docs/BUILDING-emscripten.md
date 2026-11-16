@@ -108,6 +108,44 @@
 	sudo service apache2 restart
 	```
 
+### Building the DDNet server via Emscripten
+
+-	The server can be compiled to WebAssembly to run it with Node.js or in a [Cloudflare Durable Object](https://developers.cloudflare.com/durable-objects/).
+	Clients connect to it with WebSockets, which is supported by the web client.
+	Native clients cannot connect, as UDP is not supported.
+-	The client and the server cannot be built at the same time with Emscripten, so use a separate build directory for the server.
+-	Run `emcmake cmake .. -G "Unix Makefiles" -DCLIENT=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON` in your build directory to configure followed by `cmake --build . -j8` to build.
+-	The server is built without threads, as they are not available in Cloudflare Workers.
+	Work that would run on other threads, like database queries, runs synchronously instead.
+	HTTP requests are not supported, so the server cannot register itself at the master server, which cannot list servers that are only reachable with WebSockets anyway.
+-	The build directory contains the files `DDNet-Server.mjs` and `DDNet-Server.wasm` as well as the scripts to run the server, which are copied from `other/emscripten/server`.
+
+### Running the server with Node.js
+
+-	Node.js 20 or newer is required.
+-	Copy the files `DDNet-Server.mjs`, `DDNet-Server.wasm`, `package.json` and `server.mjs` from the build directory to the server.
+-	Run `npm install --omit=dev` to install the dependencies.
+-	Run `node server.mjs [arguments]` in the directory which contains the `data` directory to start the server.
+	The arguments are passed to the server and it uses the same configuration files and directories as the native server.
+-	Clients connect with WebSockets to the server port (`sv_port`), so enter `<host>:<port>` in the web client to connect.
+	The web client uses secure WebSockets (`wss://`) when it is served via HTTPS, because browsers do not allow insecure connections from secure pages.
+	To accept secure WebSockets, set the environment variables `DDNET_TLS_CERT` and `DDNET_TLS_KEY` to the paths of a certificate and its private key.
+	Alternatively, use a reverse proxy and set `DDNET_TRUST_PROXY=1` to use the client address from its `X-Forwarded-For` header.
+
+### Running the server in a Cloudflare Durable Object
+
+-	Copy the files `DDNet-Server.mjs`, `DDNet-Server.wasm`, `empty.mjs`, `package.json`, `worker.mjs` and `wrangler.toml` from the build directory into a new directory and run `npm install` in it.
+-	Create the directory `files` with the files of the server, which are copied into its working directory when it starts.
+	For example, copy the maps from `data/maps` to `files/data/maps` and create the config file `files/autoexec_server.cfg`.
+	The files are only accessible to the server and they are not served to the public.
+-	Optionally, set additional console commands that are executed when the server starts, like the rcon password, as a secret with `npx wrangler secret put DDNET_COMMANDS`.
+	Multiple commands are separated with `;`.
+-	Run `npx wrangler dev` to test the server locally or run `npx wrangler deploy` to deploy it to Cloudflare.
+-	Clients connect with secure WebSockets (`wss://`) to port 443 of the Worker, so enter `ddnet-server.<account>.workers.dev:443` in the web client when it is served via HTTPS.
+	The path of the WebSocket URL selects the Durable Object, which allows running multiple servers with one Worker. The root path is the server named `default`.
+-	The server starts when the first client connects and keeps running while clients are connected.
+	The home directory of the server, which contains the user directory with the ranks database, is stored in the Durable Object storage.
+
 ### Common problems and solutions
 
 -	Make sure that the `CC` and `CXX` variables are not set in your shell environment, because this will interfere with the compiler selection of the emsdk.

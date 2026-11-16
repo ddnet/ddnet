@@ -1,0 +1,30 @@
+# Configuration to run the server in a Cloudflare Durable Object, see worker.mjs.
+# Install the dependencies with `npm install`, then run it locally with
+# `npx wrangler dev` or deploy it to Cloudflare with `npx wrangler deploy`.
+name = "ddnet-server"
+main = "worker.mjs"
+compatibility_date = "2025-09-01"
+
+# The files in this directory are copied into the working directory of the server
+# when it starts, e.g. `files/autoexec_server.cfg` and the maps in `files/data/maps`.
+# They are only accessible to the server and not served to the public.
+[assets]
+directory = "files"
+binding = "FILES"
+run_worker_first = true
+
+# Creates `files/files.json`, which lists the files for the server.
+[build]
+command = '''node -e "const fs = require('fs'); fs.mkdirSync('files', {recursive: true}); const files = fs.readdirSync('files', {recursive: true}).map((path) => path.split(require('path').sep).join('/')).filter((path) => path != 'files.json' && fs.statSync('files/' + path).isFile()); fs.writeFileSync('files/files.json', JSON.stringify(files));"'''
+
+[[durable_objects.bindings]]
+name = "DDNET_SERVER"
+class_name = "DDNetServer"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DDNetServer"]
+
+# Only imported by the Node.js support of Emscripten, which is not used in Cloudflare Workers.
+[alias]
+"module" = "./empty.mjs"

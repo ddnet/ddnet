@@ -124,7 +124,7 @@
 		<div id="controls">
 			<h1>DDNet Web</h1>
 			<p>This is an experimental version of the <a href="https://ddnet.org/downloads/">DDNet client</a> running in a web browser.</p>
-			<p>Connecting to most servers is currently not possible. Servers must be compiled with support for WebSockets.</p>
+			<p>Connecting to most servers is currently not possible. Servers must be compiled with support for WebSockets or be compiled with Emscripten.</p>
 			<div id="drop-target">
 				<p>You can drop a <code>.demo</code> file, <code>.map</code> file or a <code>ddnet://</code> link here, or click to select a file.
 				You can also drop files and links directly into the window after starting the client.</p>
@@ -185,6 +185,8 @@
 			var Module = {
 				noInitialRun: true,
 				arguments: [],
+				// Servers are connected to with WebSockets, which must be secure when the client is served via HTTPS.
+				websocket: { url: location.protocol === 'https:' ? 'wss://' : 'ws://' },
 				print: function(text) {
 					const parsedLine = parseAnsiColorRgb(text);
 					console.log(parsedLine.message);

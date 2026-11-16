@@ -725,6 +725,10 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 	const int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(nanoseconds).count();
 	dbg_assert(microseconds >= 0, "Negative wait duration %" PRId64 " not allowed", microseconds);
 
+#if defined(CONF_PLATFORM_EMSCRIPTEN) && defined(CONF_WEBSOCKETS)
+	const int websockets[] = {sock->web_ipv4sock, sock->web_ipv6sock};
+	return websocket_wait(websockets, std::size(websockets), microseconds);
+#else
 	fd_set readfds;
 	FD_ZERO(&readfds);
 
@@ -779,6 +783,7 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 	}
 #endif
 	return 0;
+#endif
 }
 
 static void priv_net_close_socket(int sock)

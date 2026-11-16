@@ -1,6 +1,7 @@
 #ifndef ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
 #define ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
 
+#include <base/detect.h>
 #include <base/sphore.h>
 #include <base/types.h>
 
@@ -61,6 +62,9 @@ struct CMysqlConfig
 	char m_aSslKey[IO_MAX_PATH_LENGTH];
 };
 
+class CBackup;
+class CWorker;
+
 class CDbConnectionPool
 {
 public:
@@ -103,6 +107,9 @@ public:
 
 private:
 	static bool ExecSqlFunc(IDbConnection *pConnection, struct CSqlExecData *pData, Write w);
+	// Signals the backup thread that a new query is available. Without threads,
+	// the query is processed synchronously instead.
+	void SignalBackup();
 
 	// Only the main thread accesses this variable. It points to the index,
 	// where the next query is added to the queue.
@@ -130,8 +137,13 @@ private:
 	};
 
 	std::shared_ptr<CSharedData> m_pShared;
+#if defined(CONF_NO_THREADS)
+	std::unique_ptr<CWorker> m_pWorker;
+	std::unique_ptr<CBackup> m_pBackup;
+#else
 	void *m_pWorkerThread = nullptr;
 	void *m_pBackupThread = nullptr;
+#endif
 };
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_POOL_H

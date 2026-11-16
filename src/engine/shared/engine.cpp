@@ -75,7 +75,10 @@ public:
 			CNetBase::Init();
 		}
 
-#if defined(CONF_PLATFORM_EMSCRIPTEN)
+#if defined(CONF_NO_THREADS)
+		// Jobs are run synchronously
+		const size_t ThreadCount = 0;
+#elif defined(CONF_PLATFORM_EMSCRIPTEN)
 		// Make sure we don't use more threads than allowed in total (see PTHREAD_POOL_SIZE in Emscripten.toolchain)
 		// otherwise starting more threads may lead to deadlocks as the threads will simply not start.
 		const size_t ThreadCount = 4;

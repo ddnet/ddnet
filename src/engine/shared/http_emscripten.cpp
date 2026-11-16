@@ -315,10 +315,15 @@ bool CHttpEmscripten::Init(std::chrono::milliseconds ShutdownDelay)
 {
 	m_ShutdownDelay = ShutdownDelay;
 
+#if defined(CONF_NO_THREADS)
+	// HTTP requests are not supported without threads, requests fail immediately instead
+	m_Initialized = true;
+#else
 	m_pThread = thread_init(CHttpEmscripten::ThreadMain, this, "http");
 
 	std::unique_lock Lock(m_Lock);
 	m_ConditionVariableInit.wait(Lock, [this]() { return m_Initialized.load(std::memory_order_seq_cst); });
+#endif
 
 	return true;
 }
@@ -362,7 +367,12 @@ void CHttpEmscripten::Run(std::shared_ptr<IHttpRequest> pRequest)
 			pRequestImpl->OnCompletionInternal(EHttpState::ABORTED, "Shutting down");
 			return;
 		}
+#if defined(CONF_NO_THREADS)
+		pRequestImpl->OnCompletionInternal(EHttpState::ERROR, "HTTP requests are not supported without threads");
+		return;
+#else
 		m_PendingRequests.emplace_back(pRequestImpl);
+#endif
 	}
 	m_ConditionVariableLoop.notify_all();
 }

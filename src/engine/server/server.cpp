@@ -3418,7 +3418,12 @@ int CServer::Run()
 		log_error("server", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
 		return -1;
 	}
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	// Only WebSockets are supported, UDP sockets cannot be used with Emscripten
+	BindAddr.type = Config()->m_SvIpv4Only ? NETTYPE_WEBSOCKET_IPV4 : (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6);
+#else
 	BindAddr.type = Config()->m_SvIpv4Only ? (NETTYPE_IPV4 | NETTYPE_WEBSOCKET_IPV4) : NETTYPE_ALL;
+#endif
 
 	int Port = Config()->m_SvPort;
 	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp); BindAddr.port++)

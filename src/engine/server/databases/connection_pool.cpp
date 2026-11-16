@@ -125,21 +125,21 @@ void CDbConnectionPool::Print(Mode DatabaseMode)
 {
 	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
-	m_pShared->m_NumBackup.Signal();
+	SignalBackup();
 }
 
 void CDbConnectionPool::RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64])
 {
 	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode, aFilename);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
-	m_pShared->m_NumBackup.Signal();
+	SignalBackup();
 }
 
 void CDbConnectionPool::RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig)
 {
 	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(DatabaseMode, pMysqlConfig);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
-	m_pShared->m_NumBackup.Signal();
+	SignalBackup();
 }
 
 void CDbConnectionPool::Execute(
@@ -149,7 +149,7 @@ void CDbConnectionPool::Execute(
 {
 	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
-	m_pShared->m_NumBackup.Signal();
+	SignalBackup();
 }
 
 void CDbConnectionPool::ExecuteWrite(
@@ -159,7 +159,7 @@ void CDbConnectionPool::ExecuteWrite(
 {
 	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
 	m_InsertIdx %= std::size(m_pShared->m_aQueries);
-	m_pShared->m_NumBackup.Signal();
+	SignalBackup();
 }
 
 void CDbConnectionPool::OnShutdown()
@@ -168,7 +168,7 @@ void CDbConnectionPool::OnShutdown()
 		return;
 	m_Shutdown = true;
 	m_pShared->m_Shutdown.store(true);
-	m_pShared->m_NumBackup.Signal();
+	SignalBackup();
 	int i = 0;
 	while(m_pShared->m_Shutdown.load())
 	{
@@ -193,11 +193,12 @@ public:
 	CBackup(std::shared_ptr<CDbConnectionPool::CSharedData> pShared, int DebugSql) :
 		m_DebugSql(DebugSql), m_pShared(std::move(pShared)) {}
 	static void Start(void *pUser);
+	void ProcessQueries();
 
 private:
 	bool m_DebugSql;
 
-	void ProcessQueries();
+	int m_JobNum = 0;
 
 	std::unique_ptr<IDbConnection> m_pWriteBackup;
 
@@ -214,10 +215,17 @@ void CBackup::Start(void *pUser)
 
 void CBackup::ProcessQueries()
 {
-	for(int JobNum = 0;; JobNum++)
+	for(;; m_JobNum++)
 	{
+#if defined(CONF_NO_THREADS)
+		// process the queued queries synchronously and return when all are done
+		if(m_pShared->m_NumBackup.GetApproximateValue() == 0)
+		{
+			return;
+		}
+#endif
 		m_pShared->m_NumBackup.Wait();
-		CSqlExecData *pThreadData = m_pShared->m_aQueries[JobNum % std::size(m_pShared->m_aQueries)].get();
+		CSqlExecData *pThreadData = m_pShared->m_aQueries[m_JobNum % std::size(m_pShared->m_aQueries)].get();
 
 		// work through all database jobs after OnShutdown is called before exiting the thread
 		if(pThreadData == nullptr)
@@ -235,7 +243,7 @@ void CBackup::ProcessQueries()
 		{
 			bool Success = CDbConnectionPool::ExecSqlFunc(m_pWriteBackup.get(), pThreadData, Write::BACKUP_FIRST);
 			if(m_DebugSql || !Success)
-				dbg_msg("sql", "[%i] %s done on write backup database, Success=%i", JobNum, pThreadData->m_pName, Success);
+				dbg_msg("sql", "[%i] %s done on write backup database, Success=%i", m_JobNum, pThreadData->m_pName, Success);
 		}
 		m_pShared->m_NumWorker.Signal();
 	}
@@ -257,6 +265,13 @@ private:
 	void Print(CDbConnectionPool::Mode DatabaseMode);
 
 	bool m_DebugSql;
+
+	int m_JobNum = 0;
+	// remember last working server and try to connect to it first
+	int m_ReadServer = 0;
+	// enter fail mode when a sql request fails, skip read request during it and
+	// write to the backup database until all requests are handled
+	bool m_FailMode = false;
 
 	// There are two possible configurations
 	//  * sqlite mode: There exists exactly one READ and the same WRITE server
@@ -283,19 +298,21 @@ void CWorker::Start(void *pUser)
 
 void CWorker::ProcessQueries()
 {
-	// remember last working server and try to connect to it first
-	int ReadServer = 0;
-	// enter fail mode when a sql request fails, skip read request during it and
-	// write to the backup database until all requests are handled
-	bool FailMode = false;
-	for(int JobNum = 0;; JobNum++)
+	for(;; m_JobNum++)
 	{
-		if(FailMode && m_pShared->m_NumWorker.GetApproximateValue() == 0)
+		if(m_FailMode && m_pShared->m_NumWorker.GetApproximateValue() == 0)
 		{
-			FailMode = false;
+			m_FailMode = false;
 		}
+#if defined(CONF_NO_THREADS)
+		// process the queued queries synchronously and return when all are done
+		if(m_pShared->m_NumWorker.GetApproximateValue() == 0)
+		{
+			return;
+		}
+#endif
 		m_pShared->m_NumWorker.Wait();
-		auto pThreadData = std::move(m_pShared->m_aQueries[JobNum % std::size(m_pShared->m_aQueries)]);
+		auto pThreadData = std::move(m_pShared->m_aQueries[m_JobNum % std::size(m_pShared->m_aQueries)]);
 		// work through all database jobs after OnShutdown is called before exiting the thread
 		if(pThreadData == nullptr)
 		{
@@ -311,27 +328,27 @@ void CWorker::ProcessQueries()
 			{
 				if(m_pShared->m_Shutdown)
 				{
-					dbg_msg("sql", "[%i] %s dismissed read request during shutdown", JobNum, pThreadData->m_pName);
+					dbg_msg("sql", "[%i] %s dismissed read request during shutdown", m_JobNum, pThreadData->m_pName);
 					break;
 				}
-				if(FailMode)
+				if(m_FailMode)
 				{
-					dbg_msg("sql", "[%i] %s dismissed read request during FailMode", JobNum, pThreadData->m_pName);
+					dbg_msg("sql", "[%i] %s dismissed read request during FailMode", m_JobNum, pThreadData->m_pName);
 					break;
 				}
-				int CurServer = (ReadServer + i) % (int)m_vpReadConnections.size();
+				int CurServer = (m_ReadServer + i) % (int)m_vpReadConnections.size();
 				if(CDbConnectionPool::ExecSqlFunc(m_vpReadConnections[CurServer].get(), pThreadData.get(), Write::NORMAL))
 				{
-					ReadServer = CurServer;
+					m_ReadServer = CurServer;
 					if(m_DebugSql)
-						dbg_msg("sql", "[%i] %s done on read database %d", JobNum, pThreadData->m_pName, CurServer);
+						dbg_msg("sql", "[%i] %s done on read database %d", m_JobNum, pThreadData->m_pName, CurServer);
 					Success = true;
 					break;
 				}
 			}
 			if(!Success)
 			{
-				FailMode = true;
+				m_FailMode = true;
 			}
 		}
 		break;
@@ -339,25 +356,25 @@ void CWorker::ProcessQueries()
 		{
 			if(m_pShared->m_Shutdown && m_pWriteBackup != nullptr)
 			{
-				dbg_msg("sql", "[%i] %s skipped to backup database during shutdown", JobNum, pThreadData->m_pName);
+				dbg_msg("sql", "[%i] %s skipped to backup database during shutdown", m_JobNum, pThreadData->m_pName);
 			}
-			else if(FailMode && m_pWriteBackup != nullptr)
+			else if(m_FailMode && m_pWriteBackup != nullptr)
 			{
-				dbg_msg("sql", "[%i] %s skipped to backup database during FailMode", JobNum, pThreadData->m_pName);
+				dbg_msg("sql", "[%i] %s skipped to backup database during FailMode", m_JobNum, pThreadData->m_pName);
 			}
 			else if(CDbConnectionPool::ExecSqlFunc(m_pWriteConnection.get(), pThreadData.get(), Write::NORMAL))
 			{
 				if(m_DebugSql)
-					dbg_msg("sql", "[%i] %s done on write database", JobNum, pThreadData->m_pName);
+					dbg_msg("sql", "[%i] %s done on write database", m_JobNum, pThreadData->m_pName);
 				Success = true;
 			}
 			// enter fail mode if not successful
-			FailMode = FailMode || !Success;
+			m_FailMode = m_FailMode || !Success;
 			const Write w = Success ? Write::NORMAL_SUCCEEDED : Write::NORMAL_FAILED;
 			if(m_pWriteBackup && CDbConnectionPool::ExecSqlFunc(m_pWriteBackup.get(), pThreadData.get(), w))
 			{
 				if(m_DebugSql)
-					dbg_msg("sql", "[%i] %s done move write on backup database to non-backup table", JobNum, pThreadData->m_pName);
+					dbg_msg("sql", "[%i] %s done move write on backup database to non-backup table", m_JobNum, pThreadData->m_pName);
 				Success = true;
 			}
 		}
@@ -408,7 +425,7 @@ void CWorker::ProcessQueries()
 			break;
 		}
 		if(!Success)
-			dbg_msg("sql", "[%i] %s failed on all databases", JobNum, pThreadData->m_pName);
+			dbg_msg("sql", "[%i] %s failed on all databases", m_JobNum, pThreadData->m_pName);
 		if(pThreadData->m_pThreadData != nullptr && pThreadData->m_pThreadData->m_pResult != nullptr)
 		{
 			pThreadData->m_pThreadData->m_pResult->m_Success = Success;
@@ -479,15 +496,31 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 CDbConnectionPool::CDbConnectionPool()
 {
 	m_pShared = std::make_shared<CSharedData>();
+#if defined(CONF_NO_THREADS)
+	m_pWorker = std::make_unique<CWorker>(m_pShared, g_Config.m_DbgSql);
+	m_pBackup = std::make_unique<CBackup>(m_pShared, g_Config.m_DbgSql);
+#else
 	m_pWorkerThread = thread_init(CWorker::Start, new CWorker(m_pShared, g_Config.m_DbgSql), "database worker thread");
 	m_pBackupThread = thread_init(CBackup::Start, new CBackup(m_pShared, g_Config.m_DbgSql), "database backup worker thread");
+#endif
 }
 
 CDbConnectionPool::~CDbConnectionPool()
 {
 	OnShutdown();
+#if !defined(CONF_NO_THREADS)
 	if(m_pWorkerThread)
 		thread_wait(m_pWorkerThread);
 	if(m_pBackupThread)
 		thread_wait(m_pBackupThread);
+#endif
+}
+
+void CDbConnectionPool::SignalBackup()
+{
+	m_pShared->m_NumBackup.Signal();
+#if defined(CONF_NO_THREADS)
+	m_pBackup->ProcessQueries();
+	m_pWorker->ProcessQueries();
+#endif
 }

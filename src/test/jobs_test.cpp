@@ -165,3 +165,30 @@ TEST_F(Jobs, Many)
 	}
 	SetUp();
 }
+
+TEST(JobsWithoutThreads, Synchronous)
+{
+	CJobPool Pool;
+	Pool.Init(0);
+	bool Ran = false;
+	auto pJob = std::make_shared<CJob>([&] { Ran = true; });
+	EXPECT_EQ(pJob->State(), IJob::STATE_QUEUED);
+	Pool.Add(pJob);
+	EXPECT_TRUE(Ran);
+	EXPECT_EQ(pJob->State(), IJob::STATE_DONE);
+	Pool.Shutdown();
+}
+
+TEST(JobsWithoutThreads, AbortedBeforeStart)
+{
+	CJobPool Pool;
+	Pool.Init(0);
+	bool Ran = false;
+	auto pJob = std::make_shared<CJob>([&] { Ran = true; });
+	pJob->Abortable(true);
+	EXPECT_TRUE(pJob->Abort());
+	Pool.Add(pJob);
+	EXPECT_FALSE(Ran);
+	EXPECT_EQ(pJob->State(), IJob::STATE_ABORTED);
+	Pool.Shutdown();
+}

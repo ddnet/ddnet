@@ -89,43 +89,48 @@ void CJobPool::RunLoop()
 
 		if(pJob)
 		{
-			IJob::EJobState OldStateQueued = IJob::STATE_QUEUED;
-			if(!pJob->m_State.compare_exchange_strong(OldStateQueued, IJob::STATE_RUNNING))
-			{
-				if(OldStateQueued == IJob::STATE_ABORTED)
-				{
-					// job was aborted before it was started
-					pJob->m_State = IJob::STATE_ABORTED;
-					continue;
-				}
-				dbg_assert_failed("Job state invalid. Job was reused or uninitialized.");
-			}
-
-			// remember running jobs so we can abort them
-			{
-				const CLockScope LockScope(m_LockRunning);
-				m_RunningJobs.push_back(pJob);
-			}
-			pJob->Run();
-			{
-				const CLockScope LockScope(m_LockRunning);
-				m_RunningJobs.erase(std::find(m_RunningJobs.begin(), m_RunningJobs.end(), pJob));
-			}
-
-			// do not change state to done if job was not completed successfully
-			IJob::EJobState OldStateRunning = IJob::STATE_RUNNING;
-			if(!pJob->m_State.compare_exchange_strong(OldStateRunning, IJob::STATE_DONE))
-			{
-				if(OldStateRunning != IJob::STATE_ABORTED)
-				{
-					dbg_assert_failed("Job state invalid, must be either running or aborted");
-				}
-			}
+			RunJob(pJob);
 		}
 		else if(m_Shutdown)
 		{
 			// shut down worker thread when pool is shutting down and no more jobs are left
 			break;
+		}
+	}
+}
+
+void CJobPool::RunJob(const std::shared_ptr<IJob> &pJob)
+{
+	IJob::EJobState OldStateQueued = IJob::STATE_QUEUED;
+	if(!pJob->m_State.compare_exchange_strong(OldStateQueued, IJob::STATE_RUNNING))
+	{
+		if(OldStateQueued == IJob::STATE_ABORTED)
+		{
+			// job was aborted before it was started
+			pJob->m_State = IJob::STATE_ABORTED;
+			return;
+		}
+		dbg_assert_failed("Job state invalid. Job was reused or uninitialized.");
+	}
+
+	// remember running jobs so we can abort them
+	{
+		const CLockScope LockScope(m_LockRunning);
+		m_RunningJobs.push_back(pJob);
+	}
+	pJob->Run();
+	{
+		const CLockScope LockScope(m_LockRunning);
+		m_RunningJobs.erase(std::find(m_RunningJobs.begin(), m_RunningJobs.end(), pJob));
+	}
+
+	// do not change state to done if job was not completed successfully
+	IJob::EJobState OldStateRunning = IJob::STATE_RUNNING;
+	if(!pJob->m_State.compare_exchange_strong(OldStateRunning, IJob::STATE_DONE))
+	{
+		if(OldStateRunning != IJob::STATE_ABORTED)
+		{
+			dbg_assert_failed("Job state invalid, must be either running or aborted");
 		}
 	}
 }
@@ -216,6 +221,13 @@ void CJobPool::Add(std::shared_ptr<IJob> pJob)
 	{
 		// no jobs are accepted when the job pool is already shutting down
 		pJob->Abort();
+		return;
+	}
+
+	if(m_vpThreads.empty())
+	{
+		// run job synchronously when there are no worker threads
+		RunJob(pJob);
 		return;
 	}
 

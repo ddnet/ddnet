@@ -1,5 +1,6 @@
 #include "aio.h"
 
+#include "detect.h"
 #include "io.h"
 #include "lock.h"
 #include "mem.h"
@@ -98,10 +99,16 @@ static void aio_thread(void *user)
 				aio_handle_free_and_unlock(aio);
 				break;
 			}
+#if defined(CONF_NO_THREADS)
+			// the buffer is written synchronously, see aio_notify
+			aio->lock.unlock();
+			break;
+#else
 			aio->lock.unlock();
 			sphore_wait(&aio->sphore);
 			aio->lock.lock();
 			continue;
+#endif
 		}
 
 		buffer_ptrs(aio, &buffers);
@@ -135,6 +142,20 @@ static void aio_thread(void *user)
 	}
 }
 
+// Wakes up the thread to write the buffer. Without threads, the buffer is written synchronously instead.
+static void aio_notify(ASYNCIO *aio)
+{
+#if defined(CONF_NO_THREADS)
+	// The thread releases its reference when it is done, the caller still holds the other one
+	if(aio->refcount == 2)
+	{
+		aio_thread(aio);
+	}
+#else
+	sphore_signal(&aio->sphore);
+#endif
+}
+
 ASYNCIO *aio_new(IOHANDLE io)
 {
 	ASYNCIO *aio = new ASYNCIO;
@@ -160,6 +181,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	aio->finish = EAsyncIoFinishState::RUNNING;
 	aio->refcount = 2;
 
+#if !defined(CONF_NO_THREADS)
 	aio->thread = thread_init(aio_thread, aio, "aio");
 	if(!aio->thread)
 	{
@@ -168,6 +190,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 		delete aio;
 		return nullptr;
 	}
+#endif
 	return aio;
 }
 
@@ -200,7 +223,7 @@ void aio_lock(ASYNCIO *aio) ACQUIRE(aio->lock)
 void aio_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 {
 	aio->lock.unlock();
-	sphore_signal(&aio->sphore);
+	aio_notify(aio);
 }
 
 void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
@@ -288,7 +311,7 @@ void aio_close(ASYNCIO *aio)
 		CLockScope ls(aio->lock);
 		aio->finish = EAsyncIoFinishState::CLOSE;
 	}
-	sphore_signal(&aio->sphore);
+	aio_notify(aio);
 }
 
 void aio_wait(ASYNCIO *aio)
@@ -303,8 +326,11 @@ void aio_wait(ASYNCIO *aio)
 			aio->finish = EAsyncIoFinishState::EXIT;
 		}
 	}
-	sphore_signal(&aio->sphore);
-	thread_wait(thread);
+	aio_notify(aio);
+	if(thread != nullptr)
+	{
+		thread_wait(thread);
+	}
 }
 
 void aio_free(ASYNCIO *aio)

@@ -191,6 +191,14 @@
 #define CONF_ARCH_STRING "wasm32"
 #endif
 
+/* threads */
+#if defined(__EMSCRIPTEN__) && !defined(__EMSCRIPTEN_PTHREADS__)
+// The server is built without threads with Emscripten, because it must also run in
+// environments without threads like Cloudflare Workers. Work that would run on other
+// threads is run synchronously instead.
+#define CONF_NO_THREADS 1
+#endif
+
 #ifndef CONF_FAMILY_STRING
 #define CONF_FAMILY_STRING "unknown"
 #endif
