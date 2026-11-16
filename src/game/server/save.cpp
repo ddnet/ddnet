@@ -97,6 +97,8 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 
 	if(pChr->m_TimeCpBroadcastEndTick)
 		m_TimeCpBroadcastEndTime = pChr->Server()->Tick() - pChr->m_TimeCpBroadcastEndTick;
+	else
+		m_TimeCpBroadcastEndTime = 0;
 
 	m_LastTimeCp = pChr->m_LastTimeCp;
 	m_LastTimeCpBroadcasted = pChr->m_LastTimeCpBroadcasted;
@@ -204,6 +206,8 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 
 	if(m_TimeCpBroadcastEndTime)
 		pChr->m_TimeCpBroadcastEndTick = pChr->Server()->Tick() - m_TimeCpBroadcastEndTime;
+	else
+		pChr->m_TimeCpBroadcastEndTick = 0;
 
 	pChr->m_LastTimeCp = m_LastTimeCp;
 	pChr->m_LastTimeCpBroadcasted = m_LastTimeCpBroadcasted;
