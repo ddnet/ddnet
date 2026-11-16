@@ -195,6 +195,21 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 	return FoundAddr;
 }
 
+bool CNetServer::HasTimedOutClientWithAddr(NETADDR Addr)
+{
+	for(int i = 0; i < MaxClients(); ++i)
+	{
+		if(m_aSlots[i].m_Connection.State() == CNetConnection::EState::ERROR &&
+			m_aSlots[i].m_Connection.m_TimeoutProtected &&
+			m_aSlots[i].m_Connection.m_TimeoutSituation &&
+			!net_addr_comp_noport(&Addr, m_aSlots[i].m_Connection.PeerAddress()))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool CNetServer::Connlimit(NETADDR Addr)
 {
 	int64_t Now = time_get();
@@ -259,7 +274,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, int
 	else
 	{
 		// check for sv_max_clients_per_ip
-		if(NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIp)
+		if(NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIp + (HasTimedOutClientWithAddr(Addr) ? 1 : 0))
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIp);

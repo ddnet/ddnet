@@ -484,6 +484,7 @@ class CNetServer
 
 	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, int Slot, bool VanillaAuth = false, bool Sixup = false, SECURITY_TOKEN Token = 0);
 	int NumClientsWithAddr(NETADDR Addr);
+	bool HasTimedOutClientWithAddr(NETADDR Addr);
 	bool Connlimit(NETADDR Addr);
 	void SendMsgs(NETADDR &Addr, const CPacker **ppMsgs, int Num);
 
