@@ -46,10 +46,7 @@ def icon_from_app(app_path):
 # volume_name = 'DDNet'
 
 # Volume format (see hdiutil create -help)
-format = defines.get('format', 'UDBZ')
-
-# Compression level (if relevant)
-compression_level = 9
+format = defines.get('format', 'ULMO')
 
 # Volume size
 size = defines.get('size', None)
