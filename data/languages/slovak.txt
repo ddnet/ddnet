@@ -2487,7 +2487,7 @@ Team successfully saved by %s. The database connection failed, using generated s
 == 
 
 Hold Shift to be more precise.
-== 
+== Držte Shift pre lepšiu presnosť.
 
 Dummy is not connected
 == 
