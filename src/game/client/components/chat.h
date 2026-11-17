@@ -12,6 +12,7 @@
 
 #include <generated/protocol7.h>
 
+#include <game/chat.h>
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
@@ -37,8 +38,16 @@ class CChat : public CComponent
 	public:
 		CLine();
 		void Reset(CChat &This);
+		void UpdateRedaction(bool ApplyRedactions);
 
 		bool m_Initialized;
+		bool m_Redacted;
+		struct CMessage
+		{
+			CChatMessageId m_Id;
+			bool m_Redacted = false;
+		};
+		std::vector<CMessage> m_vMessages;
 		int64_t m_Time;
 		float m_aYOffset[2];
 		int m_ClientId;
@@ -167,7 +176,8 @@ public:
 	static constexpr float MESSAGE_TEE_PADDING_RIGHT = 0.5f;
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
-	void AddLine(int ClientId, int Team, const char *pLine);
+	void AddLine(int ClientId, int Team, const char *pLine, CChatMessageId Id = {});
+	void Redact(CChatRedaction Redaction);
 	void EnableMode(int Team);
 	void DisableMode();
 	void RegisterCommand(const char *pName, const char *pParams, const char *pHelpText);

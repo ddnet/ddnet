@@ -311,9 +311,15 @@ public:
 
 	// network
 	void CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = nullptr);
-	void SendChatTarget(int To, const char *pText, int VersionFlags = FLAG_SIX | FLAG_SIXUP) const;
-	void SendChatTeam(int Team, const char *pText) const;
-	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int VersionFlags = FLAG_SIX | FLAG_SIXUP);
+	CChatMessageId SendChatTarget(int To, const char *pText, int VersionFlags = FLAG_SIX | FLAG_SIXUP);
+	CChatMessageId SendChatTeam(int Team, const char *pText);
+	CChatMessageId SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int VersionFlags = FLAG_SIX | FLAG_SIXUP);
+	CChatMessageId NextChatMessageId(int ClientId);
+	// Call on the game thread. Retain the ID, not a client slot, across asynchronous work.
+	void RedactChat(CChatRedaction Redaction);
+	void RedactChatAuthor(int ClientId);
+	static void ConChatRedact(IConsole::IResult *pResult, void *pUserData);
+	static void ConChatRedactPlayer(IConsole::IResult *pResult, void *pUserData);
 	void SendStartWarning(int ClientId, const char *pMessage);
 	void SendEmoticon(int ClientId, int Emoticon, int TargetClientId) const;
 	void SendWeaponPickup(int ClientId, int Weapon) const;
@@ -429,7 +435,7 @@ public:
 
 	// Checks if player can vote and notify them about the reason
 	bool RateLimitPlayerVote(int ClientId);
-	bool RateLimitPlayerMapVote(int ClientId) const;
+	bool RateLimitPlayerMapVote(int ClientId);
 
 	void OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int ClientId) override;
 	void ReadCensorList();
@@ -445,6 +451,8 @@ public:
 private:
 	// starting 1 to make 0 the special value "no client id"
 	uint32_t m_NextUniqueClientId = 1;
+	int m_NextChatAuthor = 1;
+	int m_ServerChatSequence = 0;
 	bool m_VoteWillPass;
 	CScore *m_pScore;
 
@@ -624,10 +632,10 @@ private:
 
 	void Whisper(int ClientId, char *pStr);
 	int WhisperRecordFlag(int ClientId) const;
-	void WhisperId(int ClientId, int VictimId, const char *pMessage);
+	CChatMessageId WhisperId(int ClientId, int VictimId, const char *pMessage);
 	void Converse(int ClientId, char *pStr);
 	bool IsVersionBanned(int Version);
-	void UnlockTeam(int ClientId, int Team) const;
+	void UnlockTeam(int ClientId, int Team);
 	void AttemptJoinTeam(int ClientId, int Team);
 
 	enum

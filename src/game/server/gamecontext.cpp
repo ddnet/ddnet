@@ -45,6 +45,7 @@
 #include <game/mapitems.h>
 #include <game/version.h>
 
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -171,6 +172,8 @@ void CGameContext::Clear()
 	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_aTuningList[0];
+	const int NextChatAuthor = m_NextChatAuthor;
+	const int ServerChatSequence = m_ServerChatSequence;
 	CMutes Mutes = m_Mutes;
 	CMutes VoteMutes = m_VoteMutes;
 	std::unique_ptr<IMap> pMap;
@@ -180,6 +183,8 @@ void CGameContext::Clear()
 	this->~CGameContext();
 	new(this) CGameContext(true);
 
+	m_NextChatAuthor = NextChatAuthor;
+	m_ServerChatSequence = ServerChatSequence;
 	m_pVoteOptionHeap = pVoteOptionHeap;
 	m_pVoteOptionFirst = pVoteOptionFirst;
 	m_pVoteOptionLast = pVoteOptionLast;
@@ -662,15 +667,75 @@ void CGameContext::CallVote(int ClientId, const char *pDesc, const char *pCmd, c
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
-void CGameContext::SendChatTarget(int To, const char *pText, int VersionFlags) const
+template<typename T>
+static void RecordChatMessage(IServer *pServer, const T &Msg)
 {
-	CNetMsg_Sv_Chat Msg;
+	CMsgPacker Packer(&Msg);
+	if(!Msg.Pack(&Packer))
+		pServer->SendMsg(&Packer, MSGFLAG_NOSEND, SERVER_DEMO_CLIENT);
+}
+
+void CGameContext::ConChatRedact(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = (CGameContext *)pUserData;
+	const CChatMessageId Id{pResult->GetInteger(0), pResult->GetInteger(1)};
+	if(!Id.IsValid())
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", "Expected a nonnegative author session and a positive message sequence");
+		return;
+	}
+	pSelf->RedactChat({Id, pResult->GetInteger(2) != 0});
+}
+
+void CGameContext::ConChatRedactPlayer(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = (CGameContext *)pUserData;
+	pSelf->RedactChatAuthor(pResult->GetVictim(0));
+}
+
+CChatMessageId CGameContext::NextChatMessageId(int ClientId)
+{
+	CPlayer *pPlayer = ClientId >= 0 ? m_apPlayers[ClientId] : nullptr;
+	int &Sequence = pPlayer ? pPlayer->m_ChatSequence : m_ServerChatSequence;
+	Sequence = Sequence == std::numeric_limits<int>::max() ? 1 : Sequence + 1;
+	const CChatMessageId Id{pPlayer ? pPlayer->m_ChatAuthor : 0, Sequence};
+	return Id;
+}
+
+void CGameContext::RedactChat(CChatRedaction Redaction)
+{
+	if(!Redaction.m_Id.IsValid())
+		return;
+	CNetMsg_Sv_ChatRedact Msg;
+	Msg.m_Author = Redaction.m_Id.m_Author;
+	Msg.m_Sequence = Redaction.m_Id.m_Sequence;
+	Msg.m_Through = Redaction.m_Through;
+
+	for(int i = 0; i < Server()->MaxClients(); ++i)
+		if(m_apPlayers[i] && GetClientVersion(i) >= VERSION_DDNET_CHAT_REDACT)
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+	if(g_Config.m_SvDemoChat)
+		RecordChatMessage(Server(), Msg);
+}
+
+void CGameContext::RedactChatAuthor(int ClientId)
+{
+	if(CheckClientId(ClientId) && m_apPlayers[ClientId])
+		RedactChat({{m_apPlayers[ClientId]->m_ChatAuthor, m_apPlayers[ClientId]->m_ChatSequence}, true});
+}
+
+CChatMessageId CGameContext::SendChatTarget(int To, const char *pText, int VersionFlags)
+{
+	const CChatMessageId Id = NextChatMessageId(-1);
+	CNetMsg_Sv_ChatMessage Msg;
+	Msg.m_Author = Id.m_Author;
+	Msg.m_Sequence = Id.m_Sequence;
 	Msg.m_Team = 0;
 	Msg.m_ClientId = -1;
 	Msg.m_pMessage = pText;
 
 	if(g_Config.m_SvDemoChat)
-		Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, SERVER_DEMO_CLIENT);
+		RecordChatMessage(Server(), Msg);
 
 	if(To == -1)
 	{
@@ -687,27 +752,34 @@ void CGameContext::SendChatTarget(int To, const char *pText, int VersionFlags) c
 	{
 		if(!((Server()->IsSixup(To) && (VersionFlags & FLAG_SIXUP)) ||
 			   (!Server()->IsSixup(To) && (VersionFlags & FLAG_SIX))))
-			return;
+			return Id;
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, To);
 	}
+	return Id;
 }
 
-void CGameContext::SendChatTeam(int Team, const char *pText) const
+CChatMessageId CGameContext::SendChatTeam(int Team, const char *pText)
 {
+	const CChatMessageId Id = NextChatMessageId(-1);
+	CNetMsg_Sv_ChatMessage Msg{Id.m_Author, Id.m_Sequence, 0, -1, pText};
+	if(g_Config.m_SvDemoChat)
+		RecordChatMessage(Server(), Msg);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_apPlayers[i] != nullptr && GetDDRaceTeam(i) == Team)
-			SendChatTarget(i, pText);
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+	return Id;
 }
 
-void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, int SpamProtectionClientId, int VersionFlags)
+CChatMessageId CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, int SpamProtectionClientId, int VersionFlags)
 {
 	dbg_assert(ChatterClientId >= -1 && ChatterClientId < MAX_CLIENTS, "ChatterClientId invalid: %d", ChatterClientId);
 
 	if(SpamProtectionClientId >= 0 && SpamProtectionClientId < MAX_CLIENTS)
 		if(ProcessSpamProtection(SpamProtectionClientId))
-			return;
+			return {};
 
+	const CChatMessageId Id = NextChatMessageId(ChatterClientId);
 	char aText[MAX_CHAT_LENGTH];
 	str_copy(aText, pText);
 	const char *pTeamString = Team == TEAM_ALL ? "chat" : "teamchat";
@@ -722,14 +794,16 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 
 	if(Team == TEAM_ALL)
 	{
-		CNetMsg_Sv_Chat Msg;
+		CNetMsg_Sv_ChatMessage Msg;
+		Msg.m_Author = Id.m_Author;
+		Msg.m_Sequence = Id.m_Sequence;
 		Msg.m_Team = 0;
 		Msg.m_ClientId = ChatterClientId;
 		Msg.m_pMessage = aText;
 
 		// pack one for the recording only
 		if(g_Config.m_SvDemoChat)
-			Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, SERVER_DEMO_CLIENT);
+			RecordChatMessage(Server(), Msg);
 
 		// send to the clients
 		for(int i = 0; i < Server()->MaxClients(); i++)
@@ -750,14 +824,16 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 	else
 	{
 		CTeamsCore *pTeams = &m_pController->Teams().m_Core;
-		CNetMsg_Sv_Chat Msg;
+		CNetMsg_Sv_ChatMessage Msg;
+		Msg.m_Author = Id.m_Author;
+		Msg.m_Sequence = Id.m_Sequence;
 		Msg.m_Team = 1;
 		Msg.m_ClientId = ChatterClientId;
 		Msg.m_pMessage = aText;
 
 		// pack one for the recording only
 		if(g_Config.m_SvDemoChat)
-			Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, SERVER_DEMO_CLIENT);
+			RecordChatMessage(Server(), Msg);
 
 		// send to the clients
 		for(int i = 0; i < Server()->MaxClients(); i++)
@@ -781,6 +857,7 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 			}
 		}
 	}
+	return Id;
 }
 
 void CGameContext::SendStartWarning(int ClientId, const char *pMessage)
@@ -4016,6 +4093,9 @@ void CGameContext::RegisterDDRaceCommands()
 
 void CGameContext::RegisterChatCommands()
 {
+	Console()->Register("chat_redact", "i[author-session] i[sequence] ?i[through]", CFGFLAG_SERVER, ConChatRedact, this, "Redact one chat message, or all messages by the author through the sequence when through is 1");
+	Console()->Register("chat_redact_player", "v[player]", CFGFLAG_SERVER, ConChatRedactPlayer, this, "Redact all chat messages sent so far by the connected player");
+
 	Console()->Register("rules", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRules, this, "Shows the server rules");
 	Console()->Register("emote", "?s[emote name] i[duration in seconds]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConEyeEmote, this, "Sets your tee's eye emote");
 	Console()->Register("eyeemote", "?s['on'|'off'|'toggle']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetEyeEmote, this, "Toggles use of standard eye-emotes on/off, eyeemote s, where s = on for on, off for off, toggle for toggle and nothing to show current status");
@@ -4426,6 +4506,8 @@ CPlayer *CGameContext::CreatePlayer(int ClientId, int StartTeam, bool Afk, int L
 	if(m_apPlayers[ClientId])
 		delete m_apPlayers[ClientId];
 	m_apPlayers[ClientId] = new(ClientId) CPlayer(this, m_NextUniqueClientId, ClientId, StartTeam);
+	m_apPlayers[ClientId]->m_ChatAuthor = m_NextChatAuthor;
+	m_NextChatAuthor = m_NextChatAuthor == std::numeric_limits<int>::max() ? 1 : m_NextChatAuthor + 1;
 	m_apPlayers[ClientId]->SetInitialAfk(Afk);
 	m_apPlayers[ClientId]->m_LastWhisperTo = LastWhisperTo;
 	m_NextUniqueClientId += 1;
@@ -5081,11 +5163,12 @@ int CGameContext::WhisperRecordFlag(int ClientId) const
 	return g_Config.m_SvDemoChat && !Server()->IsSixup(ClientId) ? 0 : MSGFLAG_NORECORD;
 }
 
-void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
+CChatMessageId CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 {
 	dbg_assert(CheckClientId(ClientId) && m_apPlayers[ClientId] != nullptr, "ClientId invalid");
 	dbg_assert(CheckClientId(VictimId) && m_apPlayers[VictimId] != nullptr, "VictimId invalid");
 
+	const CChatMessageId Id = NextChatMessageId(ClientId);
 	m_apPlayers[ClientId]->m_LastWhisperTo = VictimId;
 
 	char aCensoredMessage[256];
@@ -5102,7 +5185,7 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 	{
 		// The translation layer will send the correct 0.6 packet after translating
 		Msg.m_Mode = (int)protocol7::NUM_CHATS + TEAM_WHISPER_SEND;
-		Server()->SendPackMsgTranslateChat(&Msg, MSGFLAG_VITAL | WhisperRecordFlag(ClientId), ClientId);
+		Server()->SendPackMsgTranslateChat(&Msg, MSGFLAG_VITAL | WhisperRecordFlag(ClientId), ClientId, Id);
 	}
 	else
 	{
@@ -5113,20 +5196,21 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 	if(!m_apPlayers[VictimId]->m_Whispers)
 	{
 		SendChatTarget(ClientId, "This person has disabled receiving whispers");
-		return;
+		return Id;
 	}
 
 	if(Server()->IsSixup(VictimId) || GetClientVersion(VictimId) >= VERSION_DDNET_WHISPER)
 	{
 		// The translation layer will send the correct 0.6 packet after translating
 		Msg.m_Mode = (int)protocol7::NUM_CHATS + TEAM_WHISPER_RECV;
-		Server()->SendPackMsgTranslateChat(&Msg, MSGFLAG_VITAL | WhisperRecordFlag(VictimId), VictimId);
+		Server()->SendPackMsgTranslateChat(&Msg, MSGFLAG_VITAL | WhisperRecordFlag(VictimId), VictimId, Id);
 	}
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientId), aCensoredMessage);
 		SendChatTarget(VictimId, aBuf);
 	}
+	return Id;
 }
 
 void CGameContext::Converse(int ClientId, char *pStr)
@@ -5302,7 +5386,7 @@ bool CGameContext::RateLimitPlayerVote(int ClientId)
 	return false;
 }
 
-bool CGameContext::RateLimitPlayerMapVote(int ClientId) const
+bool CGameContext::RateLimitPlayerMapVote(int ClientId)
 {
 	if(!Server()->IsRconAuthed(ClientId) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 	{

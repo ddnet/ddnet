@@ -1123,11 +1123,23 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		return;
 	}
 
+	if(MsgId == NETMSGTYPE_SV_CHATREDACT)
+	{
+		m_Chat.OnMessage(MsgId, pRawMsg);
+		return;
+	}
+
 	if(Dummy)
 	{
 		if(MsgId == NETMSGTYPE_SV_READYTOENTER)
 		{
 			Client()->EnterGame(Conn);
+		}
+		else if(MsgId == NETMSGTYPE_SV_CHATMESSAGE && m_aLocalIds[0] >= 0 && m_aLocalIds[1] >= 0)
+		{
+			const auto *pMsg = (CNetMsg_Sv_ChatMessage *)pRawMsg;
+			if((pMsg->m_Team == 1 && (m_aClients[m_aLocalIds[0]].m_Team != m_aClients[m_aLocalIds[1]].m_Team || m_Teams.Team(m_aLocalIds[0]) != m_Teams.Team(m_aLocalIds[1]))) || pMsg->m_Team > 1)
+				m_Chat.OnMessage(MsgId, pRawMsg);
 		}
 		else if(MsgId == NETMSGTYPE_SV_CHAT && m_aLocalIds[0] >= 0 && m_aLocalIds[1] >= 0)
 		{
