@@ -266,6 +266,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	void UpdateDemoIntraTimers();
 	int MaxLatencyTicks() const;
 	int PredictionMargin() const;
+	int SnapshotMarginTicks() const;
+	void CheckWifiPowerSave();
 
 	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;

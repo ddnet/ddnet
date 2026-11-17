@@ -543,8 +543,9 @@ int CNetConnection::Update()
 		}
 		else
 		{
-			// resend packet if we haven't got it acked in 1 second
-			if(Now - pResend->m_LastSendTime > time_freq())
+			// resend packet if we haven't got it acked in configured timeout
+			const int64_t ResendTimeout = (time_freq() * (int64_t)g_Config.m_ConnResendTimeoutMs) / 1000;
+			if(Now - pResend->m_LastSendTime >= ResendTimeout)
 				ResendChunk(pResend);
 		}
 	}
