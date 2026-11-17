@@ -129,7 +129,7 @@ void CChat::RebuildChat()
 			continue;
 		TextRender()->DeleteTextContainer(Line.m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
-		Line.UpdateRedaction(true);
+		Line.UpdateRedaction(g_Config.m_ClChatRedact);
 		// recalculate sizes
 		Line.m_aYOffset[0] = -1.0f;
 		Line.m_aYOffset[1] = -1.0f;
@@ -286,6 +286,7 @@ void CChat::OnInit()
 	Reset();
 	Console()->Chain("cl_chat_old", ConchainChatRebuild, this);
 	Console()->Chain("cl_chat_show_message_ids", ConchainChatRebuild, this);
+	Console()->Chain("cl_chat_redact", ConchainChatRebuild, this);
 	Console()->Chain("cl_chat_size", ConchainChatFontSize, this);
 	Console()->Chain("cl_chat_width", ConchainChatWidth, this);
 }
@@ -835,7 +836,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine, CChatMessageId Id
 		if(Id.IsValid())
 		{
 			PreviousLine.m_vMessages.push_back({Id});
-			PreviousLine.UpdateRedaction(true);
+			PreviousLine.UpdateRedaction(g_Config.m_ClChatRedact);
 		}
 		else
 			PreviousLine.m_TimesRepeated++;
@@ -1063,7 +1064,7 @@ void CChat::OnPrepareLines(float y)
 		char aMessageId[32] = "";
 		if(g_Config.m_ClChatShowMessageIds && !Line.m_vMessages.empty())
 		{
-			const CChatMessageId Id = Line.LatestMessageId(true);
+			const CChatMessageId Id = Line.LatestMessageId(g_Config.m_ClChatRedact);
 			str_format(aMessageId, sizeof(aMessageId), "[%d:%d] ", Id.m_Author, Id.m_Sequence);
 		}
 
