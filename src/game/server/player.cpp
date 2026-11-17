@@ -1043,6 +1043,12 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				GameServer()->SendBroadcast(Result.m_Data.m_aBroadcast, -1);
 			break;
 		case CScorePlayerResult::MAP_VOTE:
+			if(GameServer()->m_VoteCloseTime)
+			{
+				GameServer()->SendChatTarget(m_ClientId, "Wait for current vote to end before calling a new one.");
+				return;
+			}
+
 			GameServer()->m_VoteType = CGameContext::VOTE_TYPE_OPTION;
 			GameServer()->m_LastMapVote = time_get();
 
