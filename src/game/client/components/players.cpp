@@ -534,6 +534,16 @@ void CPlayers::RenderHook(
 	float d = distance(Pos, HookPos);
 	vec2 Dir = normalize(Pos - HookPos);
 
+	// custom hook styles (kagune, neon, rainbow, lightning)
+	const bool IsLocalHook = ClientId >= 0 && ClientId == GameClient()->m_Snap.m_LocalClientId;
+	if(g_Config.m_ClHookStyle != 0 && ClientId >= 0 && (IsLocalHook || g_Config.m_ClHookStyleOthers))
+	{
+		RenderCustomHook(Pos, HookPos, Alpha);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
+		return;
+	}
+
 	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookHead);
 	Graphics()->QuadsSetRotation(angle(Dir) + pi);
 	// render head
@@ -560,6 +570,183 @@ void CPlayers::RenderHook(
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
+}
+
+void CPlayers::RenderCustomHook(vec2 Pos, vec2 HookPos, float Alpha)
+{
+	const int Style = g_Config.m_ClHookStyle; // 1 kagune, 2 neon, 3 rainbow, 4 lightning
+	const float Dist = distance(Pos, HookPos);
+	if(Dist < 1.0f)
+		return;
+
+	const float Time = Client()->LocalTime();
+	const vec2 Dir = normalize(HookPos - Pos); // tee -> hook head
+	const vec2 Perp(-Dir.y, Dir.x);
+
+	const ColorRGBA Base = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookColor, true));
+	const ColorRGBA White(1.0f, 1.0f, 1.0f, 1.0f);
+	const float Wave = g_Config.m_ClKaguneWave / 100.0f;
+	const float Width = (float)g_Config.m_ClKaguneWidth;
+
+	int Strands = 1;
+	if(Style == 1)
+		Strands = g_Config.m_ClKaguneCount;
+	else if(Style == 4)
+		Strands = 2;
+	Strands = std::clamp(Strands, 1, 8);
+
+	const int Segments = std::clamp((int)(Dist / 12.0f), 8, 80);
+
+	// pseudo random value in [-1, 1] that is stable for the same input (lightning flicker)
+	auto Noise = [](int A, int B, int C) {
+		unsigned H = (unsigned)A * 374761393u + (unsigned)B * 668265263u + (unsigned)C * 2147483647u;
+		H = (H ^ (H >> 13)) * 1274126177u;
+		return ((H ^ (H >> 16)) & 0xFFFF) / 32767.5f - 1.0f;
+	};
+
+	static vec2 s_aaPoints[8][81];
+	static vec2 s_aaNormals[8][81];
+	static float s_aaWidths[8][81];
+
+	// build the strands
+	const int Frame = (int)(Time * 25.0f);
+	for(int k = 0; k < Strands; k++)
+	{
+		const float Center = k - (Strands - 1) * 0.5f;
+		for(int i = 0; i <= Segments; i++)
+		{
+			const float t = (float)i / Segments; // 0 at the tee, 1 at the hook head
+			const float Env = std::sin(t * pi); // pinned at both ends
+			float Off = 0.0f;
+			float W = 3.0f;
+
+			if(Style == 1) // kagune: swaying, twisting tentacles
+			{
+				const float Amp = (6.0f + 26.0f * Wave) * std::min(1.0f, Dist / 220.0f);
+				Off = Env * (Amp * std::sin(Time * 4.0f + t * 9.0f + k * 2.1f) + Center * (5.0f + 6.0f * Wave) * std::cos(Time * 2.0f + t * 4.0f));
+				W = Width * (0.5f + 0.5f * (1.0f - t)) / (1.0f + 0.12f * (Strands - 1)) * (1.0f - 0.85f * t * t);
+			}
+			else if(Style == 2) // neon beam
+			{
+				Off = Env * 1.5f * std::sin(Time * 18.0f + t * 20.0f);
+				W = 2.2f + 0.8f * std::sin(Time * 14.0f);
+			}
+			else if(Style == 3) // rainbow ribbon
+			{
+				Off = Env * 5.0f * std::sin(Time * 5.0f + t * 12.0f);
+				W = 3.5f;
+			}
+			else // lightning
+			{
+				const float Jag = (i == 0 || i == Segments) ? 0.0f : Noise(i, Frame, k) * 12.0f;
+				Off = Env * Jag + (k == 0 ? 0.0f : Env * 4.0f);
+				W = 1.8f + (k == 0 ? 0.6f : 0.0f);
+			}
+
+			s_aaPoints[k][i] = mix(Pos, HookPos, t) + Perp * Off;
+			s_aaWidths[k][i] = std::max(W, 0.6f);
+		}
+		for(int i = 0; i <= Segments; i++)
+		{
+			const vec2 Prev = s_aaPoints[k][std::max(i - 1, 0)];
+			const vec2 Next = s_aaPoints[k][std::min(i + 1, Segments)];
+			const vec2 Tangent = Next - Prev;
+			s_aaNormals[k][i] = length(Tangent) > 0.001f ? normalize(vec2(-Tangent.y, Tangent.x)) : Perp;
+		}
+	}
+
+	std::vector<IGraphics::CFreeformItem> vQuads;
+	vQuads.reserve(Strands * Segments + 1);
+
+	// draws all strands once with a width multiplier; Rainbow colors each segment itself
+	auto DrawPass = [&](float WidthMul, ColorRGBA Color, bool Rainbow) {
+		vQuads.clear();
+		if(Rainbow)
+			Graphics()->QuadsBegin();
+		else
+		{
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a * Alpha);
+		}
+
+		for(int k = 0; k < Strands; k++)
+		{
+			for(int i = 0; i < Segments; i++)
+			{
+				const vec2 P0 = s_aaPoints[k][i];
+				const vec2 P1 = s_aaPoints[k][i + 1];
+				const vec2 N0 = s_aaNormals[k][i] * s_aaWidths[k][i] * WidthMul;
+				const vec2 N1 = s_aaNormals[k][i + 1] * s_aaWidths[k][i + 1] * WidthMul;
+				const IGraphics::CFreeformItem Quad(
+					P1.x - N1.x, P1.y - N1.y, P1.x + N1.x, P1.y + N1.y,
+					P0.x - N0.x, P0.y - N0.y, P0.x + N0.x, P0.y + N0.y);
+				if(Rainbow)
+				{
+					const float Hue = std::fmod((float)i / Segments * 1.5f - Time * 0.6f + 8.0f, 1.0f);
+					const ColorRGBA C = color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, Color.r > 0.9f ? 0.8f : 0.55f));
+					Graphics()->SetColor(C.r, C.g, C.b, Color.a * Alpha);
+					Graphics()->QuadsDrawFreeform(&Quad, 1);
+				}
+				else
+					vQuads.push_back(Quad);
+			}
+		}
+
+		// spear tip at the hook head (kagune and neon)
+		if(Style == 1 || Style == 2)
+		{
+			const float TipLen = (Style == 1 ? 18.0f : 10.0f) * WidthMul;
+			const float TipWidth = (Style == 1 ? Width * 0.7f : 5.0f) * WidthMul;
+			const vec2 Tip = HookPos + Dir * TipLen;
+			const IGraphics::CFreeformItem TipQuad(
+				Tip.x, Tip.y, Tip.x, Tip.y,
+				HookPos.x - Perp.x * TipWidth, HookPos.y - Perp.y * TipWidth,
+				HookPos.x + Perp.x * TipWidth, HookPos.y + Perp.y * TipWidth);
+			if(Rainbow)
+				Graphics()->QuadsDrawFreeform(&TipQuad, 1);
+			else
+				vQuads.push_back(TipQuad);
+		}
+
+		if(!Rainbow && !vQuads.empty())
+			Graphics()->QuadsDrawFreeform(vQuads.data(), vQuads.size());
+		Graphics()->QuadsEnd();
+	};
+
+	Graphics()->TextureClear();
+
+	// soft glow (additive)
+	if(g_Config.m_ClHookGlow)
+	{
+		Graphics()->BlendAdditive();
+		DrawPass(2.6f, ColorRGBA(Base.r, Base.g, Base.b, 0.18f), false);
+		Graphics()->BlendNormal();
+	}
+
+	// dark outline for the tentacles
+	if(Style == 1)
+		DrawPass(1.3f, ColorRGBA(0.1f, 0.0f, 0.02f, 0.9f), false);
+
+	// body
+	DrawPass(1.0f, Style == 4 ? ColorRGBA(Base.r, Base.g, Base.b, 0.85f) : Base, Style == 3);
+
+	// bright core
+	const ColorRGBA CoreColor = Style == 3 ? ColorRGBA(1.0f, 1.0f, 1.0f, 0.9f) : ColorRGBA(
+		mix(Base.r, 1.0f, 0.65f), mix(Base.g, 1.0f, 0.65f), mix(Base.b, 1.0f, 0.65f), 0.95f);
+	DrawPass(Style == 1 ? 0.3f : 0.4f, CoreColor, Style == 3);
+
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// sparks flying off the hook
+	if(g_Config.m_ClHookParticles && !GameClient()->IsWorldPaused() && !GameClient()->IsDemoPlaybackPaused())
+	{
+		if(random_float() < 30.0f * Client()->RenderFrameTime())
+		{
+			const float t = random_float();
+			ColorRGBA SparkColor = Style == 3 ? color_cast<ColorRGBA>(ColorHSLA(random_float(), 1.0f, 0.6f)) : Base;
+			GameClient()->m_Effects.HookSpark(mix(Pos, HookPos, t), Perp * (random_float() < 0.5f ? 1.0f : -1.0f), SparkColor, Alpha);
+		}
+	}
 }
 
 void CPlayers::RenderPlayer(

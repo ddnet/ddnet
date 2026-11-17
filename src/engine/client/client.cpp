@@ -5388,6 +5388,10 @@ int CClient::GetPredictionTime()
 
 int CClient::GetPredictionTick()
 {
+	// cl_antiping_max: always show the fully predicted tick, ignore limit/percent
+	if(g_Config.m_ClAntiPingMax)
+		return PredGameTick(g_Config.m_ClDummy);
+
 	int PredictionTick = GetPredictionTime() * GameTickSpeed() / 1000.0f;
 
 	int PredictionMin = g_Config.m_ClAntiPingLimit * GameTickSpeed() / 1000.0f;

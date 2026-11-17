@@ -52,6 +52,156 @@ void CEffects::AirJump(vec2 Pos, float Alpha, float Volume)
 void CEffects::DamageIndicator(vec2 Pos, vec2 Dir, float Alpha)
 {
 	GameClient()->m_DamageInd.Create(Pos, Dir, Alpha);
+
+	if(g_Config.m_ClGore > 0 && g_Config.m_ClGoreOnHit)
+		GoreHit(Pos, Dir, Alpha);
+}
+
+void CEffects::GoreHit(vec2 Pos, vec2 Dir, float Alpha)
+{
+	const int Level = g_Config.m_ClGore;
+	const float Lifetime = (float)g_Config.m_ClGoreLifetime;
+	const int Count = 6 + Level * 6;
+
+	for(int i = 0; i < Count; i++)
+	{
+		CParticle p;
+		p.SetDefault();
+		p.m_Spr = SPRITE_PART_SPLAT01 + (rand() % 3);
+		p.m_Pos = Pos;
+		// spray in the hit direction with some spread
+		const vec2 Spread = random_direction() * random_float(0.1f, 0.5f);
+		p.m_Vel = (Dir + Spread) * random_float(200.0f, 700.0f);
+		p.m_LifeSpan = random_float(0.4f, 1.0f) * std::min(Lifetime, 3.0f);
+		p.m_StartSize = random_float(14.0f, 28.0f);
+		p.m_EndSize = p.m_StartSize * 0.6f;
+		p.m_Rot = random_angle();
+		p.m_Rotspeed = random_float(-0.5f, 0.5f) * pi;
+		p.m_Gravity = 900.0f;
+		p.m_Friction = 0.85f;
+		p.m_UseAlphaFading = true;
+		p.m_StartAlpha = Alpha * 0.9f;
+		p.m_EndAlpha = 0.0f;
+		p.m_Color = ColorRGBA(random_float(0.55f, 0.8f), 0.0f, random_float(0.0f, 0.05f), Alpha);
+		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+	}
+}
+
+void CEffects::GoreDeath(vec2 Pos, ColorRGBA BloodColor, float Alpha)
+{
+	const int Level = g_Config.m_ClGore;
+	const float Lifetime = (float)g_Config.m_ClGoreLifetime;
+
+	// extra blood fountain (on top of the vanilla burst)
+	const int BloodCount = Level == 1 ? 48 : (Level == 2 ? 96 : 192);
+	for(int i = 0; i < BloodCount; i++)
+	{
+		CParticle p;
+		p.SetDefault();
+		p.m_Spr = SPRITE_PART_SPLAT01 + (rand() % 3);
+		p.m_Pos = Pos + random_direction() * random_float(0.0f, 10.0f);
+		p.m_Vel = random_direction() * (random_float(0.1f, 1.2f) * 1100.0f);
+		p.m_LifeSpan = random_float(0.5f, 1.0f) * Lifetime;
+		p.m_StartSize = random_float(20.0f, 52.0f);
+		p.m_EndSize = p.m_StartSize * 0.5f;
+		p.m_Rot = random_angle();
+		p.m_Rotspeed = random_float(-0.5f, 0.5f) * pi;
+		p.m_Gravity = 1000.0f;
+		p.m_Friction = 0.8f;
+		p.m_UseAlphaFading = true;
+		p.m_StartAlpha = Alpha;
+		p.m_EndAlpha = 0.0f;
+		// mix the tee's own blood color with deep red
+		ColorRGBA Dark(0.5f, 0.0f, 0.02f, Alpha);
+		const float t = random_float(0.35f, 0.8f);
+		p.m_Color = ColorRGBA(
+			mix(BloodColor.r, Dark.r, t),
+			mix(BloodColor.g, Dark.g, t),
+			mix(BloodColor.b, Dark.b, t),
+			Alpha);
+		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+	}
+
+	// gibs: heavy chunks that bounce around
+	if(Level >= 2)
+	{
+		const int GibCount = Level == 2 ? 10 : 26;
+		for(int i = 0; i < GibCount; i++)
+		{
+			CParticle p;
+			p.SetDefault();
+			p.m_Spr = SPRITE_PART_BALL;
+			p.m_Pos = Pos;
+			p.m_Vel = direction(-0.5f * pi + random_float(-1.3f, 1.3f)) * random_float(300.0f, 1300.0f);
+			p.m_LifeSpan = random_float(0.6f, 1.0f) * Lifetime;
+			p.m_StartSize = random_float(10.0f, 22.0f);
+			p.m_EndSize = p.m_StartSize;
+			p.m_Rot = random_angle();
+			p.m_Rotspeed = random_float(-2.0f, 2.0f) * pi;
+			p.m_Gravity = 1600.0f;
+			p.m_Friction = 0.9f;
+			p.m_FlowAffected = 0.0f;
+			p.m_UseAlphaFading = true;
+			p.m_StartAlpha = Alpha;
+			p.m_EndAlpha = 0.0f;
+			p.m_Color = ColorRGBA(random_float(0.35f, 0.6f), random_float(0.0f, 0.08f), random_float(0.0f, 0.08f), Alpha);
+			GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+
+			// every gib leaves a short blood trail behind it
+			CParticle Trail = p;
+			Trail.m_Spr = SPRITE_PART_SMOKE;
+			Trail.m_StartSize = p.m_StartSize * 1.5f;
+			Trail.m_EndSize = 0.0f;
+			Trail.m_LifeSpan = 0.6f;
+			Trail.m_Gravity = 300.0f;
+			Trail.m_Color = ColorRGBA(0.6f, 0.0f, 0.02f, Alpha * 0.6f);
+			Trail.m_StartAlpha = Alpha * 0.6f;
+			GameClient()->m_Particles.Add(CParticles::GROUP_TRAIL_EXTRA, &Trail);
+		}
+	}
+
+	// red mist for the extreme level
+	if(Level >= 3)
+	{
+		for(int i = 0; i < 40; i++)
+		{
+			CParticle p;
+			p.SetDefault();
+			p.m_Spr = SPRITE_PART_SMOKE;
+			p.m_Pos = Pos;
+			p.m_Vel = random_direction() * random_float(100.0f, 500.0f);
+			p.m_LifeSpan = random_float(0.8f, 1.6f);
+			p.m_StartSize = random_float(40.0f, 80.0f);
+			p.m_EndSize = 0.0f;
+			p.m_Friction = 0.6f;
+			p.m_Gravity = random_float(-200.0f, 50.0f);
+			p.m_Color = ColorRGBA(0.7f, 0.0f, 0.03f, Alpha * 0.5f);
+			p.m_StartAlpha = Alpha * 0.5f;
+			GameClient()->m_Particles.Add(CParticles::GROUP_EXTRA, &p);
+		}
+	}
+}
+
+void CEffects::HookSpark(vec2 Pos, vec2 Dir, ColorRGBA Color, float Alpha)
+{
+	CParticle p;
+	p.SetDefault();
+	p.m_Spr = SPRITE_PART_SPARKLE;
+	p.m_Pos = Pos;
+	p.m_Vel = Dir * random_float(20.0f, 120.0f) + random_direction() * random_float(30.0f, 90.0f);
+	p.m_LifeSpan = random_float(0.25f, 0.6f);
+	p.m_StartSize = random_float(8.0f, 16.0f);
+	p.m_EndSize = 0.0f;
+	p.m_Rot = random_angle();
+	p.m_Rotspeed = random_float(-1.0f, 1.0f) * pi;
+	p.m_Friction = 0.9f;
+	p.m_FlowAffected = 0.0f;
+	p.m_Collides = false;
+	p.m_UseAlphaFading = true;
+	p.m_StartAlpha = Alpha;
+	p.m_EndAlpha = 0.0f;
+	p.m_Color = Color.WithAlpha(Alpha);
+	GameClient()->m_Particles.Add(CParticles::GROUP_TRAIL_EXTRA, &p);
 }
 
 void CEffects::PowerupShine(vec2 Pos, vec2 Size, float Alpha)
@@ -269,6 +419,9 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientId, float Alpha)
 		p.m_StartAlpha = Alpha;
 		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
+
+	if(g_Config.m_ClGore > 0)
+		GoreDeath(Pos, BloodColor, Alpha);
 }
 
 void CEffects::Confetti(vec2 Pos, float Alpha)

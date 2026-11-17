@@ -123,6 +123,99 @@ void CControls::ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUse
 	pSet->m_pControls->m_aInputData[g_Config.m_ClDummy].m_WantedWeapon = 0;
 }
 
+int CControls::ActiveWeapon() const
+{
+	const int LocalId = GameClient()->m_Snap.m_LocalClientId;
+	// prefer the predicted weapon so the macro does not have to wait for a full round trip
+	if(LocalId >= 0 && GameClient()->Predict() && GameClient()->m_aClients[LocalId].m_IsPredicted)
+		return GameClient()->m_aClients[LocalId].m_Predicted.m_ActiveWeapon;
+	if(GameClient()->m_Snap.m_pLocalCharacter)
+		return GameClient()->m_Snap.m_pLocalCharacter->m_Weapon;
+	return -1;
+}
+
+void CControls::ConQuickHammer(IConsole::IResult *pResult, void *pUserData)
+{
+	CControls *pThis = static_cast<CControls *>(pUserData);
+	const int Dummy = g_Config.m_ClDummy;
+
+	if(!g_Config.m_ClQuickHammer || pThis->Client()->State() != IClient::STATE_ONLINE)
+		return;
+	if(pThis->m_aQuickHammerState[Dummy] != 0)
+		return;
+	if(pThis->GameClient()->m_Snap.m_SpecInfo.m_Active || pThis->GameClient()->m_Spectator.IsActive())
+		return;
+
+	const int Weapon = pThis->ActiveWeapon();
+	// no weapon info yet, or ninja (cannot switch away from it)
+	if(Weapon < 0 || Weapon == WEAPON_NINJA)
+		return;
+
+	pThis->m_aQuickHammerPrevWeapon[Dummy] = Weapon;
+	pThis->m_aQuickHammerStartTime[Dummy] = time_get();
+	pThis->m_aQuickHammerState[Dummy] = 1;
+	if(Weapon != WEAPON_HAMMER)
+		pThis->m_aInputData[Dummy].m_WantedWeapon = WEAPON_HAMMER + 1;
+}
+
+void CControls::UpdateQuickHammer()
+{
+	const int Dummy = g_Config.m_ClDummy;
+	int &State = m_aQuickHammerState[Dummy];
+	if(State == 0)
+		return;
+
+	int &Fire = m_aInputData[Dummy].m_Fire;
+	const int Prev = m_aQuickHammerPrevWeapon[Dummy];
+	const int Weapon = ActiveWeapon();
+	const int Tick = Client()->PredGameTick(Dummy);
+	const bool SwitchBack = g_Config.m_ClQuickHammerReturn && Prev != WEAPON_HAMMER;
+
+	// safety net: never get stuck, give up after half a second
+	if(Weapon < 0 || time_get() - m_aQuickHammerStartTime[Dummy] > time_freq() / 2)
+	{
+		if((Fire & 1) != 0)
+			Fire = (Fire + 1) & INPUT_STATE_MASK;
+		if(SwitchBack && Weapon >= 0 && Weapon != Prev)
+			m_aInputData[Dummy].m_WantedWeapon = Prev + 1;
+		State = 0;
+		return;
+	}
+
+	if(State == 1)
+	{
+		// hammer is active: press fire for exactly one tick
+		if(Weapon == WEAPON_HAMMER)
+		{
+			if((Fire & 1) == 0)
+				Fire = (Fire + 1) & INPUT_STATE_MASK;
+			m_aQuickHammerTick[Dummy] = Tick;
+			State = 2;
+		}
+	}
+	else if(State == 2)
+	{
+		// next tick: release fire and go back to the previous weapon
+		if(Tick > m_aQuickHammerTick[Dummy])
+		{
+			if((Fire & 1) != 0)
+				Fire = (Fire + 1) & INPUT_STATE_MASK;
+			if(SwitchBack)
+			{
+				m_aInputData[Dummy].m_WantedWeapon = Prev + 1;
+				State = 3;
+			}
+			else
+				State = 0;
+		}
+	}
+	else if(State == 3)
+	{
+		if(Weapon == Prev)
+			State = 0;
+	}
+}
+
 void CControls::OnConsoleInit()
 {
 	// game commands
@@ -181,6 +274,7 @@ void CControls::OnConsoleInit()
 		Console()->Register("+prevweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, &s_Set, "Switch to previous weapon");
 	}
 
+	Console()->Register("quickhammer", "", CFGFLAG_CLIENT, ConQuickHammer, this, "Switch to hammer, hit once and switch back to the previous weapon");
 	Console()->Register("tp_to_cursor", "", CFGFLAG_CLIENT, ConTpToCursor, this, "Practice: teleport yourself to your cursor");
 	Console()->Register("tp_dummy_to_cursor", "", CFGFLAG_CLIENT, ConTpDummyToCursor, this, "Practice: teleport the other tee to your cursor");
 }
@@ -420,6 +514,8 @@ void CControls::OnRender()
 				m_aInputData[g_Config.m_ClDummy].m_WantedWeapon = Weapon + 1;
 		}
 	}
+
+	UpdateQuickHammer();
 
 	// update target pos
 	if(GameClient()->m_Snap.m_pGameInfoObj && !GameClient()->m_Snap.m_SpecInfo.m_Active)

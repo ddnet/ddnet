@@ -341,6 +341,116 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 #endif
 }
 
+void CMenus::RenderSettingsClientMod(CUIRect MainView)
+{
+	CUIRect Button, Label, Left, Right;
+	MainView.VSplitMid(&Left, &Right, 20.0f);
+
+	// ---- hook visuals (left column) ----
+	Left.HSplitTop(30.0f, &Label, &Left);
+	Ui()->DoLabel(&Label, Localize("Hook style"), 20.0f, TEXTALIGN_ML);
+	Left.HSplitTop(5.0f, nullptr, &Left);
+
+	{
+		int Style = g_Config.m_ClHookStyle;
+		const int Prev = Style;
+		DoLine_RadioMenu(Left, Localize("Style"),
+			m_vButtonContainersHookStyle,
+			{Localize("Off", "Hook style"), Localize("Kagune", "Hook style"), Localize("Neon", "Hook style"), Localize("Rainbow", "Hook style"), Localize("Bolt", "Hook style")},
+			{0, 1, 2, 3, 4},
+			Style);
+		if(Style != Prev)
+			g_Config.m_ClHookStyle = Style;
+	}
+
+	if(g_Config.m_ClHookStyle != 0)
+	{
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClHookStyleOthers, Localize("Apply to other players"), g_Config.m_ClHookStyleOthers, &Button))
+			g_Config.m_ClHookStyleOthers ^= 1;
+
+		static CButtonContainer s_HookColorReset;
+		DoLine_ColorPicker(&s_HookColorReset, 25.0f, 13.0f, 5.0f, &Left, Localize("Hook color"), &g_Config.m_ClHookColor, ColorRGBA(1.0f, 0.0f, 0.1f, 1.0f), false);
+
+		if(g_Config.m_ClHookStyle == 1)
+		{
+			Left.HSplitTop(20.0f, &Button, &Left);
+			Ui()->DoScrollbarOption(&g_Config.m_ClKaguneCount, &g_Config.m_ClKaguneCount, &Button, Localize("Tentacles"), 1, 8);
+
+			Left.HSplitTop(20.0f, &Button, &Left);
+			Ui()->DoScrollbarOption(&g_Config.m_ClKaguneWave, &g_Config.m_ClKaguneWave, &Button, Localize("Sway"), 0, 100, &CUi::ms_LinearScrollbarScale, 0u, "%");
+
+			Left.HSplitTop(20.0f, &Button, &Left);
+			Ui()->DoScrollbarOption(&g_Config.m_ClKaguneWidth, &g_Config.m_ClKaguneWidth, &Button, Localize("Thickness"), 2, 30);
+		}
+
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClHookGlow, Localize("Glow"), g_Config.m_ClHookGlow, &Button))
+			g_Config.m_ClHookGlow ^= 1;
+
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClHookParticles, Localize("Sparks along the hook"), g_Config.m_ClHookParticles, &Button))
+			g_Config.m_ClHookParticles ^= 1;
+	}
+
+	// ---- gores helpers (right column) ----
+	Right.HSplitTop(30.0f, &Label, &Right);
+	Ui()->DoLabel(&Label, Localize("Gores"), 20.0f, TEXTALIGN_ML);
+	Right.HSplitTop(5.0f, nullptr, &Right);
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClQuickHammer, Localize("Quick hammer"), g_Config.m_ClQuickHammer, &Button))
+		g_Config.m_ClQuickHammer ^= 1;
+	Ui()->DoToolTip(&g_Config.m_ClQuickHammer, &Button, Localize("One key press: switch to hammer, hit once, switch back. Set the key in Controls -> Weapon -> Quick hammer (gores), or in the console: bind <key> quickhammer"));
+
+	if(g_Config.m_ClQuickHammer)
+	{
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_CheckBox(&g_Config.m_ClQuickHammerReturn, Localize("Switch back to previous weapon"), g_Config.m_ClQuickHammerReturn, &Button))
+			g_Config.m_ClQuickHammerReturn ^= 1;
+	}
+
+	// ---- blood effects (right column) ----
+	Right.HSplitTop(15.0f, nullptr, &Right);
+	Right.HSplitTop(30.0f, &Label, &Right);
+	Ui()->DoLabel(&Label, Localize("Blood effects"), 20.0f, TEXTALIGN_ML);
+	Right.HSplitTop(5.0f, nullptr, &Right);
+
+	{
+		int Gore = g_Config.m_ClGore;
+		const int Prev = Gore;
+		DoLine_RadioMenu(Right, Localize("Blood"),
+			m_vButtonContainersGore,
+			{Localize("Off", "Gore mode"), Localize("Low", "Gore mode"), Localize("High", "Gore mode"), Localize("Extreme", "Gore mode")},
+			{0, 1, 2, 3},
+			Gore);
+		if(Gore != Prev)
+			g_Config.m_ClGore = Gore;
+	}
+
+	if(g_Config.m_ClGore != 0)
+	{
+		Right.HSplitTop(20.0f, &Button, &Right);
+		Ui()->DoScrollbarOption(&g_Config.m_ClGoreLifetime, &g_Config.m_ClGoreLifetime, &Button, Localize("Blood lifetime"), 1, 15, &CUi::ms_LinearScrollbarScale, 0u, "s");
+
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_CheckBox(&g_Config.m_ClGoreOnHit, Localize("Blood on hit"), g_Config.m_ClGoreOnHit, &Button))
+			g_Config.m_ClGoreOnHit ^= 1;
+		Ui()->DoToolTip(&g_Config.m_ClGoreOnHit, &Button, Localize("Spawn blood when a tee takes damage, not only when it dies"));
+	}
+
+	// ---- antiping preset (right column) ----
+	Right.HSplitTop(20.0f, nullptr, &Right);
+	Right.HSplitTop(30.0f, &Label, &Right);
+	Ui()->DoLabel(&Label, Localize("AntiPing"), 20.0f, TEXTALIGN_ML);
+	Right.HSplitTop(5.0f, nullptr, &Right);
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPingMax, Localize("AntiPing MAX"), g_Config.m_ClAntiPingMax, &Button))
+		g_Config.m_ClAntiPingMax ^= 1;
+	Ui()->DoToolTip(&g_Config.m_ClAntiPingMax, &Button, Localize("Forces all AntiPing options on and always shows the fully predicted state. Looks the smoothest, but mispredictions of other players become more visible"));
+}
+
 CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect View, bool Active)
 {
 	CPopupMapPickerContext *pPopupContext = static_cast<CPopupMapPickerContext *>(pContext);

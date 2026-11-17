@@ -29,6 +29,7 @@ class CPlayers : public CComponent
 		const CTeeRenderInfo *pRenderInfo,
 		int ClientId,
 		float Intra = 0.f);
+	void RenderCustomHook(vec2 Pos, vec2 HookPos, float Alpha);
 	void RenderHookCollLine(
 		const CScreenRect &ScreenRect,
 		const CNetObj_Character *pPrevChar,

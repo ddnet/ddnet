@@ -41,6 +41,12 @@ public:
 	int m_aInputDirectionRight[NUM_DUMMIES];
 	int m_aShowHookColl[NUM_DUMMIES];
 
+	// quick hammer (gores): 0 idle, 1 waiting for hammer, 2 fired, 3 switching back
+	int m_aQuickHammerState[NUM_DUMMIES] = {0, 0};
+	int m_aQuickHammerPrevWeapon[NUM_DUMMIES] = {0, 0};
+	int m_aQuickHammerTick[NUM_DUMMIES] = {0, 0};
+	int64_t m_aQuickHammerStartTime[NUM_DUMMIES] = {0, 0};
+
 	CControls();
 	int Sizeof() const override { return sizeof(*this); }
 
@@ -60,6 +66,9 @@ private:
 	static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData);
 	static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData);
 	static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData);
+	static void ConQuickHammer(IConsole::IResult *pResult, void *pUserData);
+	int ActiveWeapon() const;
+	void UpdateQuickHammer();
 	static void ConTpToCursor(IConsole::IResult *pResult, void *pUserData);
 	static void ConTpDummyToCursor(IConsole::IResult *pResult, void *pUserData);
 	vec2 CursorWorldPos() const;

@@ -581,6 +581,7 @@ protected:
 
 	// found in menus_settings_ddnet.cpp
 	void RenderSettingsDDNet(CUIRect MainView);
+	void RenderSettingsClientMod(CUIRect MainView);
 
 	// found in menus_settings_general.cpp
 	void RenderSettingsGeneral(CUIRect MainView);
@@ -620,6 +621,8 @@ protected:
 	std::vector<CButtonContainer> m_vButtonContainersNamePlateShow = {{}, {}, {}, {}};
 	std::vector<CButtonContainer> m_vButtonContainersNamePlateKeyPresses = {{}, {}, {}, {}};
 	std::vector<CButtonContainer> m_vButtonContainersAntiPingPlayers = {{}, {}, {}};
+	std::vector<CButtonContainer> m_vButtonContainersHookStyle = {{}, {}, {}, {}, {}};
+	std::vector<CButtonContainer> m_vButtonContainersGore = {{}, {}, {}, {}};
 
 	class CMapListItem
 	{
@@ -715,6 +718,7 @@ public:
 		SETTINGS_GRAPHICS,
 		SETTINGS_SOUND,
 		SETTINGS_DDNET,
+		SETTINGS_CLIENTMOD,
 		SETTINGS_ASSETS,
 		SETTINGS_CREDITS,
 

@@ -25,6 +25,28 @@ MACRO_CONFIG_INT(ClAntiPingSmooth, cl_antiping_smooth, 0, 0, 1, CFGFLAG_CLIENT |
 MACRO_CONFIG_INT(ClAntiPingGunfire, cl_antiping_gunfire, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict gunfire and show predicted weapon physics (with cl_antiping_grenade 1 and cl_antiping_weapons 1)")
 MACRO_CONFIG_INT(ClAntiPingPreInput, cl_antiping_preinput, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict other players using preinputs for more accurate input prediction")
 MACRO_CONFIG_INT(ClPredictionMargin, cl_prediction_margin, 10, 1, 300, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Prediction margin in ms (adds latency, can reduce lag from ping jumps)")
+
+// hook visuals
+MACRO_CONFIG_INT(ClHookStyle, cl_hook_style, 0, 0, 4, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Hook style (0 = vanilla, 1 = kagune tentacles, 2 = neon beam, 3 = rainbow, 4 = lightning)")
+MACRO_CONFIG_INT(ClHookStyleOthers, cl_hook_style_others, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Apply the hook style to other players too")
+MACRO_CONFIG_COL(ClHookColor, cl_hook_color, 0xFF00FF7F, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Main color of the custom hook (kagune / neon)")
+MACRO_CONFIG_INT(ClKaguneCount, cl_kagune_count, 4, 1, 8, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Number of kagune tentacles")
+MACRO_CONFIG_INT(ClKaguneWave, cl_kagune_wave, 60, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How much the kagune tentacles sway (0-100)")
+MACRO_CONFIG_INT(ClKaguneWidth, cl_kagune_width, 10, 2, 30, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Base width of the kagune tentacles")
+MACRO_CONFIG_INT(ClHookParticles, cl_hook_particles, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Spawn sparks along the custom hook")
+MACRO_CONFIG_INT(ClHookGlow, cl_hook_glow, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draw a soft glow around the custom hook")
+
+// gore mode
+MACRO_CONFIG_INT(ClGore, cl_gore, 0, 0, 3, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Gore mode (0 = off, 1 = more blood, 2 = blood + gibs, 3 = extreme)")
+MACRO_CONFIG_INT(ClGoreLifetime, cl_gore_lifetime, 4, 1, 15, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds gore particles stay around")
+MACRO_CONFIG_INT(ClGoreOnHit, cl_gore_on_hit, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Spawn blood when a tee takes damage (hammer, explosions)")
+
+// gores helper: quick hammer
+MACRO_CONFIG_INT(ClQuickHammer, cl_quick_hammer, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable the quickhammer command: switch to hammer, hit once and switch back to the previous weapon")
+MACRO_CONFIG_INT(ClQuickHammerReturn, cl_quick_hammer_return, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "After a quickhammer, switch back to the weapon that was active before")
+
+// antiping preset
+MACRO_CONFIG_INT(ClAntiPingMax, cl_antiping_max, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum antiping preset: forces all antiping options on and predicts as far ahead as possible")
 MACRO_CONFIG_INT(ClSubTickAiming, cl_sub_tick_aiming, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Send aiming data at sub-tick accuracy")
 #if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_IOS)
 MACRO_CONFIG_INT(ClTouchControls, cl_touch_controls, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable ingame touch controls")

@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_EFFECTS_H
 #define GAME_CLIENT_COMPONENTS_EFFECTS_H
 
+#include <base/color.h>
 #include <base/vmath.h>
 
 #include <game/client/component.h>
@@ -40,6 +41,13 @@ public:
 	void FreezingFlakes(vec2 Pos, vec2 Size, float Alpha);
 	void SparkleTrail(vec2 Pos, float Alpha);
 	void Confetti(vec2 Pos, float Alpha);
+
+	// gore mode (cl_gore)
+	void GoreDeath(vec2 Pos, ColorRGBA BloodColor, float Alpha);
+	void GoreHit(vec2 Pos, vec2 Dir, float Alpha);
+
+	// custom hook sparks (cl_hook_particles)
+	void HookSpark(vec2 Pos, vec2 Dir, ColorRGBA Color, float Alpha);
 
 	void Update();
 };

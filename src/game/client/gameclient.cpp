@@ -971,6 +971,13 @@ float CGameClient::GetAnimationPlaybackSpeed() const
 
 int CGameClient::AntiPingPlayers() const
 {
+	// cl_antiping_max forces antiping on with the most aggressive player prediction
+	if(g_Config.m_ClAntiPingMax &&
+		!m_Snap.m_SpecInfo.m_Active &&
+		Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		return 1;
+	}
 	if(g_Config.m_ClAntiPing &&
 		g_Config.m_ClAntiPingPlayers &&
 		!m_Snap.m_SpecInfo.m_Active &&
@@ -983,16 +990,14 @@ int CGameClient::AntiPingPlayers() const
 
 bool CGameClient::AntiPingGrenade() const
 {
-	return g_Config.m_ClAntiPing &&
-	       g_Config.m_ClAntiPingGrenade &&
+	return (g_Config.m_ClAntiPingMax || (g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade)) &&
 	       !m_Snap.m_SpecInfo.m_Active &&
 	       Client()->State() != IClient::STATE_DEMOPLAYBACK;
 }
 
 bool CGameClient::AntiPingWeapons() const
 {
-	return g_Config.m_ClAntiPing &&
-	       g_Config.m_ClAntiPingWeapons &&
+	return (g_Config.m_ClAntiPingMax || (g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons)) &&
 	       !m_Snap.m_SpecInfo.m_Active &&
 	       Client()->State() != IClient::STATE_DEMOPLAYBACK;
 }
@@ -1001,7 +1006,7 @@ bool CGameClient::AntiPingGunfire() const
 {
 	return AntiPingGrenade() &&
 	       AntiPingWeapons() &&
-	       g_Config.m_ClAntiPingGunfire;
+	       (g_Config.m_ClAntiPingMax || g_Config.m_ClAntiPingGunfire);
 }
 
 bool CGameClient::Predict() const
