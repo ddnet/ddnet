@@ -39,6 +39,7 @@ class CChat : public CComponent
 		CLine();
 		void Reset(CChat &This);
 		void UpdateRedaction(bool ApplyRedactions);
+		CChatMessageId LatestMessageId(bool ApplyRedactions) const;
 
 		bool m_Initialized;
 		bool m_Redacted;
@@ -162,7 +163,7 @@ class CChat : public CComponent
 	static void ConEchoConfig(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearChat(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConchainChatOld(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainChatRebuild(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainChatFontSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainChatWidth(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
