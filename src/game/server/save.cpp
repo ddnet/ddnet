@@ -696,7 +696,13 @@ bool CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 		{
 			pGameServer->Switchers()[i].m_aStatus[Team] = m_pSwitchers[i].m_Status;
 			if(m_pSwitchers[i].m_EndTime)
+			{
 				pGameServer->Switchers()[i].m_aEndTick[Team] = pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
+			}
+			else
+			{
+				pGameServer->Switchers()[i].m_aEndTick[Team] = 0;
+			}
 			pGameServer->Switchers()[i].m_aType[Team] = m_pSwitchers[i].m_Type;
 		}
 	}
