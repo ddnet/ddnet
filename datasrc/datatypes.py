@@ -517,6 +517,11 @@ class NetIntRange(NetIntAny):
 		return NetVariable(self.name).emit_dump(offset) + [f'dbg_msg("snapshot", "%s\\t{self.name}=%d ({min_fmt} {max_fmt})", aRawData, pObj->{self.name}{min_arg}{max_arg});']
 
 
+class NetIntPositive(NetIntRange):
+	def __init__(self, name, *, default=None):
+		NetIntRange.__init__(self, name, 0, "max_int", default=default)
+
+
 class NetBool(NetIntRange):
 	def __init__(self, name, *, default=None):
 		default = None if default is None else int(default)
