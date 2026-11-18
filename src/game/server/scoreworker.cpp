@@ -388,7 +388,7 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		str_copy(pMapVote->m_aReason, "/map");
 
 		for(char *p = pMapVote->m_aServer; *p; p++) // lower case server
-			*p = tolower(*p);
+			*p = tolower((unsigned char)*p);
 	}
 	else
 	{
