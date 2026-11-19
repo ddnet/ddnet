@@ -1190,7 +1190,7 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pController->Teams().GetTeamState(Team) != ETeamState::OPEN)
+	if(pController->Teams().GetTeamState(Team) != ETeamState::OPEN || pController->Teams().GetSaving(Team))
 	{
 		pSelf->SendChatTarget(pResult->m_ClientId, "Team mode can't be changed while racing");
 		return;
