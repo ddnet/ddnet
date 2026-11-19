@@ -940,12 +940,20 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
       # Prevent overriding the parent project's compiler/linker settings on Windows
       set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
+      # googletest uses `include_directories` which CMake 4.5 doesn't like
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.5)
+        cmake_diagnostic(PUSH)
+        cmake_diagnostic(SET CMD_NON_TARGET_DIRECTIVE IGNORE)
+      endif()
       # Add googletest directly to our build. This defines the gtest target.
       add_subdirectory(
         ${PROJECT_BINARY_DIR}/googletest-src
         ${PROJECT_BINARY_DIR}/googletest-build
         EXCLUDE_FROM_ALL
       )
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.5)
+        cmake_diagnostic(POP)
+      endif()
 
       foreach(target gtest gmock)
         # Enable additional assertions. See:
