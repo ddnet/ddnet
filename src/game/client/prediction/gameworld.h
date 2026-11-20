@@ -85,6 +85,7 @@ public:
 		bool m_NoWeakHookAndBounce;
 		bool m_PredictEvents;
 		bool m_OldLaser;
+		bool m_JetpackExhaust;
 	} m_WorldConfig;
 
 	bool m_IsValidCopy;

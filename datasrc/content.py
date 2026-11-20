@@ -246,6 +246,8 @@ container.sounds.Add(SoundSet("ctf_capture", ["audio/sfx_ctf_cap_pl.wv"]))
 
 container.sounds.Add(SoundSet("menu", ["audio/music_menu.wv"]))
 
+container.sounds.Add(SoundSet("jetpack_fire", FileList("audio/wp_jetpack_fire-%02d.wv", 3)))
+
 image_null = Image("null", "")
 image_particles = Image("particles", "particles.png")
 image_game = Image("game", "game.png")
@@ -369,6 +371,8 @@ container.sprites.Add(Sprite("weapon_ninja_proj", set_game, 0, 0, 0, 0))
 container.sprites.Add(Sprite("weapon_laser_body", set_game, 2, 12, 7, 3))
 container.sprites.Add(Sprite("weapon_laser_cursor", set_game, 0, 12, 2, 2))
 container.sprites.Add(Sprite("weapon_laser_proj", set_game, 10, 12, 2, 2))
+
+container.sprites.Add(Sprite("weapon_jetpack", set_game, 20, 12, 4, 4))
 
 container.sprites.Add(Sprite("hook_chain", set_game, 2, 0, 1, 1))
 container.sprites.Add(Sprite("hook_head", set_game, 3, 0, 2, 1))

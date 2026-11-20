@@ -53,6 +53,8 @@ private:
 	bool m_BelongsToPracticeTeam;
 	int m_DDRaceTeam;
 	bool m_IsSolo;
+	// exhaust of a jetpack shot, hidden by the client unless the owner holds the telegun, same for the damage indicator
+	bool m_JetpackExhaust;
 	vec2 m_InitDir;
 
 public:
