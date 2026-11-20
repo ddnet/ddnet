@@ -706,6 +706,7 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 
 	Teams.KillCharacterOrTeam(pResult->m_ClientId, Team);
 	Teams.SetPractice(Team, false);
+	Teams.ResetSwitchers(Team);
 	pPlayer->Respawn(); // set spawn as strong hook
 }
 
