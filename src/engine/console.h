@@ -152,6 +152,9 @@ public:
 
 	virtual bool Cheated() const = 0;
 
+	// Whether a command with CMDFLAG_RESPONSE is currently being executed
+	virtual bool ExecutingResponseCommand() const = 0;
+
 	virtual int FlagMask() const = 0;
 	virtual void SetFlagMask(int FlagMask) = 0;
 };
