@@ -27,7 +27,7 @@ CMultiView::CMultiView()
 	m_IsInit = false;
 	m_Teleported = false;
 	m_OldPos = vec2(0.0f, 0.0f);
-	m_OldPersonalZoom = 0;
+	m_OldPersonalZoom = 0.0f;
 	m_SecondChance = 0.0f;
 	m_OldCameraDistance = 0.0f;
 	OnReset();
