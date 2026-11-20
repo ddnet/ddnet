@@ -635,7 +635,7 @@ void CVideo::UpdateVideoBufferFromGraphics(size_t ThreadIndex)
 	uint32_t Width;
 	uint32_t Height;
 	CImageInfo::EImageFormat Format;
-	m_pGraphics->GetReadPresentedImageDataFuncUnsafe()(Width, Height, Format, m_vVideoBuffers[ThreadIndex].m_vBuffer);
+	dbg_assert(m_pGraphics->GetReadPresentedImageDataFuncUnsafe()(Width, Height, Format, m_vVideoBuffers[ThreadIndex].m_vBuffer), "Failed to read presented image data");
 	dbg_assert((int)Width == m_Width && (int)Height == m_Height, "Size mismatch between video (%d x %d) and graphics (%d x %d)", m_Width, m_Height, Width, Height);
 	dbg_assert(Format == CImageInfo::FORMAT_RGBA, "Unexpected image format %d", (int)Format);
 }
