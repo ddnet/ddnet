@@ -222,9 +222,9 @@ private:
 class CCommunityCache : public ICommunityCache
 {
 	IServerBrowser *m_pServerBrowser;
-	std::optional<SHA256_DIGEST> m_InfoSha256;
 	int m_LastType = IServerBrowser::NUM_TYPES; // initial value does not appear normally, marking uninitialized cache
 	unsigned m_SelectedCommunitiesHash = 0;
+	std::vector<const CCommunity *> m_vpSortedCommunities;
 	std::vector<const CCommunity *> m_vpSelectedCommunities;
 	std::vector<const CCommunityCountry *> m_vpSelectableCountries;
 	std::vector<const CCommunityType *> m_vpSelectableTypes;
@@ -238,7 +238,10 @@ public:
 	{
 	}
 
+	void Invalidate();
+	void UpdateSortedCommunities();
 	void Update(bool Force) override;
+	const std::vector<const CCommunity *> &SortedCommunities() const override { return m_vpSortedCommunities; }
 	const std::vector<const CCommunity *> &SelectedCommunities() const override { return m_vpSelectedCommunities; }
 	const std::vector<const CCommunityCountry *> &SelectableCountries() const override { return m_vpSelectableCountries; }
 	const std::vector<const CCommunityType *> &SelectableTypes() const override { return m_vpSelectableTypes; }
@@ -345,6 +348,7 @@ private:
 	std::vector<int> m_vSortedServerlist;
 	std::unordered_map<NETADDR, int> m_ByAddr;
 
+	// Must not be reordered, the community cache holds pointers into this.
 	std::vector<CCommunity> m_vCommunities;
 	std::unordered_map<NETADDR, CCommunityServer> m_CommunityServersByAddr;
 
