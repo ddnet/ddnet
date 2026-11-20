@@ -1,4 +1,4 @@
-from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange
+from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetIntPositive, NetTwIntString, NetIntRange
 from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick, NetTickStrict
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
@@ -671,5 +671,19 @@ Messages = [
 	
 	NetMessageEx("Sv_MapInfo", "map-info@netmsg.ddnet.org", [
 		NetString("m_pDescription"),
+	]),
+
+	NetMessageEx("Sv_ChatMessage", "chat-message@netmsg.ddnet.org", [
+		NetIntPositive("m_Author"),
+		NetIntPositive("m_Sequence"),
+		NetIntRange("m_Team", 0, 3),
+		NetIntRange("m_ClientId", -1, 'MAX_CLIENTS-1'),
+		NetStringHalfStrict("m_pMessage"),
+	]),
+
+	NetMessageEx("Sv_ChatRedact", "chat-redact@netmsg.ddnet.org", [
+		NetIntPositive("m_Author"),
+		NetIntPositive("m_Sequence"),
+		NetBool("m_Through"),
 	]),
 ]
