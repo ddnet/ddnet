@@ -468,8 +468,8 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 	if(pBounces)
 		*pBounces = 0;
 
-	vec2 Pos = *pInoutPos;
-	vec2 Vel = *pInoutVel;
+	const vec2 &Pos = *pInoutPos;
+	const vec2 &Vel = *pInoutVel;
 	if(CheckPoint(Pos + Vel))
 	{
 		int Affected = 0;
@@ -497,7 +497,7 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 	}
 	else
 	{
-		*pInoutPos = Pos + Vel;
+		*pInoutPos += Vel;
 	}
 }
 
