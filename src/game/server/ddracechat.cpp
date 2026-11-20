@@ -636,8 +636,46 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 	if(NumCurrentVotes >= NumRequiredVotes)
 	{
+		if(Teams.GetTeamState(Team) == ETeamState::STARTED)
+		{
+			// create practice save to restore when /unpractice
+			std::optional<ESaveResult> PracticeSave = Teams.CreatePracticeSave(Team);
+
+			if(PracticeSave.has_value() && *PracticeSave != ESaveResult::SUCCESS)
+			{
+				switch(*PracticeSave)
+				{
+				case ESaveResult::CHAR_NOT_FOUND:
+					pSelf->SendChatTeam(Team, "Practice mode is not enabled because all players in your team have to be alive and not in '/spec'.");
+					break;
+				case ESaveResult::DRAGGER_ACTIVE:
+					pSelf->SendChatTeam(Team, "Practice mode is not enabled because a dragger is active.");
+					break;
+				default:
+					pSelf->SendChatTeam(Team, "Practice mode was not enabled.");
+					break;
+				}
+
+				// reset voting so everyone can /practice again
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(Teams.m_Core.Team(i) == Team && pSelf->m_apPlayers[i])
+						pSelf->m_apPlayers[i]->m_VotedForPractice = false;
+				}
+				return;
+			}
+		}
+
+		if(Teams.HasPracticeSave(Team))
+		{
+			pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing! Use /unpractice to restore your team.");
+		}
+		else
+		{
+			pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing!");
+		}
+
 		Teams.SetPractice(Team, true);
-		pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing!");
 		pSelf->SendChatTeam(Team, "See /practicecmdlist for a list of all available practice commands. Most commonly used ones are /telecursor, /lasttp and /rescue");
 	}
 }
@@ -677,6 +715,15 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if(Teams.HasPracticeSave(Team) && !Teams.IsPracticeSaveMember(Team, pResult->m_ClientId))
+	{
+		// joined during practice, kick them back to team 0 to "unpractice" themselves instead of the whole team.
+		Teams.SetForceCharacterTeam(pResult->m_ClientId, TEAM_FLOCK);
+		pPlayer->KillCharacter(WEAPON_GAME);
+		pSelf->SendChatTarget(pResult->m_ClientId, "You were moved back to team 0 because you joined during practice.");
+		return;
+	}
+
 	if(Teams.TeamSize(Team) > g_Config.m_SvMaxTeamSize && pSelf->m_pController->Teams().TeamLocked(Team))
 	{
 		log_info("chatresp", "Can't disable practice. This team exceeds the maximum allowed size of %d players for regular team", g_Config.m_SvMaxTeamSize);
@@ -704,9 +751,18 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "'%s' disabled practice mode for your team", pSelf->Server()->ClientName(pResult->m_ClientId));
 	pSelf->SendChatTeam(Team, aBuf);
 
-	Teams.KillCharacterOrTeam(pResult->m_ClientId, Team);
-	Teams.SetPractice(Team, false);
-	pPlayer->Respawn(); // set spawn as strong hook
+	if(Teams.HasPracticeSave(Team))
+	{
+		pSelf->SendChatTeam(Team, "Your team has been restored.");
+		Teams.RestorePracticeSave(Team);
+		Teams.SetPractice(Team, false);
+	}
+	else
+	{
+		Teams.KillCharacterOrTeam(pResult->m_ClientId, Team);
+		Teams.SetPractice(Team, false);
+		pPlayer->Respawn(); // set spawn as strong hook
+	}
 }
 
 void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData)
@@ -977,6 +1033,12 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if(pSelf->m_pController->Teams().HasPracticeSave(Team) && !pSelf->m_pController->Teams().IsPracticeSaveMember(Team, pResult->m_ClientId))
+	{
+		log_info("chatresp", "Only members from before practice can lock this team.");
+		return;
+	}
+
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
 		return;
 
@@ -987,6 +1049,9 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
+		// locking team kicks everyone not in practice save
+		if(pSelf->m_pController->Teams().HasPracticeSave(Team))
+			pSelf->m_pController->Teams().KickPracticeJoiners(Team);
 		pSelf->m_pController->Teams().SetTeamLock(Team, true);
 
 		if(pSelf->m_pController->Teams().TeamFlock(Team))
