@@ -55,6 +55,7 @@
 #include "components/mapsounds.h"
 #include "components/menu_background.h"
 #include "components/menus.h"
+#include "components/map_difficulty.h"
 #include "components/motd.h"
 #include "components/multiview.h"
 #include "components/nameplates.h"
@@ -162,6 +163,7 @@ public:
 	CKeyBinder m_KeyBinder;
 	CParticles m_Particles;
 	CMenus m_Menus;
+	CMapDifficulty m_MapDifficulty;
 	CSkins m_Skins;
 	CSkins7 m_Skins7;
 	CCountryFlags m_CountryFlags;

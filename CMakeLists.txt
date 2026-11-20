@@ -2709,6 +2709,8 @@ if(CLIENT)
     components/menu_background.h
     components/menus.cpp
     components/menus.h
+    components/map_difficulty.cpp
+    components/map_difficulty.h
     components/menus_browser.cpp
     components/menus_demo.cpp
     components/menus_ingame.cpp
