@@ -3695,8 +3695,7 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	std::vector<CMapNameItem> vMapList;
-	const char *pDirectory = pResult->GetString(0);
+	const char *pDirectory = pResult->NumArguments() > 0 ? pResult->GetString(0) : "";
 
 	// Don't allow moving to parent directories
 	if(str_find_nocase(pDirectory, ".."))
@@ -3704,10 +3703,12 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 
 	char aPath[IO_MAX_PATH_LENGTH] = "maps/";
 	str_append(aPath, pDirectory);
+
+	std::vector<CMapNameItem> vMapList;
 	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, MapScan, &vMapList);
 	std::sort(vMapList.begin(), vMapList.end(), CMapNameItem::CompareFilenameAscending);
 
-	for(auto &Item : vMapList)
+	for(const auto &Item : vMapList)
 	{
 		if(!str_comp(Item.m_aName, "..") && (!str_comp(aPath, "maps/")))
 			continue;
@@ -3715,30 +3716,42 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 		char aDescription[VOTE_DESC_LENGTH];
 		str_format(aDescription, sizeof(aDescription), "%s: %s%s", Item.m_IsDirectory ? "Directory" : "Map", Item.m_aName, Item.m_IsDirectory ? "/" : "");
 
-		char aCommand[VOTE_CMD_LENGTH];
 		char aOptionEscaped[IO_MAX_PATH_LENGTH * 2];
-		char *pDst = aOptionEscaped;
-		str_escape(&pDst, Item.m_aName, aOptionEscaped + sizeof(aOptionEscaped));
+		{
+			char *pDst = aOptionEscaped;
+			str_escape(&pDst, Item.m_aName, aOptionEscaped + sizeof(aOptionEscaped));
+		}
 
-		char aDirectory[IO_MAX_PATH_LENGTH] = "";
-		if(pResult->NumArguments())
-			str_copy(aDirectory, pDirectory);
+		char aDirectory[IO_MAX_PATH_LENGTH];
+		str_copy(aDirectory, pDirectory);
 
 		if(!str_comp(Item.m_aName, ".."))
 		{
 			if(fs_parent_dir(aDirectory) != 0)
+			{
 				aDirectory[0] = '\0';
-			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectory);
+			}
+		}
+
+		char aDirectoryEscaped[IO_MAX_PATH_LENGTH * 2];
+		{
+			char *pDst = aDirectoryEscaped;
+			str_escape(&pDst, aDirectory, aDirectoryEscaped + sizeof(aDirectoryEscaped));
+		}
+
+		char aCommand[VOTE_CMD_LENGTH];
+		if(!str_comp(Item.m_aName, ".."))
+		{
+			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectoryEscaped);
 		}
 		else if(Item.m_IsDirectory)
 		{
-			str_append(aDirectory, "/");
-			str_append(aDirectory, aOptionEscaped);
-
-			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectory);
+			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s/%s\"", aDirectoryEscaped, aOptionEscaped);
 		}
 		else
-			str_format(aCommand, sizeof(aCommand), "change_map \"%s%s%s\"", pDirectory, pDirectory[0] == '\0' ? "" : "/", aOptionEscaped);
+		{
+			str_format(aCommand, sizeof(aCommand), "change_map \"%s%s%s\"", aDirectoryEscaped, aDirectoryEscaped[0] == '\0' ? "" : "/", aOptionEscaped);
+		}
 
 		pSelf->AddVote(aDescription, aCommand);
 	}
