@@ -325,3 +325,30 @@ fn dbg_assert_panic_handler(panic_info: &PanicHookInfo) -> ! {
 pub extern "C" fn rust_panic_use_dbg_assert() {
     panic::set_hook(Box::new(|info| dbg_assert_panic_handler(info)));
 }
+
+/// Extension trait for string buffers obtained from C++
+pub trait StrBufExt {
+    /// Copy the given string into the buffer, truncating it if necessary.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the string contains a NUL character (`'\0'`) anywhere.
+    fn truncated_copy_from_and_add_nul(&mut self, s: &str);
+}
+
+impl StrBufExt for [c_char] {
+    fn truncated_copy_from_and_add_nul(&mut self, mut s: &str) {
+        assert!(s.bytes().all(|b| b != 0));
+        if s.len() > self.len() - 1 {
+            // TODO(MSRV 1.91): Use str::floor_char_boundary.
+            for end in (0..self.len()).rev() {
+                if s.is_char_boundary(end) {
+                    s = &s[..end];
+                }
+            }
+        }
+        for i in 0..s.len() {
+            self[i] = s.as_bytes()[i] as c_char;
+        }
+    }
+}

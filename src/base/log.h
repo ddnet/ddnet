@@ -32,6 +32,8 @@ struct LOG_COLOR
 #define log_debug_color(color, sys, ...) log_log_color(LEVEL_DEBUG, color, sys, __VA_ARGS__)
 #define log_trace_color(color, sys, ...) log_log_color(LEVEL_TRACE, color, sys, __VA_ARGS__)
 
+extern "C" {
+
 /**
  * @defgroup Log Logging
  *
@@ -85,5 +87,7 @@ struct LOG_COLOR
  * @param args The variable argument list.
  */
 [[gnu::format(printf, 4, 0)]] void log_log_color_v(LEVEL level, LOG_COLOR color, const char *sys, const char *fmt, va_list args);
+
+} // extern "C"
 
 #endif // BASE_LOG_H

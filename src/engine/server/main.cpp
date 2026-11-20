@@ -7,6 +7,7 @@
 #include <base/str.h>
 #include <base/windows.h>
 
+#include <engine/asdf.h>
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/http.h>
@@ -164,6 +165,9 @@ int main(int argc, const char **argv)
 	IGameServer *pGameServer = CreateGameServer();
 	pKernel->RegisterInterface(pGameServer);
 
+	IAsdf *pAsdf = CreateAsdf();
+	pKernel->RegisterInterface(pAsdf);
+
 	pEngine->Init();
 	pConsole->Init();
 	pConfigManager->Init();
@@ -215,6 +219,8 @@ int main(int argc, const char **argv)
 
 	auto pServerLogger = std::make_shared<CServerLogger>(pServer);
 	pEngine->SetAdditionalLogger(pServerLogger);
+
+	pAsdf->Init();
 
 	// run the server
 	log_trace("server", "initialization finished after %.2fms, starting...", (time_get() - MainStart) * 1000.0f / (float)time_freq());
