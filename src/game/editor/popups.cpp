@@ -5,19 +5,26 @@
 #include "editor_actions.h"
 
 #include <base/color.h>
+#include <base/str.h>
 
 #include <engine/font_icons.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
+#include <engine/shared/localization.h>
 #include <engine/storage.h>
+#include <engine/textrender.h>
 
 #include <game/client/gameclient.h>
+#include <game/client/ui_rect.h>
 #include <game/client/ui_scrollregion.h>
+#include <game/editor/editor_binds.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
+#include <game/localization.h>
 
+#include <algorithm>
 #include <limits>
 
 CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect View, bool Active)
@@ -442,6 +449,241 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		}
 	}
 
+	return CUi::POPUP_KEEP_OPEN;
+}
+
+void CEditor::UpdateEditorControlsSearchMatches()
+{
+	m_vEditorControlsSearchMatches.clear();
+
+	if(!m_EditorControlsFilterInput.IsEmpty())
+	{
+		for(size_t BindIndex = 0; BindIndex < m_vpEditorBinds.size(); ++BindIndex)
+		{
+			const auto &pBind = m_vpEditorBinds[BindIndex];
+			if(str_utf8_find_nocase(pBind->Description(), m_EditorControlsFilterInput.GetString()) == nullptr &&
+				str_utf8_find_nocase(pBind->KeyBindText(), m_EditorControlsFilterInput.GetString()) == nullptr)
+			{
+				continue;
+			}
+
+			m_aEditorControlsSectionExpanded[(int)pBind->Section()] = true;
+			m_vEditorControlsSearchMatches.emplace_back(BindIndex);
+		}
+
+		// The binds are not registered in the order the sections are displayed in
+		// (the bind list starts with the History section, while the General section
+		// is displayed first), so sort the matches to match the display order, so
+		// that the best match (the current search match) is shown at the top.
+		std::sort(m_vEditorControlsSearchMatches.begin(), m_vEditorControlsSearchMatches.end(), [this](int Lhs, int Rhs) {
+			const int LhsSection = (int)m_vpEditorBinds[Lhs]->Section();
+			const int RhsSection = (int)m_vpEditorBinds[Rhs]->Section();
+			if(LhsSection != RhsSection)
+			{
+				return LhsSection < RhsSection;
+			}
+			return Lhs < Rhs;
+		});
+	}
+
+	if(m_vEditorControlsSearchMatches.empty())
+	{
+		m_EditorControlsCurrentSearchMatch = 0;
+	}
+	else if(m_EditorControlsCurrentSearchMatch >= (int)m_vEditorControlsSearchMatches.size())
+	{
+		m_EditorControlsCurrentSearchMatch = m_vEditorControlsSearchMatches.size() - 1;
+	}
+}
+
+CUi::EPopupMenuFunctionResult CEditor::PopupMenuControls(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	constexpr float HeaderFontSize = 16.0f;
+	constexpr float FontSize = 13.0f;
+	constexpr float Margin = 10.0f;
+	constexpr float ButtonHeight = 20.0f;
+	constexpr float ButtonSpacing = 2.0f;
+
+	View.HMargin(4.0f, &View);
+	CUIRect QuickSearch, SearchMatches;
+	View.HSplitBottom(ButtonHeight, &View, &QuickSearch);
+	QuickSearch.VSplitRight(Margin, &QuickSearch, nullptr);
+	QuickSearch.VSplitRight(150.0f, &QuickSearch, &SearchMatches);
+	QuickSearch.VSplitRight(Margin, &QuickSearch, nullptr);
+	View.HSplitBottom(Margin, &View, nullptr);
+
+	// Quick search
+	if(pEditor->Ui()->DoEditBox_Search(&pEditor->m_EditorControlsFilterInput, &QuickSearch, FontSize, Active))
+	{
+		pEditor->m_EditorControlsCurrentSearchMatch = 0;
+		pEditor->UpdateEditorControlsSearchMatches();
+		pEditor->m_EditorControlsSearchMatchReveal = true;
+	}
+	else if(!pEditor->m_vEditorControlsSearchMatches.empty() && (pEditor->Ui()->ConsumeHotkey(CUi::EHotkey::HOTKEY_ENTER) || pEditor->Ui()->ConsumeHotkey(CUi::EHotkey::HOTKEY_TAB)))
+	{
+		pEditor->UpdateEditorControlsSearchMatches();
+		pEditor->m_EditorControlsCurrentSearchMatch += pEditor->Input()->ShiftIsPressed() ? -1 : 1;
+		if(pEditor->m_EditorControlsCurrentSearchMatch >= (int)pEditor->m_vEditorControlsSearchMatches.size())
+		{
+			pEditor->m_EditorControlsCurrentSearchMatch = 0;
+		}
+		if(pEditor->m_EditorControlsCurrentSearchMatch < 0)
+		{
+			pEditor->m_EditorControlsCurrentSearchMatch = pEditor->m_vEditorControlsSearchMatches.size() - 1;
+		}
+		pEditor->m_EditorControlsSearchMatchReveal = true;
+	}
+
+	if(!pEditor->m_EditorControlsFilterInput.IsEmpty())
+	{
+		if(!pEditor->m_vEditorControlsSearchMatches.empty())
+		{
+			char aSearchMatchLabel[64];
+			str_format(aSearchMatchLabel, sizeof(aSearchMatchLabel), Localize("Match %d of %d"), pEditor->m_EditorControlsCurrentSearchMatch + 1, (int)pEditor->m_vEditorControlsSearchMatches.size());
+			pEditor->Ui()->DoLabel(&SearchMatches, aSearchMatchLabel, FontSize, TEXTALIGN_MC);
+		}
+		else
+		{
+			pEditor->Ui()->DoLabel(&SearchMatches, Localize("No results"), FontSize, TEXTALIGN_MC);
+		}
+	}
+
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollUnit = 6.0f * ButtonHeight;
+	ScrollParams.m_ForceShowScrollbar = false;
+
+	pEditor->m_EditorControlsScrollRegion.Begin(&View, &ScrollParams);
+
+	constexpr const char *SECTIONS[] = {
+		Localizable("General"),
+		Localizable("History"),
+		Localizable("Brush"),
+		Localizable("Quads and Sounds"),
+		Localizable("Font Typer"),
+		Localizable("File Browser"),
+		Localizable("Map View"),
+		Localizable("Layers"),
+		Localizable("Server Settings")};
+	static_assert(std::size(SECTIONS) == EBindSection::NUM_SECTIONS, "Number of sections mismatch");
+
+	// this could be precomputed
+	float aSectionContentHeights[EBindSection::NUM_SECTIONS] = {};
+	for(const auto &pBind : pEditor->m_vpEditorBinds)
+	{
+		aSectionContentHeights[(int)pBind->Section()] += ButtonHeight + ButtonSpacing;
+	}
+
+	for(size_t Section = 0; Section < EBindSection::NUM_SECTIONS; ++Section)
+	{
+		const bool WasExpanded = pEditor->m_aEditorControlsSectionExpanded[Section];
+		float FullHeight = WasExpanded ? aSectionContentHeights[Section] : 0.0f;
+		FullHeight += HeaderFontSize + (WasExpanded ? Margin : 0.0f);
+		FullHeight += 2.0f * Margin;
+
+		CUIRect SettingsBlock;
+		View.HSplitTop(FullHeight, &SettingsBlock, &View);
+		View.HSplitTop(Margin, nullptr, &View);
+		if(!pEditor->m_EditorControlsScrollRegion.AddRect(SettingsBlock) && !pEditor->m_EditorControlsSearchMatchReveal)
+		{
+			continue;
+		}
+		SettingsBlock.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, pEditor->Ui()->HotItem() != &pEditor->m_aEditorControlsSectionExpandButtons[Section] ? 0.25f : 0.3f), IGraphics::CORNER_ALL, 10.0f);
+		SettingsBlock.Margin(Margin, &SettingsBlock);
+
+		CUIRect Label;
+		SettingsBlock.HSplitTop(HeaderFontSize, &Label, &SettingsBlock);
+		if(WasExpanded)
+		{
+			SettingsBlock.HSplitTop(Margin, nullptr, &SettingsBlock);
+		}
+
+		{
+			CUIRect ButtonArea;
+			Label.Margin(-Margin, &ButtonArea);
+			if(pEditor->Ui()->DoButtonLogic(&pEditor->m_aEditorControlsSectionExpandButtons[Section], 0, &ButtonArea, BUTTONFLAG_LEFT))
+			{
+				pEditor->m_aEditorControlsSectionExpanded[Section] = !WasExpanded;
+			}
+
+			CUIRect ExpandButton;
+			Label.VSplitRight(20.0f, &Label, &ExpandButton);
+			Label.VSplitRight(ButtonSpacing, &Label, nullptr);
+			if(pEditor->m_EditorControlsScrollRegion.AddRect(ExpandButton))
+			{
+				SLabelProperties Props;
+				Props.SetColor(ColorRGBA(1.0f, 1.0f, 1.0f, 0.65f * pEditor->Ui()->ButtonColorMul(&pEditor->m_aEditorControlsSectionExpandButtons[Section])));
+				Props.m_EnableWidthCheck = false;
+				pEditor->Ui()->TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+				pEditor->Ui()->TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+				pEditor->Ui()->DoLabel(&ExpandButton, WasExpanded ? FontIcon::CHEVRON_UP : FontIcon::CHEVRON_DOWN, HeaderFontSize, TEXTALIGN_MR, Props);
+				pEditor->Ui()->TextRender()->SetRenderFlags(0);
+				pEditor->Ui()->TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+			}
+		}
+
+		if(pEditor->m_EditorControlsScrollRegion.AddRect(Label))
+		{
+			pEditor->Ui()->DoLabel(&Label, Localize(SECTIONS[Section]), HeaderFontSize, TEXTALIGN_ML);
+		}
+
+		if(!WasExpanded)
+		{
+			continue;
+		}
+
+		// Only render the binds, they are not changeable here.
+		for(size_t BindIndex = 0; BindIndex < pEditor->m_vpEditorBinds.size(); ++BindIndex)
+		{
+			const auto &pBind = pEditor->m_vpEditorBinds[BindIndex];
+			if(pBind->Section() != Section)
+			{
+				continue;
+			}
+			CUIRect Row;
+			SettingsBlock.HSplitTop(ButtonHeight, &Row, &SettingsBlock);
+			SettingsBlock.HSplitTop(ButtonSpacing, nullptr, &SettingsBlock);
+			if(!pEditor->m_EditorControlsScrollRegion.AddRect(Row) && !pEditor->m_EditorControlsSearchMatchReveal)
+			{
+				continue;
+			}
+
+			const auto SearchMatch = std::find(pEditor->m_vEditorControlsSearchMatches.begin(), pEditor->m_vEditorControlsSearchMatches.end(), (int)BindIndex);
+			const bool SearchMatchSelected = SearchMatch != pEditor->m_vEditorControlsSearchMatches.end() && pEditor->m_EditorControlsCurrentSearchMatch == (int)(SearchMatch - pEditor->m_vEditorControlsSearchMatches.begin());
+			if(SearchMatchSelected && pEditor->m_EditorControlsSearchMatchReveal)
+			{
+				pEditor->m_EditorControlsSearchMatchReveal = false;
+				// Scroll to reveal search match
+				CUIRect ScrollTarget;
+				Row.HMargin(-Margin, &ScrollTarget);
+				pEditor->m_EditorControlsScrollRegion.AddRect(ScrollTarget, true);
+			}
+
+			Row.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.1f), IGraphics::CORNER_ALL, 5.0f);
+			Row.Margin(2.0f, &Row);
+
+			CUIRect KeyLabel;
+			Row.VSplitRight(200.0f, &Row, &KeyLabel);
+			Row.VSplitRight(5.0f, &Row, nullptr);
+			SLabelProperties LabelProps = {.m_MaxWidth = Row.w, .m_EllipsisAtEnd = true, .m_MinimumFontSize = 9.0f};
+			SLabelProperties KeyLabelProps = {.m_MaxWidth = KeyLabel.w, .m_EllipsisAtEnd = false, .m_MinimumFontSize = 9.0f};
+			if(SearchMatchSelected)
+			{
+				LabelProps.SetColor(ColorRGBA(0.1f, 0.1f, 1.0f, 1.0f));
+				KeyLabelProps.SetColor(ColorRGBA(0.1f, 0.1f, 1.0f, 1.0f));
+			}
+			else if(SearchMatch != pEditor->m_vEditorControlsSearchMatches.end())
+			{
+				LabelProps.SetColor(ColorRGBA(0.4f, 0.4f, 0.9f, 1.0f));
+				KeyLabelProps.SetColor(ColorRGBA(0.4f, 0.4f, 0.9f, 1.0f));
+			}
+			pEditor->Ui()->DoLabel(&Row, pBind->Description(), FontSize, TEXTALIGN_ML, LabelProps);
+			pEditor->Ui()->DoLabel(&KeyLabel, pBind->KeyBindText(), FontSize, TEXTALIGN_ML, KeyLabelProps);
+		}
+	}
+
+	pEditor->m_EditorControlsScrollRegion.End();
 	return CUi::POPUP_KEEP_OPEN;
 }
 

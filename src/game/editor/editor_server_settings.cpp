@@ -15,6 +15,7 @@
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/editor/editor_actions.h>
+#include <game/editor/editor_binds.h>
 #include <game/editor/editor_history.h>
 #include <game/gamecore.h>
 
@@ -52,6 +53,20 @@ struct SMapSettingCommand : public IMapSetting
 	SMapSettingCommand(const char *pName, const char *pHelp, const char *pArgs) :
 		IMapSetting(pName, pHelp, IMapSetting::SETTING_COMMAND), m_pArgs(pArgs) {}
 };
+
+void CEditor::RegisterServerSettingsBinds()
+{
+	RegisterBind(false, false, false, KEY_DELETE, "Delete server setting.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(false, false, true, KEY_DOWN, "Move server setting down.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(false, false, true, KEY_UP, "Move server setting up.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(false, true, false, KEY_Y, "Redo the last command edit.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(false, true, false, KEY_Z, "Undo the last command edit.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(false, false, false, KEY_RETURN, "Add or replace command based on the entered value.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(false, false, true, KEY_RETURN, "Update the selected command based on the entered value.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(false, true, false, KEY_SPACE, "Open available dropbox menu for an option.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(false, false, false, KEY_TAB, "Tab through existing options.", EBindSection::SERVER_SETTINGS);
+	RegisterBind(true, false, false, KEY_TAB, "Tab through existing options in reverse order.", EBindSection::SERVER_SETTINGS);
+}
 
 void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast)
 {
