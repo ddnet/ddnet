@@ -1102,6 +1102,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 		auto *pCurrentQuad = &pLayer->m_vQuads[i];
 		CPoint Min = pCurrentQuad->m_aPoints[0];
 		CPoint Max = pCurrentQuad->m_aPoints[0];
+		const bool QuadSelected = Map()->IsQuadSelected(i);
 
 		for(int v = 0; v < 5; v++)
 		{
@@ -1124,7 +1125,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 				continue;
 
 			// Don't check alignment with other selected points
-			bool IsCurrentPointSelected = Map()->IsQuadSelected(i) && (Map()->IsQuadCornerSelected(v) || (v == PointIndex && PointIndex == 4));
+			bool IsCurrentPointSelected = QuadSelected && (Map()->IsQuadCornerSelected(v) || (v == PointIndex && PointIndex == 4));
 			if(IsCurrentPointSelected)
 				continue;
 
@@ -1132,7 +1133,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 		}
 
 		// Don't check alignment with center of selected quads
-		if(!Map()->IsQuadSelected(i))
+		if(!QuadSelected)
 		{
 			CPoint Center = (Min + Max) / 2.0f;
 			CheckAlignment(&Center);
@@ -1161,7 +1162,7 @@ void CEditor::ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer
 		{
 			for(int m = 0; m < 4; m++)
 			{
-				if(Map()->IsQuadPointSelected(Selected, m))
+				if(Map()->IsQuadCornerSelected(m))
 				{
 					ComputePointAlignments(pLayer, pQuad, Selected, m, Offset, vAllAlignments, true);
 				}
@@ -1447,7 +1448,60 @@ static CColor AverageColor(const std::vector<CQuad *> &vpQuads)
 	return Average / std::size(CQuad{}.m_aColors) / vpQuads.size();
 }
 
-void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index)
+void CEditor::DrawQuadPivotHandle(const CQuad *pQuad, bool Selected)
+{
+	const void *pId = &pQuad->m_aPoints[4]; // use pivot addr as id
+	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[4].x), fx2f(pQuad->m_aPoints[4].y));
+
+	// draw selection background
+	if(Selected)
+	{
+		Graphics()->SetColor(0, 0, 0, 1);
+		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
+		Graphics()->QuadsDraw(&QuadItem, 1);
+	}
+
+	if(Ui()->CheckActiveItem(pId) || Ui()->HotItem() == pId)
+	{
+		Graphics()->SetColor(1, 1, 1, 1);
+	}
+	else
+	{
+		Graphics()->SetColor(Selected ? ColorRGBA(1.0f, 0.0f, 1.0f, 1.0f) : ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f));
+	}
+
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
+	Graphics()->QuadsDraw(&QuadItem, 1);
+}
+
+void CEditor::DrawQuadPointHandle(const CQuad *pQuad, int PointIndex, bool Selected)
+{
+	const void *pId = &pQuad->m_aPoints[PointIndex];
+	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[PointIndex].x), fx2f(pQuad->m_aPoints[PointIndex].y));
+	const bool PointSelected = Selected && Map()->IsQuadCornerSelected(PointIndex);
+
+	// draw selection background
+	if(PointSelected)
+	{
+		Graphics()->SetColor(0, 0, 0, 1);
+		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
+		Graphics()->QuadsDraw(&QuadItem, 1);
+	}
+
+	if(Ui()->CheckActiveItem(pId) || Ui()->HotItem() == pId)
+	{
+		Graphics()->SetColor(1, 1, 1, 1);
+	}
+	else
+	{
+		Graphics()->SetColor(PointSelected ? ColorRGBA(0.0f, 1.0f, 1.0f, 1.0f) : ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
+	Graphics()->QuadsDraw(&QuadItem, 1);
+}
+
+void CEditor::DoQuadPivotInteraction(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index)
 {
 	enum
 	{
@@ -1473,9 +1527,6 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	static ivec2 s_LastOffset; // Last offset, stored as static so we can use it to draw every frame
 
 	// get pivot
-	float CenterX = fx2f(pQuad->m_aPoints[4].x);
-	float CenterY = fx2f(pQuad->m_aPoints[4].y);
-
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	auto &&GetDragOffset = [&]() -> ivec2 {
@@ -1487,15 +1538,6 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		return ivec2(f2fx(Pos.x) - s_OriginalPosition.x, f2fx(Pos.y) - s_OriginalPosition.y);
 	};
 
-	const bool QuadSelected = Map()->IsQuadSelected(Index);
-	// draw selection background
-	if(QuadSelected)
-	{
-		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
-		Graphics()->QuadsDraw(&QuadItem, 1);
-	}
-
 	if(Ui()->CheckActiveItem(pId))
 	{
 		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
@@ -1504,7 +1546,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 			{
 				if(distance_squared(s_MouseStart, Ui()->MousePos()) > 20.0f)
 				{
-					if(!QuadSelected)
+					if(!Map()->IsQuadSelected(Index))
 						Map()->SelectQuad(Index);
 
 					s_OriginalPosition = pQuad->m_aPoints[4];
@@ -1692,8 +1734,6 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 				s_PivotAlignments.clear();
 			}
 		}
-
-		Graphics()->SetColor(1, 1, 1, 1);
 	}
 	else if(Input()->KeyPress(KEY_R) && !Map()->m_vSelectedQuads.empty() && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && !Ui()->IsPopupOpen())
 	{
@@ -1719,7 +1759,6 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	{
 		m_pUiGotContext = pId;
 
-		Graphics()->SetColor(1, 1, 1, 1);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Shift+right click to delete.");
 
 		if(Ui()->MouseButton(0))
@@ -1735,7 +1774,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 			{
 				s_Operation = OP_DELETE;
 
-				if(!QuadSelected)
+				if(!Map()->IsQuadSelected(Index))
 					Map()->SelectQuad(Index);
 
 				Ui()->SetActiveItem(pId);
@@ -1744,41 +1783,19 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 			{
 				s_Operation = OP_CONTEXT_MENU;
 
-				if(!QuadSelected)
+				if(!Map()->IsQuadSelected(Index))
 					Map()->SelectQuad(Index);
 
 				Ui()->SetActiveItem(pId);
 			}
 		}
 	}
-	else
-	{
-		constexpr ColorRGBA QuadPivotColor = ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f);
-		constexpr ColorRGBA InvertedQuadPivotColor = color_invert(QuadPivotColor).WithAlpha(QuadPivotColor.a);
-		if(QuadSelected)
-			Graphics()->SetColor(InvertedQuadPivotColor);
-		else
-			Graphics()->SetColor(QuadPivotColor);
-	}
-
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
-	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int V)
+void CEditor::DoQuadPointInteraction(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex)
 {
-	const void *pId = &pQuad->m_aPoints[V];
-	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[V].x), fx2f(pQuad->m_aPoints[V].y));
+	const void *pId = &pQuad->m_aPoints[PointIndex];
 	const bool IgnoreGrid = Input()->AltIsPressed();
-
-	const bool QuadPointSelected = Map()->IsQuadPointSelected(QuadIndex, V);
-	// draw selection background
-	if(QuadPointSelected)
-	{
-		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
-		Graphics()->QuadsDraw(&QuadItem, 1);
-	}
 
 	enum
 	{
@@ -1812,8 +1829,8 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 			{
 				if(distance_squared(s_MouseStart, Ui()->MousePos()) > 20.0f)
 				{
-					if(!QuadPointSelected)
-						Map()->SelectQuadPoint(QuadIndex, V);
+					if(!Map()->IsQuadPointSelected(QuadIndex, PointIndex))
+						Map()->SelectQuadPoint(QuadIndex, PointIndex);
 
 					if(Input()->ShiftIsPressed())
 					{
@@ -1824,11 +1841,11 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 					{
 						s_Operation = OP_MOVEPOINT;
 						// Save original positions before moving
-						s_OriginalPoint = pQuad->m_aPoints[V];
+						s_OriginalPoint = pQuad->m_aPoints[PointIndex];
 						for(int Selected : Map()->m_vSelectedQuads)
 						{
 							for(int m = 0; m < 4; m++)
-								if(Map()->IsQuadPointSelected(Selected, m))
+								if(Map()->IsQuadCornerSelected(m))
 									PreparePointDrag(&pLayer->m_vQuads[Selected], Selected, m);
 						}
 					}
@@ -1849,7 +1866,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 				{
 					for(int m = 0; m < 4; m++)
 					{
-						if(Map()->IsQuadPointSelected(Selected, m))
+						if(Map()->IsQuadCornerSelected(m))
 						{
 							DoPointDrag(&pLayer->m_vQuads[Selected], Selected, m, s_LastOffset);
 						}
@@ -1869,7 +1886,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 					CQuad *pSelectedQuad = &pLayer->m_vQuads[Selected];
 					for(int m = 0; m < 4; m++)
 					{
-						if(Map()->IsQuadPointSelected(Selected, m))
+						if(Map()->IsQuadCornerSelected(m))
 						{
 							// 0,2;1,3 - line x
 							// 0,1;2,3 - line y
@@ -1892,7 +1909,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 			// Axis
 			EAxis Axis = GetDragAxis(s_LastOffset);
-			DrawAxis(Axis, s_OriginalPoint, pQuad->m_aPoints[V]);
+			DrawAxis(Axis, s_OriginalPoint, pQuad->m_aPoints[PointIndex]);
 
 			// Alignments
 			DrawPointAlignments(s_Alignments, s_LastOffset);
@@ -1910,7 +1927,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 						Map()->SelectQuad(QuadIndex);
 
 					m_PointPopupContext.m_pEditor = this;
-					m_PointPopupContext.m_SelectedQuadPoint = V;
+					m_PointPopupContext.m_SelectedQuadPoint = PointIndex;
 					m_PointPopupContext.m_SelectedQuadIndex = Map()->FindSelectedQuadIndex(QuadIndex);
 					dbg_assert(m_PointPopupContext.m_SelectedQuadIndex >= 0, "Selected quad index not found for quad point popup");
 					Ui()->DoPopupMenu(&m_PointPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 75, &m_PointPopupContext, PopupPoint);
@@ -1925,9 +1942,9 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 				if(s_Operation == OP_SELECT)
 				{
 					if(Input()->ShiftIsPressed())
-						Map()->ToggleSelectQuadPoint(QuadIndex, V);
+						Map()->ToggleSelectQuadPoint(QuadIndex, PointIndex);
 					else
-						Map()->SelectQuadPoint(QuadIndex, V);
+						Map()->SelectQuadPoint(QuadIndex, PointIndex);
 				}
 
 				if(s_Operation == OP_MOVEPOINT)
@@ -1943,14 +1960,11 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 				Ui()->SetActiveItem(nullptr);
 			}
 		}
-
-		Graphics()->SetColor(1, 1, 1, 1);
 	}
 	else if(Ui()->HotItem() == pId)
 	{
 		m_pUiGotContext = pId;
 
-		Graphics()->SetColor(1, 1, 1, 1);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move the texture. Hold alt to ignore grid.");
 
 		if(Ui()->MouseButton(0))
@@ -1966,22 +1980,10 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 			Ui()->SetActiveItem(pId);
 
-			if(!QuadPointSelected)
-				Map()->SelectQuadPoint(QuadIndex, V);
+			if(!Map()->IsQuadPointSelected(QuadIndex, PointIndex))
+				Map()->SelectQuadPoint(QuadIndex, PointIndex);
 		}
 	}
-	else
-	{
-		constexpr ColorRGBA QuadPointColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
-		constexpr ColorRGBA InvertedQuadPointColor = color_invert(QuadPointColor).WithAlpha(QuadPointColor.a);
-		if(QuadPointSelected)
-			Graphics()->SetColor(InvertedQuadPointColor);
-		else
-			Graphics()->SetColor(QuadPointColor);
-	}
-
-	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
-	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
 void CEditor::DoQuadEnvelopes(const CLayerQuads *pLayerQuads)
@@ -2223,19 +2225,23 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer)
+void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer, const std::vector<bool> &vQuadSelected)
 {
 	const vec2 MouseWorld = MapView()->MouseWorldPos();
+	const float Scale = MapView()->MouseWorldScale();
 
 	float MinDist = 500.0f;
 	const void *pMinPointId = nullptr;
+	bool MinSelected = false;
 
-	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = distance_squared(Position, MouseWorld) / (MapView()->MouseWorldScale() * MapView()->MouseWorldScale());
-		if(CurrDist < MinDist)
+	const auto UpdateMinimum = [&](vec2 Position, const void *pId, bool Selected) {
+		const float CurrDist = distance_squared(Position, MouseWorld) / (Scale * Scale);
+		// Prefer points of selected quads when they overlap exactly.
+		if(CurrDist < MinDist || (CurrDist == MinDist && Selected && !MinSelected))
 		{
 			MinDist = CurrDist;
 			pMinPointId = pId;
+			MinSelected = Selected;
 			return true;
 		}
 		return false;
@@ -2243,6 +2249,9 @@ void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer)
 
 	for(const CQuad &Quad : pLayer->m_vQuads)
 	{
+		const size_t QuadIndex = &Quad - pLayer->m_vQuads.data();
+		const bool QuadSelected = QuadIndex < vQuadSelected.size() && vQuadSelected[QuadIndex];
+
 		if(m_ShowEnvelopePreview &&
 			m_ActiveEnvelopePreview != EEnvelopePreview::NONE &&
 			Quad.m_PosEnv >= 0 &&
@@ -2251,16 +2260,16 @@ void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer)
 			for(const auto &EnvPoint : Map()->m_vpEnvelopes[Quad.m_PosEnv]->m_vPoints)
 			{
 				const vec2 Position = vec2(fx2f(Quad.m_aPoints[4].x) + fx2f(EnvPoint.m_aValues[0]), fx2f(Quad.m_aPoints[4].y) + fx2f(EnvPoint.m_aValues[1]));
-				if(UpdateMinimum(Position, &EnvPoint) && Ui()->ActiveItem() == nullptr)
+				if(UpdateMinimum(Position, &EnvPoint, QuadSelected) && Ui()->ActiveItem() == nullptr)
 				{
-					Map()->m_CurrentQuadIndex = &Quad - pLayer->m_vQuads.data();
+					Map()->m_CurrentQuadIndex = (int)QuadIndex;
 				}
 			}
 		}
 
 		for(const auto &Point : Quad.m_aPoints)
 		{
-			UpdateMinimum(vec2(fx2f(Point.x), fx2f(Point.y)), &Point);
+			UpdateMinimum(vec2(fx2f(Point.x), fx2f(Point.y)), &Point, QuadSelected);
 		}
 	}
 
