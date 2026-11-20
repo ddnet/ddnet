@@ -363,7 +363,7 @@ if(NOT MSVC AND NOT HAIKU)
 
   # Don't insert timestamps into PEs to keep the build reproducible.
   if(TARGET_OS STREQUAL "windows")
-    add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
+    add_linker_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
   endif()
 
   # Strip absolute build paths from debug info. Prevent adding compiler name and version metadata.
