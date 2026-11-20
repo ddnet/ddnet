@@ -1,3 +1,4 @@
+#include <base/dbg.h>
 #include <base/io.h>
 #include <base/log.h>
 #include <base/mem.h>
@@ -23,13 +24,10 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		log_error(TOOL_NAME, "Failed to import settings from '%s': failed to open config for reading", pConfigName);
 		return;
 	}
-
-	std::vector<const char *> vpLines;
-	int TotalLength = 0;
+	std::vector<const char *> vpConfigLines;
 	while(const char *pLine = LineReader.Get())
 	{
-		vpLines.push_back(pLine);
-		TotalLength += str_length(pLine) + 1;
+		vpConfigLines.push_back(pLine);
 	}
 
 	std::shared_ptr<IMap> pMap = CreateMap();
@@ -39,67 +37,59 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		return;
 	}
 
-	char *pSettings = (char *)malloc(std::max(1, TotalLength));
-	int Offset = 0;
-	for(const char *pLine : vpLines)
+	const CMapItemInfoSettings *pSettingsItem = static_cast<CMapItemInfoSettings *>(pMap->FindItem(MAPITEMTYPE_INFO, 0));
+	if(pSettingsItem == nullptr)
 	{
-		int Length = str_length(pLine) + 1;
-		mem_copy(pSettings + Offset, pLine, Length);
-		Offset += Length;
+		if(vpConfigLines.empty())
+		{
+			log_info(TOOL_NAME, "Configs coincide, not updating map");
+			return;
+		}
+	}
+	else
+	{
+		const std::optional<std::vector<const char *>> vpMapLines = pMap->GetDataStringArray(pSettingsItem->m_Settings);
+		if(!vpMapLines.has_value())
+		{
+			log_error(TOOL_NAME, "Failed to read settings from map '%s'", pMapName);
+			return;
+		}
+		if((vpConfigLines.empty() && vpMapLines.value().size() == 1 && vpMapLines.value().front()[0] == '\0') ||
+			std::equal(vpConfigLines.begin(), vpConfigLines.end(), vpMapLines.value().begin(), vpMapLines.value().end(),
+				[&](const char *pConfigLine, const char *pMapLine) { return str_comp(pConfigLine, pMapLine) == 0; }))
+		{
+			log_info(TOOL_NAME, "Configs coincide, not updating map");
+			return;
+		}
+		pMap->UnloadData(pSettingsItem->m_Settings);
+		if(vpConfigLines.empty())
+		{
+			// An empty string array would be packed as index -1, but we need to preserve the
+			// original data indices below so we instead pack an array of an empty string.
+			vpConfigLines = {""};
+		}
 	}
 
 	CDataFileWriter Writer;
 
-	int SettingsIndex = pMap->NumData();
-	bool FoundInfo = false;
-	for(int i = 0; i < pMap->NumItems(); i++)
+	for(int ItemIndex = 0; ItemIndex < pMap->NumItems(); ItemIndex++)
 	{
 		int Type, Id;
-		int *pItem = (int *)pMap->GetItem(i, &Type, &Id);
-		int Size = pMap->GetItemSize(i);
-		CMapItemInfoSettings MapInfo;
-		if(Type == MAPITEMTYPE_INFO && Id == 0)
+		CUuid Uuid;
+		const void *pItem = pMap->GetItem(ItemIndex, &Type, &Id, &Uuid);
+
+		// Filter ITEMTYPE_EX items, they will be automatically added again.
+		if(Type == ITEMTYPE_EX)
 		{
-			FoundInfo = true;
-			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pItem;
-			if(Size >= (int)sizeof(CMapItemInfoSettings))
-			{
-				MapInfo = *pInfo;
-				pItem = (int *)&MapInfo;
-				Size = sizeof(MapInfo);
-				if(pInfo->m_Settings > -1)
-				{
-					SettingsIndex = pInfo->m_Settings;
-					char *pMapSettings = (char *)pMap->GetData(SettingsIndex);
-					int DataSize = pMap->GetDataSize(SettingsIndex);
-					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
-					{
-						log_info(TOOL_NAME, "Configs coincide, not updating map");
-						free(pSettings);
-						return;
-					}
-					pMap->UnloadData(pInfo->m_Settings);
-				}
-				else
-				{
-					MapInfo = *pInfo;
-					MapInfo.m_Settings = SettingsIndex;
-					pItem = (int *)&MapInfo;
-					Size = sizeof(MapInfo);
-				}
-			}
-			else
-			{
-				*(CMapItemInfo *)&MapInfo = *(CMapItemInfo *)pInfo;
-				MapInfo.m_Settings = SettingsIndex;
-				pItem = (int *)&MapInfo;
-				Size = sizeof(MapInfo);
-			}
+			continue;
 		}
-		Writer.AddItem(Type, Id, Size, pItem);
+
+		const int Size = pMap->GetItemSize(ItemIndex);
+		Writer.AddItem(Type, Id, Size, pItem, &Uuid);
 	}
 
-	if(!FoundInfo)
+	const int NewSettingsDataIndex = pMap->NumData();
+	if(pSettingsItem == nullptr)
 	{
 		CMapItemInfoSettings Info;
 		Info.m_Version = 1;
@@ -107,24 +97,23 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		Info.m_MapVersion = -1;
 		Info.m_Credits = -1;
 		Info.m_License = -1;
-		Info.m_Settings = SettingsIndex;
+		Info.m_Settings = NewSettingsDataIndex;
 		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Info), &Info);
 	}
 
-	for(int i = 0; i < pMap->NumData() || i == SettingsIndex; i++)
+	for(int DataIndex = 0; DataIndex < pMap->NumData() || DataIndex == NewSettingsDataIndex; DataIndex++)
 	{
-		if(i == SettingsIndex)
+		if(DataIndex == NewSettingsDataIndex)
 		{
-			Writer.AddData(TotalLength, pSettings);
+			dbg_assert(Writer.AddDataStringArray(vpConfigLines) == DataIndex, "Data indices mismatch");
 			continue;
 		}
-		unsigned char *pData = (unsigned char *)pMap->GetData(i);
-		int Size = pMap->GetDataSize(i);
-		Writer.AddData(Size, pData);
-		pMap->UnloadData(i);
+		const void *pData = pMap->GetData(DataIndex);
+		const int Size = pMap->GetDataSize(DataIndex);
+		dbg_assert(Writer.AddData(Size, pData) == DataIndex, "Data indices mismatch");
+		pMap->UnloadData(DataIndex);
 	}
 
-	free(pSettings);
 	pMap->Unload();
 
 	if(!Writer.Open(pStorage, pMapName))
