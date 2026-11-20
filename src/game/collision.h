@@ -101,8 +101,6 @@ public:
 	int GetSwitchDelay(int Index) const;
 
 	int IsSolid(int x, int y) const;
-	bool IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const;
-	bool IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const;
 	int IsWallJump(int Index) const;
 	int IsNoLaser(int x, int y) const;
 	int IsFrontNoLaser(int x, int y) const;
@@ -169,6 +167,10 @@ private:
 	// TILE_TELEINEVIL, TILE_TELECHECK, TILE_TELECHECKIN, TILE_TELECHECKINEVIL, TILE_TELEINHOOK
 	std::map<int, std::vector<vec2>> m_TeleOthers;
 	bool m_HasHookTeleIns;
+
+	int HitHookAffectingTile(int Hit, int Index, int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const;
+	template<typename FIsTeleport>
+	int IntersectLineTeleHookImpl(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, FIsTeleport IsTeleportFn) const;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);
