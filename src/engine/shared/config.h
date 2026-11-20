@@ -78,6 +78,29 @@ namespace DefaultConfig
 #undef MACRO_CONFIG_STR
 }
 
+/**
+ * Declared limits of integer config variables. Equal limits disable clamping.
+ * Otherwise a maximum of zero leaves the value unbounded above.
+ */
+namespace ConfigLimits
+{
+	class CIntLimits
+	{
+	public:
+		int m_Min = 0;
+		int m_Max = 0;
+	};
+
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	inline constexpr CIntLimits Name{.m_Min = Min, .m_Max = Max};
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc)
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc)
+#include "config_variables.h"
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+}
+
 // Note: The values of some of these flags cannot be changed because they are recorded to Teehistorian files.
 enum
 {
