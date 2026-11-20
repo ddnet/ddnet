@@ -3255,11 +3255,11 @@ if(SERVER)
       ${SERVER_ICON}
       ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:game-server-without-main>
-      # tidy-alphabetical-sort
+      # tidy-alphabetical-start
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
-      # tidy-alphabetical-sort
+      # tidy-alphabetical-end
     )
   else()
     add_executable(game-server
@@ -3268,11 +3268,11 @@ if(SERVER)
       ${SERVER_ICON}
       ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:game-server-without-main>
-      # tidy-alphabetical-sort
+      # tidy-alphabetical-start
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
-      # tidy-alphabetical-sort
+      # tidy-alphabetical-end
     )
   endif()
   set_property(TARGET game-server
