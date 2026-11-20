@@ -77,6 +77,8 @@ class CConsole : public IConsole
 	void PrintCommandList(EAccessLevel MinAccessLevel, int ExcludeFlagMask);
 
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = IConsole::CLIENT_ID_UNSPECIFIED, bool InterpretSemicolons = true) override;
+	class CResult;
+	void ExecuteCommand(int Stroke, CCommand *pCommand, int ClientId, CResult *pResult);
 
 	FGetVictimsCommandCallback m_pfnGetVictimsCommandCallback = nullptr;
 	void *m_pGetVictimsCommandUserData = nullptr;
