@@ -82,6 +82,10 @@
 #include <emscripten/emscripten.h>
 #endif
 
+#if defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_MACOS) && !defined(CONF_PLATFORM_ANDROID) && !defined(CONF_PLATFORM_IOS)
+#include <dirent.h>
+#endif
+
 #include "SDL.h"
 #ifdef main
 #undef main
@@ -2312,7 +2316,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							m_PredictedTime.SetAdjustSpeed(CSmoothTime::ADJUSTDIRECTION_UP, 1000.0f);
 							m_PredictedTime.UpdateMargin(PredictionMargin() * time_freq() / 1000);
 						}
-						m_aGameTime[Conn].Init((GameTick - 1) * time_freq() / GameTickSpeed());
+						m_aGameTime[Conn].Init((GameTick - SnapshotMarginTicks()) * time_freq() / GameTickSpeed());
 						m_aapSnapshots[Conn][SNAP_PREV] = m_aSnapshotStorage[Conn].m_pFirst;
 						m_aapSnapshots[Conn][SNAP_CURRENT] = m_aSnapshotStorage[Conn].m_pLast;
 						m_aPrevGameTick[Conn] = m_aapSnapshots[Conn][SNAP_PREV]->m_Tick;
@@ -2344,13 +2348,17 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						int64_t Now = m_aGameTime[Conn].Get(time_get());
 						int64_t TickStart = GameTick * time_freq() / GameTickSpeed();
 						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
-						m_aGameTime[Conn].Update(&m_aGametimeMarginGraphs[Conn], (GameTick - 1) * time_freq() / GameTickSpeed(), TimeLeft, CSmoothTime::ADJUSTDIRECTION_DOWN);
+						m_aGameTime[Conn].Update(&m_aGametimeMarginGraphs[Conn], (GameTick - SnapshotMarginTicks()) * time_freq() / GameTickSpeed(), TimeLeft, CSmoothTime::ADJUSTDIRECTION_DOWN);
 					}
 
 					if(m_aReceivedSnapshots[Conn] > GameTickSpeed() && !m_aDidPostConnect[Conn])
 					{
 						OnPostConnect(Conn);
 						m_aDidPostConnect[Conn] = true;
+						if(Conn == CONN_MAIN)
+						{
+							CheckWifiPowerSave();
+						}
 					}
 
 					// ack snapshot
@@ -5455,6 +5463,71 @@ int CClient::PredictionMargin() const
 {
 	return m_ServerCapabilities.m_SyncWeaponInput ? g_Config.m_ClPredictionMargin : 10;
 }
+
+int CClient::SnapshotMarginTicks() const
+{
+	return std::max(1, g_Config.m_ClSnapshotMarginTicks);
+}
+
+#if defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_MACOS) && !defined(CONF_PLATFORM_ANDROID) && !defined(CONF_PLATFORM_IOS)
+static bool IsWifiPowerSaveActive(const char *pIface)
+{
+	char aCmd[128];
+	str_format(aCmd, sizeof(aCmd), "iw dev %s get power_save 2>/dev/null", pIface);
+	FILE *pPipe = popen(aCmd, "r");
+	if(!pPipe)
+		return false;
+
+	char aLine[128];
+	bool Active = false;
+	while(fgets(aLine, sizeof(aLine), pPipe))
+	{
+		if(str_find(aLine, "Power save: on"))
+		{
+			Active = true;
+			break;
+		}
+	}
+	pclose(pPipe);
+	return Active;
+}
+
+void CClient::CheckWifiPowerSave()
+{
+	DIR *pDir = opendir("/sys/class/net");
+	if(!pDir)
+		return;
+
+	struct dirent *pEntry;
+	while((pEntry = readdir(pDir)) != nullptr)
+	{
+		if(pEntry->d_name[0] == '.')
+			continue;
+
+		char aPath[256];
+		str_format(aPath, sizeof(aPath), "/sys/class/net/%s/wireless", pEntry->d_name);
+		char aPathPhy[256];
+		str_format(aPathPhy, sizeof(aPathPhy), "/sys/class/net/%s/phy80211", pEntry->d_name);
+		if(!fs_is_dir(aPath) && !fs_is_dir(aPathPhy))
+			continue;
+
+		if(!IsWifiPowerSaveActive(pEntry->d_name))
+			continue;
+
+		char aWarn[512];
+		str_format(aWarn, sizeof(aWarn),
+			"WARNING: ur Wi-Fi power saving is active! It may cause 100-200ms latency spikes in online games. Either disable it via `sudo iw dev %s set power_save off`, or don't come complaining later!",
+			pEntry->d_name);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net", aWarn, ColorRGBA(1.0f, 0.4f, 0.4f, 1.0f));
+		break;
+	}
+	closedir(pDir);
+}
+#else
+void CClient::CheckWifiPowerSave()
+{
+}
+#endif
 
 IClient::EConnectivity CClient::UdpConnectivity(int NetType)
 {
