@@ -161,7 +161,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		SHA256_DIGEST m_Sha256;
 		char m_aUrl[256];
 	};
-	std::optional<CMapDetails> m_MapDetails;
+	std::optional<CMapDetails> m_aMapDetails[NUM_DUMMIES];
 
 	EInfoState m_InfoState = EInfoState::ERROR;
 	std::shared_ptr<IHttpRequest> m_pDDNetInfoTask = nullptr;
@@ -382,6 +382,7 @@ public:
 
 	const char *LoadMap(const char *pName, const char *pFilename, const std::optional<SHA256_DIGEST> &WantedSha256, unsigned WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, const std::optional<SHA256_DIGEST> &WantedSha256, int WantedCrc);
+	void DummyCheckMap(const char *pName, unsigned Crc, const std::optional<SHA256_DIGEST> &Sha256);
 
 	int TranslateSysMsg(int *pMsgId, bool System, CUnpacker *pUnpacker, CPacker *pPacker, CNetChunk *pPacket, bool *pIsExMsg);
 
