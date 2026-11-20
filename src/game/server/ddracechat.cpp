@@ -52,30 +52,29 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 		log_info("chatresp", "/cmdlist will show a list of all chat commands");
 		log_info("chatresp", "/help + any command will show you the help for this command");
 		log_info("chatresp", "Example /help settings will display the help about /settings");
+		return;
+	}
+
+	const char *pArg = pResult->GetString(0);
+	const IConsole::ICommandInfo *pCmdInfo =
+		pSelf->Console()->GetCommandInfo(pArg, CFGFLAG_SERVER | CFGFLAG_CHAT, false);
+	if(pCmdInfo)
+	{
+		if(pCmdInfo->Params())
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pCmdInfo->Name(), pCmdInfo->Params());
+			log_info("chatresp", "%s", aBuf);
+		}
+
+		if(pCmdInfo->Help())
+			log_info("chatresp", "%s", pCmdInfo->Help());
 	}
 	else
 	{
-		const char *pArg = pResult->GetString(0);
-		const IConsole::ICommandInfo *pCmdInfo =
-			pSelf->Console()->GetCommandInfo(pArg, CFGFLAG_SERVER | CFGFLAG_CHAT, false);
-		if(pCmdInfo)
-		{
-			if(pCmdInfo->Params())
-			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pCmdInfo->Name(), pCmdInfo->Params());
-				log_info("chatresp", "%s", aBuf);
-			}
-
-			if(pCmdInfo->Help())
-				log_info("chatresp", "%s", pCmdInfo->Help());
-		}
-		else
-		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Unknown command %s", pArg);
-			log_info("chatresp", "%s", aBuf);
-		}
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Unknown command %s", pArg);
+		log_info("chatresp", "%s", aBuf);
 	}
 }
 
@@ -88,96 +87,95 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		log_info("chatresp", "to check a server setting say /settings and setting's name, setting names are:");
 		log_info("chatresp", "teams, cheats, collision, hooking, endlesshooking,");
 		log_info("chatresp", "hitting, oldlaser, timeout, votes, pause and scores");
+		return;
+	}
+
+	const char *pArg = pResult->GetString(0);
+	char aBuf[256];
+	float ColTemp;
+	float HookTemp;
+	pSelf->GlobalTuning()->Get("player_collision", &ColTemp);
+	pSelf->GlobalTuning()->Get("player_hooking", &HookTemp);
+	if(str_comp_nocase(pArg, "teams") == 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s %s",
+			g_Config.m_SvTeam == SV_TEAM_ALLOWED ?
+				"Teams are available on this server" :
+			(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) ?
+				"Teams are not available on this server" :
+				"You have to be in a team to play on this server", /*g_Config.m_SvTeamStrict ? "and if you die in a team all of you die" : */
+			"and all of your team will die if the team is locked");
+		log_info("chatresp", "%s", aBuf);
+	}
+	else if(str_comp_nocase(pArg, "cheats") == 0)
+	{
+		log_info("chatresp", g_Config.m_SvTestingCommands ?
+					     "Cheats are enabled on this server" :
+					     "Cheats are disabled on this server");
+	}
+	else if(str_comp_nocase(pArg, "collision") == 0)
+	{
+		log_info("chatresp", ColTemp ?
+					     "Players can collide on this server" :
+					     "Players can't collide on this server");
+	}
+	else if(str_comp_nocase(pArg, "hooking") == 0)
+	{
+		log_info("chatresp", HookTemp ?
+					     "Players can hook each other on this server" :
+					     "Players can't hook each other on this server");
+	}
+	else if(str_comp_nocase(pArg, "endlesshooking") == 0)
+	{
+		log_info("chatresp", g_Config.m_SvEndlessDrag ?
+					     "Players hook time is unlimited" :
+					     "Players hook time is limited");
+	}
+	else if(str_comp_nocase(pArg, "hitting") == 0)
+	{
+		log_info("chatresp", g_Config.m_SvHit ?
+					     "Players weapons affect others" :
+					     "Players weapons has no affect on others");
+	}
+	else if(str_comp_nocase(pArg, "oldlaser") == 0)
+	{
+		log_info("chatresp", g_Config.m_SvOldLaser ?
+					     "Lasers can hit you if you shot them and they pull you towards the bounce origin (Like DDRace Beta)" :
+					     "Lasers can't hit you if you shot them, and they pull others towards the shooter");
+	}
+	else if(str_comp_nocase(pArg, "timeout") == 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "The Server Timeout is currently set to %d seconds", g_Config.m_ConnTimeout);
+		log_info("chatresp", "%s", aBuf);
+	}
+	else if(str_comp_nocase(pArg, "votes") == 0)
+	{
+		log_info("chatresp", g_Config.m_SvVoteKick ?
+					     "Players can use Callvote menu tab to kick offenders" :
+					     "Players can't use the Callvote menu tab to kick offenders");
+		if(g_Config.m_SvVoteKick)
+		{
+			str_format(aBuf, sizeof(aBuf),
+				"Players are banned for %d minute(s) if they get voted off", g_Config.m_SvVoteKickBantime);
+
+			log_info("chatresp", "%s", g_Config.m_SvVoteKickBantime ? aBuf : "Players are just kicked and not banned if they get voted off");
+		}
+	}
+	else if(str_comp_nocase(pArg, "pause") == 0)
+	{
+		log_info("chatresp", g_Config.m_SvPauseable ?
+					     "/spec will pause you and your tee will vanish" :
+					     "/spec will pause you but your tee will not vanish");
+	}
+	else if(str_comp_nocase(pArg, "scores") == 0)
+	{
+		log_info("chatresp", g_Config.m_SvHideScore ?
+					     "Scores are private on this server" :
+					     "Scores are public on this server");
 	}
 	else
 	{
-		const char *pArg = pResult->GetString(0);
-		char aBuf[256];
-		float ColTemp;
-		float HookTemp;
-		pSelf->GlobalTuning()->Get("player_collision", &ColTemp);
-		pSelf->GlobalTuning()->Get("player_hooking", &HookTemp);
-		if(str_comp_nocase(pArg, "teams") == 0)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s %s",
-				g_Config.m_SvTeam == SV_TEAM_ALLOWED ?
-					"Teams are available on this server" :
-				(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) ?
-					"Teams are not available on this server" :
-					"You have to be in a team to play on this server", /*g_Config.m_SvTeamStrict ? "and if you die in a team all of you die" : */
-				"and all of your team will die if the team is locked");
-			log_info("chatresp", "%s", aBuf);
-		}
-		else if(str_comp_nocase(pArg, "cheats") == 0)
-		{
-			log_info("chatresp", g_Config.m_SvTestingCommands ?
-						     "Cheats are enabled on this server" :
-						     "Cheats are disabled on this server");
-		}
-		else if(str_comp_nocase(pArg, "collision") == 0)
-		{
-			log_info("chatresp", ColTemp ?
-						     "Players can collide on this server" :
-						     "Players can't collide on this server");
-		}
-		else if(str_comp_nocase(pArg, "hooking") == 0)
-		{
-			log_info("chatresp", HookTemp ?
-						     "Players can hook each other on this server" :
-						     "Players can't hook each other on this server");
-		}
-		else if(str_comp_nocase(pArg, "endlesshooking") == 0)
-		{
-			log_info("chatresp", g_Config.m_SvEndlessDrag ?
-						     "Players hook time is unlimited" :
-						     "Players hook time is limited");
-		}
-		else if(str_comp_nocase(pArg, "hitting") == 0)
-		{
-			log_info("chatresp", g_Config.m_SvHit ?
-						     "Players weapons affect others" :
-						     "Players weapons has no affect on others");
-		}
-		else if(str_comp_nocase(pArg, "oldlaser") == 0)
-		{
-			log_info("chatresp", g_Config.m_SvOldLaser ?
-						     "Lasers can hit you if you shot them and they pull you towards the bounce origin (Like DDRace Beta)" :
-						     "Lasers can't hit you if you shot them, and they pull others towards the shooter");
-		}
-		else if(str_comp_nocase(pArg, "timeout") == 0)
-		{
-			str_format(aBuf, sizeof(aBuf), "The Server Timeout is currently set to %d seconds", g_Config.m_ConnTimeout);
-			log_info("chatresp", "%s", aBuf);
-		}
-		else if(str_comp_nocase(pArg, "votes") == 0)
-		{
-			log_info("chatresp", g_Config.m_SvVoteKick ?
-						     "Players can use Callvote menu tab to kick offenders" :
-						     "Players can't use the Callvote menu tab to kick offenders");
-			if(g_Config.m_SvVoteKick)
-			{
-				str_format(aBuf, sizeof(aBuf),
-					"Players are banned for %d minute(s) if they get voted off", g_Config.m_SvVoteKickBantime);
-
-				log_info("chatresp", "%s", g_Config.m_SvVoteKickBantime ? aBuf : "Players are just kicked and not banned if they get voted off");
-			}
-		}
-		else if(str_comp_nocase(pArg, "pause") == 0)
-		{
-			log_info("chatresp", g_Config.m_SvPauseable ?
-						     "/spec will pause you and your tee will vanish" :
-						     "/spec will pause you but your tee will not vanish");
-		}
-		else if(str_comp_nocase(pArg, "scores") == 0)
-		{
-			log_info("chatresp", g_Config.m_SvHideScore ?
-						     "Scores are private on this server" :
-						     "Scores are public on this server");
-		}
-		else
-		{
-			log_info("chatresp", "no matching settings found, type /settings to view them");
-		}
+		log_info("chatresp", "no matching settings found, type /settings to view them");
 	}
 }
 
@@ -1248,33 +1246,32 @@ void CGameContext::ConTeam(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() > 0)
 	{
 		pSelf->AttemptJoinTeam(pResult->m_ClientId, pResult->GetInteger(0));
+		return;
+	}
+
+	char aBuf[512];
+	if(!pPlayer->IsPlaying())
+	{
+		log_info("chatresp", "You can't check your team while you are dead/a spectator.");
 	}
 	else
 	{
-		char aBuf[512];
-		if(!pPlayer->IsPlaying())
+		int TeamSize = 0;
+		const int PlayerTeam = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+
+		// Count players in team
+		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 		{
-			log_info("chatresp", "You can't check your team while you are dead/a spectator.");
+			const CPlayer *pOtherPlayer = pSelf->m_apPlayers[ClientId];
+			if(!pOtherPlayer || !pOtherPlayer->IsPlaying())
+				continue;
+
+			if(pSelf->GetDDRaceTeam(ClientId) == PlayerTeam)
+				TeamSize++;
 		}
-		else
-		{
-			int TeamSize = 0;
-			const int PlayerTeam = pSelf->GetDDRaceTeam(pResult->m_ClientId);
 
-			// Count players in team
-			for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
-			{
-				const CPlayer *pOtherPlayer = pSelf->m_apPlayers[ClientId];
-				if(!pOtherPlayer || !pOtherPlayer->IsPlaying())
-					continue;
-
-				if(pSelf->GetDDRaceTeam(ClientId) == PlayerTeam)
-					TeamSize++;
-			}
-
-			str_format(aBuf, sizeof(aBuf), "You are in team %d having %d %s", PlayerTeam, TeamSize, TeamSize > 1 ? "players" : "player");
-			log_info("chatresp", "%s", aBuf);
-		}
+		str_format(aBuf, sizeof(aBuf), "You are in team %d having %d %s", PlayerTeam, TeamSize, TeamSize > 1 ? "players" : "player");
+		log_info("chatresp", "%s", aBuf);
 	}
 }
 
@@ -1357,39 +1354,38 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	{
 		log_info("chatresp", "Emote commands are: /emote surprise /emote blink /emote close /emote angry /emote happy /emote pain /emote normal");
 		log_info("chatresp", "Example: /emote surprise 10 for 10 seconds or /emote surprise (default 1 second)");
+		return;
 	}
+
+	if(!pPlayer->CanOverrideDefaultEmote())
+		return;
+
+	int EmoteType = 0;
+	if(!str_comp_nocase(pResult->GetString(0), "angry"))
+		EmoteType = EMOTE_ANGRY;
+	else if(!str_comp_nocase(pResult->GetString(0), "blink"))
+		EmoteType = EMOTE_BLINK;
+	else if(!str_comp_nocase(pResult->GetString(0), "close"))
+		EmoteType = EMOTE_BLINK;
+	else if(!str_comp_nocase(pResult->GetString(0), "happy"))
+		EmoteType = EMOTE_HAPPY;
+	else if(!str_comp_nocase(pResult->GetString(0), "pain"))
+		EmoteType = EMOTE_PAIN;
+	else if(!str_comp_nocase(pResult->GetString(0), "surprise"))
+		EmoteType = EMOTE_SURPRISE;
+	else if(!str_comp_nocase(pResult->GetString(0), "normal"))
+		EmoteType = EMOTE_NORMAL;
 	else
 	{
-		if(!pPlayer->CanOverrideDefaultEmote())
-			return;
-
-		int EmoteType = 0;
-		if(!str_comp_nocase(pResult->GetString(0), "angry"))
-			EmoteType = EMOTE_ANGRY;
-		else if(!str_comp_nocase(pResult->GetString(0), "blink"))
-			EmoteType = EMOTE_BLINK;
-		else if(!str_comp_nocase(pResult->GetString(0), "close"))
-			EmoteType = EMOTE_BLINK;
-		else if(!str_comp_nocase(pResult->GetString(0), "happy"))
-			EmoteType = EMOTE_HAPPY;
-		else if(!str_comp_nocase(pResult->GetString(0), "pain"))
-			EmoteType = EMOTE_PAIN;
-		else if(!str_comp_nocase(pResult->GetString(0), "surprise"))
-			EmoteType = EMOTE_SURPRISE;
-		else if(!str_comp_nocase(pResult->GetString(0), "normal"))
-			EmoteType = EMOTE_NORMAL;
-		else
-		{
-			log_info("chatresp", "Unknown emote... Say /emote");
-			return;
-		}
-
-		int Duration = 1;
-		if(pResult->NumArguments() > 1)
-			Duration = std::clamp(pResult->GetInteger(1), 1, 86400);
-
-		pPlayer->OverrideDefaultEmote(EmoteType, pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed());
+		log_info("chatresp", "Unknown emote... Say /emote");
+		return;
 	}
+
+	int Duration = 1;
+	if(pResult->NumArguments() > 1)
+		Duration = std::clamp(pResult->GetInteger(1), 1, 86400);
+
+	pPlayer->OverrideDefaultEmote(EmoteType, pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed());
 }
 
 void CGameContext::ConNinjaJetpack(IConsole::IResult *pResult, void *pUserData)
@@ -1705,18 +1701,19 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConBack(IConsole::IResult *pResult, void *pUserData)
 {
 	auto *pSelf = static_cast<CGameContext *>(pUserData);
-	if(auto *pChr = pSelf->GetPracticeCharacter(pResult))
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	auto *pPlayer = pChr->GetPlayer();
+	if(!pPlayer->m_LastDeath.has_value())
 	{
-		auto *pPlayer = pChr->GetPlayer();
-		if(!pPlayer->m_LastDeath.has_value())
-		{
-			pSelf->SendChatTarget(pPlayer->GetCid(), "There is nowhere to go back to.");
-			return;
-		}
-		pChr->GetLastRescueTeeRef(pPlayer->m_RescueMode) = pPlayer->m_LastDeath.value();
-		if(pChr->Rescue())
-			pChr->Unfreeze();
+		pSelf->SendChatTarget(pPlayer->GetCid(), "There is nowhere to go back to.");
+		return;
 	}
+	pChr->GetLastRescueTeeRef(pPlayer->m_RescueMode) = pPlayer->m_LastDeath.value();
+	if(pChr->Rescue())
+		pChr->Unfreeze();
 }
 
 void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
@@ -1797,44 +1794,42 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pCallingPlayer->GetCid(), "Can't recognize specified arguments. Usage: /tpxy x y, e.g. /tpxy 9 3.");
 		return;
 	}
-	else
+
+	float BaseX = 0.f, BaseY = 0.f;
+
+	const auto DetermineCoordinateRelativity = [](const char *pInString, const float AbsoluteDefaultValue, float &OutFloat) -> bool {
+		// mode 0 = abs, 1 = sub, 2 = add
+
+		// Relative?
+		const char *pStrDelta = str_startswith(pInString, "~");
+
+		float d;
+		if(!str_tofloat(pStrDelta ? pStrDelta : pInString, &d))
+			return false;
+
+		// Is the number valid?
+		if(std::isnan(d) || std::isinf(d))
+			return false;
+
+		// Convert our gleaned 'display' coordinate to an actual map coordinate
+		d *= 32.f;
+
+		OutFloat = (pStrDelta ? AbsoluteDefaultValue : 0) + d;
+		return true;
+	};
+
+	if(!DetermineCoordinateRelativity(pResult->GetString(0), pCallingPlayer->m_ViewPos.x, BaseX))
 	{
-		float BaseX = 0.f, BaseY = 0.f;
-
-		const auto DetermineCoordinateRelativity = [](const char *pInString, const float AbsoluteDefaultValue, float &OutFloat) -> bool {
-			// mode 0 = abs, 1 = sub, 2 = add
-
-			// Relative?
-			const char *pStrDelta = str_startswith(pInString, "~");
-
-			float d;
-			if(!str_tofloat(pStrDelta ? pStrDelta : pInString, &d))
-				return false;
-
-			// Is the number valid?
-			if(std::isnan(d) || std::isinf(d))
-				return false;
-
-			// Convert our gleaned 'display' coordinate to an actual map coordinate
-			d *= 32.f;
-
-			OutFloat = (pStrDelta ? AbsoluteDefaultValue : 0) + d;
-			return true;
-		};
-
-		if(!DetermineCoordinateRelativity(pResult->GetString(0), pCallingPlayer->m_ViewPos.x, BaseX))
-		{
-			pSelf->SendChatTarget(pCallingPlayer->GetCid(), "Invalid X coordinate.");
-			return;
-		}
-		if(!DetermineCoordinateRelativity(pResult->GetString(1), pCallingPlayer->m_ViewPos.y, BaseY))
-		{
-			pSelf->SendChatTarget(pCallingPlayer->GetCid(), "Invalid Y coordinate.");
-			return;
-		}
-
-		Pos = {BaseX, BaseY};
+		pSelf->SendChatTarget(pCallingPlayer->GetCid(), "Invalid X coordinate.");
+		return;
 	}
+	if(!DetermineCoordinateRelativity(pResult->GetString(1), pCallingPlayer->m_ViewPos.y, BaseY))
+	{
+		pSelf->SendChatTarget(pCallingPlayer->GetCid(), "Invalid Y coordinate.");
+		return;
+	}
+
+	Pos = {BaseX, BaseY};
 
 	pSelf->PracticeTeleport(pCallingCharacter, Pos);
 }
@@ -1939,40 +1934,40 @@ void CGameContext::ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUs
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
-	if(pChr)
-	{
-		if(pSelf->Collision()->TeleOuts(pResult->GetInteger(0) - 1).empty())
-		{
-			pSelf->SendChatTarget(pChr->GetPlayer()->GetCid(), "There is no teleporter with that index on the map.");
-			return;
-		}
+	if(!pChr)
+		return;
 
-		ConToTeleporter(pResult, pUserData);
-		pChr->ResetJumps();
-		pChr->Unfreeze();
-		pChr->ResetVelocity();
-		pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
+	if(pSelf->Collision()->TeleOuts(pResult->GetInteger(0) - 1).empty())
+	{
+		pSelf->SendChatTarget(pChr->GetPlayer()->GetCid(), "There is no teleporter with that index on the map.");
+		return;
 	}
+
+	ConToTeleporter(pResult, pUserData);
+	pChr->ResetJumps();
+	pChr->Unfreeze();
+	pChr->ResetVelocity();
+	pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
 }
 
 void CGameContext::ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
-	if(pChr)
-	{
-		if(pSelf->Collision()->TeleCheckOuts(pResult->GetInteger(0) - 1).empty())
-		{
-			pSelf->SendChatTarget(pChr->GetPlayer()->GetCid(), "There is no checkpoint teleporter with that index on the map.");
-			return;
-		}
+	if(!pChr)
+		return;
 
-		ConToCheckTeleporter(pResult, pUserData);
-		pChr->ResetJumps();
-		pChr->Unfreeze();
-		pChr->ResetVelocity();
-		pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
+	if(pSelf->Collision()->TeleCheckOuts(pResult->GetInteger(0) - 1).empty())
+	{
+		pSelf->SendChatTarget(pChr->GetPlayer()->GetCid(), "There is no checkpoint teleporter with that index on the map.");
+		return;
 	}
+
+	ConToCheckTeleporter(pResult, pUserData);
+	pChr->ResetJumps();
+	pChr->Unfreeze();
+	pChr->ResetVelocity();
+	pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
 }
 
 void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
