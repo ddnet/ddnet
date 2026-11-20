@@ -23,6 +23,7 @@
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
+#include <engine/shared/ddnet_info.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
@@ -1282,6 +1283,185 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->ClientAddr(ClientId));
 #endif
 	return 0;
+}
+
+// Seconds to wait before requesting the info file again after it could not
+// provide a usable STUN server, which is unlikely to change quickly.
+static int StunInfoRetryDelay(int NumErrors)
+{
+	static constexpr int s_aDelays[] = {30, 60, 120, 300, 900};
+	return s_aDelays[std::clamp(NumErrors, 0, (int)std::size(s_aDelays) - 1)];
+}
+
+void CServer::InitStun()
+{
+	m_StunEnabled = false;
+	m_HaveStunServerIpv4 = false;
+	m_HaveStunServerIpv6 = false;
+	m_StunPortIpv4 = 0;
+	m_StunPortIpv6 = 0;
+	m_StunUnchangedTraceIpv4 = 0;
+	m_StunUnchangedTraceIpv6 = 0;
+	m_StunInfoErrors = 0;
+	m_NextStunInfoRequest = -1;
+	m_NextStunRefresh = -1;
+	if(m_pStunInfoRequest)
+	{
+		m_pStunInfoRequest->Abort();
+		m_pStunInfoRequest = nullptr;
+	}
+
+	if(!Engine() || !m_pHttp || !m_pRegister)
+	{
+		return;
+	}
+
+	if(!Config()->m_SvStunServer)
+	{
+		// A registration with a port discovered earlier is kept, it may be the
+		// only one clients can connect to.
+		return;
+	}
+
+	m_StunEnabled = true;
+}
+
+void CServer::RequestStunInfo()
+{
+	m_pStunInfoRequest = HttpGet(DDNET_INFO_URL);
+	m_pStunInfoRequest->Timeout(CTimeout{10000, 0, 500, 10});
+	m_pStunInfoRequest->LogProgress(HTTPLOG::FAILURE);
+	m_pHttp->Run(m_pStunInfoRequest);
+}
+
+void CServer::UpdateStun()
+{
+	if(!m_StunEnabled)
+	{
+		return;
+	}
+
+	// Only care about the address families that are registered with the socket
+	// this server actually listens on.
+	const int SocketNetType = m_NetServer.NetType();
+	const bool WantsIpv4 = (SocketNetType & NETTYPE_IPV4) && m_pRegister->IsNetTypeEnabled(NETTYPE_IPV4);
+	const bool WantsIpv6 = (SocketNetType & NETTYPE_IPV6) && m_pRegister->IsNetTypeEnabled(NETTYPE_IPV6);
+	if(!WantsIpv4 && !WantsIpv6)
+	{
+		return;
+	}
+
+	// The STUN servers are not configured on this server, they are read from the same info file the client uses.
+	const bool NeedsInfo = (WantsIpv4 && !m_HaveStunServerIpv4) || (WantsIpv6 && !m_HaveStunServerIpv6);
+	if(NeedsInfo && !m_pStunInfoRequest && (m_NextStunInfoRequest < 0 || time_get() >= m_NextStunInfoRequest))
+	{
+		RequestStunInfo();
+	}
+
+	if(m_pStunInfoRequest && m_pStunInfoRequest->Done())
+	{
+		json_value *pInfo = m_pStunInfoRequest->State() == EHttpState::DONE ? m_pStunInfoRequest->ResultJson() : nullptr;
+		NETADDR StunServerIpv4;
+		NETADDR StunServerIpv6;
+		const bool HaveIpv4 = pInfo != nullptr && StunServerFromInfoJson(*pInfo, NETTYPE_IPV4, &StunServerIpv4);
+		const bool HaveIpv6 = pInfo != nullptr && StunServerFromInfoJson(*pInfo, NETTYPE_IPV6, &StunServerIpv6);
+		const bool Enough = (!WantsIpv4 || HaveIpv4) && (!WantsIpv6 || HaveIpv6);
+		if(!Enough)
+		{
+			char aReason[64];
+			if(!pInfo)
+			{
+				if(m_pStunInfoRequest->State() == EHttpState::ERROR)
+				{
+					str_format(aReason, sizeof(aReason), "status %d", m_pStunInfoRequest->StatusCode());
+				}
+				else
+				{
+					str_copy(aReason, "invalid response", sizeof(aReason));
+				}
+			}
+			else
+			{
+				str_copy(aReason, "no usable stun server", sizeof(aReason));
+			}
+			if(m_StunInfoErrors == 0)
+			{
+				log_warn("stun", "could not get a stun server from '%s' (%s), trying again later", DDNET_INFO_URL, aReason);
+			}
+			else
+			{
+				log_debug("stun", "could not get a stun server from '%s' (%s), trying again later", DDNET_INFO_URL, aReason);
+			}
+			m_NextStunInfoRequest = time_get() + StunInfoRetryDelay(m_StunInfoErrors) * time_freq();
+			m_StunInfoErrors += 1;
+		}
+		else
+		{
+			m_NextStunInfoRequest = -1;
+			m_StunInfoErrors = 0;
+		}
+
+		// Feed what was found, one address family is useful even if the other is missing.
+		auto FeedStunServer = [&](bool Have, const NETADDR &StunServer, bool &HaveStunServer, int NetType) {
+			if(!Have)
+			{
+				return;
+			}
+			if(!HaveStunServer)
+			{
+				char aAddr[NETADDR_MAXSTRSIZE];
+				net_addr_str(&StunServer, aAddr, sizeof(aAddr), true);
+				log_info("stun", "using stun server %s for %s", aAddr, NetType == NETTYPE_IPV4 ? "IPv4" : "IPv6");
+			}
+			HaveStunServer = true;
+			m_NetServer.FeedStunServer(StunServer);
+		};
+		FeedStunServer(HaveIpv4, StunServerIpv4, m_HaveStunServerIpv4, NETTYPE_IPV4);
+		FeedStunServer(HaveIpv6, StunServerIpv6, m_HaveStunServerIpv6, NETTYPE_IPV6);
+
+		json_value_free(pInfo);
+		m_pStunInfoRequest = nullptr;
+	}
+
+	if(Config()->m_SvStunServerRefreshRate > 0 && m_pRegister->NeedsStunPort() && time_get() >= m_NextStunRefresh)
+	{
+		m_NextStunRefresh = time_get() + Config()->m_SvStunServerRefreshRate * time_freq();
+		m_NetServer.RefreshStun();
+	}
+
+	auto UpdatePort = [&](int NetType, int &Port, int64_t &LastUnchangedTrace) {
+		NETADDR MappedAddr;
+		if(!m_NetServer.GetStunMappedAddress(NetType, &MappedAddr))
+		{
+			return;
+		}
+		char aAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&MappedAddr, aAddr, sizeof(aAddr), true);
+		if(Port == MappedAddr.port)
+		{
+			// This is checked on every update, so report an unchanged port only once per refresh interval.
+			const int RefreshRate = Config()->m_SvStunServerRefreshRate;
+			if(RefreshRate > 0 && m_pRegister->NeedsStunPort() && time_get() >= LastUnchangedTrace + (int64_t)RefreshRate * time_freq())
+			{
+				LastUnchangedTrace = time_get();
+				log_trace("stun", "public address %s unchanged", aAddr);
+			}
+			return;
+		}
+
+		if(Port == 0)
+		{
+			log_info("stun", "discovered public address %s", aAddr);
+		}
+		else
+		{
+			log_info("stun", "updated public address %s", aAddr);
+		}
+		Port = MappedAddr.port;
+		m_pRegister->SetStunPort(NetType, Port);
+	};
+	UpdatePort(NETTYPE_IPV4, m_StunPortIpv4, m_StunUnchangedTraceIpv4);
+	UpdatePort(NETTYPE_IPV6, m_StunPortIpv6, m_StunUnchangedTraceIpv6);
 }
 
 void CServer::InitDnsbl(int ClientId)
@@ -3477,6 +3657,7 @@ int CServer::Run()
 	// process pending commands
 	m_pConsole->StoreCommands(false);
 	m_pRegister->OnConfigChange();
+	InitStun();
 
 	if(m_AuthManager.IsGenerated())
 	{
@@ -3640,6 +3821,7 @@ int CServer::Run()
 #endif
 
 				// master server stuff
+				UpdateStun();
 				m_pRegister->Update();
 
 				if(m_ServerInfoNeedsUpdate)
@@ -3777,6 +3959,12 @@ int CServer::Run()
 	m_pRegister->OnShutdown();
 	m_Econ.Shutdown();
 	m_Fifo.Shutdown();
+	if(m_pStunInfoRequest)
+	{
+		// Don't wait for the STUN server lookup to finish on shutdown.
+		m_pStunInfoRequest->Abort();
+		m_pStunInfoRequest = nullptr;
+	}
 	m_pHttp->Shutdown();
 	Engine()->ShutdownJobs();
 
@@ -4646,6 +4834,15 @@ void CServer::ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, I
 	}
 }
 
+void CServer::ConchainStunServerUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		static_cast<CServer *>(pUserData)->InitStun();
+	}
+}
+
 void CServer::ConchainRegisterCommunityTokenRedact(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	// community tokens look like this:
@@ -4785,6 +4982,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_reserved_slots_auth_level", ConchainReservedSlotsAuthLevel, this);
 	Console()->Chain("sv_map", ConchainMapUpdate, this);
 	Console()->Chain("sv_sixup", ConchainSixupUpdate, this);
+	Console()->Chain("sv_stun_server", ConchainStunServerUpdate, this);
 	Console()->Chain("sv_register_community_token", ConchainRegisterCommunityTokenRedact, nullptr);
 
 	Console()->Chain("loglevel", ConchainLoglevel, this);

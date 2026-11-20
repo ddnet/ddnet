@@ -10,6 +10,7 @@
 #include <base/str.h>
 
 #include <engine/map.h>
+#include <engine/shared/ddnet_info.h>
 #include <engine/shared/protocol.h>
 
 #include <generated/protocol7.h>
@@ -17,9 +18,6 @@
 #include <optional>
 #include <unordered_set>
 #include <vector>
-
-static constexpr const char *DDNET_INFO_FILE = "ddnet-info.json";
-static constexpr const char *DDNET_INFO_URL = "https://info.ddnet.org/info";
 
 class CUIElement;
 

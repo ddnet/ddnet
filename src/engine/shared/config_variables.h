@@ -474,6 +474,8 @@ MACRO_CONFIG_STR(SvRegister, sv_register, 16, "1", CFGFLAG_SERVER, "Register ser
 MACRO_CONFIG_STR(SvRegisterExtra, sv_register_extra, 256, "", CFGFLAG_SERVER, "Extra headers to send to the register endpoint, comma-separated 'Header: Value' pairs")
 MACRO_CONFIG_STR(SvRegisterUrl, sv_register_url, 128, "https://master1.ddnet.org/ddnet/15/register", CFGFLAG_SERVER, "Masterserver URL to register to")
 MACRO_CONFIG_INT(SvRegisterPort, sv_register_port, 0, 0, 65535, CFGFLAG_SERVER, "Port for the master server to register the server with, useful if you are behind NAT, otherwise you only need sv_port")
+MACRO_CONFIG_INT(SvStunServer, sv_stun_server, 0, 0, 1, CFGFLAG_SERVER, "Discover this server's public port with the STUN servers from info.ddnet.org and register with it if the masterserver can't reach the configured port")
+MACRO_CONFIG_INT(SvStunServerRefreshRate, sv_stun_server_refresh_rate, 60, 0, 65535, CFGFLAG_SERVER, "Seconds between STUN port discoveries while the masterserver can't reach the configured port (0 = off)")
 MACRO_CONFIG_STR(SvRegisterCommunityToken, sv_register_community_token, 128, "", CFGFLAG_SERVER, "Token to register this server to a particular community")
 MACRO_CONFIG_INT(SvFlag, sv_flag, CountryCode::DEFAULT, CountryCode::MINIMUM, CountryCode::MAXIMUM, CFGFLAG_SERVER, "Country flag to group this community under (ISO 3166-1 numeric)")
 MACRO_CONFIG_STR(SvOfficialTutorial, sv_official_tutorial, 128, "", CFGFLAG_SERVER, "Don't set this, used to mark official tutorial servers")
