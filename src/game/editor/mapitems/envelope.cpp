@@ -1,6 +1,7 @@
 #include "envelope.h"
 
 #include <base/dbg.h>
+#include <base/str.h>
 
 #include <algorithm>
 #include <chrono>
@@ -52,6 +53,15 @@ CEnvelope::CEnvelope(int NumChannels) :
 	default:
 		dbg_assert_failed("invalid number of channels for envelope");
 	}
+}
+
+CEnvelope::CEnvelope(const CEnvelope &Other) :
+	m_vPoints(Other.m_vPoints),
+	m_Synchronized(Other.m_Synchronized),
+	m_Type(Other.m_Type),
+	m_PointsAccess(&m_vPoints)
+{
+	str_copy(m_aName, Other.m_aName);
 }
 
 void CEnvelope::Resort()
