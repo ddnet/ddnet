@@ -107,6 +107,7 @@ class CNetObjHandler
 	char m_aUnpackedData[1024 * 2];
 	int m_NumObjCorrections;
 	int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
+	void ReportNetCorrection(const char *pErrorMsg);
 
 	static const char *ms_apObjNames[];
 	static const char *ms_apExObjNames[];
@@ -178,6 +179,12 @@ int CNetObjHandler::ClampInt(const char *pErrorMsg, int Value, int Min, int Max)
 	if(Value < Min) { m_pObjCorrectedOn = pErrorMsg; m_NumObjCorrections++; return Min; }
 	if(Value > Max) { m_pObjCorrectedOn = pErrorMsg; m_NumObjCorrections++; return Max; }
 	return Value;
+}
+
+void CNetObjHandler::ReportNetCorrection(const char *pErrorMsg)
+{
+	m_pObjCorrectedOn = pErrorMsg;
+	m_NumObjCorrections++;
 }
 	""")
 
