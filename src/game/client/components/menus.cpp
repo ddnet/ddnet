@@ -542,6 +542,7 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 		const float BrowserButtonWidth = 75.0f;
 		Box.VSplitLeft(10.0f, nullptr, &Box);
 		Box.VSplitLeft(BrowserButtonWidth, &Button, &Box);
+		const float BrowserTabsX = Button.x;
 		static CButtonContainer s_InternetButton;
 		if(DoButton_MenuTab(&s_InternetButton, FontIcon::EARTH_AMERICAS, ActivePage == PAGE_INTERNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
 		{
@@ -570,6 +571,7 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 		if(
 			!Ui()->IsPopupOpen() &&
 			CLineInput::GetActiveInput() == nullptr &&
+			!GameClient()->m_UiTutorial.IsMenuOverlayVisible() &&
 			(g_Config.m_UiPage >= PAGE_INTERNET && g_Config.m_UiPage <= MaxPage) &&
 			(m_MenuPage >= PAGE_INTERNET && m_MenuPage <= PAGE_FAVORITE_COMMUNITY_5))
 		{
@@ -608,6 +610,7 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 			if(FavoriteCommunityIndex >= std::size(s_aFavoriteCommunityButtons))
 				break;
 		}
+		GameClient()->m_UiTutorial.SetTargetRect(CUiTutorial::ETarget::BROWSER_TABS, {BrowserTabsX, Button.y, Button.x + Button.w - BrowserTabsX, Button.h});
 
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -1158,6 +1161,8 @@ void CMenus::Render()
 	}
 
 	Ui()->RenderPopupMenus();
+
+	GameClient()->m_UiTutorial.RenderMenuOverlay();
 
 	// Prevent UI elements from being hovered while a key reader is active
 	if(GameClient()->m_KeyBinder.IsActive())

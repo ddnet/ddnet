@@ -472,13 +472,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 			const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
 			if(pItem)
 			{
-				str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
-				m_ServerBrowserShouldRevealSelection = true;
+				SelectServer(pItem->m_aAddress);
 			}
 		}
 	}
 
-	WasListboxItemActivated = s_ListBox.WasItemActivated();
+	// Servers can be selected but not joined while the tutorial explains the list.
+	WasListboxItemActivated = s_ListBox.WasItemActivated() && !GameClient()->m_UiTutorial.IsMenuOverlayVisible();
 }
 
 void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItemActivated)
@@ -518,6 +518,8 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 	ServersAndConnect.HSplitTop(35.0f, &ServersPlayersOnline, &ConnectButtons);
 	ConnectButtons.HSplitTop(5.0f, nullptr, &ConnectButtons);
 
+	GameClient()->m_UiTutorial.SetTargetRect(CUiTutorial::ETarget::BROWSER_SEARCH, SearchAndInfo);
+
 	CUIRect QuickSearch, QuickExclude;
 	SearchAndInfo.HSplitTop(20.0f, &QuickSearch, &QuickExclude);
 	QuickSearch.Margin(2.0f, &QuickSearch);
@@ -543,7 +545,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 		static char s_aTooltipText[64];
 		str_format(s_aTooltipText, sizeof(s_aTooltipText), "%s: \"solo; nameless tee; kobra 2\"", Localize("Example of usage"));
 		Ui()->DoToolTip(&s_FilterInput, &QuickSearch, s_aTooltipText);
-		if(!Ui()->IsPopupOpen() && Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		if(!Ui()->IsPopupOpen() && Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed() && !GameClient()->m_UiTutorial.IsMenuOverlayVisible())
 		{
 			Ui()->SetActiveItem(&s_FilterInput);
 			s_FilterInput.SelectAll();
@@ -616,6 +618,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 	{
 		CUIRect ButtonRefresh, ButtonConnect;
 		ConnectButtons.VSplitMid(&ButtonRefresh, &ButtonConnect, 5.0f);
+		GameClient()->m_UiTutorial.SetTargetRect(CUiTutorial::ETarget::BROWSER_CONNECT, ButtonConnect);
 
 		// refresh button
 		{
@@ -654,6 +657,12 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 			}
 		}
 	}
+}
+
+void CMenus::SelectServer(const char *pAddress)
+{
+	str_copy(g_Config.m_UiServerAddress, pAddress);
+	m_ServerBrowserShouldRevealSelection = true;
 }
 
 void CMenus::Connect(const char *pAddress)
@@ -1635,9 +1644,9 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				// handle click and double click on item
 				if(ButtonResult && Friend.ServerInfo())
 				{
-					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
-					m_ServerBrowserShouldRevealSelection = true;
-					if(ButtonResult == 1 && Ui()->DoDoubleClickLogic(Friend.ListItemId()))
+					SelectServer(Friend.ServerInfo()->m_aAddress);
+					// Friends can be selected but not joined while the tutorial explains the friends list.
+					if(ButtonResult == 1 && Ui()->DoDoubleClickLogic(Friend.ListItemId()) && !GameClient()->m_UiTutorial.IsMenuOverlayVisible())
 					{
 						Connect(g_Config.m_UiServerAddress);
 					}
@@ -1730,14 +1739,6 @@ void CMenus::PopupConfirmRemoveFriend()
 	m_pRemoveFriend = nullptr;
 }
 
-enum
-{
-	UI_TOOLBOX_PAGE_FILTERS = 0,
-	UI_TOOLBOX_PAGE_INFO,
-	UI_TOOLBOX_PAGE_FRIENDS,
-	NUM_UI_TOOLBOX_PAGES,
-};
-
 void CMenus::RenderServerbrowserTabBar(CUIRect TabBar)
 {
 	CUIRect FilterTabButton, InfoTabButton, FriendsTabButton;
@@ -1776,6 +1777,9 @@ void CMenus::RenderServerbrowserTabBar(CUIRect TabBar)
 		g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_FRIENDS;
 	}
 	Ui()->DoToolTip(&s_FriendsTabButton, &FriendsTabButton, Localize("Friends"));
+
+	const CUIRect &ActiveTabButton = g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_FILTERS ? FilterTabButton : (g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO ? InfoTabButton : FriendsTabButton);
+	GameClient()->m_UiTutorial.SetTargetRect(CUiTutorial::ETarget::BROWSER_TOOLBOX_TAB, ActiveTabButton);
 
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -1861,6 +1865,9 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	ToolBox.HSplitTop(24.0f, &TabBar, &ToolBox);
 	ServerList.HSplitBottom(65.0f, &ServerList, &StatusBox);
+
+	GameClient()->m_UiTutorial.SetTargetRect(CUiTutorial::ETarget::BROWSER_LIST, ServerList);
+	GameClient()->m_UiTutorial.SetTargetRect(CUiTutorial::ETarget::BROWSER_TOOLBOX, ToolBox);
 
 	bool WasListboxItemActivated;
 	RenderServerbrowserServerList(ServerList, WasListboxItemActivated);
