@@ -60,6 +60,7 @@ public:
 
 class CServer : public IServer
 {
+	friend class CServerLib;
 	friend class CServerLogger;
 
 	class IGameServer *m_pGameServer;
