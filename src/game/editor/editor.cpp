@@ -1474,6 +1474,69 @@ void CEditor::DrawQuadPivotHandle(const CQuad *pQuad, bool Selected)
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
+static constexpr float QUAD_POINT_HANDLE_MIN_ANGLE = 45.0f / 180.0f * pi;
+static constexpr float QUAD_POINT_HANDLE_MAX_ANGLE = 135.0f / 180.0f * pi;
+static constexpr float QUAD_POINT_HANDLE_SIZE = 10.0f;
+static constexpr float QUAD_POINT_HANDLE_BG_SIZE = 12.0f;
+
+static void QuadPointHandleVertices(const CQuad *pQuad, int CornerIndex, float ArmLength, vec2 *pPoints)
+{
+	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[CornerIndex].x), fx2f(pQuad->m_aPoints[CornerIndex].y));
+
+	// m_aPoints is TL/TR/BL/BR (a 2-bit x/y field), so the corners sharing an
+	// edge with CornerIndex are CornerIndex ^ 1 and CornerIndex ^ 2, not i-1/i+1.
+	float aEdgeAngle[2];
+	for(int ArmIndex = 0; ArmIndex < 2; ArmIndex++)
+	{
+		const int Adjacent = ArmIndex == 0 ? (CornerIndex ^ 1) : (CornerIndex ^ 2);
+		const vec2 Edge = vec2(fx2f(pQuad->m_aPoints[Adjacent].x), fx2f(pQuad->m_aPoints[Adjacent].y)) - Center;
+		// Degenerate edge (a neighbor coincides with the corner)
+		if(length(Edge) > 0.0001f)
+			aEdgeAngle[ArmIndex] = std::atan2(Edge.y, Edge.x);
+		else
+			aEdgeAngle[ArmIndex] = ArmIndex == 0 ? ((CornerIndex & 1) ? pi : 0.0f) : ((CornerIndex & 2) ? -pi / 2.0f : pi / 2.0f);
+	}
+
+	float Delta = aEdgeAngle[1] - aEdgeAngle[0];
+	while(Delta <= -pi)
+		Delta += 2.0f * pi;
+	while(Delta > pi)
+		Delta -= 2.0f * pi;
+
+	const float HalfAngle = std::clamp(std::fabs(Delta) / 2.0f, QUAD_POINT_HANDLE_MIN_ANGLE / 2.0f, QUAD_POINT_HANDLE_MAX_ANGLE / 2.0f);
+	float Bisector = aEdgeAngle[0] + Delta / 2.0f;
+	// Put the handle on the interior side.
+	const vec2 Diagonal = vec2(fx2f(pQuad->m_aPoints[CornerIndex ^ 3].x), fx2f(pQuad->m_aPoints[CornerIndex ^ 3].y));
+	if(dot(Diagonal - Center, direction(Bisector)) < 0.0f)
+		Bisector += pi;
+	const float Spread = Delta >= 0.0f ? HalfAngle : -HalfAngle;
+
+	pPoints[0] = Center;
+	pPoints[1] = Center + direction(Bisector - Spread) * ArmLength;
+	pPoints[2] = Center + direction(Bisector + Spread) * ArmLength;
+	pPoints[3] = pPoints[1] + pPoints[2] - Center;
+}
+
+static vec2 QuadPointHandleCenter(const CQuad *pQuad, int CornerIndex, float ArmLength)
+{
+	vec2 aPoints[4];
+	QuadPointHandleVertices(pQuad, CornerIndex, ArmLength, aPoints);
+	return (aPoints[1] + aPoints[2]) * 0.5f;
+}
+
+static IGraphics::CFreeformItem QuadPointHandleFreeform(const CQuad *pQuad, int CornerIndex, float ArmLength)
+{
+	vec2 aPoints[4];
+	QuadPointHandleVertices(pQuad, CornerIndex, ArmLength, aPoints);
+	// Freeform quads emit their vertices in the order X0, X1, X3, X2, so filling the
+	// slots apex, arm, arm, far-vertex draws the rhombus as a closed loop.
+	return IGraphics::CFreeformItem(
+		aPoints[0].x, aPoints[0].y,
+		aPoints[1].x, aPoints[1].y,
+		aPoints[2].x, aPoints[2].y,
+		aPoints[3].x, aPoints[3].y);
+}
+
 void CEditor::DrawQuadPointHandles(const CQuad *pQuad, bool Selected)
 {
 	int ActiveItemCorner = -1;
@@ -1491,29 +1554,25 @@ void CEditor::DrawQuadPointHandles(const CQuad *pQuad, bool Selected)
 	// draw all quad points at once
 	if(!IsActive)
 	{
-		IGraphics::CQuadItem aQuadItems[4];
+		IGraphics::CFreeformItem aFreeformItems[4];
 		for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
-		{
-			const vec2 Center = vec2(fx2f(pQuad->m_aPoints[CornerIndex].x), fx2f(pQuad->m_aPoints[CornerIndex].y));
-			aQuadItems[CornerIndex] = IGraphics::CQuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
-		}
+			aFreeformItems[CornerIndex] = QuadPointHandleFreeform(pQuad, CornerIndex, QUAD_POINT_HANDLE_SIZE * MapView()->MouseWorldScale());
 		Graphics()->SetColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
-		Graphics()->QuadsDraw(aQuadItems, 4);
+		Graphics()->QuadsDrawFreeform(aFreeformItems, 4);
 		return;
 	}
 
-	// quad gets actively modified not just drawn
+	// draw each handle individually (selected/hovered/active corner)
 	for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
 	{
-		const vec2 Center = vec2(fx2f(pQuad->m_aPoints[CornerIndex].x), fx2f(pQuad->m_aPoints[CornerIndex].y));
 		const bool PointSelected = Selected && Map()->IsQuadCornerSelected(CornerIndex);
 
 		// draw selection background
 		if(PointSelected)
 		{
 			Graphics()->SetColor(0, 0, 0, 1);
-			IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
-			Graphics()->QuadsDraw(&QuadItem, 1);
+			IGraphics::CFreeformItem Background = QuadPointHandleFreeform(pQuad, CornerIndex, QUAD_POINT_HANDLE_BG_SIZE * MapView()->MouseWorldScale());
+			Graphics()->QuadsDrawFreeform(&Background, 1);
 		}
 
 		if(ActiveItemCorner == CornerIndex || HotItemCorner == CornerIndex)
@@ -1525,8 +1584,8 @@ void CEditor::DrawQuadPointHandles(const CQuad *pQuad, bool Selected)
 			Graphics()->SetColor(PointSelected ? ColorRGBA(0.0f, 1.0f, 1.0f, 1.0f) : ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
 		}
 
-		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IGraphics::CFreeformItem FreeformItem = QuadPointHandleFreeform(pQuad, CornerIndex, QUAD_POINT_HANDLE_SIZE * MapView()->MouseWorldScale());
+		Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
 	}
 }
 
@@ -2296,10 +2355,17 @@ void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer, const std::vector<bo
 			}
 		}
 
-		for(const auto &Point : Quad.m_aPoints)
+		for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
 		{
-			UpdateMinimum(vec2(fx2f(Point.x), fx2f(Point.y)), &Point, QuadSelected);
+			const CPoint &Point = Quad.m_aPoints[CornerIndex];
+			// Target the handle's middle, not the raw corner, so hover/grab lines up
+			// with the drawn rhombus and quads sharing a corner stay separately grabbable.
+			const vec2 Position = QuadPointHandleCenter(&Quad, CornerIndex, QUAD_POINT_HANDLE_SIZE * Scale);
+			UpdateMinimum(Position, &Point, QuadSelected);
 		}
+		// The pivot is not a corner handle, so it keeps its raw position.
+		const CPoint &Pivot = Quad.m_aPoints[4];
+		UpdateMinimum(vec2(fx2f(Pivot.x), fx2f(Pivot.y)), &Pivot, QuadSelected);
 	}
 
 	if(pMinPointId != nullptr)
