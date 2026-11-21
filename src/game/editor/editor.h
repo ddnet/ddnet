@@ -205,9 +205,6 @@ public:
 
 		m_BrushColorEnabled = true;
 
-		m_PopupEventActivated = false;
-		m_PopupEventWasActivated = false;
-
 		m_ToolbarPreviewSound = -1;
 
 		m_SelectEntitiesImage = "DDNet";
@@ -349,8 +346,7 @@ public:
 	};
 
 	int m_PopupEventType;
-	int m_PopupEventActivated;
-	int m_PopupEventWasActivated;
+	int m_PopupEventActivated = false;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
 

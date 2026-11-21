@@ -95,8 +95,6 @@ void CUi::ClosePopupMenu(const SPopupMenuId *pId, bool IncludeDescendants)
 		else
 			m_vPopupMenus.erase(PopupMenuToClose);
 		SetActiveItem(nullptr);
-		if(m_pfnPopupMenuClosedCallback)
-			m_pfnPopupMenuClosedCallback();
 	}
 }
 
@@ -107,8 +105,6 @@ void CUi::ClosePopupMenus()
 
 	m_vPopupMenus.clear();
 	SetActiveItem(nullptr);
-	if(m_pfnPopupMenuClosedCallback)
-		m_pfnPopupMenuClosedCallback();
 }
 
 bool CUi::IsPopupOpen() const
@@ -124,11 +120,6 @@ bool CUi::IsPopupOpen(const SPopupMenuId *pId) const
 bool CUi::IsPopupHovered() const
 {
 	return std::any_of(m_vPopupMenus.begin(), m_vPopupMenus.end(), [this](const SPopupMenu PopupMenu) { return MouseHovered(&PopupMenu.m_Rect); });
-}
-
-void CUi::SetPopupMenuClosedCallback(FPopupMenuClosedCallback pfnCallback)
-{
-	m_pfnPopupMenuClosedCallback = std::move(pfnCallback);
 }
 
 void CUi::SMessagePopupContext::DefaultColor(ITextRender *pTextRender)
