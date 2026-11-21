@@ -33,4 +33,6 @@ extend-ignore-re = [
 	'0x510E527FUL',
 	'I\*\*nteger',
 	's\*\*tring',
+	# Valid domain suffixes in the URL allow-list.
+	'"(?:ba|fo|pn|immobilien|onl)"',
 ]

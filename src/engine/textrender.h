@@ -10,6 +10,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 enum
 {
@@ -98,18 +99,53 @@ struct STextBoundingBox
 		m_X += Offset.x;
 		m_Y += Offset.y;
 	}
+	bool Inside(float x, float y) const
+	{
+		return m_X <= x && x <= m_X + m_W && m_Y <= y && y <= m_Y + m_H;
+	}
 };
 
 // Allow to render multi colored text in one go without having to call TextEx() multiple times.
 // Needed to allow multi colored multi line texts
-struct STextColorSplit
+struct SRichTextOption
 {
 	int m_CharIndex; // Which index within the text should the split occur
 	int m_Length; // How long is the split
 	ColorRGBA m_Color; // The color the text should be starting from m_CharIndex
+	std::optional<bool> m_Underline; // Whether or not the text should be underlined, if omitted it will be inherited from any existing option
 
-	STextColorSplit(int CharIndex, int Length, const ColorRGBA &Color) :
-		m_CharIndex(CharIndex), m_Length(Length), m_Color(Color) {}
+	SRichTextOption(int CharIndex, int Length, const ColorRGBA &Color, std::optional<bool> Underline) :
+		m_CharIndex(CharIndex), m_Length(Length), m_Color(Color), m_Underline(Underline) {}
+
+	SRichTextOption(int CharIndex, int Length, const ColorRGBA &Color) :
+		SRichTextOption(CharIndex, Length, Color, std::nullopt) {}
+};
+
+class CTextCharacterDetails
+{
+public:
+	std::optional<STextBoundingBox> GetCharacterBox(int CharacterIndex) const
+	{
+		if(CharacterIndex < 0 || (size_t)CharacterIndex >= m_vCharactersInfo.size())
+			return std::nullopt;
+		return m_vCharactersInfo.at(CharacterIndex);
+	}
+
+	int GetCharacterIndex(vec2 Position) const
+	{
+		for(int CharIndex = 0; (size_t)CharIndex < m_vCharactersInfo.size(); CharIndex++)
+		{
+			const auto &CharacterBox = m_vCharactersInfo.at(CharIndex);
+			if(CharacterBox.Inside(Position.x, Position.y))
+				return CharIndex;
+		}
+		return -1;
+	}
+
+	friend class CTextRender;
+
+private:
+	std::vector<STextBoundingBox> m_vCharactersInfo;
 };
 
 class CTextCursor
@@ -147,6 +183,8 @@ public:
 	int m_SelectionStart = 0;
 	int m_SelectionEnd = 0;
 
+	bool m_RequestCharacterDetails = false;
+
 	ETextCursorCursorMode m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
 	bool m_ForceCursorRendering = false;
 	// note this is the decoded character offset
@@ -158,12 +196,19 @@ public:
 	 */
 	bool m_Truncated = false;
 
-	// Color splits of the cursor to allow multicolored text
-	std::vector<STextColorSplit> m_vColorSplits;
+	// Text options of the cursor to allow multipart formatted text
+	std::vector<SRichTextOption> m_vRichTextOptions;
+	void AddRichTextOption(const SRichTextOption &Option);
 
 	float Height() const;
 	STextBoundingBox BoundingBox() const;
 	void SetPosition(vec2 Position);
+	const CTextCharacterDetails &CharacterDetails() const;
+
+private:
+	CTextCharacterDetails m_CharacterDetails;
+
+	friend class CTextRender;
 };
 
 struct STextContainerUsages

@@ -332,7 +332,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContextWithInput *pCont
 	}
 
 	// Color the arguments
-	std::vector<STextColorSplit> vColorSplits;
+	std::vector<SRichTextOption> vColorSplits;
 	Context.ColorArguments(vColorSplits);
 
 	// Do and render clearable edit box with the colors
@@ -506,7 +506,7 @@ int CEditor::RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect V
 
 			// Call the callback to fill the current line string
 			char aBuf[128];
-			pfnMatchCallback(vData.at(i), aBuf, Props.m_vColorSplits);
+			pfnMatchCallback(vData.at(i), aBuf, Props.m_vRichTextOptions);
 
 			LargestWidth = std::max(LargestWidth, TextRender()->TextWidth(12.0f, aBuf) + 10.0f);
 			if(!Item.m_Visible)
@@ -1013,7 +1013,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 	}
 }
 
-void CEditor::MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match, char (&aOutput)[128], std::vector<STextColorSplit> &vColorSplits)
+void CEditor::MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match, char (&aOutput)[128], std::vector<SRichTextOption> &vColorSplits)
 {
 	// Check the match argument index.
 	// If it's -1, we're displaying the list of available map settings names
@@ -1792,7 +1792,7 @@ const char *CMapSettingsBackend::CContext::InputString() const
 	return m_pLineInput->GetString();
 }
 
-void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> &vColorSplits) const
+void CMapSettingsBackend::CContext::ColorArguments(std::vector<SRichTextOption> &vColorSplits) const
 {
 	// Get argument color based on its type
 	auto &&GetArgumentColor = [](char Type) -> ColorRGBA {
@@ -1834,7 +1834,7 @@ void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> 
 		}
 	}
 
-	std::sort(vColorSplits.begin(), vColorSplits.end(), [](const STextColorSplit &a, const STextColorSplit &b) {
+	std::sort(vColorSplits.begin(), vColorSplits.end(), [](const SRichTextOption &a, const SRichTextOption &b) {
 		return a.m_CharIndex < b.m_CharIndex;
 	});
 }

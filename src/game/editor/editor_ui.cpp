@@ -171,13 +171,13 @@ int CEditor::DoButton_DraggableEx(const void *pId, const char *pText, int Checke
 	return Ui()->DoDraggableButtonLogic(pId, Checked, pRect, pClicked, pAbrupted);
 }
 
-bool CEditor::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const char *pToolTip, const std::vector<STextColorSplit> &vColorSplits)
+bool CEditor::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const char *pToolTip, const std::vector<SRichTextOption> &vColorSplits)
 {
 	UpdateTooltip(pLineInput, pRect, pToolTip);
 	return Ui()->DoEditBox(pLineInput, pRect, FontSize, Corners, vColorSplits);
 }
 
-bool CEditor::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const char *pToolTip, const std::vector<STextColorSplit> &vColorSplits)
+bool CEditor::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const char *pToolTip, const std::vector<SRichTextOption> &vColorSplits)
 {
 	UpdateTooltip(pLineInput, pRect, pToolTip);
 	return Ui()->DoClearableEditBox(pLineInput, pRect, FontSize, Corners, vColorSplits);

@@ -3169,6 +3169,8 @@ void CClient::InitInterfaces()
 #endif
 
 	m_pConfigManager->RegisterCallback(IFavorites::ConfigSaveCallback, m_pFavorites);
+	m_pConfigManager->RegisterCallback(ConfigSaveCallback, this);
+
 	m_Friends.Init();
 	m_Foes.Init(true);
 
@@ -4688,6 +4690,8 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("save_replay", "?i[length] ?r[filename]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 	m_pConsole->Register("benchmark_quit", "i[seconds] r[file]", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_BenchmarkQuit, this, "Benchmark frame times for number of seconds to file, then quit");
 
+	m_UrlAllowList.InitConsole(m_pConsole);
+
 	RustVersionRegister(*m_pConsole);
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
@@ -5198,16 +5202,33 @@ int main(int argc, const char **argv)
 		pConsole->ExecuteFile(AUTOEXEC_FILE, IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 
-	if(g_Config.m_ClConfigVersion < 1)
+	// Config migrations
 	{
-		if(g_Config.m_ClAntiPing == 0)
+		if(g_Config.m_ClConfigVersion < 1)
 		{
-			g_Config.m_ClAntiPingPlayers = 1;
-			g_Config.m_ClAntiPingGrenade = 1;
-			g_Config.m_ClAntiPingWeapons = 1;
+			if(g_Config.m_ClAntiPing == 0)
+			{
+				g_Config.m_ClAntiPingPlayers = 1;
+				g_Config.m_ClAntiPingGrenade = 1;
+				g_Config.m_ClAntiPingWeapons = 1;
+			}
 		}
+
+		// add default allowed urls
+		if(g_Config.m_ClConfigVersion < 2)
+		{
+			// Only explicitly allow ddnet.org, other domains will have to be manually allowed to prevent
+			// automatic malware download
+			static const char *s_apDefaultAllowedDomains[] = {
+				"ddnet.org",
+			};
+
+			for(const auto *pDomainName : s_apDefaultAllowedDomains)
+				pClient->UrlAllowDomain(pDomainName);
+		}
+
+		g_Config.m_ClConfigVersion = 2;
 	}
-	g_Config.m_ClConfigVersion = 1;
 
 	// parse the command line arguments
 	pConsole->SetUnknownCommandCallback(UnknownArgumentCallback, pClient);
@@ -5456,6 +5477,33 @@ int CClient::PredictionMargin() const
 	return m_ServerCapabilities.m_SyncWeaponInput ? g_Config.m_ClPredictionMargin : 10;
 }
 
+void CClient::TriggerEvent(EEventId EventId, void *pContext)
+{
+	const auto pList = m_EventHandlers.find(EventId);
+	if(pList == m_EventHandlers.end())
+		return;
+
+	for(const auto &fnHandler : pList->second)
+	{
+		if(!fnHandler)
+			continue;
+		fnHandler(pContext);
+	}
+}
+
+void CClient::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
+{
+	((CClient *)pUserData)->OnConfigSave(pConfigManager);
+}
+
+void CClient::OnConfigSave(IConfigManager *pConfigManager)
+{
+	// General configuration save for the client that doesn't use config variable
+	// and don't belong to a separate component
+
+	m_UrlAllowList.Save(pConfigManager);
+}
+
 IClient::EConnectivity CClient::UdpConnectivity(int NetType)
 {
 	static const int NETTYPES[2] = {NETTYPE_IPV6, NETTYPE_IPV4};
@@ -5519,14 +5567,25 @@ static bool ViewLinkImpl(const char *pLink)
 #endif
 }
 
-bool CClient::ViewLink(const char *pLink)
+bool CClient::ViewLink(const char *pLink, bool CheckLink)
 {
+	if(CheckLink && !m_UrlAllowList.IsAllowed(pLink))
+	{
+		TriggerEvent(EEventId::LINK_WARNING, (void *)pLink);
+		return false;
+	}
+
 	if(!str_startswith(pLink, "https://"))
 	{
 		log_error("client", "Failed to open link '%s': only https-links are allowed", pLink);
 		return false;
 	}
 	return ViewLinkImpl(pLink);
+}
+
+inline bool CClient::ViewLink(const char *pLink)
+{
+	return ViewLink(pLink, false);
 }
 
 bool CClient::ViewFile(const char *pFilename)
@@ -5665,4 +5724,18 @@ void CClient::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr
 {
 	m_pFileLogger = pFileLogger;
 	m_pStdoutLogger = pStdoutLogger;
+}
+
+void CClient::UrlAllowDomain(const char *pDomainName)
+{
+	m_UrlAllowList.AllowDomain(pDomainName);
+}
+
+void CClient::RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler)
+{
+	auto pList = m_EventHandlers.find(EventId);
+	if(pList == m_EventHandlers.end())
+		m_EventHandlers[EventId].push_back(std::move(fnHandler));
+	else
+		pList->second.push_back(std::move(fnHandler));
 }
