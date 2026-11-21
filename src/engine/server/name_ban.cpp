@@ -42,16 +42,17 @@ void CNameBans::Ban(const char *pName, const char *pReason, const int Distance, 
 
 void CNameBans::Unban(const char *pName)
 {
-	auto ToRemove = std::remove_if(m_vNameBans.begin(), m_vNameBans.end(), [pName](const CNameBan &Ban) { return str_comp(Ban.m_aName, pName) == 0; });
-	if(ToRemove == m_vNameBans.end())
+	const auto NumRemoved = std::erase_if(m_vNameBans, [pName](const CNameBan &Ban) {
+		if(str_comp(Ban.m_aName, pName) != 0)
+			return false;
+
+		log_info("name_ban", "removed name='%s' distance=%d is_substring=%d reason='%s'",
+			Ban.m_aName, Ban.m_Distance, Ban.m_IsSubstring, Ban.m_aReason);
+		return true;
+	});
+	if(NumRemoved == 0)
 	{
 		log_error("name_ban", "name ban '%s' not found", pName);
-	}
-	else
-	{
-		log_info("name_ban", "removed name='%s' distance=%d is_substring=%d reason='%s'",
-			(*ToRemove).m_aName, (*ToRemove).m_Distance, (*ToRemove).m_IsSubstring, (*ToRemove).m_aReason);
-		m_vNameBans.erase(ToRemove, m_vNameBans.end());
 	}
 }
 
