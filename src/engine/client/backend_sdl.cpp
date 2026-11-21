@@ -273,7 +273,7 @@ CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int
 	else if(BackendType == BACKEND_TYPE_VULKAN)
 	{
 #if defined(CONF_BACKEND_VULKAN)
-		m_pGLBackend = CreateVulkanCommandProcessorFragment();
+		m_pGLBackend = CreateVulkanCommandProcessorFragment(CVulkanCapabilities{.m_Headless = false});
 #endif
 	}
 #endif

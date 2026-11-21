@@ -10,7 +10,7 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
-#if defined(CONF_VIDEORECORDER) && !defined(BACKEND_NO_SDL)
+#if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>
 #endif
 
@@ -51,7 +51,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 			pSelf->m_BufferInProcess.store(false, std::memory_order_relaxed);
 			pSelf->m_BufferSwapCond.notify_all();
 
-#if defined(CONF_VIDEORECORDER) && !defined(BACKEND_NO_SDL)
+#if defined(CONF_VIDEORECORDER)
 			if(IVideo::Current())
 				IVideo::Current()->NextVideoFrameThread();
 #endif
@@ -108,7 +108,7 @@ void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 	if(Error.m_ErrorType == GFX_ERROR_TYPE_NONE)
 	{
 		RunBufferSingleThreadedUnsafe(pBuffer);
-#if defined(CONF_VIDEORECORDER) && !defined(BACKEND_NO_SDL)
+#if defined(CONF_VIDEORECORDER)
 		if(IVideo::Current())
 			IVideo::Current()->NextVideoFrameThread();
 #endif
