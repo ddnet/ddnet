@@ -210,9 +210,6 @@ bool CMultiView::Init(int Team)
 			else
 				continue;
 
-			if(PlayerPos.x == 0 || PlayerPos.y == 0)
-				continue;
-
 			// skip players that aren't in view
 			if(PlayerPos.x <= AxisX.x || PlayerPos.x >= AxisX.y || PlayerPos.y <= AxisY.x || PlayerPos.y >= AxisY.y)
 				continue;
