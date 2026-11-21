@@ -70,7 +70,7 @@ private:
 	bool m_IsInit;
 	bool m_Teleported;
 	vec2 m_OldPos;
-	int m_OldPersonalZoom;
+	float m_OldPersonalZoom;
 	float m_SecondChance;
 	float m_OldCameraDistance;
 };
