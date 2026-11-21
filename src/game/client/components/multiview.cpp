@@ -23,7 +23,7 @@ CMultiView::CMultiView()
 {
 	m_Team = 0;
 	m_ShowHud = false;
-	m_Solo = false;
+	m_OnlyOnePlayer = false;
 	m_IsInit = false;
 	m_Teleported = false;
 	m_OldPos = vec2(0.0f, 0.0f);
@@ -105,33 +105,39 @@ void CMultiView::ClearAll()
 
 void CMultiView::OnKillMessage(const CNetMsg_Sv_KillMsg *pKillMessage)
 {
-	// if we are spectating a static id set (team 0) and somebody killed, and its not a guy in solo, we remove them from the list
-	// never remove players from the list if it is a pvp server
-	if(IsAnyViewed() && m_Team == 0 && m_aViewedClients[pKillMessage->m_Victim].m_IsViewed && !GameClient()->m_aClients[pKillMessage->m_Victim].m_Spec && !m_Solo && !GameClient()->m_GameInfo.m_Pvp)
+	if(g_Config.m_SvSoloServer || GameClient()->m_GameInfo.m_Pvp || !IsAnyViewed() || m_Team != 0 ||
+		!m_aViewedClients[pKillMessage->m_Victim].m_IsViewed || GameClient()->m_aClients[pKillMessage->m_Victim].m_Spec || m_OnlyOnePlayer)
 	{
-		m_aViewedClients[pKillMessage->m_Victim].m_IsViewed = false;
-
-		// if everyone of a team killed, we have no ids to spectate anymore, so we disable multi view
-		if(!IsAnyViewed())
-		{
-			Reset();
-		}
-		else
-		{
-			// the "main" tee killed, search a new one
-			if(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId == pKillMessage->m_Victim)
-			{
-				int NewClientId = FindFirstViewed();
-				if(NewClientId != SPEC_FREEVIEW)
-				{
-					CViewedClient &Client = m_aViewedClients[NewClientId];
-					Client.Reset();
-					Client.m_IsViewed = true;
-					GameClient()->m_Spectator.Spectate(NewClientId);
-				}
-			}
-		}
+		return;
 	}
+
+	// if we are spectating a static id set (team 0) and somebody killed, and its not a guy in solo, we remove them from the list
+	// never remove players from the list if it is a pvp server or a solo map
+	m_aViewedClients[pKillMessage->m_Victim].m_IsViewed = false;
+
+	// if everyone of a team killed, we have no ids to spectate anymore, so we disable multi view
+	if(!IsAnyViewed())
+	{
+		Reset();
+		return;
+	}
+
+	// the "main" tee killed, search a new one
+	if(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != pKillMessage->m_Victim)
+	{
+		return;
+	}
+
+	int NewClientId = FindFirstViewed();
+	if(NewClientId == SPEC_FREEVIEW)
+	{
+		return;
+	}
+
+	CViewedClient &Client = m_aViewedClients[NewClientId];
+	Client.Reset();
+	Client.m_IsViewed = true;
+	GameClient()->m_Spectator.Spectate(NewClientId);
 }
 
 void CMultiView::OnMessage(int MsgType, void *pRawMsg)
@@ -241,7 +247,7 @@ bool CMultiView::Init(int Team)
 			m_Team = 0;
 
 		// we are spectating only one player
-		m_Solo = Count == 1;
+		m_OnlyOnePlayer = Count == 1;
 	}
 
 	if(IsAnyViewed())
@@ -387,19 +393,19 @@ void CMultiView::UpdateView()
 	}
 
 	// if we only have one tee that's in the list, we activate solo-mode
-	m_Solo = false;
+	m_OnlyOnePlayer = false;
 	for(auto &ViewedClient : m_aViewedClients)
 	{
 		if(ViewedClient.m_IsViewed)
 		{
-			if(!m_Solo)
+			if(!m_OnlyOnePlayer)
 			{
-				m_Solo = true;
+				m_OnlyOnePlayer = true;
 			}
 			else
 			{
 				// we found a second view, so we can stop searching
-				m_Solo = false;
+				m_OnlyOnePlayer = false;
 				break;
 			}
 		}
