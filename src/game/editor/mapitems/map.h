@@ -224,6 +224,7 @@ public:
 	void ToggleSelectQuad(int Index);
 	void DeselectQuads();
 	bool IsQuadCornerSelected(int Index) const;
+	bool IsAnyQuadCornerSelected() const;
 	bool IsQuadPointSelected(int QuadIndex, int Index) const;
 	void SelectQuadPoint(int QuadIndex, int Index);
 	void ToggleSelectQuadPoint(int QuadIndex, int Index);

@@ -1474,31 +1474,60 @@ void CEditor::DrawQuadPivotHandle(const CQuad *pQuad, bool Selected)
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::DrawQuadPointHandle(const CQuad *pQuad, int PointIndex, bool Selected)
+void CEditor::DrawQuadPointHandles(const CQuad *pQuad, bool Selected)
 {
-	const void *pId = &pQuad->m_aPoints[PointIndex];
-	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[PointIndex].x), fx2f(pQuad->m_aPoints[PointIndex].y));
-	const bool PointSelected = Selected && Map()->IsQuadCornerSelected(PointIndex);
-
-	// draw selection background
-	if(PointSelected)
+	int ActiveItemCorner = -1;
+	int HotItemCorner = -1;
+	for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
 	{
-		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
+		const void *pId = &pQuad->m_aPoints[CornerIndex];
+		if(Ui()->CheckActiveItem(pId))
+			ActiveItemCorner = CornerIndex;
+		else if(Ui()->HotItem() == pId)
+			HotItemCorner = CornerIndex;
+	}
+	const bool IsActive = (Selected && Map()->IsAnyQuadCornerSelected()) || ActiveItemCorner != -1 || HotItemCorner != -1;
+
+	// draw all quad points at once
+	if(!IsActive)
+	{
+		IGraphics::CQuadItem aQuadItems[4];
+		for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
+		{
+			const vec2 Center = vec2(fx2f(pQuad->m_aPoints[CornerIndex].x), fx2f(pQuad->m_aPoints[CornerIndex].y));
+			aQuadItems[CornerIndex] = IGraphics::CQuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
+		}
+		Graphics()->SetColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		Graphics()->QuadsDraw(aQuadItems, 4);
+		return;
+	}
+
+	// quad gets actively modified not just drawn
+	for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
+	{
+		const vec2 Center = vec2(fx2f(pQuad->m_aPoints[CornerIndex].x), fx2f(pQuad->m_aPoints[CornerIndex].y));
+		const bool PointSelected = Selected && Map()->IsQuadCornerSelected(CornerIndex);
+
+		// draw selection background
+		if(PointSelected)
+		{
+			Graphics()->SetColor(0, 0, 0, 1);
+			IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
+			Graphics()->QuadsDraw(&QuadItem, 1);
+		}
+
+		if(ActiveItemCorner == CornerIndex || HotItemCorner == CornerIndex)
+		{
+			Graphics()->SetColor(1, 1, 1, 1);
+		}
+		else
+		{
+			Graphics()->SetColor(PointSelected ? ColorRGBA(0.0f, 1.0f, 1.0f, 1.0f) : ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+
+		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
-
-	if(Ui()->CheckActiveItem(pId) || Ui()->HotItem() == pId)
-	{
-		Graphics()->SetColor(1, 1, 1, 1);
-	}
-	else
-	{
-		Graphics()->SetColor(PointSelected ? ColorRGBA(0.0f, 1.0f, 1.0f, 1.0f) : ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-
-	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
-	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
 void CEditor::DoQuadPivotInteraction(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index)
