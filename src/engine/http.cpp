@@ -133,7 +133,7 @@ void IHttpRequest::OnValidation(bool Success)
 			(void)fs_remove(m_aDestAbsoluteTmp);
 			return;
 		}
-		if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
+		if(fs_replace_file(m_aDestAbsoluteTmp, m_aDestAbsolute))
 		{
 			log_error("http", "i/o error, cannot move file: %s", m_aDest);
 			m_State = EHttpState::ERROR;
@@ -382,7 +382,7 @@ void IHttpRequest::OnCompletionInternal(EHttpState State)
 		}
 		else if(!m_ValidateBeforeOverwrite)
 		{
-			if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
+			if(fs_replace_file(m_aDestAbsoluteTmp, m_aDestAbsolute))
 			{
 				log_error("http", "i/o error, cannot move file: %s", m_aDest);
 				State = EHttpState::ERROR;

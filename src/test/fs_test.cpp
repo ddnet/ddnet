@@ -3,6 +3,11 @@
 #include <base/fs.h>
 #include <base/io.h>
 #include <base/str.h>
+#include <base/windows.h>
+
+#if defined(CONF_FAMILY_WINDOWS)
+#include <windows.h>
+#endif
 
 #include <gtest/gtest.h>
 
@@ -393,4 +398,99 @@ TEST(Filesystem, RenameOpenFileDeleteTarget)
 	EXPECT_FALSE(io_close(FileRead));
 
 	EXPECT_FALSE(fs_remove(aNewFilename));
+}
+
+TEST(Filesystem, ReplacePreparedFileAndPreserveDestinationOnFailure)
+{
+	CTestInfo Info;
+	char aPrepared[IO_MAX_PATH_LENGTH];
+	Info.Filename(aPrepared, sizeof(aPrepared), ".prepared");
+	const auto Write = [](const char *pPath, const char *pContents) {
+		IOHANDLE File = io_open(pPath, IOFLAG_WRITE);
+		ASSERT_NE(File, nullptr);
+		EXPECT_EQ(io_write(File, pContents, str_length(pContents)), static_cast<unsigned>(str_length(pContents)));
+		EXPECT_EQ(io_close(File), 0);
+	};
+	const auto Read = [](const char *pPath) {
+		IOHANDLE File = io_open(pPath, IOFLAG_READ);
+		if(File == nullptr)
+			return std::string();
+		char aContents[64] = {};
+		io_read(File, aContents, sizeof(aContents) - 1);
+		io_close(File);
+		return std::string(aContents);
+	};
+	Write(Info.m_aFilename, "previous saved file");
+	EXPECT_NE(fs_replace_file(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "previous saved file");
+	Write(aPrepared, "completed new file");
+#if defined(CONF_FAMILY_WINDOWS)
+	// Reproduce an actual final-replacement refusal, without an earlier delete.
+	const auto WideName = windows_utf8_to_wide(Info.m_aFilename);
+	ASSERT_NE(SetFileAttributesW(WideName.c_str(), FILE_ATTRIBUTE_READONLY), 0);
+	EXPECT_NE(fs_replace_file(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "previous saved file");
+	EXPECT_EQ(Read(aPrepared), "completed new file");
+	EXPECT_NE(SetFileAttributesW(WideName.c_str(), FILE_ATTRIBUTE_NORMAL), 0);
+	const auto Locked = CreateFileW(WideName.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+	ASSERT_NE(Locked, INVALID_HANDLE_VALUE);
+	EXPECT_NE(fs_replace_file(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "previous saved file");
+	EXPECT_EQ(Read(aPrepared), "completed new file");
+	EXPECT_NE(CloseHandle(Locked), 0);
+#endif
+	EXPECT_EQ(fs_replace_file(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "completed new file");
+	EXPECT_FALSE(fs_is_file(aPrepared));
+	EXPECT_EQ(fs_remove(Info.m_aFilename), 0);
+	Write(aPrepared, "new destination");
+	EXPECT_EQ(fs_replace_file(aPrepared, Info.m_aFilename), 0);
+	EXPECT_EQ(Read(Info.m_aFilename), "new destination");
+	EXPECT_FALSE(fs_is_file(aPrepared));
+	EXPECT_EQ(fs_remove(Info.m_aFilename), 0);
+}
+
+TEST(Filesystem, ReplaceFileWithOpenReader)
+{
+	CTestInfo Info;
+	char aPrepared[IO_MAX_PATH_LENGTH];
+	Info.Filename(aPrepared, sizeof(aPrepared), ".prepared");
+	IOHANDLE File = io_open(Info.m_aFilename, IOFLAG_WRITE);
+	ASSERT_NE(File, nullptr);
+	EXPECT_EQ(io_write(File, "old file", 8), 8U);
+	EXPECT_EQ(io_close(File), 0);
+	File = io_open(aPrepared, IOFLAG_WRITE);
+	ASSERT_NE(File, nullptr);
+	EXPECT_EQ(io_write(File, "new file", 8), 8U);
+	EXPECT_EQ(io_close(File), 0);
+
+	// Map readers remain open while the editor saves and requests a hot reload.
+	IOHANDLE Reader = io_open(Info.m_aFilename, IOFLAG_READ);
+	ASSERT_NE(Reader, nullptr);
+	const int Result = fs_replace_file(aPrepared, Info.m_aFilename);
+#if defined(CONF_FAMILY_WINDOWS)
+	const DWORD Error = GetLastError();
+#endif
+	char aContents[9] = {};
+	EXPECT_EQ(io_read(Reader, aContents, 8), 8U);
+	EXPECT_STREQ(aContents, "old file");
+	EXPECT_EQ(io_close(Reader), 0);
+#if defined(CONF_FAMILY_WINDOWS)
+	if(Result != 0 && (Error == ERROR_INVALID_PARAMETER || Error == ERROR_NOT_SUPPORTED || Error == ERROR_INVALID_FUNCTION))
+	{
+		EXPECT_TRUE(fs_is_file(Info.m_aFilename));
+		EXPECT_TRUE(fs_is_file(aPrepared));
+		EXPECT_EQ(fs_remove(Info.m_aFilename), 0);
+		EXPECT_EQ(fs_remove(aPrepared), 0);
+		GTEST_SKIP() << "Filesystem does not support POSIX file replacement";
+	}
+#endif
+	EXPECT_EQ(Result, 0);
+	File = io_open(Info.m_aFilename, IOFLAG_READ);
+	ASSERT_NE(File, nullptr);
+	EXPECT_EQ(io_read(File, aContents, 8), 8U);
+	EXPECT_STREQ(aContents, "new file");
+	EXPECT_EQ(io_close(File), 0);
+	EXPECT_FALSE(fs_is_file(aPrepared));
+	EXPECT_EQ(fs_remove(Info.m_aFilename), 0);
 }

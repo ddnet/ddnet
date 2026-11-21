@@ -189,7 +189,7 @@ void CRaceDemo::StopRecord(int Time)
 			char aNewFilename[512];
 			GetPath(aNewFilename, sizeof(aNewFilename), m_Time);
 
-			Storage()->RenameFile(m_aTmpFilename, aNewFilename, IStorage::TYPE_SAVE);
+			Storage()->ReplaceFile(m_aTmpFilename, aNewFilename, IStorage::TYPE_SAVE);
 		}
 		else // no new record
 			Storage()->RemoveFile(m_aTmpFilename, IStorage::TYPE_SAVE);
