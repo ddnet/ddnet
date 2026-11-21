@@ -46,6 +46,9 @@ void CGameTeams::Reset()
 		m_aTeamFlock[i] = false;
 		m_apSaveTeamResult[i] = nullptr;
 		m_aTeamSentStartWarning[i] = false;
+
+		m_aTeamFirstFinishTick[i] = -1;
+		m_aTeamFinishReminderSent[i] = false;
 		if(m_pGameContext->PracticeByDefault())
 			m_aPractice[i] = true;
 		ResetRoundState(i);
@@ -54,6 +57,8 @@ void CGameTeams::Reset()
 
 void CGameTeams::ResetRoundState(int Team)
 {
+	m_aTeamFirstFinishTick[Team] = -1;
+	m_aTeamFinishReminderSent[Team] = false;
 	ResetInvited(Team);
 	if(Team != TEAM_SUPER)
 		ResetSwitchers(Team);
@@ -220,6 +225,9 @@ void CGameTeams::OnCharacterFinish(int ClientId)
 	{
 		if(m_aTeeStarted[ClientId])
 		{
+			int Team = m_Core.Team(ClientId);
+			if(m_aTeamState[Team] == ETeamState::STARTED && m_aTeamFirstFinishTick[Team] == -1)
+				m_aTeamFirstFinishTick[Team] = Server()->Tick();
 			m_aTeeFinished[ClientId] = true;
 		}
 		CheckTeamFinished(m_Core.Team(ClientId));
@@ -229,6 +237,46 @@ void CGameTeams::OnCharacterFinish(int ClientId)
 void CGameTeams::Tick()
 {
 	int Now = Server()->Tick();
+	for(int Team = 0; Team < TEAM_SUPER; ++Team)
+	{
+		int Frequency = Server()->TickSpeed() * 60;
+		int Remainder = Server()->TickSpeed() * 30;
+		int TicksSinceFirstFinish = Now - m_aTeamFirstFinishTick[Team];
+		bool SendReminder = TicksSinceFirstFinish >= Remainder && TicksSinceFirstFinish % Frequency == Remainder;
+		if(!SendReminder)
+			m_aTeamFinishReminderSent[Team] = false;
+		if(m_aTeamFirstFinishTick[Team] == -1 || !SendReminder || m_aTeamFinishReminderSent[Team] ||
+			m_aTeamState[Team] != ETeamState::STARTED || m_aTeamFlock[Team] || m_aPractice[Team])
+			continue;
+
+		bool TeamHasCheatCharacter = false;
+		int NumPlayersNotFinished = 0;
+		char aPlayerNames[256] = "";
+		for(int ClientId = 0; ClientId < MAX_CLIENTS; ++ClientId)
+		{
+			CCharacter *pChar = Character(ClientId);
+			if(m_Core.Team(ClientId) == Team && pChar && pChar->m_DDRaceState == ERaceState::CHEATED)
+				TeamHasCheatCharacter = true;
+			CPlayer *pPlayer = GetPlayer(ClientId);
+			if(m_Core.Team(ClientId) != Team || !pPlayer || !pPlayer->IsPlaying() || m_aTeeFinished[ClientId])
+				continue;
+			if(aPlayerNames[0])
+				str_append(aPlayerNames, ", ");
+			str_append(aPlayerNames, Server()->ClientName(ClientId));
+			++NumPlayersNotFinished;
+		}
+		if(NumPlayersNotFinished == 0 || TeamHasCheatCharacter)
+			continue;
+
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf),
+			"Your team has %d %s not touched finish yet: %s",
+			NumPlayersNotFinished,
+			NumPlayersNotFinished == 1 ? "player that has" : "players that have",
+			aPlayerNames);
+		GameServer()->SendChatTeam(Team, aBuf);
+		m_aTeamFinishReminderSent[Team] = true;
+	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -523,6 +571,11 @@ int CGameTeams::TeamSize(int Team) const
 void CGameTeams::ChangeTeamState(int Team, ETeamState State)
 {
 	m_aTeamState[Team] = State;
+	if(State != ETeamState::STARTED)
+	{
+		m_aTeamFirstFinishTick[Team] = -1;
+		m_aTeamFinishReminderSent[Team] = false;
+	}
 }
 
 void CGameTeams::KillTeam(int Team, int NewStrongId, int ExceptId)

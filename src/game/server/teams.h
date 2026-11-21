@@ -38,6 +38,8 @@ class CGameTeams
 	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_DDRACE_TEAMS];
 	uint64_t m_aLastSwap[MAX_CLIENTS]; // index is id of player who initiated swap
 	bool m_aTeamSentStartWarning[NUM_DDRACE_TEAMS];
+	int m_aTeamFirstFinishTick[NUM_DDRACE_TEAMS];
+	bool m_aTeamFinishReminderSent[NUM_DDRACE_TEAMS];
 	// `m_aTeamUnfinishableKillTick` is -1 by default and gets set when a
 	// team becomes unfinishable. If the team hasn't entered practice mode
 	// by that time, it'll get killed to prevent people not understanding
