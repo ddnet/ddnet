@@ -139,7 +139,7 @@ protected:
 	virtual void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const;
 	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 	virtual bool IsDesignLayer() const { return true; }
-	CTile *m_pTiles;
+	CTile *m_pTiles = nullptr;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;
@@ -278,7 +278,7 @@ protected:
 	bool CalculateQuadClipping(const CQuadCluster &QuadCluster, float aQuadOffsetMin[2], float aQuadOffsetMax[2]) const;
 
 	std::vector<CQuadCluster> m_vQuadClusters;
-	CQuad *m_pQuads;
+	CQuad *m_pQuads = nullptr;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;
@@ -327,6 +327,7 @@ class CRenderLayerEntityTele final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
+	bool IsValid() const override;
 	void Init() override;
 	void Unload() override;
 
@@ -338,7 +339,7 @@ protected:
 
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTeleNumbers;
-	CTeleTile *m_pTeleTiles;
+	CTeleTile *m_pTeleTiles = nullptr;
 };
 
 class CRenderLayerEntitySpeedup final : public CRenderLayerEntityBase
@@ -346,6 +347,7 @@ class CRenderLayerEntitySpeedup final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
+	bool IsValid() const override;
 	void Init() override;
 	void Unload() override;
 
@@ -359,7 +361,7 @@ protected:
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualForce;
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualMaxSpeed;
-	CSpeedupTile *m_pSpeedupTiles;
+	CSpeedupTile *m_pSpeedupTiles = nullptr;
 };
 
 class CRenderLayerEntitySwitch final : public CRenderLayerEntityBase
@@ -367,6 +369,7 @@ class CRenderLayerEntitySwitch final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
+	bool IsValid() const override;
 	void Init() override;
 	void Unload() override;
 
@@ -380,7 +383,7 @@ protected:
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualSwitchNumberTop;
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualSwitchNumberBottom;
-	CSwitchTile *m_pSwitchTiles;
+	CSwitchTile *m_pSwitchTiles = nullptr;
 };
 
 class CRenderLayerEntityTune final : public CRenderLayerEntityBase
@@ -388,6 +391,7 @@ class CRenderLayerEntityTune final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
+	bool IsValid() const override;
 	void Init() override;
 
 protected:
@@ -397,7 +401,7 @@ protected:
 	IGraphics::CTextureHandle GetTexture() const override;
 
 private:
-	CTuneTile *m_pTuneTiles;
+	CTuneTile *m_pTuneTiles = nullptr;
 	mutable CTuneColorMapper m_TuneColorMapper;
 };
 #endif

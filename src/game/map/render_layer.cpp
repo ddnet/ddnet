@@ -300,7 +300,6 @@ CRenderLayerTile::CRenderLayerTile(int GroupId, int LayerId, int Flags, CMapItem
 {
 	m_pLayerTilemap = pLayerTilemap;
 	m_Color = ColorRGBA(m_pLayerTilemap->m_Color.r / 255.0f, m_pLayerTilemap->m_Color.g / 255.0f, m_pLayerTilemap->m_Color.b / 255.0f, pLayerTilemap->m_Color.a / 255.0f);
-	m_pTiles = nullptr;
 }
 
 void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals)
@@ -931,8 +930,7 @@ int CRenderLayerTile::GetDataIndex() const
 
 bool CRenderLayerTile::IsValid() const
 {
-	return m_pLayerTilemap != nullptr && m_pLayerTilemap->m_Width > 0 && m_pLayerTilemap->m_Height > 0 &&
-	       (m_pTiles != nullptr || (m_VisualTiles.has_value() && m_VisualTiles->m_BufferContainerIndex != -1) || (m_pMap != nullptr && m_pMap->GetDataSize(GetDataIndex()) > 0));
+	return m_pTiles != nullptr || (m_VisualTiles.has_value() && m_VisualTiles->m_BufferContainerIndex != -1);
 }
 
 void *CRenderLayerTile::GetRawData() const
@@ -946,7 +944,11 @@ void CRenderLayerTile::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CR
 	InitTileData();
 
 	// set clip region
-	if(!Graphics()->IsTileBufferingEnabled() || !m_TileAndQuadBuffering)
+	if(!IsValid())
+	{
+		m_LayerClip = CClipRegion(0.0f, 0.0f, 0.0f, 0.0f);
+	}
+	else if(!Graphics()->IsTileBufferingEnabled() || !m_TileAndQuadBuffering)
 	{
 		// shrink clip region, this is done in `UploadTileData` for buffered backends
 		int MinX = m_pLayerTilemap->m_Width;
@@ -1013,7 +1015,6 @@ CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapIt
 	CRenderLayer(GroupId, LayerId, Flags)
 {
 	m_pLayerQuads = pLayerQuads;
-	m_pQuads = nullptr;
 }
 
 void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &Params)
@@ -1575,6 +1576,11 @@ int CRenderLayerEntityTele::GetDataIndex() const
 	return m_pLayerTilemap->m_Tele;
 }
 
+bool CRenderLayerEntityTele::IsValid() const
+{
+	return m_pTeleTiles != nullptr;
+}
+
 void CRenderLayerEntityTele::Init()
 {
 	InitCallback();
@@ -1639,6 +1645,11 @@ IGraphics::CTextureHandle CRenderLayerEntitySpeedup::GetTexture() const
 int CRenderLayerEntitySpeedup::GetDataIndex() const
 {
 	return m_pLayerTilemap->m_Speedup;
+}
+
+bool CRenderLayerEntitySpeedup::IsValid() const
+{
+	return m_pSpeedupTiles != nullptr;
 }
 
 void CRenderLayerEntitySpeedup::Init()
@@ -1725,6 +1736,11 @@ IGraphics::CTextureHandle CRenderLayerEntitySwitch::GetTexture() const
 int CRenderLayerEntitySwitch::GetDataIndex() const
 {
 	return m_pLayerTilemap->m_Switch;
+}
+
+bool CRenderLayerEntitySwitch::IsValid() const
+{
+	return m_pSwitchTiles != nullptr;
 }
 
 void CRenderLayerEntitySwitch::Init()
@@ -1833,6 +1849,11 @@ void CRenderLayerEntityTune::Init()
 int CRenderLayerEntityTune::GetDataIndex() const
 {
 	return m_pLayerTilemap->m_Tune;
+}
+
+bool CRenderLayerEntityTune::IsValid() const
+{
+	return m_pTuneTiles != nullptr;
 }
 
 void CRenderLayerEntityTune::InitTileData()
