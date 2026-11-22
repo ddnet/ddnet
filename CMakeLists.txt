@@ -207,7 +207,7 @@ if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
-set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
+set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the built client executable")
 set(IOS_BUNDLE_IDENTIFIER "org.ddnet.client" CACHE STRING "iOS bundle identifier")
 
 ########################################################################
@@ -363,7 +363,7 @@ if(NOT MSVC AND NOT HAIKU)
 
   # Don't insert timestamps into PEs to keep the build reproducible.
   if(TARGET_OS STREQUAL "windows")
-    add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
+    add_linker_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
   endif()
 
   # Strip absolute build paths from debug info. Prevent adding compiler name and version metadata.
@@ -3256,11 +3256,11 @@ if(SERVER)
       ${SERVER_ICON}
       ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:game-server-without-main>
-      # tidy-alphabetical-sort
+      # tidy-alphabetical-start
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
-      # tidy-alphabetical-sort
+      # tidy-alphabetical-end
     )
   else()
     add_executable(game-server
@@ -3269,11 +3269,11 @@ if(SERVER)
       ${SERVER_ICON}
       ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:game-server-without-main>
-      # tidy-alphabetical-sort
+      # tidy-alphabetical-start
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
-      # tidy-alphabetical-sort
+      # tidy-alphabetical-end
     )
   endif()
   set_property(TARGET game-server
@@ -3347,6 +3347,7 @@ if(TOOLS)
       if(TOOL MATCHES "^map_render$" AND NOT EGL_FOUND)
         continue()
       endif()
+      set(TOOL_INCLUDE_DIRS)
       set(TOOL_DEPS ${DEPS})
       set(TOOL_LIBS ${LIBS})
       unset(EXTRA_TOOL_SRC)
@@ -3546,7 +3547,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
 
   add_custom_target(run_cxx_tests
     COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> --gtest_brief=1 ${TESTRUNNER_ARGS}
-    COMMENT Running unit tests
+    COMMENT "Running unit tests"
     DEPENDS ${TARGET_TESTRUNNER}
     USES_TERMINAL
   )
@@ -3555,7 +3556,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   )
   add_custom_target(run_cxx_tests_verbose
     COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> --no-capture ${TESTRUNNER_ARGS}
-    COMMENT Running unit tests
+    COMMENT "Running unit tests"
     DEPENDS ${TARGET_TESTRUNNER}
     USES_TERMINAL
   )
