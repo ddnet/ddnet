@@ -3545,7 +3545,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
 
   add_custom_target(run_cxx_tests
     COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> --gtest_brief=1 ${TESTRUNNER_ARGS}
-    COMMENT Running unit tests
+    COMMENT "Running unit tests"
     DEPENDS ${TARGET_TESTRUNNER}
     USES_TERMINAL
   )
@@ -3554,7 +3554,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   )
   add_custom_target(run_cxx_tests_verbose
     COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> --no-capture ${TESTRUNNER_ARGS}
-    COMMENT Running unit tests
+    COMMENT "Running unit tests"
     DEPENDS ${TARGET_TESTRUNNER}
     USES_TERMINAL
   )
