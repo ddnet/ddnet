@@ -29,6 +29,8 @@ CLayerTiles::CLayerTiles(CEditorMap *pMap, int w, int h) :
 	m_Color.a = 255;
 	m_ColorEnv = -1;
 	m_ColorEnvOffset = 0;
+	m_PosEnv = -1;
+	m_PosEnvOffset = 0;
 
 	m_HasTele = false;
 	m_HasSpeedup = false;
@@ -57,6 +59,8 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_Color = Other.m_Color;
 	m_ColorEnv = Other.m_ColorEnv;
 	m_ColorEnvOffset = Other.m_ColorEnvOffset;
+	m_PosEnv = Other.m_PosEnv;
+	m_PosEnvOffset = Other.m_PosEnvOffset;
 
 	m_AutomapperConfig = Other.m_AutomapperConfig;
 	m_AutomapperReference = Other.m_AutomapperReference;
@@ -154,6 +158,7 @@ void CLayerTiles::Render(const CEditorMap *pRenderMap)
 	IGraphics::CTextureHandle Texture;
 	bool RenderOpaque = false;
 	ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	vec2 Offset(0.0f, 0.0f);
 	if(m_HasGame)
 	{
 		Texture = Editor()->GetEntitiesTexture();
@@ -197,19 +202,26 @@ void CLayerTiles::Render(const CEditorMap *pRenderMap)
 		{
 			RenderOpaque = false;
 		}
+
+		if(Color.a > 0.0f)
+		{
+			ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+			pRenderMap->m_EnvelopeEvaluator.EnvelopeEval(m_PosEnvOffset, m_PosEnv, Position, 3);
+			Offset = vec2(Position.r, Position.g);
+		}
 	}
 	Graphics()->TextureSet(Texture);
 
 	if(RenderOpaque)
 	{
 		Graphics()->BlendNone();
-		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE);
+		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, Offset, 32.0f, Color, LAYERRENDERFLAG_OPAQUE);
 		Graphics()->BlendNormal();
-		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
+		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, Offset, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
 	}
 	else
 	{
-		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, 0);
+		Editor()->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, Offset, 32.0f, Color, 0);
 	}
 
 	// Render DDRace Layers
