@@ -146,6 +146,10 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 					pRenderLayer->Init();
 					m_vpRenderLayers.push_back(std::move(pRenderLayer));
 				}
+				else
+				{
+					log_debug("map_renderer", "Group %d Layer %d is invalid and gets ignored", GroupId, LayerId);
+				}
 			}
 		}
 	}
