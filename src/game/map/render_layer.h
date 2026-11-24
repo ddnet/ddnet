@@ -96,7 +96,7 @@ protected:
 class CRenderLayerGroup : public CRenderLayer
 {
 public:
-	CRenderLayerGroup(int GroupId, CMapItemGroup *pGroup);
+	CRenderLayerGroup(int GroupId, const CMapItemGroup *pGroup);
 	~CRenderLayerGroup() override = default;
 	void Init() override;
 	void Render(const CRenderLayerParams &Params) override;
@@ -112,13 +112,13 @@ protected:
 		return IGraphics::CTextureHandle();
 	}
 
-	CMapItemGroup *m_pGroup;
+	const CMapItemGroup *m_pGroup;
 };
 
 class CRenderLayerTile : public CRenderLayer
 {
 public:
-	CRenderLayerTile(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerTile(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap);
 	~CRenderLayerTile() override = default;
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
@@ -139,7 +139,7 @@ protected:
 	virtual void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const;
 	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 	virtual bool IsDesignLayer() const { return true; }
-	CTile *m_pTiles = nullptr;
+	const CTile *m_pTiles = nullptr;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;
@@ -225,14 +225,14 @@ protected:
 	void RenderKillTileBorder(const ColorRGBA &Color);
 
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTiles;
-	CMapItemLayerTilemap *m_pLayerTilemap;
+	const CMapItemLayerTilemap *m_pLayerTilemap;
 	ColorRGBA m_Color;
 };
 
 class CRenderLayerQuads : public CRenderLayer
 {
 public:
-	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
+	CRenderLayerQuads(int GroupId, int LayerId, int Flags, const CMapItemLayerQuads *pLayerQuads);
 	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FCallbackLayerInit> &CallbackLayerInitOptional, bool TileAndQuadBuffering) override;
 	void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
@@ -257,7 +257,7 @@ protected:
 	void RenderQuadLayer(float Alpha, const CRenderLayerParams &Params);
 
 	std::optional<CRenderLayerQuads::CQuadLayerVisuals> m_VisualQuad;
-	CMapItemLayerQuads *m_pLayerQuads;
+	const CMapItemLayerQuads *m_pLayerQuads;
 
 	class CQuadCluster
 	{
@@ -278,7 +278,7 @@ protected:
 	bool CalculateQuadClipping(const CQuadCluster &QuadCluster, float aQuadOffsetMin[2], float aQuadOffsetMax[2]) const;
 
 	std::vector<CQuadCluster> m_vQuadClusters;
-	CQuad *m_pQuads = nullptr;
+	const CQuad *m_pQuads = nullptr;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;
@@ -287,7 +287,7 @@ private:
 class CRenderLayerEntityBase : public CRenderLayerTile
 {
 public:
-	CRenderLayerEntityBase(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerEntityBase(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap);
 	~CRenderLayerEntityBase() override = default;
 	bool DoRender(const CRenderLayerParams &Params) override;
 
@@ -300,7 +300,7 @@ protected:
 class CRenderLayerEntityGame final : public CRenderLayerEntityBase
 {
 public:
-	CRenderLayerEntityGame(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerEntityGame(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap);
 	void Init() override;
 
 protected:
@@ -314,7 +314,7 @@ private:
 class CRenderLayerEntityFront final : public CRenderLayerEntityBase
 {
 public:
-	CRenderLayerEntityFront(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerEntityFront(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	void Init() override;
 
@@ -325,7 +325,7 @@ protected:
 class CRenderLayerEntityTele final : public CRenderLayerEntityBase
 {
 public:
-	CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	bool IsValid() const override;
 	void Init() override;
@@ -339,13 +339,13 @@ protected:
 
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTeleNumbers;
-	CTeleTile *m_pTeleTiles = nullptr;
+	const CTeleTile *m_pTeleTiles = nullptr;
 };
 
 class CRenderLayerEntitySpeedup final : public CRenderLayerEntityBase
 {
 public:
-	CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	bool IsValid() const override;
 	void Init() override;
@@ -361,13 +361,13 @@ protected:
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualForce;
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualMaxSpeed;
-	CSpeedupTile *m_pSpeedupTiles = nullptr;
+	const CSpeedupTile *m_pSpeedupTiles = nullptr;
 };
 
 class CRenderLayerEntitySwitch final : public CRenderLayerEntityBase
 {
 public:
-	CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	bool IsValid() const override;
 	void Init() override;
@@ -383,13 +383,13 @@ protected:
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualSwitchNumberTop;
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualSwitchNumberBottom;
-	CSwitchTile *m_pSwitchTiles = nullptr;
+	const CSwitchTile *m_pSwitchTiles = nullptr;
 };
 
 class CRenderLayerEntityTune final : public CRenderLayerEntityBase
 {
 public:
-	CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex() const override;
 	bool IsValid() const override;
 	void Init() override;
@@ -401,7 +401,7 @@ protected:
 	IGraphics::CTextureHandle GetTexture() const override;
 
 private:
-	CTuneTile *m_pTuneTiles = nullptr;
+	const CTuneTile *m_pTuneTiles = nullptr;
 	mutable CTuneColorMapper m_TuneColorMapper;
 };
 #endif
