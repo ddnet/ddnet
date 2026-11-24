@@ -224,7 +224,7 @@ void CRenderLayer::InitCallback() const
  * Group *
  **************/
 
-CRenderLayerGroup::CRenderLayerGroup(int GroupId, CMapItemGroup *pGroup) :
+CRenderLayerGroup::CRenderLayerGroup(int GroupId, const CMapItemGroup *pGroup) :
 	CRenderLayer(GroupId, 0, 0), m_pGroup(pGroup) {}
 
 bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params)
@@ -295,7 +295,7 @@ void CRenderLayerGroup::Render(const CRenderLayerParams &Params)
  * Tile Layer *
  **************/
 
-CRenderLayerTile::CRenderLayerTile(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
+CRenderLayerTile::CRenderLayerTile(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayer(GroupId, LayerId, Flags)
 {
 	m_pLayerTilemap = pLayerTilemap;
@@ -1011,7 +1011,7 @@ void CRenderLayerTile::GetTileData(unsigned char *pIndex, unsigned char *pFlags,
  * Quad Layer *
  **************/
 
-CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads) :
+CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, int Flags, const CMapItemLayerQuads *pLayerQuads) :
 	CRenderLayer(GroupId, LayerId, Flags)
 {
 	m_pLayerQuads = pLayerQuads;
@@ -1033,7 +1033,7 @@ void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &P
 			bool AnyVisible = false;
 			for(int QuadClusterId = 0; QuadClusterId < QuadCluster.m_NumQuads; ++QuadClusterId)
 			{
-				CQuad *pQuad = &m_pQuads[QuadCluster.m_StartIndex + QuadClusterId];
+				const CQuad *pQuad = &m_pQuads[QuadCluster.m_StartIndex + QuadClusterId];
 
 				ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 				if(pQuad->m_ColorEnv >= 0)
@@ -1151,7 +1151,7 @@ void CRenderLayerQuads::Init()
 		vTmpQuads.resize(m_pLayerQuads->m_NumQuads);
 
 	auto SetQuadRenderInfo = [&](SQuadRenderInfo &QInfo, int QuadId, bool InitInfo) {
-		CQuad *pQuad = &m_pQuads[QuadId];
+		const CQuad *pQuad = &m_pQuads[QuadId];
 
 		// init for envelopeless quad layers
 		if(InitInfo)
@@ -1488,7 +1488,7 @@ bool CRenderLayerQuads::DoRender(const CRenderLayerParams &Params)
  * Entity Layer *
  ****************/
 // BASE
-CRenderLayerEntityBase::CRenderLayerEntityBase(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
+CRenderLayerEntityBase::CRenderLayerEntityBase(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerTile(GroupId, LayerId, Flags, pLayerTilemap) {}
 
 bool CRenderLayerEntityBase::DoRender(const CRenderLayerParams &Params)
@@ -1510,7 +1510,7 @@ IGraphics::CTextureHandle CRenderLayerEntityBase::GetTexture() const
 }
 
 // GAME
-CRenderLayerEntityGame::CRenderLayerEntityGame(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
+CRenderLayerEntityGame::CRenderLayerEntityGame(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
 void CRenderLayerEntityGame::Init()
@@ -1548,7 +1548,7 @@ ColorRGBA CRenderLayerEntityGame::GetDeathBorderColor() const
 }
 
 // FRONT
-CRenderLayerEntityFront::CRenderLayerEntityFront(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
+CRenderLayerEntityFront::CRenderLayerEntityFront(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
 int CRenderLayerEntityFront::GetDataIndex() const
@@ -1568,7 +1568,7 @@ void CRenderLayerEntityFront::RenderTileLayerNoTileBuffer(const ColorRGBA &Color
 }
 
 // TELE
-CRenderLayerEntityTele::CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
+CRenderLayerEntityTele::CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
 int CRenderLayerEntityTele::GetDataIndex() const
@@ -1634,7 +1634,7 @@ void CRenderLayerEntityTele::GetTileData(unsigned char *pIndex, unsigned char *p
 }
 
 // SPEEDUP
-CRenderLayerEntitySpeedup::CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
+CRenderLayerEntitySpeedup::CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
 IGraphics::CTextureHandle CRenderLayerEntitySpeedup::GetTexture() const
@@ -1725,7 +1725,7 @@ void CRenderLayerEntitySpeedup::RenderTileLayerNoTileBuffer(const ColorRGBA &Col
 }
 
 // SWITCH
-CRenderLayerEntitySwitch::CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
+CRenderLayerEntitySwitch::CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
 IGraphics::CTextureHandle CRenderLayerEntitySwitch::GetTexture() const
@@ -1817,7 +1817,7 @@ void CRenderLayerEntitySwitch::RenderTileLayerNoTileBuffer(const ColorRGBA &Colo
 }
 
 // TUNE
-CRenderLayerEntityTune::CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
+CRenderLayerEntityTune::CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, const CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
 IGraphics::CTextureHandle CRenderLayerEntityTune::GetTexture() const

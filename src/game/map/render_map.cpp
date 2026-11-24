@@ -367,13 +367,13 @@ void CRenderMap::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::ch
 	}
 }
 
-void CRenderMap::ForceRenderQuads(CQuad *pQuads, int NumQuads, const IEnvelopeEval *pEnvEval, float Alpha)
+void CRenderMap::ForceRenderQuads(const CQuad *pQuads, int NumQuads, const IEnvelopeEval *pEnvEval, float Alpha)
 {
 	Graphics()->TrianglesBegin();
 	float Conv = 1 / 255.0f;
 	for(int i = 0; i < NumQuads; i++)
 	{
-		CQuad *pQuad = &pQuads[i];
+		const CQuad *pQuad = &pQuads[i];
 
 		ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		pEnvEval->EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4);
@@ -572,7 +572,7 @@ void CRenderMap::RenderTile(int x, int y, unsigned char Index, float Scale, Colo
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
+void CRenderMap::RenderTilemap(const CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	CScreenRect ScreenRect = Graphics()->GetScreen();
 
@@ -733,7 +733,7 @@ void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRG
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderTeleOverlay(const CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -779,7 +779,7 @@ void CRenderMap::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, 
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderSpeedupOverlay(const CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	CScreenRect ScreenRect = Graphics()->GetScreen();
 
@@ -857,7 +857,7 @@ void CRenderMap::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, floa
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderSwitchOverlay(const CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -906,7 +906,7 @@ void CRenderMap::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float S
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderTuneOverlay(const CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -952,7 +952,7 @@ void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, 
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, bool ExtendTiles)
+void CRenderMap::RenderTelemap(const CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, bool ExtendTiles)
 {
 	CScreenRect ScreenRect = Graphics()->GetScreen();
 
@@ -1057,7 +1057,7 @@ void CRenderMap::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Colo
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float Scale, ColorRGBA Color, bool ExtendTiles)
+void CRenderMap::RenderSwitchmap(const CSwitchTile *pSwitchTile, int w, int h, float Scale, ColorRGBA Color, bool ExtendTiles)
 {
 	CScreenRect ScreenRect = Graphics()->GetScreen();
 
@@ -1197,7 +1197,7 @@ void CRenderMap::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float S
 	Graphics()->MapScreen(ScreenRect);
 }
 
-void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, bool ExtendTiles, CTuneColorMapper *pTuneColorMapper)
+void CRenderMap::RenderTunemap(const CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, bool ExtendTiles, CTuneColorMapper *pTuneColorMapper)
 {
 	CScreenRect ScreenRect = Graphics()->GetScreen();
 
