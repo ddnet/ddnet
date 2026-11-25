@@ -32,7 +32,7 @@ Are you sure that you want to quit?
 == Çıkmak istediğinize emin misiniz?
 
 Automatically record demos
-== Demoları otomatik olarak kaydet
+== Kayıtları otomatik olarak kaydet
 
 Automatically take game over screenshot
 == Oyun bittiğinde otomatik olarak ekran görüntüsü al
@@ -86,13 +86,13 @@ Delete
 == Sil
 
 Delete demo
-== Demoyu sil
+== Kaydı sil
 
 Demofile: %s
-== Demo dosyası: %s
+== Kayıt dosyası: %s
 
 Demos
-== Demolar
+== Kayıtlar
 
 Disconnect
 == Bağlantıyı kes
@@ -116,7 +116,7 @@ Error
 == Hata
 
 Error loading demo
-== Demo yüklenirken hata oluştu
+== Kayıt yüklenirken hata oluştu
 
 Favorite
 == Favori
@@ -179,7 +179,7 @@ Hook
 == Kanca
 
 Invalid Demo
-== Geçersiz Demo
+== Geçersiz Kayıt
 
 Join blue
 == Maviye katıl
@@ -293,7 +293,7 @@ Remove friend
 == Arkadaşı çıkar
 
 Rename demo
-== Demonun adını değiştir
+== Kaydın adını değiştir
 
 Reset filter
 == Filtreleri sıfırla
@@ -389,7 +389,7 @@ Type
 == Tür
 
 Unable to rename the demo
-== Demonun ismi değiştirilemiyor
+== Kaydın ismi değiştirilemiyor
 
 Use sounds
 == Sesleri kullan
@@ -443,7 +443,7 @@ Internet
 == İnternet
 
 Max demos
-== Maksimum Demo Sayısı
+== Maksimum Kayıt Sayısı
 
 News
 == Haberler
@@ -467,7 +467,7 @@ Hue
 == Renk
 
 Record demo
-== Demo kaydet
+== Kayıt al
 
 Your skin
 == Sizin görünüşünüz
@@ -521,7 +521,7 @@ Reconnect in %d sec
 == %d saniye içinde yeniden bağlanılacak
 
 Render demo
-== Demo'yu işle
+== Kaydı işle
 
 Replace video
 == Video üzerine yaz
@@ -614,7 +614,7 @@ Remove chat
 == %.2f KiB
 
 Demo
-== Demo
+== Kayıt
 
 Markers
 == İşaretler
@@ -806,7 +806,7 @@ Client message
 == İstemci mesajı
 
 Save the best demo of each race
-== Her yarış için en iyi demoyu kaydet
+== Her yarış için en iyi Kaydı kaydet
 
 Default length
 == Varsayılan uzunluk
@@ -967,7 +967,7 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == %s dokusunun formatı RGBA değil, bu görsel hatalara neden olacak.
 
 Preparing demo playback
-== Demo oynatmaya hazırlanıyor
+== Kayıt oynatmaya hazırlanıyor
 
 Connected
 == Bağlanıldı
@@ -1048,7 +1048,7 @@ Checking for existing player with your name
 == Adınıza sahip diğer oyuncular aranıyor
 
 A demo with this name already exists
-== Bu ada sahip bir demo zaten var
+== Bu ada sahip bir kayıt zaten var
 
 A folder with this name already exists
 == Bu ada sahip bir klasör zaten var
@@ -1148,13 +1148,13 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == '%s' klanını arkadaş listenizden silmek istediğinize emin misiniz?
 
 Play the current demo
-== Demoyu oynat
+== Kaydı oynat
 
 Pause the current demo
-== Demoyu duraklat
+== Kaydı duraklat
 
 Stop the current demo
-== Demoyu durdur
+== Kaydı durdur
 
 Go back one tick
 == Bir tık geri git
@@ -1163,10 +1163,10 @@ Go forward one tick
 == Bir tık ileri git
 
 Slow down the demo
-== Demoyu yavaşlat
+== Kaydı yavaşlat
 
 Speed up the demo
-== Demoyu hızlandır
+== Kaydı hızlandır
 
 Mark the beginning of a cut (right click to reset)
 == Bir kesitin başlangıcını işaretleyin (sıfırlamak için sağ tıkla)
@@ -1175,7 +1175,7 @@ Mark the end of a cut (right click to reset)
 == Bir kesitin bitişini işaretleyin (sıfırlamak için sağ tıkla)
 
 Export cut as a separate demo
-== Kesiti ayrı bir demo olarak dışarı aktar
+== Kesiti ayrı bir kayıt olarak dışarı aktar
 
 Go back one marker
 == Bir işaret geri git
@@ -1184,7 +1184,7 @@ Go forward one marker
 == Bir işaret ileri git
 
 Close the demo player
-== Demo oynatıcısını kapat
+== Kayıt oynatıcısını kapat
 
 Toggle keyboard shortcuts
 == Klavye kısayollarını kullan
@@ -1199,7 +1199,7 @@ Cut length
 == Kesit uzunluğu
 
 Loading demo files
-== Demo dosyaları yükleniyor
+== Kayıt dosyaları yükleniyor
 
 All combined
 == Hepsi birlikte
@@ -1208,22 +1208,22 @@ Folder Link
 == Klasör Linki
 
 Demos directory
-== Demo klasörü
+== Kayıt klasörü
 
 Open the directory that contains the demo files
-== Demo dosyalarını içeren klasörü aç
+== Kayıt dosyalarını içeren klasörü aç
 
 Are you sure that you want to delete the folder '%s'?
 == '%s' klasörünü silmek istediğine emin misin?
 
 Are you sure that you want to delete the demo '%s'?
-== '%s' demosunu silmek istediğine emin misin?
+== '%s' kaydını silmek istediğine emin misin?
 
 Delete folder
 == Klasörü sil
 
 Unable to delete the demo '%s'
-== '%s' demosu silinemiyor
+== '%s' kaydı silinemiyor
 
 Unable to delete the folder '%s'. Make sure it's empty first.
 == '%s' klasörü silinemiyor. Önce boş olduğundan emin olun.
@@ -1559,7 +1559,7 @@ Play
 == Oyna
 
 Loading race demo files
-== Yarış demo dosyaları yükleniyor
+== Yarış kayıt dosyaları yükleniyor
 
 Super
 == Süper
@@ -1591,7 +1591,7 @@ Render cut to video
 == Kesiti videoya dönüştür
 
 Error playing demo
-== Demo oynatılırken hata oluştu
+== Kayıt oynatılırken hata oluştu
 
 Failed saving the replay!
 == Tekrar kaydedilemedi!
@@ -1678,7 +1678,7 @@ Please use a different filename
 == Farklı bir dosya adı kullanın
 
 No demo selected
-== Demo seçilmedi
+== Kayıt seçilmedi
 
 Created
 == Oluşturuldu
@@ -1729,7 +1729,7 @@ Entities background color
 == Yapı arka plan rengi
 
 Loading demo file from storage
-== Cihazdaki demo dosyası yükleniyor
+== Cihazdaki kayıt dosyası yükleniyor
 
 No login required
 == Giriş yapılmasına gerek yok
@@ -2076,7 +2076,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk ve WarHammer tarafından yapıldı
+== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk, WarHammer ve zavzagali tarafından yapıldı
 
 Show spectator cursor
 == İzlenenin imlecini göster
@@ -2086,7 +2086,7 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 == VRAM bitmiş. 'cl_skins_loaded_max' değerini daha düşük bir değere ayarlamayı veya özel varlıkları (kaplamalar, varlıklar vb.), özellikle de yüksek çözünürlüklü olanları kaldırmayı deneyin.
 
 No demo with this filename exists
-== Bu isimle bir demo bulunmuyor
+== Bu isimle bir kayıt bulunmuyor
 
 This name cannot be used for files and folders
 == Bu isim dosya ve klasörler için kullanılamıyor
@@ -2388,7 +2388,7 @@ Rcon Authed
 
 [Touch button visibilities]
 Demo Player
-== Demo Oynatıcı
+== Kayıt Oynatıcı
 
 [Touch button visibilities]
 Extra Menu
@@ -2472,7 +2472,7 @@ You will be disconnected from the server.
 == Sunucudan bağlantınız kesilecek.
 
 Are you sure that you want to disconnect and play this demo?
-== Bağlantıyı kesip bu demoyu oynatmak istediğinizden emin misiniz?
+== Bağlantıyı kesip bu kaydı oynatmak istediğinizden emin misiniz?
 
 Show background quads
 == Arka plan dörtgenlerini göster
@@ -2580,7 +2580,7 @@ Player is currently authed in rcon.
 == Oyuncu şu anda rcon'da doğrulandı.
 
 Demo player is currently active.
-== Demo oynatıcı şu anda aktif.
+== Kayıt oynatıcı şu anda aktif.
 
 The extra menu with the given number is activated.
 == Belirtilen sayıda ekstra menü aktif edildi.
@@ -2647,13 +2647,13 @@ Hook collision line tip
 == Kanca çizgisi ucu
 
 Refresh the demo list
-== Demo listesini yenile
+== Kayıt listesini yenile
 
 Open the selected folder
 == Seçili dosyayı aç
 
 Play the selected demo
-== Seçili demoyu oynat
+== Seçili kaydı oynat
 
 Prediction margin
 == Tahmin etme payı
@@ -2662,64 +2662,64 @@ Predict events (experimental)
 == Olayları tahmin et (deneysel)
 
 Hold Shift to be more precise.
-== 
+== Daha hassas olmak için Shift tuşuna basılı tut
 
 Dummy is not connected
-== 
+== Kukla bağlanamadı.
 
 [Important alert message]
 Tap to dismiss…
-== 
+== Görmezden gelmek için tıkla.
 
 Initializing layers
-== 
+== Katmanlar başlatılıyor.
 
 [Direct touch input]
 Relative aim
-== 
+== Göreceli nişan
 
 [Predefined touch button behaviors]
 Joystick Relative Aim
-== 
+== Göreceli kol nişanı.
 
 Virtual joystick which only aims and moves the mouse pointer relatively.
-== 
+== Sadece nişan almaya ve fare imlecini oynatmaya yarayan kol.
 
 Credits
-== 
+== Katkıda bulunanlar
 
 Teleport to cursor
-== 
+== İmlece ışınlan.
 
 Teleport dummy to cursor
-== 
+== Kukla imlecine ışınlan.
 
 Practice
-== 
+== Pratik.
 
 [AntiPing: predict other players]
 Off
-== 
+== Kapalı.
 
 [AntiPing: predict other players]
 All
-== 
+== Hepsi.
 
 [AntiPing: predict other players]
 Interact
-== 
+== Etkileşime gir.
 
 Always predict frozen players
-== 
+== Donmuş oyuncuları her zaman tahmin et.
 
 No country flags match your filter criteria
-== 
+== Kriterlerine hiçbir ülke bayrağı uymuyor.
 
 Join
-== 
+== Katıl.
 
 not bound
-== 
+== bağlanmamış.
 
 Show cursor
-== 
+== İmleci göster.
