@@ -149,7 +149,7 @@ int CEditor::DoButton_MenuItem(const void *pId, const char *pText, int Checked, 
 	return DoButtonLogic(pId, Checked, pRect, Flags, pToolTip);
 }
 
-int CEditor::DoButton_DraggableEx(const void *pId, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip, int Corners, float FontSize)
+int CEditor::DoButton_DraggableEx(const void *pId, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip, int Corners, float FontSize, const std::vector<STextColorSplit> &vColorSplits)
 {
 	pRect->Draw(GetButtonColor(pId, Checked), Corners, 3.0f);
 
@@ -159,6 +159,7 @@ int CEditor::DoButton_DraggableEx(const void *pId, const char *pText, int Checke
 	SLabelProperties Props;
 	Props.m_MaxWidth = Rect.w;
 	Props.m_EllipsisAtEnd = true;
+	Props.m_vColorSplits = vColorSplits;
 	Ui()->DoLabel(&Rect, pText, FontSize, TEXTALIGN_MC, Props);
 
 	if(Ui()->MouseInside(pRect))

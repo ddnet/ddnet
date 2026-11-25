@@ -145,6 +145,8 @@ public:
 	CSoundSourceCircleShapePropTracker m_SoundSourceCircleShapePropTracker;
 
 	// Selections
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_SearchInput;
+
 	int m_SelectedGroup;
 	std::vector<int> m_vSelectedLayers;
 	std::vector<int> m_vSelectedQuads;
@@ -200,14 +202,16 @@ public:
 	int MoveGroup(int IndexFrom, int IndexTo);
 	void DeleteGroup(int Index);
 	void MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup);
+	void GroupDisplayName(int Index, char *pBuf, int BufSize) const;
 
 	// Layers
 	std::shared_ptr<CLayer> SelectedLayer(int Index) const;
 	std::shared_ptr<CLayer> SelectedLayerType(int Index, int Type) const;
 	void SelectLayer(int LayerIndex, int GroupIndex = -1);
 	void AddSelectedLayer(int LayerIndex);
-	void SelectNextLayer();
-	void SelectPreviousLayer();
+	void SelectMatchingLayer(int Direction);
+	void SelectNextLayer(bool SearchMatches);
+	void SelectPreviousLayer(bool SearchMatches);
 	void SelectGameLayer();
 	void MakeGameLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer);
@@ -215,6 +219,7 @@ public:
 	void MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
+	const char *LayerDisplayName(int GroupIndex, int LayerIndex) const;
 
 	// Quads
 	std::vector<CQuad *> SelectedQuads();
