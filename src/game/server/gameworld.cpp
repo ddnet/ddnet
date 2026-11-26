@@ -168,7 +168,7 @@ void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
 	{
 		for(; pEnt;)
 		{
-			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+			CEntity *pNextEntity = pEnt->m_pNextTypeEntity;
 			for(int i = 0; i < NumPlayers; i++)
 			{
 				if(pEnt->GetOwnerId() == PlayerIds[i])
@@ -178,7 +178,7 @@ void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
 					break;
 				}
 			}
-			pEnt = m_pNextTraverseEntity;
+			pEnt = pNextEntity;
 		}
 	}
 }
