@@ -387,6 +387,11 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	float InnerRadius = 48.0f;
 	int Num = m_World.FindEntities(Pos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	CClientMask TeamMask = CClientMask().set();
+
+	const CCharacter *pOwnerChr = GetPlayerChar(Owner);
+	const int OwnerTuneZone = pOwnerChr ? Collision()->IsTune(Collision()->GetMapIndex(pOwnerChr->m_Pos)) : 0;
+	const float Strength = TuningList()[OwnerTuneZone].m_ExplosionStrength;
+
 	for(int i = 0; i < Num; i++)
 	{
 		auto *pChr = static_cast<CCharacter *>(apEnts[i]);
@@ -396,11 +401,6 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		if(l)
 			ForceDir = normalize(Diff);
 		l = 1 - std::clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
-		float Strength;
-		if(Owner == -1 || !m_apPlayers[Owner] || !m_apPlayers[Owner]->m_TuneZone)
-			Strength = GlobalTuning()->m_ExplosionStrength;
-		else
-			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
 
 		float Dmg = Strength * l;
 		if(!(int)Dmg)
