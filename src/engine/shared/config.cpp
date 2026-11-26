@@ -345,7 +345,7 @@ void CConfigManager::Init()
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 
-	m_pConsole->Register("reset", "s[config]", CFGFLAG_SERVER | CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Reset, this, "Reset a config to its default value");
+	m_pConsole->Register("reset", "s[config]", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_Reset, this, "Reset a config to its default value");
 	m_pConsole->Register("toggle", "s[config] s[value 1] s[value 2]", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_Toggle, this, "Toggle config value");
 	m_pConsole->Register("+toggle", "s[config] s[value 1] s[value 2]", CFGFLAG_CLIENT, Con_ToggleStroke, this, "Toggle config value via keypress");
 }
