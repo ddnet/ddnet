@@ -279,6 +279,21 @@ bool CLayerTiles::IsEntitiesLayer() const
 	return Map()->m_pGameLayer.get() == this || Map()->m_pTeleLayer.get() == this || Map()->m_pSpeedupLayer.get() == this || Map()->m_pFrontLayer.get() == this || Map()->m_pSwitchLayer.get() == this || Map()->m_pTuneLayer.get() == this;
 }
 
+int CLayerTiles::TilemapFlags() const
+{
+	if(m_HasTele)
+		return TILESLAYERFLAG_TELE;
+	if(m_HasSpeedup)
+		return TILESLAYERFLAG_SPEEDUP;
+	if(m_HasFront)
+		return TILESLAYERFLAG_FRONT;
+	if(m_HasSwitch)
+		return TILESLAYERFLAG_SWITCH;
+	if(m_HasTune)
+		return TILESLAYERFLAG_TUNE;
+	return m_HasGame ? TILESLAYERFLAG_GAME : 0;
+}
+
 bool CLayerTiles::IsEmpty() const
 {
 	for(int y = 0; y < m_Height; y++)

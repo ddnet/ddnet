@@ -1,5 +1,7 @@
 #include "layer_group.h"
 
+#include "layer_tiles.h"
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
@@ -175,6 +177,25 @@ int CLayerGroup::MoveLayer(int IndexFrom, int IndexTo)
 	m_vpLayers.erase(m_vpLayers.begin() + IndexFrom);
 	m_vpLayers.insert(m_vpLayers.begin() + IndexTo, pMovedLayer);
 	return IndexTo;
+}
+
+CLayer *CLayerGroup::FindBrushLayer(const CLayer &Target, size_t PreferredIndex) const
+{
+	if(Target.m_Type == LAYERTYPE_TILES)
+	{
+		const int Flags = static_cast<const CLayerTiles &>(Target).TilemapFlags();
+		if(Flags != 0)
+		{
+			const auto It = std::ranges::find_if(m_vpLayers, [Flags](const auto &pLayer) {
+				return pLayer->m_Type == LAYERTYPE_TILES && static_cast<const CLayerTiles &>(*pLayer).TilemapFlags() == Flags;
+			});
+			return It == m_vpLayers.end() ? nullptr : It->get();
+		}
+	}
+
+	if(PreferredIndex < m_vpLayers.size() && m_vpLayers[PreferredIndex]->m_Type == Target.m_Type)
+		return m_vpLayers[PreferredIndex].get();
+	return nullptr;
 }
 
 bool CLayerGroup::IsEmpty() const
