@@ -681,6 +681,7 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	int RespawnTick = pSelf->Server()->Tick() - pSelf->Server()->TickSpeed() * 3 - 2;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(Teams.m_Core.Team(i) == Team)
@@ -693,6 +694,9 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 
 				if(!g_Config.m_SvPauseable && pPlayer2->IsPaused() == -1 * CPlayer::PAUSE_SPEC)
 					pPlayer2->Pause(CPlayer::PAUSE_PAUSED, true);
+
+				pPlayer2->m_DieTick = RespawnTick;
+				pPlayer2->m_PreviousDieTick = RespawnTick;
 			}
 		}
 	}
