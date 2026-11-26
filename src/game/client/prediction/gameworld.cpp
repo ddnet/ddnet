@@ -481,6 +481,7 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 					float Dist = distance(Prev ? pChar->m_PrevPrevPos : pChar->m_PrevPos, NetPos);
 					if(Dist < First)
 					{
+						Second = First;
 						pClosest = pChar;
 						First = Dist;
 					}
