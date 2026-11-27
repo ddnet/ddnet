@@ -31,11 +31,27 @@ public:
 		NUM_ENTTYPES
 	};
 
+	class CEntityIterator
+	{
+		friend CGameWorld;
+
+		CGameWorld *m_pWorld;
+		CEntity *m_pNext = nullptr;
+		bool m_AllowEntityRemoval = false;
+
+	public:
+		CEntityIterator(CGameWorld *pWorld, CEntity *pFirstEntity);
+		CEntityIterator(CGameWorld *pWorld, int EntityType);
+		~CEntityIterator();
+		void AllowEntityRemoval();
+		CEntity *Next();
+	};
+
 private:
 	void Reset();
 	void RemoveEntities();
 
-	CEntity *m_pNextTraverseEntity = nullptr;
+	std::vector<CEntityIterator *> m_vpEntityIterators;
 	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
 
 	class CGameContext *m_pGameServer;
@@ -57,8 +73,6 @@ public:
 
 	void SetGameServer(CGameContext *pGameServer);
 	void Init(CCollision *pCollision, CTuningParams *pTuningList);
-
-	CEntity *FindFirst(int Type);
 
 	/*
 		Function: FindEntities

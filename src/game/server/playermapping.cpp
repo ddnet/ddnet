@@ -41,7 +41,8 @@ void CPlayerMapping::Tick()
 	// Walk the character list ONCE per tick, not once per legacy client
 	int aCharacterIds[MAX_CLIENTS];
 	int NumCharacters = 0;
-	for(CCharacter *pChar = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
+	CGameWorld::CEntityIterator Iterator(&GameServer()->m_World, CGameWorld::ENTTYPE_CHARACTER);
+	while(CCharacter *pChar = static_cast<CCharacter *>(Iterator.Next()))
 	{
 		aCharacterIds[NumCharacters++] = pChar->GetPlayer()->GetCid();
 	}

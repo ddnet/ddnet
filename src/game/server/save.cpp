@@ -597,8 +597,8 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 	m_pSavedTees = new CSaveTee[MembersCount];
 	int aPlayerCids[MAX_CLIENTS];
 	int j = 0;
-	CCharacter *p = (CCharacter *)pGameServer->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-	for(; p; p = (CCharacter *)p->TypeNext())
+	CGameWorld::CEntityIterator Iterator(&pGameServer->m_World, CGameWorld::ENTTYPE_CHARACTER);
+	while(CCharacter *p = static_cast<CCharacter *>(Iterator.Next()))
 	{
 		if(pTeams->m_Core.Team(p->GetPlayer()->GetCid()) != Team)
 			continue;

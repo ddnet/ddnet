@@ -2620,13 +2620,14 @@ void CGameClient::OnPredict()
 			if((!m_Snap.m_aCharacters[i].m_Active && pChar->m_SnapTicks > 10) || IsOtherTeam(i))
 				pChar->Destroy();
 
-	CProjectile *pProjNext = nullptr;
-	for(CProjectile *pProj = (CProjectile *)m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = pProjNext)
 	{
-		pProjNext = (CProjectile *)pProj->TypeNext();
-		if(IsOtherTeam(pProj->GetOwner()))
+		CGameWorld::CEntityIterator Iterator(&m_PredictedWorld, CGameWorld::ENTTYPE_PROJECTILE);
+		while(CProjectile *pProj = static_cast<CProjectile *>(Iterator.Next()))
 		{
-			pProj->Destroy();
+			if(IsOtherTeam(pProj->GetOwner()))
+			{
+				pProj->Destroy();
+			}
 		}
 	}
 

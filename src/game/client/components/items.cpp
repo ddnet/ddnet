@@ -490,37 +490,45 @@ void CItems::OnRender()
 
 	if(UsePredicted)
 	{
-		for(auto *pProj = (CProjectile *)GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
-			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_aStatus[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
-				continue;
-
-			CProjectileData Data = pProj->GetData();
-			RenderProjectile(&Data, pProj->GetId(), ScreenRectProjectile);
-		}
-		for(CEntity *pEnt = GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->NextEntity())
-		{
-			auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
-			if(!pLaser || pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
-				continue;
-			CLaserData Data = pLaser->GetData();
-			if(!IsLaserInside(Data))
-				continue;
-			RenderLaser(&Data, true);
-		}
-		for(auto *pPickup = (CPickup *)GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
-		{
-			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < (int)aSwitchers.size() && !aSwitchers[pPickup->m_Number].m_aStatus[SwitcherTeam] && BlinkingPickup)
-				continue;
-
-			if(pPickup->InDDNetTile())
+			CGameWorld::CEntityIterator Iterator(&GameClient()->m_PrevPredictedWorld, CGameWorld::ENTTYPE_PROJECTILE);
+			while(CProjectile *pProj = static_cast<CProjectile *>(Iterator.Next()))
 			{
-				if(auto *pPrev = (CPickup *)GameClient()->m_PrevPredictedWorld.GetEntity(pPickup->GetId(), CGameWorld::ENTTYPE_PICKUP))
+				if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_aStatus[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
+					continue;
+
+				CProjectileData Data = pProj->GetData();
+				RenderProjectile(&Data, pProj->GetId(), ScreenRectProjectile);
+			}
+		}
+		{
+			CGameWorld::CEntityIterator Iterator(&GameClient()->m_PrevPredictedWorld, CGameWorld::ENTTYPE_LASER);
+			while(CLaser *pLaser = static_cast<CLaser *>(Iterator.Next()))
+			{
+				if(pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
+					continue;
+				CLaserData Data = pLaser->GetData();
+				if(!IsLaserInside(Data))
+					continue;
+				RenderLaser(&Data, true);
+			}
+		}
+		{
+			CGameWorld::CEntityIterator Iterator(&GameClient()->m_PrevPredictedWorld, CGameWorld::ENTTYPE_PICKUP);
+			while(CPickup *pPickup = static_cast<CPickup *>(Iterator.Next()))
+			{
+				if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < (int)aSwitchers.size() && !aSwitchers[pPickup->m_Number].m_aStatus[SwitcherTeam] && BlinkingPickup)
+					continue;
+
+				if(pPickup->InDDNetTile())
 				{
-					CNetObj_Pickup Data, Prev;
-					pPickup->FillInfo(&Data);
-					pPrev->FillInfo(&Prev);
-					RenderPickup(&Prev, &Data, true, pPickup->Flags());
+					if(auto *pPrev = (CPickup *)GameClient()->m_PrevPredictedWorld.GetEntity(pPickup->GetId(), CGameWorld::ENTTYPE_PICKUP))
+					{
+						CNetObj_Pickup Data, Prev;
+						pPickup->FillInfo(&Data);
+						pPrev->FillInfo(&Prev);
+						RenderPickup(&Prev, &Data, true, pPickup->Flags());
+					}
 				}
 			}
 		}

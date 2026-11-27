@@ -18,6 +18,43 @@
 //////////////////////////////////////////////////
 // game world
 //////////////////////////////////////////////////
+
+CGameWorld::CEntityIterator::CEntityIterator(CGameWorld *pWorld, CEntity *pFirstEntity) :
+	m_pWorld(pWorld),
+	m_pNext(pFirstEntity)
+{
+	m_pWorld->m_vpEntityIterators.push_back(this);
+}
+
+CGameWorld::CEntityIterator::CEntityIterator(CGameWorld *pWorld, int EntityType) :
+	m_pWorld(pWorld)
+{
+	dbg_assert(EntityType >= 0 && EntityType < NUM_ENTTYPES, "Invalid EntityType: %d", EntityType);
+	m_pNext = m_pWorld->m_apFirstEntityTypes[EntityType];
+	m_pWorld->m_vpEntityIterators.push_back(this);
+}
+
+CGameWorld::CEntityIterator::~CEntityIterator()
+{
+	dbg_assert(m_pWorld->m_vpEntityIterators.back() == this, "Inconsistent entity iterator removal");
+	m_pWorld->m_vpEntityIterators.pop_back();
+}
+
+void CGameWorld::CEntityIterator::AllowEntityRemoval()
+{
+	m_AllowEntityRemoval = true;
+}
+
+CEntity *CGameWorld::CEntityIterator::Next()
+{
+	CEntity *pResult = m_pNext;
+	if(m_pNext != nullptr)
+	{
+		m_pNext = m_pNext->m_pNextTypeEntity;
+	}
+	return pResult;
+}
+
 CGameWorld::CGameWorld()
 {
 	m_pGameServer = nullptr;
@@ -50,18 +87,11 @@ void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList)
 	m_pTuningList = pTuningList;
 }
 
-CEntity *CGameWorld::FindFirst(int Type)
-{
-	return Type < 0 || Type >= NUM_ENTTYPES ? nullptr : m_apFirstEntityTypes[Type];
-}
-
 int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type)
 {
-	if(Type < 0 || Type >= NUM_ENTTYPES)
-		return 0;
-
 	int Num = 0;
-	for(CEntity *pEnt = m_apFirstEntityTypes[Type]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
+	CEntityIterator Iterator(this, Type);
+	while(CEntity *pEnt = Iterator.Next())
 	{
 		if(distance(pEnt->m_Pos, Pos) < Radius + pEnt->m_ProximityRadius)
 		{
@@ -97,6 +127,11 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 	if(!pEnt->m_pNextTypeEntity && !pEnt->m_pPrevTypeEntity && m_apFirstEntityTypes[pEnt->m_ObjType] != pEnt)
 		return;
 
+	for(CEntityIterator *pEntityIterator : m_vpEntityIterators)
+	{
+		dbg_assert(pEntityIterator->m_AllowEntityRemoval, "Removing entities not allowed with current iterator");
+	}
+
 	// remove
 	if(pEnt->m_pPrevTypeEntity)
 		pEnt->m_pPrevTypeEntity->m_pNextTypeEntity = pEnt->m_pNextTypeEntity;
@@ -106,8 +141,13 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 		pEnt->m_pNextTypeEntity->m_pPrevTypeEntity = pEnt->m_pPrevTypeEntity;
 
 	// keep list traversing valid
-	if(m_pNextTraverseEntity == pEnt)
-		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+	for(CEntityIterator *pEntityIterator : m_vpEntityIterators)
+	{
+		if(pEntityIterator->m_pNext == pEnt)
+		{
+			pEntityIterator->m_pNext = pEnt->m_pNextTypeEntity;
+		}
+	}
 
 	pEnt->m_pNextTypeEntity = nullptr;
 	pEnt->m_pPrevTypeEntity = nullptr;
@@ -116,11 +156,12 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 //
 void CGameWorld::Snap(int SnappingClient)
 {
-	for(CEntity *pEnt = m_apFirstEntityTypes[ENTTYPE_CHARACTER]; pEnt;)
 	{
-		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-		pEnt->Snap(SnappingClient);
-		pEnt = m_pNextTraverseEntity;
+		CEntityIterator Iterator(this, m_apFirstEntityTypes[ENTTYPE_CHARACTER]);
+		while(CEntity *pEnt = Iterator.Next())
+		{
+			pEnt->Snap(SnappingClient);
+		}
 	}
 
 	for(int i = 0; i < NUM_ENTTYPES; i++)
@@ -128,11 +169,10 @@ void CGameWorld::Snap(int SnappingClient)
 		if(i == ENTTYPE_CHARACTER)
 			continue;
 
-		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt;)
+		CEntityIterator Iterator(this, m_apFirstEntityTypes[i]);
+		while(CEntity *pEnt = Iterator.Next())
 		{
-			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Snap(SnappingClient);
-			pEnt = m_pNextTraverseEntity;
 		}
 	}
 }
@@ -140,13 +180,15 @@ void CGameWorld::Snap(int SnappingClient)
 void CGameWorld::Reset()
 {
 	// reset all entities
-	for(auto *pEnt : m_apFirstEntityTypes)
-		for(; pEnt;)
+	for(CEntity *pFirstEntity : m_apFirstEntityTypes)
+	{
+		CEntityIterator Iterator(this, pFirstEntity);
+		Iterator.AllowEntityRemoval();
+		while(CEntity *pEnt = Iterator.Next())
 		{
-			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Reset();
-			pEnt = m_pNextTraverseEntity;
 		}
+	}
 	RemoveEntities();
 
 	GameServer()->m_pController->OnReset();
@@ -164,11 +206,12 @@ void CGameWorld::RemoveEntitiesFromPlayer(int PlayerId)
 
 void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
 {
-	for(auto *pEnt : m_apFirstEntityTypes)
+	for(CEntity *pFirstEntity : m_apFirstEntityTypes)
 	{
-		for(; pEnt;)
+		CEntityIterator Iterator(this, pFirstEntity);
+		Iterator.AllowEntityRemoval();
+		while(CEntity *pEnt = Iterator.Next())
 		{
-			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			for(int i = 0; i < NumPlayers; i++)
 			{
 				if(pEnt->GetOwnerId() == PlayerIds[i])
@@ -178,7 +221,6 @@ void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
 					break;
 				}
 			}
-			pEnt = m_pNextTraverseEntity;
 		}
 	}
 }
@@ -186,17 +228,19 @@ void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
 void CGameWorld::RemoveEntities()
 {
 	// destroy objects marked for destruction
-	for(auto *pEnt : m_apFirstEntityTypes)
-		for(; pEnt;)
+	for(CEntity *pFirstEntity : m_apFirstEntityTypes)
+	{
+		CEntityIterator Iterator(this, pFirstEntity);
+		Iterator.AllowEntityRemoval();
+		while(CEntity *pEnt = Iterator.Next())
 		{
-			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			if(pEnt->m_MarkedForDestroy)
 			{
 				RemoveEntity(pEnt);
 				pEnt->Destroy();
 			}
-			pEnt = m_pNextTraverseEntity;
 		}
+	}
 }
 
 void CGameWorld::Tick()
@@ -213,49 +257,52 @@ void CGameWorld::Tick()
 			// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
 			if(g_Config.m_SvNoWeakHook && i == ENTTYPE_CHARACTER)
 			{
-				auto *pEnt = m_apFirstEntityTypes[i];
-				for(; pEnt;)
+				CEntityIterator Iterator(this, m_apFirstEntityTypes[ENTTYPE_CHARACTER]);
+				Iterator.AllowEntityRemoval();
+				while(CCharacter *pCharacter = static_cast<CCharacter *>(Iterator.Next()))
 				{
-					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-					((CCharacter *)pEnt)->PreTick();
-					pEnt = m_pNextTraverseEntity;
+					pCharacter->PreTick();
 				}
 			}
 
-			auto *pEnt = m_apFirstEntityTypes[i];
-			for(; pEnt;)
+			CEntityIterator Iterator(this, m_apFirstEntityTypes[i]);
+			Iterator.AllowEntityRemoval();
+			while(CEntity *pEnt = Iterator.Next())
 			{
-				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->Tick();
-				pEnt = m_pNextTraverseEntity;
 			}
 		}
 
-		for(auto *pEnt : m_apFirstEntityTypes)
-			for(; pEnt;)
+		for(CEntity *pFirstEntity : m_apFirstEntityTypes)
+		{
+			CEntityIterator Iterator(this, pFirstEntity);
+			Iterator.AllowEntityRemoval();
+			while(CEntity *pEnt = Iterator.Next())
 			{
-				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickDeferred();
-				pEnt = m_pNextTraverseEntity;
 			}
+		}
 	}
 	else
 	{
 		// update all objects
-		for(auto *pEnt : m_apFirstEntityTypes)
-			for(; pEnt;)
+		for(CEntity *pFirstEntity : m_apFirstEntityTypes)
+		{
+			CEntityIterator Iterator(this, pFirstEntity);
+			Iterator.AllowEntityRemoval();
+			while(CEntity *pEnt = Iterator.Next())
 			{
-				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickPaused();
-				pEnt = m_pNextTraverseEntity;
 			}
+		}
 	}
 
 	RemoveEntities();
 
 	// find the characters' strong/weak id
 	int StrongWeakId = 0;
-	for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
+	CEntityIterator Iterator(this, m_apFirstEntityTypes[ENTTYPE_CHARACTER]);
+	while(CCharacter *pChar = static_cast<CCharacter *>(Iterator.Next()))
 	{
 		pChar->m_StrongWeakId = StrongWeakId;
 		StrongWeakId++;
@@ -265,28 +312,30 @@ void CGameWorld::Tick()
 ESaveResult CGameWorld::BlocksSave(int ClientId)
 {
 	// check all objects
-	for(auto *pEnt : m_apFirstEntityTypes)
-		for(; pEnt;)
+	for(CEntity *pFirstEntity : m_apFirstEntityTypes)
+	{
+		CEntityIterator Iterator(this, pFirstEntity);
+		while(CEntity *pEnt = Iterator.Next())
 		{
-			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			ESaveResult Result = pEnt->BlocksSave(ClientId);
 			if(Result != ESaveResult::SUCCESS)
 				return Result;
-			pEnt = m_pNextTraverseEntity;
 		}
+	}
 	return ESaveResult::SUCCESS;
 }
 
 void CGameWorld::SwapClients(int Client1, int Client2)
 {
 	// update all objects
-	for(auto *pEnt : m_apFirstEntityTypes)
-		for(; pEnt;)
+	for(CEntity *pFirstEntity : m_apFirstEntityTypes)
+	{
+		CEntityIterator Iterator(this, pFirstEntity);
+		while(CEntity *pEnt = Iterator.Next())
 		{
-			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->SwapClients(Client1, Client2);
-			pEnt = m_pNextTraverseEntity;
 		}
+	}
 }
 
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
@@ -299,8 +348,8 @@ CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Typ
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
 	CEntity *pClosest = nullptr;
 
-	CEntity *pEntity = FindFirst(Type);
-	for(; pEntity; pEntity = pEntity->TypeNext())
+	CEntityIterator Iterator(this, Type);
+	while(CEntity *pEntity = Iterator.Next())
 	{
 		if(pEntity == pNotThis)
 			continue;
@@ -337,8 +386,8 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, const CEntity *
 	float ClosestRange = Radius * 2;
 	CCharacter *pClosest = nullptr;
 
-	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
-	for(; p; p = (CCharacter *)p->TypeNext())
+	CEntityIterator Iterator(this, m_apFirstEntityTypes[ENTTYPE_CHARACTER]);
+	while(CCharacter *p = static_cast<CCharacter *>(Iterator.Next()))
 	{
 		if(p == pNotThis)
 			continue;
@@ -360,8 +409,8 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, const CEntity *
 std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis)
 {
 	std::vector<CCharacter *> vpCharacters;
-	CCharacter *pChr = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
+	CEntityIterator Iterator(this, m_apFirstEntityTypes[ENTTYPE_CHARACTER]);
+	while(CCharacter *pChr = static_cast<CCharacter *>(Iterator.Next()))
 	{
 		if(pChr == pNotThis)
 			continue;
@@ -381,8 +430,8 @@ std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1
 
 void CGameWorld::ReleaseHooked(int ClientId)
 {
-	CCharacter *pChr = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
+	CEntityIterator Iterator(this, m_apFirstEntityTypes[ENTTYPE_CHARACTER]);
+	while(CCharacter *pChr = static_cast<CCharacter *>(Iterator.Next()))
 	{
 		if(pChr->Core()->HookedPlayer() == ClientId && !pChr->IsSuper())
 		{

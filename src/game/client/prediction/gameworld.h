@@ -32,6 +32,22 @@ public:
 		NUM_ENTTYPES
 	};
 
+	class CEntityIterator
+	{
+		friend CGameWorld;
+
+		CGameWorld *m_pWorld;
+		CEntity *m_pNext = nullptr;
+		bool m_AllowEntityRemoval = false;
+
+	public:
+		CEntityIterator(CGameWorld *pWorld, CEntity *pFirstEntity);
+		CEntityIterator(CGameWorld *pWorld, int EntityType);
+		~CEntityIterator();
+		void AllowEntityRemoval();
+		CEntity *Next();
+	};
+
 	CWorldCore m_Core;
 	CTeamsCore m_Teams;
 
@@ -39,8 +55,6 @@ public:
 	~CGameWorld();
 	void Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs);
 
-	CEntity *FindFirst(int Type);
-	CEntity *FindLast(int Type);
 	int FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type);
 	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
 	CEntity *IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis = nullptr, int CollideWith = -1, const CEntity *pThisOnly = nullptr);
@@ -144,7 +158,7 @@ public:
 private:
 	void RemoveEntities();
 
-	CEntity *m_pNextTraverseEntity = nullptr;
+	std::vector<CEntityIterator *> m_vpEntityIterators;
 	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
 
 	CCharacter *m_apCharacters[MAX_CLIENTS];
