@@ -290,6 +290,7 @@ public:
 	virtual int SnapNumItems(int SnapId) const = 0;
 	virtual const void *SnapFindItem(int SnapId, int Type, int Id) const = 0;
 	virtual CSnapItem SnapGetItem(int SnapId, int Index) const = 0;
+	virtual int ReceivedGameTick(int Conn) const = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 	virtual void SnapSetStaticsize7(int ItemType, int Size) = 0;

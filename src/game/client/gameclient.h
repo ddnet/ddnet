@@ -413,9 +413,7 @@ public:
 
 	CSnapState m_Snap;
 	int m_aLocalTuneZone[NUM_DUMMIES]; // current tunezone (0-255)
-	bool m_aReceivedTuning[NUM_DUMMIES]; // was tuning message received after zone change
-	int m_aExpectingTuningForZone[NUM_DUMMIES]; // tunezone changed, waiting for tuning for that zone
-	int m_aExpectingTuningSince[NUM_DUMMIES]; // how many snaps received since tunezone changed
+	int m_aReceivedTuningTick[NUM_DUMMIES]; // newest snapshot received before the tuning message, -1 once the tuning is used
 	CTuningParams m_aTuning[NUM_DUMMIES]; // current local player tuning, only what the player/dummy has
 
 	std::bitset<RECORDER_MAX> m_ActiveRecordings;
