@@ -68,6 +68,7 @@
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/touch_controls.h"
+#include "components/ui_tutorial.h"
 #include "components/voting.h"
 
 #include <memory>
@@ -177,6 +178,7 @@ public:
 	CEmoticon m_Emoticon;
 	CDamageInd m_DamageInd;
 	CTouchControls m_TouchControls;
+	CUiTutorial m_UiTutorial;
 	CVoting m_Voting;
 	CSpectator m_Spectator;
 	CMultiView m_MultiView;
