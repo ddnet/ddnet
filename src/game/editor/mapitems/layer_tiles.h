@@ -129,6 +129,7 @@ public:
 	void Clamp(CIntRect *pRect) const;
 
 	bool IsEntitiesLayer() const override;
+	int TilemapFlags() const;
 
 	[[nodiscard]] virtual bool IsEmpty() const;
 	void BrushSelecting(CUIRect Rect) override;

@@ -45,6 +45,7 @@ public:
 	void DuplicateLayer(int Index);
 	int MoveLayer(int IndexFrom, int IndexTo);
 
+	CLayer *FindBrushLayer(const CLayer &Target, size_t PreferredIndex) const;
 	bool IsEmpty() const;
 	void Clear();
 

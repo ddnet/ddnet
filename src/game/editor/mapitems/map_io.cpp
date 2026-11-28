@@ -213,20 +213,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 
 				Item.m_Width = pLayerTiles->m_Width;
 				Item.m_Height = pLayerTiles->m_Height;
-				// Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
-
-				if(pLayerTiles->m_HasTele)
-					Item.m_Flags = TILESLAYERFLAG_TELE;
-				else if(pLayerTiles->m_HasSpeedup)
-					Item.m_Flags = TILESLAYERFLAG_SPEEDUP;
-				else if(pLayerTiles->m_HasFront)
-					Item.m_Flags = TILESLAYERFLAG_FRONT;
-				else if(pLayerTiles->m_HasSwitch)
-					Item.m_Flags = TILESLAYERFLAG_SWITCH;
-				else if(pLayerTiles->m_HasTune)
-					Item.m_Flags = TILESLAYERFLAG_TUNE;
-				else
-					Item.m_Flags = pLayerTiles->m_HasGame ? TILESLAYERFLAG_GAME : 0;
+				Item.m_Flags = pLayerTiles->TilemapFlags();
 
 				Item.m_Image = pLayerTiles->m_Image;
 
