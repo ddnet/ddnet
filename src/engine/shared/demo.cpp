@@ -390,6 +390,7 @@ int CDemoRecorder::Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilena
 			log_error_color(DEMO_PRINT_COLOR, "demo_recorder", "Could not remove demo file '%s'.", m_aCurrentFilename);
 			return -1;
 		}
+		log_info_color(DEMO_PRINT_COLOR, "demo_recorder", "Stopped recording to '%s' (deleted)", m_aCurrentFilename);
 	}
 	else if(pTargetFilename[0] != '\0')
 	{
@@ -398,9 +399,13 @@ int CDemoRecorder::Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilena
 			log_error_color(DEMO_PRINT_COLOR, "demo_recorder", "Could not move demo file '%s' to '%s'.", m_aCurrentFilename, pTargetFilename);
 			return -1;
 		}
+		log_info_color(DEMO_PRINT_COLOR, "demo_recorder", "Stopped recording to '%s'", pTargetFilename);
+	}
+	else
+	{
+		log_info_color(DEMO_PRINT_COLOR, "demo_recorder", "Stopped recording to '%s'", m_aCurrentFilename);
 	}
 
-	log_info_color(DEMO_PRINT_COLOR, "demo_recorder", "Stopped recording to '%s'", m_aCurrentFilename);
 	return 0;
 }
 
