@@ -1212,6 +1212,8 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser, bool Sixup, bool Va
 	pThis->Antibot()->OnEngineClientDrop(ClientId, "rejoin");
 	pThis->Antibot()->OnEngineClientJoin(ClientId);
 
+	pThis->SendRconType(ClientId, pThis->m_AuthManager.NumNonDefaultKeys() > 0);
+	pThis->SendCapabilities(ClientId);
 	pThis->SendMap(ClientId);
 
 	return 0;
