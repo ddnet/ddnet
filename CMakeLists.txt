@@ -919,7 +919,7 @@ endif()
 ########################################################################
 
 if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
-  set(DDNET_GTEST_VERSION e5443e5c65f23bfd2a9d56a30bb5b1de91a48ff9)
+  set(DDNET_GTEST_VERSION a46a6012a133c7c0929fdae55b321c2fe65f3c5f)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
