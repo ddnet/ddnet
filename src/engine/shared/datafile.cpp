@@ -419,6 +419,7 @@ public:
 			}
 			else
 			{
+				Check(Offset % sizeof(int) == 0, "item offset not integer aligned. index=%d offset=%d", Index, Offset);
 				Check(Offset > PrevItemOffset, "item offset not greater than previous. index=%d offset=%d previous=%d", Index, Offset, PrevItemOffset);
 			}
 			Check(Offset < m_Header.m_ItemSize, "item offset larger than total item size. index=%d offset=%d total=%d", Index, Offset, m_Header.m_ItemSize);
