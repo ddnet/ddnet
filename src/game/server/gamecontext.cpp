@@ -116,6 +116,7 @@ CGameContext::CGameContext(bool Resetting) :
 	m_aVoteReason[0] = '\0';
 	m_NumVoteOptions = 0;
 	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
+	m_VoteVictim = -1;
 
 	m_LatestLog = 0;
 	mem_zero(&m_aLogs, sizeof(m_aLogs));
@@ -1110,9 +1111,12 @@ void CGameContext::SendVoteStatus(int ClientId, int Total, int Yes, int No)
 
 void CGameContext::AbortVoteKickOnDisconnect(int ClientId)
 {
-	if(m_VoteCloseTime && ((str_startswith(m_aVoteCommand, "kick ") && str_toint(&m_aVoteCommand[5]) == ClientId) ||
-				      (str_startswith(m_aVoteCommand, "set_team ") && str_toint(&m_aVoteCommand[9]) == ClientId)))
+	if(m_VoteCloseTime &&
+		(IsKickVote() || IsSpecVote()) &&
+		m_VoteVictim == ClientId)
+	{
 		m_VoteEnforce = VOTE_ENFORCE_ABORT;
+	}
 }
 
 void CGameContext::SendTuningParams(int ClientId, int Zone)
@@ -2487,6 +2491,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		}
 
 		m_VoteType = VOTE_TYPE_OPTION;
+		m_VoteVictim = -1;
 	}
 	else if(str_comp_nocase(pMsg->m_pType, "kick") == 0)
 	{
