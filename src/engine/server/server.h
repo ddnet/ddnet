@@ -36,6 +36,7 @@ class CMsgPacker;
 class CPacker;
 class IEngine;
 class IEngineHttp;
+class IHttpRequest;
 class ILogger;
 
 class CServerBan : public CNetBan
@@ -84,6 +85,22 @@ class CServer : public IServer
 	class CDbConnectionPool *m_pConnectionPool;
 
 	int m_PreviousDebugDummies = 0;
+
+	// STUN port discovery for the master server registration
+	bool m_StunEnabled = false;
+	bool m_HaveStunServerIpv4 = false;
+	bool m_HaveStunServerIpv6 = false;
+	// Public port discovered via STUN, 0 if there is none.
+	int m_StunPortIpv4 = 0;
+	int m_StunPortIpv6 = 0;
+	// Last time an unchanged public port was logged, to not repeat it on every update.
+	int64_t m_StunUnchangedTraceIpv4 = 0;
+	int64_t m_StunUnchangedTraceIpv6 = 0;
+	// Request for the DDNet info file, which contains the STUN servers.
+	std::shared_ptr<IHttpRequest> m_pStunInfoRequest;
+	int m_StunInfoErrors = 0;
+	int64_t m_NextStunInfoRequest = -1;
+	int64_t m_NextStunRefresh = -1;
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
@@ -492,6 +509,7 @@ public:
 	static void ConchainReservedSlotsAuthLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainStunServerUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRegisterCommunityTokenRedact(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -522,6 +540,9 @@ public:
 	int *GetIdMap(int ClientId) override;
 	int *GetReverseIdMap(int ClientId) override;
 
+	void InitStun();
+	void RequestStunInfo();
+	void UpdateStun();
 	void InitDnsbl(int ClientId);
 	bool DnsblWhite(int ClientId) override
 	{
