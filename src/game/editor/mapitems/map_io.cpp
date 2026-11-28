@@ -42,7 +42,7 @@ void CDataFileWriterFinishJob::Run()
 {
 	m_Writer.Finish();
 
-	if(!m_pStorage->RenameFile(m_aTempFilename, m_aRealFilename, IStorage::TYPE_SAVE))
+	if(!m_pStorage->ReplaceFile(m_aTempFilename, m_aRealFilename, IStorage::TYPE_SAVE))
 	{
 		str_format(m_aErrorMessage, sizeof(m_aErrorMessage), "Saving failed: Could not move temporary map file '%s' to '%s'.", m_aTempFilename, m_aRealFilename);
 		log_error("editor/save", "%s", m_aErrorMessage);

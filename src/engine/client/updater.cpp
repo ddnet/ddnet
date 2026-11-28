@@ -225,12 +225,12 @@ bool CUpdater::MoveFile(const char *pFile)
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
 		m_pStorage->RenameBinaryFile(pFile, aBuf);
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
-		Success &= m_pStorage->RenameBinaryFile(aBuf, pFile);
+		Success &= m_pStorage->ReplaceBinaryFile(aBuf, pFile);
 	}
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
-		Success &= m_pStorage->RenameBinaryFile(aBuf, pFile);
+		Success &= m_pStorage->ReplaceBinaryFile(aBuf, pFile);
 	}
 
 	return Success;
@@ -269,7 +269,7 @@ bool CUpdater::ReplaceClient()
 	m_pStorage->RemoveBinaryFile(CLIENT_EXEC ".old");
 	Success &= m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, CLIENT_EXEC ".old");
 	str_format(aPath, sizeof(aPath), "update/%s", m_aClientExecTmp);
-	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_CLIENT_EXEC);
+	Success &= m_pStorage->ReplaceBinaryFile(aPath, PLAT_CLIENT_EXEC);
 #if !defined(CONF_FAMILY_WINDOWS)
 	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof(aPath));
 	Success &= SetExecutableBit(aPath);
@@ -287,7 +287,7 @@ bool CUpdater::ReplaceServer()
 	m_pStorage->RemoveBinaryFile(SERVER_EXEC ".old");
 	Success &= m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, SERVER_EXEC ".old");
 	str_format(aPath, sizeof(aPath), "update/%s", m_aServerExecTmp);
-	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_SERVER_EXEC);
+	Success &= m_pStorage->ReplaceBinaryFile(aPath, PLAT_SERVER_EXEC);
 #if !defined(CONF_FAMILY_WINDOWS)
 	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof(aPath));
 	Success &= SetExecutableBit(aPath);
