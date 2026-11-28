@@ -327,6 +327,47 @@ TEST_F(GameWorld, LaserOfPlayerWithoutCharacterHitsOthers)
 	EXPECT_EQ(pTarget->m_FreezeTime, 0); // NOLINT(clang-analyzer-unix.Malloc)
 }
 
+TEST_F(GameWorld, ExplosionStrengthDoesNotFollowSpectatorCamera)
+{
+	const CCollision *pCollision = GameServer()->Collision();
+	vec2 TuneZonePos(0.0f, 0.0f);
+	int TuneZone = 0;
+	for(int Index = 0; Index < pCollision->GetWidth() * pCollision->GetHeight() && TuneZone == 0; Index++)
+	{
+		TuneZone = pCollision->IsTune(Index);
+		TuneZonePos = vec2((Index % pCollision->GetWidth() + 0.5f) * 32.0f, (Index / pCollision->GetWidth() + 0.5f) * 32.0f);
+	}
+	ASSERT_NE(TuneZone, 0);
+
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "tune_zone %d explosion_strength 60", TuneZone);
+	GameServer()->Console()->ExecuteLine(aBuf, IConsole::CLIENT_ID_UNSPECIFIED);
+
+	g_Config.m_DbgDummies = 1;
+	m_pServer->UpdateDebugDummies(false);
+	GameServer()->OnTick();
+	const int OwnerId = m_pServer->MaxClients() - 1;
+	CPlayer *pOwner = GameServer()->m_apPlayers[OwnerId];
+	CCharacter *pChr = GameServer()->GetPlayerChar(OwnerId);
+	ASSERT_NE(pChr, nullptr);
+	ASSERT_EQ(pCollision->IsTune(pCollision->GetMapIndex(pChr->m_Pos)), 0);
+
+	// paused with the spectator camera inside the tune zone, the character is still in the world
+	pOwner->Pause(CPlayer::PAUSE_PAUSED, true);
+	CNetObj_PlayerInput Input = {};
+	Input.m_TargetX = round_to_int(TuneZonePos.x);
+	Input.m_TargetY = round_to_int(TuneZonePos.y);
+	Input.m_PlayerFlags = PLAYERFLAG_PLAYING | PLAYERFLAG_SPEC_CAM;
+	GameServer()->OnClientDirectInput(OwnerId, &Input);
+	GameServer()->OnTick();
+	ASSERT_EQ(pOwner->m_TuneZone, TuneZone);
+
+	// within the inner radius the force is twice the explosion strength
+	const float VelBefore = pChr->GetCore().m_Vel.y;
+	GameServer()->CreateExplosion(pChr->m_Pos + vec2(0.0f, 16.0f), OwnerId, WEAPON_GRENADE, false, -1);
+	EXPECT_NEAR(VelBefore - pChr->GetCore().m_Vel.y, 2 * GameServer()->GlobalTuning()->m_ExplosionStrength, 0.01f);
+}
+
 TEST_F(GameWorld, BasicTick)
 {
 	int ClientId = 0;
