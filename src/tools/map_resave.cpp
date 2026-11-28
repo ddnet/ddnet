@@ -52,7 +52,11 @@ static int ResaveMap(const char *pSourceMap, const char *pDestinationMap, IStora
 	}
 
 	pMap->Unload();
-	Writer.Finish();
+	if(!Writer.Finish())
+	{
+		log_error(TOOL_NAME, "Failed to write destination map '%s'", pDestinationMap);
+		return -1;
+	}
 	log_info(TOOL_NAME, "Resaved '%s' to '%s'", pSourceMap, pDestinationMap);
 	return 0;
 }

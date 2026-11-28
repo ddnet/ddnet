@@ -32,7 +32,7 @@ public:
 
 static bool ReplaceArea(IStorage *, const char[3][64], const float[][2][2]);
 static bool OpenMaps(IStorage *, const char[3][64], IMap *[2], CDataFileWriter &);
-static void SaveOutputMap(IMap *, CDataFileWriter &);
+static bool SaveOutputMap(IMap *, CDataFileWriter &);
 static bool CompareLayers(const char[3][64], IMap *[2]);
 static void CompareGroups(const char[3][64], IMap *[2]);
 static const CMapItemGroup *GetLayerGroup(IMap *, int);
@@ -147,9 +147,7 @@ bool ReplaceArea(IStorage *pStorage, const char aaMapNames[3][64], const float a
 			ReplaceAreaQuads(apInputMaps, aaaGameAreas, apLayerGroups, apItem, aLayersStart[1] + i);
 	}
 
-	SaveOutputMap(apInputMaps[1], OutputMap);
-
-	return true;
+	return SaveOutputMap(apInputMaps[1], OutputMap);
 }
 
 bool OpenMaps(IStorage *pStorage, const char aaMapNames[3][64], IMap *apInputMaps[2], CDataFileWriter &OutputMap)
@@ -172,7 +170,7 @@ bool OpenMaps(IStorage *pStorage, const char aaMapNames[3][64], IMap *apInputMap
 	return true;
 }
 
-void SaveOutputMap(IMap *pInputMap, CDataFileWriter &OutputMap)
+bool SaveOutputMap(IMap *pInputMap, CDataFileWriter &OutputMap)
 {
 	for(int i = 0; i < pInputMap->NumItems(); i++)
 	{
@@ -201,7 +199,12 @@ void SaveOutputMap(IMap *pInputMap, CDataFileWriter &OutputMap)
 	}
 
 	pInputMap->Unload();
-	OutputMap.Finish();
+	if(!OutputMap.Finish())
+	{
+		log_error(TOOL_NAME, "unable to write output map");
+		return false;
+	}
+	return true;
 }
 
 bool CompareLayers(const char aaMapNames[3][64], IMap *apInputMaps[2])
