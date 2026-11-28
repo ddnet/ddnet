@@ -44,6 +44,8 @@ public:
 	int GetTeam() const { return m_Team; }
 	int GetCid() const { return m_ClientId; }
 	uint32_t GetUniqueCid() const { return m_UniqueClientId; }
+	int m_ChatAuthor = 0;
+	int m_ChatSequence = 0;
 	int GetClientVersion() const;
 	bool SetTimerType(int TimerType);
 

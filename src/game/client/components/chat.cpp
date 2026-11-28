@@ -35,11 +35,31 @@ CChat::CLine::CLine()
 	m_QuadContainerIndex = -1;
 }
 
+void CChat::CLine::UpdateRedaction(bool ApplyRedactions)
+{
+	if(m_vMessages.empty())
+		return;
+
+	const int VisibleCount = std::count_if(m_vMessages.begin(), m_vMessages.end(), [ApplyRedactions](const CMessage &Message) { return !ApplyRedactions || !Message.m_Redacted; });
+	m_Redacted = VisibleCount == 0;
+	m_TimesRepeated = std::max(0, VisibleCount - 1);
+}
+
+CChatMessageId CChat::CLine::LatestMessageId(bool ApplyRedactions) const
+{
+	for(auto It = m_vMessages.rbegin(); It != m_vMessages.rend(); ++It)
+		if(!ApplyRedactions || !It->m_Redacted)
+			return It->m_Id;
+	return {};
+}
+
 void CChat::CLine::Reset(CChat &This)
 {
 	This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
 	This.Graphics()->DeleteQuadContainer(m_QuadContainerIndex);
 	m_Initialized = false;
+	m_Redacted = false;
+	m_vMessages.clear();
 	m_Time = 0;
 	m_aText[0] = '\0';
 	m_aName[0] = '\0';
@@ -109,6 +129,7 @@ void CChat::RebuildChat()
 			continue;
 		TextRender()->DeleteTextContainer(Line.m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
+		Line.UpdateRedaction(g_Config.m_ClChatRedact);
 		// recalculate sizes
 		Line.m_aYOffset[0] = -1.0f;
 		Line.m_aYOffset[1] = -1.0f;
@@ -207,7 +228,7 @@ void CChat::ConClearChat(IConsole::IResult *pResult, void *pUserData)
 	((CChat *)pUserData)->ClearLines();
 }
 
-void CChat::ConchainChatOld(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CChat::ConchainChatRebuild(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
 	((CChat *)pUserData)->RebuildChat();
@@ -263,7 +284,9 @@ void CChat::OnConsoleInit()
 void CChat::OnInit()
 {
 	Reset();
-	Console()->Chain("cl_chat_old", ConchainChatOld, this);
+	Console()->Chain("cl_chat_old", ConchainChatRebuild, this);
+	Console()->Chain("cl_chat_show_message_ids", ConchainChatRebuild, this);
+	Console()->Chain("cl_chat_redact", ConchainChatRebuild, this);
 	Console()->Chain("cl_chat_size", ConchainChatFontSize, this);
 	Console()->Chain("cl_chat_width", ConchainChatWidth, this);
 }
@@ -570,7 +593,19 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	if(GameClient()->m_SuppressEvents)
 		return;
 
-	if(MsgType == NETMSGTYPE_SV_CHAT)
+	if(MsgType == NETMSGTYPE_SV_CHATREDACT)
+	{
+		const auto *pMsg = (CNetMsg_Sv_ChatRedact *)pRawMsg;
+		Redact({{pMsg->m_Author, pMsg->m_Sequence}, pMsg->m_Through != 0});
+	}
+	else if(MsgType == NETMSGTYPE_SV_CHATMESSAGE)
+	{
+		const auto *pMsg = (CNetMsg_Sv_ChatMessage *)pRawMsg;
+		AddLine(pMsg->m_ClientId, pMsg->m_Team, pMsg->m_pMessage, {pMsg->m_Author, pMsg->m_Sequence});
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && pMsg->m_ClientId == SERVER_MSG)
+			StoreSave(pMsg->m_pMessage);
+	}
+	else if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
@@ -677,7 +712,22 @@ void CChat::StoreSave(const char *pText)
 	io_close(File);
 }
 
-void CChat::AddLine(int ClientId, int Team, const char *pLine)
+void CChat::Redact(CChatRedaction Redaction)
+{
+	if(!Redaction.m_Id.IsValid())
+		return;
+	for(auto &Line : m_aLines)
+	{
+		if(!Line.m_Initialized)
+			continue;
+		for(auto &Message : Line.m_vMessages)
+			if(Redaction.Matches(Message.m_Id))
+				Message.m_Redacted = true;
+	}
+	RebuildChat();
+}
+
+void CChat::AddLine(int ClientId, int Team, const char *pLine, CChatMessageId Id)
 {
 	if(*pLine == 0 ||
 		(ClientId == SERVER_MSG && !g_Config.m_ClShowChatSystem) ||
@@ -753,7 +803,14 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		else
 			pFrom = "chat/all";
 
-		log_info_color(color_cast<LOG_COLOR>(ChatLogColor), pFrom, "%s%s%s", Line.m_aName, Line.m_ClientId >= 0 ? ": " : "", Line.m_aText);
+		char aMessageId[32] = "";
+		if(g_Config.m_ClChatShowMessageIds && !Line.m_vMessages.empty())
+		{
+			const CChatMessageId MessageId = Line.m_vMessages.back().m_Id;
+			str_format(aMessageId, sizeof(aMessageId), "[%d:%d] ", MessageId.m_Author, MessageId.m_Sequence);
+		}
+
+		log_info_color(color_cast<LOG_COLOR>(ChatLogColor), pFrom, "%s%s%s%s", aMessageId, Line.m_aName, Line.m_ClientId >= 0 ? ": " : "", Line.m_aText);
 	};
 
 	// Custom color for new line
@@ -767,13 +824,22 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	// 0 = global; 1 = team; 2 = sending whisper; 3 = receiving whisper
 
 	// If it's a client message, m_aText will have ": " prepended so we have to work around it.
-	if(PreviousLine.m_Initialized &&
+	if(PreviousLine.m_Initialized && !PreviousLine.m_Redacted &&
+		// Bound identity storage even when an author repeats a line indefinitely.
+		PreviousLine.m_vMessages.size() < 1024 &&
+		(PreviousLine.m_vMessages.empty() ? !Id.IsValid() : Id.IsValid() && PreviousLine.m_vMessages.front().m_Id.m_Author == Id.m_Author) &&
 		PreviousLine.m_TeamNumber == Team &&
 		PreviousLine.m_ClientId == ClientId &&
 		str_comp(PreviousLine.m_aText, pLine) == 0 &&
 		PreviousLine.m_CustomColor == CustomColor)
 	{
-		PreviousLine.m_TimesRepeated++;
+		if(Id.IsValid())
+		{
+			PreviousLine.m_vMessages.push_back({Id});
+			PreviousLine.UpdateRedaction(g_Config.m_ClChatRedact);
+		}
+		else
+			PreviousLine.m_TimesRepeated++;
 		TextRender()->DeleteTextContainer(PreviousLine.m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(PreviousLine.m_QuadContainerIndex);
 		PreviousLine.m_Time = time();
@@ -789,6 +855,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	CLine &CurrentLine = m_aLines[m_CurrentLine];
 	CurrentLine.Reset(*this);
 	CurrentLine.m_Initialized = true;
+	if(Id.IsValid())
+		CurrentLine.m_vMessages.push_back({Id});
 	CurrentLine.m_Time = time();
 	CurrentLine.m_aYOffset[0] = -1.0f;
 	CurrentLine.m_aYOffset[1] = -1.0f;
@@ -976,6 +1044,8 @@ void CChat::OnPrepareLines(float y)
 		CLine &Line = m_aLines[((m_CurrentLine - i) + MAX_LINES) % MAX_LINES];
 		if(!Line.m_Initialized)
 			break;
+		if(Line.m_Redacted)
+			continue;
 		if(Now > Line.m_Time + 16 * time_freq() && !m_PrevShowChat)
 			break;
 
@@ -989,6 +1059,13 @@ void CChat::OnPrepareLines(float y)
 		if(g_Config.m_ClShowIds && Line.m_ClientId >= 0 && Line.m_aName[0] != '\0')
 		{
 			GameClient()->FormatClientId(Line.m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
+		}
+
+		char aMessageId[32] = "";
+		if(g_Config.m_ClChatShowMessageIds && !Line.m_vMessages.empty())
+		{
+			const CChatMessageId Id = Line.LatestMessageId(g_Config.m_ClChatRedact);
+			str_format(aMessageId, sizeof(aMessageId), "[%d:%d] ", Id.m_Author, Id.m_Sequence);
 		}
 
 		char aCount[12];
@@ -1033,6 +1110,7 @@ void CChat::OnPrepareLines(float y)
 				}
 			}
 
+			TextRender()->TextEx(&MeasureCursor, aMessageId);
 			TextRender()->TextEx(&MeasureCursor, aClientId);
 			TextRender()->TextEx(&MeasureCursor, Line.m_aName);
 			if(Line.m_TimesRepeated > 0)
@@ -1108,6 +1186,7 @@ void CChat::OnPrepareLines(float y)
 			NameColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
 
 		TextRender()->TextColor(NameColor);
+		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &LineCursor, aMessageId);
 		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &LineCursor, aClientId);
 		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &LineCursor, Line.m_aName);
 
@@ -1294,6 +1373,8 @@ void CChat::OnRender()
 		CLine &Line = m_aLines[((m_CurrentLine - i) + MAX_LINES) % MAX_LINES];
 		if(!Line.m_Initialized)
 			break;
+		if(Line.m_Redacted)
+			continue;
 		if(Now > Line.m_Time + 16 * time_freq() && !m_PrevShowChat)
 			break;
 

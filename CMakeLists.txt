@@ -2444,6 +2444,7 @@ set_src(ENGINE_GFX GLOB src/engine/gfx
 set_src(GAME_SHARED GLOB src/game
   # tidy-alphabetical-start
   alloc.h
+  chat.h
   collision.cpp
   collision.h
   gamecore.cpp

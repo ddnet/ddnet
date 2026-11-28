@@ -20,6 +20,8 @@
 #include <generated/protocol7.h>
 #include <generated/protocolglue.h>
 
+#include <game/chat.h>
+
 #include <algorithm>
 #include <array>
 #include <optional>
@@ -139,10 +141,21 @@ public:
 		return SendPackMsgTranslateChat(&Msg, Flags, ClientId);
 	}
 
+	int SendPackMsgTranslate(const CNetMsg_Sv_ChatMessage *pMsg, int Flags, int ClientId)
+	{
+		protocol7::CNetMsg_Sv_Chat Msg;
+		Msg.m_ClientId = pMsg->m_ClientId;
+		Msg.m_Mode = pMsg->m_Team > 1 ? (int)protocol7::NUM_CHATS + pMsg->m_Team :
+						(pMsg->m_Team ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL);
+		Msg.m_pMessage = pMsg->m_pMessage;
+		Msg.m_TargetId = pMsg->m_ClientId;
+		return SendPackMsgTranslateChat(&Msg, Flags, ClientId, {pMsg->m_Author, pMsg->m_Sequence});
+	}
+
 	// This function is directly being called from CGameContext.
 	// Whisper will always be managed in 0.7 format and only in this function properly
 	// translated for either 0.6 or 0.7 connection including 128p translation.
-	int SendPackMsgTranslateChat(const protocol7::CNetMsg_Sv_Chat *pMsg, int Flags, int ClientId)
+	int SendPackMsgTranslateChat(const protocol7::CNetMsg_Sv_Chat *pMsg, int Flags, int ClientId, CChatMessageId Id = {})
 	{
 		protocol7::CNetMsg_Sv_Chat MsgCopy = *pMsg;
 
@@ -167,6 +180,19 @@ public:
 				else
 					*pId = GetMaxClients(ClientId) - 1;
 			}
+		}
+
+		if(Id.IsValid() && GetClientVersion(ClientId) >= VERSION_DDNET_CHAT_REDACT)
+		{
+			CNetMsg_Sv_ChatMessage Msg;
+			Msg.m_Author = Id.m_Author;
+			Msg.m_Sequence = Id.m_Sequence;
+			Msg.m_Team = MsgCopy.m_Mode == WhisperSend || MsgCopy.m_Mode == WhisperRecv ?
+					     MsgCopy.m_Mode - protocol7::NUM_CHATS :
+					     (int)(MsgCopy.m_Mode == protocol7::CHAT_TEAM);
+			Msg.m_ClientId = *pId;
+			Msg.m_pMessage = MsgCopy.m_pMessage;
+			return SendPackMsgOne(&Msg, Flags, ClientId);
 		}
 
 		if(IsSixup(ClientId))
