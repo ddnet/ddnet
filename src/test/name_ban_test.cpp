@@ -1,3 +1,5 @@
+#include <base/logger.h>
+
 #include <engine/server/name_ban.h>
 
 #include <gtest/gtest.h>
@@ -60,11 +62,18 @@ TEST(NameBan, Substring)
 TEST(NameBan, Unban)
 {
 	CNameBans Bans;
-	Bans.Ban("abc", "", 0, false);
-	Bans.Ban("xyz", "", 0, false);
+	Bans.Ban("abc", "first reason", 0, false);
+	Bans.Ban("xyz", "second reason", 0, false);
 	EXPECT_TRUE(Bans.IsBanned("abc"));
 	EXPECT_TRUE(Bans.IsBanned("xyz"));
-	Bans.Unban("abc");
+	CMemoryLogger Logger;
+	{
+		CLogScope Scope(&Logger);
+		Bans.Unban("abc");
+	}
+	const auto vLines = Logger.Lines();
+	ASSERT_EQ(vLines.size(), 1u);
+	EXPECT_STREQ(vLines.front().Message(), "removed name='abc' distance=0 is_substring=0 reason='first reason'");
 	EXPECT_FALSE(Bans.IsBanned("abc"));
 	EXPECT_TRUE(Bans.IsBanned("xyz"));
 	Bans.Unban("xyz");
