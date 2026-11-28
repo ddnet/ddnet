@@ -44,6 +44,7 @@ def transfer(file_from, file_to, date, keep_timestamp_utc):
 
 	conn_from = sqlite3.connect(file_from, isolation_level="EXCLUSIVE")
 	conn_from.text_factory = lambda b: b.decode(errors="ignore").rstrip()
+	conn_from.execute("BEGIN IMMEDIATE")
 	for line in conn_from.iterdump():
 		cursor_to.execute(line)
 	for table in TABLES:
