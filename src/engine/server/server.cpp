@@ -1221,9 +1221,9 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 
-	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
-
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
+	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
+	pThis->m_aClients[ClientId].m_pDnsblLookup = nullptr;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
 	pThis->m_aClients[ClientId].m_Country = CountryCode::DEFAULT;
@@ -1256,6 +1256,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	CServer *pThis = (CServer *)pUser;
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_PREAUTH;
 	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
+	pThis->m_aClients[ClientId].m_pDnsblLookup = nullptr;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
 	pThis->m_aClients[ClientId].m_Country = CountryCode::DEFAULT;
@@ -1345,6 +1346,8 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 		pThis->GameServer()->OnClientDrop(ClientId, pReason);
 
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_EMPTY;
+	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
+	pThis->m_aClients[ClientId].m_pDnsblLookup = nullptr;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
 	pThis->m_aClients[ClientId].m_Country = CountryCode::DEFAULT;
@@ -4989,6 +4992,8 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	m_aClients[ClientId].m_DDNetVersion = m_aClients[OrigId].m_DDNetVersion;
 	m_aClients[ClientId].m_GotDDNetVersionPacket = m_aClients[OrigId].m_GotDDNetVersionPacket;
 	m_aClients[ClientId].m_DDNetVersionSettled = m_aClients[OrigId].m_DDNetVersionSettled;
+	m_aClients[ClientId].m_DnsblState = m_aClients[OrigId].m_DnsblState;
+	m_aClients[ClientId].m_pDnsblLookup = m_aClients[OrigId].m_pDnsblLookup;
 
 	DelClientCallback(OrigId, "Timeout Protection used", this);
 
