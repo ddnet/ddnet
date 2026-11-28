@@ -564,7 +564,7 @@ public:
 
 	void DoQuadEnvelopes(const CLayerQuads *pLayerQuads);
 	void DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex);
-	void DrawQuadPointHandle(const CQuad *pQuad, int PointIndex, bool Selected);
+	void DrawQuadPointHandles(const CQuad *pQuad, bool Selected);
 	void DoQuadPointInteraction(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex);
 	void UpdateHotQuadPoint(const CLayerQuads *pLayer, const std::vector<bool> &vQuadSelected);
 
