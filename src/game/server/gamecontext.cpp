@@ -1118,24 +1118,16 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 	{
 		for(int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			if(m_apPlayers[i])
-			{
-				if(m_apPlayers[i]->GetCharacter())
-				{
-					if(m_apPlayers[i]->GetCharacter()->m_TuneZone == Zone)
-						SendTuningParams(i, Zone);
-				}
-				else if(m_apPlayers[i]->m_TuneZone == Zone)
-				{
-					SendTuningParams(i, Zone);
-				}
-			}
+			if(m_apPlayers[i] && m_apPlayers[i]->m_TuneZone == Zone)
+				SendTuningParams(i, Zone);
 		}
 		return;
 	}
 
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	dbg_assert(m_apPlayers[ClientId], "client %d without player", ClientId);
+
+	m_apPlayers[ClientId]->m_TuneZone = Zone;
 
 	CTuningParams Params = m_aTuningList[Zone];
 

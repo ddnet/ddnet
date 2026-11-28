@@ -659,9 +659,7 @@ void CGameClient::OnReset()
 	// m_Snap was cleared in InvalidateSnapshot
 
 	std::fill(std::begin(m_aLocalTuneZone), std::end(m_aLocalTuneZone), -1);
-	std::fill(std::begin(m_aReceivedTuning), std::end(m_aReceivedTuning), false);
-	std::fill(std::begin(m_aExpectingTuningForZone), std::end(m_aExpectingTuningForZone), -1);
-	std::fill(std::begin(m_aExpectingTuningSince), std::end(m_aExpectingTuningSince), 0);
+	std::fill(std::begin(m_aReceivedTuningTick), std::end(m_aReceivedTuningTick), -1);
 	std::fill(std::begin(m_aTuning), std::end(m_aTuning), CTuningParams());
 
 	m_ActiveRecordings.reset();
@@ -1079,7 +1077,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		m_ServerMode = SERVERMODE_PURE;
 
-		m_aReceivedTuning[Conn] = true;
+		m_aReceivedTuningTick[Conn] = Client()->ReceivedGameTick(Conn);
 		// apply new tuning
 		m_aTuning[Conn] = NewTuning;
 		return;
@@ -3429,12 +3427,7 @@ void CGameClient::UpdateLocalTuning()
 				m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride :
 				Collision()->IsTune(Collision()->GetMapIndex(LocalPos));
 
-		if(TuneZone != m_aLocalTuneZone[g_Config.m_ClDummy])
-		{
-			// our tunezone changed, expecting tuning message
-			m_aLocalTuneZone[g_Config.m_ClDummy] = m_aExpectingTuningForZone[g_Config.m_ClDummy] = TuneZone;
-			m_aExpectingTuningSince[g_Config.m_ClDummy] = 0;
-		}
+		m_aLocalTuneZone[g_Config.m_ClDummy] = TuneZone;
 
 		// tunezone could have changed, send dummy tuning to demo
 		if(m_ActiveRecordings.any() && m_IsDummySwapping && m_aLocalTuneZone[0] != m_aLocalTuneZone[1])
@@ -3446,41 +3439,11 @@ void CGameClient::UpdateLocalTuning()
 			Client()->SendMsgActive(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND);
 		}
 
-		if(m_aExpectingTuningForZone[g_Config.m_ClDummy] >= 0)
+		const int TuningTick = m_aReceivedTuningTick[g_Config.m_ClDummy];
+		if(TuningTick < Client()->GameTick(g_Config.m_ClDummy) && (TuningTick >= 0 || m_IsDummySwapping != 0))
 		{
-			if(m_aReceivedTuning[g_Config.m_ClDummy])
-			{
-				TuningList()[m_aExpectingTuningForZone[g_Config.m_ClDummy]] = m_aTuning[g_Config.m_ClDummy];
-				m_GameWorld.TuningList()[m_aExpectingTuningForZone[g_Config.m_ClDummy]] = m_aTuning[g_Config.m_ClDummy];
-				m_aReceivedTuning[g_Config.m_ClDummy] = false;
-				m_aExpectingTuningForZone[g_Config.m_ClDummy] = -1;
-			}
-			else if(m_aExpectingTuningSince[g_Config.m_ClDummy] >= 5)
-			{
-				// if we are expecting tuning for more than 10 snaps (less than a quarter of a second)
-				// it is probably dropped or it was received out of order
-				// or applied to another tunezone.
-				// we need to fallback to current tuning to fix ourselves.
-				m_aExpectingTuningForZone[g_Config.m_ClDummy] = -1;
-				m_aExpectingTuningSince[g_Config.m_ClDummy] = 0;
-				m_aReceivedTuning[g_Config.m_ClDummy] = false;
-				log_debug("tunezone", "the tuning was missed");
-			}
-			else
-			{
-				// if we are expecting tuning and have not received one yet.
-				// do not update any tuning, so we don't apply it to the wrong tunezone.
-				log_debug("tunezone", "waiting for tuning for zone %d", m_aExpectingTuningForZone[g_Config.m_ClDummy]);
-				m_aExpectingTuningSince[g_Config.m_ClDummy]++;
-			}
-		}
-		else
-		{
-			// if we have processed what we need, and the tuning is still wrong due to out of order message
-			// fix our tuning by using the current one
-			m_GameWorld.TuningList()[TuneZone] = m_aTuning[g_Config.m_ClDummy];
-			m_aExpectingTuningSince[g_Config.m_ClDummy] = 0;
-			m_aReceivedTuning[g_Config.m_ClDummy] = false;
+			TuningList()[TuneZone] = m_aTuning[g_Config.m_ClDummy];
+			m_aReceivedTuningTick[g_Config.m_ClDummy] = -1;
 		}
 	}
 }

@@ -362,6 +362,7 @@ public:
 	int GetPredictionTick() override;
 	const void *SnapFindItem(int SnapId, int Type, int Id) const override;
 	int SnapNumItems(int SnapId) const override;
+	int ReceivedGameTick(int Conn) const override { return m_aSnapshotStorage[Conn].m_pLast ? m_aSnapshotStorage[Conn].m_pLast->m_Tick : 0; }
 	void SnapSetStaticsize(int ItemType, int Size) override;
 	void SnapSetStaticsize7(int ItemType, int Size) override;
 
