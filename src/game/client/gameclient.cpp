@@ -2622,6 +2622,7 @@ void CGameClient::OnPredict()
 
 	{
 		CGameWorld::CEntityIterator Iterator(&m_PredictedWorld, CGameWorld::ENTTYPE_PROJECTILE);
+		Iterator.AllowEntityRemoval();
 		while(CProjectile *pProj = static_cast<CProjectile *>(Iterator.Next()))
 		{
 			if(IsOtherTeam(pProj->GetOwner()))
