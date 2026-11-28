@@ -597,19 +597,21 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 	m_pSavedTees = new CSaveTee[MembersCount];
 	int aPlayerCids[MAX_CLIENTS];
 	int j = 0;
-	CGameWorld::CEntityIterator Iterator(&pGameServer->m_World, CGameWorld::ENTTYPE_CHARACTER);
-	while(CCharacter *p = static_cast<CCharacter *>(Iterator.Next()))
 	{
-		if(pTeams->m_Core.Team(p->GetPlayer()->GetCid()) != Team)
-			continue;
-		if(m_MembersCount == j && !Force)
-			return ESaveResult::CHAR_NOT_FOUND;
-		ESaveResult Result = pGameServer->m_World.BlocksSave(p->GetPlayer()->GetCid());
-		if(Result != ESaveResult::SUCCESS && !Force)
-			return Result;
-		m_pSavedTees[j].Save(p);
-		aPlayerCids[j] = p->GetPlayer()->GetCid();
-		j++;
+		CGameWorld::CEntityIterator Iterator(&pGameServer->m_World, CGameWorld::ENTTYPE_CHARACTER);
+		while(CCharacter *p = static_cast<CCharacter *>(Iterator.Next()))
+		{
+			if(pTeams->m_Core.Team(p->GetPlayer()->GetCid()) != Team)
+				continue;
+			if(m_MembersCount == j && !Force)
+				return ESaveResult::CHAR_NOT_FOUND;
+			ESaveResult Result = pGameServer->m_World.BlocksSave(p->GetPlayer()->GetCid());
+			if(Result != ESaveResult::SUCCESS && !Force)
+				return Result;
+			m_pSavedTees[j].Save(p);
+			aPlayerCids[j] = p->GetPlayer()->GetCid();
+			j++;
+		}
 	}
 	if(m_MembersCount != j && !Force)
 		return ESaveResult::CHAR_NOT_FOUND;
