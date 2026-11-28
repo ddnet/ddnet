@@ -205,7 +205,7 @@ EM_JS(int64_t, ParseDateJsImpl, (const char *pStr), {
 	const parsedDate = Date.parse(UTF8ToString(pStr));
 	if(isNaN(parsedDate)) // Invalid dates are represented as NaN for some reason
 	{
-		return -1;
+		return BigInt(-1);
 	}
 	return BigInt(Math.floor(parsedDate / 1000));
 });
