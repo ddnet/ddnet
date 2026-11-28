@@ -15,6 +15,7 @@
 #include <engine/client/ghost.h>
 #include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
+#include <engine/client/url_allowlist.h>
 #include <engine/editor.h>
 #include <engine/graphics.h>
 #include <engine/http.h>
@@ -29,6 +30,7 @@
 #include <deque>
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 
 class CDemoEdit;
 class IDemoRecorder;
@@ -277,6 +279,14 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	// For DummyName function
 	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
+
+	std::unordered_map<EEventId, std::vector<FEventHandler>> m_EventHandlers;
+	void TriggerEvent(EEventId EventId, void *pContext);
+
+	CUrlAllowList m_UrlAllowList;
+
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
+	void OnConfigSave(IConfigManager *pConfigManager);
 
 public:
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
@@ -542,7 +552,8 @@ public:
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	EConnectivity UdpConnectivity(int NetType) override;
 
-	bool ViewLink(const char *pLink) override;
+	bool ViewLink(const char *pLink, bool CheckLink) override;
+	inline bool ViewLink(const char *pLink) override;
 	bool ViewFile(const char *pFilename) override;
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -553,6 +564,10 @@ public:
 	std::optional<int> ShowMessageBox(const IGraphics::CMessageBox &MessageBox) override;
 	void GetGpuInfoString(char (&aGpuInfo)[512]) override;
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
+
+	void UrlAllowDomain(const char *pDomainName) override;
+
+	void RegisterEventHandler(EEventId EventId, const FEventHandler &fnHandler) override;
 };
 
 #endif
