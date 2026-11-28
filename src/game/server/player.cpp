@@ -1050,6 +1050,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			}
 
 			GameServer()->m_VoteType = CGameContext::VOTE_TYPE_OPTION;
+			GameServer()->m_VoteVictim = -1;
 			GameServer()->m_LastMapVote = time_get();
 
 			char aCmd[256];
