@@ -589,10 +589,7 @@ void CMapView::Render(CUIRect View)
 								{
 									if(vQuadSelected[QuadIndex] == Selected)
 									{
-										for(int CornerIndex = 0; CornerIndex < 4; CornerIndex++)
-										{
-											Editor()->DrawQuadPointHandle(&pLayer->m_vQuads[QuadIndex], CornerIndex, Selected);
-										}
+										Editor()->DrawQuadPointHandles(&pLayer->m_vQuads[QuadIndex], Selected);
 									}
 								}
 							}

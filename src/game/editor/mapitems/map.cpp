@@ -517,6 +517,11 @@ bool CEditorMap::IsQuadPointSelected(int QuadIndex, int Index) const
 	return IsQuadSelected(QuadIndex) && IsQuadCornerSelected(Index);
 }
 
+bool CEditorMap::IsAnyQuadCornerSelected() const
+{
+	return m_SelectedQuadPoints > 0;
+}
+
 void CEditorMap::SelectQuadPoint(int QuadIndex, int Index)
 {
 	SelectQuad(QuadIndex);
