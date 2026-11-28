@@ -66,7 +66,7 @@ private:
 	CViewedClient m_aViewedClients[MAX_CLIENTS];
 
 	// runtime state while multi-view is active
-	bool m_Solo;
+	bool m_OnlyOnePlayer;
 	bool m_IsInit;
 	bool m_Teleported;
 	vec2 m_OldPos;
